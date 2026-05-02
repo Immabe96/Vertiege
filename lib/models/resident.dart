@@ -52,6 +52,7 @@ class Resident {
   final Map<String, WorldStanding> worldStandings;
   final List<String> bannedWorldIds;
   final Map<String, int> mutedUntil;
+  final int lastSeenAt;
 
   const Resident({
     required this.id,
@@ -71,6 +72,7 @@ class Resident {
     this.worldStandings = const {},
     this.bannedWorldIds = const [],
     this.mutedUntil = const {},
+    this.lastSeenAt = 0,
   });
 
   Resident copyWith({
@@ -91,6 +93,7 @@ class Resident {
     Map<String, WorldStanding>? worldStandings,
     List<String>? bannedWorldIds,
     Map<String, int>? mutedUntil,
+    int? lastSeenAt,
   }) =>
       Resident(
         id: id ?? this.id,
@@ -110,5 +113,6 @@ class Resident {
         worldStandings: worldStandings ?? this.worldStandings,
         bannedWorldIds: bannedWorldIds ?? this.bannedWorldIds,
         mutedUntil: mutedUntil ?? this.mutedUntil,
+        lastSeenAt: lastSeenAt ?? this.lastSeenAt,
       );
 }

@@ -6,6 +6,7 @@ class Comment {
   final String residentName;
   final String content;
   final int timestamp;
+  final bool isEdited;
 
   const Comment({
     required this.id,
@@ -13,7 +14,20 @@ class Comment {
     required this.residentName,
     required this.content,
     required this.timestamp,
+    this.isEdited = false,
   });
+
+  Comment copyWith({
+    String? id, String? residentId, String? residentName,
+    String? content, int? timestamp, bool? isEdited,
+  }) => Comment(
+    id: id ?? this.id,
+    residentId: residentId ?? this.residentId,
+    residentName: residentName ?? this.residentName,
+    content: content ?? this.content,
+    timestamp: timestamp ?? this.timestamp,
+    isEdited: isEdited ?? this.isEdited,
+  );
 }
 
 class Post {
@@ -30,6 +44,7 @@ class Post {
   final List<Comment> comments;
   final bool isAnnouncement;
   final bool isPinned;
+  final bool isEdited;
 
   const Post({
     required this.id,
@@ -45,6 +60,7 @@ class Post {
     this.comments = const [],
     this.isAnnouncement = false,
     this.isPinned = false,
+    this.isEdited = false,
   });
 
   Post copyWith({
@@ -61,6 +77,7 @@ class Post {
     List<Comment>? comments,
     bool? isAnnouncement,
     bool? isPinned,
+    bool? isEdited,
   }) =>
       Post(
         id: id ?? this.id,
@@ -76,5 +93,6 @@ class Post {
         comments: comments ?? this.comments,
         isAnnouncement: isAnnouncement ?? this.isAnnouncement,
         isPinned: isPinned ?? this.isPinned,
+        isEdited: isEdited ?? this.isEdited,
       );
 }

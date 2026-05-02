@@ -209,6 +209,13 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
     return r.bannedWorldIds.contains('$worldId:$residentId');
   }
 
+  void touchPresence() {
+    final r = state.resident;
+    if (r == null) return;
+    state = state.copyWith(resident: r.copyWith(lastSeenAt: DateTime.now().millisecondsSinceEpoch));
+    _persist();
+  }
+
   void joinWorld(String worldId) {
     final r = state.resident;
     if (r == null || r.joinedWorldIds.contains(worldId)) return;
@@ -317,6 +324,7 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
       worldStandings: _parseStandings(json['worldStandings']),
       bannedWorldIds: _toStringList(json['bannedWorldIds']) ?? [],
       mutedUntil: (json['mutedUntil'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as int?) ?? 0)) ?? {},
+      lastSeenAt: (json['lastSeenAt'] as int?) ?? 0,
     );
   }
 
@@ -338,6 +346,7 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
         'worldStandings': r.worldStandings.map((k, v) => MapEntry(k, {'rep': v.rep})),
         'bannedWorldIds': r.bannedWorldIds,
         'mutedUntil': r.mutedUntil,
+        'lastSeenAt': r.lastSeenAt,
       };
 
   static List<String>? _toStringList(dynamic value) {

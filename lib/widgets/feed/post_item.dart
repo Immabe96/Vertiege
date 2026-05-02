@@ -24,9 +24,10 @@ class PostItem extends ConsumerWidget {
     final theme = Theme.of(context);
     final resident = ref.watch(residentProvider).resident;
 
+    final isOwnPost = resident?.id == post.residentId;
     final canMod = _canDelete(ref);
     final canPin = _canPin(ref);
-    final showOverflow = canMod || resident?.id != post.residentId || canPin;
+    final showOverflow = canMod || !isOwnPost || canPin || isOwnPost;
 
     return FadeIn(
       delayMs: index * 70,
@@ -51,15 +52,32 @@ class PostItem extends ConsumerWidget {
                     onTap: () => context.push('/residents/${post.residentId}'),
                     child: Hero(
                       tag: 'avatar-${post.residentId}',
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
-                        ),
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(post.residentAvatar),
-                          radius: 20,
-                        ),
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
+                            ),
+                            child: CircleAvatar(
+                              backgroundImage: NetworkImage(post.residentAvatar),
+                              radius: 20,
+                            ),
+                          ),
+                          if (_isRecentlyActive(ref))
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 12, height: 12,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: theme.colorScheme.surface, width: 2),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -77,7 +95,8 @@ class PostItem extends ConsumerWidget {
                           children: [
                             TierIcon(tier: post.tierAtPosting.value, size: 12),
                             const SizedBox(width: 4),
-                            Text(formatTimestamp(post.timestamp), style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
+                            Text(formatTimestamp(post.timestamp) + (post.isEdited ? ' (edited)' : ''),
+                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
                           ],
                         ),
                       ],
@@ -90,13 +109,16 @@ class PostItem extends ConsumerWidget {
                         if (action == 'delete') _onDelete(ref);
                         if (action == 'report') _onReport(context, ref);
                         if (action == 'pin') _onTogglePin(ref);
+                        if (action == 'edit') _onEdit(context, ref);
                       },
                       itemBuilder: (context) => [
+                        if (isOwnPost)
+                          const PopupMenuItem(value: 'edit', child: Text('Edit post')),
                         if (canPin)
                           PopupMenuItem(value: 'pin', child: Text(post.isPinned ? 'Unpin post' : 'Pin post')),
                         if (canMod)
                           const PopupMenuItem(value: 'delete', child: Text('Delete post')),
-                        if (resident?.id != post.residentId)
+                        if (!isOwnPost)
                           const PopupMenuItem(value: 'report', child: Text('Report')),
                       ],
                     ),
@@ -180,6 +202,13 @@ class PostItem extends ConsumerWidget {
     return WorldPermissions.canDeletePost(resident, worldId!, post.residentId, null);
   }
 
+  bool _isRecentlyActive(WidgetRef ref) {
+    final r = ref.read(residentProvider).resident;
+    if (r == null) return false;
+    final fifteenMin = 15 * 60 * 1000;
+    return (r.lastSeenAt > 0) && (DateTime.now().millisecondsSinceEpoch - r.lastSeenAt < fifteenMin);
+  }
+
   bool _canPin(WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
     if (resident == null || worldId == null) return false;
@@ -188,6 +217,34 @@ class PostItem extends ConsumerWidget {
 
   void _onTogglePin(WidgetRef ref) {
     ref.read(postProvider.notifier).togglePin(post.id);
+  }
+
+  void _onEdit(BuildContext context, WidgetRef ref) {
+    final ctrl = TextEditingController(text: post.content);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit post'),
+        content: TextField(
+          controller: ctrl,
+          maxLines: 3,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final text = ctrl.text.trim();
+              if (text.isNotEmpty) {
+                ref.read(postProvider.notifier).editPost(post.id, text);
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _onDelete(WidgetRef ref) {

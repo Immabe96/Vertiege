@@ -71,6 +71,15 @@ class PostNotifier extends StateNotifier<PostState> {
         );
   }
 
+  void editPost(String postId, String newContent) {
+    final posts = state.posts.map((p) {
+      if (p.id == postId) return p.copyWith(content: newContent, isEdited: true);
+      return p;
+    }).toList();
+    state = state.copyWith(posts: posts);
+    _persist();
+  }
+
   void togglePin(String postId) {
     final posts = state.posts.map((p) {
       if (p.id == postId) return p.copyWith(isPinned: !p.isPinned);
@@ -164,6 +173,7 @@ class PostNotifier extends StateNotifier<PostState> {
           [],
       isAnnouncement: json['isAnnouncement'] ?? false,
       isPinned: json['isPinned'] ?? false,
+      isEdited: json['isEdited'] ?? false,
     );
   }
 
@@ -185,6 +195,7 @@ class PostNotifier extends StateNotifier<PostState> {
         'reactions': p.reactions,
         'isAnnouncement': p.isAnnouncement,
         'isPinned': p.isPinned,
+        'isEdited': p.isEdited,
         'comments': p.comments
             .map((c) => {
                   'id': c.id,

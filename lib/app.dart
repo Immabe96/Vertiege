@@ -36,6 +36,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     ]);
     ref.read(eventProvider);
     ref.read(questProvider);
+    ref.read(residentProvider.notifier).touchPresence();
   }
 
   @override
