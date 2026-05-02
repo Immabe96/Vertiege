@@ -7,6 +7,7 @@ import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/fade_in.dart';
+import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../widgets/profile/name_banner.dart';
 import '../../widgets/profile/badge_display.dart';
@@ -147,23 +148,9 @@ class _ProfileStrength extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Center(
-          child: Container(
+          child: SizedBox(
             width: 120,
-            height: 4,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
-              color: theme.colorScheme.surfaceContainerHighest,
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: pct,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(2),
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
+            child: AnimatedProgressBar(value: pct, height: 6),
           ),
         ),
       ],
