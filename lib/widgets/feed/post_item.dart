@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../models/post.dart';
+import '../../state/post_provider.dart';
+import '../../state/resident_provider.dart';
+import '../../utils/date_format.dart';
+import '../core/fade_in.dart';
+import '../shared/tier_icon.dart';
+import 'post_image.dart';
+import 'comment_sheet.dart';
+import 'reaction_bar.dart';
+
+class PostItem extends ConsumerWidget {
+  final Post post;
+  final int index;
+
+  const PostItem({super.key, required this.post, this.index = 0});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final resident = ref.watch(residentProvider).resident;
+
+    return FadeIn(
+      delayMs: index * 50,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => context.push('/residents/${post.residentId}'),
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(post.residentAvatar),
+                      radius: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () => context.push('/residents/${post.residentId}'),
+                          child: Text(post.residentName, style: theme.textTheme.labelLarge),
+                        ),
+                        Row(
+                          children: [
+                            TierIcon(tier: post.tierAtPosting.value, size: 14),
+                            const SizedBox(width: 4),
+                            Text(formatTimestamp(post.timestamp), style: theme.textTheme.labelSmall),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(post.content, style: theme.textTheme.bodyMedium),
+              if (post.imageUri != null) ...[
+                const SizedBox(height: 8),
+                PostImage(uri: post.imageUri!),
+              ],
+              const SizedBox(height: 8),
+              ReactionBar(
+                reactions: post.reactions,
+                currentResidentId: resident?.id ?? '',
+                onReact: (emoji) {
+                  ref.read(postProvider.notifier).addReaction(post.id, emoji, resident?.id ?? '');
+                },
+              ),
+              if (post.comments.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                TextButton(
+                  onPressed: () => _showComments(context, ref),
+                  child: Text('View ${post.comments.length} comments'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showComments(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => CommentSheet(
+        comments: post.comments,
+        onSubmit: (content) {
+          final resident = ref.read(residentProvider).resident;
+          if (resident == null) return;
+          final comment = Comment(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            residentId: resident.id,
+            residentName: resident.name,
+            content: content,
+            timestamp: DateTime.now().millisecondsSinceEpoch,
+          );
+          ref.read(postProvider.notifier).addComment(post.id, comment);
+        },
+      ),
+    );
+  }
+}
