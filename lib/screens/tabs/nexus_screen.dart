@@ -7,7 +7,6 @@ import '../../state/quest_provider.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/notification_bell.dart';
 import '../../widgets/core/fade_in.dart';
-import '../../widgets/feed/post_input.dart';
 import '../../widgets/feed/post_item.dart';
 
 enum _FeedTab { all, following, announcements }
@@ -118,7 +117,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
               ),
               // Daily Quests
               SliverToBoxAdapter(child: FadeIn(delayMs: 60, child: _QuestCard())),
-              SliverToBoxAdapter(child: FadeIn(delayMs: 80, child: PostInput(worldId: 'neon-district'))),
+              // Note: Nexus posts go to the global feed — worldId is intentionally broad
+              // Future: show a world selector dropdown when posting from Nexus
+              SliverToBoxAdapter(child: const SizedBox.shrink()),
               if (posts.isEmpty)
                 SliverToBoxAdapter(
                   child: FadeIn(

@@ -22,18 +22,17 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   @override
   void initState() {
     super.initState();
-    _loadStores();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadStores());
   }
 
   Future<void> _loadStores() async {
-    await Future.wait(<Future<void>>[
-      ref.read(themeProvider.notifier).loadTheme(),
-      ref.read(worldProvider.notifier).loadWorlds(),
-      ref.read(residentProvider.notifier).loadResident(),
-      ref.read(postProvider.notifier).loadPosts(),
-      ref.read(notificationProvider.notifier).loadNotifications(),
-      ref.read(achievementProvider.notifier).loadAchievements(),
-    ]);
+    // Defer to post-frame to avoid rebuilding ProviderScope during build
+    await ref.read(themeProvider.notifier).loadTheme();
+    await ref.read(worldProvider.notifier).loadWorlds();
+    await ref.read(residentProvider.notifier).loadResident();
+    await ref.read(postProvider.notifier).loadPosts();
+    await ref.read(notificationProvider.notifier).loadNotifications();
+    await ref.read(achievementProvider.notifier).loadAchievements();
     ref.read(eventProvider);
     ref.read(questProvider);
     ref.read(residentProvider.notifier).touchPresence();
@@ -42,7 +41,30 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
+    final isLoading = ref.watch(residentProvider).isLoading;
     final router = ref.watch(appRouterProvider);
+
+    if (isLoading) {
+      return MaterialApp(
+        title: 'Vertiege',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeState.themeMode,
+        home: const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading worlds...'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return MaterialApp.router(
       title: 'Vertiege',

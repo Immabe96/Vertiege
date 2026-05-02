@@ -29,7 +29,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             tier: ResidentTier.hustlers,
           ),
         );
-    context.go('/');
+    // Let state propagate before navigating
+    Future.microtask(() {
+      if (mounted) context.go('/');
+    });
   }
 
   @override

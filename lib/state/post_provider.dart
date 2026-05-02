@@ -107,7 +107,7 @@ class PostNotifier extends StateNotifier<PostState> {
     _persist();
 
     _ref.read(questProvider.notifier).onCommentAdded();
-    _ref.read(residentProvider.notifier).addRep(comment.residentId, 3);
+    _ref.read(residentProvider.notifier).addRep(post.worldId, 3);
     _ref.read(notificationProvider.notifier).addNotification(
           type: NotificationType.comment,
           message: 'Someone commented on your post',

@@ -28,12 +28,16 @@ class WorldDetailScreen extends ConsumerWidget {
     final posts = ref.watch(postProvider.notifier).getPostsByWorld(worldId);
     final theme = Theme.of(context);
 
-    // Auto-join world and load channels
+    // Auto-join world and load channels (only on first mount)
     if (world != null && resident != null) {
-      if (!resident.joinedWorldIds.contains(worldId)) {
+      final alreadyJoined = resident.joinedWorldIds.contains(worldId);
+      if (!alreadyJoined && !resident.bannedWorldIds.contains('$worldId:${resident.id}')) {
+        // Use addPostFrameCallback to avoid triggering during build
         Future.microtask(() {
-          ref.read(residentProvider.notifier).joinWorld(worldId);
-          ref.read(channelProvider.notifier).ensureDefaultChannels(worldId);
+          if (ref.read(residentProvider).resident?.joinedWorldIds.contains(worldId) == false) {
+            ref.read(residentProvider.notifier).joinWorld(worldId);
+            ref.read(channelProvider.notifier).ensureDefaultChannels(worldId);
+          }
         });
       } else {
         Future.microtask(() {
