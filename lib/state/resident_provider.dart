@@ -156,6 +156,59 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
     _persist();
   }
 
+  void muteResident(String worldId, String residentId, int durationHours) {
+    final r = state.resident;
+    if (r == null) return;
+    final mutedUntil = DateTime.now().millisecondsSinceEpoch + (durationHours * 3600000);
+    state = state.copyWith(
+      resident: r.copyWith(mutedUntil: {...r.mutedUntil, '$worldId:$residentId': mutedUntil}),
+    );
+    _persist();
+  }
+
+  void unmuteResident(String worldId, String residentId) {
+    final r = state.resident;
+    if (r == null) return;
+    final updated = Map<String, int>.from(r.mutedUntil);
+    updated.remove('$worldId:$residentId');
+    state = state.copyWith(resident: r.copyWith(mutedUntil: updated));
+    _persist();
+  }
+
+  bool isMutedInWorld(String worldId, String residentId) {
+    final r = state.resident;
+    if (r == null) return false;
+    final until = r.mutedUntil['$worldId:$residentId'] ?? 0;
+    return until > DateTime.now().millisecondsSinceEpoch;
+  }
+
+  void banResident(String worldId, String residentId) {
+    final r = state.resident;
+    if (r == null) return;
+    state = state.copyWith(
+      resident: r.copyWith(bannedWorldIds: [...r.bannedWorldIds, '$worldId:$residentId']),
+    );
+    _persist();
+    if (residentId == r.id) leaveWorld(worldId);
+  }
+
+  void unbanResident(String worldId, String residentId) {
+    final r = state.resident;
+    if (r == null) return;
+    state = state.copyWith(
+      resident: r.copyWith(
+        bannedWorldIds: r.bannedWorldIds.where((id) => id != '$worldId:$residentId').toList(),
+      ),
+    );
+    _persist();
+  }
+
+  bool isBannedInWorld(String worldId, String residentId) {
+    final r = state.resident;
+    if (r == null) return false;
+    return r.bannedWorldIds.contains('$worldId:$residentId');
+  }
+
   void joinWorld(String worldId) {
     final r = state.resident;
     if (r == null || r.joinedWorldIds.contains(worldId)) return;
@@ -262,6 +315,8 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
       following: _toStringList(json['following']) ?? [],
       joinedWorldIds: _toStringList(json['joinedWorldIds']) ?? [],
       worldStandings: _parseStandings(json['worldStandings']),
+      bannedWorldIds: _toStringList(json['bannedWorldIds']) ?? [],
+      mutedUntil: (json['mutedUntil'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as int?) ?? 0)) ?? {},
     );
   }
 
@@ -281,6 +336,8 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
         'following': r.following,
         'joinedWorldIds': r.joinedWorldIds,
         'worldStandings': r.worldStandings.map((k, v) => MapEntry(k, {'rep': v.rep})),
+        'bannedWorldIds': r.bannedWorldIds,
+        'mutedUntil': r.mutedUntil,
       };
 
   static List<String>? _toStringList(dynamic value) {

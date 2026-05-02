@@ -7,6 +7,9 @@ import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 
 import '../services/invite_service.dart';
+import '../services/permission_service.dart';
+import '../services/world_service.dart';
+import '../config/tiers.dart';
 import '../models/invite.dart';
 import '../utils/date_format.dart';
 
@@ -45,6 +48,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   List<WorldInvite> _invites = [];
   bool _isLoadingInvites = false;
 
+  List<Map<String, dynamic>> _members = [];
+  bool _isLoadingMembers = false;
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +61,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     _selectedIcon = world?.icon ?? 'public';
 
     _loadInvites();
+    _loadMembers();
   }
 
   @override
@@ -107,6 +114,55 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to save settings: $e')),
         );
+      }
+    }
+  }
+
+  Future<void> _loadMembers() async {
+    setState(() => _isLoadingMembers = true);
+    try {
+      final members = await WorldService.getMembers(widget.worldId);
+      if (mounted) {
+        setState(() {
+          _members = members;
+          _isLoadingMembers = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingMembers = false);
+    }
+  }
+
+  Future<void> _muteMember(String residentId, String name, int hours) async {
+    ref.read(residentProvider.notifier).muteResident(widget.worldId, residentId, hours);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$name muted for $hours hour(s)')),
+      );
+    }
+  }
+
+  Future<void> _banMember(String residentId, String name) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Ban $name?'),
+        content: const Text('They will be removed from the world and cannot rejoin.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ban'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      ref.read(residentProvider.notifier).banResident(widget.worldId, residentId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name banned')));
+        _loadMembers();
       }
     }
   }
@@ -201,6 +257,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final world = ref.watch(worldProvider).worlds[widget.worldId];
+    final resident = ref.watch(residentProvider).resident;
 
     return Scaffold(
       appBar: AppBar(
@@ -468,6 +525,84 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               );
                             }),
                           ],
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: Spacing.md),
+
+                  // ── Member Management ────────────────────────────
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(Spacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.group, color: colorScheme.primary, size: 20),
+                              const SizedBox(width: Spacing.sm),
+                              Text('Members', style: theme.textTheme.titleMedium),
+                            ],
+                          ),
+                          const SizedBox(height: Spacing.sm),
+                          Text('Manage residents and their standing in this world.',
+                            style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                          const SizedBox(height: Spacing.md),
+                          if (_isLoadingMembers)
+                            const Center(child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ))
+                          else if (_members.isEmpty)
+                            Text('No members found', style: theme.textTheme.bodyMedium)
+                          else
+                            ..._members.map((m) {
+                              final residentId = m['resident_id'] as String? ?? '';
+                              final name = m['resident_name'] as String? ?? 'Member';
+                              final rep = m['rep'] as int? ?? 0;
+                              final standing = getStanding(rep);
+                              final isSovereign = residentId == world.sovereignId;
+                              final isCurrentUser = residentId == resident?.id;
+                              final canMod = resident != null && WorldPermissions.canModerate(resident, widget.worldId, world.sovereignId);
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: CircleAvatar(
+                                  child: Text(name.substring(0, 1).toUpperCase()),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+                                    if (isSovereign) ...[
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.auto_awesome, size: 12, color: colorScheme.primary),
+                                    ],
+                                  ],
+                                ),
+                                subtitle: Text('${standing.title} · Rep $rep'),
+                                trailing: isCurrentUser || !canMod
+                                    ? null
+                                    : PopupMenuButton<String>(
+                                        icon: Icon(Icons.more_vert, size: 18, color: colorScheme.outline),
+                                        onSelected: (action) {
+                                          switch (action) {
+                                            case 'mute1':
+                                              _muteMember(residentId, name, 1);
+                                            case 'mute24':
+                                              _muteMember(residentId, name, 24);
+                                            case 'ban':
+                                              _banMember(residentId, name);
+                                          }
+                                        },
+                                        itemBuilder: (ctx) => [
+                                          const PopupMenuItem(value: 'mute1', child: Text('Mute 1 hour')),
+                                          const PopupMenuItem(value: 'mute24', child: Text('Mute 24 hours')),
+                                          const PopupMenuItem(value: 'ban', child: Text('Ban')),
+                                        ],
+                                      ),
+                              );
+                            }),
                         ],
                       ),
                     ),

@@ -50,6 +50,8 @@ class Resident {
   final List<String> following;
   final List<String> joinedWorldIds;
   final Map<String, WorldStanding> worldStandings;
+  final List<String> bannedWorldIds;
+  final Map<String, int> mutedUntil;
 
   const Resident({
     required this.id,
@@ -67,6 +69,8 @@ class Resident {
     this.following = const [],
     this.joinedWorldIds = const [],
     this.worldStandings = const {},
+    this.bannedWorldIds = const [],
+    this.mutedUntil = const {},
   });
 
   Resident copyWith({
@@ -85,6 +89,8 @@ class Resident {
     List<String>? following,
     List<String>? joinedWorldIds,
     Map<String, WorldStanding>? worldStandings,
+    List<String>? bannedWorldIds,
+    Map<String, int>? mutedUntil,
   }) =>
       Resident(
         id: id ?? this.id,
@@ -102,5 +108,7 @@ class Resident {
         following: following ?? this.following,
         joinedWorldIds: joinedWorldIds ?? this.joinedWorldIds,
         worldStandings: worldStandings ?? this.worldStandings,
+        bannedWorldIds: bannedWorldIds ?? this.bannedWorldIds,
+        mutedUntil: mutedUntil ?? this.mutedUntil,
       );
 }

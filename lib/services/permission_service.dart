@@ -44,4 +44,12 @@ class WorldPermissions {
 
   static bool canAnnounce(Resident resident, String worldId, String? sovereignId) =>
       _standingLevel(resident, worldId, sovereignId) >= _manageMinStanding;
+
+  static bool isBanned(Resident resident, String worldId) =>
+      resident.bannedWorldIds.contains('$worldId:${resident.id}');
+
+  static bool isMuted(Resident resident, String worldId) {
+    final until = resident.mutedUntil['$worldId:${resident.id}'] ?? 0;
+    return until > DateTime.now().millisecondsSinceEpoch;
+  }
 }
