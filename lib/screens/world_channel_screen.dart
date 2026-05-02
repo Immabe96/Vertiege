@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/resident_provider.dart';
 import '../state/chat_provider.dart';
@@ -48,6 +49,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
+    HapticFeedback.lightImpact();
     ref.read(chatProvider.notifier).sendChannelMessage(
       channelId: widget.channelId,
       senderId: resident.id,

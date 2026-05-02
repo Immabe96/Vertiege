@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/resident_provider.dart';
 import '../state/chat_provider.dart';
@@ -32,6 +33,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
+    HapticFeedback.lightImpact();
     ref.read(chatProvider.notifier).sendDmMessage(
       roomId: widget.roomId,
       senderId: resident.id,

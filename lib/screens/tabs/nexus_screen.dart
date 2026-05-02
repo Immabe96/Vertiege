@@ -21,54 +21,60 @@ class NexusScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(Spacing.md),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('$greeting, ${resident?.name ?? 'Traveler'}',
-                            style: theme.textTheme.headlineSmall),
-                        if (resident != null) ...[
-                          const SizedBox(height: Spacing.xs),
-                          Text('Tier: ${resident.tier.label} | Streak: ${resident.streakCount} days',
-                              style: theme.textTheme.bodyMedium),
-                        ],
-                      ],
-                    ),
-                    NotificationBell(
-                      onPress: () {
-                        final shell = StatefulNavigationShell.of(context);
-                        shell.goBranch(4);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(child: PostInput(worldId: 'neon-district')),
-            if (posts.isEmpty)
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(postProvider.notifier).loadPosts();
+            await Future<void>.delayed(const Duration(milliseconds: 200));
+          },
+          child: CustomScrollView(
+            slivers: [
               SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(Spacing.xl),
-                    child: Text('No posts yet. Be the first!', style: theme.textTheme.bodyLarge),
+                child: Padding(
+                  padding: const EdgeInsets.all(Spacing.md),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$greeting, ${resident?.name ?? 'Traveler'}',
+                              style: theme.textTheme.headlineSmall),
+                          if (resident != null) ...[
+                            const SizedBox(height: Spacing.xs),
+                            Text('Tier: ${resident.tier.label} | Streak: ${resident.streakCount} days',
+                                style: theme.textTheme.bodyMedium),
+                          ],
+                        ],
+                      ),
+                      NotificationBell(
+                        onPress: () {
+                          final shell = StatefulNavigationShell.of(context);
+                          shell.goBranch(4);
+                        },
+                      ),
+                    ],
                   ),
                 ),
-              )
-            else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => PostItem(post: posts[index], index: index),
-                  childCount: posts.length,
-                ),
               ),
-          ],
+              SliverToBoxAdapter(child: PostInput(worldId: 'neon-district')),
+              if (posts.isEmpty)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(Spacing.xl),
+                      child: Text('No posts yet. Be the first!', style: theme.textTheme.bodyLarge),
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => PostItem(post: posts[index], index: index),
+                    childCount: posts.length,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

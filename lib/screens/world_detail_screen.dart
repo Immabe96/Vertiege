@@ -42,66 +42,86 @@ class WorldDetailScreen extends ConsumerWidget {
     return WorldAccessGuard(
       worldId: worldId,
       child: Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 200,
-              actions: [
-                if (world != null && resident?.id == world.sovereignId)
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'World settings',
-                    onPressed: () => context.push('/explore/$worldId/settings'),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(postProvider.notifier).loadPosts();
+            await Future<void>.delayed(const Duration(milliseconds: 200));
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                actions: [
+                  if (world != null && resident?.id == world.sovereignId)
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'World settings',
+                      onPressed: () => context.push('/explore/$worldId/settings'),
+                    ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(world?.name ?? worldId),
+                  background: WorldBanner(worldId: worldId),
+                ),
+              ),
+              if (world != null) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(world.description, style: theme.textTheme.bodyLarge),
+                        const SizedBox(height: 8),
+                        Text('Sovereign: ${world.sovereignName}', style: theme.textTheme.bodyMedium),
+                        Text('Prestige: ${world.prestige}', style: theme.textTheme.bodyMedium),
+                      ],
+                    ),
                   ),
+                ),
+                SliverToBoxAdapter(
+                  child: WorldChannelList(worldId: worldId),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    child: WorldResidents(world: world),
+                  ),
+                ),
               ],
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(world?.name ?? worldId),
-                background: WorldBanner(worldId: worldId),
-              ),
-            ),
-            if (world != null) ...[
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(Spacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(world.description, style: theme.textTheme.bodyLarge),
-                      const SizedBox(height: 8),
-                      Text('Sovereign: ${world.sovereignName}', style: theme.textTheme.bodyMedium),
-                      Text('Prestige: ${world.prestige}', style: theme.textTheme.bodyMedium),
-                    ],
+              SliverToBoxAdapter(child: PostInput(worldId: worldId)),
+              if (posts.isEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 40,
+                            color: theme.colorScheme.outlineVariant,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No posts in this world yet',
+                            style: theme.textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => PostItem(post: posts[index], index: index),
+                    childCount: posts.length,
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: WorldChannelList(worldId: worldId),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(Spacing.md),
-                  child: WorldResidents(world: world),
-                ),
-              ),
             ],
-            SliverToBoxAdapter(child: PostInput(worldId: worldId)),
-            if (posts.isEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Center(
-                    child: Text('No posts in this world yet', style: theme.textTheme.bodyLarge),
-                  ),
-                ),
-              )
-            else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => PostItem(post: posts[index], index: index),
-                  childCount: posts.length,
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );

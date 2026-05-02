@@ -23,46 +23,53 @@ class IdentityScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Identity')),
-      body: ListView(
-        padding: const EdgeInsets.all(Spacing.md),
-        children: [
-          Center(
-            child: CosmeticAvatar(
-              totalXp: achievements.totalXp,
-              size: 80,
-              imageUrl: resident.avatarUrl,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(residentProvider.notifier).loadResident();
+          await ref.read(achievementProvider.notifier).loadAchievements();
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        },
+        child: ListView(
+          padding: const EdgeInsets.all(Spacing.md),
+          children: [
+            Center(
+              child: CosmeticAvatar(
+                totalXp: achievements.totalXp,
+                size: 80,
+                imageUrl: resident.avatarUrl,
+              ),
             ),
-          ),
-          const SizedBox(height: Spacing.md - 4),
+            const SizedBox(height: Spacing.md - 4),
 
-          Center(child: NameBanner(profession: resident.profession, name: resident.name)),
-          const SizedBox(height: 4),
-          Center(child: Text(resident.tier.label, style: theme.textTheme.bodyLarge)),
-          const SizedBox(height: 4),
-          Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.titleMedium)),
-          const SizedBox(height: 16),
-          BadgeDisplay(earnedBadgeIds: resident.decorations),
-          const SizedBox(height: 16),
-          ListTile(
-            leading: const Icon(Icons.emoji_events),
-            title: const Text('Achievements'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/achievements'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings'),
-          ),
-          const SizedBox(height: 16),
-          ShareCard(
-            resident: resident,
-            totalXp: achievements.totalXp,
-            achievementCount:
-                achievements.userAchievements.where((a) => a.status == AchievementStatus.verified).length,
-          ),
-        ],
+            Center(child: NameBanner(profession: resident.profession, name: resident.name)),
+            const SizedBox(height: 4),
+            Center(child: Text(resident.tier.label, style: theme.textTheme.bodyLarge)),
+            const SizedBox(height: 4),
+            Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.titleMedium)),
+            const SizedBox(height: 16),
+            BadgeDisplay(earnedBadgeIds: resident.decorations),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.emoji_events),
+              title: const Text('Achievements'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/achievements'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings'),
+            ),
+            const SizedBox(height: 16),
+            ShareCard(
+              resident: resident,
+              totalXp: achievements.totalXp,
+              achievementCount:
+                  achievements.userAchievements.where((a) => a.status == AchievementStatus.verified).length,
+            ),
+          ],
+        ),
       ),
     );
   }

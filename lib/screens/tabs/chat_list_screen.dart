@@ -106,16 +106,23 @@ class ChatListScreen extends ConsumerWidget {
         children: [
           Icon(
             Icons.chat_bubble_outline,
-            size: 64,
+            size: 80,
             color: theme.colorScheme.outlineVariant,
           ),
-          const SizedBox(height: 16),
-          Text('No conversations yet', style: theme.textTheme.bodyLarge),
-          const SizedBox(height: 4),
+          const SizedBox(height: 20),
           Text(
-            'Connect with other residents to start chatting',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.outlineVariant,
+            'No conversations yet',
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 48),
+            child: Text(
+              'When you connect with other residents, your conversations will appear here. Start by joining a world and saying hello!',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
             ),
           ),
         ],
@@ -189,7 +196,7 @@ class _RoomTile extends StatelessWidget {
     if (msg == null) return 'No messages yet';
     final text = msg.toString();
     if (text.isEmpty) return 'No messages yet';
-    return text.length > 50 ? '${text.substring(0, 50)}…' : text;
+    return text.length > 50 ? '${text.substring(0, 50)}...' : text;
   }
 
   String _relativeTime() {

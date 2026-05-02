@@ -158,19 +158,25 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                 ],
                               ),
                             )
-                          : GridView.builder(
-                              padding: const EdgeInsets.all(12),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.85,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                              ),
-                              itemCount: filtered.length,
-                              itemBuilder: (context, index) {
-                                return WorldCard(world: filtered[index]);
+                          : RefreshIndicator(
+                              onRefresh: () async {
+                                await ref.read(worldProvider.notifier).loadWorlds();
+                                await Future<void>.delayed(const Duration(milliseconds: 200));
                               },
+                              child: GridView.builder(
+                                padding: const EdgeInsets.all(12),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 0.85,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                ),
+                                itemCount: filtered.length,
+                                itemBuilder: (context, index) {
+                                  return WorldCard(world: filtered[index]);
+                                },
+                              ),
                             ),
                 ),
               ],
