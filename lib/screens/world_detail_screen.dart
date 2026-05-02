@@ -9,6 +9,7 @@ import '../widgets/worlds/world_banner.dart';
 import '../widgets/worlds/world_channel_list.dart';
 import '../widgets/worlds/world_residents.dart';
 import '../services/permission_service.dart';
+import '../state/event_provider.dart';
 import '../widgets/feed/post_input.dart';
 import '../widgets/feed/post_item.dart';
 import '../widgets/core/fade_in.dart';
@@ -85,6 +86,12 @@ class WorldDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: FadeIn(
+                    delayMs: 130,
+                    child: _EventsCard(worldId: worldId, sovereignId: world.sovereignId),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -174,6 +181,121 @@ class WorldDetailScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _EventsCard extends ConsumerWidget {
+  final String worldId;
+  final String sovereignId;
+
+  const _EventsCard({required this.worldId, required this.sovereignId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final events = ref.watch(eventProvider).eventsByWorld[worldId]?.where((e) => e.isUpcoming).toList() ?? [];
+    final theme = Theme.of(context);
+    final resident = ref.watch(residentProvider).resident;
+    final canCreate = resident != null && WorldPermissions.canAnnounce(resident, worldId, sovereignId);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              Text('Events', style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              )),
+              const Spacer(),
+              if (canCreate)
+                TextButton.icon(
+                  onPressed: () => _showCreateEvent(context, ref),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Create'),
+                ),
+            ],
+          ),
+        ),
+        if (events.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 4),
+            child: Text('No upcoming events', style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.outline,
+            )),
+          )
+        else
+          ...events.take(3).map((event) {
+            final isRsvp = resident != null && event.rsvpIds.contains(resident.id);
+            return ListTile(
+              dense: true,
+              leading: Icon(isRsvp ? Icons.event_available : Icons.event, size: 20,
+                  color: isRsvp ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant),
+              title: Text(event.title, style: theme.textTheme.bodyMedium),
+              subtitle: Text(event.description, maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall),
+              trailing: TextButton(
+                onPressed: () {
+                  if (resident != null) {
+                    ref.read(eventProvider.notifier).toggleRsvp(worldId, event.id, resident.id);
+                  }
+                },
+                child: Text(isRsvp ? 'Going (${event.rsvpIds.length})' : 'RSVP (${event.rsvpIds.length})',
+                    style: TextStyle(fontSize: 12, color: isRsvp ? theme.colorScheme.primary : theme.colorScheme.outline)),
+              ),
+            );
+          }),
+      ],
+    );
+  }
+
+  void _showCreateEvent(BuildContext context, WidgetRef ref) {
+    final titleCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Create Event'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleCtrl,
+              autofocus: true,
+              decoration: const InputDecoration(hintText: 'Event title', border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descCtrl,
+              maxLines: 2,
+              decoration: const InputDecoration(hintText: 'Description', border: OutlineInputBorder()),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final title = titleCtrl.text.trim();
+              if (title.isEmpty) return;
+              final resident = ref.read(residentProvider).resident;
+              if (resident == null) return;
+              ref.read(eventProvider.notifier).createEvent(
+                worldId: worldId,
+                title: title,
+                description: descCtrl.text.trim(),
+                createdBy: resident.id,
+                createdByName: resident.name,
+                startsAt: DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch,
+              );
+              Navigator.pop(ctx);
+            },
+            child: const Text('Create'),
+          ),
+        ],
       ),
     );
   }

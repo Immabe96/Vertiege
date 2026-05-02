@@ -15,14 +15,29 @@ class PostInput extends ConsumerStatefulWidget {
   ConsumerState<PostInput> createState() => _PostInputState();
 }
 
-class _PostInputState extends ConsumerState<PostInput> {
+class _PostInputState extends ConsumerState<PostInput> with SingleTickerProviderStateMixin {
   final _controller = TextEditingController();
   String? _imageUri;
   bool _isAnnouncement = false;
+  bool _sent = false;
+  late final AnimationController _sendAnim;
+  late final Animation<double> _sendScale;
+
+  @override
+  void initState() {
+    super.initState();
+    _sendAnim = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
+    _sendScale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.3), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.3, end: 0.9), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 60),
+    ]).animate(CurvedAnimation(parent: _sendAnim, curve: Curves.easeInOut));
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _sendAnim.dispose();
     super.dispose();
   }
 
@@ -45,9 +60,14 @@ class _PostInputState extends ConsumerState<PostInput> {
         );
 
     _controller.clear();
+    _sendAnim.forward(from: 0);
     setState(() {
       _imageUri = null;
       _isAnnouncement = false;
+      _sent = true;
+    });
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) setState(() => _sent = false);
     });
   }
 
@@ -112,10 +132,13 @@ class _PostInputState extends ConsumerState<PostInput> {
                 const SizedBox(width: 8),
                 Column(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: _submit,
-                      color: theme.colorScheme.primary,
+                    ScaleTransition(
+                      scale: _sendScale,
+                      child: IconButton(
+                        icon: Icon(_sent ? Icons.check : Icons.send),
+                        onPressed: _sent ? null : _submit,
+                        color: _sent ? Colors.green : theme.colorScheme.primary,
+                      ),
                     ),
                     ImagePickerWidget(
                       onImageSelected: (uri) => setState(() => _imageUri = uri),

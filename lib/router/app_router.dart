@@ -21,6 +21,7 @@ import '../screens/settings_screen.dart';
 import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
 import '../screens/world_members_screen.dart';
+import '../screens/search_screen.dart';
 import '../screens/auth/auth_callback.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -160,6 +161,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/search',
+        builder: (context, state) => const SearchScreen(),
       ),
       GoRoute(
         path: '/create-world',

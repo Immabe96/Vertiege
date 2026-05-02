@@ -29,6 +29,7 @@ class Post {
   final Map<String, int> reactions;
   final List<Comment> comments;
   final bool isAnnouncement;
+  final bool isPinned;
 
   const Post({
     required this.id,
@@ -43,6 +44,7 @@ class Post {
     this.reactions = const {},
     this.comments = const [],
     this.isAnnouncement = false,
+    this.isPinned = false,
   });
 
   Post copyWith({
@@ -58,6 +60,7 @@ class Post {
     Map<String, int>? reactions,
     List<Comment>? comments,
     bool? isAnnouncement,
+    bool? isPinned,
   }) =>
       Post(
         id: id ?? this.id,
@@ -72,5 +75,6 @@ class Post {
         reactions: reactions ?? this.reactions,
         comments: comments ?? this.comments,
         isAnnouncement: isAnnouncement ?? this.isAnnouncement,
+        isPinned: isPinned ?? this.isPinned,
       );
 }

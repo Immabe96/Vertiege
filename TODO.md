@@ -1,29 +1,24 @@
 # Vertiege — TODO
 
-## Already Done
-- [x] FadeIn widget (fade + slide-up, configurable delay/duration)
-- [x] Staggered list animations — PostItem, WorldCard, AchievementCard
-- [x] Hero: world icon (WorldCard → WorldDetailScreen)
-- [x] Hero: avatar → profile (PostItem, IdentityScreen, ResidentProfileScreen)
-- [x] FadeIn entry animations on all screens
-- [x] Pull-to-refresh on all list screens
-- [x] Swipe-to-dismiss on alerts
-- [x] Haptic feedback on tab switches
-- [x] Empty states for all screens
-- [x] World creation flow
-- [x] Chat provider + real-time + DM
-- [x] Channel view + routing + messaging
-- [x] Discovery, Invites, and World Settings
-- [x] AchievementCard index + FadeIn + AchievementGrid refactor
-- [x] flutter analyze — all 132 issues cleaned (0 errors, 0 warnings)
-- [x] Roles & permissions — WorldPermissions service, PostInput gate, settings gate, delete controls, standing titles
+## Done (Rounds 1-3)
+- [x] Phases 1-5: Core infrastructure
+- [x] Animations: FadeIn, Hero, staggered lists, page polish
+- [x] Analyzer: 132→3 issues
+- [x] Phase 6: Moderation & Governance
+- [x] Phase 7: Member Directory & Social
+- [x] Phase 8: Channel Management
+- [x] Phase 9: World Events + RSVP
+- [x] Phase 10: Offline banner, error handling
+- [x] Round 2: Global Search, Nexus feed tabs, daily quests
+- [x] Round 2: Like burst animation, send button morph
+- [x] Round 2: Scroll-to-top on tab re-tap
+- [x] Round 3: Trending worlds section
+- [x] Round 3: Profile strength tracker
 
-## Next Up
-- [ ] ParallaxScroll — wire up the existing unused widget
-- [ ] AnimatedList for real-time post insertions
-- [ ] Channels/rooms — topic-based sub-spaces
-- [ ] Member directory — see all residents (full list beyond top 5)
-- [ ] Announcements — sovereign/admin broadcast posts
-- [ ] Invite system — residents invite others (Patron+)
-- [ ] Moderation tools — remove posts, mute, ban
-- [ ] World events — scheduled happenings
+## Next Iteration
+- [ ] Leaderboard — weekly top residents per world
+- [ ] Post pinning — sovereign can pin posts to top of feed
+- [ ] World activity stats dashboard
+- [ ] Achievement showcase improvements
+- [ ] Haptic consistency pass
+- [ ] Deep linking for invite codes

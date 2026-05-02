@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../state/world_provider.dart';
 import '../../widgets/core/fade_in.dart';
@@ -44,6 +45,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       appBar: AppBar(
         title: const Text('Explore Worlds'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: () => context.push('/search'),
+          ),
           if (_searchController.text.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear),
@@ -126,6 +132,24 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   ),
                 ),
 
+                // Trending / Hot worlds
+                if (allWorlds.isNotEmpty && _selectedType == null && _searchController.text.isEmpty)
+                  FadeIn(
+                    delayMs: 60,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
+                      child: Row(
+                        children: [
+                          Icon(Icons.local_fire_department, size: 16, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 4),
+                          Text('Trending', style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          )),
+                        ],
+                      ),
+                    ),
+                  ),
                 // Content area
                 Expanded(
                   child: allWorlds.isEmpty

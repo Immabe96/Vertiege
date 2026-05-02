@@ -7,6 +7,7 @@ import '../services/storage_service.dart';
 import '../utils/id_generator.dart';
 import 'resident_provider.dart';
 import 'notification_provider.dart';
+import 'quest_provider.dart';
 
 class PostState {
   final List<Post> posts;
@@ -47,6 +48,7 @@ class PostNotifier extends StateNotifier<PostState> {
     _persist();
 
     _ref.read(residentProvider.notifier).addRep(worldId, 5);
+    _ref.read(questProvider.notifier).onPostCreated();
   }
 
   void addReaction(String postId, String emoji, String residentId) {
@@ -60,12 +62,22 @@ class PostNotifier extends StateNotifier<PostState> {
     state = state.copyWith(posts: posts);
     _persist();
 
+    _ref.read(questProvider.notifier).onReacted();
     _ref.read(notificationProvider.notifier).addNotification(
           type: NotificationType.like,
           message: 'Someone reacted to your post',
           postId: postId,
           worldId: null,
         );
+  }
+
+  void togglePin(String postId) {
+    final posts = state.posts.map((p) {
+      if (p.id == postId) return p.copyWith(isPinned: !p.isPinned);
+      return p;
+    }).toList();
+    state = state.copyWith(posts: posts);
+    _persist();
   }
 
   void deletePost(String postId) {
@@ -85,6 +97,7 @@ class PostNotifier extends StateNotifier<PostState> {
     state = state.copyWith(posts: posts);
     _persist();
 
+    _ref.read(questProvider.notifier).onCommentAdded();
     _ref.read(residentProvider.notifier).addRep(comment.residentId, 3);
     _ref.read(notificationProvider.notifier).addNotification(
           type: NotificationType.comment,
@@ -97,17 +110,19 @@ class PostNotifier extends StateNotifier<PostState> {
   List<Post> getPostsByWorld(String worldId) {
     final worldPosts = state.posts.where((p) => p.worldId == worldId).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    // Announcements always float to top
-    final announcements = worldPosts.where((p) => p.isAnnouncement).toList();
-    final regular = worldPosts.where((p) => !p.isAnnouncement).toList();
-    return [...announcements, ...regular];
+    // Pinned first, then announcements, then regular
+    final pinned = worldPosts.where((p) => p.isPinned).toList();
+    final announcements = worldPosts.where((p) => !p.isPinned && p.isAnnouncement).toList();
+    final regular = worldPosts.where((p) => !p.isPinned && !p.isAnnouncement).toList();
+    return [...pinned, ...announcements, ...regular];
   }
 
   List<Post> getAllPosts() {
     final sorted = List.of(state.posts)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    final announcements = sorted.where((p) => p.isAnnouncement).toList();
-    final regular = sorted.where((p) => !p.isAnnouncement).toList();
-    return [...announcements, ...regular];
+    final pinned = sorted.where((p) => p.isPinned).toList();
+    final announcements = sorted.where((p) => !p.isPinned && p.isAnnouncement).toList();
+    final regular = sorted.where((p) => !p.isPinned && !p.isAnnouncement).toList();
+    return [...pinned, ...announcements, ...regular];
   }
 
   void setPosts(List<Post> posts) {
@@ -148,6 +163,7 @@ class PostNotifier extends StateNotifier<PostState> {
               .toList() ??
           [],
       isAnnouncement: json['isAnnouncement'] ?? false,
+      isPinned: json['isPinned'] ?? false,
     );
   }
 
@@ -168,6 +184,7 @@ class PostNotifier extends StateNotifier<PostState> {
         'tierAtPosting': p.tierAtPosting.value,
         'reactions': p.reactions,
         'isAnnouncement': p.isAnnouncement,
+        'isPinned': p.isPinned,
         'comments': p.comments
             .map((c) => {
                   'id': c.id,

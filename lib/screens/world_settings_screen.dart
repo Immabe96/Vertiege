@@ -11,6 +11,8 @@ import '../services/permission_service.dart';
 import '../services/world_service.dart';
 import '../config/tiers.dart';
 import '../models/invite.dart';
+import '../models/channel.dart';
+import '../state/channel_provider.dart';
 import '../utils/date_format.dart';
 
 final _iconChoices = const [
@@ -165,6 +167,96 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         _loadMembers();
       }
     }
+  }
+
+  void _deleteChannel(String channelId, String name) {
+    ref.read(channelProvider.notifier).deleteChannel(widget.worldId, channelId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Channel "$name" deleted')),
+    );
+  }
+
+  void _renameChannel(String channelId, String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename Channel'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'New channel name',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                ref.read(channelProvider.notifier).renameChannel(widget.worldId, channelId, name);
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateChannel(BuildContext context) {
+    final nameController = TextEditingController();
+    final descController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Create Channel'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Channel name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                hintText: 'Description (optional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              if (name.isNotEmpty) {
+                ref.read(channelProvider.notifier).createChannel(
+                  worldId: widget.worldId,
+                  name: name,
+                  description: descController.text.trim().isEmpty ? null : descController.text.trim(),
+                );
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Channel "$name" created')),
+                );
+              }
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _generateInvite() async {
@@ -387,6 +479,70 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               label: Text(
                                   _isSaving ? 'Saving...' : 'Save Changes'),
                             ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: Spacing.md),
+
+                  // ── Channels ──────────────────────────────────────
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(Spacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.tag, color: colorScheme.primary, size: 20),
+                              const SizedBox(width: Spacing.sm),
+                              Text('Channels', style: theme.textTheme.titleMedium),
+                            ],
+                          ),
+                          const SizedBox(height: Spacing.sm),
+                          Text('Manage channels for this world.',
+                            style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                          const SizedBox(height: Spacing.md),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final channels = ref.watch(channelProvider).channelsByWorld[widget.worldId] ?? [];
+                              return Column(
+                                children: [
+                                  ...channels.map((ch) => ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    leading: Icon(
+                                      ch.channelType == ChannelType.announcement
+                                          ? Icons.campaign
+                                          : ch.channelType == ChannelType.feed
+                                              ? Icons.dynamic_feed
+                                              : Icons.tag,
+                                      size: 20,
+                                    ),
+                                    title: Text('# ${ch.name}'),
+                                    subtitle: Text(ch.description ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    trailing: ch.isDefault
+                                        ? Text('Default', style: theme.textTheme.labelSmall?.copyWith(color: colorScheme.outline))
+                                        : IconButton(
+                                            icon: Icon(Icons.delete_outline, size: 18, color: colorScheme.error),
+                                            onPressed: () => _deleteChannel(ch.id, ch.name),
+                                          ),
+                                    onTap: ch.isDefault ? null : () => _renameChannel(ch.id, ch.name),
+                                  )),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 40,
+                                    child: OutlinedButton.icon(
+                                      onPressed: () => _showCreateChannel(context),
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Add Channel'),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),

@@ -57,6 +57,50 @@ class ChannelNotifier extends StateNotifier<ChannelState> {
   List<WorldChannel> getChannels(String worldId) =>
       state.channelsByWorld[worldId] ?? [];
 
+  void createChannel({
+    required String worldId,
+    required String name,
+    String? description,
+    ChannelType channelType = ChannelType.text,
+  }) {
+    final channels = List<WorldChannel>.from(state.channelsByWorld[worldId] ?? []);
+    final channel = WorldChannel(
+      id: generateId(),
+      worldId: worldId,
+      name: name,
+      description: description,
+      channelType: channelType,
+      position: channels.length,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    channels.add(channel);
+    state = state.copyWith(
+      channelsByWorld: {...state.channelsByWorld, worldId: channels},
+    );
+    _persist(worldId, channels);
+  }
+
+  void deleteChannel(String worldId, String channelId) {
+    final channels = (state.channelsByWorld[worldId] ?? [])
+        .where((c) => c.id != channelId && !c.isDefault)
+        .toList();
+    state = state.copyWith(
+      channelsByWorld: {...state.channelsByWorld, worldId: channels},
+    );
+    _persist(worldId, channels);
+  }
+
+  void renameChannel(String worldId, String channelId, String newName) {
+    final channels = (state.channelsByWorld[worldId] ?? []).map((c) {
+      if (c.id == channelId) return c.copyWith(name: newName);
+      return c;
+    }).toList();
+    state = state.copyWith(
+      channelsByWorld: {...state.channelsByWorld, worldId: channels},
+    );
+    _persist(worldId, channels);
+  }
+
   Future<List<WorldChannel>> _createDefaults(String worldId) async {
     final channels = await WorldService.createDefaultChannels(worldId);
     if (channels.isEmpty) {

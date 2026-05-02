@@ -21,14 +21,28 @@ class WorldCard extends ConsumerWidget {
 
     return FadeIn(
       delayMs: index * 60,
-      child: Card(
-        elevation: isLocked ? 0 : 1,
-        color: isLocked ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surface,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isLocked ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isLocked
+                ? theme.colorScheme.outlineVariant.withValues(alpha: 0.1)
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           onTap: () => context.push('/explore/${world.id}'),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -36,31 +50,54 @@ class WorldCard extends ConsumerWidget {
                   children: [
                     Hero(
                       tag: 'world-icon-${world.id}',
-                      child: WorldIcon(worldId: world.id, size: 40),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: WorldIcon(worldId: world.id, size: 28),
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(world.name, style: theme.textTheme.titleSmall),
+                          Text(world.name,
+                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
                           const SizedBox(height: 2),
-                          Text(world.description,
-                              style: theme.textTheme.bodySmall,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis),
+                          Text(
+                            '${world.memberCount} members',
+                            style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
+                Text(world.description,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.3),
+                  maxLines: 2, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 10),
                 Wrap(
-                  spacing: 4,
+                  spacing: 6,
+                  runSpacing: 4,
                   children: [
-                    _Chip(label: world.type.name, color: theme.colorScheme.secondary),
-                    _Chip(label: 'Prestige ${world.prestige}', color: theme.colorScheme.primary),
-                    if (isLocked) _Chip(label: 'Locked', color: theme.colorScheme.error),
+                    _Badge(
+                      label: world.type.name,
+                      icon: Icons.public,
+                      color: theme.colorScheme.secondary,
+                    ),
+                    _Badge(
+                      label: 'P ${world.prestige}',
+                      icon: Icons.star,
+                      color: theme.colorScheme.primary,
+                    ),
+                    if (isLocked)
+                      _Badge(label: 'Locked', icon: Icons.lock, color: theme.colorScheme.error),
                   ],
                 ),
               ],
@@ -72,20 +109,30 @@ class WorldCard extends ConsumerWidget {
   }
 }
 
-class _Chip extends StatelessWidget {
+class _Badge extends StatelessWidget {
   final String label;
+  final IconData icon;
   final Color color;
-  const _Chip({required this.label, required this.color});
+
+  const _Badge({required this.label, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+          Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
+        ],
+      ),
     );
   }
 }

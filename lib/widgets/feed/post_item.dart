@@ -9,7 +9,6 @@ import '../../state/resident_provider.dart';
 import '../../utils/date_format.dart';
 import '../core/fade_in.dart';
 import '../shared/tier_icon.dart';
-import 'post_image.dart';
 import 'comment_sheet.dart';
 import 'reaction_bar.dart';
 
@@ -25,12 +24,24 @@ class PostItem extends ConsumerWidget {
     final theme = Theme.of(context);
     final resident = ref.watch(residentProvider).resident;
 
+    final canMod = _canDelete(ref);
+    final canPin = _canPin(ref);
+    final showOverflow = canMod || resident?.id != post.residentId || canPin;
+
     return FadeIn(
       delayMs: index * 70,
-      child: Card(
+      child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.15)),
+          boxShadow: [
+            BoxShadow(color: theme.shadowColor.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -40,40 +51,50 @@ class PostItem extends ConsumerWidget {
                     onTap: () => context.push('/residents/${post.residentId}'),
                     child: Hero(
                       tag: 'avatar-${post.residentId}',
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(post.residentAvatar),
-                        radius: 18,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
+                        ),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(post.residentAvatar),
+                          radius: 20,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
                           onTap: () => context.push('/residents/${post.residentId}'),
-                          child: Text(post.residentName, style: theme.textTheme.labelLarge),
+                          child: Text(post.residentName, style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
                         ),
+                        const SizedBox(height: 1),
                         Row(
                           children: [
-                            TierIcon(tier: post.tierAtPosting.value, size: 14),
+                            TierIcon(tier: post.tierAtPosting.value, size: 12),
                             const SizedBox(width: 4),
-                            Text(formatTimestamp(post.timestamp), style: theme.textTheme.labelSmall),
+                            Text(formatTimestamp(post.timestamp), style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  if (_canDelete(ref) || resident?.id != post.residentId)
+                  if (showOverflow)
                     PopupMenuButton<String>(
-                      icon: Icon(Icons.more_vert, size: 18, color: theme.colorScheme.outline),
+                      icon: Icon(Icons.more_horiz, size: 20, color: theme.colorScheme.outline),
                       onSelected: (action) {
                         if (action == 'delete') _onDelete(ref);
                         if (action == 'report') _onReport(context, ref);
+                        if (action == 'pin') _onTogglePin(ref);
                       },
                       itemBuilder: (context) => [
-                        if (_canDelete(ref))
+                        if (canPin)
+                          PopupMenuItem(value: 'pin', child: Text(post.isPinned ? 'Unpin post' : 'Pin post')),
+                        if (canMod)
                           const PopupMenuItem(value: 'delete', child: Text('Delete post')),
                         if (resident?.id != post.residentId)
                           const PopupMenuItem(value: 'report', child: Text('Report')),
@@ -81,44 +102,71 @@ class PostItem extends ConsumerWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 8),
-              if (post.isAnnouncement)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
+              if (post.isPinned || post.isAnnouncement) ...[
+                const SizedBox(height: 8),
+                if (post.isPinned)
+                  Row(
+                    children: [
+                      Icon(Icons.push_pin, size: 14, color: theme.colorScheme.tertiary),
+                      const SizedBox(width: 4),
+                      Text('Pinned', style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.tertiary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                if (post.isAnnouncement)
+                  Row(
                     children: [
                       Icon(Icons.campaign, size: 14, color: theme.colorScheme.primary),
                       const SizedBox(width: 4),
-                      Text(
-                        'Announcement',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                      Text('Announcement', style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+              ],
+              Padding(
+                padding: EdgeInsets.only(top: post.isPinned || post.isAnnouncement ? 6 : 8, bottom: post.imageUri != null ? 8 : 0),
+                child: Text(post.content, style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
+              ),
+              if (post.imageUri != null) ...[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(post.imageUri!, fit: BoxFit.cover, width: double.infinity),
+                  ),
+                ),
+              ],
+              IntrinsicHeight(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ReactionBar(
+                        reactions: post.reactions,
+                        currentResidentId: resident?.id ?? '',
+                        onReact: (emoji) {
+                          ref.read(postProvider.notifier).addReaction(post.id, emoji, resident?.id ?? '');
+                        },
+                      ),
+                    ),
+                    if (post.comments.isNotEmpty) ...[
+                      Container(width: 1, color: theme.dividerColor),
+                      GestureDetector(
+                        onTap: () => _showComments(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.chat_bubble_outline, size: 16, color: theme.colorScheme.outline),
+                              const SizedBox(width: 4),
+                              Text('${post.comments.length}', style: theme.textTheme.labelSmall),
+                            ],
+                          ),
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-              Text(post.content, style: theme.textTheme.bodyMedium),
-              if (post.imageUri != null) ...[
-                const SizedBox(height: 8),
-                PostImage(uri: post.imageUri!),
-              ],
-              const SizedBox(height: 8),
-              ReactionBar(
-                reactions: post.reactions,
-                currentResidentId: resident?.id ?? '',
-                onReact: (emoji) {
-                  ref.read(postProvider.notifier).addReaction(post.id, emoji, resident?.id ?? '');
-                },
               ),
-              if (post.comments.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                TextButton(
-                  onPressed: () => _showComments(context, ref),
-                  child: Text('View ${post.comments.length} comments'),
-                ),
-              ],
             ],
           ),
         ),
@@ -130,6 +178,16 @@ class PostItem extends ConsumerWidget {
     final resident = ref.read(residentProvider).resident;
     if (resident == null || worldId == null) return false;
     return WorldPermissions.canDeletePost(resident, worldId!, post.residentId, null);
+  }
+
+  bool _canPin(WidgetRef ref) {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null || worldId == null) return false;
+    return WorldPermissions.canModerate(resident, worldId!, null);
+  }
+
+  void _onTogglePin(WidgetRef ref) {
+    ref.read(postProvider.notifier).togglePin(post.id);
   }
 
   void _onDelete(WidgetRef ref) {

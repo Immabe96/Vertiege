@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/achievement.dart';
+import '../../models/resident.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/design_system.dart';
@@ -56,6 +57,11 @@ class IdentityScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             FadeIn(
+              delayMs: 95,
+              child: _ProfileStrength(resident: resident),
+            ),
+            const SizedBox(height: 4),
+            FadeIn(
               delayMs: 100,
               child: Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.titleMedium)),
             ),
@@ -103,6 +109,64 @@ class IdentityScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProfileStrength extends StatelessWidget {
+  final Resident resident;
+  const _ProfileStrength({required this.resident});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final checks = [
+      resident.name.isNotEmpty && resident.name != 'Traveler',
+      resident.bio.isNotEmpty,
+      resident.profession != null && resident.profession!.isNotEmpty,
+      resident.avatarUrl.isNotEmpty && !resident.avatarUrl.contains('placeholder'),
+      resident.decorations.isNotEmpty,
+      resident.streakCount >= 3,
+    ];
+    final done = checks.where((c) => c).length;
+    final pct = done / checks.length;
+
+    if (pct >= 1.0) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.auto_awesome, size: 12, color: theme.colorScheme.primary),
+            const SizedBox(width: 4),
+            Text('Profile ${(pct * 100).round()}% complete',
+                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Center(
+          child: Container(
+            width: 120,
+            height: 4,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              color: theme.colorScheme.surfaceContainerHighest,
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: pct,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

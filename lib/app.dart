@@ -6,6 +6,8 @@ import 'state/notification_provider.dart';
 import 'state/achievement_provider.dart';
 import 'state/post_provider.dart';
 import 'state/world_provider.dart';
+import 'state/event_provider.dart';
+import 'state/quest_provider.dart';
 import 'theme/app_theme.dart';
 import 'router/app_router.dart';
 
@@ -32,6 +34,8 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       ref.read(notificationProvider.notifier).loadNotifications(),
       ref.read(achievementProvider.notifier).loadAchievements(),
     ]);
+    ref.read(eventProvider);
+    ref.read(questProvider);
   }
 
   @override

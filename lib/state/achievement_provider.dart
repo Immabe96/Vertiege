@@ -64,7 +64,7 @@ class AchievementNotifier extends StateNotifier<AchievementState> {
     state = state.copyWith(userAchievements: achievements, totalXp: newTotalXp);
     _persist();
 
-    HapticFeedback.lightImpact();
+    HapticFeedback.heavyImpact();
   }
 
   AchievementStatus getAchievementStatus(String achievementId) {
