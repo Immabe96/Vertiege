@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/world.dart';
 import '../../state/world_provider.dart';
+import '../../widgets/core/fade_in.dart';
 import '../../widgets/worlds/world_card.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
@@ -59,63 +60,69 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           : Column(
               children: [
                 // Search bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      hintText: 'Search worlds...',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              tooltip: 'Clear',
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {});
-                              },
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                FadeIn(
+                  delayMs: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText: 'Search worlds...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                tooltip: 'Clear',
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() {});
+                                },
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                       ),
-                      filled: true,
-                      fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
 
                 // Filter chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: Row(
-                    children: [
-                      FilterChip(
-                        label: const Text('All'),
-                        selected: _selectedType == null,
-                        onSelected: (_) => setState(() => _selectedType = null),
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: const Text('Wealth'),
-                        selected: _selectedType == WorldType.wealth,
-                        onSelected: (_) => setState(() => _selectedType = WorldType.wealth),
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: const Text('Profession'),
-                        selected: _selectedType == WorldType.profession,
-                        onSelected: (_) => setState(() => _selectedType = WorldType.profession),
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: const Text('Dominion'),
-                        selected: _selectedType == WorldType.dominion,
-                        onSelected: (_) => setState(() => _selectedType = WorldType.dominion),
-                      ),
-                    ],
+                FadeIn(
+                  delayMs: 40,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Row(
+                      children: [
+                        FilterChip(
+                          label: const Text('All'),
+                          selected: _selectedType == null,
+                          onSelected: (_) => setState(() => _selectedType = null),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          label: const Text('Wealth'),
+                          selected: _selectedType == WorldType.wealth,
+                          onSelected: (_) => setState(() => _selectedType = WorldType.wealth),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          label: const Text('Profession'),
+                          selected: _selectedType == WorldType.profession,
+                          onSelected: (_) => setState(() => _selectedType = WorldType.profession),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          label: const Text('Dominion'),
+                          selected: _selectedType == WorldType.dominion,
+                          onSelected: (_) => setState(() => _selectedType = WorldType.dominion),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -174,7 +181,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                 ),
                                 itemCount: filtered.length,
                                 itemBuilder: (context, index) {
-                                  return WorldCard(world: filtered[index]);
+                                  return WorldCard(world: filtered[index], index: index);
                                 },
                               ),
                             ),

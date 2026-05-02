@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
-import '../../models/resident.dart' hide NotificationType;
 import '../../state/resident_provider.dart';
 import '../../services/access_control.dart';
 import '../core/fade_in.dart';
@@ -10,8 +9,9 @@ import 'world_icon.dart';
 
 class WorldCard extends ConsumerWidget {
   final World world;
+  final int index;
 
-  const WorldCard({super.key, required this.world});
+  const WorldCard({super.key, required this.world, this.index = 0});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,6 +20,7 @@ class WorldCard extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return FadeIn(
+      delayMs: index * 60,
       child: Card(
         elevation: isLocked ? 0 : 1,
         color: isLocked ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surface,
@@ -33,7 +34,10 @@ class WorldCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    WorldIcon(worldId: world.id, size: 40),
+                    Hero(
+                      tag: 'world-icon-${world.id}',
+                      child: WorldIcon(worldId: world.id, size: 40),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(

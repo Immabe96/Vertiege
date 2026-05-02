@@ -6,6 +6,7 @@ import '../state/achievement_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../services/profile_service.dart';
 import '../services/chat_service.dart';
+import '../widgets/core/fade_in.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/name_banner.dart';
 import '../widgets/profile/badge_display.dart';
@@ -76,47 +77,69 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Center(child: CosmeticAvatar(totalXp: achievements.totalXp, size: 80, imageUrl: resident.avatarUrl)),
+        Center(
+          child: Hero(
+            tag: 'avatar-${resident.id}',
+            child: CosmeticAvatar(totalXp: achievements.totalXp, size: 80, imageUrl: resident.avatarUrl),
+          ),
+        ),
         const SizedBox(height: 12),
-        Center(child: NameBanner(profession: resident.profession, name: resident.name)),
+        FadeIn(
+          delayMs: 60,
+          child: Center(child: NameBanner(profession: resident.profession, name: resident.name)),
+        ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TierIcon(tier: resident.tier.value),
-            const SizedBox(width: 8),
-            Text(resident.tier.label, style: theme.textTheme.titleMedium),
-          ],
+        FadeIn(
+          delayMs: 80,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TierIcon(tier: resident.tier.value),
+              const SizedBox(width: 8),
+              Text(resident.tier.label, style: theme.textTheme.titleMedium),
+            ],
+          ),
         ),
         const SizedBox(height: 4),
-        Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.headlineSmall)),
+        FadeIn(
+          delayMs: 100,
+          child: Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.headlineSmall)),
+        ),
         if (resident.bio.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Text(resident.bio, style: theme.textTheme.bodyLarge, textAlign: TextAlign.center),
+          FadeIn(
+            delayMs: 120,
+            child: Text(resident.bio, style: theme.textTheme.bodyLarge, textAlign: TextAlign.center),
+          ),
         ],
         const SizedBox(height: 12),
-        Center(child: Text('Streak: ${resident.streakCount} days', style: theme.textTheme.bodyMedium)),
-        // Show Message button for other residents only
+        FadeIn(
+          delayMs: 140,
+          child: Center(child: Text('Streak: ${resident.streakCount} days', style: theme.textTheme.bodyMedium)),
+        ),
         if (resident.id != ref.watch(residentProvider).resident?.id) ...[
           const SizedBox(height: 16),
-          Center(
-            child: FilledButton.icon(
-              onPressed: () async {
-                final currentId = ref.read(residentProvider).resident?.id;
-                if (currentId == null) return;
-                final room = await ChatService.getOrCreateRoom(currentId, resident.id);
-                if (room != null && context.mounted) {
-                  context.push('/chat/${room['id']}');
-                }
-              },
-              icon: const Icon(Icons.chat_bubble_outline),
-              label: const Text('Message'),
+          FadeIn(
+            delayMs: 160,
+            child: Center(
+              child: FilledButton.icon(
+                onPressed: () async {
+                  final currentId = ref.read(residentProvider).resident?.id;
+                  if (currentId == null) return;
+                  final room = await ChatService.getOrCreateRoom(currentId, resident.id);
+                  if (room != null && context.mounted) {
+                    context.push('/chat/${room['id']}');
+                  }
+                },
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text('Message'),
+              ),
             ),
           ),
         ],
         if (resident.decorations.isNotEmpty) ...[
           const SizedBox(height: 16),
-          BadgeDisplay(earnedBadgeIds: resident.decorations),
+          FadeIn(delayMs: 180, child: BadgeDisplay(earnedBadgeIds: resident.decorations)),
         ],
       ],
     );

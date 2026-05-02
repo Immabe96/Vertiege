@@ -23,7 +23,7 @@ class PostItem extends ConsumerWidget {
     final resident = ref.watch(residentProvider).resident;
 
     return FadeIn(
-      delayMs: index * 50,
+      delayMs: index * 70,
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Padding(
@@ -35,9 +35,12 @@ class PostItem extends ConsumerWidget {
                 children: [
                   GestureDetector(
                     onTap: () => context.push('/residents/${post.residentId}'),
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(post.residentAvatar),
-                      radius: 18,
+                    child: Hero(
+                      tag: 'avatar-${post.residentId}',
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(post.residentAvatar),
+                        radius: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),

@@ -10,6 +10,7 @@ import '../widgets/worlds/world_channel_list.dart';
 import '../widgets/worlds/world_residents.dart';
 import '../widgets/feed/post_input.dart';
 import '../widgets/feed/post_item.dart';
+import '../widgets/core/fade_in.dart';
 import '../state/post_provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -61,54 +62,74 @@ class WorldDetailScreen extends ConsumerWidget {
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(world?.name ?? worldId),
-                  background: WorldBanner(worldId: worldId),
+                  background: Hero(
+                    tag: 'world-icon-$worldId',
+                    child: WorldBanner(worldId: worldId),
+                  ),
                 ),
               ),
               if (world != null) ...[
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(Spacing.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(world.description, style: theme.textTheme.bodyLarge),
-                        const SizedBox(height: 8),
-                        Text('Sovereign: ${world.sovereignName}', style: theme.textTheme.bodyMedium),
-                        Text('Prestige: ${world.prestige}', style: theme.textTheme.bodyMedium),
-                      ],
+                  child: FadeIn(
+                    delayMs: 100,
+                    child: Padding(
+                      padding: const EdgeInsets.all(Spacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(world.description, style: theme.textTheme.bodyLarge),
+                          const SizedBox(height: 8),
+                          Text('Sovereign: ${world.sovereignName}', style: theme.textTheme.bodyMedium),
+                          Text('Prestige: ${world.prestige}', style: theme.textTheme.bodyMedium),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: WorldChannelList(worldId: worldId),
+                  child: FadeIn(
+                    delayMs: 140,
+                    child: WorldChannelList(worldId: worldId),
+                  ),
                 ),
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(Spacing.md),
-                    child: WorldResidents(world: world),
+                  child: FadeIn(
+                    delayMs: 180,
+                    child: Padding(
+                      padding: const EdgeInsets.all(Spacing.md),
+                      child: WorldResidents(world: world),
+                    ),
                   ),
                 ),
               ],
-              SliverToBoxAdapter(child: PostInput(worldId: worldId)),
+              SliverToBoxAdapter(
+                child: FadeIn(
+                  delayMs: 220,
+                  child: PostInput(worldId: worldId),
+                ),
+              ),
               if (posts.isEmpty)
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.auto_awesome,
-                            size: 40,
-                            color: theme.colorScheme.outlineVariant,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'No posts in this world yet',
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        ],
+                  child: FadeIn(
+                    delayMs: 260,
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.auto_awesome,
+                              size: 40,
+                              color: theme.colorScheme.outlineVariant,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No posts in this world yet',
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/notification_provider.dart';
 import '../../models/notification.dart';
 import '../../utils/date_format.dart';
+import '../../widgets/core/fade_in.dart';
 
 class AlertsScreen extends ConsumerWidget {
   const AlertsScreen({super.key});
@@ -73,23 +74,26 @@ class AlertsScreen extends ConsumerWidget {
                     onDismissed: (_) {
                       ref.read(notificationProvider.notifier).markRead(n.id);
                     },
-                    child: ListTile(
-                      leading: Icon(
-                        icon,
-                        color: n.read
-                            ? theme.colorScheme.outline
-                            : theme.colorScheme.primary,
-                      ),
-                      title: Text(
-                        n.message,
-                        style: TextStyle(
-                          fontWeight:
-                              n.read ? FontWeight.normal : FontWeight.bold,
+                    child: FadeIn(
+                      delayMs: index * 60,
+                      child: ListTile(
+                        leading: Icon(
+                          icon,
+                          color: n.read
+                              ? theme.colorScheme.outline
+                              : theme.colorScheme.primary,
                         ),
+                        title: Text(
+                          n.message,
+                          style: TextStyle(
+                            fontWeight:
+                                n.read ? FontWeight.normal : FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(formatTimestamp(n.createdAt)),
+                        onTap: () =>
+                            ref.read(notificationProvider.notifier).markRead(n.id),
                       ),
-                      subtitle: Text(formatTimestamp(n.createdAt)),
-                      onTap: () =>
-                          ref.read(notificationProvider.notifier).markRead(n.id),
                     ),
                   );
                 },

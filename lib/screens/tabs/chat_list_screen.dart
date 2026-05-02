@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../utils/date_format.dart';
+import '../../widgets/core/fade_in.dart';
 
 class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
@@ -147,6 +148,7 @@ class ChatListScreen extends ConsumerWidget {
           room: room,
           currentResidentId: residentId,
           onTap: () => context.go('/chat/$roomId'),
+          index: index,
         );
       },
     );
@@ -157,12 +159,14 @@ class _RoomTile extends StatelessWidget {
   final Map<String, dynamic> room;
   final String currentResidentId;
   final VoidCallback onTap;
+  final int index;
 
   const _RoomTile({
     super.key,
     required this.room,
     required this.currentResidentId,
     required this.onTap,
+    this.index = 0,
   });
 
   /// Returns the display name for the other participant in this DM room.
@@ -215,40 +219,43 @@ class _RoomTile extends StatelessWidget {
     final theme = Theme.of(context);
     final name = _otherResidentName();
 
-    return ListTile(
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Text(
-          name.substring(0, 1).toUpperCase(),
-          style: TextStyle(
-            color: theme.colorScheme.onPrimaryContainer,
+    return FadeIn(
+      delayMs: index * 50,
+      child: ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: CircleAvatar(
+          backgroundColor: theme.colorScheme.primaryContainer,
+          child: Text(
+            name.substring(0, 1).toUpperCase(),
+            style: TextStyle(
+              color: theme.colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        title: Text(
+          name,
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
-      ),
-      title: Text(
-        name,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
+        subtitle: Text(
+          _lastMessagePreview(),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.outline,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-      ),
-      subtitle: Text(
-        _lastMessagePreview(),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.outline,
+        trailing: Text(
+          _relativeTime(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.outlineVariant,
+          ),
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        onTap: onTap,
       ),
-      trailing: Text(
-        _relativeTime(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.outlineVariant,
-        ),
-      ),
-      onTap: onTap,
     );
   }
 }

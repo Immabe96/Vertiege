@@ -5,6 +5,7 @@ import '../../state/resident_provider.dart';
 import '../../state/post_provider.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/notification_bell.dart';
+import '../../widgets/core/fade_in.dart';
 import '../../widgets/feed/post_input.dart';
 import '../../widgets/feed/post_item.dart';
 
@@ -29,40 +30,46 @@ class NexusScreen extends ConsumerWidget {
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(Spacing.md),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('$greeting, ${resident?.name ?? 'Traveler'}',
-                              style: theme.textTheme.headlineSmall),
-                          if (resident != null) ...[
-                            const SizedBox(height: Spacing.xs),
-                            Text('Tier: ${resident.tier.label} | Streak: ${resident.streakCount} days',
-                                style: theme.textTheme.bodyMedium),
+                child: FadeIn(
+                  delayMs: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('$greeting, ${resident?.name ?? 'Traveler'}',
+                                style: theme.textTheme.headlineSmall),
+                            if (resident != null) ...[
+                              const SizedBox(height: Spacing.xs),
+                              Text('Tier: ${resident.tier.label} | Streak: ${resident.streakCount} days',
+                                  style: theme.textTheme.bodyMedium),
+                            ],
                           ],
-                        ],
-                      ),
-                      NotificationBell(
-                        onPress: () {
-                          final shell = StatefulNavigationShell.of(context);
-                          shell.goBranch(4);
-                        },
-                      ),
-                    ],
+                        ),
+                        NotificationBell(
+                          onPress: () {
+                            final shell = StatefulNavigationShell.of(context);
+                            shell.goBranch(4);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: PostInput(worldId: 'neon-district')),
+              SliverToBoxAdapter(child: FadeIn(delayMs: 80, child: PostInput(worldId: 'neon-district'))),
               if (posts.isEmpty)
                 SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(Spacing.xl),
-                      child: Text('No posts yet. Be the first!', style: theme.textTheme.bodyLarge),
+                  child: FadeIn(
+                    delayMs: 160,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(Spacing.xl),
+                        child: Text('No posts yet. Be the first!', style: theme.textTheme.bodyLarge),
+                      ),
                     ),
                   ),
                 )
