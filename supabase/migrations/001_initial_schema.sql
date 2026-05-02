@@ -1,11 +1,28 @@
 -- Vertiege: Complete Supabase Schema
 -- Run this in your Supabase SQL Editor (https://app.supabase.com)
 
+-- ⚠️ WARNING: This drops ALL old Expo app data and recreates everything
+
+-- ── Clean up old schema (cascade drops remove policies too) ─
+drop table if exists public.moderation_logs cascade;
+drop table if exists public.reports cascade;
+drop table if exists public.events cascade;
+drop table if exists public.channel_messages cascade;
+drop table if exists public.chat_messages cascade;
+drop table if exists public.dm_rooms cascade;
+drop table if exists public.invites cascade;
+drop table if exists public.posts cascade;
+drop table if exists public.channels cascade;
+drop table if exists public.world_members cascade;
+drop table if exists public.worlds cascade;
+drop table if exists public.notifications cascade;
+drop table if exists public.profiles cascade;
+
 -- ── Extension ──────────────────────────────────────────────
 create extension if not exists "uuid-ossp";
 
 -- ── Profiles ───────────────────────────────────────────────
-create table if not exists public.profiles (
+create table public.profiles (
   id          uuid primary key default uuid_generate_v4(),
   name        text not null,
   bio         text default '',
@@ -42,7 +59,7 @@ create policy "Users can insert own profile"
   on public.profiles for insert with check (auth.uid() = id);
 
 -- ── Worlds ─────────────────────────────────────────────────
-create table if not exists public.worlds (
+create table public.worlds (
   id              text primary key,
   name            text not null,
   type            text not null default 'wealth', -- wealth, profession, dominion
@@ -69,7 +86,7 @@ create policy "Users can create worlds"
   on public.worlds for insert with check (auth.uid() = sovereign_id);
 
 -- ── World Members (standing per resident per world) ────────
-create table if not exists public.world_members (
+create table public.world_members (
   id            uuid primary key default uuid_generate_v4(),
   world_id      text not null references public.worlds(id) on delete cascade,
   resident_id   uuid not null references public.profiles(id) on delete cascade,
@@ -88,7 +105,7 @@ create policy "Residents can join worlds"
   on public.world_members for insert with check (auth.uid() = resident_id);
 
 -- ── Channels ───────────────────────────────────────────────
-create table if not exists public.channels (
+create table public.channels (
   id            text primary key,
   world_id      text not null references public.worlds(id) on delete cascade,
   name          text not null,
@@ -110,7 +127,7 @@ create policy "World members can create channels"
   );
 
 -- ── Posts ──────────────────────────────────────────────────
-create table if not exists public.posts (
+create table public.posts (
   id              text primary key,
   world_id        text not null references public.worlds(id) on delete cascade,
   resident_id     uuid not null references public.profiles(id) on delete cascade,
@@ -144,7 +161,7 @@ create policy "Authors or moderators can delete posts"
   on public.posts for delete using (auth.uid() = resident_id);
 
 -- ── Events ─────────────────────────────────────────────────
-create table if not exists public.events (
+create table public.events (
   id              text primary key,
   world_id        text not null references public.worlds(id) on delete cascade,
   title           text not null,
@@ -163,7 +180,7 @@ create policy "Anyone can read events"
   on public.events for select using (true);
 
 -- ── Reports ────────────────────────────────────────────────
-create table if not exists public.reports (
+create table public.reports (
   id            text primary key,
   world_id      text not null references public.worlds(id) on delete cascade,
   post_id       text not null references public.posts(id) on delete cascade,
@@ -183,7 +200,7 @@ create policy "Anyone can create reports"
   on public.reports for insert with check (true);
 
 -- ── Invites ────────────────────────────────────────────────
-create table if not exists public.invites (
+create table public.invites (
   id            text primary key,
   world_id      text not null references public.worlds(id) on delete cascade,
   code          text not null unique,
@@ -205,7 +222,7 @@ create policy "World members can create invites"
   );
 
 -- ── DM Rooms ───────────────────────────────────────────────
-create table if not exists public.dm_rooms (
+create table public.dm_rooms (
   id            text primary key,
   resident_ids  text[] not null,
   names         jsonb default '{}',
@@ -220,7 +237,7 @@ create policy "Users can read own DM rooms"
   on public.dm_rooms for select using (auth.uid() = any(resident_ids));
 
 -- ── Chat Messages ──────────────────────────────────────────
-create table if not exists public.chat_messages (
+create table public.chat_messages (
   id            text primary key,
   room_id       text not null references public.dm_rooms(id) on delete cascade,
   sender_id     uuid not null references public.profiles(id) on delete cascade,
@@ -241,7 +258,7 @@ create policy "Room members can send messages"
   );
 
 -- ── Channel Messages ───────────────────────────────────────
-create table if not exists public.channel_messages (
+create table public.channel_messages (
   id            text primary key,
   channel_id    text not null references public.channels(id) on delete cascade,
   world_id      text not null references public.worlds(id) on delete cascade,
@@ -264,7 +281,7 @@ create policy "World members can send channel messages"
   );
 
 -- ── Notifications ──────────────────────────────────────────
-create table if not exists public.notifications (
+create table public.notifications (
   id            text primary key,
   recipient_id  uuid not null references public.profiles(id),
   type          text not null, -- like, comment, worldUnlocked, tierUpgrade, welcome, modAction
@@ -281,7 +298,7 @@ create policy "Users can read own notifications"
   on public.notifications for select using (auth.uid() = recipient_id);
 
 -- ── Moderation Logs ────────────────────────────────────────
-create table if not exists public.moderation_logs (
+create table public.moderation_logs (
   id              text primary key,
   world_id        text not null references public.worlds(id) on delete cascade,
   moderator_id    uuid not null references public.profiles(id),
