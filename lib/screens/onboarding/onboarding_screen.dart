@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
 import '../../models/resident.dart';
+import '../../widgets/core/tactile_button.dart';
+import '../../theme/colors.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -41,24 +43,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.public, size: 80, color: theme.colorScheme.primary),
-              const SizedBox(height: 24),
-              Text('Welcome to Virtual Status Worlds', style: theme.textTheme.headlineMedium, textAlign: TextAlign.center),
-              const SizedBox(height: 8),
-              Text('Set up your profile to get started.', style: theme.textTheme.bodyLarge, textAlign: TextAlign.center),
+              Icon(Icons.public, size: 72, color: AppColors.seed),
+              const SizedBox(height: 20),
+              Text('Welcome to Vertiege', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800), textAlign: TextAlign.center),
+              const SizedBox(height: 6),
+              Text('Choose your name. Step into the worlds.', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
               const SizedBox(height: 32),
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder(), prefixIcon: Icon(Icons.person)),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               TextField(
                 controller: _bioController,
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Bio (optional)', border: OutlineInputBorder()),
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Bio (optional)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.edit_note)),
               ),
               const SizedBox(height: 24),
-              FilledButton(onPressed: _complete, child: const Text('Enter the Worlds')),
+              TactileButton(
+                label: 'Enter the Worlds',
+                icon: Icons.arrow_forward,
+                fullWidth: true,
+                color: AppColors.seed,
+                onPressed: _complete,
+              ),
             ],
           ),
         ),
