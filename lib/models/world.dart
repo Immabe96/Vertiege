@@ -64,6 +64,84 @@ class World extends WorldBase {
     this.requiredTier,
     this.requiredProfession,
   });
+
+  World copyWith({
+    String? id,
+    String? name,
+    WorldType? type,
+    String? description,
+    String? sovereignId,
+    String? sovereignName,
+    int? prestige,
+    int? memberCount,
+    String? icon,
+    int? createdAt,
+    int? requiredTier,
+    String? requiredProfession,
+  }) =>
+      World(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        type: type ?? this.type,
+        description: description ?? this.description,
+        sovereignId: sovereignId ?? this.sovereignId,
+        sovereignName: sovereignName ?? this.sovereignName,
+        prestige: prestige ?? this.prestige,
+        memberCount: memberCount ?? this.memberCount,
+        icon: icon ?? this.icon,
+        createdAt: createdAt ?? this.createdAt,
+        requiredTier: requiredTier ?? this.requiredTier,
+        requiredProfession: requiredProfession ?? this.requiredProfession,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'type': type.name,
+        'description': description,
+        'sovereignId': sovereignId,
+        'sovereignName': sovereignName,
+        'prestige': prestige,
+        'memberCount': memberCount,
+        'icon': icon,
+        'createdAt': createdAt,
+        if (requiredTier != null) 'requiredTier': requiredTier,
+        if (requiredProfession != null) 'requiredProfession': requiredProfession,
+      };
+
+  static World fromJson(Map<String, dynamic> json) => World(
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        type: _parseType(json['type']),
+        description: json['description'] ?? '',
+        sovereignId: json['sovereignId'] ?? '',
+        sovereignName: json['sovereignName'] ?? '',
+        prestige: json['prestige'] ?? 1,
+        memberCount: json['memberCount'] ?? 0,
+        icon: json['icon'] ?? 'earth',
+        createdAt: json['createdAt'] ?? 0,
+        requiredTier: json['requiredTier'],
+        requiredProfession: json['requiredProfession'],
+      );
+
+  static World fromSupabase(Map<String, dynamic> data) => World(
+        id: data['id'] ?? '',
+        name: data['name'] ?? '',
+        type: _parseType(data['type']),
+        description: data['description'] ?? '',
+        sovereignId: data['sovereign_id'] ?? '',
+        sovereignName: data['sovereign_name'] ?? '',
+        prestige: data['prestige'] ?? 1,
+        icon: data['icon'] ?? 'earth',
+        createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
+      );
+
+  static WorldType _parseType(String? type) {
+    return WorldType.values.firstWhere(
+      (t) => t.name == type,
+      orElse: () => WorldType.wealth,
+    );
+  }
 }
 
 class DominionWorld extends WorldBase {

@@ -3,6 +3,46 @@ import '../utils/id_generator.dart';
 import 'supabase.dart';
 
 class WorldService {
+  // --- World CRUD ---
+
+  static Future<Map<String, dynamic>?> createWorld({
+    required String name,
+    required String type,
+    required String description,
+    required String sovereignId,
+    required String sovereignName,
+    required String icon,
+  }) async {
+    final world = {
+      'id': generateId(),
+      'name': name,
+      'type': type,
+      'description': description,
+      'sovereign_id': sovereignId,
+      'sovereign_name': sovereignName,
+      'prestige': 1,
+      'icon': icon,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    if (!isSupabaseConfigured()) return world;
+
+    final client = getSupabase();
+    await client.from('worlds').insert(world);
+    return world;
+  }
+
+  static Future<List<Map<String, dynamic>>> loadWorlds() async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('worlds')
+        .select()
+        .order('created_at', ascending: false);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  // --- Membership ---
   static Future<void> joinWorld(String worldId, String residentId) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();

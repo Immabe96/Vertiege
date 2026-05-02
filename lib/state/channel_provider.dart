@@ -40,6 +40,12 @@ class ChannelNotifier extends StateNotifier<ChannelState> {
     );
   }
 
+  void cacheChannels(String worldId, List<WorldChannel> channels) {
+    state = state.copyWith(
+      channelsByWorld: {...state.channelsByWorld, worldId: channels},
+    );
+  }
+
   Future<void> ensureDefaultChannels(String worldId) async {
     if (state.channelsByWorld[worldId]?.isNotEmpty == true) return;
     final channels = await _createDefaults(worldId);
