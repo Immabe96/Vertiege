@@ -6,7 +6,7 @@ create extension if not exists "uuid-ossp";
 
 -- ── Profiles ───────────────────────────────────────────────
 create table if not exists public.profiles (
-  id          text primary key,
+  id          uuid primary key default uuid_generate_v4(),
   name        text not null,
   bio         text default '',
   tier        int default 1,
@@ -36,10 +36,10 @@ create policy "Anyone can read profiles"
   on public.profiles for select using (true);
 
 create policy "Users can update own profile"
-  on public.profiles for update using (auth.uid()::text = id);
+  on public.profiles for update using (auth.uid() = id);
 
 create policy "Users can insert own profile"
-  on public.profiles for insert with check (auth.uid()::text = id);
+  on public.profiles for insert with check (auth.uid() = id);
 
 -- ── Worlds ─────────────────────────────────────────────────
 create table if not exists public.worlds (
@@ -47,7 +47,7 @@ create table if not exists public.worlds (
   name            text not null,
   type            text not null default 'wealth', -- wealth, profession, dominion
   description     text default '',
-  sovereign_id    text not null references public.profiles(id),
+  sovereign_id    uuid not null references public.profiles(id),
   sovereign_name  text not null,
   prestige        int default 1,
   member_count    int default 0,
@@ -63,16 +63,16 @@ create policy "Anyone can read worlds"
   on public.worlds for select using (true);
 
 create policy "Sovereign can update world"
-  on public.worlds for update using (auth.uid()::text = sovereign_id);
+  on public.worlds for update using (auth.uid() = sovereign_id);
 
 create policy "Users can create worlds"
-  on public.worlds for insert with check (auth.uid()::text = sovereign_id);
+  on public.worlds for insert with check (auth.uid() = sovereign_id);
 
 -- ── World Members (standing per resident per world) ────────
 create table if not exists public.world_members (
   id            uuid primary key default uuid_generate_v4(),
   world_id      text not null references public.worlds(id) on delete cascade,
-  resident_id   text not null references public.profiles(id) on delete cascade,
+  resident_id   uuid not null references public.profiles(id) on delete cascade,
   resident_name text not null,
   rep           int default 0,
   joined_at     timestamptz default now(),
@@ -85,7 +85,7 @@ create policy "Anyone can read members"
   on public.world_members for select using (true);
 
 create policy "Residents can join worlds"
-  on public.world_members for insert with check (auth.uid()::text = resident_id);
+  on public.world_members for insert with check (auth.uid() = resident_id);
 
 -- ── Channels ───────────────────────────────────────────────
 create table if not exists public.channels (
@@ -106,14 +106,14 @@ create policy "Anyone can read channels"
 
 create policy "World members can create channels"
   on public.channels for insert with check (
-    exists (select 1 from public.world_members where world_id = channels.world_id and resident_id = auth.uid()::text)
+    exists (select 1 from public.world_members where world_id = channels.world_id and resident_id = auth.uid())
   );
 
 -- ── Posts ──────────────────────────────────────────────────
 create table if not exists public.posts (
   id              text primary key,
   world_id        text not null references public.worlds(id) on delete cascade,
-  resident_id     text not null references public.profiles(id),
+  resident_id     uuid not null references public.profiles(id) on delete cascade,
   resident_name   text not null,
   resident_avatar text default '',
   content         text not null,
@@ -134,14 +134,14 @@ create policy "Anyone can read posts"
 
 create policy "World members can create posts"
   on public.posts for insert with check (
-    exists (select 1 from public.world_members where world_id = posts.world_id and resident_id = auth.uid()::text)
+    exists (select 1 from public.world_members where world_id = posts.world_id and resident_id = auth.uid())
   );
 
 create policy "Authors can update own posts"
-  on public.posts for update using (auth.uid()::text = resident_id);
+  on public.posts for update using (auth.uid() = resident_id);
 
 create policy "Authors or moderators can delete posts"
-  on public.posts for delete using (auth.uid()::text = resident_id);
+  on public.posts for delete using (auth.uid() = resident_id);
 
 -- ── Events ─────────────────────────────────────────────────
 create table if not exists public.events (
@@ -149,7 +149,7 @@ create table if not exists public.events (
   world_id        text not null references public.worlds(id) on delete cascade,
   title           text not null,
   description     text default '',
-  created_by      text not null references public.profiles(id),
+  created_by      uuid not null references public.profiles(id),
   created_by_name text not null,
   starts_at       bigint not null,
   ends_at         bigint,
@@ -167,7 +167,7 @@ create table if not exists public.reports (
   id            text primary key,
   world_id      text not null references public.worlds(id) on delete cascade,
   post_id       text not null references public.posts(id) on delete cascade,
-  reporter_id   text not null,
+  reporter_id   uuid not null,
   reason        text not null, -- spam, harassment, hateSpeech, nsfw, misinformation, other
   details       text,
   status        text default 'pending', -- pending, resolved, dismissed
@@ -187,7 +187,7 @@ create table if not exists public.invites (
   id            text primary key,
   world_id      text not null references public.worlds(id) on delete cascade,
   code          text not null unique,
-  created_by    text not null references public.profiles(id),
+  created_by    uuid not null references public.profiles(id),
   uses          int default 0,
   max_uses      int default 10,
   expires_at    bigint,
@@ -201,7 +201,7 @@ create policy "Anyone can read invites"
 
 create policy "World members can create invites"
   on public.invites for insert with check (
-    exists (select 1 from public.world_members where world_id = invites.world_id and resident_id = auth.uid()::text)
+    exists (select 1 from public.world_members where world_id = invites.world_id and resident_id = auth.uid())
   );
 
 -- ── DM Rooms ───────────────────────────────────────────────
@@ -217,13 +217,13 @@ create table if not exists public.dm_rooms (
 alter table public.dm_rooms enable row level security;
 
 create policy "Users can read own DM rooms"
-  on public.dm_rooms for select using (auth.uid()::text = any(resident_ids));
+  on public.dm_rooms for select using (auth.uid() = any(resident_ids));
 
 -- ── Chat Messages ──────────────────────────────────────────
 create table if not exists public.chat_messages (
   id            text primary key,
   room_id       text not null references public.dm_rooms(id) on delete cascade,
-  sender_id     text not null references public.profiles(id),
+  sender_id     uuid not null references public.profiles(id) on delete cascade,
   content       text not null,
   created_at    timestamptz default now()
 );
@@ -232,12 +232,12 @@ alter table public.chat_messages enable row level security;
 
 create policy "Room members can read messages"
   on public.chat_messages for select using (
-    exists (select 1 from public.dm_rooms where id = chat_messages.room_id and auth.uid()::text = any(resident_ids))
+    exists (select 1 from public.dm_rooms where id = chat_messages.room_id and auth.uid() = any(resident_ids))
   );
 
 create policy "Room members can send messages"
   on public.chat_messages for insert with check (
-    exists (select 1 from public.dm_rooms where id = chat_messages.room_id and auth.uid()::text = any(resident_ids))
+    exists (select 1 from public.dm_rooms where id = chat_messages.room_id and auth.uid() = any(resident_ids))
   );
 
 -- ── Channel Messages ───────────────────────────────────────
@@ -245,7 +245,7 @@ create table if not exists public.channel_messages (
   id            text primary key,
   channel_id    text not null references public.channels(id) on delete cascade,
   world_id      text not null references public.worlds(id) on delete cascade,
-  sender_id     text not null references public.profiles(id),
+  sender_id     uuid not null references public.profiles(id) on delete cascade,
   sender_name   text not null,
   content       text not null,
   created_at    timestamptz default now()
@@ -255,18 +255,18 @@ alter table public.channel_messages enable row level security;
 
 create policy "World members can read channel messages"
   on public.channel_messages for select using (
-    exists (select 1 from public.world_members where world_id = channel_messages.world_id and resident_id = auth.uid()::text)
+    exists (select 1 from public.world_members where world_id = channel_messages.world_id and resident_id = auth.uid())
   );
 
 create policy "World members can send channel messages"
   on public.channel_messages for insert with check (
-    exists (select 1 from public.world_members where world_id = channel_messages.world_id and resident_id = auth.uid()::text)
+    exists (select 1 from public.world_members where world_id = channel_messages.world_id and resident_id = auth.uid())
   );
 
 -- ── Notifications ──────────────────────────────────────────
 create table if not exists public.notifications (
   id            text primary key,
-  recipient_id  text not null references public.profiles(id),
+  recipient_id  uuid not null references public.profiles(id),
   type          text not null, -- like, comment, worldUnlocked, tierUpgrade, welcome, modAction
   message       text not null,
   world_id      text,
@@ -278,14 +278,14 @@ create table if not exists public.notifications (
 alter table public.notifications enable row level security;
 
 create policy "Users can read own notifications"
-  on public.notifications for select using (auth.uid()::text = recipient_id);
+  on public.notifications for select using (auth.uid() = recipient_id);
 
 -- ── Moderation Logs ────────────────────────────────────────
 create table if not exists public.moderation_logs (
   id              text primary key,
   world_id        text not null references public.worlds(id) on delete cascade,
-  moderator_id    text not null references public.profiles(id),
-  target_user_id  text not null references public.profiles(id),
+  moderator_id    uuid not null references public.profiles(id),
+  target_user_id  uuid not null references public.profiles(id),
   action          text not null, -- mute, unmute, ban, unban, warn
   reason          text,
   duration_hours  int,
@@ -296,7 +296,7 @@ alter table public.moderation_logs enable row level security;
 
 create policy "World moderators can read logs"
   on public.moderation_logs for select using (
-    exists (select 1 from public.world_members where world_id = moderation_logs.world_id and resident_id = auth.uid()::text)
+    exists (select 1 from public.world_members where world_id = moderation_logs.world_id and resident_id = auth.uid())
   );
 
 -- ── Functions ──────────────────────────────────────────────
