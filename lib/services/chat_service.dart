@@ -89,4 +89,61 @@ class ChatService {
         )
         .subscribe();
   }
+
+  // --- Channel messages (world channels) ---
+
+  static Future<void> sendChannelMessage({
+    required String channelId,
+    required String senderId,
+    required String content,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('channel_messages').insert({
+      'id': generateId(),
+      'channel_id': channelId,
+      'sender_id': senderId,
+      'content': content,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<List<Map<String, dynamic>>> getChannelMessages(
+    String channelId, {
+    int limit = 100,
+  }) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('channel_messages')
+        .select()
+        .eq('channel_id', channelId)
+        .order('created_at', ascending: true)
+        .limit(limit);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  static RealtimeChannel? subscribeToChannelMessages(
+    String channelId,
+    void Function(Map<String, dynamic> message) onInsert,
+  ) {
+    if (!isSupabaseConfigured()) return null;
+    final client = getSupabase();
+    return client
+        .channel('channel_$channelId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'channel_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'channel_id',
+            value: channelId,
+          ),
+          callback: (payload) {
+            onInsert(payload.newRecord);
+          },
+        )
+        .subscribe();
+  }
 }

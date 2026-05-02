@@ -9,6 +9,7 @@ import '../screens/tabs/chat_list_screen.dart';
 import '../screens/tabs/identity_screen.dart';
 import '../screens/tabs/alerts_screen.dart';
 import '../screens/world_detail_screen.dart';
+import '../screens/world_channel_screen.dart';
 import '../screens/chat_room_screen.dart';
 import '../screens/resident_profile_screen.dart';
 import '../screens/achievements/achievements_index.dart';
@@ -67,6 +68,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) => WorldDetailScreen(
                       worldId: state.pathParameters['worldId']!,
                     ),
+                    routes: [
+                      GoRoute(
+                        path: ':channelName',
+                        builder: (context, state) => WorldChannelScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          channelId: '',
+                          channelName: state.pathParameters['channelName']!,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
