@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/resident.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
+import 'package:go_router/go_router.dart';
 import '../services/profile_service.dart';
+import '../services/chat_service.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/name_banner.dart';
 import '../widgets/profile/badge_display.dart';
@@ -94,6 +96,24 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
         ],
         const SizedBox(height: 12),
         Center(child: Text('Streak: ${resident.streakCount} days', style: theme.textTheme.bodyMedium)),
+        // Show Message button for other residents only
+        if (resident.id != ref.watch(residentProvider).resident?.id) ...[
+          const SizedBox(height: 16),
+          Center(
+            child: FilledButton.icon(
+              onPressed: () async {
+                final currentId = ref.read(residentProvider).resident?.id;
+                if (currentId == null) return;
+                final room = await ChatService.getOrCreateRoom(currentId, resident.id);
+                if (room != null && context.mounted) {
+                  context.push('/chat/${room['id']}');
+                }
+              },
+              icon: const Icon(Icons.chat_bubble_outline),
+              label: const Text('Message'),
+            ),
+          ),
+        ],
         if (resident.decorations.isNotEmpty) ...[
           const SizedBox(height: 16),
           BadgeDisplay(earnedBadgeIds: resident.decorations),

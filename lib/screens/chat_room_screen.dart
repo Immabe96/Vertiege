@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/resident_provider.dart';
-import '../services/chat_service.dart';
+import '../state/chat_provider.dart';
 import '../utils/date_format.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
@@ -15,20 +15,14 @@ class ChatRoomScreen extends ConsumerStatefulWidget {
 
 class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final _controller = TextEditingController();
-  final _messages = <Map<String, dynamic>>[];
 
   @override
   void initState() {
     super.initState();
-    _loadMessages();
-    ChatService.subscribeToMessages(widget.roomId, (message) {
-      setState(() => _messages.add(message));
-    });
-  }
-
-  Future<void> _loadMessages() async {
-    final msgs = await ChatService.getMessages(widget.roomId);
-    setState(() => _messages.addAll(msgs));
+    final roomId = widget.roomId;
+    final notifier = ref.read(chatProvider.notifier);
+    notifier.loadDmMessages(roomId);
+    notifier.subscribeToDm(roomId);
   }
 
   void _send() {
@@ -38,28 +32,35 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    ChatService.sendMessage(roomId: widget.roomId, senderId: resident.id, content: content);
+    ref.read(chatProvider.notifier).sendDmMessage(
+      roomId: widget.roomId,
+      senderId: resident.id,
+      senderName: resident.name,
+      senderAvatar: resident.avatarUrl,
+      content: content,
+    );
     _controller.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final resident = ref.watch(residentProvider).resident;
+    final messages = ref.watch(chatProvider).dmMessages[widget.roomId] ?? [];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Chat')),
       body: Column(
         children: [
           Expanded(
-            child: _messages.isEmpty
+            child: messages.isEmpty
                 ? Center(child: Text('No messages yet', style: theme.textTheme.bodyLarge))
                 : ListView.builder(
                     padding: const EdgeInsets.all(12),
-                    itemCount: _messages.length,
+                    itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      final msg = _messages[index];
-                      final isMe = msg['sender_id'] == ref.read(residentProvider).resident?.id;
-                      final timestamp = DateTime.tryParse(msg['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0;
+                      final msg = messages[index];
+                      final isMe = msg.senderId == resident?.id;
 
                       return Align(
                         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -73,9 +74,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                           child: Column(
                             crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                             children: [
-                              Text(msg['content'] ?? ''),
+                              Text(msg.content),
                               const SizedBox(height: 2),
-                              Text(formatTimestamp(timestamp), style: theme.textTheme.labelSmall),
+                              Text(formatTimestamp(msg.createdAt), style: theme.textTheme.labelSmall),
                             ],
                           ),
                         ),
@@ -104,6 +105,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   @override
   void dispose() {
+    ref.read(chatProvider.notifier).unsubscribeFromDm(widget.roomId);
     _controller.dispose();
     super.dispose();
   }

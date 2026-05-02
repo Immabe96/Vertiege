@@ -70,13 +70,13 @@ class ChatService {
     return (data as List).cast<Map<String, dynamic>>();
   }
 
-  static void subscribeToMessages(
+  static RealtimeChannel? subscribeToMessages(
     String roomId,
     void Function(Map<String, dynamic> message) onInsert,
   ) {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
-    client
+    final channel = client
         .channel('chat_$roomId')
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
@@ -88,6 +88,7 @@ class ChatService {
           },
         )
         .subscribe();
+    return channel;
   }
 
   // --- Channel messages (world channels) ---

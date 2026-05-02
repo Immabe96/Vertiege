@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/message.dart';
 import '../state/resident_provider.dart';
-import '../services/chat_service.dart';
+import '../state/chat_provider.dart';
 import '../utils/date_format.dart';
-import '../utils/id_generator.dart';
 
 class WorldChannelScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -25,26 +23,22 @@ class WorldChannelScreen extends ConsumerStatefulWidget {
 class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
-  List<ChannelMessage> _messages = [];
-  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadMessages();
+    // Resolve channelId from channel name if not provided
+    final notifier = ref.read(chatProvider.notifier);
+    notifier.loadChannelMessages(widget.channelId);
+    notifier.subscribeToChannel(widget.channelId);
   }
 
   @override
   void dispose() {
+    ref.read(chatProvider.notifier).unsubscribeFromChannel(widget.channelId);
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadMessages() async {
-    // For now, channel messages are stored locally
-    // Phase 3 will add Supabase real-time
-    setState(() => _loading = false);
   }
 
   void _sendMessage() {
@@ -54,26 +48,15 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    final msg = ChannelMessage(
-      id: generateId(),
+    ref.read(chatProvider.notifier).sendChannelMessage(
       channelId: widget.channelId,
       senderId: resident.id,
       senderName: resident.name,
       senderAvatar: resident.avatarUrl,
       content: content,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
     );
-
-    setState(() => _messages = [..._messages, msg]);
     _controller.clear();
     _scrollToBottom();
-
-    // Try to persist via Supabase
-    ChatService.sendChannelMessage(
-      channelId: widget.channelId,
-      senderId: resident.id,
-      content: content,
-    );
   }
 
   void _scrollToBottom() {
@@ -91,24 +74,18 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final resident = ref.watch(residentProvider).resident;
+    final messages = ref.watch(chatProvider).channelMessages[widget.channelId] ?? [];
+    final isLoading = !ref.watch(chatProvider).channelMessages.containsKey(widget.channelId);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('# ${widget.channelName}'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(20),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(widget.worldId, style: theme.textTheme.labelSmall),
-          ),
-        ),
-      ),
+      appBar: AppBar(title: Text('# ${widget.channelName}')),
       body: Column(
         children: [
           Expanded(
-            child: _loading
+            child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _messages.isEmpty
+                : messages.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -122,10 +99,9 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen> {
                     : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(12),
-                        itemCount: _messages.length,
+                        itemCount: messages.length,
                         itemBuilder: (context, index) {
-                          final msg = _messages[index];
-                          final resident = ref.read(residentProvider).resident;
+                          final msg = messages[index];
                           final isMe = msg.senderId == resident?.id;
 
                           return Align(
@@ -139,15 +115,18 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen> {
                                     : theme.colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width * 0.75,
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (!isMe)
-                                    Text(msg.senderName, style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    )),
+                                    Text(msg.senderName,
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        )),
                                   Text(msg.content, style: theme.textTheme.bodyMedium),
                                   const SizedBox(height: 4),
                                   Text(formatTimestamp(msg.createdAt),
