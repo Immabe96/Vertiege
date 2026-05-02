@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import '../models/resident.dart';
+import '../config/tiers.dart';
 import '../services/storage_service.dart';
 import 'achievement_provider.dart';
 
@@ -141,7 +142,8 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
     final r = state.resident;
     if (r == null) return (level: 1, title: 'Visitor', rep: 0);
     final rep = r.worldStandings[worldId]?.rep ?? 0;
-    return (level: 1, title: 'Visitor', rep: rep);
+    final standing = getStanding(rep);
+    return (level: standing.level, title: standing.title, rep: rep);
   }
 
   void unlockWealthWorld(String worldId) {

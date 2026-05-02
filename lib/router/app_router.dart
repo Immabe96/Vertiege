@@ -53,14 +53,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/',
                 builder: (context, state) => const NexusScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'explore/:worldId',
-                    builder: (context, state) => WorldDetailScreen(
-                      worldId: state.pathParameters['worldId']!,
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

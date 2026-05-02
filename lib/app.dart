@@ -4,6 +4,7 @@ import 'state/theme_provider.dart';
 import 'state/resident_provider.dart';
 import 'state/notification_provider.dart';
 import 'state/achievement_provider.dart';
+import 'state/post_provider.dart';
 import 'state/world_provider.dart';
 import 'theme/app_theme.dart';
 import 'router/app_router.dart';
@@ -23,11 +24,14 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   }
 
   Future<void> _loadStores() async {
-    await ref.read(themeProvider.notifier).loadTheme();
-    await ref.read(worldProvider.notifier).loadWorlds();
-    await ref.read(residentProvider.notifier).loadResident();
-    await ref.read(notificationProvider.notifier).loadNotifications();
-    await ref.read(achievementProvider.notifier).loadAchievements();
+    await Future.wait(<Future<void>>[
+      ref.read(themeProvider.notifier).loadTheme(),
+      ref.read(worldProvider.notifier).loadWorlds(),
+      ref.read(residentProvider.notifier).loadResident(),
+      ref.read(postProvider.notifier).loadPosts(),
+      ref.read(notificationProvider.notifier).loadNotifications(),
+      ref.read(achievementProvider.notifier).loadAchievements(),
+    ]);
   }
 
   @override

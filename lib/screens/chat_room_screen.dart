@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../state/resident_provider.dart';
-import '../../services/chat_service.dart';
-import '../../utils/date_format.dart';
+import '../state/resident_provider.dart';
+import '../services/chat_service.dart';
+import '../utils/date_format.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;

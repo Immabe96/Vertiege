@@ -101,6 +101,41 @@ class PostNotifier extends StateNotifier<PostState> {
     _persist();
   }
 
+  Future<void> loadPosts() async {
+    final raw = await StorageService.getString(StorageService.postsKey);
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      final posts = list.map((e) => _postFromJson(e)).toList();
+      state = state.copyWith(posts: posts);
+    } catch (_) {}
+  }
+
+  static Post _postFromJson(Map<String, dynamic> json) {
+    return Post(
+      id: json['id'] ?? '',
+      worldId: json['worldId'] ?? '',
+      residentId: json['residentId'] ?? '',
+      residentName: json['residentName'] ?? '',
+      residentAvatar: json['residentAvatar'] ?? '',
+      content: json['content'] ?? '',
+      imageUri: json['imageUri'],
+      timestamp: json['timestamp'] ?? 0,
+      tierAtPosting: ResidentTier.fromValue(json['tierAtPosting'] ?? 1),
+      reactions: Map<String, int>.from(json['reactions'] ?? {}),
+      comments: (json['comments'] as List<dynamic>?)
+              ?.map((c) => Comment(
+                    id: c['id'] ?? '',
+                    residentId: c['residentId'] ?? '',
+                    residentName: c['residentName'] ?? '',
+                    content: c['content'] ?? '',
+                    timestamp: c['timestamp'] ?? 0,
+                  ))
+              .toList() ??
+          [],
+    );
+  }
+
   void _persist() {
     final json = jsonEncode(state.posts.map(_postToJson).toList());
     StorageService.setStringDebounced(StorageService.postsKey, json);

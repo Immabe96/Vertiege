@@ -62,8 +62,8 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text('Reset All Data', style: TextStyle(color: Colors.red)),
+            leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
+            title: Text('Reset All Data', style: TextStyle(color: theme.colorScheme.error)),
             subtitle: const Text('Clear all local data and start fresh'),
             onTap: () async {
               final confirmed = await showDialog<bool>(

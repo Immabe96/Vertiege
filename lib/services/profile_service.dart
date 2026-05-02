@@ -4,13 +4,13 @@ import 'supabase.dart';
 class ProfileService {
   static Future<void> upsertProfile(Resident resident) async {
     if (!isSupabaseConfigured()) return;
-    final client = await getSupabase();
+    final client = getSupabase();
     await client.from('profiles').upsert(_toProfileRow(resident));
   }
 
   static Future<Resident?> getProfile(String userId) async {
     if (!isSupabaseConfigured()) return null;
-    final client = await getSupabase();
+    final client = getSupabase();
     final data = await client.from('profiles').select().eq('id', userId).single();
     if (data == null) return null;
     return _toResident(data);
@@ -18,7 +18,7 @@ class ProfileService {
 
   static Future<List<Resident>> searchResidents(String query, {int limit = 20}) async {
     if (!isSupabaseConfigured()) return [];
-    final client = await getSupabase();
+    final client = getSupabase();
     final data = await client
         .from('profiles')
         .select()
@@ -29,7 +29,7 @@ class ProfileService {
 
   static Future<List<Resident>> getTopResidents({int limit = 5}) async {
     if (!isSupabaseConfigured()) return [];
-    final client = await getSupabase();
+    final client = getSupabase();
     final data = await client
         .from('profiles')
         .select()

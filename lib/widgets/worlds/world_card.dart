@@ -25,7 +25,7 @@ class WorldCard extends ConsumerWidget {
         color: isLocked ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surface,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => context.go('/explore/${world.id}'),
+          onTap: () => context.push('/explore/${world.id}'),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(

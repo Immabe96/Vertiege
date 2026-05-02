@@ -8,7 +8,7 @@ class ChatService {
     String otherResidentId,
   ) async {
     if (!isSupabaseConfigured()) return null;
-    final client = await getSupabase();
+    final client = getSupabase();
     final ids = [residentId, otherResidentId]..sort();
     final existing = await client
         .from('chat_rooms')
@@ -30,7 +30,7 @@ class ChatService {
 
   static Future<List<Map<String, dynamic>>> getRooms(String residentId) async {
     if (!isSupabaseConfigured()) return [];
-    final client = await getSupabase();
+    final client = getSupabase();
     final data = await client
         .from('chat_rooms')
         .select()
@@ -45,7 +45,7 @@ class ChatService {
     required String content,
   }) async {
     if (!isSupabaseConfigured()) return;
-    final client = await getSupabase();
+    final client = getSupabase();
     await client.from('chat_messages').insert({
       'room_id': roomId,
       'sender_id': senderId,
@@ -60,7 +60,7 @@ class ChatService {
 
   static Future<List<Map<String, dynamic>>> getMessages(String roomId, {int limit = 100}) async {
     if (!isSupabaseConfigured()) return [];
-    final client = await getSupabase();
+    final client = getSupabase();
     final data = await client
         .from('chat_messages')
         .select()
@@ -75,7 +75,7 @@ class ChatService {
     void Function(Map<String, dynamic> message) onInsert,
   ) {
     if (!isSupabaseConfigured()) return;
-    final client = Supabase.instance.client;
+    final client = getSupabase();
     client
         .channel('chat_$roomId')
         .onPostgresChanges(

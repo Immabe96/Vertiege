@@ -9,7 +9,7 @@ class PostService {
     String? imageUrl,
   }) async {
     if (!isSupabaseConfigured()) return;
-    final client = await getSupabase();
+    final client = getSupabase();
     await client.from('posts').insert({
       'resident_id': residentId,
       'world_id': worldId,
@@ -23,7 +23,7 @@ class PostService {
 
   static Future<List<Map<String, dynamic>>> getPosts({String? worldId, int limit = 50}) async {
     if (!isSupabaseConfigured()) return [];
-    final client = await getSupabase();
+    final client = getSupabase();
     var query = client.from('posts').select().order('created_at', ascending: false).limit(limit);
     if (worldId != null) query = query.eq('world_id', worldId);
     final data = await query;
@@ -32,7 +32,7 @@ class PostService {
 
   static Future<void> addReaction(String postId, String emoji, String residentId) async {
     if (!isSupabaseConfigured()) return;
-    final client = await getSupabase();
+    final client = getSupabase();
     await client.rpc('toggle_reaction', params: {
       'post_id': postId,
       'emoji': emoji,
@@ -42,7 +42,7 @@ class PostService {
 
   static Future<void> addComment(String postId, String residentId, String content) async {
     if (!isSupabaseConfigured()) return;
-    final client = await getSupabase();
+    final client = getSupabase();
     await client.rpc('add_comment', params: {
       'post_id': postId,
       'resident_id': residentId,

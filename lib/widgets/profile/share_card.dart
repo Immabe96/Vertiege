@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -42,8 +43,10 @@ class _ShareCardState extends State<ShareCard> {
   }
 
   Future<String?> _writeTempFile(Uint8List bytes) async {
-    // Share.shareXFiles with direct bytes is simpler
-    return null;
+    final dir = Directory.systemTemp;
+    final file = File('${dir.path}/vertiege_share_${DateTime.now().millisecondsSinceEpoch}.png');
+    await file.writeAsBytes(bytes);
+    return file.path;
   }
 
   @override
