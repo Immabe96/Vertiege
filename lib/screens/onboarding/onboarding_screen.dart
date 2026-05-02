@@ -57,7 +57,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             joinedWorldIds: const ['neon-district'],
           ),
         );
-    context.go('/');
+    // Defer navigation to allow router to rebuild with new resident
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.go('/');
+    });
   }
 
   @override

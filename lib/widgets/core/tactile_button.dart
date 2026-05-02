@@ -49,6 +49,7 @@ class _TactileButtonState extends State<TactileButton> {
       width: widget.fullWidth ? double.infinity : null,
       height: widget.height,
       child: GestureDetector(
+        onTap: widget.onPressed,
         onTapDown: widget.onPressed != null ? (_) => setState(() => _pressed = true) : null,
         onTapUp: widget.onPressed != null ? (_) => setState(() => _pressed = false) : null,
         onTapCancel: () => setState(() => _pressed = false),
