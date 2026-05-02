@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
 import '../../models/resident.dart';
 import '../../widgets/core/tactile_button.dart';
@@ -28,13 +29,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             tier: ResidentTier.hustlers,
           ),
         );
-    // setResident triggers the router to auto-redirect from /onboarding to /
+    // setResident has completed, let GoRouter handle the redirect
+    context.go('/');
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       body: SafeArea(
         child: Padding(
