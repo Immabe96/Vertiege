@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/achievement.dart';
 import '../config/achievements.dart' as config;
 import '../services/storage_service.dart';
-import 'resident_provider.dart';
 
 class AchievementState {
   final List<UserAchievement> userAchievements;
@@ -30,9 +29,7 @@ class AchievementState {
 }
 
 class AchievementNotifier extends StateNotifier<AchievementState> {
-  final Ref _ref;
-
-  AchievementNotifier(this._ref) : super(const AchievementState());
+  AchievementNotifier(Ref ref) : super(const AchievementState());
 
   Future<void> submitAchievement(String achievementId, String proofUri) async {
     final existing = state.userAchievements.where((a) => a.achievementId == achievementId).firstOrNull;

@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ui' show VoidCallback;
 import 'package:shared_preferences/shared_preferences.dart';
 
 final Map<String, Timer> _timers = {};

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_status_worlds/config/tiers.dart';
-import 'package:virtual_status_worlds/models/world.dart';
+import 'package:vertiege/config/tiers.dart';
+import 'package:vertiege/models/world.dart';
 
 void main() {
   group('WORLDS_CONFIG', () {

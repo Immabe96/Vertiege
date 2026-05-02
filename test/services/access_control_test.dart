@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_status_worlds/models/resident.dart';
-import 'package:virtual_status_worlds/models/world.dart';
-import 'package:virtual_status_worlds/services/access_control.dart';
+import 'package:vertiege/models/resident.dart';
+import 'package:vertiege/models/world.dart';
+import 'package:vertiege/services/access_control.dart';
 
 void main() {
   final hustler = Resident(id: '1', name: 'Test', tier: ResidentTier.hustlers);

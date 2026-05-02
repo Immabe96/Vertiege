@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/resident.dart';
 import 'access_icon.dart';
 
 class AccessGuard extends StatelessWidget {
@@ -31,7 +30,7 @@ class AccessGuard extends StatelessWidget {
             children: [
               const AccessIcon(type: AccessIconType.locked, size: 48),
               const SizedBox(height: 16),
-              Text('Tier ${requiredTier}+ Required', style: theme.textTheme.titleLarge),
+              Text('Tier $requiredTier+ Required', style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
               Text('Reach tier $requiredTier to unlock this content.',
                   textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),

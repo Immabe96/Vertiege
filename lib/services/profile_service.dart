@@ -12,7 +12,6 @@ class ProfileService {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
     final data = await client.from('profiles').select().eq('id', userId).single();
-    if (data == null) return null;
     return _toResident(data);
   }
 

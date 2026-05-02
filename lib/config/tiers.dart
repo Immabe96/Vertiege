@@ -1,5 +1,4 @@
 import '../models/world.dart';
-import '../models/resident.dart';
 
 const Map<int, String> tierNames = {
   1: 'Hustler',
@@ -55,18 +54,6 @@ const Map<int, List<String>> featureUnlocks = {
 };
 
 WorldFeatures getUnlockedFeatures(int prestige) {
-  final features = WorldFeatures();
-  for (final entry in featureUnlocks.entries) {
-    if (prestige >= entry.key) {
-      for (final feat in entry.value) {
-        switch (feat) {
-          case 'lounge':
-            features as WorldFeatures; // no-op, use features directly
-        }
-      }
-    }
-  }
-  final result = WorldFeatures();
   final accumulated = <String>{};
   for (final entry in featureUnlocks.entries) {
     if (prestige >= entry.key) {

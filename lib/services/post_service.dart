@@ -1,4 +1,3 @@
-import '../models/post.dart';
 import 'supabase.dart';
 
 class PostService {
@@ -24,9 +23,9 @@ class PostService {
   static Future<List<Map<String, dynamic>>> getPosts({String? worldId, int limit = 50}) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
-    var query = client.from('posts').select().order('created_at', ascending: false).limit(limit);
-    if (worldId != null) query = query.eq('world_id', worldId);
-    final data = await query;
+    final data = worldId != null
+        ? await client.from('posts').select().eq('world_id', worldId).order('created_at', ascending: false).limit(limit)
+        : await client.from('posts').select().order('created_at', ascending: false).limit(limit);
     return (data as List).cast<Map<String, dynamic>>();
   }
 

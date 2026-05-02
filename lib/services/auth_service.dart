@@ -1,4 +1,5 @@
 import 'supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
   static Future<AuthResponse> signInWithEmail(String email, String password) async {

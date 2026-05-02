@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_status_worlds/config/achievements.dart';
-import 'package:virtual_status_worlds/models/resident.dart';
+import 'package:vertiege/config/achievements.dart';
+import 'package:vertiege/models/resident.dart';
 
 void main() {
   group('ACHIEVEMENTS', () {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtual_status_worlds/utils/string_utils.dart';
-import 'package:virtual_status_worlds/utils/date_format.dart';
+import 'package:vertiege/utils/string_utils.dart';
+import 'package:vertiege/utils/date_format.dart';
 
 void main() {
   group('capitalize', () {

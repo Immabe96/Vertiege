@@ -17,7 +17,6 @@ class ReactionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Wrap(
       spacing: 6,
       children: _emojis.map((emoji) {

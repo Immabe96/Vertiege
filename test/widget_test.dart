@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:virtual_status_worlds/app.dart';
+import 'package:vertiege/app.dart';
 
 void main() {
   testWidgets('App renders onboarding when no resident', (WidgetTester tester) async {

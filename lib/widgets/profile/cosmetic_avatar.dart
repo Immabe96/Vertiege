@@ -11,7 +11,6 @@ class CosmeticAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final frame = getFrameForXp(totalXp);
-    final theme = Theme.of(context);
 
     return Container(
       width: size + 8,
