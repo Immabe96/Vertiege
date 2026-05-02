@@ -122,17 +122,38 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           FadeIn(
             delayMs: 160,
             child: Center(
-              child: FilledButton.icon(
-                onPressed: () async {
-                  final currentId = ref.read(residentProvider).resident?.id;
-                  if (currentId == null) return;
-                  final room = await ChatService.getOrCreateRoom(currentId, resident.id);
-                  if (room != null && context.mounted) {
-                    context.push('/chat/${room['id']}');
-                  }
-                },
-                icon: const Icon(Icons.chat_bubble_outline),
-                label: const Text('Message'),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () async {
+                      final currentId = ref.read(residentProvider).resident?.id;
+                      if (currentId == null) return;
+                      final room = await ChatService.getOrCreateRoom(currentId, resident.id);
+                      if (room != null && context.mounted) {
+                        context.push('/chat/${room['id']}');
+                      }
+                    },
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    label: const Text('Message'),
+                  ),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final isFollowing = ref.watch(residentProvider.select((s) => s.resident?.following.contains(resident.id) ?? false));
+                      return isFollowing
+                          ? OutlinedButton.icon(
+                              onPressed: () => ref.read(residentProvider.notifier).unfollow(resident.id),
+                              icon: const Icon(Icons.person_remove),
+                              label: const Text('Unfollow'),
+                            )
+                          : OutlinedButton.icon(
+                              onPressed: () => ref.read(residentProvider.notifier).follow(resident.id),
+                              icon: const Icon(Icons.person_add),
+                              label: const Text('Follow'),
+                            );
+                    },
+                  ),
+                ],
               ),
             ),
           ),

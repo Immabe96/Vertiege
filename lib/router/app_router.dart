@@ -20,6 +20,7 @@ import '../screens/achievements/submit_achievement.dart';
 import '../screens/settings_screen.dart';
 import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
+import '../screens/world_members_screen.dart';
 import '../screens/auth/auth_callback.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -84,6 +85,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'settings',
                         builder: (context, state) => WorldSettingsScreen(
                           worldId: state.pathParameters['worldId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'members',
+                        builder: (context, state) => WorldMembersScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          worldName: state.uri.queryParameters['name'] ?? 'World',
+                          sovereignId: state.uri.queryParameters['sovereign'] ?? '',
                         ),
                       ),
                     ],

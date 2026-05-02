@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../config/tiers.dart';
 import '../../models/world.dart';
+import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/world_service.dart';
 import '../core/fade_in.dart';
@@ -107,6 +107,18 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
               ),
             );
           }),
+          if (_residents.length > 5)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: TextButton(
+                onPressed: () => context.push(
+                  '/explore/${widget.world.id}/members'
+                  '?name=${Uri.encodeComponent(widget.world.name)}'
+                  '&sovereign=${Uri.encodeComponent(widget.world.sovereignId)}',
+                ),
+                child: Text('See all ${_residents.length} members'),
+              ),
+            ),
       ],
     );
   }

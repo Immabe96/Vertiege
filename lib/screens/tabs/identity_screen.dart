@@ -59,6 +59,16 @@ class IdentityScreen extends ConsumerWidget {
               delayMs: 100,
               child: Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.titleMedium)),
             ),
+            if (resident.following.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              FadeIn(
+                delayMs: 110,
+                child: Center(
+                  child: Text('Following ${resident.following.length} resident${resident.following.length == 1 ? '' : 's'}',
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             FadeIn(delayMs: 120, child: BadgeDisplay(earnedBadgeIds: resident.decorations)),
             const SizedBox(height: 16),
