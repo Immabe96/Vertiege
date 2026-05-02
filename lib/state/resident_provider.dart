@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../models/resident.dart';
 import '../config/tiers.dart';
 import '../services/storage_service.dart';
+import '../services/world_service.dart';
 import 'achievement_provider.dart';
 
 class ResidentState {
@@ -155,6 +156,34 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
     _persist();
   }
 
+  void joinWorld(String worldId) {
+    final r = state.resident;
+    if (r == null || r.joinedWorldIds.contains(worldId)) return;
+    state = state.copyWith(
+      resident: r.copyWith(joinedWorldIds: [...r.joinedWorldIds, worldId]),
+    );
+    _persist();
+    WorldService.joinWorld(worldId, r.id);
+  }
+
+  void leaveWorld(String worldId) {
+    final r = state.resident;
+    if (r == null) return;
+    state = state.copyWith(
+      resident: r.copyWith(
+        joinedWorldIds: r.joinedWorldIds.where((id) => id != worldId).toList(),
+      ),
+    );
+    _persist();
+    WorldService.leaveWorld(worldId, r.id);
+  }
+
+  bool isMemberOf(String worldId) {
+    final r = state.resident;
+    if (r == null) return false;
+    return r.joinedWorldIds.contains(worldId);
+  }
+
   void verifyProfession(String profession) {
     state = state.copyWith(verificationStatus: VerificationStatus.verifying);
     Future.delayed(const Duration(seconds: 2), () {
@@ -231,6 +260,7 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
       lastCheckIn: json['lastCheckIn'] as String?,
       streakCount: (json['streakCount'] as int?) ?? 0,
       following: _toStringList(json['following']) ?? [],
+      joinedWorldIds: _toStringList(json['joinedWorldIds']) ?? [],
       worldStandings: _parseStandings(json['worldStandings']),
     );
   }
@@ -249,6 +279,7 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
         'lastCheckIn': r.lastCheckIn,
         'streakCount': r.streakCount,
         'following': r.following,
+        'joinedWorldIds': r.joinedWorldIds,
         'worldStandings': r.worldStandings.map((k, v) => MapEntry(k, {'rep': v.rep})),
       };
 

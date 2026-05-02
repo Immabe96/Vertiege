@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/design_system.dart';
 import '../state/world_provider.dart';
+import '../state/resident_provider.dart';
+import '../state/channel_provider.dart';
 import '../widgets/worlds/world_access_guard.dart';
 import '../widgets/worlds/world_banner.dart';
+import '../widgets/worlds/world_channel_list.dart';
 import '../widgets/worlds/world_residents.dart';
 import '../widgets/feed/post_input.dart';
 import '../widgets/feed/post_item.dart';
@@ -17,8 +20,23 @@ class WorldDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final world = ref.watch(worldProvider).worlds[worldId];
+    final resident = ref.watch(residentProvider).resident;
     final posts = ref.watch(postProvider.notifier).getPostsByWorld(worldId);
     final theme = Theme.of(context);
+
+    // Auto-join world and load channels
+    if (world != null && resident != null) {
+      if (!resident.joinedWorldIds.contains(worldId)) {
+        Future.microtask(() {
+          ref.read(residentProvider.notifier).joinWorld(worldId);
+          ref.read(channelProvider.notifier).ensureDefaultChannels(worldId);
+        });
+      } else {
+        Future.microtask(() {
+          ref.read(channelProvider.notifier).loadChannels(worldId);
+        });
+      }
+    }
 
     return WorldAccessGuard(
       worldId: worldId,
@@ -46,6 +64,9 @@ class WorldDetailScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+              ),
+              SliverToBoxAdapter(
+                child: WorldChannelList(worldId: worldId),
               ),
               SliverToBoxAdapter(
                 child: Padding(

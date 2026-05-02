@@ -48,6 +48,7 @@ class Resident {
   final String? lastCheckIn;
   final int streakCount;
   final List<String> following;
+  final List<String> joinedWorldIds;
   final Map<String, WorldStanding> worldStandings;
 
   const Resident({
@@ -64,6 +65,7 @@ class Resident {
     this.lastCheckIn,
     this.streakCount = 0,
     this.following = const [],
+    this.joinedWorldIds = const [],
     this.worldStandings = const {},
   });
 
@@ -81,6 +83,7 @@ class Resident {
     String? lastCheckIn,
     int? streakCount,
     List<String>? following,
+    List<String>? joinedWorldIds,
     Map<String, WorldStanding>? worldStandings,
   }) =>
       Resident(
@@ -97,6 +100,7 @@ class Resident {
         lastCheckIn: lastCheckIn ?? this.lastCheckIn,
         streakCount: streakCount ?? this.streakCount,
         following: following ?? this.following,
+        joinedWorldIds: joinedWorldIds ?? this.joinedWorldIds,
         worldStandings: worldStandings ?? this.worldStandings,
       );
 }

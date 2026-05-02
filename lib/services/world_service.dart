@@ -1,0 +1,82 @@
+import '../models/channel.dart';
+import '../utils/id_generator.dart';
+import 'supabase.dart';
+
+class WorldService {
+  static Future<void> joinWorld(String worldId, String residentId) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('world_members').upsert({
+      'id': '${worldId}_$residentId',
+      'world_id': worldId,
+      'resident_id': residentId,
+      'standing': 1,
+      'rep': 0,
+      'joined_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<void> leaveWorld(String worldId, String residentId) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client
+        .from('world_members')
+        .delete()
+        .eq('world_id', worldId)
+        .eq('resident_id', residentId);
+  }
+
+  static Future<List<Map<String, dynamic>>> getMembers(String worldId) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('world_members')
+        .select()
+        .eq('world_id', worldId)
+        .order('standing', ascending: false);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  static Future<List<WorldChannel>> getChannels(String worldId) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('world_channels')
+        .select()
+        .eq('world_id', worldId)
+        .order('position', ascending: true);
+    return (data as List).map((e) => WorldChannel.fromJson(e)).toList();
+  }
+
+  static Future<void> createChannel(WorldChannel channel) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('world_channels').insert(channel.toJson());
+  }
+
+  static Future<List<WorldChannel>> createDefaultChannels(String worldId) async {
+    const defaults = [
+      ('general', 'General discussion', ChannelType.text),
+      ('lounge', 'Off-topic and casual chat', ChannelType.text),
+      ('introductions', 'New residents introduce themselves', ChannelType.text),
+    ];
+
+    final channels = <WorldChannel>[];
+    for (var i = 0; i < defaults.length; i++) {
+      final (name, desc, type) = defaults[i];
+      final channel = WorldChannel(
+        id: generateId(),
+        worldId: worldId,
+        name: name,
+        description: desc,
+        channelType: type,
+        position: i,
+        isDefault: true,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      channels.add(channel);
+      await createChannel(channel);
+    }
+    return channels;
+  }
+}

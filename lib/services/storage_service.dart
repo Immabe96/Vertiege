@@ -18,6 +18,8 @@ class StorageService {
   static const String notificationsKey = '@notifications_data';
   static const String achievementsKey = '@achievements_data';
   static const String themeKey = '@theme_preference';
+  static const String channelsKey = '@channels_data';
+  static const String membershipsKey = '@memberships_data';
 
   static Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
@@ -52,7 +54,7 @@ class StorageService {
 
   static Future<void> clearAll() async {
     final prefs = await _prefs;
-    for (final key in [residentKey, postsKey, notificationsKey, achievementsKey, themeKey]) {
+    for (final key in [residentKey, postsKey, notificationsKey, achievementsKey, themeKey, channelsKey, membershipsKey]) {
       await prefs.remove(key);
     }
   }
