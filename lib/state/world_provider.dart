@@ -95,6 +95,29 @@ class WorldNotifier extends StateNotifier<WorldState> {
     return worldId;
   }
 
+  void updateWorldSettings({
+    required String worldId,
+    String? name,
+    String? description,
+    String? icon,
+  }) {
+    final world = state.worlds[worldId];
+    if (world == null) return;
+
+    final updated = world.copyWith(
+      name: name ?? world.name,
+      description: description ?? world.description,
+      icon: icon ?? world.icon,
+    );
+
+    state = state.copyWith(
+      worlds: {...state.worlds, worldId: updated},
+    );
+
+    // Persist locally
+    _persistUserWorld(updated);
+  }
+
   Future<Map<String, World>> _loadUserWorlds() async {
     final raw = await StorageService.getString(StorageService.userWorldsKey);
     if (raw == null || raw.isEmpty) return {};

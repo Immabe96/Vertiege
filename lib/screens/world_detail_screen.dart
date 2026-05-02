@@ -11,6 +11,7 @@ import '../widgets/worlds/world_residents.dart';
 import '../widgets/feed/post_input.dart';
 import '../widgets/feed/post_item.dart';
 import '../state/post_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class WorldDetailScreen extends ConsumerWidget {
   final String worldId;
@@ -45,6 +46,14 @@ class WorldDetailScreen extends ConsumerWidget {
           slivers: [
             SliverAppBar(
               expandedHeight: 200,
+              actions: [
+                if (world != null && resident?.id == world.sovereignId)
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'World settings',
+                    onPressed: () => context.push('/explore/$worldId/settings'),
+                  ),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(world?.name ?? worldId),
                 background: WorldBanner(worldId: worldId),
