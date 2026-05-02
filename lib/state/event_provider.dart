@@ -19,7 +19,7 @@ class EventState {
 
 class EventNotifier extends StateNotifier<EventState> {
   EventNotifier() : super(const EventState()) {
-    _load();
+    Future.microtask(() => _load());
   }
 
   List<WorldEvent> getEvents(String worldId) =>

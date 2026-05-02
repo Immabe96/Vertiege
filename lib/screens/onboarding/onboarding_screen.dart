@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
 import '../../models/resident.dart';
 import '../../widgets/core/tactile_button.dart';
@@ -29,10 +28,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             tier: ResidentTier.hustlers,
           ),
         );
-    // Let state propagate before navigating
-    Future.microtask(() {
-      if (mounted) context.go('/');
-    });
+    // setResident triggers the router to auto-redirect from /onboarding to /
   }
 
   @override

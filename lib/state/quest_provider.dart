@@ -58,7 +58,7 @@ class QuestState {
 
 class QuestNotifier extends StateNotifier<QuestState> {
   QuestNotifier() : super(const QuestState()) {
-    _init();
+    Future.microtask(() => _init());
   }
 
   static const _templates = [
