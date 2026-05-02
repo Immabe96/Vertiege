@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/design_system.dart';
 import '../state/world_provider.dart';
 import '../widgets/worlds/world_access_guard.dart';
 import '../widgets/worlds/world_banner.dart';
@@ -34,7 +35,7 @@ class WorldDetailScreen extends ConsumerWidget {
             if (world != null) ...[
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(Spacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -48,7 +49,7 @@ class WorldDetailScreen extends ConsumerWidget {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(Spacing.md),
                   child: WorldResidents(world: world),
                 ),
               ),

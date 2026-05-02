@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/achievement.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
+import '../../theme/design_system.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../widgets/profile/name_banner.dart';
 import '../../widgets/profile/badge_display.dart';
@@ -23,7 +24,7 @@ class IdentityScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Identity')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Spacing.md),
         children: [
           Center(
             child: CosmeticAvatar(
@@ -32,7 +33,8 @@ class IdentityScreen extends ConsumerWidget {
               imageUrl: resident.avatarUrl,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md - 4),
+
           Center(child: NameBanner(profession: resident.profession, name: resident.name)),
           const SizedBox(height: 4),
           Center(child: Text(resident.tier.label, style: theme.textTheme.bodyLarge)),

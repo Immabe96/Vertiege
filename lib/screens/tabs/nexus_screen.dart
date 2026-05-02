@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
 import '../../state/post_provider.dart';
+import '../../theme/design_system.dart';
 import '../../widgets/core/notification_bell.dart';
 import '../../widgets/feed/post_input.dart';
 import '../../widgets/feed/post_item.dart';
@@ -24,7 +25,7 @@ class NexusScreen extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(Spacing.md),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -34,7 +35,7 @@ class NexusScreen extends ConsumerWidget {
                         Text('$greeting, ${resident?.name ?? 'Traveler'}',
                             style: theme.textTheme.headlineSmall),
                         if (resident != null) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: Spacing.xs),
                           Text('Tier: ${resident.tier.label} | Streak: ${resident.streakCount} days',
                               style: theme.textTheme.bodyMedium),
                         ],
@@ -55,7 +56,7 @@ class NexusScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(Spacing.xl),
                     child: Text('No posts yet. Be the first!', style: theme.textTheme.bodyLarge),
                   ),
                 ),
