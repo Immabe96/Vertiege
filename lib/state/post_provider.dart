@@ -28,6 +28,7 @@ class PostNotifier extends StateNotifier<PostState> {
     required String content,
     String? imageUri,
     int tierValue = 1,
+    bool isAnnouncement = false,
   }) async {
     final post = Post(
       id: generateId(),
@@ -39,6 +40,7 @@ class PostNotifier extends StateNotifier<PostState> {
       imageUri: imageUri,
       timestamp: DateTime.now().millisecondsSinceEpoch,
       tierAtPosting: ResidentTier.fromValue(tierValue),
+      isAnnouncement: isAnnouncement,
     );
 
     state = state.copyWith(posts: [post, ...state.posts]);
@@ -93,12 +95,19 @@ class PostNotifier extends StateNotifier<PostState> {
   }
 
   List<Post> getPostsByWorld(String worldId) {
-    return state.posts.where((p) => p.worldId == worldId).toList()
+    final worldPosts = state.posts.where((p) => p.worldId == worldId).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    // Announcements always float to top
+    final announcements = worldPosts.where((p) => p.isAnnouncement).toList();
+    final regular = worldPosts.where((p) => !p.isAnnouncement).toList();
+    return [...announcements, ...regular];
   }
 
   List<Post> getAllPosts() {
-    return List.of(state.posts)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final sorted = List.of(state.posts)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final announcements = sorted.where((p) => p.isAnnouncement).toList();
+    final regular = sorted.where((p) => !p.isAnnouncement).toList();
+    return [...announcements, ...regular];
   }
 
   void setPosts(List<Post> posts) {
@@ -138,6 +147,7 @@ class PostNotifier extends StateNotifier<PostState> {
                   ))
               .toList() ??
           [],
+      isAnnouncement: json['isAnnouncement'] ?? false,
     );
   }
 
@@ -157,6 +167,7 @@ class PostNotifier extends StateNotifier<PostState> {
         'timestamp': p.timestamp,
         'tierAtPosting': p.tierAtPosting.value,
         'reactions': p.reactions,
+        'isAnnouncement': p.isAnnouncement,
         'comments': p.comments
             .map((c) => {
                   'id': c.id,

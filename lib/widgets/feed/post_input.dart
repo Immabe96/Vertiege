@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/permission_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../shared/image_picker_widget.dart';
 
 class PostInput extends ConsumerStatefulWidget {
   final String worldId;
+  final String? sovereignId;
 
-  const PostInput({super.key, required this.worldId});
+  const PostInput({super.key, required this.worldId, this.sovereignId});
 
   @override
   ConsumerState<PostInput> createState() => _PostInputState();
@@ -16,6 +18,7 @@ class PostInput extends ConsumerStatefulWidget {
 class _PostInputState extends ConsumerState<PostInput> {
   final _controller = TextEditingController();
   String? _imageUri;
+  bool _isAnnouncement = false;
 
   @override
   void dispose() {
@@ -38,15 +41,22 @@ class _PostInputState extends ConsumerState<PostInput> {
           content: content,
           imageUri: _imageUri,
           tierValue: resident.tier.value,
+          isAnnouncement: _isAnnouncement,
         );
 
     _controller.clear();
-    setState(() => _imageUri = null);
+    setState(() {
+      _imageUri = null;
+      _isAnnouncement = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final resident = ref.read(residentProvider).resident;
+    final canAnnounce = resident != null &&
+        WorldPermissions.canAnnounce(resident, widget.worldId, widget.sovereignId);
 
     return Card(
       margin: const EdgeInsets.all(12),
@@ -54,6 +64,37 @@ class _PostInputState extends ConsumerState<PostInput> {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
+            if (canAnnounce)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => setState(() => _isAnnouncement = !_isAnnouncement),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: _isAnnouncement
+                          ? theme.colorScheme.primaryContainer
+                          : theme.colorScheme.surfaceContainerHighest,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.campaign, size: 16, color: _isAnnouncement ? theme.colorScheme.primary : theme.colorScheme.outline),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Announcement',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: _isAnnouncement ? theme.colorScheme.primary : theme.colorScheme.outline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             Row(
               children: [
                 Expanded(

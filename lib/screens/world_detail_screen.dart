@@ -107,7 +107,7 @@ class WorldDetailScreen extends ConsumerWidget {
                 SliverToBoxAdapter(
                   child: FadeIn(
                     delayMs: 220,
-                    child: PostInput(worldId: worldId),
+                    child: PostInput(worldId: worldId, sovereignId: world.sovereignId),
                   ),
                 )
               else ...[

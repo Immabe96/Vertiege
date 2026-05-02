@@ -41,4 +41,7 @@ class WorldPermissions {
 
   static bool canModerate(Resident resident, String worldId, String? sovereignId) =>
       _standingLevel(resident, worldId, sovereignId) >= _moderateMinStanding;
+
+  static bool canAnnounce(Resident resident, String worldId, String? sovereignId) =>
+      _standingLevel(resident, worldId, sovereignId) >= _manageMinStanding;
 }

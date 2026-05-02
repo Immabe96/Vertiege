@@ -28,6 +28,7 @@ class Post {
   final ResidentTier tierAtPosting;
   final Map<String, int> reactions;
   final List<Comment> comments;
+  final bool isAnnouncement;
 
   const Post({
     required this.id,
@@ -41,6 +42,7 @@ class Post {
     this.tierAtPosting = ResidentTier.hustlers,
     this.reactions = const {},
     this.comments = const [],
+    this.isAnnouncement = false,
   });
 
   Post copyWith({
@@ -55,6 +57,7 @@ class Post {
     ResidentTier? tierAtPosting,
     Map<String, int>? reactions,
     List<Comment>? comments,
+    bool? isAnnouncement,
   }) =>
       Post(
         id: id ?? this.id,
@@ -68,5 +71,6 @@ class Post {
         tierAtPosting: tierAtPosting ?? this.tierAtPosting,
         reactions: reactions ?? this.reactions,
         comments: comments ?? this.comments,
+        isAnnouncement: isAnnouncement ?? this.isAnnouncement,
       );
 }

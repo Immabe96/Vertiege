@@ -73,6 +73,23 @@ class PostItem extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
+              if (post.isAnnouncement)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Icon(Icons.campaign, size: 14, color: theme.colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Announcement',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Text(post.content, style: theme.textTheme.bodyMedium),
               if (post.imageUri != null) ...[
                 const SizedBox(height: 8),
