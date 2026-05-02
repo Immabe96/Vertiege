@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/post.dart';
+import '../../services/permission_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../utils/date_format.dart';
@@ -14,8 +15,9 @@ import 'reaction_bar.dart';
 class PostItem extends ConsumerWidget {
   final Post post;
   final int index;
+  final String? worldId;
 
-  const PostItem({super.key, required this.post, this.index = 0});
+  const PostItem({super.key, required this.post, this.index = 0, this.worldId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,6 +64,12 @@ class PostItem extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (_canDelete(ref))
+                    IconButton(
+                      icon: Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error),
+                      tooltip: 'Delete post',
+                      onPressed: () => _onDelete(ref),
+                    ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -90,6 +98,16 @@ class PostItem extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  bool _canDelete(WidgetRef ref) {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null || worldId == null) return false;
+    return WorldPermissions.canDeletePost(resident, worldId!, post.residentId, null);
+  }
+
+  void _onDelete(WidgetRef ref) {
+    ref.read(postProvider.notifier).deletePost(post.id);
   }
 
   void _showComments(BuildContext context, WidgetRef ref) {

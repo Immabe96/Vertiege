@@ -8,6 +8,7 @@ import '../widgets/worlds/world_access_guard.dart';
 import '../widgets/worlds/world_banner.dart';
 import '../widgets/worlds/world_channel_list.dart';
 import '../widgets/worlds/world_residents.dart';
+import '../services/permission_service.dart';
 import '../widgets/feed/post_input.dart';
 import '../widgets/feed/post_item.dart';
 import '../widgets/core/fade_in.dart';
@@ -53,7 +54,7 @@ class WorldDetailScreen extends ConsumerWidget {
               SliverAppBar(
                 expandedHeight: 200,
                 actions: [
-                  if (world != null && resident?.id == world.sovereignId)
+                  if (world != null && resident != null && WorldPermissions.canManageSettings(resident, worldId, world.sovereignId))
                     IconButton(
                       icon: const Icon(Icons.settings),
                       tooltip: 'World settings',
@@ -102,12 +103,41 @@ class WorldDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ],
-              SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 220,
-                  child: PostInput(worldId: worldId),
+              if (resident != null && world != null && WorldPermissions.canPost(resident, worldId, world.sovereignId))
+                SliverToBoxAdapter(
+                  child: FadeIn(
+                    delayMs: 220,
+                    child: PostInput(worldId: worldId),
+                  ),
+                )
+              else ...[
+                SliverToBoxAdapter(
+                  child: FadeIn(
+                    delayMs: 220,
+                    child: Padding(
+                      padding: const EdgeInsets.all(Spacing.md),
+                      child: Card(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Icon(Icons.lock, size: 18, color: theme.colorScheme.outline),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Member+ required to post',
+                                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
               if (posts.isEmpty)
                 SliverToBoxAdapter(
                   child: FadeIn(
@@ -137,7 +167,7 @@ class WorldDetailScreen extends ConsumerWidget {
               else
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => PostItem(post: posts[index], index: index),
+                    (context, index) => PostItem(post: posts[index], index: index, worldId: worldId),
                     childCount: posts.length,
                   ),
                 ),

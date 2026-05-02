@@ -15,14 +15,14 @@
 - [x] Channel view + routing + messaging
 - [x] Discovery, Invites, and World Settings
 - [x] AchievementCard index + FadeIn + AchievementGrid refactor
-- [x] flutter analyze — all 132 issues cleaned (0 errors, 0 warnings, 3 pre-existing infos)
+- [x] flutter analyze — all 132 issues cleaned (0 errors, 0 warnings)
+- [x] Roles & permissions — WorldPermissions service, PostInput gate, settings gate, delete controls, standing titles
 
 ## Next Up
 - [ ] ParallaxScroll — wire up the existing unused widget
 - [ ] AnimatedList for real-time post insertions
 - [ ] Channels/rooms — topic-based sub-spaces
-- [ ] Roles & permissions — Visitor→Council gates actions
-- [ ] Member directory — see all residents
+- [ ] Member directory — see all residents (full list beyond top 5)
 - [ ] Announcements — sovereign/admin broadcast posts
 - [ ] Invite system — residents invite others (Patron+)
 - [ ] Moderation tools — remove posts, mute, ban

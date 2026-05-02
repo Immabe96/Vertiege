@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../config/tiers.dart';
 import '../../models/world.dart';
 import '../../models/resident.dart';
 import '../../services/world_service.dart';
+import '../core/fade_in.dart';
 
 class WorldResidents extends ConsumerStatefulWidget {
   final World world;
@@ -70,6 +72,8 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
             final idx = entry.key;
             final member = entry.value;
             final resident = member.resident;
+            final standing = getStanding(member.rep);
+            final isSovereign = resident.id == widget.world.sovereignId;
             final medalColor = idx == 0
                 ? const Color(0xFFD4A843)
                 : idx == 1
@@ -78,18 +82,29 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
                         ? const Color(0xFFCD7F32)
                         : null;
 
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(resident.avatarUrl),
-                child: medalColor != null
-                    ? Text('${idx + 1}',
-                        style: TextStyle(color: medalColor, fontWeight: FontWeight.bold))
-                    : null,
+            return FadeIn(
+              delayMs: idx * 50,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(resident.avatarUrl),
+                  child: medalColor != null
+                      ? Text('${idx + 1}',
+                          style: TextStyle(color: medalColor, fontWeight: FontWeight.bold))
+                      : null,
+                ),
+                title: Row(
+                  children: [
+                    Flexible(child: Text(resident.name, overflow: TextOverflow.ellipsis)),
+                    if (isSovereign) ...[
+                      const SizedBox(width: 6),
+                      Icon(Icons.auto_awesome, size: 14, color: theme.colorScheme.primary),
+                    ],
+                  ],
+                ),
+                subtitle: Text(standing.title),
+                trailing: Text('Rep ${member.rep}', style: theme.textTheme.labelSmall),
+                onTap: () => context.push('/residents/${resident.id}'),
               ),
-              title: Text(resident.name),
-              subtitle: Text(resident.tier.label),
-              trailing: Text('Rep ${member.rep}'),
-              onTap: () => context.push('/residents/${resident.id}'),
             );
           }),
       ],

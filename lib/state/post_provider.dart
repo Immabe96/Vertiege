@@ -66,6 +66,11 @@ class PostNotifier extends StateNotifier<PostState> {
         );
   }
 
+  void deletePost(String postId) {
+    state = state.copyWith(posts: state.posts.where((p) => p.id != postId).toList());
+    _persist();
+  }
+
   void addComment(String postId, Comment comment) {
     final post = state.posts.where((p) => p.id == postId).firstOrNull;
     if (post == null) return;
