@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
-import '../../utils/date_format.dart';
+import '../../theme/design_system.dart';
+import '../../utils/time_ago.dart';
 import '../../widgets/core/fade_in.dart';
+import '../../widgets/core/status_dot.dart';
 
 class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
@@ -17,9 +20,7 @@ class ChatListScreen extends ConsumerWidget {
     final chatState = ref.watch(chatProvider);
 
     // Trigger initial load once when resident is available and rooms
-    // have not been fetched yet. The guard on isLoadingRooms inside
-    // loadDmRooms prevents duplicate in-flight calls, and this outer
-    // check on dmRooms.isEmpty prevents re-fetching after success.
+    // have not been fetched yet.
     if (residentId != null &&
         chatState.dmRooms.isEmpty &&
         !chatState.isLoadingRooms) {
@@ -62,11 +63,11 @@ class ChatListScreen extends ConsumerWidget {
 
   Widget _buildLoadingState(ThemeData theme) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
       itemCount: 8,
       itemBuilder: (context, index) => Padding(
         padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 6),
         child: Card(
           elevation: 0,
           color: theme.colorScheme.surfaceContainerLow,
@@ -115,7 +116,7 @@ class ChatListScreen extends ConsumerWidget {
             'No conversations yet',
             style: theme.textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 48),
             child: Text(
@@ -137,7 +138,7 @@ class ChatListScreen extends ConsumerWidget {
     String residentId,
   ) {
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: Spacing.sm),
       itemCount: rooms.length,
       itemBuilder: (context, index) {
         final room = rooms[index];
@@ -170,10 +171,6 @@ class _RoomTile extends StatelessWidget {
   });
 
   /// Returns the display name for the other participant in this DM room.
-  ///
-  /// Filters `resident_ids` to remove the current user, then checks for a
-  /// backend-supplied name via [names] map or [other_name] key. Falls back
-  /// to the raw ID when no display name is available.
   String _otherResidentName() {
     final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
     final otherId = ids.firstWhere(
@@ -182,35 +179,67 @@ class _RoomTile extends StatelessWidget {
     );
     if (otherId.isEmpty) return 'Unknown';
 
-    // Backend may supply a names map keyed by resident ID.
     final names = room['names'] as Map<String, dynamic>?;
     if (names != null && names[otherId] is String) {
       return names[otherId] as String;
     }
 
-    // Backend may supply a single other_name field.
     final direct = room['other_name'];
     if (direct is String && direct.isNotEmpty) return direct;
 
     return otherId;
   }
 
-  String _lastMessagePreview() {
-    final msg = room['last_message'];
-    if (msg == null) return 'No messages yet';
-    final text = msg.toString();
-    if (text.isEmpty) return 'No messages yet';
-    return text.length > 50 ? '${text.substring(0, 50)}...' : text;
+  /// Returns the other resident's avatar URL, if available.
+  String? _otherResidentAvatar() {
+    final avatar = room['other_avatar'];
+    if (avatar is String && avatar.isNotEmpty) return avatar;
+    return null;
   }
 
+  String _lastMessagePreview() {
+    final msg = room['last_message'];
+    if (msg == null || msg.toString().isEmpty) return 'No messages yet';
+    final text = msg.toString();
+    if (text.length > 50) return '${text.substring(0, 50)}...';
+    return text;
+  }
+
+  /// Returns a compact relative time label like "2m", "1h", "3d".
   String _relativeTime() {
     final lastMessageAt = room['last_message_at'];
     if (lastMessageAt == null) return '';
     try {
       final dt = DateTime.parse(lastMessageAt.toString());
-      return formatTimestamp(dt.millisecondsSinceEpoch);
+      // timeAgo returns "5m ago" etc — strip " ago" for compact display
+      final label = timeAgo(dt);
+      if (label == 'just now') return 'now';
+      return label.replaceAll(' ago', '');
     } catch (_) {
       return '';
+    }
+  }
+
+  /// Unread count badge value, if any.
+  int _unreadCount() {
+    final count = room['unread_count'];
+    if (count is int) return count;
+    if (count is String) return int.tryParse(count) ?? 0;
+    return 0;
+  }
+
+  /// Derives presence from the room's last_message_at timestamp.
+  /// If the last message was within the last 5 minutes, show online.
+  Presence _presence() {
+    final lastMessageAt = room['last_message_at'];
+    if (lastMessageAt == null) return Presence.offline;
+    try {
+      final dt = DateTime.parse(lastMessageAt.toString());
+      final diff = DateTime.now().difference(dt);
+      if (diff.inMinutes < 5) return Presence.online;
+      return Presence.offline;
+    } catch (_) {
+      return Presence.offline;
     }
   }
 
@@ -218,41 +247,107 @@ class _RoomTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final name = _otherResidentName();
+    final avatar = _otherResidentAvatar();
+    final unread = _unreadCount();
+    final hasUnread = unread > 0;
 
     return FadeIn(
       delayMs: index * 50,
       child: ListTile(
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(
-            name.substring(0, 1).toUpperCase(),
-            style: TextStyle(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.w600,
+            const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 4),
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              backgroundImage:
+                  avatar != null ? NetworkImage(avatar) : null,
+              child: avatar == null
+                  ? Text(
+                      name.isNotEmpty
+                          ? name[0].toUpperCase()
+                          : '?',
+                      style: TextStyle(
+                        color: theme.colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                        fontSize: FontSizes.bodyLarge,
+                      ),
+                    )
+                  : null,
             ),
-          ),
+            Positioned(
+              right: -1,
+              bottom: -1,
+              child: StatusDot(
+                presence: _presence(),
+                size: 10,
+                borderWidth: 2,
+              ),
+            ),
+          ],
         ),
-        title: Text(
-          name,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                name,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(
+              _relativeTime(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: hasUnread
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outlineVariant,
+                fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
         ),
-        subtitle: Text(
-          _lastMessagePreview(),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.outline,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Text(
-          _relativeTime(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.outlineVariant,
-          ),
+        subtitle: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _lastMessagePreview(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: hasUnread
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.outline,
+                  fontWeight: hasUnread ? FontWeight.w500 : FontWeight.w400,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (hasUnread) ...[
+              const SizedBox(width: Spacing.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 7,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(RadiusTokens.round),
+                ),
+                child: Text(
+                  unread > 99 ? '99+' : unread.toString(),
+                  style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
+                    fontSize: FontSizes.caption - 1,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         onTap: onTap,
       ),

@@ -69,14 +69,16 @@ class ChatNotifier extends StateNotifier<ChatState> {
     required String senderName,
     String? senderAvatar,
     required String content,
+    String? imageUrl,
   }) async {
     final msg = ChannelMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: 'dm_${DateTime.now().millisecondsSinceEpoch}_${senderId.hashCode}',
       channelId: roomId,
       senderId: senderId,
       senderName: senderName,
       senderAvatar: senderAvatar,
       content: content,
+      imageUrl: imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
@@ -100,7 +102,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
         channelId: roomId,
         senderId: data['sender_id'] ?? '',
         senderName: data['sender_name'] ?? '',
+        senderAvatar: data['sender_avatar'],
         content: data['content'] ?? '',
+        imageUrl: data['image_url'],
         createdAt: DateTime.parse(data['created_at'] ?? '').millisecondsSinceEpoch,
       );
       final existing = state.dmMessages[roomId] ?? [];
@@ -138,14 +142,16 @@ class ChatNotifier extends StateNotifier<ChatState> {
     required String senderName,
     String? senderAvatar,
     required String content,
+    String? imageUrl,
   }) async {
     final msg = ChannelMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: 'ch_${DateTime.now().millisecondsSinceEpoch}_${senderId.hashCode}',
       channelId: channelId,
       senderId: senderId,
       senderName: senderName,
       senderAvatar: senderAvatar,
       content: content,
+      imageUrl: imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
@@ -169,7 +175,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
         channelId: channelId,
         senderId: data['sender_id'] ?? '',
         senderName: data['sender_name'] ?? '',
+        senderAvatar: data['sender_avatar'],
         content: data['content'] ?? '',
+        imageUrl: data['image_url'],
         createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
       );
       final existing = state.channelMessages[channelId] ?? [];
@@ -205,7 +213,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
             channelId: e['room_id'] ?? e['channel_id'] ?? '',
             senderId: e['sender_id'] ?? '',
             senderName: e['sender_name'] ?? '',
+            senderAvatar: e['sender_avatar'],
             content: e['content'] ?? '',
+            imageUrl: e['image_url'],
             createdAt: DateTime.tryParse(e['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
           )).toList();
 }

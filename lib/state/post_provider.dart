@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../models/resident.dart';
 import '../models/notification.dart';
+import '../services/permission_service.dart';
+import 'world_provider.dart';
 import '../services/storage_service.dart';
 import '../utils/id_generator.dart';
 import 'resident_provider.dart';
@@ -11,9 +13,27 @@ import 'quest_provider.dart';
 
 class PostState {
   final List<Post> posts;
-  const PostState({this.posts = const []});
+  final Set<String> bookmarkedPostIds;
+  final String? error;
 
-  PostState copyWith({List<Post>? posts}) => PostState(posts: posts ?? this.posts);
+  const PostState({
+    this.posts = const [],
+    this.bookmarkedPostIds = const {},
+    this.error,
+  });
+
+  bool get hasError => error != null;
+
+  PostState copyWith({
+    List<Post>? posts,
+    Set<String>? bookmarkedPostIds,
+    String? error,
+    bool clearError = false,
+  }) => PostState(
+    posts: posts ?? this.posts,
+    bookmarkedPostIds: bookmarkedPostIds ?? this.bookmarkedPostIds,
+    error: clearError ? null : error ?? this.error,
+  );
 }
 
 class PostNotifier extends StateNotifier<PostState> {
@@ -28,9 +48,16 @@ class PostNotifier extends StateNotifier<PostState> {
     required String residentAvatar,
     required String content,
     String? imageUri,
+    List<String>? imageUris,
     int tierValue = 1,
     bool isAnnouncement = false,
+    String? repostOf,
   }) async {
+    final resident = _ref.read(residentProvider).resident;
+    if (resident == null) return;
+    final world = _ref.read(worldProvider).worlds[worldId];
+    if (!WorldPermissions.canPost(resident, worldId, world?.sovereignId)) return;
+
     final post = Post(
       id: generateId(),
       worldId: worldId,
@@ -39,9 +66,11 @@ class PostNotifier extends StateNotifier<PostState> {
       residentAvatar: residentAvatar,
       content: content,
       imageUri: imageUri,
+      imageUris: imageUris,
       timestamp: DateTime.now().millisecondsSinceEpoch,
       tierAtPosting: ResidentTier.fromValue(tierValue),
       isAnnouncement: isAnnouncement,
+      repostOf: repostOf,
     );
 
     state = state.copyWith(posts: [post, ...state.posts]);
@@ -90,8 +119,12 @@ class PostNotifier extends StateNotifier<PostState> {
   }
 
   void deletePost(String postId) {
-    state = state.copyWith(posts: state.posts.where((p) => p.id != postId).toList());
+    state = state.copyWith(
+      posts: state.posts.where((p) => p.id != postId).toList(),
+      bookmarkedPostIds: state.bookmarkedPostIds.where((id) => id != postId).toSet(),
+    );
     _persist();
+    _persistBookmarks();
   }
 
   void addComment(String postId, Comment comment) {
@@ -116,10 +149,90 @@ class PostNotifier extends StateNotifier<PostState> {
         );
   }
 
+  // ── Bookmark ────────────────────────────────────────────────
+
+  static const String _bookmarksKey = '@bookmarked_posts';
+
+  void toggleBookmark(String postId) {
+    if (state.bookmarkedPostIds.contains(postId)) {
+      _unbookmark(postId);
+    } else {
+      _bookmark(postId);
+    }
+  }
+
+  void _bookmark(String postId) {
+    final updated = {...state.bookmarkedPostIds, postId};
+    state = state.copyWith(bookmarkedPostIds: updated);
+    _persistBookmarks();
+  }
+
+  void _unbookmark(String postId) {
+    final updated = state.bookmarkedPostIds.where((id) => id != postId).toSet();
+    state = state.copyWith(bookmarkedPostIds: updated);
+    _persistBookmarks();
+  }
+
+  bool isBookmarked(String postId) => state.bookmarkedPostIds.contains(postId);
+
+  Future<void> _persistBookmarks() async {
+    final json = jsonEncode(state.bookmarkedPostIds.toList());
+    await StorageService.setString(_bookmarksKey, json);
+  }
+
+  Future<void> loadBookmarks() async {
+    final raw = await StorageService.getString(_bookmarksKey);
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      state = state.copyWith(
+        bookmarkedPostIds: list.map((e) => e.toString()).toSet(),
+      );
+    } catch (_) {}
+  }
+
+  // ── Repost ──────────────────────────────────────────────────
+
+  void repost(String originalPostId) {
+    final original = state.posts.where((p) => p.id == originalPostId).firstOrNull;
+    if (original == null) return;
+
+    final resident = _ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    final repost = Post(
+      id: generateId(),
+      worldId: original.worldId,
+      residentId: resident.id,
+      residentName: resident.name,
+      residentAvatar: resident.avatarUrl,
+      content: original.content,
+      imageUri: original.imageUri,
+      imageUris: original.imageUris,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      tierAtPosting: resident.tier,
+      repostOf: originalPostId,
+    );
+
+    state = state.copyWith(posts: [repost, ...state.posts]);
+    _persist();
+
+    _ref.read(residentProvider.notifier).addRep(original.worldId, 5);
+    _ref.read(questProvider.notifier).onPostCreated();
+
+    _ref.read(notificationProvider.notifier).addNotification(
+          type: NotificationType.like,
+          message: '${resident.name} reposted your post',
+          postId: originalPostId,
+          worldId: original.worldId,
+        );
+  }
+
+  // ── Query ──────────────────────────────────────────────────
+
   List<Post> getPostsByWorld(String worldId) {
     final worldPosts = state.posts.where((p) => p.worldId == worldId).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    // Pinned first, then announcements, then regular
     final pinned = worldPosts.where((p) => p.isPinned).toList();
     final announcements = worldPosts.where((p) => !p.isPinned && p.isAnnouncement).toList();
     final regular = worldPosts.where((p) => !p.isPinned && !p.isAnnouncement).toList();
@@ -140,13 +253,15 @@ class PostNotifier extends StateNotifier<PostState> {
   }
 
   Future<void> loadPosts() async {
-    final raw = await StorageService.getString(StorageService.postsKey);
-    if (raw == null || raw.isEmpty) return;
     try {
+      final raw = await StorageService.getString(StorageService.postsKey);
+      if (raw == null || raw.isEmpty) return;
       final list = jsonDecode(raw) as List<dynamic>;
       final posts = list.map((e) => _postFromJson(e)).toList();
-      state = state.copyWith(posts: posts);
-    } catch (_) {}
+      state = state.copyWith(posts: posts, clearError: true);
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to load posts: $e');
+    }
   }
 
   static Post _postFromJson(Map<String, dynamic> json) {
@@ -158,6 +273,9 @@ class PostNotifier extends StateNotifier<PostState> {
       residentAvatar: json['residentAvatar'] ?? '',
       content: json['content'] ?? '',
       imageUri: json['imageUri'],
+      imageUris: (json['imageUris'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       timestamp: json['timestamp'] ?? 0,
       tierAtPosting: ResidentTier.fromValue(json['tierAtPosting'] ?? 1),
       reactions: Map<String, int>.from(json['reactions'] ?? {}),
@@ -174,6 +292,7 @@ class PostNotifier extends StateNotifier<PostState> {
       isAnnouncement: json['isAnnouncement'] ?? false,
       isPinned: json['isPinned'] ?? false,
       isEdited: json['isEdited'] ?? false,
+      repostOf: json['repostOf'],
     );
   }
 
@@ -190,12 +309,14 @@ class PostNotifier extends StateNotifier<PostState> {
         'residentAvatar': p.residentAvatar,
         'content': p.content,
         'imageUri': p.imageUri,
+        'imageUris': p.imageUris,
         'timestamp': p.timestamp,
         'tierAtPosting': p.tierAtPosting.value,
         'reactions': p.reactions,
         'isAnnouncement': p.isAnnouncement,
         'isPinned': p.isPinned,
         'isEdited': p.isEdited,
+        'repostOf': p.repostOf,
         'comments': p.comments
             .map((c) => {
                   'id': c.id,

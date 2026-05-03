@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../state/resident_provider.dart';
 import '../services/invite_service.dart';
 import '../screens/onboarding/onboarding_screen.dart';
+import '../screens/auth/login_screen.dart';
+import '../screens/auth/signup_screen.dart';
 import '../screens/tabs/tab_layout.dart';
 import '../screens/tabs/nexus_screen.dart';
 import '../screens/tabs/explore_screen.dart';
@@ -26,22 +29,50 @@ import '../screens/auth/auth_callback.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final resident = ref.watch(residentProvider).resident;
+  final supabaseClient = Supabase.instance.client;
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
       final location = state.uri.path;
-      final isOnboarding = location == '/onboarding';
-      final isAuthCallback = location == '/auth/callback';
 
-      if (isAuthCallback) return null;
+      // Never interrupt deep-link auth callbacks
+      if (location == '/auth/callback') return null;
 
-      if (resident == null && !isOnboarding) return '/onboarding';
-      if (resident != null && isOnboarding) return '/';
+      // Auth pages are always accessible (they handle their own state)
+      final isAuthPage =
+          location == '/login' || location == '/signup';
+
+      // Check for a cached Supabase session (synchronous)
+      final hasSession = supabaseClient.auth.currentSession != null;
+
+      if (!hasSession) {
+        // Not authenticated — allow access only to auth pages
+        if (!isAuthPage) return '/login';
+        return null;
+      }
+
+      // Authenticated with a session
+      if (resident == null) {
+        // No resident profile yet — redirect to onboarding
+        if (location != '/onboarding') return '/onboarding';
+        return null;
+      }
+
+      // Authenticated with resident — redirect away from auth/onboarding pages
+      if (isAuthPage || location == '/onboarding') return '/';
 
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignUpScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),

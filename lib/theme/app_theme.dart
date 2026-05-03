@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
+import 'design_system.dart';
 
 class AppTheme {
   AppTheme._();
 
-  // ── Shared radius tokens (Open Design: Discord 4-8px, Supabase 6-16px) ─
   static const _cardRadius = 12.0;
   static const _inputRadius = 8.0;
   static const _buttonRadius = 8.0;
   static const _pillRadius = 9999.0;
-
-  // ── Discord-inspired surface hierarchy (dark) ──────────────────────────
-  // bg-floating > bg-primary > bg-secondary > bg-tertiary
-  static const _darkSurfaceBase = Color(0xFF1E1F22);
-  static const _darkSurfaceCard = Color(0xFF2B2D31);
 
   // ── Light ──────────────────────────────────────────────────────────────
   static final ThemeData light = ThemeData(
@@ -23,23 +18,51 @@ class AppTheme {
       seedColor: AppColors.seed,
       brightness: Brightness.light,
     ),
-    // Cards: subtle border, no heavy shadow (Supabase pattern)
+    scaffoldBackgroundColor: Colors.grey.shade50,
+    // ── AppBar ──
+    appBarTheme: AppBarTheme(
+      centerTitle: false,
+      elevation: 0,
+      scrolledUnderElevation: 1,
+      surfaceTintColor: Colors.transparent,
+      titleTextStyle: TextStyle(
+        fontSize: FontSizes.title,
+        fontWeight: FontWeight.w600,
+        letterSpacing: LetterSpacing.heading,
+        color: Colors.black,
+      ),
+    ),
+    // ── Bottom Nav ──
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
+      selectedLabelStyle: TextStyle(
+        fontSize: FontSizes.caption,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontSize: FontSizes.caption,
+      ),
+    ),
+    // ── Cards ──
     cardTheme: CardThemeData(
       elevation: 0,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(_cardRadius),
         side: BorderSide(color: Colors.grey.shade200),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
     ),
-    // Inputs: filled, compact (Discord pattern)
+    // ── Inputs ──
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(_inputRadius)),
       filled: true,
+      fillColor: Colors.grey.shade100,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       isDense: true,
     ),
-    // Buttons: rounded, tactile-ready (Duolingo pattern)
+    // ── Buttons ──
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
@@ -51,14 +74,39 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
       ),
     ),
-    // Tabs: pill-shaped (Supabase pattern)
+    // ── Tabs ──
     tabBarTheme: TabBarThemeData(
       indicatorSize: TabBarIndicatorSize.tab,
       dividerHeight: 0,
     ),
-    // Chips: rounded
+    // ── Chips ──
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_pillRadius)),
+    ),
+    // ── SnackBar ──
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.md)),
+      contentTextStyle: const TextStyle(fontSize: FontSizes.body),
+    ),
+    // ── Dialog ──
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.lg)),
+      titleTextStyle: const TextStyle(
+        fontSize: FontSizes.subhead,
+        fontWeight: FontWeight.w600,
+        letterSpacing: LetterSpacing.tight,
+      ),
+    ),
+    // ── FAB ──
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
+    ),
+    // ── Divider ──
+    dividerTheme: DividerThemeData(
+      space: 1,
+      thickness: BorderWidth.thin,
     ),
   );
 
@@ -70,25 +118,53 @@ class AppTheme {
       seedColor: AppColors.seed,
       brightness: Brightness.dark,
     ),
-    // Cards: border-based depth, no shadows (Discord/Supabase pattern)
+    scaffoldBackgroundColor: AppColors.darkSurfaceBase,
+    // ── AppBar ──
+    appBarTheme: AppBarTheme(
+      centerTitle: false,
+      elevation: 0,
+      scrolledUnderElevation: 1,
+      surfaceTintColor: Colors.transparent,
+      backgroundColor: AppColors.darkSurfaceBase,
+      titleTextStyle: const TextStyle(
+        fontSize: FontSizes.title,
+        fontWeight: FontWeight.w600,
+        letterSpacing: LetterSpacing.heading,
+        color: Colors.white,
+      ),
+    ),
+    // ── Bottom Nav ──
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      elevation: 0,
+      backgroundColor: AppColors.darkSurfaceRaised,
+      type: BottomNavigationBarType.fixed,
+      selectedLabelStyle: const TextStyle(
+        fontSize: FontSizes.caption,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontSize: FontSizes.caption,
+      ),
+    ),
+    // ── Cards ──
     cardTheme: CardThemeData(
       elevation: 0,
-      color: _darkSurfaceCard,
+      color: AppColors.darkSurfaceCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(_cardRadius),
         side: const BorderSide(color: Color(0xFF3F4147)),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
     ),
-    // Inputs: darker surface fill
+    // ── Inputs ──
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(_inputRadius)),
       filled: true,
-      fillColor: _darkSurfaceBase,
+      fillColor: AppColors.darkSurfaceBase,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       isDense: true,
     ),
-    // Buttons: tactile-ready
+    // ── Buttons ──
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
@@ -100,12 +176,38 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
       ),
     ),
+    // ── Tabs ──
     tabBarTheme: TabBarThemeData(
       indicatorSize: TabBarIndicatorSize.tab,
       dividerHeight: 0,
     ),
+    // ── Chips ──
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_pillRadius)),
+    ),
+    // ── SnackBar ──
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.md)),
+    ),
+    // ── Dialog ──
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.lg)),
+      titleTextStyle: const TextStyle(
+        fontSize: FontSizes.subhead,
+        fontWeight: FontWeight.w600,
+        letterSpacing: LetterSpacing.tight,
+      ),
+    ),
+    // ── FAB ──
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
+    ),
+    // ── Divider ──
+    dividerTheme: const DividerThemeData(
+      space: 1,
+      thickness: BorderWidth.thin,
     ),
   );
 }

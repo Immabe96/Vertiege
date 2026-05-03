@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx skills *)",
+      "Bash(git commit -m ' *)",
+      "Read(//home/imma/.agents/skills/flutter-tester/**)",
+      "Read(//home/imma/.agents/skills/owasp-mobile-security-checker/**)",
+      "Read(//home/imma/.claude/agents/**)",
+      "Bash(dart analyze *)",
+      "Read(//home/imma/Downloads/**)",
+      "Bash(flutter analyze *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(git restore *)",
+      "Bash(git config *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(claude mcp *)",
+      "mcp__magic__21st_magic_component_inspiration",
+      "Bash(git push *)",
+      "Bash(dpkg -L imagemagick-7-common)",
+      "Bash(python3 -c \"from PIL import Image; print\\('Pillow available'\\)\")",
+      "Bash(git -C /home/imma/social-app-flutter ls-files -- .claude/settings.local.json)",
+      "Bash(git -C /home/imma/social-app-flutter ls-files -- .claude/settings.local.json .env .env.local)",
+      "Bash(git -C /home/imma/social-app ls-files -- .env .claude/)",
+      "Bash(git -C /home/imma/open-design ls-files -- CLAUDE.md AGENTS.md)",
+      "Bash(cp /home/imma/.claude/settings.json /home/imma/social-app-flutter/.config-backup/claude/settings.json)",
+      "Bash(cp /home/imma/social-app-flutter/.claude/settings.local.json /home/imma/social-app-flutter/.config-backup/claude/settings.local.json)",
+      "Bash(cp /home/imma/social-app-flutter/.vscode/mcp.json /home/imma/social-app-flutter/.config-backup/mcp/mcp.json)",
+      "Bash(cp /home/imma/social-app/.claude/settings.json /home/imma/social-app-flutter/.config-backup/claude/social-app-settings.json)",
+      "Bash(cp /home/imma/.config/Code/User/mcp.json /home/imma/social-app-flutter/.config-backup/vscode/global-mcp.json)"
+    ],
+    "defaultMode": "default",
+    "additionalDirectories": [
+      "/home/imma/open-design"
+    ]
+  },
+  "model": "opus[1m]",
+  "enabledPlugins": {
+    "figma@claude-plugins-official": true
+  },
+  "theme": "auto"
+}

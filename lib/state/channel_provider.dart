@@ -155,15 +155,14 @@ class ChannelNotifier extends StateNotifier<ChannelState> {
     }
   }
 
-  void _persist(String worldId, List<WorldChannel> channels) {
-    _loadAllLocal().then((all) {
-      all[worldId] = channels;
-      final encoded = <String, dynamic>{};
-      for (final entry in all.entries) {
-        encoded[entry.key] = entry.value.map((c) => c.toJson()).toList();
-      }
-      StorageService.setStringDebounced(StorageService.channelsKey, jsonEncode(encoded));
-    });
+  Future<void> _persist(String worldId, List<WorldChannel> channels) async {
+    final all = await _loadAllLocal();
+    all[worldId] = channels;
+    final encoded = <String, dynamic>{};
+    for (final entry in all.entries) {
+      encoded[entry.key] = entry.value.map((c) => c.toJson()).toList();
+    }
+    await StorageService.setStringDebounced(StorageService.channelsKey, jsonEncode(encoded));
   }
 }
 

@@ -1,9 +1,6 @@
-String formatTimestamp(int ts) {
-  final now = DateTime.now().millisecondsSinceEpoch;
-  final diff = now - ts;
+import 'time_ago.dart';
 
-  if (diff < 60000) return 'Just now';
-  if (diff < 3600000) return '${diff ~/ 60000}m ago';
-  if (diff < 86400000) return '${diff ~/ 3600000}h ago';
-  return '${diff ~/ 86400000}d ago';
-}
+/// Bridge to new relative-time formatter so all existing callers
+/// automatically gain weekly / monthly / yearly granularity.
+String formatTimestamp(int ts) =>
+    timeAgo(DateTime.fromMillisecondsSinceEpoch(ts));

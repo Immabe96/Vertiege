@@ -219,6 +219,7 @@ class ResidentNotifier extends StateNotifier<ResidentState> {
   void joinWorld(String worldId) {
     final r = state.resident;
     if (r == null || r.joinedWorldIds.contains(worldId)) return;
+    if (r.bannedWorldIds.contains('$worldId:${r.id}')) return;
     state = state.copyWith(
       resident: r.copyWith(joinedWorldIds: [...r.joinedWorldIds, worldId]),
     );

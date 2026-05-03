@@ -5,6 +5,7 @@ class ChannelMessage {
   final String senderName;
   final String? senderAvatar;
   final String content;
+  final String? imageUrl;
   final int createdAt;
 
   const ChannelMessage({
@@ -14,6 +15,7 @@ class ChannelMessage {
     required this.senderName,
     this.senderAvatar,
     required this.content,
+    this.imageUrl,
     required this.createdAt,
   });
 
@@ -24,6 +26,7 @@ class ChannelMessage {
     String? senderName,
     String? senderAvatar,
     String? content,
+    String? imageUrl,
     int? createdAt,
   }) =>
       ChannelMessage(
@@ -33,6 +36,7 @@ class ChannelMessage {
         senderName: senderName ?? this.senderName,
         senderAvatar: senderAvatar ?? this.senderAvatar,
         content: content ?? this.content,
+        imageUrl: imageUrl ?? this.imageUrl,
         createdAt: createdAt ?? this.createdAt,
       );
 
@@ -43,6 +47,7 @@ class ChannelMessage {
         'senderName': senderName,
         'senderAvatar': senderAvatar,
         'content': content,
+        'imageUrl': imageUrl,
         'createdAt': createdAt,
       };
 
@@ -53,6 +58,7 @@ class ChannelMessage {
         senderName: json['senderName'] ?? '',
         senderAvatar: json['senderAvatar'],
         content: json['content'] ?? '',
+        imageUrl: json['imageUrl'],
         createdAt: json['createdAt'] ?? 0,
       );
 }

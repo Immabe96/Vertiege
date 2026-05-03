@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+/// Banner for a world. Uses the generated world-{id}.jpg in assets/generated/.
+/// Falls back to a colored placeholder with the world's Material icon.
 class WorldBanner extends StatelessWidget {
   final String worldId;
   final double width;
@@ -10,12 +11,12 @@ class WorldBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/banners/$worldId-banner.svg',
+    return Image.asset(
+      'assets/generated/world-$worldId.jpg',
       width: width,
       height: height,
       fit: BoxFit.cover,
-      placeholderBuilder: (_) => Container(
+      errorBuilder: (context, error, stackTrace) => Container(
         width: width,
         height: height,
         color: Theme.of(context).colorScheme.surfaceContainerHighest,

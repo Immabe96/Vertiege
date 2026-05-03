@@ -25,16 +25,22 @@ class _SubmitAchievementScreenState extends ConsumerState<SubmitAchievementScree
         children: [
           Text('Select an achievement to submit for verification:', style: theme.textTheme.bodyLarge),
           const SizedBox(height: 12),
-          ...achievements.map((a) {
-            final status = ref.watch(achievementProvider.notifier).getAchievementStatus(a.id);
-            return RadioListTile<String>(
-              title: Text(a.title),
-              subtitle: Text('${a.xpValue} XP • ${a.category.name}'),
-              value: a.id,
-              groupValue: _selectedId,
-              onChanged: status == AchievementStatus.locked ? (v) => setState(() => _selectedId = v) : null,
-            );
-          }),
+          RadioGroup<String>(
+            groupValue: _selectedId,
+            onChanged: (v) => setState(() => _selectedId = v),
+            child: Column(
+              children: achievements.map((a) {
+                final status = ref.watch(achievementProvider.notifier).getAchievementStatus(a.id);
+                final locked = status == AchievementStatus.locked;
+                return RadioListTile<String>(
+                  value: a.id,
+                  title: Text(a.title),
+                  subtitle: Text('${a.xpValue} XP • ${a.category.name}'),
+                  enabled: locked,
+                );
+              }).toList(),
+            ),
+          ),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _selectedId != null

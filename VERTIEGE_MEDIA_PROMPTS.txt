@@ -1,0 +1,257 @@
+============================================
+VERTIEGE — MEDIA GENERATION PROMPTS
+============================================
+Style: geometric minimalist, flat (no gradients), dark charcoal background (#111111),
+gold accents (#D4A843), warm white, silver, copper. No text. No rounded corners.
+Clean vector/geometric aesthetic. Luxury feel. Dark-mode-first.
+
+============================================
+BATCH 1 — CRITICALS (10 images)
+============================================
+
+Generate 10 images in a matching geometric minimalist style. Each image should be flat
+(no gradients), dark charcoal background (#111111), gold accents (#D4A843 and warm
+white/silver/copper), no text, no rounded corners. All clean vector aesthetic.
+
+Image 1 — 1024x1024 — stylized letter 'V' constructed from three intersecting geometric
+diamond planes, sharp 45-degree angles, gold and warm white, transparent background,
+luxury brand mark, app icon foreground
+
+Image 2 — 1024x1024 — dark charcoal tessellating equilateral triangles forming a subtle
+geometric grid pattern, extremely faint gold hairlines, flat, app icon background
+
+Image 3 — 1024x1024 — centered geometric gold V monogram on dark charcoal, subtle
+geometric rays emanating from center in extremely dark gray, elegant splash screen
+
+Image 4 — 400x400 — empty geometric picture frame, thin gold outline, faint geometric
+feather-quill icon inside made of intersecting diagonal lines, minimal, empty state no posts
+
+Image 5 — 400x400 — two overlapping empty speech bubbles made of thin gold wireframe
+geometry, one larger one smaller, minimal, empty state no chats
+
+Image 6 — 400x400 — empty geometric globe outline formed by thin gold latitude and
+longitude lines, no fill, minimal, empty state no worlds
+
+Image 7 — 400x400 — empty geometric trophy shield outline, thin gold lines, faint
+sparkle dots around it, minimal, empty state no achievements
+
+Image 8 — 400x400 — silent bell formed by geometric lines, no fill, subtle silver-gray
+outline, faint diagonal strike-through line, calm minimal, empty state no notifications
+
+Image 9 — 200x200 — single perfect geometric circle, thin gold outline, no fill,
+centered, minimal entry-level elegance, tier emblem Hustler level 1
+
+Image 10 — 200x200 — complex geometric mandala with 6-pointed star formed by intersecting
+triangles, concentric circles, radiating fine gold lines, most intricate, tier emblem Apex level 5
+
+============================================
+BATCH 2 — TIERS + AVATAR (5 images)
+============================================
+
+Generate 5 images continuing the same geometric minimalist style. Flat (no gradients),
+dark charcoal background (#111111), gold accents (#D4A843 plus silver and copper),
+no text, no rounded corners, clean vector aesthetic.
+
+Image 1 — 200x200 — two concentric geometric circles with thin gold and silver lines,
+progressive complexity from batch-1 tier-1, tier emblem High Roller level 2
+
+Image 2 — 200x200 — three nested geometric shapes (circle + triangle + square) in gold,
+silver, and copper lines, medium complexity, tier emblem Elite level 3
+
+Image 3 — 200x200 — ornate geometric crest with 4-point star inside circle, gold and
+platinum lines, elegant, tier emblem Old Money level 4
+
+Image 4 — 200x200 — 5-point geometric star formed by intersecting angular lines, gold
+and white, complex crest-like, premium, tier emblem alternate
+
+Image 5 — 400x400 — geometric profile silhouette formed by intersecting angular planes,
+gold and charcoal, faceted crystal-like, anonymous sophisticated default avatar
+
+============================================
+BATCH 3 — WORLD BANNERS (11 images)
+============================================
+Each: 800x400, 16:9 landscape, dark background, geometric, no text, no people.
+
+Generate 11 world banners in matching geometric minimalist style. Each banner is a
+horizontal landscape (800x400), geometric abstract, dark background with gold and
+accent-color highlights, flat, elegant, no text, no people, no gradients.
+
+Image 1 — 800x400 — abstract geometric seascape, clean overlapping waves in deep navy
+and teal, gold horizon line, minimalist (Azure Coast)
+
+Image 2 — 800x400 — intersecting flight paths forming elegant geometric grid in silver
+and white on deep blue, aviation precision (Aviation Heights)
+
+Image 3 — 800x400 — abstract geometric medical cross formed by intersecting circles and
+hexagonal lines, white and emerald on dark charcoal, clean (Medical Nexus)
+
+Image 4 — 800x400 — abstract geometric skyscraper silhouettes made of vertical golden
+rectangles on deep gray, financial elegance (Financial District)
+
+Image 5 — 800x400 — abstract circuit-board-like geometric grid, cyan and white dots and
+lines on dark indigo, minimal tech aesthetic (Tech Sprawl)
+
+Image 6 — 800x400 — abstract geometric pillars and arches, white marble-like angular
+lines on deep slate, authoritative clean (Legal Plaza)
+
+Image 7 — 800x400 — abstract crystal formations using angular polygons, translucent
+white and gold on deep teal, geometric (Crystal Shore)
+
+Image 8 — 800x400 — abstract quantum orbits, concentric ellipses intersecting, copper
+and silver on near-black, precise (Quantum Core)
+
+Image 9 — 800x400 — abstract open book formed by layered geometric curves and arcs,
+silver and cream on dark slate, literary elegance (Silver Page)
+
+Image 10 — 800x400 — abstract velvet drape geometry, intersecting deep crimson and
+burgundy folds with gold lines, luxurious (Crimson Court)
+
+Image 11 — 800x400 — abstract star chart with geometric constellation lines and nodes,
+gold and white dots on deep space blue, cosmic (Nova Station)
+
+============================================
+BATCH 4 — WORLD BANNERS PART 2 (6 images)
+============================================
+Each: 800x400, 16:9 landscape, dark background, geometric, no text, no people.
+
+Image 1 — 800x400 — abstract neon tubing forming geometric grid, cyan and magenta thin
+lines on dark charcoal, futuristic city vibe (Neon District)
+
+Image 2 — 800x400 — abstract geometric crown or throne, gold angular lines on deep
+charcoal, regal sovereignty (Sovereign City)
+
+Image 3 — 800x400 — abstract golden estate gates, ornate geometric ironwork pattern,
+rich gold on charcoal, luxury (Golden Estate)
+
+Image 4 — 800x400 — abstract ethereal floating platforms, soft gold and silver geometric
+shapes, celestial dreamlike atmosphere (Aetheria)
+
+Image 5 — 800x400 — abstract geometric art gallery walls, framed empty canvases as thin
+gold rectangles, warm minimal (Arts Pavilion)
+
+Image 6 — 800x400 — abstract geometric mountain peaks with crisp diagonal lines, gold
+and charcoal, adventure exploration (generic/exploration)
+
+============================================
+BATCH 5 — WORLD ICONS (17 images)
+============================================
+Each: 200x200, square 1:1, geometric emblem, dark background, gold accent, no text.
+Each icon represents a distinct world. Match the world's theme from its banner batch.
+
+Image 1 — 200x200 — geometric neon tube forming a letter N, cyan thin stroke, dark
+charcoal background, futuristic minimal (Neon District)
+
+Image 2 — 200x200 — geometric waves forming letter A-shape, layered angular lines in
+teal and navy, minimal (Azure Coast)
+
+Image 3 — 200x200 — geometric wings or flight path arrow, silver intersecting lines
+forming upward chevron, deep blue background (Aviation Heights)
+
+Image 4 — 200x200 — geometric medical cross with hexagonal center, emerald and white
+thin lines, dark background (Medical Nexus)
+
+Image 5 — 200x200 — geometric building or column, vertical golden rectangles forming
+pillar abstract, dark charcoal (Financial District)
+
+Image 6 — 200x200 — geometric circuit chip, cyan rectangular nodes connected by thin
+gold lines, dark indigo (Tech Sprawl)
+
+Image 7 — 200x200 — geometric scales of justice, angular balance icon with white lines,
+dark slate background (Legal Plaza)
+
+Image 8 — 200x200 — geometric crystal diamond, angular polygon with translucent white
+and gold, deep teal background (Crystal Shore)
+
+Image 9 — 200x200 — geometric atom or orbit, concentric ellipses with copper and silver
+nodes, near-black background (Quantum Core)
+
+Image 10 — 200x200 — geometric open book pages, layered angular curves in silver and
+cream, dark slate (Silver Page)
+
+Image 11 — 200x200 — geometric theater curtain or crown, angular crimson folds with gold
+lines, dark background (Crimson Court)
+
+Image 12 — 200x200 — geometric star or compass, gold constellation lines on deep space
+blue, cosmic (Nova Station)
+
+Image 13 — 200x200 — geometric crown or scepter, angular gold lines forming regal emblem,
+dark charcoal (Sovereign City)
+
+Image 14 — 200x200 — geometric gates or archway, ornate gold angular lines, dark
+charcoal (Golden Estate)
+
+Image 15 — 200x200 — geometric floating diamond or platform, ethereal silver and gold
+angular shapes, dark background (Aetheria)
+
+Image 16 — 200x200 — geometric gallery frame or easel, thin gold rectangular outlines
+overlapping, warm dark background (Arts Pavilion)
+
+Image 17 — 200x200 — geometric compass or map pin, angular gold and silver intersecting
+lines, dark charcoal, exploration generic (Worlds fallback)
+
+============================================
+BATCH 6 — ACHIEVEMENT BADGES (10 images)
+============================================
+Each: 200x200, hexagonal badge shape, thin gold/silver/bronze border, dark center,
+geometric icon inside, no text, flat.
+
+Image 1 — 200x200 — hexagonal badge with geometric briefcase icon, gold lines on dark
+center, thin gold hexagonal border (Career achievement)
+
+Image 2 — 200x200 — hexagonal badge with geometric people icon (3 connected circles),
+gold lines on dark, thin gold border (Community achievement)
+
+Image 3 — 200x200 — hexagonal badge with geometric paint palette icon, gold lines on
+dark, thin gold border (Creative achievement)
+
+Image 4 — 200x200 — hexagonal badge with geometric book icon, gold lines on dark, thin
+gold border (Education achievement)
+
+Image 5 — 200x200 — hexagonal badge with geometric coin stack icon, gold lines on dark,
+thin gold border (Finance achievement)
+
+Image 6 — 200x200 — hexagonal badge with geometric heart icon, gold lines on dark, thin
+gold border (Health achievement)
+
+Image 7 — 200x200 — hexagonal badge with geometric linked rings icon (2 intersecting
+circles), gold lines on dark, thin gold border (Relationships achievement)
+
+Image 8 — 200x200 — hexagonal badge with geometric star icon, gold lines on dark, thin
+gold border (Skills achievement)
+
+Image 9 — 200x200 — hexagonal badge with geometric compass icon, gold lines on dark,
+thin gold border (Travel achievement)
+
+Image 10 — 200x200 — hexagonal badge with geometric laughing mask icon, gold lines on
+dark, thin gold border (Funny achievement)
+
+============================================
+BATCH 7 — PROFESSION BADGES + NOTIFICATION ICON (7 images)
+============================================
+Each: 200x200, geometric emblem, dark background, no text, flat.
+Each represents a verified profession.
+
+Image 1 — 200x200 — geometric paintbrush and palette, angular lines forming creative
+tools, gold and white, dark background (Artist profession)
+
+Image 2 — 200x200 — geometric scales of justice badge, angular lines, silver and white,
+dark background (Attorney profession)
+
+Image 3 — 200x200 — geometric caduceus or staff, angular medical symbol, emerald and
+white lines, dark background (Doctor profession)
+
+Image 4 — 200x200 — geometric gear and compass, angular mechanical lines, silver and
+copper, dark background (Engineer profession)
+
+Image 5 — 200x200 — geometric bar chart and coin, angular financial lines, gold and
+white, dark background (Finance profession)
+
+Image 6 — 200x200 — geometric wings or aircraft, angular aviation lines, silver and
+white, deep blue dark background (Pilot profession)
+
+Image 7 — 96x96 — small geometric bell icon, thin gold lines, dark background, simple
+minimal recognizable at tiny sizes (Push notification icon)
+
+============================================
+TOTAL: 56 images across 7 batches
+============================================

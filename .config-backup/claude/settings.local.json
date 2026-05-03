@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(claude plugin *)",
+      "Bash(git reset *)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__magic__21st_magic_component_builder",
+      "Read(//home/imma/open-design/**)",
+      "Bash(npm i *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm tools-dev *)",
+      "Bash(xdg-open /home/imma/social-app-flutter/design-mockups/nexus-feed.html)",
+      "Bash(xdg-open /home/imma/social-app-flutter/design-mockups/identity-profile.html)",
+      "Bash(flutter run *)",
+      "Bash(jobs -l)",
+      "Bash(sudo apt-get *)",
+      "Bash(flutter devices *)",
+      "Bash(sudo -S apt-get install -y ninja-build cmake clang pkg-config libgtk-3-dev)",
+      "Bash(supabase --version)",
+      "Read(//home/imma/**)",
+      "Read(//home/imma/.supabase/**)",
+      "Bash(npx supabase *)",
+      "Bash(curl -s https://wjaphoaxalvgjnrwqjwe.supabase.co/rest/v1/ -H 'apikey: sb_publishable_CpEQsbLTf2ql-xwhPjHOkA_SSpXkJ49' -H 'Authorization: Bearer sb_publishable_CpEQsbLTf2ql-xwhPjHOkA_SSpXkJ49')",
+      "mcp__magic__logo_search",
+      "WebFetch(domain:developers.figma.com)",
+      "Bash(adb devices *)",
+      "Bash(adb -s 44ec8e9f shell getprop ro.build.version.sdk)",
+      "Bash(adb -s 44ec8e9f shell getprop ro.product.cpu.abi)",
+      "Bash(flutter doctor *)",
+      "Bash(echo \"---EXIT:$?---\")",
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__plugin_figma_figma__get_metadata",
+      "Bash(node /home/imma/social-app-flutter/scripts/gen-worlds.mjs)",
+      "Bash(printenv)",
+      "Bash(node -e ' *)",
+      "Bash(node /home/imma/social-app-flutter/scripts/gen-all.mjs)",
+      "Bash(node /home/imma/social-app/generate_banners.mjs)",
+      "Bash(apt list *)"
+    ],
+    "additionalDirectories": [
+      "/home/imma/social-app-flutter",
+      "/home/imma/android-sdk/ndk/28.2.13676358",
+      "/home/imma/social-app"
+    ]
+  },
+  "prefersReducedMotion": true
+}

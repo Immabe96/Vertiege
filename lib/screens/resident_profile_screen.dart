@@ -103,7 +103,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
         const SizedBox(height: 4),
         FadeIn(
           delayMs: 100,
-          child: Center(child: Text('${achievements.totalXp} XP', style: theme.textTheme.headlineSmall)),
+          child: Center(child: Text('${resident.tier.label} Tier', style: theme.textTheme.headlineSmall)),
         ),
         if (resident.bio.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -130,8 +130,9 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       final currentId = ref.read(residentProvider).resident?.id;
                       if (currentId == null) return;
                       final room = await ChatService.getOrCreateRoom(currentId, resident.id);
-                      if (room != null && context.mounted) {
-                        context.push('/chat/${room['id']}');
+                      if (room != null && mounted) {
+                        final roomId = room['id'] as String;
+                        context.push('/chat/$roomId');
                       }
                     },
                     icon: const Icon(Icons.chat_bubble_outline),

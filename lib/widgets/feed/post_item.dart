@@ -6,6 +6,7 @@ import '../../models/report.dart';
 import '../../services/permission_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
+import '../../theme/design_system.dart';
 import '../../utils/date_format.dart';
 import '../core/fade_in.dart';
 import '../core/status_dot.dart';
@@ -137,7 +138,7 @@ class PostItem extends ConsumerWidget {
               ],
               Padding(
                 padding: EdgeInsets.only(top: post.isPinned || post.isAnnouncement ? 6 : 8, bottom: post.imageUri != null ? 8 : 0),
-                child: Text(post.content, style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
+                child: _ExpandableContent(content: post.content, theme: theme),
               ),
               if (post.imageUri != null) ...[
                 Padding(
@@ -342,6 +343,65 @@ class _ReportSheetState extends State<_ReportSheet> {
             child: FilledButton(
               onPressed: () => widget.onSubmit(_reason, _detailsController.text.trim().isEmpty ? null : _detailsController.text.trim()),
               child: const Text('Submit Report'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/// An expandable content widget for posts.
+///
+/// Truncates text > 280 characters and shows a "See more..." / "Show less"
+/// toggle with a smooth [AnimatedSize] transition.
+class _ExpandableContent extends StatefulWidget {
+  final String content;
+  final ThemeData theme;
+
+  const _ExpandableContent({required this.content, required this.theme});
+
+  @override
+  State<_ExpandableContent> createState() => _ExpandableContentState();
+}
+
+class _ExpandableContentState extends State<_ExpandableContent> {
+  static const int _truncateAt = 280;
+  bool _expanded = false;
+
+  bool get _isLong => widget.content.length > _truncateAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = widget.theme.textTheme.bodyMedium?.copyWith(height: 1.4);
+
+    if (!_isLong) {
+      return Text(widget.content, style: textStyle);
+    }
+
+    final displayText = _expanded
+        ? widget.content
+        : '${widget.content.substring(0, _truncateAt)}...';
+
+    return AnimatedSize(
+      duration: AnimDurations.normal,
+      curve: AnimCurves.easeInOut,
+      alignment: Alignment.topLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(displayText, style: textStyle),
+          const SizedBox(height: Spacing.xs),
+          GestureDetector(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Text(
+              _expanded ? 'Show less' : 'See more...',
+              style: widget.theme.textTheme.labelMedium?.copyWith(
+                color: widget.theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// {@template Skeleton}
+/// **DEPRECATED — use [Shimmer] from `shimmer.dart` instead.**
+///
+/// This widget uses a plain opacity pulse. The replacement [Shimmer]
+/// (same directory) provides a gradient-sweep highlight effect that
+/// matches modern apps (Twitter, Instagram, LinkedIn) and supports
+/// the same `width`, `height`, and `borderRadius` parameters.
+///
+/// Kept to avoid a hard break for any existing import, but new code
+/// should prefer `Shimmer`, `ShimmerPostCard`, and `ShimmerChatTile`.
+/// {@endtemplate}
 class Skeleton extends StatefulWidget {
   final double width;
   final double height;

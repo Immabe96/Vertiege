@@ -38,6 +38,7 @@ class Post {
   final String residentAvatar;
   final String content;
   final String? imageUri;
+  final List<String>? imageUris;
   final int timestamp;
   final ResidentTier tierAtPosting;
   final Map<String, int> reactions;
@@ -45,6 +46,7 @@ class Post {
   final bool isAnnouncement;
   final bool isPinned;
   final bool isEdited;
+  final String? repostOf;
 
   const Post({
     required this.id,
@@ -54,6 +56,7 @@ class Post {
     required this.residentAvatar,
     required this.content,
     this.imageUri,
+    this.imageUris,
     required this.timestamp,
     this.tierAtPosting = ResidentTier.hustlers,
     this.reactions = const {},
@@ -61,7 +64,18 @@ class Post {
     this.isAnnouncement = false,
     this.isPinned = false,
     this.isEdited = false,
+    this.repostOf,
   });
+
+  /// Resolves the effective list of image URIs, supporting both the legacy
+  /// single [imageUri] and the new multi-image [imageUris] field.
+  List<String> get allImageUris {
+    if (imageUris != null && imageUris!.isNotEmpty) return imageUris!;
+    if (imageUri != null && imageUri!.isNotEmpty) return [imageUri!];
+    return [];
+  }
+
+  bool get hasImages => allImageUris.isNotEmpty;
 
   Post copyWith({
     String? id,
@@ -71,6 +85,7 @@ class Post {
     String? residentAvatar,
     String? content,
     String? imageUri,
+    List<String>? imageUris,
     int? timestamp,
     ResidentTier? tierAtPosting,
     Map<String, int>? reactions,
@@ -78,6 +93,7 @@ class Post {
     bool? isAnnouncement,
     bool? isPinned,
     bool? isEdited,
+    String? repostOf,
   }) =>
       Post(
         id: id ?? this.id,
@@ -87,6 +103,7 @@ class Post {
         residentAvatar: residentAvatar ?? this.residentAvatar,
         content: content ?? this.content,
         imageUri: imageUri ?? this.imageUri,
+        imageUris: imageUris ?? this.imageUris,
         timestamp: timestamp ?? this.timestamp,
         tierAtPosting: tierAtPosting ?? this.tierAtPosting,
         reactions: reactions ?? this.reactions,
@@ -94,5 +111,6 @@ class Post {
         isAnnouncement: isAnnouncement ?? this.isAnnouncement,
         isPinned: isPinned ?? this.isPinned,
         isEdited: isEdited ?? this.isEdited,
+        repostOf: repostOf ?? this.repostOf,
       );
 }

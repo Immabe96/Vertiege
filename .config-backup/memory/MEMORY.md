@@ -1,0 +1,2 @@
+- [App name is Vertiege](app_name.md) — app naming and branding
+- [World-server design principle](world-server-design.md) — worlds as Discord-like guilds
