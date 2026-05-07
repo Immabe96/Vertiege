@@ -1,0 +1,78 @@
+enum NotificationType { like, comment, worldUnlocked, tierUpgrade, welcome, modAction, ranking, streakReminder, reactionMilestone }
+
+class AppNotification {
+  final String id;
+  final NotificationType type;
+  final String message;
+  final String? worldId;
+  final String? postId;
+  final bool read;
+  final int createdAt;
+
+  const AppNotification({
+    required this.id,
+    required this.type,
+    required this.message,
+    this.worldId,
+    this.postId,
+    this.read = false,
+    required this.createdAt,
+  });
+
+  AppNotification copyWith({
+    String? id,
+    NotificationType? type,
+    String? message,
+    String? worldId,
+    String? postId,
+    bool? read,
+    int? createdAt,
+  }) =>
+      AppNotification(
+        id: id ?? this.id,
+        type: type ?? this.type,
+        message: message ?? this.message,
+        worldId: worldId ?? this.worldId,
+        postId: postId ?? this.postId,
+        read: read ?? this.read,
+        createdAt: createdAt ?? this.createdAt,
+      );
+
+  static NotificationType typeFromString(String value) {
+    return switch (value) {
+      'like' => NotificationType.like,
+      'comment' => NotificationType.comment,
+      'worldUnlocked' => NotificationType.worldUnlocked,
+      'tierUpgrade' => NotificationType.tierUpgrade,
+      'welcome' => NotificationType.welcome,
+      'modAction' => NotificationType.modAction,
+      'ranking' => NotificationType.ranking,
+      'streakReminder' => NotificationType.streakReminder,
+      'reactionMilestone' => NotificationType.reactionMilestone,
+      _ => NotificationType.like,
+    };
+  }
+
+  static AppNotification fromSupabase(Map<String, dynamic> data) => AppNotification(
+        id: data['id'] ?? '',
+        type: typeFromString(data['type'] ?? ''),
+        message: data['message'] ?? '',
+        worldId: data['world_id'],
+        postId: data['post_id'],
+        read: data['read'] ?? false,
+        createdAt: data['created_at'] != null 
+            ? DateTime.tryParse(data['created_at'])?.millisecondsSinceEpoch ?? 0 
+            : 0,
+      );
+
+  Map<String, dynamic> toSupabase(String recipientId) => {
+        'id': id,
+        'recipient_id': recipientId,
+        'type': type.name,
+        'message': message,
+        'world_id': worldId,
+        'post_id': postId,
+        'read': read,
+        'created_at': DateTime.fromMillisecondsSinceEpoch(createdAt).toIso8601String(),
+      };
+}

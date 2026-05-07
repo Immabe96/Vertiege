@@ -1,0 +1,12 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#081a2e"/><stop offset="60%" stop-color="#052040"/><stop offset="100%" stop-color="#0a1620"/></linearGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#bg)"/>
+  <path d="M0 140 Q100 100 200 120 T400 100" fill="#1CB0F6" opacity=".06"/>
+  <path d="M0 150 Q100 130 200 140 T400 120" fill="#1CB0F6" opacity=".08"/>
+  <path d="M0 160 Q150 140 300 150 T400 140" fill="#1CB0F6" opacity=".06"/>
+  <circle cx="320" cy="35" r="18" fill="#FFC800" opacity=".12"/>
+  <circle cx="320" cy="35" r="10" fill="#FFC800" opacity=".3"/>
+  <text x="200" y="185" text-anchor="middle" font-family="serif" font-size="26" fill="#1CB0F6" font-weight="bold" letter-spacing="4">AZURE COAST</text>
+</svg>

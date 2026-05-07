@@ -1,0 +1,343 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../models/world.dart';
+import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
+import '../../services/access_control.dart';
+import '../../services/store_service.dart';
+import '../../services/legacy_service.dart';
+import '../../theme/colors.dart';
+import '../../theme/design_system.dart';
+import '../../utils/world_assets.dart';
+import '../core/fade_in.dart';
+import '../core/sovereign_card.dart';
+import 'world_icon.dart';
+import 'world_banner.dart';
+
+CardTier _getPrestigeTier(int prestige) {
+  if (prestige >= 600) return CardTier.apex;
+  if (prestige >= 300) return CardTier.elite;
+  return CardTier.hustler;
+}
+
+class WorldCard extends ConsumerWidget {
+  final World world;
+  final int index;
+  final bool wide;
+
+  const WorldCard({super.key, required this.world, this.index = 0, this.wide = false});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final resident = ref.watch(residentProvider).resident;
+    final isLocked = resident != null && !canAccessWorld(resident, world);
+    final tier = _getPrestigeTier(world.prestige);
+
+    return FadeIn(
+      delayMs: index * 60,
+      child: SovereignCard(
+        tier: tier,
+        onTap: () => context.push('/explore/${world.id}'),
+        child: wide ? _WideLayout(world: world, isLocked: isLocked) : _SquareLayout(world: world, isLocked: isLocked),
+      ),
+    );
+  }
+}
+
+// ── Square layout (featured) ──────────────────────────────
+
+class _SquareLayout extends StatelessWidget {
+  final World world;
+  final bool isLocked;
+
+  const _SquareLayout({required this.world, required this.isLocked});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _BannerThumbnail(world: world, compact: false),
+        _CardBody(world: world, isLocked: isLocked),
+      ],
+    );
+  }
+}
+
+// ── Wide / rectangular layout (lists) ─────────────────────
+
+class _WideLayout extends StatelessWidget {
+  final World world;
+  final bool isLocked;
+
+  const _WideLayout({required this.world, required this.isLocked});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 120),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 120,
+            child: _BannerThumbnail(world: world, compact: true),
+          ),
+          Expanded(
+            child: _CardBody(world: world, isLocked: isLocked),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Card body (text content) ──────────────────────────────
+
+class _CardBody extends ConsumerWidget {
+  final World world;
+  final bool isLocked;
+
+  const _CardBody({required this.world, required this.isLocked});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final resident = ref.watch(residentProvider).resident;
+    final isSovereign = resident?.id == world.sovereignId;
+    final canBoost = world.type == WorldType.dominion && isSovereign && world.boostsRemaining > 0 && StoreService.isEnabled;
+    final worldAlliances = ref.watch(worldProvider).alliances
+        .where((a) => a.worldId1 == world.id || a.worldId2 == world.id)
+        .toList();
+    final legacyTier = LegacyService.calculateLegacy(
+      world.prestige,
+      DateTime.fromMillisecondsSinceEpoch(world.createdAt > 0 ? world.createdAt : DateTime.now().millisecondsSinceEpoch),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(Spacing.sm + 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            world.name,
+            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeights.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              Icon(Icons.people, size: 12, color: AppColors.inkSecondary),
+              const SizedBox(width: 4),
+              Text(
+                '${world.memberCount} members',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: AppColors.inkSecondary,
+                ),
+              ),
+              const SizedBox(width: Spacing.sm),
+              Text(
+                '★ P${world.prestige}',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeights.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.sm),
+          Text(
+            world.description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: Spacing.sm),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              _Badge(
+                label: world.type.name,
+                icon: Icons.public,
+                color: theme.colorScheme.secondary,
+              ),
+              if (isLocked)
+                _Badge(label: 'Locked', icon: Icons.lock, color: theme.colorScheme.error),
+              if (world.isBoosted)
+                _Badge(label: 'Boosted', icon: Icons.rocket_launch, color: AppColors.tertiary),
+              if (legacyTier != LegacyTier.none)
+                _Badge(
+                  label: 'LEGACY: ${legacyTier.label}',
+                  icon: Icons.auto_awesome,
+                  color: legacyTier.color,
+                ),
+              for (final alliance in worldAlliances)
+                _Badge(
+                  label: 'ALLIED WITH ${alliance.allyName(world.id).toUpperCase()}',
+                  icon: Icons.handshake,
+                  color: AppColors.tertiary,
+                ),
+            ],
+          ),
+          if (canBoost) ...[
+            const SizedBox(height: Spacing.sm),
+            SizedBox(
+              width: double.infinity,
+              height: TouchTargets.iconButton,
+              child: OutlinedButton.icon(
+                onPressed: () => _handleBoost(context, ref),
+                icon: const Icon(Icons.rocket_launch, size: IconSizes.sm),
+                label: const Text('Boost'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.tertiary,
+                  side: const BorderSide(color: AppColors.tertiary),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+                  textStyle: const TextStyle(fontSize: FontSizes.labelSm),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleBoost(BuildContext context, WidgetRef ref) async {
+    HapticFeedback.mediumImpact();
+    final result = await ref.read(worldProvider.notifier).boostWorld(world.id);
+    if (!context.mounted) return;
+
+    if (result == StorePurchaseState.purchased) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${world.name} boosted! +${World.boostActivityPoints} activity pts — improved Discover ranking.',
+          ),
+        ),
+      );
+    } else if (result == StorePurchaseState.error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Boost failed. Please try again.')),
+      );
+    }
+  }
+}
+
+// ── Banner Thumbnail ──────────────────────────────────────
+
+class _BannerThumbnail extends StatelessWidget {
+  final World world;
+  final bool compact;
+
+  const _BannerThumbnail({required this.world, this.compact = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final height = compact ? double.infinity : 80.0;
+
+    return SizedBox(
+      height: compact ? null : 80,
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Hero(
+              tag: 'world-icon-${world.id}',
+              child: WorldBanner(
+                worldId: world.id,
+                width: double.infinity,
+                height: compact ? double.infinity : 80,
+                worldType: world.type,
+                prestige: world.prestige,
+              ),
+            ),
+
+            // Subtle gradient overlay at bottom for icon readability
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        theme.colorScheme.surface.withValues(alpha: 0.7),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // World icon overlaid at bottom-center of thumbnail
+            if (!compact)
+              Positioned(
+                bottom: -6,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: WorldIcon(
+                    worldId: world.id,
+                    size: IconSizes.md + 16,
+                    tintColor: WorldAssets.colorForPrestige(world.prestige),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Badge ─────────────────────────────────────────────────
+
+class _Badge extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _Badge({required this.label, required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(RadiusTokens.chip),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: IconSizes.xs, color: color),
+          const SizedBox(width: 3),
+          Text(label,
+            style: TextStyle(
+              color: color,
+              fontSize: FontSizes.caption,
+              fontWeight: FontWeights.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

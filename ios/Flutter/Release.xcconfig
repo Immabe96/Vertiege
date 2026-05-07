@@ -1,0 +1,5 @@
+#include "Generated.xcconfig"
+
+// Release signing — fill in when iOS build is needed
+// DEVELOPMENT_TEAM = <your-team-id>
+// PROVISIONING_PROFILE_SPECIFIER = <your-profile-specifier>

@@ -1,0 +1,12 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#081a2e"/><stop offset="100%" stop-color="#0a1220"/></linearGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#bg)"/>
+  <path d="M30 80 Q200 30 370 80" fill="none" stroke="#1CB0F6" opacity=".08" stroke-width="40"/>
+  <path d="M160 60 L240 60 L250 75 L230 100 L170 100 L150 75 Z" fill="#1CB0F6" opacity=".15"/>
+  <path d="M190 70 L210 70 L210 95 L190 95 Z" fill="#1CB0F6" opacity=".25"/>
+  <path d="M0 120 Q200 80 400 120" stroke="#1CB0F6" opacity=".06" stroke-width="2"/>
+  <text x="200" y="165" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#1CB0F6" font-weight="bold" letter-spacing="5">AVIATION HEIGHTS</text>
+  <text x="200" y="183" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#1CB0F6" opacity=".5">PUSH THE BOUNDARIES OF FLIGHT</text>
+</svg>
