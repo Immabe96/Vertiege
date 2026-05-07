@@ -1,6 +1,6 @@
-# Vertiege
+# Vertiege v1.0.0-beta
 
-> A tier-gated social network where every world is a Discord-like server with entry conditions. Built with Flutter + Riverpod + Supabase + Material 3.
+> A tier-gated social network where every world is a sovereign realm with entry conditions. Built with Flutter + Riverpod + Supabase + Sovereign Excellence dark theme.
 
 <p align="center">
   <img src="assets/generated/avatar-1.png" width="64" />
@@ -13,117 +13,45 @@
 
 ---
 
-## Features
+## Table of Contents
 
-### World System (Discord-like Servers)
-| Feature | Description |
-|---------|-------------|
-| 17 Worlds | Neon District, Azure Coast, Sovereign City, Golden Estate, Aetheria, Aviation Heights, Medical Nexus, Financial District, Tech Sprawl, Legal Plaza, Arts Pavilion, Crystal Shore, Quantum Core, Silver Page, Crimson Court, Nova Station |
-| World Types | Wealth (tier-gated), Profession (role-gated), Dominion (open) |
-| Access Control | Tier-based gates + profession verification + wealth world unlocks |
-| World Roles | Sovereign → Council → Patron → Elder → Veteran → Contributor → Member → Visitor |
-| Prestige System | Worlds level up through activity (P1–P50), unlocking features at thresholds |
-| World Settings | Overview (name, description, icon), Channels, Invites, Member Management, Danger Zone |
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Screens](#screens)
+- [Widgets](#widgets)
+- [State & Providers](#state--providers)
+- [Services](#services)
+- [Models](#models)
+- [Theme & Design System](#theme--design-system)
+- [Router](#router)
+- [Configuration](#configuration)
+- [Utilities](#utilities)
+- [Features](#features)
+- [Tier & Standing Systems](#tier--standing-systems)
+- [World Types & Access](#world-types--access)
+- [Getting Started](#getting-started)
+- [Build & Release](#build--release)
+- [License](#license)
 
-### Social Feed
-| Feature | Description |
-|---------|-------------|
-| Post Creation | Text + image posts with announcement toggle for sovereign/council |
-| Reactions | Fire, Diamond, Trophy, Clap with burst animation and haptic feedback |
-| Comments | Modal bottom sheet with threaded comment submission |
-| Feed Tabs | All / Following / Announcements with pill-shaped filter chips |
-| Post Pinning | Sovereign/council can pin posts to top of feed |
-| Announcements | Campaign-badged broadcast posts that float above regular content |
-| Delete/Report | PostItem overflow menu: delete (own/any based on standing), report with reason chips |
+---
 
-### Channels
-| Feature | Description |
-|---------|-------------|
-| Default Channels | General, Lounge, Introductions auto-created per world |
-| Custom Channels | Create, rename, delete via WorldSettings |
-| Channel Types | Text, Announcement, Feed |
-| Real-time Messaging | Per-channel messaging with live updates |
+## Overview
 
-### Chat & Communication
-| Feature | Description |
-|---------|-------------|
-| Direct Messages | User-to-user DM rooms with real-time messaging |
-| Chat List | All conversations with last message preview, relative timestamps |
-| World Channels | Contextual channel messaging within worlds |
+Vertiege is a semi-social, semi-gamified sovereign realm platform. Users create residents, join tier-gated worlds, earn prestige through activity, and ascend through five tiers — from Hustler to Apex.
 
-### Standing & Permissions
-| Standing | Rep | Permissions |
-|----------|-----|-------------|
-| Visitor | 0 | View only |
-| Member | 10 | Post, react, comment |
-| Contributor | 50 | Images, polls, delete own posts |
-| Veteran | 200 | Lounge access |
-| Elder | 500 | Vault, gift |
-| Patron | 1,000 | Invite others |
-| Council | 5,000 | Moderate (delete any post, mute, ban) |
-| Sovereign | — | All permissions + settings, roles, announcements |
+**191 Dart files** across **10 directories**.
 
-### Moderation & Governance
-| Feature | Description |
-|---------|-------------|
-| Mute System | Time-based (1h, 24h) with auto-expiry |
-| Ban System | Permanent removal from world, prevents rejoin |
-| Moderation Panel | WorldSettings → Member Management with per-member actions |
-| Report System | 6 report reasons (spam, harassment, hate speech, NSFW, misinformation, other) |
-| Permission Gates | PostInput hidden for Visitors, Settings gated to Council+, Announcements Council+ |
-
-### Member Directory & Social
-| Feature | Description |
-|---------|-------------|
-| Full Directory | Per-world member list with search, rep sorting, sovereign badges |
-| Follow/Unfollow | Follow other residents, view following count on Identity |
-| WorldResidents | Top 5 by rep with gold/silver/bronze medals and standing titles |
-| Resident Profiles | Global stats (XP, tier, badges) + per-world standing context |
-
-### Events
-| Feature | Description |
-|---------|-------------|
-| Create Events | Sovereign/council create titled/described events |
-| RSVP System | One-tap RSVP toggle with attendee count |
-| Upcoming Filter | Only future events shown, sorted by start time |
-| Event Cards | Listed on WorldDetailScreen above channels |
-
-### Gamification
-| Feature | Description |
-|---------|-------------|
-| Daily Quests | 4 rotating tasks (post, react, comment, explore) with XP rewards |
-| Claim System | Completed quests claimed for XP with checkmark animation |
-| Streak Tracking | Daily check-in streak with tier-based XP bonuses |
-| Achievements | 10 categories, submit/verify flow, XP values per achievement |
-| Tier System | Hustler → High Roller → Elite → Old Money → Apex (XP-based) |
-| Rep System | Per-world reputation (rep) from posts, reactions, comments |
-
-### UI/UX Polish
-| Feature | Description |
-|---------|-------------|
-| FadeIn Animations | All screen content with staggered delays |
-| Hero Transitions | World icon (card→detail), Avatar (post→profile) |
-| Floating Tab Bar | Pill-shaped bottom nav with animated active indicator |
-| Like Burst | Scale bounce animation on reaction chips |
-| Send Morph | Send→checkmark icon transition on post |
-| Scroll-to-Top | Tab re-tap triggers scroll to top |
-| Profile Strength | Progress bar showing profile completion % |
-| Pull-to-Refresh | On all list screens |
-| Swipe-to-Dismiss | Notifications with archive undo |
-| Empty States | Illustrated placeholders for all empty feeds |
-| Shimmer Loading | Skeleton shimmer widget for async loads |
-| Dark Mode | Full dark theme with surface container colors |
-
-### Navigation
-| Tab | Route | Screen |
-|-----|-------|--------|
-| Nexus | `/` | Home feed with tabs, quests, PostInput |
-| Explore | `/explore` | World discovery grid with search + filter |
-| Chats | `/chat` | DM list with real-time rooms |
-| Identity | `/identity` | Profile, achievements, settings, share card |
-| Alerts | `/alerts` | Grouped notifications with archive |
-
-Top-level routes: `/search`, `/settings`, `/achievements`, `/create-world`, `/residents/:id`, `/invite/:code`
+| Category | Count |
+|----------|-------|
+| Screens | 32 |
+| Widgets | 93 |
+| State Providers | 10 |
+| Services | 26 |
+| Models | 12 |
+| Theme | 3 |
+| Router | 1 |
+| Config | 4 |
+| Utils | 8 |
 
 ---
 
@@ -131,108 +59,657 @@ Top-level routes: `/search`, `/settings`, `/achievements`, `/create-world`, `/re
 
 ```
 lib/
-├── app.dart                    # App entry + store initialization
-├── main.dart                   # Supabase init + ProviderScope
+├── main.dart                          # Entry: dotenv, gate status, Supabase init with HTTP timeouts
+├── app.dart                           # VirtualStatusWorldsApp: splash → background loads → router
 ├── config/
-│   ├── achievements.dart       # Achievement catalog
-│   ├── cosmetics.dart          # Avatar frame cosmetics
-│   └── tiers.dart              # Standing levels + prestige config
+│   ├── achievements.dart              # 90 achievements across 13 categories
+│   ├── cosmetics.dart                 # Avatar frames, decorations, prestige badges
+│   ├── tiers.dart                     # 7 standing levels, tier names, world level thresholds, worldsConfig (14 default worlds)
+│   └── titles.dart                    # Earned title map (achievement ID → display title)
 ├── models/
-│   ├── achievement.dart        # Achievement + UserAchievement
-│   ├── channel.dart            # WorldChannel (text/announcement/feed)
-│   ├── event.dart              # WorldEvent with RSVP
-│   ├── invite.dart             # WorldInvite
-│   ├── notification.dart       # AppNotification
-│   ├── post.dart               # Post + Comment
-│   ├── report.dart             # Report (6 reasons)
-│   ├── resident.dart           # Resident + WorldStanding + ResidentTier
-│   └── world.dart              # World + DominionWorld + WorldFeatures
+│   ├── achievement.dart               # Achievement, AchievementCategory (13), AchievementStatus
+│   ├── alliance.dart                  # Alliance between two worlds
+│   ├── channel.dart                   # WorldChannel, ChannelType (text/announcement/feed)
+│   ├── event.dart                     # WorldEvent with RSVP tracking
+│   ├── invite.dart                    # WorldInvite with code, uses, expiration
+│   ├── message.dart                   # ChannelMessage for channel + DM
+│   ├── notification.dart              # AppNotification, NotificationType (9 types)
+│   ├── post.dart                      # Post, Comment, reactions map
+│   ├── report.dart                    # Report, ReportReason (6), ReportStatus
+│   ├── resident.dart                  # Resident, ResidentTier (1-5), WorldStanding, VerificationStatus
+│   ├── season.dart                    # Season, SeasonWorldScore, composite scoring
+│   └── world.dart                     # World, WorldType (wealth/profession/dominion), WorldConstitution, WorldFeatures, DominionWorld
 ├── router/
-│   └── app_router.dart         # GoRouter with 5-tab StatefulShellRoute
+│   └── app_router.dart                # GoRouter Provider: 25+ routes, auth/tier redirect guards
 ├── screens/
-│   ├── auth/                   # AuthCallbackScreen
-│   ├── onboarding/             # OnboardingScreen
-│   ├── achievements/           # Index, Category, Submit
-│   ├── tabs/
-│   │   ├── tab_layout.dart     # Floating pill nav shell
-│   │   ├── nexus_screen.dart   # Home feed with tabs
-│   │   ├── explore_screen.dart # World discovery grid
-│   │   ├── chat_list_screen.dart # DM list
-│   │   ├── identity_screen.dart  # Profile + stats
-│   │   └── alerts_screen.dart    # Notifications
-│   ├── resident_profile_screen.dart
-│   ├── world_detail_screen.dart
-│   ├── world_channel_screen.dart
-│   ├── world_members_screen.dart
-│   ├── world_settings_screen.dart
-│   ├── chat_room_screen.dart
-│   ├── create_world_screen.dart
-│   ├── search_screen.dart
-│   └── settings_screen.dart
+│   ├── auth/                          # LoginScreen, SignUpScreen, AuthCallbackScreen
+│   ├── onboarding/                    # OnboardingScreen, TheGateScreen
+│   ├── tabs/                          # TabLayout, NexusScreen, ExploreScreen, ChatListScreen, IdentityScreen, CreatePostScreen, AlertsScreen
+│   ├── achievements/                  # AchievementsIndexScreen, AchievementCategoryScreen, SubmitAchievementScreen
+│   ├── journey/                       # AscensionPathScreen
+│   ├── world_detail_screen.dart       # Full world view: banner, tabs, join/leave
+│   ├── world_channel_screen.dart      # Channel chat view
+│   ├── world_settings_screen.dart     # Sovereign world management
+│   ├── world_members_screen.dart      # Member roster with standings
+│   ├── chat_room_screen.dart          # 1:1 DM chat room
+│   ├── resident_profile_screen.dart   # Other resident's profile
+│   ├── create_world_screen.dart       # World creation flow
+│   ├── search_screen.dart             # Global search
+│   ├── settings_screen.dart           # App settings
+│   ├── splash_screen.dart             # Animated splash with procedural shapes
+│   ├── cosmetics_shop_screen.dart     # Cosmetics marketplace
+│   ├── season_screen.dart             # Season leaderboard
+│   ├── subscription_screen.dart       # IAP subscription tiers
+│   ├── hall_of_ascension_screen.dart  # Leaderboard gallery
+│   └── verification_review_screen.dart # Admin: approve/reject verifications
 ├── services/
-│   ├── access_control.dart     # canAccessWorld() entry check
-│   ├── auth_service.dart       # Supabase auth
-│   ├── backup_service.dart     # Data export/import
-│   ├── chat_service.dart       # DM room management
-│   ├── invite_service.dart     # Invite CRUD
-│   ├── permission_service.dart # Standing-based action gating
-│   ├── post_service.dart       # Supabase post operations
-│   ├── profile_service.dart    # Profile upsert/search
-│   ├── storage_service.dart    # SharedPreferences wrapper
-│   ├── supabase.dart           # Supabase client singleton
-│   └── world_service.dart      # World + channel CRUD
+│   ├── supabase.dart                  # Client accessor + isSupabaseConfigured() gate
+│   ├── auth_service.dart              # Email sign-in/sign-up/out with token persistence
+│   ├── profile_service.dart           # CRUD for profiles table
+│   ├── world_service.dart             # World CRUD + join/leave + default channels
+│   ├── post_service.dart              # Post CRUD with moderation filter
+│   ├── chat_service.dart              # DM room + channel message management
+│   ├── notification_service.dart      # Fetch/mark-read notifications
+│   ├── storage_service.dart           # SharedPreferences wrapper (debounced writes)
+│   ├── secure_storage_service.dart    # FlutterSecureStorage for auth tokens
+│   ├── prestige_service.dart          # Prestige scoring algorithm
+│   ├── season_service.dart            # Season data + rankings
+│   ├── daily_reward_service.dart      # Daily XP/shield reward generation
+│   ├── verification_service.dart      # Profession proof submission + review
+│   ├── ai_verification_service.dart   # Simulated AI achievement verification
+│   ├── access_control.dart            # canAccessWorld() tier/profession gating
+│   ├── permission_service.dart        # Standing-based action permissions
+│   ├── moderation_service.dart        # Server-side ban/mute/warn
+│   ├── moderation_filter.dart         # Pre-publish content filter (3-stage pipeline)
+│   ├── council_service.dart           # Council member tracking
+│   ├── invite_service.dart            # Invite create/lookup/accept
+│   ├── backup_service.dart            # JSON backup/restore
+│   ├── cache_service.dart             # Feed/world cache for instant resume
+│   ├── legacy_service.dart            # Legacy tier color mapping
+│   ├── store_service.dart             # IAP wrapper (in_app_purchase)
+│   ├── subscription_service.dart      # Subscription tiers + benefits
+│   └── crash_reporter.dart            # Crash reporting abstraction (ready for Firebase Crashlytics)
 ├── state/
-│   ├── achievement_provider.dart # Riverpod StateNotifier
-│   ├── channel_provider.dart
-│   ├── chat_provider.dart
-│   ├── event_provider.dart
-│   ├── notification_provider.dart
-│   ├── post_provider.dart
-│   ├── quest_provider.dart       # Daily quests
-│   ├── resident_provider.dart
-│   ├── theme_provider.dart
-│   └── world_provider.dart
+│   ├── resident_provider.dart         # Resident state + profile persistence
+│   ├── world_provider.dart            # Worlds map + alliances + create/join/leave
+│   ├── post_provider.dart             # Feed posts + comments + reactions
+│   ├── chat_provider.dart             # DM rooms + channel messages + real-time
+│   ├── channel_provider.dart          # WorldChannel CRUD
+│   ├── event_provider.dart            # WorldEvent with RSVP
+│   ├── notification_provider.dart     # Notifications sync
+│   ├── achievement_provider.dart      # Achievements + XP + tier thresholds
+│   ├── quest_provider.dart            # Daily quests + streak tracking
+│   └── theme_provider.dart            # Theme mode persistence
 ├── theme/
-│   ├── app_theme.dart           # Light + dark ThemeData
-│   ├── colors.dart              # AppColors palette
-│   └── design_system.dart       # Spacing, Radius, FontSizes tokens
+│   ├── colors.dart                    # AppColors: OLED obsidian surface hierarchy, sovereign violet primary, gold tertiary, tier accents
+│   ├── design_system.dart             # Font, spacing, radius, animation tokens, world icon map
+│   └── app_theme.dart                 # Material 3 dark-only ThemeData from seed colors
 ├── utils/
-│   ├── date_format.dart         # Relative timestamps
-│   └── id_generator.dart        # UUID v4 wrapper
+│   ├── date_format.dart               # Relative timestamp formatting
+│   ├── time_ago.dart                  # Human-readable relative time + TimeAgo widget
+│   ├── tier_utils.dart                # Standing-to-color mapping
+│   ├── text_parser.dart               # @mentions + #hashtags extraction
+│   ├── haptics.dart                   # Curated haptic feedback presets
+│   ├── id_generator.dart              # UUID v4 generation
+│   ├── world_assets.dart              # Deterministic world icon/color/gradient generator
+│   └── string_utils.dart              # capitalize(), truncate() helpers
 └── widgets/
-    ├── core/
-    │   ├── fade_in.dart          # Staggered entry animation
-    │   ├── offline_banner.dart   # Connectivity indicator
-    │   ├── skeleton.dart         # Shimmer loading placeholder
-    │   └── notification_bell.dart # Unread badge icon
-    ├── feed/
-    │   ├── post_item.dart        # Post card (modern glass design)
-    │   ├── post_input.dart       # Create post with announcement toggle
-    │   ├── reaction_bar.dart     # Reaction chips with burst animation
-    │   ├── comment_sheet.dart    # Modal bottom sheet
-    │   └── post_image.dart       # Network image with skeleton
-    ├── worlds/
-    │   ├── world_card.dart       # Discovery grid card
-    │   ├── world_banner.dart     # SVG banner for detail header
-    │   ├── world_icon.dart       # Per-world icon mapping
-    │   ├── world_channel_list.dart # Channel tiles
-    │   ├── world_residents.dart  # Top 5 with medals
-    │   └── world_access_guard.dart # Entry gate UI
-    ├── achievements/
-    │   ├── achievement_card.dart  # Achievement tile
-    │   └── achievement_grid.dart  # Full achievement list
-    ├── profile/
-    │   ├── cosmetic_avatar.dart   # Tier-framed avatar
-    │   ├── name_banner.dart       # Profession-colored name
-    │   ├── badge.dart             # Decoration badge chip
-    │   ├── badge_display.dart     # Badge wrap
-    │   └── share_card.dart        # Exportable profile card
-    └── shared/
-        ├── tier_icon.dart         # Tier indicator
-        └── image_picker_widget.dart
+    ├── core/ (22)                     # GlassPanel, GlowBorder, FadeIn, Shimmer, EmptyState, LoadingState, SafeAsyncBuilder, etc.
+    ├── worlds/ (21)                   # WorldCard, WorldBanner, WorldAccessGuard, Leaderboard, etc.
+    ├── profile/ (11)                  # CosmeticAvatar, LuminaryNameplate, BadgeDisplay, StreakDisplay, etc.
+    ├── feed/ (7)                      # PostItem, PostComposer, ReactionBar, CommentSheet, etc.
+    ├── achievements/ (3)              # AchievementCard, AchievementGrid, TierCelebration
+    ├── auth/ (1)                      # AuthErrorCard
+    ├── shared/ (5)                    # TierIcon, ProgressBar, ShareButton, FilterPill, ImagePicker
+    ├── nexus/ (9)                     # BentoGrid, BentoCards (DailyQuest, PrestigeProgress, SeasonSnapshot, Trending, FeedPreview), FeedTabChip, FeedSortDropdown, WorldInviteSection
+    ├── explore/ (8)                   # TierSection, SectionHeader, ViewModeToggle, FeaturedWorldsRow, BoostedWorldsRow, TrendingRisingSection, ShimmerWorldCard, SeasonBanner
+    ├── chat/ (5)                      # ChatMessageGrouper, ChatDateSeparator, ChatInputBar, ChatImage, ScrollFab
+    └── journey/ (1)                   # ProgressTrail (5-step tier visualization)
 ```
 
-**9,758 lines of Dart** across 65+ files.
+---
+
+## Screens
+
+### Auth (3 screens)
+
+| Screen | Route | Description |
+|--------|-------|-------------|
+| LoginScreen | `/login` | Email/password login with glass panels, tactile buttons, auth error card |
+| SignUpScreen | `/signup` | Email/password sign-up creating a new Supabase auth user |
+| AuthCallbackScreen | `/auth/callback` | Post-authentication transitional screen with gradient background and loading indicator |
+
+### Onboarding (2 screens)
+
+| Screen | Route | Description |
+|--------|-------|-------------|
+| OnboardingScreen | `/onboarding` | Profile setup: picks avatar image, enters display name, creates initial resident record |
+| TheGateScreen | `/the-gate` | Immersive 3-step intro: cosmic background, tier reveal, world path selection, marks gate completion for routing |
+
+### Tab Screens (7 screens + 1 layout)
+
+| Screen | Route | Description |
+|--------|-------|-------------|
+| TabLayout | — | 4-tab bottom navigation shell (Nexus, Explore, Chat, Identity) with notification badge and quick-post FAB |
+| NexusScreen | `/` | Main feed: luminary nameplate greeting, bento grid (5 cards: prestige, quests, season, trending, feed preview), tab/sort controls, post list with infinite scroll, scroll-to-top FAB |
+| ExploreScreen | `/explore` | World discovery: search bar, season banner, filter pills (All/Wealth/Profession/Dominion), featured worlds row, boosted realms row, trending/rising sections, view mode toggle (Grid/Tier/List), 2-column grid |
+| ChatListScreen | `/chat` | DM list: glass cards with cosmetic avatars, status dots, time-ago stamps, unread badges, New Chat button, Explore Worlds CTA on empty state |
+| IdentityScreen | `/identity` | Current user profile: hero avatar with gold glow, luminary nameplate, tier icon, subscription badge, streak display, bio, Edit Profile + Share buttons, achievement grid, referral chip, sign out |
+| CreatePostScreen | `/create-post` | Post composer with ghost input, image picker, and world selector |
+| AlertsScreen | `/notifications` | Notification feed grouped by today/this week/earlier with fade-in animation |
+
+### World Screens (6 screens)
+
+| Screen | Route | Description |
+|--------|-------|-------------|
+| WorldDetailScreen | `/explore/:worldId` | Master world view: full-bleed procedural banner with tier glow, hero section with world name/sovereign/stats, info cards (members/posts/events), live chat preview, resource vault, alliances section, tab bar (Feed/Channels/Members), join/leave with pulse animation |
+| WorldChannelScreen | `/explore/:worldId/:channelName` | Channel chat: message grouper with date separators, message bubbles (sent/received/system), chat images, glass input bar with send button, scroll-to-bottom FAB |
+| WorldSettingsScreen | `/explore/:worldId/settings` | Sovereign management: edit name/description/constitution, manage channels (add/edit/delete/reorder), invite management, boost via IAP |
+| WorldMembersScreen | `/explore/:worldId/members` | Member roster: search, standing levels with tier colors, sovereign badges, rep values, profile navigation, error state with retry |
+| CreateWorldScreen | `/create-world` | World creation: name, type selector (wealth/profession/dominion), icon picker, description, constitution editor, subscription gate for tier-restricted creation |
+| SearchScreen | `/search` | Global search: recent searches, world results with cards, resident results with avatars, debounced query with clear button |
+
+### Other Screens (9 screens)
+
+| Screen | Route | Description |
+|--------|-------|-------------|
+| SplashScreen | `/splash` | Animated splash: scaling gold globe icon, fade-in Vertiege title, tagline, pulsing loader, procedural decorative shapes (4 positioned glass shapes) |
+| SettingsScreen | `/settings` | App settings: theme mode toggle, text size slider, notification preferences, backup/restore data, sign out, delete account |
+| ResidentProfileScreen | `/residents/:id` | Other resident's profile: cosmetic avatar, luminary nameplate, tier standing, achievements list, DM entry point, follow/unfollow |
+| ChatRoomScreen | `/chat/:roomId` | Full DM chat: message grouper with date separators, glass-style bubbles, image sharing/attachment, typing indicator (3 bouncing dots), image preview bar, scroll FAB |
+| CosmeticsShopScreen | `/shop` | Cosmetics marketplace: frames, badges, nameplate styles as unlockable items |
+| SeasonScreen | `/season` | Season leaderboard: current season name/dates, top worlds ranked by composite score with trend indicators (up/down arrows) |
+| SubscriptionScreen | `/subscription` | Subscription tiers (Resident/Patrician/Sovereign Elite) with benefits comparison and IAP purchase buttons |
+| HallOfAscensionScreen | `/hall-of-ascension` | Achievement leaderboard: XP-ranked residents with luminary nameplates and avatars, prestige leaderboard for worlds (sample data gated to debug mode) |
+| VerificationReviewScreen | `/admin/verifications` | Admin panel: list of pending verification submissions, approve/reject with reviewer notes |
+| AscensionPathScreen | `/ascension-path` | Tier progress visualization: 5-step trail (Hustler→High Roller→Elite→Old Money→Apex) with XP thresholds and milestone checkpoints |
+
+---
+
+## Widgets
+
+### Core (22 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| GlassPanel | Reusable frosted-glass container with configurable blur, borders, padding, rounded corners |
+| GlassSheet | Glass-morphism bottom sheet with blur overlay, gold drag handle |
+| SovereignCard | Tier-aware card wrapper: GlowBorder (Apex) or GlassPanel (lower tiers) |
+| GlowBorder | Tier-colored glow effect border (Apex gold, Elite violet, Hustler orange) |
+| FadeIn | Entrance animation: fade + slide + optional scale with configurable delay/duration/curve, 2s fallback |
+| Shimmer / Pulse | Skeleton loading animations for placeholders |
+| EmptyState / AppEmptyState | Branded animated empty state with icon, message, optional CTA button |
+| GlassLoadingList / ScreenLoading | Full-screen skeleton loaders: feed, list, grid, profile, detail variants |
+| ErrorBanner | Sovereign-styled error with code label, message, retry button |
+| NotificationBell | Bell icon with unread count badge, animated pulse |
+| GhostInput | Styled text input with glass border and accent colors |
+| TactileButton | Duolingo-inspired pressable button with 3px drop animation |
+| StatusDot | Discord-style presence dot (online/idle/dnd/offline) |
+| SovereignStat | Icon + value + label stat in glass panel |
+| XpToast | Overlay-based XP gain toast: slides up, bounces, shows "+XP", fades out |
+| DailyRewardDialog | Celebratory glass-modal for daily reward collection |
+| ProtocolLogs | Read-only glass panel with monospace log entries |
+| ImageViewer | Full-screen image viewer with hero animation and dismiss gesture |
+| OfflineBanner | Conditional banner when connectivity is lost |
+| ContextualChips | Dynamic chip row for contextual actions (tips, quests, invites) |
+| SafeAsyncBuilder | Generic async UI: loading/error/empty/data states in one widget |
+| SovereignProgressBar | Thin 4px progress bar with current/max and tier accent |
+
+### Worlds (21 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| WorldCard | Compact card for explore grid: banner, icon, name, prestige, member count, tier badge, lock badge |
+| WorldBanner | Procedural banner generated deterministically from world ID |
+| WorldHeroBanner | Expandable hero with scroll parallax, join button, settings gear |
+| WorldIcon | Frosted-glass icon container from WorldAssets |
+| WorldInfoSheet | Bottom sheet: description, stats, quick actions |
+| WorldInfoCards | Stat trio (members, posts, events) for detail header |
+| WorldChannelList | Vertical clickable channel tiles |
+| WorldResidents | Paginated member list with avatars |
+| WorldEventsCard | Calendar-styled upcoming events (next 3) |
+| WorldFeedTab | Combined feed: post input + post/event list |
+| WorldDetailMembers | Members tab: leaderboard, rows, events, residents |
+| WorldMemberRow | Horizontal scrollable member avatars with rep/tier |
+| EventCard | Glass card: event title, date/time, RSVP action |
+| Leaderboard | Top members by reputation with rank/avatar/rep |
+| AccessIcon | Lock/unlock/denied icon with semantic colors |
+| WorldAccessGuard | Gate widget: checks tier/profession against world requirements |
+| WorldShareCard | 9:16 story-format share card with procedural banner |
+| BannerGenerator | AI-assisted banner generator (4 procedural variants) |
+| ResourceVault | Glass placeholder for world resource storage (Elder+ gated) |
+| AllianceSection | Allied worlds display with navigation |
+| ChatPreviewPanel | Recent messages preview for a world |
+
+### Profile (11 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| CosmeticAvatar | Avatar resolver (file/network/asset) with cosmetic frame overlay |
+| LuminaryNameplate | Tier-aware name renderer: plain text → animated gold-violet gradient with glow |
+| Badge | Chip badge for a single earned decoration |
+| BadgeDisplay | Horizontal wrap of multiple earned badges |
+| NameBanner | Small name+profession near avatars in post/comment contexts |
+| ShareCard | Glass export card: avatar, nameplate, tier, XP |
+| AchievementShareCard | Glass export card for newly earned achievements |
+| CompletionHint | Tap target toggling "share"/"copied" with haptic feedback |
+| ReferralChip | Referral code as copy-to-clipboard chip |
+| SubscriptionBadge | Tier badge (Resident/Patrician/Sovereign Elite) |
+| StreakDisplay | Streak counter with fire icon, milestones, shields |
+
+### Feed (7 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| PostItem | Full post card: author avatar, nameplate, content, image, timestamp, comments, reactions, tier icon, report/share |
+| PostComposer | In-world post composer with text + image + XpToast on submit |
+| PostInput | Compact post input bar for quick posting |
+| PostImage | Network image with shimmer placeholder and rounded corners |
+| CommentSheet | Comment list with text input for new comments |
+| MediaGrid | Optimized image grid (1/2/3+ images) |
+| ReactionBar | Emoji reaction chips with haptic and burst animation |
+
+### Nexus (9 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| BentoGrid | Responsive wrap layout for BentoCard children |
+| FeedTabChip | Tab chip (All/Following/Announcements) |
+| FeedSortDropdown | Sort dropdown (Latest/Hot/Top) |
+| WorldInviteSection | Pending world invite cards with accept/decline |
+| DailyQuestCard | Small bento: daily quest progress |
+| PrestigeProgressCard | Medium bento: tier name + XP bar |
+| SeasonSnapshotCard | Small bento: season name + world count |
+| TrendingCard | Large bento: 3 trending worlds |
+| FeedPreviewCard | Large bento: 2 recent posts + View All link |
+
+### Explore (8 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| TierSection | Model: groups worlds by tier with title + color |
+| SectionHeader | Gold bar + Space Grotesk section heading |
+| ViewModeToggle | Toggle button for Grid/Tier/List modes |
+| FeaturedWorldsRow | Horizontal scroll of featured world cards |
+| BoostedWorldsRow | Horizontal scroll of boosted world cards |
+| TrendingRisingSection | Section with HOT/NEW badge and horizontal world cards |
+| ShimmerWorldCard | Placeholder shimmer matching WorldCard dimensions |
+| SeasonBanner | Season name, dates, world count with gold CTA |
+
+### Chat (5 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| ChatMessageGrouper | Groups raw messages into ChatDisplayItem (date separator, first/subsequent) |
+| ChatDateSeparator | Centered date label with horizontal rules |
+| ChatInputBar | Glass input: send button + optional attachment icon |
+| ChatImage | Network/local image bubble with rounded corners |
+| ScrollFab | Scroll-to-bottom floating action button |
+
+### Achievements (3 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| AchievementCard | Single achievement: icon, title, description, XP, status, AI confidence |
+| AchievementGrid | Grid of achievement cards with category headers |
+| TierCelebration | Full-screen overlay celebration for tier-up with particle effects |
+
+### Shared (5 widgets)
+
+| Widget | Purpose |
+|--------|---------|
+| TierIcon | Tier 1-5 → Material icon with corresponding color |
+| ProgressBar | Fill-based bar with current/max, label, tier accent |
+| ShareButton | RepaintBoundary wrapper: captures child as PNG → native share sheet |
+| FilterPill | Glass-style selectable chip with icon + label |
+| ImagePickerWidget | Gallery image picker returning file path |
+
+### Auth (1 widget)
+
+| Widget | Purpose |
+|--------|---------|
+| AuthErrorCard | Red-tinted error container for auth forms |
+
+### Journey (1 widget)
+
+| Widget | Purpose |
+|--------|---------|
+| ProgressTrail | 5-step tier trail (Hustler→Apex) with filled/unfilled dots and connecting lines |
+
+---
+
+## State & Providers
+
+All 10 providers use Riverpod `Notifier`/`NotifierProvider` pattern with `copyWith` on immutable state classes.
+
+| Provider | State Class | Key Fields | Persistence |
+|----------|------------|------------|-------------|
+| residentProvider | ResidentState | resident, isLoading, verificationStatus | SharedPreferences (immediate write) |
+| worldProvider | WorldState | worlds (14 default), isLoading, alliances | SharedPreferences |
+| postProvider | PostState | posts, bookmarkedPostIds, error | SharedPreferences |
+| chatProvider | ChatState | dmRooms, dmMessages, channelMessages, isLoadingRooms | In-memory |
+| channelProvider | ChannelState | channelsByWorld, worldChannelIds | SharedPreferences |
+| eventProvider | EventState | eventsByWorld, rsvp | SharedPreferences |
+| notificationProvider | NotificationState | notifications, unreadCount | SharedPreferences |
+| achievementProvider | AchievementState | userAchievements, totalXp, currentTier, celebration | SharedPreferences |
+| questProvider | QuestState | dailyQuests, streak, completedAt | SharedPreferences |
+| themeProvider | ThemeState | themeMode | SharedPreferences |
+
+---
+
+## Services
+
+26 services handling backend communication, business logic, and persistence.
+
+### Backend Services (Supabase)
+
+| Service | Supabase Table | Operations |
+|---------|---------------|------------|
+| auth_service | auth.users | signInWithEmail, signUpWithEmail, signInWithOtp, signOut, getSession |
+| profile_service | profiles | upsert, get, search, getTopResidents |
+| world_service | worlds, world_members | create, loadWorlds, joinWorld, leaveWorld |
+| post_service | posts | create (with moderation), getPosts, addReaction, addComment |
+| chat_service | dm_rooms, dm_messages, channel_messages | getOrCreateRoom, sendMessage, getMessages, getChannelMessages |
+
+### Business Logic
+
+| Service | Purpose |
+|---------|---------|
+| access_control | `canAccessWorld()`: checks tier, profession, unlocked list |
+| permission_service | Standing-based action gating: canPost, canDelete, canInvite, canModerate |
+| moderation_filter | 3-stage pre-publish filter: profanity word list → keyword heuristics → spam detection |
+| moderation_service | Server-side ban/mute/warn with moderation_logs |
+| prestige_service | World prestige scoring from member count, tier, posts, standing |
+| season_service | Season data generation + rankings |
+| daily_reward_service | Daily XP/shield reward generation and last-claim tracking |
+| verification_service | Profession proof upload (10MB cap, jpg/png/pdf) + submit/approve/reject |
+| ai_verification_service | Simulated AI proof analysis with confidence scores |
+| council_service | Council member tracking and governance logging |
+| invite_service | World invite create/lookup/accept with code generation |
+| legacy_service | Maps legacy tier system to new colors/labels |
+
+### Infrastructure
+
+| Service | Purpose |
+|---------|---------|
+| supabase | `getSupabase()` client accessor + `isSupabaseConfigured()` gate |
+| storage_service | SharedPreferences wrapper: setString, getString, setStringDebounced, remove, getAll |
+| secure_storage_service | FlutterSecureStorage for auth tokens (userId, accessToken, refreshToken) |
+| cache_service | Feed/world cache for instant-resume UX |
+| backup_service | JSON export/import of all SharedPreferences keys |
+| store_service | IAP wrapper: buyWealthTier, buyWorldBoost, restorePurchases, loadProducts |
+| subscription_service | Tier management (Resident/Patrician/SovereignElite) with per-resident key |
+| crash_reporter | Crash reporting abstraction (ConsoleCrashReporter default, FirebaseCrashlytics ready) |
+
+---
+
+## Models
+
+12 model classes with enums, serialization, and business logic.
+
+| Model | Key Enums | Serialization |
+|-------|-----------|---------------|
+| Resident | ResidentTier (5 levels), VerificationStatus | fromJson/toJson/fromSupabase |
+| World | WorldType (wealth/profession/dominion) | toJson/fromJson/fromSupabase |
+| WorldConstitution | — | toJson/fromJson (nested in World) |
+| Post | — | fromJson/toJson |
+| Comment | — | fromJson/toJson |
+| ChannelMessage | — | fromSupabase |
+| WorldChannel | ChannelType (text/announcement/feed) | fromSupabase |
+| AppNotification | NotificationType (9 types) | fromSupabase/toSupabase |
+| Achievement | AchievementCategory (13), AchievementStatus (4) | — |
+| WorldEvent | — | — |
+| Season | — | — |
+| Alliance | — | — |
+| WorldInvite | — | fromSupabase |
+| Report | ReportReason (6), ReportStatus (3) | — |
+
+---
+
+## Theme & Design System
+
+### Sovereign Excellence — Dark Only
+
+| Token Category | Values |
+|----------------|--------|
+| Surface | OLED obsidian: `#0A0A0B` (canvas), `#131316` (surface), `#1A1A1E` (surfaceContainer) |
+| Primary | Sovereign violet: `#8B7CF6` → `#A78BFA` |
+| Tertiary | Gold: `#D4A843` → `#F0C969` |
+| Ink | `#F4F4F5` (primary), `#A1A1AA` (secondary), `#71717A` (muted) |
+| Semantic | `#EF4444` (error), `#22C55E` (success), `#F59E0B` (warning) |
+| Tier Colors | Hustler `#F97316` (orange) → Elite `#8B7CF6` (violet) → Apex gold gradients |
+| Fonts | Space Grotesk (headlines), Inter (body), JetBrains Mono (code) |
+| Spacing Scale | 4, 6, 8, 10, 12, 16, 20, 24, 32, 40 |
+| Radius Scale | 4, 6, 8, 10, 12, 16, 20, 24, 9999 (pill) |
+
+### Glass Tokens
+
+| Token | Value |
+|-------|-------|
+| Background Alpha | 0.55 |
+| Border Alpha | 0.12 |
+| Blur Sigma | 12 |
+| Gold Glow Alpha | 0.06 |
+
+---
+
+## Router
+
+GoRouter as a Riverpod Provider with auth redirect guard.
+
+### Route Map
+
+| Path | Screen | Access |
+|------|--------|--------|
+| `/splash` | SplashScreen | Public |
+| `/login` | LoginScreen | Public |
+| `/signup` | SignUpScreen | Public |
+| `/auth/callback` | AuthCallbackScreen | Public |
+| `/onboarding` | OnboardingScreen | Auth required, no resident |
+| `/the-gate` | TheGateScreen | Auth + resident, gate not completed |
+| `/` | NexusScreen | Full access |
+| `/explore` | ExploreScreen | Full access |
+| `/explore/:worldId` | WorldDetailScreen | Tier-gated |
+| `/explore/:worldId/:channelName` | WorldChannelScreen | World member |
+| `/explore/:worldId/settings` | WorldSettingsScreen | Sovereign/Council |
+| `/explore/:worldId/members` | WorldMembersScreen | World member |
+| `/chat` | ChatListScreen | Full access |
+| `/chat/:roomId` | ChatRoomScreen | Full access |
+| `/identity` | IdentityScreen | Full access |
+| `/notifications` | AlertsScreen | Full access |
+| `/search` | SearchScreen | Full access |
+| `/create-post` | CreatePostScreen | Full access |
+| `/create-world` | CreateWorldScreen | Tier 2+ |
+| `/settings` | SettingsScreen | Full access |
+| `/residents/:id` | ResidentProfileScreen | Full access |
+| `/achievements` | AchievementsIndexScreen | Full access |
+| `/achievements/:category` | AchievementCategoryScreen | Full access |
+| `/achievements/submit` | SubmitAchievementScreen | Full access |
+| `/subscription` | SubscriptionScreen | Tier 2+ |
+| `/season` | SeasonScreen | Full access |
+| `/shop` | CosmeticsShopScreen | Full access |
+| `/hall-of-ascension` | HallOfAscensionScreen | Full access |
+| `/ascension-path` | AscensionPathScreen | Full access |
+| `/admin/verifications` | VerificationReviewScreen | Tier 4+ (Admin) |
+| `/invite/:code` | InviteAcceptScreen | Auth required |
+
+### Redirect Logic
+
+```
+No session → /login
+Session, no resident → /onboarding
+Session + resident, gate not done → /the-gate
+Tier < 4, /admin/* → /
+Tier < 2, /create-world → /
+Tier < 2, /subscription → /
+On auth/onboarding/gate pages, fully authenticated → /
+```
+
+---
+
+## Configuration
+
+| File | Contents |
+|------|----------|
+| tiers.dart | Tier names (Hustler-1 → Apex-5), 7 standing levels (Visitor→Council), world level thresholds (1-10), worldsConfig (14 default worlds with tier/profession requirements) |
+| achievements.dart | 90 achievements across 13 categories, xpThresholds (500/2000/10000/50000), getTierForXp() |
+| titles.dart | Earned title map: achievement ID → display title ("the Storyteller", "the Eternal", etc.) |
+| cosmetics.dart | CosmeticFrame definitions, decorationLabels, prestigeBadges |
+
+---
+
+## Utilities
+
+| Utility | Purpose |
+|---------|---------|
+| date_format | Delegates to timeAgo() for relative timestamps |
+| time_ago | "just now", "5m ago", "3h ago", "2d ago", "1w ago", "3mo ago", "2y ago" + TimeAgo widget (auto-updating) |
+| tier_utils | Maps standing level (1-7) to tier-appropriate display colors |
+| text_parser | Extracts @mentions and #hashtags from post/channel text |
+| haptics | light(), medium(), heavy(), selection(), doubleTap() presets |
+| id_generator | UUID v4 via uuid package |
+| world_assets | Deterministic accent color, Material icon, pattern params from world ID hash |
+| string_utils | capitalize(), truncate() helpers |
+
+---
+
+## Features
+
+### World Discovery
+- 14 built-in worlds: 5 Tier-gated Wealth, 6 Profession-gated, 3 open-access
+- Grid, Tier (Apex/Elite/Hustler), and List view modes
+- Search with debounce, filter pills by world type
+- Season banner with current season name and rankings link
+- Featured worlds row (top 5 by prestige)
+- Trending/Rising sections with velocity scoring
+- World detail: procedural banner, tabs (Feed/Channels/Members), join/leave
+
+### Social Feed
+- Post creation with text + image + announcement toggle
+- Feed filtering: All / Following / Announcements
+- Sort modes: Latest / Hot (by reactions) / Top (by comments)
+- Reactions: thumbs up, heart, fire, celebrate with haptic
+- Comments: modal bottom sheet with submission
+- Post pinning, announcements, delete/report
+
+### Chat & Messaging
+- Direct Messages: 1:1 rooms with real-time messaging
+- World Channels: per-world channel messaging
+- Message grouping: date separators, sender grouping (5-min window)
+- Image sharing with preview
+- Typing indicator (bouncing dots)
+- Scroll-to-bottom FAB
+
+### Tier & Progression
+- 5 tiers: Hustler → High Roller → Elite → Old Money → Apex
+- XP from posts, reactions, achievements, daily quests
+- Tier thresholds: 0, 500, 2000, 10000, 50000
+- 7 standing levels per world: Visitor → Member → Contributor → Veteran → Elder → Patron → Council
+- Reputation from world activity
+- Daily quests: 4 rotating tasks with XP rewards
+- Streak tracking with shields and milestone bonuses
+- 90 achievements across 13 categories
+- Achievement verification with proof submission
+- Ascension path: visual 5-step tier trail
+
+### Monetization
+- Wealth world tiers purchasable via IAP
+- World boosts (consumable)
+- Subscription tiers: Resident (free), Patrician, Sovereign Elite
+- Each tier: world limits, streak shields, priority verification, gold name, custom background, analytics, badge
+
+### Moderation
+- 3-stage content filter: profanity → patterns → spam
+- Server-side ban/mute/warn
+- Report system: 6 reasons (spam, harassment, hate speech, NSFW, misinformation, other)
+- Admin verification review panel
+
+### Cosmetics & Identity
+- Cosmetic avatar frames
+- Luminary nameplates with tier-based visual treatment
+- Badges and decorations
+- Subscription badges
+- Streak display with milestone tracking
+- Referral codes
+- Shareable profile and achievement cards
+
+### Seasons
+- 4-week world competitions
+- Composite scoring: posts, reactions, new members, events, channel activity
+- Podium rankings with trend indicators
+- Season leaderboard screen
+
+---
+
+## Tier & Standing Systems
+
+### Resident Tiers (Global)
+
+| Tier | Name | XP Required | Visual |
+|------|------|-------------|--------|
+| 1 | Hustler | 0 | Plain text, orange accent |
+| 2 | High Roller | 500 | SemiBold, violet primary |
+| 3 | Elite | 2,000 | Bold, subtle glow |
+| 4 | Old Money | 10,000 | Gold text, pronounced glow |
+| 5 | Apex | 50,000 | Animated gold-violet gradient |
+
+### World Standing (Per-World)
+
+| Level | Title | Rep | Unlocks |
+|-------|-------|-----|---------|
+| 1 | Visitor | 0 | View |
+| 2 | Member | 10 | Post, react, comment |
+| 3 | Contributor | 50 | Images, polls, delete own |
+| 4 | Veteran | 200 | Lounge |
+| 5 | Elder | 500 | Vault, gift |
+| 6 | Patron | 1,000 | Invite others |
+| 7 | Council | 5,000 | Moderate (delete any, mute, ban) |
+
+### World Levels (Dominion)
+
+| Level | Activity Score | Resident Capacity |
+|-------|---------------|-------------------|
+| 1 | 0 | 10 |
+| 5 | 1,000 | 50 |
+| 10 | 10,000 | 500 |
+
+### World Prestige (0-50)
+
+| Range | Tier Name | Glow Color |
+|-------|-----------|------------|
+| 0-19 | Hustler | Orange |
+| 20-39 | Elite/High Roller | Violet |
+| 40-50 | Apex | Gold |
+
+---
+
+## World Types & Access
+
+### 14 Default Worlds
+
+| World | Type | Requirement |
+|-------|------|-------------|
+| Neon District | Wealth | Tier 1 (Hustler) |
+| Crystal Shore | Wealth | Tier 1 (Hustler) |
+| Azure Coast | Wealth | Tier 2 (High Roller) |
+| Crimson Court | Wealth | Tier 2 (High Roller) |
+| Sovereign City | Wealth | Tier 3 (Elite) |
+| Golden Estate | Wealth | Tier 4 (Old Money) |
+| Aetheria | Wealth | Tier 5 (Apex) |
+| Nova Station | Wealth | Tier 5 (Apex) |
+| Aviation Heights | Profession | Verified Aviation role |
+| Medical Nexus | Profession | Verified Medical role |
+| Financial District | Profession | Verified Finance role |
+| Tech Sprawl | Profession | Verified Technology role |
+| Legal Plaza | Profession | Verified Legal role |
+| Arts Pavilion | Profession | Verified Arts role |
+| Quantum Core | Profession | Verified Engineer role |
+| Silver Page | Profession | Verified Artist role |
+
+### Access Rules
+- **Wealth worlds**: `resident.tier >= world.requiredTier` OR world is in `resident.wealthWorldsUnlocked`
+- **Profession worlds**: `resident.verifiedRoles` contains the profession OR an alias
+- **Dominion worlds**: Invite-only, open to all once joined
 
 ---
 
@@ -240,18 +717,17 @@ lib/
 
 | Category | Technology |
 |----------|-----------|
-| Framework | Flutter 3.x |
-| Language | Dart |
-| State | Riverpod (StateNotifier + Provider) |
-| Routing | GoRouter (StatefulShellRoute with 5 tabs) |
-| Backend | Supabase (Auth, Database, Realtime) |
-| Storage | SharedPreferences (local), Supabase (remote) |
-| UI | Material 3 with Design Tokens |
-| Fonts | Google Fonts |
-| Images | Cached Network Image |
-| SVG | Flutter SVG (world banners) |
-| Share | Share Plus (profile card export) |
-| ID | UUID v4 |
+| Framework | Flutter 3.41 (Dart 3.11) |
+| State | Riverpod 2.6 (Notifier + NotifierProvider) |
+| Routing | GoRouter 14.8 (StatefulShellRoute) |
+| Backend | Supabase 2.8 (Auth, Database, Realtime, Storage) |
+| Local Storage | SharedPreferences + FlutterSecureStorage |
+| UI | Material 3 Dark-Only + Custom Glass Design System |
+| Fonts | Google Fonts (Space Grotesk, Inter) |
+| IAP | in_app_purchase 3.2 |
+| Images | image_picker 1.1 |
+| Share | share_plus 10.1 |
+| IDs | uuid 4.5 |
 
 ---
 
@@ -264,7 +740,9 @@ cd Vertiege
 
 # Configure environment
 cp .env.template .env
-# Edit .env with your Supabase URL and anon key
+# Edit .env with your Supabase URL and anon key:
+#   SUPABASE_URL=https://your-project.supabase.co
+#   SUPABASE_ANON_KEY=your-anon-key
 
 # Install dependencies
 flutter pub get
@@ -274,85 +752,42 @@ flutter run
 ```
 
 ### Prerequisites
-- Flutter SDK 3.x
-- Dart 3.x
+- Flutter SDK 3.x (stable channel)
+- Dart 3.11+
 - Android Studio / Xcode
-- Supabase project (add credentials to `.env`)
-- Windows: Developer Mode enabled (for symlink support)
+- Supabase project (for remote features; app works offline with local worlds)
 
 ---
 
-## World Icons
+## Build & Release
 
-| World | Icon | Type | Requirement |
-|-------|------|------|-------------|
-| Neon District | neon | Wealth | Tier 1 (Hustler) |
-| Crystal Shore | crystal | Wealth | Tier 1 |
-| Azure Coast | azure | Wealth | Tier 2 (High Roller) |
-| Crimson Court | crimson | Wealth | Tier 2 |
-| Sovereign City | sovereign | Wealth | Tier 3 (Elite) |
-| Golden Estate | golden | Wealth | Tier 4 (Old Money) |
-| Aetheria | aetheria | Wealth | Tier 5 (Apex) |
-| Nova Station | nova | Wealth | Tier 5 |
-| Silver Page | silver | Profession | Artist |
-| Arts Pavilion | arts | Profession | Arts |
-| Aviation Heights | aviation | Profession | Aviation |
-| Quantum Core | quantum | Profession | Engineer |
-| Financial District | finance | Profession | Finance |
-| Legal Plaza | legal | Profession | Legal |
-| Medical Nexus | medical | Profession | Medical |
-| Tech Sprawl | tech | Profession | Technology |
+### Development
+```bash
+flutter run                          # Debug on connected device
+flutter build apk --debug            # Debug APK
+```
 
----
+### Release (Play Store)
+```bash
+# Generate keystore (one-time):
+keytool -genkey -v -keystore android/upload-keystore.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias upload
 
-## Upcoming
+# Create android/key.properties:
+#   storePassword=<password>
+#   keyPassword=<password>
+#   keyAlias=upload
+#   storeFile=upload-keystore.jks
 
-### Phase 1 — Build & Sign (in progress)
-- Signed Android release APK for beta distribution
-- iOS signing skeleton
-- Environment variable migration (flutter_dotenv)
+flutter build apk --release          # Signed release APK (145MB)
+flutter build appbundle --release    # Play Store AAB
+```
 
-### Phase 2 — Bug Hunt & Fix
-- Full-screen audit of auth, worlds, feed, chat, invites, settings
-- Fix crash-level and data-loss bugs
-- Auth token storage race condition fix
-
-### Phase 3 — Polish & Performance
-- Dead dependency cleanup
-- Font flash fix (bundle fonts as assets)
-- Consistent loading/empty/error states across all screens
-- Scroll performance and animation jank
-- Offline/connectivity edge cases
-- App metadata (name, icon, splash)
-
-### Phase 4 — Ship
-- Sentry crash reporting integration
-- Structured logging (logger)
-- Final signed APK distribution
-- Beta tester onboarding guide
-
----
-
-## Phase History
-
-| Phase | Commit | What |
-|-------|--------|------|
-| 1 | `c21c760` | World membership + channel data layer |
-| 2 | `22a8c9d` | Channel view + routing + messaging |
-| 3 | `c4c7183` | Chat provider + real-time + DM |
-| 4 | `3c31b35` | World creation |
-| 5 | `47c20cf` | Discovery, Invites, World Settings |
-| — | `7499588` | Quick wins: pull-to-refresh, swipe-to-dismiss, haptics |
-| — | `81f28d4` | Animations: FadeIn, Hero, staggered lists |
-| — | `b4c334b` | Analyzer: 132→3 issues |
-| — | `79e3e2d` | Roles & Permissions backbone |
-| — | `c2af4ad` | Announcements |
-| 6 | `52c0e13` | Moderation & Governance |
-| 7 | `19dc275` | Member Directory & Social |
-| — | `93ad62e` | Events, Quests, Search, Pinning, Design Polish |
-| — | `bafdd82` | Env vars: compile-time → flutter_dotenv |
-| — | `12b3f7a` | Android release signing configured |
-| 8 | TBD | Phase 1 — Build & Sign (in progress) |
+### CI/CD
+GitHub Actions workflow at `.github/workflows/ci.yml`:
+- `flutter analyze` (lint gate)
+- `flutter test` (47 tests)
+- `flutter build apk --debug`
 
 ---
 
