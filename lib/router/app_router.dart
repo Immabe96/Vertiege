@@ -33,6 +33,10 @@ import '../screens/hall_of_ascension_screen.dart';
 import '../screens/journey/ascension_path_screen.dart';
 import '../screens/season_screen.dart';
 import '../screens/verification_review_screen.dart';
+import '../screens/audit_log_screen.dart';
+import '../screens/campfire_screen.dart';
+import '../screens/thread_screen.dart';
+import '../models/message.dart';
 import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
 
@@ -70,7 +74,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Authenticated with resident but hasn't completed The Gate
       // The Gate comes AFTER basic onboarding
-      if (!gateCompletedCache) {
+      final gateDone = resident.gateCompleted || gateCompletedCache;
+      if (!gateDone) {
         if (location != '/the-gate' && location != '/onboarding') return '/the-gate';
         return null;
       }
@@ -250,6 +255,39 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/create-world',
         builder: (context, state) => const CreateWorldScreen(),
+      ),
+      GoRoute(
+        path: '/campfire/:channelId',
+        builder: (context, state) => CampfireScreen(
+          channelId: state.pathParameters['channelId']!,
+          channelName: state.uri.queryParameters['name'] ?? 'Campfire',
+          worldId: state.uri.queryParameters['worldId'] ?? '',
+          worldName: state.uri.queryParameters['worldName'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/thread/:messageId',
+        builder: (context, state) {
+          // ThreadScreen needs a parent message — passed via extra
+          final extra = state.extra as Map<String, dynamic>?;
+          final parentMessage = extra?['message'] as ChannelMessage?;
+          if (parentMessage == null) {
+            return const NexusScreen(); // fallback
+          }
+          return ThreadScreen(
+            channelId: extra?['channelId'] ?? '',
+            worldId: extra?['worldId'] ?? '',
+            parentMessage: parentMessage,
+            channelName: extra?['channelName'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/audit-log/:worldId',
+        builder: (context, state) => AuditLogScreen(
+          worldId: state.pathParameters['worldId']!,
+          worldName: state.uri.queryParameters['name'] ?? 'World',
+        ),
       ),
       GoRoute(
         path: '/admin/verifications',

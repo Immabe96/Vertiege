@@ -6,6 +6,7 @@ import '../state/achievement_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../services/profile_service.dart';
 import '../services/chat_service.dart';
+import '../state/ally_provider.dart';
 import '../theme/colors.dart';
 import '../theme/design_system.dart';
 import '../widgets/core/fade_in.dart';
@@ -210,6 +211,55 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     backgroundColor: AppColors.tertiary,
                     foregroundColor: AppColors.onTertiary,
                   ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                // Allegiance button
+                Consumer(
+                  builder: (context, ref, _) {
+                    final currentId = ref.watch(residentProvider).resident?.id;
+                    if (currentId == null) return const SizedBox.shrink();
+                    final allyState = ref.watch(allyProvider);
+                    final isAlly = allyState.allies.any(
+                      (a) => a.otherId(currentId) == resident.id,
+                    );
+                    final isPending = allyState.pendingRequests.any(
+                      (r) => r.requesterId == currentId && r.receiverId == resident.id,
+                    );
+                    if (isAlly) {
+                      return OutlinedButton.icon(
+                        onPressed: null,
+                        icon: const Icon(Icons.handshake),
+                        label: const Text('Allies'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.success,
+                          side: const BorderSide(color: AppColors.success),
+                        ),
+                      );
+                    }
+                    if (isPending) {
+                      return OutlinedButton.icon(
+                        onPressed: null,
+                        icon: const Icon(Icons.handshake_outlined),
+                        label: const Text('Allegiance Pending'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.inkMuted,
+                          side: const BorderSide(color: AppColors.glassBorder),
+                        ),
+                      );
+                    }
+                    return OutlinedButton.icon(
+                      onPressed: () => ref.read(allyProvider.notifier).sendRequest(
+                        requesterId: currentId,
+                        receiverId: resident.id,
+                      ),
+                      icon: const Icon(Icons.handshake_outlined),
+                      label: const Text('Send Allegiance'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(width: Spacing.sm),
                 Consumer(

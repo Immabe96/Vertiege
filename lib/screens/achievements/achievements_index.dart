@@ -46,9 +46,11 @@ class AchievementsIndexScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Achievements')),
-      body: ListView(
-        padding: const EdgeInsets.all(Spacing.md),
-        children: [
+      body: RefreshIndicator(
+        onRefresh: () async => ref.read(achievementProvider.notifier).loadAchievements(),
+        child: ListView(
+          padding: const EdgeInsets.all(Spacing.md),
+          children: [
           // ── Stats Row — glass panel ─────────────────────────
           GlassPanel(
             padding: const EdgeInsets.symmetric(
@@ -168,7 +170,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
             userAchievements: state.userAchievements,
             currentTier: currentTier,
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

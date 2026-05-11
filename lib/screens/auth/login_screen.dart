@@ -37,9 +37,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  bool get _isValid =>
-      _emailController.text.trim().contains('@') &&
-      _passwordController.text.isNotEmpty;
+  bool get _isValid {
+    final email = _emailController.text.trim();
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) &&
+        _passwordController.text.length >= 6;
+  }
 
   Future<void> _handleLogin() async {
     if (!_isValid || _isLoading) return;
@@ -57,7 +59,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
 
-      // Check if resident exists locally; if not, go to onboarding
+      // Fetch the resident profile from Supabase before deciding where to go.
+      // If app data was cleared, the profile still exists on the server.
+      await ref.read(residentProvider.notifier).loadResident();
+      if (!mounted) return;
+
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
         context.go('/');
@@ -228,6 +234,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         color: AppColors.tertiary,
                         textColor: AppColors.onTertiary,
                         onPressed: _isLoading || !_isValid ? null : _handleLogin,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: Spacing.lg),
+
+              // ── OAuth ─────────────────────────────────────
+              FadeIn(
+                delayMs: 350,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(child: Divider(color: AppColors.glassBorder)),
+                        const SizedBox(width: Spacing.md),
+                        Text(
+                          'or',
+                          style: theme.textTheme.labelSmall?.copyWith(color: AppColors.inkMuted),
+                        ),
+                        const SizedBox(width: Spacing.md),
+                        const Expanded(child: Divider(color: AppColors.glassBorder)),
+                      ],
+                    ),
+                    const SizedBox(height: Spacing.md),
+                    OutlinedButton.icon(
+                      onPressed: () => AuthService.signInWithGoogle(),
+                      icon: const Icon(Icons.g_mobiledata, size: IconSizes.lg),
+                      label: const Text('Continue with Google'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.ink,
+                        side: const BorderSide(color: AppColors.glassBorder),
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                    OutlinedButton.icon(
+                      onPressed: () => AuthService.signInWithApple(),
+                      icon: const Icon(Icons.apple, size: IconSizes.lg),
+                      label: const Text('Continue with Apple'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.ink,
+                        side: const BorderSide(color: AppColors.glassBorder),
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        ),
                       ),
                     ),
                   ],

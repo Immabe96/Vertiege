@@ -9,6 +9,7 @@ import '../config/tiers.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/channel_provider.dart';
+import '../state/chat_provider.dart';
 import '../widgets/worlds/world_access_guard.dart';
 import '../widgets/worlds/world_channel_list.dart';
 
@@ -74,6 +75,10 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     _loadMembers();
     _maybeAutoJoin();
     _runGovernanceChecks();
+    final resident = ref.read(residentProvider).resident;
+    if (resident != null) {
+      ref.read(chatProvider.notifier).loadChannelReads(resident.id);
+    }
   }
 
   void _maybeAutoJoin() {
@@ -708,6 +713,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           )
                         : SingleChildScrollView(
                             padding: const EdgeInsets.all(Spacing.md),
+                            physics: const ClampingScrollPhysics(),
                             child: WorldChannelList(worldId: widget.worldId),
                           ),
                     // Members tab: member rows or empty via GlassPanel
@@ -720,6 +726,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           )
                         : SingleChildScrollView(
                             padding: const EdgeInsets.all(Spacing.md),
+                            physics: const ClampingScrollPhysics(),
                             child: WorldDetailMembers(
                               worldId: widget.worldId,
                               world: world,

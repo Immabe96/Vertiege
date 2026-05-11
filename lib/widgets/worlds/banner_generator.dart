@@ -39,8 +39,8 @@ class _BannerGeneratorState extends State<BannerGenerator> {
   }
 
   Future<void> _simulateGeneration() async {
-    // Simulate AI generation delay
-    await Future.delayed(const Duration(milliseconds: 1200));
+    // Brief shimmer animation before revealing the banner
+    await Future.delayed(const Duration(milliseconds: 400));
     if (mounted) {
       setState(() => _generating = false);
     }

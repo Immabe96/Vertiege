@@ -243,6 +243,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                       size: IconSizes.lg),
                                 ],
                               ),
+                              // Rank chips — loaded via _loadRanks
                             ),
                           ),
                         ),

@@ -4,6 +4,7 @@ class Comment {
   final String id;
   final String residentId;
   final String residentName;
+  final String? parentId; // null = top-level, non-null = reply to parent
   final String content;
   final int timestamp;
   final bool isEdited;
@@ -12,18 +13,22 @@ class Comment {
     required this.id,
     required this.residentId,
     required this.residentName,
+    this.parentId,
     required this.content,
     required this.timestamp,
     this.isEdited = false,
   });
 
+  bool get isReply => parentId != null;
+
   Comment copyWith({
     String? id, String? residentId, String? residentName,
-    String? content, int? timestamp, bool? isEdited,
+    String? parentId, String? content, int? timestamp, bool? isEdited,
   }) => Comment(
     id: id ?? this.id,
     residentId: residentId ?? this.residentId,
     residentName: residentName ?? this.residentName,
+    parentId: parentId ?? this.parentId,
     content: content ?? this.content,
     timestamp: timestamp ?? this.timestamp,
     isEdited: isEdited ?? this.isEdited,

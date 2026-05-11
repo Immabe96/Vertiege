@@ -7,4 +7,7 @@ class TextParser {
 
   static List<String> extractHashtags(String text) =>
       _hashtagRegex.allMatches(text).map((m) => m.group(1)!.toLowerCase()).toList();
+
+  static bool containsAllResidents(String text) =>
+      _mentionRegex.allMatches(text).any((m) => m.group(1)!.toLowerCase() == 'allresidents');
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../state/resident_provider.dart';
 import '../../widgets/core/tactile_button.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/core/glass_panel.dart';
@@ -46,7 +47,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final password = _passwordController.text;
     final confirm = _confirmPasswordController.text;
 
-    return email.contains('@') &&
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) &&
         password.length >= 6 &&
         confirm == password;
   }
@@ -83,8 +84,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
       if (!mounted) return;
 
-      // Navigate to onboarding to create their resident profile
-      context.go('/onboarding');
+      // Check if a profile already exists on the server (app data may have been cleared)
+      await ref.read(residentProvider.notifier).loadResident();
+      if (!mounted) return;
+
+      if (ref.read(residentProvider).resident != null) {
+        context.go('/');
+      } else {
+        context.go('/onboarding');
+      }
     } on AuthException catch (e) {
       if (!mounted) return;
       setState(() {

@@ -105,13 +105,13 @@ class _VirtualStatusWorldsAppState
     }
 
     final router = ref.watch(appRouterProvider);
-    ref.watch(themeProvider);
+    final themeState = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'Vertiege',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      themeMode: ThemeMode.dark,
+      themeMode: themeState.themeMode,
       routerConfig: router,
     );
   }

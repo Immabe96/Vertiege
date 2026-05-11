@@ -41,7 +41,7 @@ class _BentoCardTile extends StatelessWidget {
         width = (screenWidth - (2 * Spacing.md) - Spacing.sm) / 2;
         break;
       case BentoSize.medium:
-        width = (screenWidth - (2 * Spacing.md) - Spacing.sm) / 2;
+        width = screenWidth - (2 * Spacing.md);
         break;
       case BentoSize.large:
         width = screenWidth - (2 * Spacing.md);

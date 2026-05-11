@@ -22,6 +22,7 @@ import '../../widgets/nexus/bento_cards/trending_card.dart';
 import '../../widgets/nexus/bento_cards/feed_preview_card.dart';
 import '../../widgets/nexus/feed_tab_chip.dart';
 import '../../widgets/nexus/feed_sort_dropdown.dart';
+import '../tabs/tab_layout.dart';
 
 enum _FeedTab { all, following, announcements }
 
@@ -69,6 +70,8 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Scroll to top when the active tab is tapped again
+    ref.listen<int>(scrollToTopProvider, (_, next) => _scrollToTop());
     final resident = ref.watch(residentProvider).resident;
     final postState = ref.watch(postProvider);
     final allPosts = postState.posts;

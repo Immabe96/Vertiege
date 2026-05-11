@@ -15,13 +15,15 @@ import '../services/store_service.dart';
 import '../models/world.dart';
 import '../config/tiers.dart';
 import '../models/invite.dart';
-import '../models/channel.dart';
 import '../state/channel_provider.dart';
-import '../utils/date_format.dart';
 import '../utils/tier_utils.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
+import '../services/rank_service.dart';
+import '../models/rank.dart';
 import '../widgets/worlds/banner_generator.dart';
+import '../widgets/worlds/world_settings_channels.dart';
+import '../widgets/worlds/world_settings_invites.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -649,105 +651,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   // ── Channels ───────────────────────────────────
                   GlassPanel(
                     padding: const EdgeInsets.all(Spacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _sectionHeader(Icons.tag, 'Channels'),
-                        const SizedBox(height: Spacing.sm),
-                        Text(
-                          'Manage channels for this world.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.inkMuted,
-                          ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final channels = ref.watch(channelProvider).channelsByWorld[widget.worldId] ?? [];
-                            return Column(
-                              children: [
-                                if (channels.isNotEmpty) ...[
-                                  ...channels.map((ch) => Padding(
-                                        padding: const EdgeInsets.only(bottom: Spacing.sm),
-                                        child: GlassPanel(
-                                          padding: const EdgeInsets.all(Spacing.md),
-                                          borderRadius: BorderRadius.circular(RadiusTokens.xl),
-                                          child: InkWell(
-                                            onTap: ch.isDefault
-                                                ? null
-                                                : () => _renameChannel(ch.id, ch.name),
-                                            borderRadius: BorderRadius.circular(RadiusTokens.xl),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  ch.channelType == ChannelType.announcement
-                                                      ? Icons.campaign
-                                                      : ch.channelType == ChannelType.feed
-                                                          ? Icons.dynamic_feed
-                                                          : Icons.tag,
-                                                  size: IconSizes.md,
-                                                  color: AppColors.inkSecondary,
-                                                ),
-                                                const SizedBox(width: Spacing.sm),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        '# ${ch.name}',
-                                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                                          fontWeight: FontWeights.semiBold,
-                                                          color: AppColors.ink,
-                                                        ),
-                                                      ),
-                                                      if (ch.description != null &&
-                                                          ch.description!.isNotEmpty)
-                                                        Text(
-                                                          ch.description!,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                          style: theme.textTheme.labelSmall?.copyWith(
-                                                            color: AppColors.inkMuted,
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                if (ch.isDefault)
-                                                  Text(
-                                                    'Default',
-                                                    style: theme.textTheme.labelSmall?.copyWith(
-                                                      color: AppColors.outline,
-                                                    ),
-                                                  )
-                                                else
-                                                  IconButton(
-                                                    icon: Icon(Icons.delete_outline,
-                                                        size: 18, color: AppColors.error),
-                                                    onPressed: () =>
-                                                        _deleteChannel(ch.id, ch.name),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                                const SizedBox(height: Spacing.sm),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: TouchTargets.minimum,
-                                  child: OutlinedButton.icon(
-                                    onPressed: () => _showCreateChannel(context),
-                                    icon: const Icon(Icons.add, size: 18),
-                                    label: const Text('Add Channel'),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
+                    child: WorldSettingsChannels(
+                      worldId: widget.worldId,
+                      sovereignId: world.sovereignId,
+                      residentId: resident?.id,
+                      onRename: (id, name) => _renameChannel(id, name),
+                      onDelete: (id, name) => _deleteChannel(id, name),
+                      onCreate: (ctx) => _showCreateChannel(ctx),
                     ),
                   ),
 
@@ -756,144 +666,15 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   // ── Invites ────────────────────────────────────
                   GlassPanel(
                     padding: const EdgeInsets.all(Spacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _sectionHeader(Icons.person_add, 'Invites'),
-                        const SizedBox(height: Spacing.sm),
-                        Text(
-                          'Create and manage invitation codes for this world.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.inkMuted,
-                          ),
-                        ),
-                        const SizedBox(height: Spacing.md),
-                        SizedBox(
-                          width: double.infinity,
-                          height: TouchTargets.minimum,
-                          child: OutlinedButton.icon(
-                            onPressed:
-                                _isGeneratingInvite ? null : _generateInvite,
-                            icon: _isGeneratingInvite
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.link),
-                            label: Text(_isGeneratingInvite
-                                ? 'Generating...'
-                                : 'Generate Invite'),
-                          ),
-                        ),
-                        if (_generatedInviteCode != null) ...[
-                          const SizedBox(height: Spacing.md),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  readOnly: true,
-                                  controller: TextEditingController(
-                                      text: _generatedInviteCode),
-                                  decoration: _ghostInputDecoration(
-                                    hintText: 'Invite Code',
-                                    prefixIcon: const Icon(Icons.vpn_key),
-                                  ),
-                                  style: theme.textTheme.titleMedium
-                                      ?.copyWith(
-                                    letterSpacing: 2,
-                                    fontFamily: AppFont.mono,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: Spacing.sm),
-                              IconButton.filled(
-                                onPressed: () =>
-                                    _copyInviteCode(_generatedInviteCode!),
-                                icon: const Icon(Icons.copy),
-                                tooltip: 'Copy code',
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (_isLoadingInvites) ...[
-                          const SizedBox(height: Spacing.md),
-                          const Center(
-                              child: CircularProgressIndicator()),
-                        ] else if (_invites.isNotEmpty) ...[
-                          const SizedBox(height: Spacing.md),
-                          const Divider(),
-                          const SizedBox(height: Spacing.sm),
-                          Text('Existing Invites',
-                              style: theme.textTheme.labelLarge),
-                          const SizedBox(height: Spacing.sm),
-                          ..._invites.map((invite) {
-                            final expired = invite.isExpired;
-                            final exhausted = invite.isExhausted;
-                            final valid = invite.isValid;
-                            final displayDate =
-                                invite.createdAt > 0
-                                    ? formatTimestamp(invite.createdAt)
-                                    : 'Unknown date';
-                            final usesLabel = invite.maxUses > 0
-                                ? '${invite.uses}/${invite.maxUses} uses'
-                                : '${invite.uses} uses (unlimited)';
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: Spacing.sm),
-                              child: GlassPanel(
-                                padding: const EdgeInsets.all(Spacing.md),
-                                borderRadius: BorderRadius.circular(RadiusTokens.xl),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      valid
-                                          ? Icons.check_circle_outline
-                                          : Icons.cancel_outlined,
-                                      color: valid
-                                          ? AppColors.primary
-                                          : AppColors.error,
-                                      size: IconSizes.md,
-                                    ),
-                                    const SizedBox(width: Spacing.sm),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            invite.code,
-                                            style: const TextStyle(
-                                              fontFamily: AppFont.mono,
-                                              letterSpacing: 1,
-                                              color: AppColors.ink,
-                                            ),
-                                          ),
-                                          Text(
-                                            '$usesLabel  ·  $displayDate'
-                                            '${expired ? '  ·  Expired' : ''}'
-                                            '${exhausted ? '  ·  Exhausted' : ''}',
-                                            style: theme.textTheme.labelSmall?.copyWith(
-                                              color: AppColors.inkMuted,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.copy, size: 18),
-                                      onPressed: () =>
-                                          _copyInviteCode(invite.code),
-                                      tooltip: 'Copy code',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ],
-                      ],
+                    child: WorldSettingsInvites(
+                      sovereignId: world.sovereignId,
+                      residentId: resident?.id,
+                      isGenerating: _isGeneratingInvite,
+                      generatedCode: _generatedInviteCode,
+                      invites: _invites,
+                      isLoadingInvites: _isLoadingInvites,
+                      onGenerate: _generateInvite,
+                      onCopy: _copyInviteCode,
                     ),
                   ),
 
@@ -915,12 +696,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         ),
                         const SizedBox(height: Spacing.md),
                         if (_isLoadingMembers)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
+                          const Center(child: GlassLoadingCard())
                         else if (_members.isEmpty)
                           Text('No members found',
                               style: theme.textTheme.bodyMedium)
@@ -1084,6 +860,25 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     const SizedBox(height: Spacing.md),
                   ],
 
+                  // ── Ranks ────────────────────────────────────────
+                  if (resident?.id == world.sovereignId)
+                    _RanksSection(worldId: widget.worldId, worldWorldId: widget.worldId),
+
+                  const SizedBox(height: Spacing.md),
+
+                  // ── Realm Audit ──────────────────────────────────
+                  if (resident?.id == world.sovereignId)
+                    ListTile(
+                      leading: const Icon(Icons.history, color: AppColors.tertiary),
+                      title: const Text('Realm Audit'),
+                      subtitle: const Text('View moderation history and action logs'),
+                      trailing: const Icon(Icons.chevron_right, color: AppColors.outline),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.xl)),
+                      onTap: () => context.push('/audit-log/${widget.worldId}?name=${Uri.encodeComponent(world.name)}'),
+                    ),
+
+                  const SizedBox(height: Spacing.md),
+
                   // ── Danger Zone ──────────────────────────────────
                   Container(
                     padding: const EdgeInsets.all(Spacing.lg),
@@ -1128,7 +923,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               side: const BorderSide(
                                   color: AppColors.error),
                             ),
-                            onPressed: _deleteWorld,
+                            onPressed: resident?.id == world.sovereignId ? _deleteWorld : null,
                             icon: const Icon(Icons.delete_forever),
                             label: const Text('Delete World'),
                           ),
@@ -1339,9 +1134,113 @@ class _BoostWorldCard extends ConsumerWidget {
                   'Boost purchase failed. Please try again.')),
         );
       case StorePurchaseState.disabled:
-        break; // Shouldn't happen — button is disabled
+        break;
       default:
         break;
     }
   }
 }
+
+class _RanksSection extends ConsumerStatefulWidget {
+  final String worldId;
+  const _RanksSection({required this.worldId, required String worldWorldId});
+
+  @override
+  ConsumerState<_RanksSection> createState() => _RanksSectionState();
+}
+
+class _RanksSectionState extends ConsumerState<_RanksSection> {
+  List<Rank> _ranks = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final ranks = await RankService.fetchWorldRanks(widget.worldId);
+    if (mounted) setState(() { _ranks = ranks; _loading = false; });
+  }
+
+  void _showCreateDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceHigh,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.full)),
+        title: const Text('Create Rank'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Rank name'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              final name = controller.text.trim();
+              if (name.isEmpty) return;
+              await RankService.createRank(worldId: widget.worldId, name: name);
+              Navigator.pop(ctx);
+              _load();
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.military_tech, color: AppColors.tertiary, size: IconSizes.md),
+              const SizedBox(width: Spacing.sm),
+              const Expanded(child: Text('Ranks', style: TextStyle(fontSize: FontSizes.headlineMd, fontWeight: FontWeights.bold))),
+              TextButton.icon(
+                onPressed: _showCreateDialog,
+                icon: const Icon(Icons.add, size: IconSizes.sm),
+                label: const Text('Create'),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.sm),
+          if (_loading)
+            const Center(child: GlassLoadingCard())
+          else if (_ranks.isEmpty)
+            const Text('No ranks yet. Create one to assign privileges.', style: TextStyle(color: AppColors.inkMuted))
+          else
+            ..._ranks.map((r) => ListTile(
+              dense: true,
+              leading: Container(
+                width: 16, height: 16,
+                decoration: BoxDecoration(
+                  color: _parseHex(r.colorHex),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              title: Text(r.name),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline, size: IconSizes.sm),
+                onPressed: () async {
+                  await RankService.deleteRank(r.id);
+                  _load();
+                },
+              ),
+            )),
+        ],
+      ),
+    );
+  }
+}
+
+Color _parseHex(String hex) => Color(int.parse('FF${hex.substring(1)}', radix: 16));

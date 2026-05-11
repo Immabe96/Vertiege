@@ -218,7 +218,8 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen>
   }
 
   void _buyItem(_ShopItem item) {
-    final success = ref.read(residentProvider.notifier).spendCoins(item.price);
+    final notifier = ref.read(residentProvider.notifier);
+    final success = notifier.addDecoration(item.name) && notifier.spendCoins(item.price);
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

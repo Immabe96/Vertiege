@@ -65,7 +65,15 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           ),
         ),
       ),
-      body: _buildBody(context, theme, residentId, chatState),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final id = ref.read(residentProvider.select((s) => s.resident?.id));
+          if (id != null) {
+            await ref.read(chatProvider.notifier).loadDmRooms(id);
+          }
+        },
+        child: _buildBody(context, theme, residentId, chatState),
+      ),
     );
   }
 

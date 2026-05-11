@@ -24,7 +24,7 @@ Future<void> loadGateCompletionStatus() async {
   gateCompletedCache = prefs.getBool(gateCompletedKey) ?? false;
 }
 
-/// Marks The Gate as complete — persists to storage and updates cache.
+/// Marks The Gate as complete — persists to storage, Supabase, and updates cache.
 Future<void> markGateCompleted() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(gateCompletedKey, true);
@@ -228,7 +228,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
         updatedDecorations.add('gatekeeper');
       }
       ref.read(residentProvider.notifier).setResident(
-            resident.copyWith(decorations: updatedDecorations),
+            resident.copyWith(
+              decorations: updatedDecorations,
+              gateCompleted: true,
+            ),
           );
 
       // Award 100 XP

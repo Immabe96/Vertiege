@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../models/resident.dart';
 import '../../widgets/core/tactile_button.dart';
@@ -69,15 +70,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     setState(() => _submitting = true);
 
+    final userId = getSupabase().auth.currentUser?.id ?? '';
+    if (userId.isEmpty) return;
+
     ref.read(residentProvider.notifier).setResident(
           Resident(
-            id: generateId(),
+            id: userId,
             name: _nameController.text.trim(),
             bio: _bioController.text.trim(),
             avatarUrl: _avatarFile?.path ?? '',
             profession: _selectedProfession.isEmpty ? null : _selectedProfession,
             tier: ResidentTier.hustlers,
             joinedWorldIds: const ['neon-district'],
+            onboardingCompleted: true,
           ),
         );
     WidgetsBinding.instance.addPostFrameCallback((_) {

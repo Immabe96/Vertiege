@@ -23,6 +23,7 @@ import '../../widgets/core/tactile_button.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/profile/badge_display.dart';
+import '../../state/ally_provider.dart';
 import '../../widgets/shared/progress_bar.dart';
 import '../../widgets/core/sovereign_stat.dart';
 import '../../widgets/profile/streak_display.dart';
@@ -261,12 +262,12 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
                                 setSheetState(() => saving = true);
 
-                                final avatarPath = editAvatarFile?.path ?? resident.avatarUrl;
+                                final cloudAvatar = editAvatarFile?.path;
 
                                 ref.read(residentProvider.notifier).updateProfile(
                                       name: name,
                                       bio: bioController.text.trim(),
-                                      avatarUrl: avatarPath,
+                                      avatarPath: cloudAvatar,
                                       profession: selectedProfession.isEmpty ? null : selectedProfession,
                                     );
 
@@ -780,6 +781,28 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
                 onTap: () => context.push('/achievements'),
+              ),
+            ),
+            FadeIn(
+              delayMs: 183,
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final allies = ref.watch(allyProvider).allies;
+                  return ListTile(
+                    leading: Icon(
+                      Icons.handshake,
+                      color: allies.isNotEmpty ? AppColors.tertiary : colorScheme.onSurfaceVariant,
+                    ),
+                    title: const Text('Allies'),
+                    subtitle: Text(allies.isNotEmpty
+                        ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
+                        : 'No allies yet'),
+                    trailing: Icon(Icons.chevron_right, color: colorScheme.outline),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(RadiusTokens.card),
+                    ),
+                  );
+                },
               ),
             ),
             FadeIn(

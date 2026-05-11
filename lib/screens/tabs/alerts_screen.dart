@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../state/ally_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../models/notification.dart';
 import '../../utils/time_ago.dart';
@@ -294,11 +295,13 @@ class _NotificationSliverList extends StatelessWidget {
                 }
                 break;
               case NotificationType.worldUnlocked:
+              case NotificationType.mention:
                 if (n.worldId != null) {
                   context.push('/explore/${n.worldId}');
                 }
                 break;
               case NotificationType.tierUpgrade:
+              case NotificationType.allegianceRequest:
                 context.go('/identity');
                 break;
               case NotificationType.welcome:
@@ -349,6 +352,9 @@ class _NotificationSliverList extends StatelessWidget {
                   notification: n,
                   typeColor: typeColor,
                   onTap: onTap,
+                  actions: n.type == NotificationType.allegianceRequest
+                      ? _AllegianceRequestActions(notification: n)
+                      : null,
                 ),
               ),
             ),
@@ -370,6 +376,8 @@ class _NotificationSliverList extends StatelessWidget {
       NotificationType.ranking => AppColors.tertiary,
       NotificationType.streakReminder => AppColors.warning,
       NotificationType.reactionMilestone => AppColors.accentAchievement,
+      NotificationType.mention => AppColors.primary,
+      NotificationType.allegianceRequest => AppColors.accentAchievement,
     };
   }
 }
@@ -413,11 +421,13 @@ class _NotificationCard extends StatelessWidget {
   final AppNotification notification;
   final Color typeColor;
   final VoidCallback onTap;
+  final Widget? actions;
 
   const _NotificationCard({
     required this.notification,
     required this.typeColor,
     required this.onTap,
+    this.actions,
   });
 
   @override
@@ -433,77 +443,87 @@ class _NotificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
         child: GlassPanel(
           padding: EdgeInsets.zero,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Left accent border for unread ──
-                if (unread)
-                  Container(
-                    width: 3,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(RadiusTokens.xl),
-                        bottomLeft: Radius.circular(RadiusTokens.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ── Left accent border for unread ──
+                    if (unread)
+                      Container(
+                        width: 3,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(RadiusTokens.xl),
+                            bottomLeft: Radius.circular(RadiusTokens.xl),
+                          ),
+                        ),
+                      ),
+                    // ── Card body ──
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(Spacing.md),
+                        child: Row(
+                          children: [
+                            // ── Type icon in tinted container ──
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: typeColor.withValues(
+                                  alpha: AppColors.alphaSelected,
+                                ),
+                                borderRadius:
+                                    BorderRadius.circular(RadiusTokens.input),
+                              ),
+                              child: Icon(
+                                _iconForTypeStatic(n.type),
+                                color: typeColor,
+                                size: IconSizes.md,
+                              ),
+                            ),
+                            const SizedBox(width: Spacing.md),
+                            // ── Message ──
+                            Expanded(
+                              child: Text(
+                                n.message,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: unread
+                                      ? FontWeights.bold
+                                      : FontWeights.regular,
+                                  color: unread
+                                      ? AppColors.ink
+                                      : AppColors.inkSecondary,
+                                  height: LineHeight.body,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: Spacing.sm),
+                            // ── Relative timestamp ──
+                            TimeAgo(
+                              DateTime.fromMillisecondsSinceEpoch(n.createdAt),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: AppColors.inkMuted,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                // ── Card body ──
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(Spacing.md),
-                    child: Row(
-                      children: [
-                        // ── Type icon in tinted container ──
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: typeColor.withValues(
-                              alpha: AppColors.alphaSelected,
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(RadiusTokens.input),
-                          ),
-                          child: Icon(
-                            _iconForTypeStatic(n.type),
-                            color: typeColor,
-                            size: IconSizes.md,
-                          ),
-                        ),
-                        const SizedBox(width: Spacing.md),
-                        // ── Message ──
-                        Expanded(
-                          child: Text(
-                            n.message,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: unread
-                                  ? FontWeights.bold
-                                  : FontWeights.regular,
-                              color: unread
-                                  ? AppColors.ink
-                                  : AppColors.inkSecondary,
-                              height: LineHeight.body,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: Spacing.sm),
-                        // ── Relative timestamp ──
-                        TimeAgo(
-                          DateTime.fromMillisecondsSinceEpoch(n.createdAt),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppColors.inkMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              if (actions != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
+                  child: actions!,
+                ),
+            ],
           ),
         ),
       ),
@@ -521,6 +541,74 @@ class _NotificationCard extends StatelessWidget {
       NotificationType.ranking => Icons.emoji_events,
       NotificationType.streakReminder => Icons.local_fire_department,
       NotificationType.reactionMilestone => Icons.favorite_border,
+      NotificationType.mention => Icons.alternate_email,
+      NotificationType.allegianceRequest => Icons.handshake,
     };
+  }
+}
+
+class _AllegianceRequestActions extends ConsumerWidget {
+  final AppNotification notification;
+  const _AllegianceRequestActions({required this.notification});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allyNotifier = ref.read(allyProvider.notifier);
+    // The notification message contains the request info; we use notification.id
+    // as a proxy since the actual ally request ID is embedded in the notification.
+    // For now, accept/decline by iterating pending requests.
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: OutlinedButton(
+              onPressed: () async {
+                // Decline — mark notification as read and remove from list
+                ref.read(notificationProvider.notifier).markRead(notification.id);
+                // Attempt to decline based on pending list
+                final pending = ref.read(allyProvider).pendingRequests;
+                if (pending.isNotEmpty) {
+                  await allyNotifier.declineRequest(pending.first.id);
+                }
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.inkMuted,
+                side: const BorderSide(color: AppColors.glassBorder),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Text('DECLINE', style: TextStyle(fontSize: FontSizes.labelSm)),
+            ),
+          ),
+        ),
+        const SizedBox(width: Spacing.sm),
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: FilledButton(
+              onPressed: () async {
+                ref.read(notificationProvider.notifier).markRead(notification.id);
+                final pending = ref.read(allyProvider).pendingRequests;
+                if (pending.isNotEmpty) {
+                  await allyNotifier.acceptRequest(pending.first.id);
+                }
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.tertiary,
+                foregroundColor: AppColors.onTertiary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Text('ACCEPT', style: TextStyle(fontSize: FontSizes.labelSm)),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/post.dart';
@@ -49,8 +50,15 @@ class PostItem extends ConsumerWidget {
 
     return FadeIn(
       delayMs: index * 70,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+      child: GestureDetector(
+        onDoubleTap: () {
+          if (resident != null) {
+            ref.read(postProvider.notifier).addReaction(post.id, '❤️', resident.id);
+            HapticFeedback.mediumImpact();
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
         decoration: BoxDecoration(
           color: AppColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.card),
@@ -214,6 +222,7 @@ class PostItem extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

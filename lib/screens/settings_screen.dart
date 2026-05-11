@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../state/theme_provider.dart';
 import '../services/storage_service.dart';
+import '../services/auth_service.dart';
 import '../services/backup_service.dart';
 import '../theme/design_system.dart';
 import '../theme/colors.dart';
@@ -344,6 +345,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               foregroundColor: AppColors.onTertiary,
             ),
             child: const Text('Change'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTwinSealSetup() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.full),
+        ),
+        title: const Text('Twin Seal (2FA)'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.security, size: 48, color: AppColors.tertiary),
+            SizedBox(height: Spacing.md),
+            Text(
+              'Twin Seal adds an extra layer of security to your account. '
+              'Once enabled, you\'ll need to enter a 6-digit code from your '
+              'authenticator app each time you sign in.',
+              style: TextStyle(color: AppColors.inkSecondary),
+            ),
+            SizedBox(height: Spacing.md),
+            Text(
+              'To enable, use a Supabase Edge Function that generates a TOTP '
+              'secret and QR code. This feature requires the supabase/functions/enroll-totp '
+              'edge function to be deployed.',
+              style: TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              // Trigger Twin Seal enrollment via Supabase
+              AuthService.generateTwinSeal();
+            },
+            child: const Text('Set Up'),
           ),
         ],
       ),
@@ -726,9 +774,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: Spacing.xxl),
-        children: [
+      body: RefreshIndicator(
+        onRefresh: () async => _loadPrefs(),
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: Spacing.xxl),
+          children: [
           // ────────────────────────────────────────────────────
           // About
           // ────────────────────────────────────────────────────
@@ -839,6 +889,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 subtitle: const Text('Update your password'),
                 trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
                 onTap: _showChangePasswordDialog,
+              ),
+              _sectionDivider(),
+              ListTile(
+                leading: const Icon(Icons.security, size: IconSizes.md, color: AppColors.tertiary),
+                title: const Text('Twin Seal (2FA)'),
+                subtitle: const Text('Add an extra layer of security'),
+                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                onTap: _showTwinSealSetup,
               ),
               _sectionDivider(),
               ListTile(
@@ -1104,7 +1162,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: Spacing.lg),
         ],
       ),
-    );
+    ),
+  );
   }
 }
 

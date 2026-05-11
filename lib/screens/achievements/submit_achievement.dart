@@ -87,7 +87,7 @@ class _SubmitAchievementScreenState extends ConsumerState<SubmitAchievementScree
             child: Column(
               children: achievements.map((a) {
                 final status =
-                    ref.watch(achievementProvider.notifier).getAchievementStatus(a.id);
+                    ref.read(achievementProvider.notifier).getAchievementStatus(a.id);
                 final locked = status == AchievementStatus.locked;
                 return RadioListTile<String>(
                   value: a.id,

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
 import '../config/tiers.dart';
+import '../services/media_service.dart';
+import '../services/profile_service.dart';
 import '../services/storage_service.dart';
 import '../services/world_service.dart';
 import '../services/moderation_service.dart';
@@ -44,13 +46,25 @@ class ResidentNotifier extends Notifier<ResidentState> {
   Future<void> loadResident() async {
     state = state.copyWith(isLoading: true);
     try {
+      final userId = getSupabase().auth.currentUser?.id;
+      if (userId == null) {
+        state = const ResidentState(isLoading: false);
+        return;
+      }
+      // Fetch from Supabase first
+      final remote = await ProfileService.getProfile(userId);
+      if (remote != null) {
+        state = ResidentState(resident: remote, isLoading: false);
+        _persist(); // cache locally
+        return;
+      }
+      // Fallback to local cache
       final json = await StorageService.getString(StorageService.residentKey);
       if (json != null) {
         final data = jsonDecode(json) as Map<String, dynamic>;
         final resident = _fromJson(data);
         if (resident != null) {
           state = ResidentState(resident: resident, isLoading: false);
-          return;
         }
       }
       state = const ResidentState(isLoading: false);
@@ -62,28 +76,39 @@ class ResidentNotifier extends Notifier<ResidentState> {
   void setResident(Resident resident) {
     state = state.copyWith(resident: resident);
     _persist();
+    ProfileService.upsertProfile(resident);
   }
 
-  void updateProfile({
+  Future<void> updateProfile({
     String? name,
     String? bio,
-    String? avatarUrl,
+    String? avatarPath, // local file path → gets uploaded to Supabase Storage
     String? profession,
-  }) {
+  }) async {
     final r = state.resident;
     if (r == null) return;
     if (name != null && (name.isEmpty || name.length > 100)) return;
     if (bio != null && bio.length > 500) return;
 
+    String? cloudUrl = r.avatarUrl;
+    if (avatarPath != null) {
+      final uploaded = await MediaService.uploadAvatar(avatarPath, r.id);
+      if (uploaded != null) cloudUrl = uploaded;
+    }
+
     state = state.copyWith(
       resident: r.copyWith(
         name: name ?? r.name,
         bio: bio ?? r.bio,
-        avatarUrl: avatarUrl ?? r.avatarUrl,
+        avatarUrl: cloudUrl,
         profession: profession ?? r.profession,
       ),
     );
     _persist();
+    // Save to Supabase
+    if (state.resident != null) {
+      ProfileService.upsertProfile(state.resident!);
+    }
   }
 
   void updateTier(ResidentTier tier) {
@@ -291,13 +316,13 @@ class ResidentNotifier extends Notifier<ResidentState> {
     }
   }
 
-  void touchPresence() {
+  Future<void> touchPresence() async {
     final r = state.resident;
     if (r == null) return;
     state = state.copyWith(resident: r.copyWith(lastSeenAt: DateTime.now().millisecondsSinceEpoch));
     _persist();
     final client = getSupabase();
-    client.from('profiles').update({'last_seen_at': DateTime.now().millisecondsSinceEpoch}).eq('id', r.id);
+    await client.from('profiles').update({'last_seen_at': DateTime.now().millisecondsSinceEpoch}).eq('id', r.id);
   }
 
   void joinWorld(String worldId) {
@@ -379,7 +404,6 @@ class ResidentNotifier extends Notifier<ResidentState> {
     }
 
     state = state.copyWith(verificationStatus: VerificationStatus.verifying);
-    await Future.delayed(const Duration(seconds: 1));
 
     final updated = state.resident;
     if (updated == null) {
@@ -492,6 +516,16 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
   }
 
+  bool addDecoration(String decorationId) {
+    final r = state.resident;
+    if (r == null) return false;
+    final updated = [...r.decorations, decorationId];
+    state = state.copyWith(resident: r.copyWith(decorations: updated));
+    _persist();
+    if (state.resident != null) ProfileService.upsertProfile(state.resident!);
+    return true;
+  }
+
   bool spendCoins(int amount) {
     final r = state.resident;
     if (r == null || r.sovereignCoins < amount) return false;
@@ -499,6 +533,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       resident: r.copyWith(sovereignCoins: r.sovereignCoins - amount),
     );
     _persist();
+    if (state.resident != null) ProfileService.upsertProfile(state.resident!);
     return true;
   }
 
@@ -536,6 +571,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
       referredBy: json['referredBy'] as String?,
       title: json['title'] as String?,
       sovereignCoins: (json['sovereignCoins'] as int?) ?? 100,
+      onboardingCompleted: (json['onboardingCompleted'] as bool?) ?? false,
+      gateCompleted: (json['gateCompleted'] as bool?) ?? false,
     );
   }
 
@@ -562,6 +599,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
         if (r.referredBy != null) 'referredBy': r.referredBy,
         if (r.title != null) 'title': r.title,
         'sovereignCoins': r.sovereignCoins,
+        'onboardingCompleted': r.onboardingCompleted,
+        'gateCompleted': r.gateCompleted,
       };
 
   static List<String>? _toStringList(dynamic value) {

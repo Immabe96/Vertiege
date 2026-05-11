@@ -21,7 +21,20 @@
       "Bash(gh auth *)",
       "Bash(winget install *)",
       "PowerShell(winget install --id GitHub.cli 2>&1)",
-      "Bash(curl -s \"https://api.github.com/repos/Immabe96/Vertiege/actions/runs?branch=design-overhaul&per_page=1\")"
+      "Bash(curl -s \"https://api.github.com/repos/Immabe96/Vertiege/actions/runs?branch=design-overhaul&per_page=1\")",
+      "PowerShell(git push origin main 2>&1)",
+      "Bash(Select-String -Pattern \"error|warning\" -SimpleMatch)",
+      "Bash(where supabase *)",
+      "Bash(supabase --version)",
+      "Bash(dart run *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(adb install *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Immabe\\\\Vertiege\\\\lib\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(flutter clean *)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb install -r \"c:\\\\Users\\\\Immabe\\\\Vertiege\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-release.apk\" 2>&1)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb uninstall com.imma96.virtual_status_worlds 2>&1; & $adb shell pm clear com.imma96.virtual_status_worlds 2>&1; & $adb install \"c:\\\\Users\\\\Immabe\\\\Vertiege\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-release.apk\" 2>&1)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb uninstall com.imma96.virtual_status_worlds 2>&1; & $adb install \"c:\\\\Users\\\\Immabe\\\\Vertiege\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-release.apk\" 2>&1)"
     ],
     "deny": [
       "Read(./.env)",

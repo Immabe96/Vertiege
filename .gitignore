@@ -51,4 +51,12 @@ android/build/
 # Android release signing
 /android/upload-keystore.jks
 /android/key.properties
-.env
+
+# Local agent/runtime state
+/.claude/settings.local.json
+/.agents/
+/.codex/
+/.swarm/*.db
+/.swarm/*.db-shm
+/.swarm/*.db-wal
+/ruvector.db

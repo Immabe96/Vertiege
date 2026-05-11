@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/notification_provider.dart';
 import '../../state/resident_provider.dart';
+import '../../state/voice_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/haptics.dart';
@@ -54,7 +55,13 @@ class _TabLayoutState extends ConsumerState<TabLayout> {
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: _buildBottomBar(index, unread),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _CampfireBar(),
+          _buildBottomBar(index, unread),
+        ],
+      ),
     );
   }
 
@@ -134,6 +141,58 @@ class _TabLayoutState extends ConsumerState<TabLayout> {
               }),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CampfireBar extends ConsumerWidget {
+  const _CampfireBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final voice = ref.watch(voiceProvider);
+    if (!voice.isConnected) return const SizedBox.shrink();
+
+    return GestureDetector(
+      onTap: () {
+        final campfireId = voice.activeCampfireId;
+        final campfireName = voice.activeCampfireName ?? 'Campfire';
+        if (campfireId != null) {
+          context.push('/campfire/$campfireId?name=$campfireName');
+        }
+      },
+      child: Container(
+        height: 40,
+        color: AppColors.warning.withValues(alpha: 0.12),
+        child: Row(
+          children: [
+            const SizedBox(width: Spacing.lg),
+            const Icon(Icons.local_fire_department, color: AppColors.warning, size: IconSizes.sm),
+            const SizedBox(width: Spacing.sm),
+            Expanded(
+              child: Text(
+                voice.activeCampfireName ?? 'Campfire',
+                style: const TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  fontWeight: FontWeights.semiBold,
+                  color: AppColors.warning,
+                ),
+              ),
+            ),
+            Text(
+              '${voice.participants.length}',
+              style: const TextStyle(
+                fontSize: FontSizes.labelSm,
+                color: AppColors.warning,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.call_end, size: IconSizes.sm, color: AppColors.error),
+              onPressed: () => ref.read(voiceProvider.notifier).leaveCampfire(),
+            ),
+          ],
         ),
       ),
     );

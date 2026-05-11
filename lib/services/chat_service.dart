@@ -1,7 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/channel.dart';
+import '../models/notification.dart';
 import '../utils/id_generator.dart';
+import '../utils/text_parser.dart';
 import 'moderation_filter.dart';
+import 'notification_service.dart';
 import 'supabase.dart';
+import 'world_service.dart';
 
 class ChatService {
   static Future<Map<String, dynamic>?> getOrCreateRoom(
@@ -101,7 +106,7 @@ class ChatService {
     required String worldId,
     required String content,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) throw Exception('Supabase not configured');
     final client = getSupabase();
 
     // Run The Sentinel moderation filter before sending
@@ -118,6 +123,38 @@ class ChatService {
       'flagged': isFlagged,
       'created_at': DateTime.now().toIso8601String(),
     });
+
+    // Broadcast @AllResidents notifications
+    if (TextParser.containsAllResidents(content)) {
+      _broadcastMentionNotifications(
+        worldId: worldId,
+        senderId: senderId,
+        senderName: senderName,
+      );
+    }
+  }
+
+  static Future<void> _broadcastMentionNotifications({
+    required String worldId,
+    required String senderId,
+    required String senderName,
+  }) async {
+    final members = await WorldService.getMembers(worldId);
+    for (final member in members) {
+      final residentId = member['resident_id'] ?? member['id'] ?? '';
+      if (residentId.isEmpty || residentId == senderId) continue;
+      final notification = AppNotification(
+        id: generateId(),
+        type: NotificationType.mention,
+        message: '$senderName mentioned everyone',
+        worldId: worldId,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      await NotificationService.createNotification(
+        recipientId: residentId,
+        notification: notification,
+      );
+    }
   }
 
   static Future<List<Map<String, dynamic>>> getChannelMessages(
@@ -133,6 +170,173 @@ class ChatService {
         .order('created_at', ascending: true)
         .limit(limit);
     return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  // ── Channel read tracking ──────────────────────────────
+
+  static Future<void> markChannelRead({
+    required String channelId,
+    required String residentId,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('channel_reads').upsert({
+      'resident_id': residentId,
+      'channel_id': channelId,
+      'last_read_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<Map<String, DateTime>> getChannelReads(String residentId) async {
+    if (!isSupabaseConfigured()) return {};
+    final client = getSupabase();
+    final data = await client
+        .from('channel_reads')
+        .select('channel_id, last_read_at')
+        .eq('resident_id', residentId);
+    final map = <String, DateTime>{};
+    for (final row in (data as List)) {
+      final channelId = row['channel_id'] as String?;
+      final ts = DateTime.tryParse(row['last_read_at'] ?? '');
+      if (channelId != null && ts != null) {
+        map[channelId] = ts;
+      }
+    }
+    return map;
+  }
+
+  // ── Pinned messages ──────────────────────────────────────
+
+  static Future<void> pinMessage({
+    required String messageId,
+    required bool isPinned,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client
+        .from('channel_messages')
+        .update({'is_pinned': isPinned})
+        .eq('id', messageId);
+  }
+
+  static Future<List<Map<String, dynamic>>> getPinnedMessages(
+    String channelId,
+  ) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('channel_messages')
+        .select()
+        .eq('channel_id', channelId)
+        .eq('is_pinned', true)
+        .order('created_at', ascending: false);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  static Future<DateTime?> getLastMessageTimestamp(String channelId) async {
+    if (!isSupabaseConfigured()) return null;
+    final client = getSupabase();
+    final data = await client
+        .from('channel_messages')
+        .select('created_at')
+        .eq('channel_id', channelId)
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    if (data != null) {
+      return DateTime.tryParse(data['created_at'] ?? '');
+    }
+    return null;
+  }
+
+  // ── Wards (districts) ────────────────────────────────────
+
+  static Future<List<District>> getDistricts(String worldId) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('districts')
+        .select()
+        .eq('world_id', worldId)
+        .order('position');
+    return (data as List).map((e) => District.fromSupabase(e as Map<String, dynamic>)).toList();
+  }
+
+  static Future<void> createDistrict({
+    required String worldId,
+    required String name,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    final maxPos = await client
+        .from('districts')
+        .select('position')
+        .eq('world_id', worldId)
+        .order('position', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    final nextPos = (maxPos?['position'] ?? -1) + 1;
+    await client.from('districts').insert({
+      'id': generateId(),
+      'world_id': worldId,
+      'name': name,
+      'position': nextPos,
+    });
+  }
+
+  static Future<void> renameDistrict({
+    required String districtId,
+    required String name,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    await getSupabase()
+        .from('districts')
+        .update({'name': name})
+        .eq('id', districtId);
+  }
+
+  // ── Threads ─────────────────────────────────────────────
+
+  static Future<List<Map<String, dynamic>>> getThreadMessages(
+    String threadId,
+  ) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('channel_messages')
+        .select()
+        .eq('thread_id', threadId)
+        .order('created_at', ascending: true);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  static Future<void> sendThreadReply({
+    required String channelId,
+    required String senderId,
+    required String senderName,
+    required String worldId,
+    required String content,
+    required String threadId,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('channel_messages').insert({
+      'id': generateId(),
+      'channel_id': channelId,
+      'sender_id': senderId,
+      'sender_name': senderName,
+      'world_id': worldId,
+      'content': content,
+      'thread_id': threadId,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+    // Increment thread count on parent
+    await client.rpc('increment_thread_count', params: {'msg_id': threadId});
+  }
+
+  static Future<void> deleteDistrict(String districtId) async {
+    if (!isSupabaseConfigured()) return;
+    await getSupabase().from('districts').delete().eq('id', districtId);
   }
 
   static RealtimeChannel? subscribeToChannelMessages(

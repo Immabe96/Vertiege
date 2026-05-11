@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/world.dart';
 import '../../services/season_service.dart';
+import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
@@ -77,10 +78,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         ),
         actions: [
           NotificationBell(onPress: () => context.push('/notifications')),
-          IconButton(
-            icon: const Icon(Icons.add, color: AppColors.inkSecondary),
-            tooltip: 'Create World',
-            onPressed: () => context.push('/create-world'),
+          Consumer(
+            builder: (context, ref, _) {
+              final tier = ref.watch(residentProvider).resident?.tier.value ?? 0;
+              if (tier < 2) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add, color: AppColors.inkSecondary),
+                tooltip: 'Create World',
+                onPressed: () => context.push('/create-world'),
+              );
+            },
           ),
         ],
       ),

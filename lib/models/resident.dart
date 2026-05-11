@@ -57,6 +57,8 @@ class Resident {
   final String? referredBy;
   final String? title;
   final int sovereignCoins;
+  final bool onboardingCompleted;
+  final bool gateCompleted;
 
   const Resident({
     required this.id,
@@ -81,6 +83,8 @@ class Resident {
     this.referredBy,
     this.title,
     this.sovereignCoins = 100,
+    this.onboardingCompleted = false,
+    this.gateCompleted = false,
   });
 
   /// Unique referral code derived from the resident's ID — first 8 chars,
@@ -110,6 +114,8 @@ class Resident {
     String? referredBy,
     String? title,
     int? sovereignCoins,
+    bool? onboardingCompleted,
+    bool? gateCompleted,
   }) =>
       Resident(
         id: id ?? this.id,
@@ -134,5 +140,7 @@ class Resident {
         referredBy: referredBy ?? this.referredBy,
         title: title ?? this.title,
         sovereignCoins: sovereignCoins ?? this.sovereignCoins,
+        onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+        gateCompleted: gateCompleted ?? this.gateCompleted,
       );
 }

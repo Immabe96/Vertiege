@@ -1,10 +1,64 @@
 import '../utils/id_generator.dart';
 import 'supabase.dart';
 
-/// Service for server-side moderation actions (ban, mute, warn).
-/// Persists all actions to the Supabase `moderation_logs` table so they
-/// are enforced globally, not just on the moderator's device.
 class ModerationService {
+  // ── Realm Audit ──────────────────────────────────────────
+
+  static Future<void> logAudit({
+    required String worldId,
+    required String actorId,
+    String? targetId,
+    required String action,
+    Map<String, dynamic>? details,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('world_audit_log').insert({
+      'id': generateId(),
+      'world_id': worldId,
+      'actor_id': actorId,
+      'target_id': targetId,
+      'action': action,
+      'details': details ?? {},
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<List<Map<String, dynamic>>> getAuditLog(
+    String worldId, {
+    int limit = 100,
+  }) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('world_audit_log')
+        .select()
+        .eq('world_id', worldId)
+        .order('created_at', ascending: false)
+        .limit(limit);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  // ── Bulk message deletion ───────────────────────────────
+
+  static Future<void> bulkDeleteMessages({
+    required List<String> messageIds,
+    required String actorId,
+    required String worldId,
+  }) async {
+    if (!isSupabaseConfigured() || messageIds.isEmpty) return;
+    final client = getSupabase();
+    await client.from('channel_messages').delete().inFilter('id', messageIds);
+    await logAudit(
+      worldId: worldId,
+      actorId: actorId,
+      action: 'bulkDelete',
+      details: {'count': messageIds.length, 'message_ids': messageIds},
+    );
+  }
+
+  // ── Moderation actions ──────────────────────────────────
+
   /// Record a ban and remove the user from the world.
   static Future<void> banUser({
     required String worldId,

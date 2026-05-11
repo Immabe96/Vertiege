@@ -6,6 +6,10 @@ class ChannelMessage {
   final String? senderAvatar;
   final String content;
   final String? imageUrl;
+  final bool isPinned;
+  final String? threadId;
+  final int threadCount;
+  final bool isThreadStarter;
   final int createdAt;
 
   const ChannelMessage({
@@ -16,8 +20,14 @@ class ChannelMessage {
     this.senderAvatar,
     required this.content,
     this.imageUrl,
+    this.isPinned = false,
+    this.threadId,
+    this.threadCount = 0,
+    this.isThreadStarter = false,
     required this.createdAt,
   });
+
+  bool get hasThread => threadCount > 0;
 
   ChannelMessage copyWith({
     String? id,
@@ -27,6 +37,10 @@ class ChannelMessage {
     String? senderAvatar,
     String? content,
     String? imageUrl,
+    bool? isPinned,
+    String? threadId,
+    int? threadCount,
+    bool? isThreadStarter,
     int? createdAt,
   }) =>
       ChannelMessage(
@@ -37,6 +51,10 @@ class ChannelMessage {
         senderAvatar: senderAvatar ?? this.senderAvatar,
         content: content ?? this.content,
         imageUrl: imageUrl ?? this.imageUrl,
+        isPinned: isPinned ?? this.isPinned,
+        threadId: threadId ?? this.threadId,
+        threadCount: threadCount ?? this.threadCount,
+        isThreadStarter: isThreadStarter ?? this.isThreadStarter,
         createdAt: createdAt ?? this.createdAt,
       );
 
@@ -48,6 +66,10 @@ class ChannelMessage {
         'senderAvatar': senderAvatar,
         'content': content,
         'imageUrl': imageUrl,
+        'isPinned': isPinned,
+        'threadId': threadId,
+        'threadCount': threadCount,
+        'isThreadStarter': isThreadStarter,
         'createdAt': createdAt,
       };
 
@@ -59,6 +81,10 @@ class ChannelMessage {
         senderAvatar: json['senderAvatar'],
         content: json['content'] ?? '',
         imageUrl: json['imageUrl'],
+        isPinned: json['isPinned'] ?? false,
+        threadId: json['threadId'],
+        threadCount: json['threadCount'] ?? 0,
+        isThreadStarter: json['isThreadStarter'] ?? false,
         createdAt: json['createdAt'] ?? 0,
       );
 }

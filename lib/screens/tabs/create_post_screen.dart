@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/post.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
@@ -25,6 +26,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   bool _isSovereignDecree = false;
 
   // Poll state
+  String? _imagePath;
+  final _picker = ImagePicker();
   bool _showPollBuilder = false;
   final _pollQuestionController = TextEditingController();
   final List<TextEditingController> _pollOptionControllers = [];
@@ -83,6 +86,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
   }
 
+  Future<void> _pickImage() async {
+    final result = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 1200, imageQuality: 85);
+    if (result != null) setState(() => _imagePath = result.path);
+  }
+
   void _insertFormatting(TextEditingController controller, String marker) {
     final text = controller.text;
     final selection = controller.selection;
@@ -129,6 +137,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           residentName: resident.name,
           residentAvatar: resident.avatarUrl,
           content: content,
+          imageUri: _imagePath,
           tierValue: resident.tier.value,
           isAnnouncement: _isSovereignAnnouncement,
           isDecree: _isSovereignDecree,
@@ -212,52 +221,68 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
             const SizedBox(height: Spacing.lg),
 
-            // Sovereign Announcement toggle
-            GlassPanel(
-              padding: const EdgeInsets.all(Spacing.lg),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.tertiary.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    ),
-                    child: const Icon(Icons.stars, color: AppColors.tertiary, size: IconSizes.lg),
-                  ),
-                  const SizedBox(width: Spacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Sovereign Announcement',
-                          style: TextStyle(
-                            fontSize: FontSizes.headlineMd,
-                            fontWeight: FontWeights.semiBold,
-                            color: AppColors.tertiary,
-                          ),
+            // Announcement toggle (Council+ only)
+            Consumer(
+              builder: (context, ref, _) {
+                final resident = ref.watch(residentProvider).resident;
+                final worlds = ref.watch(worldProvider).worlds;
+                final selectedWorld = worlds.values.firstOrNull;
+                final isCouncil = resident != null &&
+                    selectedWorld != null &&
+                    resident.worldStandings[selectedWorld.id]?.rep != null &&
+                    resident.worldStandings[selectedWorld.id]!.rep >= 5000;
+                final isSov = resident != null &&
+                    selectedWorld != null &&
+                    resident.id == selectedWorld.sovereignId;
+                if (!isCouncil && !isSov) return const SizedBox.shrink();
+
+                return GlassPanel(
+                  padding: const EdgeInsets.all(Spacing.lg),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.tertiary.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Pin to the priority feed of all members.',
-                          style: TextStyle(
-                            fontSize: FontSizes.bodyMd,
-                            color: AppColors.inkSecondary,
-                          ),
+                        child: const Icon(Icons.stars, color: AppColors.tertiary, size: IconSizes.lg),
+                      ),
+                      const SizedBox(width: Spacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Announcement',
+                              style: TextStyle(
+                                fontSize: FontSizes.headlineMd,
+                                fontWeight: FontWeights.semiBold,
+                                color: AppColors.tertiary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Pin to the priority feed of all members.',
+                              style: TextStyle(
+                                fontSize: FontSizes.bodyMd,
+                                color: AppColors.inkSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Switch(
+                        value: _isSovereignAnnouncement,
+                        onChanged: (v) => setState(() => _isSovereignAnnouncement = v),
+                        activeThumbColor: AppColors.tertiary,
+                        activeTrackColor: AppColors.tertiary.withValues(alpha: 0.4),
+                      ),
+                    ],
                   ),
-                  Switch(
-                    value: _isSovereignAnnouncement,
-                    onChanged: (v) => setState(() => _isSovereignAnnouncement = v),
-                    activeThumbColor: AppColors.tertiary,
-                    activeTrackColor: AppColors.tertiary.withValues(alpha: 0.4),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
 
             const SizedBox(height: Spacing.lg),
@@ -419,11 +444,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             // Quick attach bar
             Row(
               children: [
-                _AttachChip(icon: Icons.image, label: 'UPLOAD IMAGE', onTap: () {}),
+                _AttachChip(icon: Icons.image, label: _imagePath != null ? 'IMAGE READY' : 'UPLOAD IMAGE', onTap: _pickImage, selected: _imagePath != null),
                 const SizedBox(width: Spacing.sm),
-                _AttachChip(icon: Icons.description, label: 'DOCUMENT', onTap: () {}),
+                _AttachChip(icon: Icons.description, label: 'DOCUMENT', onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document upload coming soon')));
+                }),
                 const SizedBox(width: Spacing.sm),
-                _AttachChip(icon: Icons.link, label: 'ADD LINK', onTap: () {}),
+                _AttachChip(icon: Icons.link, label: 'ADD LINK', onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link attachment coming soon')));
+                }),
                 const SizedBox(width: Spacing.sm),
                 _AttachChip(
                   icon: _showPollBuilder ? Icons.poll : Icons.poll_outlined,

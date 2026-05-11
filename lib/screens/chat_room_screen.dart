@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -362,6 +363,35 @@ class _MessageBubbleState extends State<_MessageBubble>
     super.dispose();
   }
 
+  static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
+    return MarkdownStyleSheet(
+      p: TextStyle(fontSize: FontSizes.bodyMd, color: textColor, height: LineHeight.body),
+      code: TextStyle(
+        fontSize: FontSizes.bodyMd - 2,
+        color: AppColors.ink,
+        backgroundColor: AppColors.surface,
+        fontFamily: AppFont.mono,
+      ),
+      codeblockDecoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: AppColors.glassBorder),
+      ),
+      a: const TextStyle(
+        fontSize: FontSizes.bodyMd,
+        color: AppColors.primary,
+        decoration: TextDecoration.underline,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        border: Border(left: BorderSide(color: AppColors.hustler, width: 3)),
+        color: AppColors.hustler.withValues(alpha: 0.05),
+      ),
+      h1: TextStyle(fontSize: FontSizes.headlineMd, fontWeight: FontWeights.bold, color: textColor, fontFamily: AppFont.headline),
+      h2: TextStyle(fontSize: FontSizes.bodyLg, fontWeight: FontWeights.bold, color: textColor, fontFamily: AppFont.headline),
+      h3: TextStyle(fontSize: FontSizes.bodyMd, fontWeight: FontWeights.semiBold, color: textColor, fontFamily: AppFont.headline),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -448,10 +478,10 @@ class _MessageBubbleState extends State<_MessageBubble>
                         if (widget.message.imageUrl != null &&
                             widget.message.imageUrl!.isNotEmpty)
                           const SizedBox(height: 4),
-                        Text(
-                          widget.message.content,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isMe
+                        MarkdownBody(
+                          data: widget.message.content,
+                          styleSheet: _markdownStyle(
+                            textColor: isMe
                                 ? AppColors.onPrimaryContainer
                                 : AppColors.ink,
                           ),

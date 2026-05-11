@@ -1,4 +1,4 @@
-enum NotificationType { like, comment, worldUnlocked, tierUpgrade, welcome, modAction, ranking, streakReminder, reactionMilestone }
+enum NotificationType { like, comment, worldUnlocked, tierUpgrade, welcome, modAction, ranking, streakReminder, reactionMilestone, mention, allegianceRequest }
 
 class AppNotification {
   final String id;
@@ -49,6 +49,8 @@ class AppNotification {
       'ranking' => NotificationType.ranking,
       'streakReminder' => NotificationType.streakReminder,
       'reactionMilestone' => NotificationType.reactionMilestone,
+      'mention' => NotificationType.mention,
+      'allegianceRequest' => NotificationType.allegianceRequest,
       _ => NotificationType.like,
     };
   }

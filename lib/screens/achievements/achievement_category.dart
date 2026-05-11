@@ -24,7 +24,7 @@ class AchievementCategoryScreen extends ConsumerWidget {
         itemCount: catAchievements.length,
         itemBuilder: (context, index) {
           final achievement = catAchievements[index];
-          final status = ref.watch(achievementProvider.notifier).getAchievementStatus(achievement.id);
+          final status = ref.read(achievementProvider.notifier).getAchievementStatus(achievement.id);
           final userAch = achievementState.userAchievements
               .where((a) => a.achievementId == achievement.id)
               .firstOrNull;

@@ -14,6 +14,7 @@ import '../theme/design_system.dart';
 import '../theme/colors.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/glass_panel.dart';
+import '../widgets/core/shimmer.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/worlds/world_icon.dart';
 
@@ -266,9 +267,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: Spacing.lg),
-      children: [
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(worldProvider.notifier).loadWorlds();
+        await ref.read(postProvider.notifier).loadPosts();
+        setState(() {}); // re-run search after data reloads
+      },
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: Spacing.lg),
+        children: [
         // ── Worlds Section ─────────────────
         _SectionHeader(icon: Icons.public, title: 'Worlds', count: results.worlds.length),
         if (results.worlds.isEmpty)
@@ -281,20 +288,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // ── People Section ─────────────────
         _SectionHeader(icon: Icons.people, title: 'People', count: results.residents.length),
         if (_loadingResidents)
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-            child: Row(
-              children: [
-                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                SizedBox(width: Spacing.sm),
-                Text('Loading residents...'),
-              ],
-            ),
+          Padding(
+            padding: const EdgeInsets.all(Spacing.md),
+            child: const Pulse(width: double.infinity, height: 48),
           )
         else if (results.residents.isEmpty)
           _EmptySection(text: 'No people found')
         else
-          ...results.residents.map((r) => _PersonTile(entry: r)),
+          ...results.residents.take(20).map((r) => _PersonTile(entry: r)),
 
         const Divider(height: 1, color: AppColors.glassBorder),
 
@@ -303,8 +304,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         if (results.posts.isEmpty)
           _EmptySection(text: 'No posts found')
         else
-          ...results.posts.map((p) => _PostTile(post: p)),
-      ],
+          ...results.posts.take(20).map((p) => _PostTile(post: p)),
+        ],
+      ),
     );
   }
 

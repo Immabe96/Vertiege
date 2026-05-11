@@ -8,12 +8,14 @@ class ChatState {
   final List<Map<String, dynamic>> dmRooms;
   final Map<String, List<ChannelMessage>> dmMessages;
   final Map<String, List<ChannelMessage>> channelMessages;
+  final Map<String, DateTime> channelReads;
   final bool isLoadingRooms;
 
   const ChatState({
     this.dmRooms = const [],
     this.dmMessages = const {},
     this.channelMessages = const {},
+    this.channelReads = const {},
     this.isLoadingRooms = false,
   });
 
@@ -21,12 +23,14 @@ class ChatState {
     List<Map<String, dynamic>>? dmRooms,
     Map<String, List<ChannelMessage>>? dmMessages,
     Map<String, List<ChannelMessage>>? channelMessages,
+    Map<String, DateTime>? channelReads,
     bool? isLoadingRooms,
   }) =>
       ChatState(
         dmRooms: dmRooms ?? this.dmRooms,
         dmMessages: dmMessages ?? this.dmMessages,
         channelMessages: channelMessages ?? this.channelMessages,
+        channelReads: channelReads ?? this.channelReads,
         isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
       );
 }
@@ -111,6 +115,10 @@ class ChatNotifier extends Notifier<ChatState> {
       senderAvatar: data['sender_avatar'],
       content: data['content'] ?? '',
       imageUrl: data['image_url'],
+      isPinned: data['is_pinned'] ?? false,
+      threadId: data['thread_id'],
+      threadCount: data['thread_count'] ?? 0,
+      isThreadStarter: data['is_thread_starter'] ?? false,
       createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
     );
   }
@@ -153,6 +161,28 @@ class ChatNotifier extends Notifier<ChatState> {
   List<ChannelMessage> channelMessagesFor(String channelId) =>
       state.channelMessages[channelId] ?? [];
 
+  List<ChannelMessage> pinnedMessagesFor(String channelId) {
+    final messages = state.channelMessages[channelId] ?? [];
+    return messages.where((m) => m.isPinned).toList();
+  }
+
+  Future<void> togglePin({
+    required String channelId,
+    required String messageId,
+    required bool isPinned,
+  }) async {
+    final messages = state.channelMessages[channelId];
+    if (messages == null) return;
+    final updated = messages.map((m) {
+      if (m.id == messageId) return m.copyWith(isPinned: isPinned);
+      return m;
+    }).toList();
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, channelId: updated},
+    );
+    await ChatService.pinMessage(messageId: messageId, isPinned: isPinned);
+  }
+
   Future<void> loadChannelMessages(String channelId) async {
     if (state.channelMessages.containsKey(channelId)) return;
     final msgs = await ChatService.getChannelMessages(channelId);
@@ -182,17 +212,27 @@ class ChatNotifier extends Notifier<ChatState> {
     );
 
     final existing = state.channelMessages[channelId] ?? [];
+    final allMessages = [...existing, msg];
     state = state.copyWith(
-      channelMessages: {...state.channelMessages, channelId: [...existing, msg]},
+      channelMessages: {...state.channelMessages, channelId: allMessages},
     );
 
-    await ChatService.sendChannelMessage(
-      channelId: channelId,
-      senderId: senderId,
-      senderName: senderName,
-      worldId: worldId,
-      content: content,
-    );
+    try {
+      await ChatService.sendChannelMessage(
+        channelId: channelId,
+        senderId: senderId,
+        senderName: senderName,
+        worldId: worldId,
+        content: content,
+      );
+    } catch (_) {
+      // Remove the optimistic message if the send failed
+      final reverted = allMessages.where((m) => m.id != msg.id).toList();
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, channelId: reverted},
+      );
+      rethrow;
+    }
   }
 
   void subscribeToChannel(String channelId) {
@@ -208,6 +248,92 @@ class ChatNotifier extends Notifier<ChatState> {
   void unsubscribeFromChannel(String channelId) {
     _subscriptions[channelId]?.unsubscribe();
     _subscriptions.remove(channelId);
+  }
+
+  // ── Channel read tracking ──────────────────────────────
+
+  Future<void> loadChannelReads(String residentId) async {
+    final reads = await ChatService.getChannelReads(residentId);
+    state = state.copyWith(channelReads: reads);
+  }
+
+  Future<void> markChannelRead({
+    required String channelId,
+    required String residentId,
+  }) async {
+    final now = DateTime.now();
+    state = state.copyWith(
+      channelReads: {...state.channelReads, channelId: now},
+    );
+    await ChatService.markChannelRead(
+      channelId: channelId,
+      residentId: residentId,
+    );
+  }
+
+  // ── Threads ────────────────────────────────────────────
+
+  Future<void> loadThreadMessages(String threadId) async {
+    final msgs = await ChatService.getThreadMessages(threadId);
+    state = state.copyWith(
+      channelMessages: {
+        ...state.channelMessages,
+        threadId: _toChannelMessages(msgs),
+      },
+    );
+  }
+
+  Future<void> sendThreadReply({
+    required String channelId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatar,
+    required String worldId,
+    required String content,
+    required String threadId,
+  }) async {
+    final msg = ChannelMessage(
+      id: generateId(),
+      channelId: channelId,
+      senderId: senderId,
+      senderName: senderName,
+      senderAvatar: senderAvatar,
+      content: content,
+      threadId: threadId,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    final existing = state.channelMessages[threadId] ?? [];
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, threadId: [...existing, msg]},
+    );
+    await ChatService.sendThreadReply(
+      channelId: channelId,
+      senderId: senderId,
+      senderName: senderName,
+      worldId: worldId,
+      content: content,
+      threadId: threadId,
+    );
+  }
+
+  int unreadCount(String channelId) {
+    final messages = state.channelMessages[channelId] ?? [];
+    if (messages.isEmpty) return 0;
+    final lastRead = state.channelReads[channelId];
+    if (lastRead == null) return messages.length;
+    return messages.where((m) =>
+      DateTime.fromMillisecondsSinceEpoch(m.createdAt).isAfter(lastRead)
+    ).length;
+  }
+
+  bool hasUnread(String channelId) {
+    final messages = state.channelMessages[channelId] ?? [];
+    if (messages.isEmpty) return false;
+    final lastRead = state.channelReads[channelId];
+    if (lastRead == null) return true; // never read
+    final lastMessageTime = DateTime
+        .fromMillisecondsSinceEpoch(messages.last.createdAt);
+    return lastMessageTime.isAfter(lastRead);
   }
 
   void unsubscribeAll() {
@@ -230,6 +356,10 @@ class ChatNotifier extends Notifier<ChatState> {
             senderAvatar: e['sender_avatar'],
             content: e['content'] ?? '',
             imageUrl: e['image_url'],
+            isPinned: e['is_pinned'] ?? false,
+            threadId: e['thread_id'],
+            threadCount: e['thread_count'] ?? 0,
+            isThreadStarter: e['is_thread_starter'] ?? false,
             createdAt: DateTime.tryParse(e['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
           )).toList();
 }

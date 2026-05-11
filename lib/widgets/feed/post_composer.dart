@@ -109,7 +109,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final content = _controller.text.trim();
     if (content.isEmpty) return;
 
@@ -122,36 +122,44 @@ class _PostComposerState extends ConsumerState<PostComposer>
     final targetWorldId = _selectedWorldId ?? (joinedWorlds.isNotEmpty ? joinedWorlds.first.id : null);
     if (targetWorldId == null) return;
 
-    ref.read(postProvider.notifier).addPost(
-          worldId: targetWorldId,
-          residentId: resident.id,
-          residentName: resident.name,
-          residentAvatar: resident.avatarUrl,
-          content: content,
-          imageUri: _imageUri,
-          tierValue: resident.tier.value,
-          isAnnouncement: _isAnnouncement,
-        );
-
     _controller.clear();
-    _sendAnim.forward(from: 0);
-    HapticFeedback.heavyImpact();
-    XpToast.show(context, amount: 15);
-    StorageService.remove(_draftKey);
-
     setState(() {
       _imageUri = null;
       _isAnnouncement = false;
       _sent = true;
       _hasDraft = false;
     });
+    _sendAnim.forward(from: 0);
+    HapticFeedback.heavyImpact();
+    XpToast.show(context, amount: 15);
+    StorageService.remove(_draftKey);
 
-    Future.delayed(const Duration(milliseconds: 700), () {
+    try {
+      await ref.read(postProvider.notifier).addPost(
+            worldId: targetWorldId,
+            residentId: resident.id,
+            residentName: resident.name,
+            residentAvatar: resident.avatarUrl,
+            content: content,
+            imageUri: _imageUri,
+            tierValue: resident.tier.value,
+            isAnnouncement: _isAnnouncement,
+          );
+    } catch (_) {
+      // Post failed — the provider will have reverted the optimistic update
       if (mounted) {
         setState(() => _sent = false);
-        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to publish post. Please try again.')),
+        );
       }
-    });
+      return;
+    }
+
+    if (mounted) {
+      setState(() => _sent = false);
+      Navigator.of(context).pop();
+    }
   }
 
   Color _charColor(int length) {

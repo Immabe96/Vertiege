@@ -8,6 +8,7 @@ import '../services/moderation_filter.dart';
 import '../services/permission_service.dart';
 import 'world_provider.dart';
 import '../services/storage_service.dart';
+import '../services/media_service.dart';
 import '../services/post_service.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
@@ -96,6 +97,12 @@ class PostNotifier extends Notifier<PostState> {
       status: postStatus,
     );
 
+    // Upload image to Supabase Storage if local file
+    String? cloudImageUrl = imageUri;
+    if (imageUri != null && !imageUri.startsWith('http')) {
+      cloudImageUrl = await MediaService.uploadPostImage(imageUri, residentId);
+    }
+
     state = state.copyWith(posts: [post, ...state.posts]);
     _persist();
 
@@ -104,7 +111,7 @@ class PostNotifier extends Notifier<PostState> {
       residentName: residentName,
       worldId: worldId,
       content: content,
-      imageUrl: imageUri,
+      imageUrl: cloudImageUrl,
       residentAvatar: residentAvatar,
       tierAtPosting: tierValue,
       isAnnouncement: isAnnouncement,
@@ -157,6 +164,9 @@ class PostNotifier extends Notifier<PostState> {
 
     state = state.copyWith(posts: posts);
     _persist();
+
+    // Persist to Supabase
+    PostService.addReaction(postId, emoji, residentId);
 
     final reactedPost = state.posts.where((p) => p.id == postId).firstOrNull;
     ref.read(questProvider.notifier).onReacted();
@@ -224,6 +234,9 @@ class PostNotifier extends Notifier<PostState> {
 
     state = state.copyWith(posts: posts);
     _persist();
+
+    // Persist to Supabase
+    PostService.addComment(postId, comment.residentId, comment.content);
 
     ref.read(questProvider.notifier).onCommentAdded();
     ref.read(residentProvider.notifier).addRep(post.worldId, 3);
@@ -390,6 +403,15 @@ class PostNotifier extends Notifier<PostState> {
 
   Future<void> loadPosts() async {
     try {
+      // Fetch from Supabase first
+      final remote = await PostService.getPosts();
+      if (remote.isNotEmpty) {
+        final posts = remote.map((e) => _postFromJson(e)).toList();
+        state = state.copyWith(posts: posts, clearError: true);
+        _persist();
+        return;
+      }
+      // Fallback to local cache
       final raw = await StorageService.getString(StorageService.postsKey);
       if (raw == null || raw.isEmpty) return;
       final list = jsonDecode(raw) as List<dynamic>;

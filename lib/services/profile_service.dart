@@ -18,11 +18,14 @@ class ProfileService {
 
   static Future<List<Resident>> searchResidents(String query, {int limit = 20}) async {
     if (!isSupabaseConfigured()) return [];
+    // Strip characters that could interfere with PostgREST filter syntax
+    final safe = query.replaceAll(RegExp(r'[%,.*()]'), '');
+    if (safe.isEmpty) return [];
     final client = getSupabase();
     final data = await client
         .from('profiles')
         .select()
-        .or('name.ilike.%$query%,profession.ilike.%$query%')
+        .or('name.ilike.%$safe%,profession.ilike.%$safe%')
         .limit(limit);
     return (data as List).map((e) => _toResident(e)).toList();
   }
@@ -52,8 +55,18 @@ class ProfileService {
         'cosmetics': {'badges': r.badges},
         'last_check_in': r.lastCheckIn,
         'streak_count': r.streakCount,
+        'streak_shields': r.streakShields,
         'following': r.following,
         'joined_world_ids': r.joinedWorldIds,
+        'world_standings': r.worldStandings.map((k, v) => MapEntry(k, {'rep': v.rep})),
+        'banned_world_ids': r.bannedWorldIds,
+        'muted_until': r.mutedUntil,
+        'last_seen_at': r.lastSeenAt,
+        if (r.referredBy != null) 'referred_by': r.referredBy,
+        if (r.title != null) 'title': r.title,
+        'sovereign_coins': r.sovereignCoins,
+        'onboarding_completed': r.onboardingCompleted,
+        'gate_completed': r.gateCompleted,
         'updated_at': DateTime.now().toIso8601String(),
       };
 
@@ -68,6 +81,29 @@ class ProfileService {
         decorations: List<String>.from(data['decorations'] ?? []),
         wealthWorldsUnlocked: List<String>.from(data['wealth_worlds_unlocked'] ?? []),
         badges: List<String>.from((data['cosmetics'] as Map?)?['badges'] ?? []),
-        streakCount: data['streakCount'] ?? 0,
+        lastCheckIn: data['last_check_in'] as String?,
+        streakCount: (data['streak_count'] as int?) ?? 0,
+        streakShields: (data['streak_shields'] as int?) ?? 0,
+        following: List<String>.from(data['following'] ?? []),
+        joinedWorldIds: List<String>.from(data['joined_world_ids'] ?? []),
+        worldStandings: _parseWorldStandings(data['world_standings']),
+        bannedWorldIds: List<String>.from(data['banned_world_ids'] ?? []),
+        mutedUntil: (data['muted_until'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as int?) ?? 0)) ?? {},
+        lastSeenAt: (data['last_seen_at'] as int?) ?? 0,
+        referredBy: data['referred_by'] as String?,
+        title: data['title'] as String?,
+        sovereignCoins: (data['sovereign_coins'] as int?) ?? 100,
+        onboardingCompleted: data['onboarding_completed'] ?? false,
+        gateCompleted: data['gate_completed'] ?? false,
       );
+
+  static Map<String, WorldStanding> _parseWorldStandings(dynamic value) {
+    if (value is Map) {
+      return value.map((k, v) => MapEntry(
+        k.toString(),
+        WorldStanding(rep: (v is Map ? (v['rep'] as int?) ?? 0 : 0)),
+      ));
+    }
+    return {};
+  }
 }
