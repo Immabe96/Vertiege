@@ -87,7 +87,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   Future<void> _pickImage() async {
-    final result = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 1200, imageQuality: 85);
+    final result = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      imageQuality: 85,
+    );
     if (result != null) setState(() => _imagePath = result.path);
   }
 
@@ -104,12 +108,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     if (selStart == selEnd) {
       // No selection — insert empty marker pair
-      newText = '${text.substring(0, selStart)}$marker$marker${text.substring(selStart)}';
+      newText =
+          '${text.substring(0, selStart)}$marker$marker${text.substring(selStart)}';
       newCursorPos = selStart + marker.length;
     } else {
       // Wrap selected text
       final selectedText = text.substring(selStart, selEnd);
-      newText = '${text.substring(0, selStart)}$marker$selectedText$marker${text.substring(selEnd)}';
+      newText =
+          '${text.substring(0, selStart)}$marker$selectedText$marker${text.substring(selEnd)}';
       newCursorPos = selEnd + marker.length * 2;
     }
 
@@ -131,7 +137,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final content = title.isEmpty ? body : '$title\n\n$body';
     final poll = _buildPoll();
 
-    ref.read(postProvider.notifier).addPost(
+    ref
+        .read(postProvider.notifier)
+        .addPost(
           worldId: worldId,
           residentId: resident.id,
           residentName: resident.name,
@@ -191,7 +199,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             // World selector
             if (worlds.isNotEmpty)
               GlassPanel(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.lg,
+                  vertical: Spacing.md,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -201,7 +212,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         color: AppColors.secondaryContainer,
                         borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
-                      child: const Icon(Icons.language, color: AppColors.tertiary, size: IconSizes.sm),
+                      child: const Icon(
+                        Icons.language,
+                        color: AppColors.tertiary,
+                        size: IconSizes.sm,
+                      ),
                     ),
                     const SizedBox(width: Spacing.md),
                     Expanded(
@@ -214,7 +229,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         ),
                       ),
                     ),
-                    const Icon(Icons.expand_more, color: AppColors.inkSecondary),
+                    const Icon(
+                      Icons.expand_more,
+                      color: AppColors.inkSecondary,
+                    ),
                   ],
                 ),
               ),
@@ -227,11 +245,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 final resident = ref.watch(residentProvider).resident;
                 final worlds = ref.watch(worldProvider).worlds;
                 final selectedWorld = worlds.values.firstOrNull;
-                final isCouncil = resident != null &&
+                final isCouncil =
+                    resident != null &&
                     selectedWorld != null &&
                     resident.worldStandings[selectedWorld.id]?.rep != null &&
                     resident.worldStandings[selectedWorld.id]!.rep >= 5000;
-                final isSov = resident != null &&
+                final isSov =
+                    resident != null &&
                     selectedWorld != null &&
                     resident.id == selectedWorld.sovereignId;
                 if (!isCouncil && !isSov) return const SizedBox.shrink();
@@ -247,7 +267,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           color: AppColors.tertiary.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(RadiusTokens.md),
                         ),
-                        child: const Icon(Icons.stars, color: AppColors.tertiary, size: IconSizes.lg),
+                        child: const Icon(
+                          Icons.stars,
+                          color: AppColors.tertiary,
+                          size: IconSizes.lg,
+                        ),
                       ),
                       const SizedBox(width: Spacing.md),
                       Expanded(
@@ -275,9 +299,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       ),
                       Switch(
                         value: _isSovereignAnnouncement,
-                        onChanged: (v) => setState(() => _isSovereignAnnouncement = v),
+                        onChanged: (v) =>
+                            setState(() => _isSovereignAnnouncement = v),
                         activeThumbColor: AppColors.tertiary,
-                        activeTrackColor: AppColors.tertiary.withValues(alpha: 0.4),
+                        activeTrackColor: AppColors.tertiary.withValues(
+                          alpha: 0.4,
+                        ),
                       ),
                     ],
                   ),
@@ -293,7 +320,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 final resident = ref.watch(residentProvider).resident;
                 final worlds = ref.watch(worldProvider).worlds;
                 final selectedWorld = worlds.values.firstOrNull;
-                final isSovereign = resident != null &&
+                final isSovereign =
+                    resident != null &&
                     selectedWorld != null &&
                     resident.id == selectedWorld.sovereignId;
 
@@ -310,16 +338,24 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             height: 48,
                             decoration: BoxDecoration(
                               color: AppColors.tertiary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(RadiusTokens.md),
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.md,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.tertiary.withValues(alpha: 0.2),
+                                  color: AppColors.tertiary.withValues(
+                                    alpha: 0.2,
+                                  ),
                                   blurRadius: 8,
                                   spreadRadius: 0,
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.auto_awesome, color: AppColors.tertiary, size: IconSizes.lg),
+                            child: const Icon(
+                              Icons.auto_awesome,
+                              color: AppColors.tertiary,
+                              size: IconSizes.lg,
+                            ),
                           ),
                           const SizedBox(width: Spacing.md),
                           Expanded(
@@ -344,11 +380,16 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                                       ),
                                       decoration: BoxDecoration(
                                         gradient: const LinearGradient(
-                                          colors: [AppColors.tertiary, AppColors.tertiaryFixedDim],
+                                          colors: [
+                                            AppColors.tertiary,
+                                            AppColors.tertiaryFixedDim,
+                                          ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
-                                        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                                        borderRadius: BorderRadius.circular(
+                                          RadiusTokens.pill,
+                                        ),
                                       ),
                                       child: const Text(
                                         'SOVEREIGN ONLY',
@@ -375,9 +416,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           ),
                           Switch(
                             value: _isSovereignDecree,
-                            onChanged: (v) => setState(() => _isSovereignDecree = v),
+                            onChanged: (v) =>
+                                setState(() => _isSovereignDecree = v),
                             activeThumbColor: AppColors.tertiary,
-                            activeTrackColor: AppColors.tertiary.withValues(alpha: 0.4),
+                            activeTrackColor: AppColors.tertiary.withValues(
+                              alpha: 0.4,
+                            ),
                           ),
                         ],
                       ),
@@ -434,7 +478,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 questionController: _pollQuestionController,
                 optionControllers: _pollOptionControllers,
                 isMultiChoice: _pollMultiChoice,
-                onToggleMultiChoice: () => setState(() => _pollMultiChoice = !_pollMultiChoice),
+                onToggleMultiChoice: () =>
+                    setState(() => _pollMultiChoice = !_pollMultiChoice),
                 onAddOption: _addPollOption,
                 onRemoveOption: _removePollOption,
                 onRemove: () => setState(() => _showPollBuilder = false),
@@ -444,15 +489,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             // Quick attach bar
             Row(
               children: [
-                _AttachChip(icon: Icons.image, label: _imagePath != null ? 'IMAGE READY' : 'UPLOAD IMAGE', onTap: _pickImage, selected: _imagePath != null),
-                const SizedBox(width: Spacing.sm),
-                _AttachChip(icon: Icons.description, label: 'DOCUMENT', onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document upload coming soon')));
-                }),
-                const SizedBox(width: Spacing.sm),
-                _AttachChip(icon: Icons.link, label: 'ADD LINK', onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link attachment coming soon')));
-                }),
+                _AttachChip(
+                  icon: Icons.image,
+                  label: _imagePath != null ? 'IMAGE READY' : 'UPLOAD IMAGE',
+                  onTap: _pickImage,
+                  selected: _imagePath != null,
+                ),
                 const SizedBox(width: Spacing.sm),
                 _AttachChip(
                   icon: _showPollBuilder ? Icons.poll : Icons.poll_outlined,
@@ -486,22 +528,29 @@ class _AttachChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.sm + 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.lg,
+          vertical: Spacing.sm + 2,
+        ),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.tertiary.withValues(alpha: 0.15)
               : AppColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.full),
           border: Border.all(
-            color: selected ? AppColors.tertiary.withValues(alpha: 0.4) : AppColors.glassBorder,
+            color: selected
+                ? AppColors.tertiary.withValues(alpha: 0.4)
+                : AppColors.glassBorder,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: IconSizes.sm,
-                color: selected ? AppColors.tertiary : AppColors.inkSecondary),
+            Icon(
+              icon,
+              size: IconSizes.sm,
+              color: selected ? AppColors.tertiary : AppColors.inkSecondary,
+            ),
             const SizedBox(width: Spacing.sm),
             Text(
               label,
@@ -548,7 +597,11 @@ class _PollBuilder extends StatelessWidget {
           // Header
           Row(
             children: [
-              const Icon(Icons.poll, size: IconSizes.md, color: AppColors.tertiary),
+              const Icon(
+                Icons.poll,
+                size: IconSizes.md,
+                color: AppColors.tertiary,
+              ),
               const SizedBox(width: Spacing.sm),
               const Expanded(
                 child: Text(
@@ -570,10 +623,7 @@ class _PollBuilder extends StatelessWidget {
           const SizedBox(height: Spacing.md),
 
           // Question field
-          GhostInput(
-            controller: questionController,
-            hint: 'Poll question...',
-          ),
+          GhostInput(controller: questionController, hint: 'Poll question...'),
           const SizedBox(height: Spacing.md),
 
           // Options
@@ -594,7 +644,10 @@ class _PollBuilder extends StatelessWidget {
                   ),
                   if (optionControllers.length > 2)
                     IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, size: IconSizes.md),
+                      icon: const Icon(
+                        Icons.remove_circle_outline,
+                        size: IconSizes.md,
+                      ),
                       onPressed: () => onRemoveOption(index),
                       color: AppColors.error,
                     ),
@@ -625,7 +678,11 @@ class _PollBuilder extends StatelessWidget {
           // Multi-choice toggle
           Row(
             children: [
-              const Icon(Icons.checklist, size: IconSizes.sm, color: AppColors.inkSecondary),
+              const Icon(
+                Icons.checklist,
+                size: IconSizes.sm,
+                color: AppColors.inkSecondary,
+              ),
               const SizedBox(width: Spacing.sm),
               const Expanded(
                 child: Text(

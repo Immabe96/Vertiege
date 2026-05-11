@@ -53,8 +53,9 @@ class ContextualChips extends ConsumerWidget {
 
       // ── Pending world invites ──
       final allWorlds = worldState.worlds.values.toList();
-      invitesCount =
-          allWorlds.where((w) => !resident.joinedWorldIds.contains(w.id)).length;
+      invitesCount = allWorlds
+          .where((w) => !resident.joinedWorldIds.contains(w.id))
+          .length;
       if (invitesCount > 0) {
         chips.add(
           _ContextChip(
@@ -68,14 +69,16 @@ class ContextualChips extends ConsumerWidget {
     }
 
     // ── Active quest ──
-    final activeQuests = questState.quests.where((q) => !q.claimed && !q.isComplete).toList();
+    final activeQuests = questState.quests
+        .where((q) => !q.claimed && !q.isComplete)
+        .toList();
     if (activeQuests.isNotEmpty) {
       chips.add(
         _ContextChip(
           icon: Icons.bolt,
           label: 'Daily Quest',
           color: AppColors.tertiary,
-          onTap: () {},
+          onTap: () => context.push('/ascension-path'),
         ),
       );
     }
@@ -83,15 +86,15 @@ class ContextualChips extends ConsumerWidget {
     if (chips.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.xs,
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: chips
-              .expand((chip) => [
-                    chip,
-                    const SizedBox(width: Spacing.sm),
-                  ])
+              .expand((chip) => [chip, const SizedBox(width: Spacing.sm)])
               .toList(),
         ),
       ),
@@ -127,18 +130,12 @@ class _ContextChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          border: Border.all(
-            color: color.withValues(alpha: 0.25),
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: IconSizes.sm,
-              color: color,
-            ),
+            Icon(icon, size: IconSizes.sm, color: color),
             const SizedBox(width: Spacing.sm),
             Text(
               label,

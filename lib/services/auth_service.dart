@@ -3,17 +3,36 @@ import 'secure_storage_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
-  static Future<AuthResponse> signInWithEmail(String email, String password) async {
-    final client = getSupabase();
-    final response = await client.auth.signInWithPassword(email: email, password: password);
+  static SupabaseClient _requireClient() {
+    final client = maybeSupabase();
+    if (client == null) {
+      throw const AuthException(
+        'Authentication is unavailable because Supabase is not configured.',
+      );
+    }
+    return client;
+  }
+
+  static Future<AuthResponse> signInWithEmail(
+    String email,
+    String password,
+  ) async {
+    final client = _requireClient();
+    final response = await client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
     if (response.session != null) {
       await _persistSession(response.session!);
     }
     return response;
   }
 
-  static Future<AuthResponse> signUpWithEmail(String email, String password) async {
-    final client = getSupabase();
+  static Future<AuthResponse> signUpWithEmail(
+    String email,
+    String password,
+  ) async {
+    final client = _requireClient();
     final response = await client.auth.signUp(email: email, password: password);
     if (response.session != null) {
       await _persistSession(response.session!);
@@ -22,7 +41,7 @@ class AuthService {
   }
 
   static Future<void> signInWithOtp(String email) async {
-    final client = getSupabase();
+    final client = _requireClient();
     await client.auth.signInWithOtp(email: email);
   }
 
@@ -30,7 +49,7 @@ class AuthService {
 
   static Future<bool> signInWithGoogle() async {
     try {
-      final client = getSupabase();
+      final client = _requireClient();
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'vertiege://auth/callback',
@@ -43,7 +62,7 @@ class AuthService {
 
   static Future<bool> signInWithApple() async {
     try {
-      final client = getSupabase();
+      final client = _requireClient();
       await client.auth.signInWithOAuth(
         OAuthProvider.apple,
         redirectTo: 'vertiege://auth/callback',
@@ -58,7 +77,7 @@ class AuthService {
 
   static Future<Map<String, dynamic>?> generateTwinSeal() async {
     try {
-      final client = getSupabase();
+      final client = _requireClient();
       final res = await client.functions.invoke('generate-totp');
       return res.data as Map<String, dynamic>?;
     } catch (_) {
@@ -68,8 +87,11 @@ class AuthService {
 
   static Future<bool> verifyTwinSeal(String code) async {
     try {
-      final client = getSupabase();
-      final res = await client.functions.invoke('verify-totp', body: {'code': code});
+      final client = _requireClient();
+      final res = await client.functions.invoke(
+        'verify-totp',
+        body: {'code': code},
+      );
       return res.data?['valid'] == true;
     } catch (_) {
       return false;
@@ -78,7 +100,7 @@ class AuthService {
 
   static Future<bool> enrollTwinSeal(String secret, String code) async {
     try {
-      final client = getSupabase();
+      final client = _requireClient();
       final res = await client.functions.invoke(
         'enroll-totp',
         body: {'secret': secret, 'code': code},
@@ -100,22 +122,23 @@ class AuthService {
   }
 
   static Future<void> signOut() async {
-    final client = getSupabase();
-    await client.auth.signOut();
+    final client = maybeSupabase();
+    if (client != null) {
+      await client.auth.signOut();
+    }
     await SecureStorageService.clearAll();
   }
 
   static Future<Session?> getSession() async {
-    final client = getSupabase();
-    return client.auth.currentSession;
+    return maybeSupabase()?.auth.currentSession;
   }
 
   static Future<User?> getCurrentUser() async {
-    final client = getSupabase();
-    return client.auth.currentUser;
+    return maybeSupabase()?.auth.currentUser;
   }
 
   static Stream<AuthState> onAuthStateChange() {
-    return getSupabase().auth.onAuthStateChange;
+    final client = _requireClient();
+    return client.auth.onAuthStateChange;
   }
 }

@@ -33,8 +33,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _submitting = false;
 
   static const _professions = [
-    '', 'Aviation', 'Medical', 'Finance', 'Legal',
-    'Technology', 'Engineering', 'Arts',
+    '',
+    'Aviation',
+    'Medical',
+    'Finance',
+    'Legal',
+    'Technology',
+    'Engineering',
+    'Arts',
   ];
 
   bool get _isValid => _nameController.text.trim().length >= 2;
@@ -70,16 +76,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     setState(() => _submitting = true);
 
-    final userId = getSupabase().auth.currentUser?.id ?? '';
-    if (userId.isEmpty) return;
+    final userId = maybeSupabase()?.auth.currentUser?.id ?? '';
+    if (userId.isEmpty) {
+      setState(() => _submitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please sign in again to finish setting up your profile.',
+          ),
+        ),
+      );
+      context.go('/login');
+      return;
+    }
 
-    ref.read(residentProvider.notifier).setResident(
+    ref
+        .read(residentProvider.notifier)
+        .setResident(
           Resident(
             id: userId,
             name: _nameController.text.trim(),
             bio: _bioController.text.trim(),
             avatarUrl: _avatarFile?.path ?? '',
-            profession: _selectedProfession.isEmpty ? null : _selectedProfession,
+            profession: _selectedProfession.isEmpty
+                ? null
+                : _selectedProfession,
             tier: ResidentTier.hustlers,
             joinedWorldIds: const ['neon-district'],
             onboardingCompleted: true,
@@ -144,15 +165,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             hintText: 'How should we call you?',
                             hintStyle: TextStyle(color: AppColors.inkMuted),
                             border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: AppColors.glassBorder),
+                              borderSide: BorderSide(
+                                color: AppColors.glassBorder,
+                              ),
                             ),
                             enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: AppColors.glassBorder),
+                              borderSide: BorderSide(
+                                color: AppColors.glassBorder,
+                              ),
                             ),
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: AppColors.primary),
                             ),
-                            prefixIcon: Icon(Icons.person_outline, size: IconSizes.md),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              size: IconSizes.md,
+                            ),
                             filled: true,
                             fillColor: AppColors.glassBackground,
                           ),
@@ -171,17 +199,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           style: const TextStyle(color: AppColors.ink),
                           decoration: InputDecoration(
                             hintText: 'A few words about yourself...',
-                            hintStyle: const TextStyle(color: AppColors.inkMuted),
+                            hintStyle: const TextStyle(
+                              color: AppColors.inkMuted,
+                            ),
                             border: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: AppColors.glassBorder),
+                              borderSide: BorderSide(
+                                color: AppColors.glassBorder,
+                              ),
                             ),
                             enabledBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: AppColors.glassBorder),
+                              borderSide: BorderSide(
+                                color: AppColors.glassBorder,
+                              ),
                             ),
                             focusedBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(color: AppColors.primary),
                             ),
-                            prefixIcon: const Icon(Icons.edit_note, size: IconSizes.md),
+                            prefixIcon: const Icon(
+                              Icons.edit_note,
+                              size: IconSizes.md,
+                            ),
                             filled: true,
                             fillColor: AppColors.glassBackground,
                             counterStyle: const TextStyle(
@@ -294,12 +331,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.surfaceOverlay,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.glassBorder,
-                      width: 2,
-                    ),
+                    border: Border.all(color: AppColors.glassBorder, width: 2),
                   ),
-                  child: Icon(Icons.close, size: 16, color: AppColors.inkSecondary),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: AppColors.inkSecondary,
+                  ),
                 ),
               ),
             ),
@@ -405,10 +443,7 @@ class _HeroHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            AppColors.surface,
-            AppColors.canvas,
-          ],
+          colors: [AppColors.surface, AppColors.canvas],
         ),
       ),
       child: SafeArea(
@@ -422,27 +457,31 @@ class _HeroHeader extends StatelessWidget {
                 color: AppColors.tertiary.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
               ),
-              child: const Icon(Icons.public, size: 40, color: AppColors.tertiary),
+              child: const Icon(
+                Icons.public,
+                size: 40,
+                color: AppColors.tertiary,
+              ),
             ),
             const SizedBox(height: Spacing.lg),
             Text(
               'Welcome to\nVertiege',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeights.bold,
-                    letterSpacing: LetterSpacing.display,
-                    height: LineHeight.display,
-                    color: AppColors.ink,
-                  ),
+                fontWeight: FontWeights.bold,
+                letterSpacing: LetterSpacing.display,
+                height: LineHeight.display,
+                color: AppColors.ink,
+              ),
             ),
             const SizedBox(height: Spacing.sm + 4),
             Text(
               'Your tier-gated social universe.\nSet your identity and enter the worlds.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.ink.withValues(alpha: 0.7),
-                    height: LineHeight.body,
-                  ),
+                color: AppColors.ink.withValues(alpha: 0.7),
+                height: LineHeight.body,
+              ),
             ),
           ],
         ),

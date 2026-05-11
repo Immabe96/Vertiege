@@ -48,8 +48,14 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   static const double _goldBorderWidth = 2.5;
 
   static const _professions = [
-    '', 'Aviation', 'Medical', 'Finance', 'Legal',
-    'Technology', 'Engineering', 'Arts',
+    '',
+    'Aviation',
+    'Medical',
+    'Finance',
+    'Legal',
+    'Technology',
+    'Engineering',
+    'Arts',
   ];
 
   final _picker = ImagePicker();
@@ -92,7 +98,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       isScrollControlled: true,
       useSafeArea: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(RadiusTokens.cardFeatured)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(RadiusTokens.cardFeatured),
+        ),
       ),
       builder: (sheetContext) {
         return StatefulBuilder(
@@ -123,8 +131,11 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           height: 5,
                           margin: const EdgeInsets.only(bottom: Spacing.lg),
                           decoration: BoxDecoration(
-                            color: Theme.of(ctx).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                            color: Theme.of(ctx).colorScheme.onSurfaceVariant
+                                .withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.pill,
+                            ),
                           ),
                         ),
                       ),
@@ -133,22 +144,26 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       Text(
                         'Edit Profile',
                         style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeights.bold,
-                            ),
+                          fontWeight: FontWeights.bold,
+                        ),
                       ),
                       const SizedBox(height: Spacing.xs),
                       Text(
                         'Customize how others see you in the worlds.',
                         style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(ctx).colorScheme.outline,
-                            ),
+                          color: Theme.of(ctx).colorScheme.outline,
+                        ),
                       ),
                       const SizedBox(height: Spacing.lg),
 
                       // ── Avatar Picker ──────────────────────
                       _sectionHeader(ctx, 'Profile Photo'),
                       const SizedBox(height: Spacing.sm),
-                      _buildEditAvatarPicker(ctx, resident, (f) => setSheetState(() => editAvatarFile = f)),
+                      _buildEditAvatarPicker(
+                        ctx,
+                        resident,
+                        (f) => setSheetState(() => editAvatarFile = f),
+                      ),
                       const SizedBox(height: Spacing.lg),
 
                       // ── Display Name ───────────────────────
@@ -164,7 +179,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         decoration: InputDecoration(
                           hintText: 'Your display name',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(RadiusTokens.card),
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.card,
+                            ),
                           ),
                           prefixIcon: const Icon(Icons.person_outline),
                           filled: true,
@@ -181,10 +198,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           Text(
                             '${bioController.text.length}/160',
                             style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-                                  color: bioController.text.length >= 160
-                                      ? AppColors.semanticError
-                                      : Theme.of(ctx).colorScheme.outline,
-                                ),
+                              color: bioController.text.length >= 160
+                                  ? AppColors.semanticError
+                                  : Theme.of(ctx).colorScheme.outline,
+                            ),
                           ),
                         ],
                       ),
@@ -199,7 +216,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         decoration: InputDecoration(
                           hintText: 'A few words about yourself...',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(RadiusTokens.card),
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.card,
+                            ),
                           ),
                           prefixIcon: const Padding(
                             padding: EdgeInsets.only(bottom: 56),
@@ -222,15 +241,22 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           return ChoiceChip(
                             label: Text(p.isEmpty ? 'None' : p),
                             selected: isSel,
-                            onSelected: (_) => setSheetState(() => selectedProfession = p),
+                            onSelected: (_) =>
+                                setSheetState(() => selectedProfession = p),
                             selectedColor: AppColors.accentLevel,
                             labelStyle: TextStyle(
-                              color: isSel ? AppColors.ink : Theme.of(ctx).colorScheme.onSurfaceVariant,
+                              color: isSel
+                                  ? AppColors.ink
+                                  : Theme.of(ctx).colorScheme.onSurfaceVariant,
                               fontSize: FontSizes.body,
                             ),
-                            backgroundColor: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                            backgroundColor: Theme.of(
+                              ctx,
+                            ).colorScheme.surfaceContainerHighest,
                             side: BorderSide(
-                              color: isSel ? AppColors.primary : AppColors.surfaceOverlay,
+                              color: isSel
+                                  ? AppColors.primary
+                                  : AppColors.surfaceOverlay,
                             ),
                           );
                         }).toList(),
@@ -239,8 +265,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       Text(
                         'Self-declared — verification coming in a future update.',
                         style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(ctx).colorScheme.outline,
-                            ),
+                          color: Theme.of(ctx).colorScheme.outline,
+                        ),
                       ),
                       const SizedBox(height: Spacing.xl),
 
@@ -264,11 +290,15 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
                                 final cloudAvatar = editAvatarFile?.path;
 
-                                ref.read(residentProvider.notifier).updateProfile(
+                                ref
+                                    .read(residentProvider.notifier)
+                                    .updateProfile(
                                       name: name,
                                       bio: bioController.text.trim(),
                                       avatarPath: cloudAvatar,
-                                      profession: selectedProfession.isEmpty ? null : selectedProfession,
+                                      profession: selectedProfession.isEmpty
+                                          ? null
+                                          : selectedProfession,
                                     );
 
                                 Navigator.of(sheetContext).pop();
@@ -297,7 +327,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
   // ── Edit Profile Sheet ────────────────────────────────────
 
-
   // ── Sign Out ────────────────────────────────────────────────
 
   void _confirmSignOut() {
@@ -309,7 +338,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
         ),
         title: const Text('Sign out?'),
-        content: const Text('You\'ll need to sign in again to access your worlds and progress.'),
+        content: const Text(
+          'You\'ll need to sign in again to access your worlds and progress.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -371,11 +402,15 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     }
     _previousXp = currentXp;
 
-    final verifiedAchievementCount =
-        achievements.userAchievements.where((a) => a.status == AchievementStatus.verified).length;
+    final verifiedAchievementCount = achievements.userAchievements
+        .where((a) => a.status == AchievementStatus.verified)
+        .length;
 
     // Calculate total REP across all world standings
-    final totalRep = resident.worldStandings.values.fold<int>(0, (sum, ws) => sum + ws.rep);
+    final totalRep = resident.worldStandings.values.fold<int>(
+      0,
+      (sum, ws) => sum + ws.rep,
+    );
 
     // Compute tier progress for SovereignProgressBar
     final tierValue = resident.tier.value;
@@ -383,14 +418,23 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final currentThreshold = xpThresholds[tierValue] ?? 0;
     final nextThreshold = xpThresholds[nextTierValue];
     final tierProgress = nextThreshold != null
-        ? ((currentXp - currentThreshold) / (nextThreshold - currentThreshold)).clamp(0.0, 1.0)
+        ? ((currentXp - currentThreshold) / (nextThreshold - currentThreshold))
+              .clamp(0.0, 1.0)
         : 1.0;
 
-    final tierNames = {1: 'Hustler', 2: 'High Roller', 3: 'Elite', 4: 'Old Money', 5: 'Apex'};
+    final tierNames = {
+      1: 'Hustler',
+      2: 'High Roller',
+      3: 'Elite',
+      4: 'Old Money',
+      5: 'Apex',
+    };
     final nextTierName = tierNames[nextTierValue] ?? 'Max';
     final tierColor = _tierProgressColor(resident.tier);
     final xpInTier = currentXp - currentThreshold;
-    final xpNeeded = nextThreshold != null ? nextThreshold - currentThreshold : 0;
+    final xpNeeded = nextThreshold != null
+        ? nextThreshold - currentThreshold
+        : 0;
 
     return Scaffold(
       appBar: PreferredSize(
@@ -405,7 +449,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               title: const Text('Identity'),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.settings, color: AppColors.inkSecondary),
+                  icon: const Icon(
+                    Icons.settings,
+                    color: AppColors.inkSecondary,
+                  ),
                   tooltip: 'Settings',
                   onPressed: () => context.push('/settings'),
                 ),
@@ -566,7 +613,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       progress: tierProgress,
                       color: tierColor,
                       label: '${resident.tier.label} Tier',
-                      trailing: nextThreshold != null ? 'Next: $nextTierName' : 'Max Tier',
+                      trailing: nextThreshold != null
+                          ? 'Next: $nextTierName'
+                          : 'Max Tier',
                     ),
                     const SizedBox(height: Spacing.xs),
                     Row(
@@ -609,9 +658,13 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.tertiary,
                           foregroundColor: AppColors.onTertiary,
-                          padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: Spacing.md,
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(RadiusTokens.card),
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.card,
+                            ),
                           ),
                         ),
                       ),
@@ -621,16 +674,25 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          Share.share('Join me on Vertiege! My profile: ${resident.name}');
+                          Share.share(
+                            'Join me on Vertiege! My profile: ${resident.name}',
+                          );
                         },
-                        icon: const Icon(Icons.share_outlined, size: IconSizes.md),
+                        icon: const Icon(
+                          Icons.share_outlined,
+                          size: IconSizes.md,
+                        ),
                         label: const Text('Share'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
                           side: const BorderSide(color: AppColors.glassBorder),
-                          padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: Spacing.md,
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(RadiusTokens.card),
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.card,
+                            ),
                           ),
                         ),
                       ),
@@ -662,7 +724,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         icon: Icons.people,
                         value: resident.following.length,
                         label: 'Following',
-                        onTap: () {},
+                        onTap: () => context.push('/search'),
                       ),
                     ),
                     const SizedBox(width: Spacing.sm),
@@ -671,7 +733,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         icon: Icons.public,
                         value: resident.joinedWorldIds.length,
                         label: 'Worlds',
-                        onTap: () {},
+                        onTap: () => context.go('/explore'),
                       ),
                     ),
                   ],
@@ -713,7 +775,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   onTap: () => _showEditProfileSheet(resident),
                 ),
               ),
-            if (resident.bio.isEmpty || resident.profession == null || resident.profession!.isEmpty)
+            if (resident.bio.isEmpty ||
+                resident.profession == null ||
+                resident.profession!.isEmpty)
               const SizedBox(height: Spacing.sm),
 
             // ── Divider ────────────────────────────────────
@@ -791,13 +855,20 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   return ListTile(
                     leading: Icon(
                       Icons.handshake,
-                      color: allies.isNotEmpty ? AppColors.tertiary : colorScheme.onSurfaceVariant,
+                      color: allies.isNotEmpty
+                          ? AppColors.tertiary
+                          : colorScheme.onSurfaceVariant,
                     ),
                     title: const Text('Allies'),
-                    subtitle: Text(allies.isNotEmpty
-                        ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
-                        : 'No allies yet'),
-                    trailing: Icon(Icons.chevron_right, color: colorScheme.outline),
+                    subtitle: Text(
+                      allies.isNotEmpty
+                          ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
+                          : 'No allies yet',
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: colorScheme.outline,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(RadiusTokens.card),
                     ),
@@ -840,7 +911,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             FadeIn(
               delayMs: 195,
               child: ListTile(
-                leading: Icon(Icons.settings, color: colorScheme.onSurfaceVariant),
+                leading: Icon(
+                  Icons.settings,
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 title: const Text('Settings'),
                 trailing: Icon(Icons.chevron_right, color: colorScheme.outline),
                 shape: RoundedRectangleBorder(
@@ -858,7 +932,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                 child: ListTile(
-                  leading: const Icon(Icons.logout, color: AppColors.semanticError),
+                  leading: const Icon(
+                    Icons.logout,
+                    color: AppColors.semanticError,
+                  ),
                   title: const Text(
                     'Sign Out',
                     style: TextStyle(color: AppColors.semanticError),
@@ -888,27 +965,37 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     return Row(
       children: [
         Expanded(
-          child: _pickButton(ctx, Icons.camera_alt_outlined, 'Camera', () async {
-            final picked = await _picker.pickImage(
-              source: ImageSource.camera,
-              maxWidth: 512,
-              maxHeight: 512,
-              imageQuality: 85,
-            );
-            if (picked != null) onChanged(File(picked.path));
-          }),
+          child: _pickButton(
+            ctx,
+            Icons.camera_alt_outlined,
+            'Camera',
+            () async {
+              final picked = await _picker.pickImage(
+                source: ImageSource.camera,
+                maxWidth: 512,
+                maxHeight: 512,
+                imageQuality: 85,
+              );
+              if (picked != null) onChanged(File(picked.path));
+            },
+          ),
         ),
         const SizedBox(width: Spacing.sm),
         Expanded(
-          child: _pickButton(ctx, Icons.photo_library_outlined, 'Gallery', () async {
-            final picked = await _picker.pickImage(
-              source: ImageSource.gallery,
-              maxWidth: 512,
-              maxHeight: 512,
-              imageQuality: 85,
-            );
-            if (picked != null) onChanged(File(picked.path));
-          }),
+          child: _pickButton(
+            ctx,
+            Icons.photo_library_outlined,
+            'Gallery',
+            () async {
+              final picked = await _picker.pickImage(
+                source: ImageSource.gallery,
+                maxWidth: 512,
+                maxHeight: 512,
+                imageQuality: 85,
+              );
+              if (picked != null) onChanged(File(picked.path));
+            },
+          ),
         ),
       ],
     );
@@ -933,7 +1020,13 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             children: [
               Icon(icon, color: AppColors.primary, size: 28),
               const SizedBox(height: Spacing.xs),
-              Text(label, style: TextStyle(color: t.colorScheme.onSurfaceVariant, fontSize: FontSizes.body)),
+              Text(
+                label,
+                style: TextStyle(
+                  color: t.colorScheme.onSurfaceVariant,
+                  fontSize: FontSizes.body,
+                ),
+              ),
             ],
           ),
         ),
@@ -945,10 +1038,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     return Text(
       title,
       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeights.bold,
-            letterSpacing: LetterSpacing.micro,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+        fontWeight: FontWeights.bold,
+        letterSpacing: LetterSpacing.micro,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }

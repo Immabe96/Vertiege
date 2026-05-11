@@ -1,9 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../services/auth_service.dart';
+import '../../state/resident_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
 
-class AuthCallbackScreen extends StatelessWidget {
+class AuthCallbackScreen extends ConsumerStatefulWidget {
   const AuthCallbackScreen({super.key});
+
+  @override
+  ConsumerState<AuthCallbackScreen> createState() => _AuthCallbackScreenState();
+}
+
+class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _finishSignIn());
+  }
+
+  Future<void> _finishSignIn() async {
+    try {
+      final session = await AuthService.getSession().timeout(
+        const Duration(seconds: 8),
+      );
+      if (!mounted) return;
+
+      if (session == null) {
+        setState(() => _error = 'We could not finish signing you in.');
+        return;
+      }
+
+      await ref
+          .read(residentProvider.notifier)
+          .loadResident()
+          .timeout(const Duration(seconds: 8));
+      if (!mounted) return;
+
+      final resident = ref.read(residentProvider).resident;
+      if (resident == null) {
+        context.go('/onboarding');
+      } else if (!resident.gateCompleted) {
+        context.go('/the-gate');
+      } else {
+        context.go('/');
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = 'Sign-in timed out. Please try again.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +82,9 @@ class AuthCallbackScreen extends StatelessWidget {
                   height: 72,
                   decoration: BoxDecoration(
                     color: AppColors.seed.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+                    borderRadius: BorderRadius.circular(
+                      RadiusTokens.cardFeatured,
+                    ),
                   ),
                   child: const Icon(
                     Icons.public,
@@ -50,18 +101,33 @@ class AuthCallbackScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: Spacing.xl),
-                const SizedBox(
-                  width: IconSizes.lg,
-                  height: IconSizes.lg,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
-                ),
+                if (_error == null)
+                  const SizedBox(
+                    width: IconSizes.lg,
+                    height: IconSizes.lg,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                else
+                  Icon(
+                    Icons.error_outline,
+                    size: IconSizes.xl,
+                    color: colorScheme.error,
+                  ),
                 const SizedBox(height: Spacing.lg),
                 Text(
-                  'Signing you in...',
+                  _error ?? 'Signing you in...',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
+                  textAlign: TextAlign.center,
                 ),
+                if (_error != null) ...[
+                  const SizedBox(height: Spacing.lg),
+                  FilledButton(
+                    onPressed: () => context.go('/login'),
+                    child: const Text('Back to Sign In'),
+                  ),
+                ],
               ],
             ),
           ),

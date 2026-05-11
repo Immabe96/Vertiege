@@ -53,176 +53,249 @@ class PostItem extends ConsumerWidget {
       child: GestureDetector(
         onDoubleTap: () {
           if (resident != null) {
-            ref.read(postProvider.notifier).addReaction(post.id, '❤️', resident.id);
+            ref
+                .read(postProvider.notifier)
+                .addReaction(post.id, '❤️', resident.id);
             HapticFeedback.mediumImpact();
           }
         },
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
-        decoration: BoxDecoration(
-          color: AppColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.card),
-          border: Border(
-            left: isCouncilPost
-                ? BorderSide(color: AppColors.tertiary.withValues(alpha: 0.5), width: 3)
-                : BorderSide(color: AppColors.glassBorder),
-            top: BorderSide(color: AppColors.glassBorder),
-            right: BorderSide(color: AppColors.glassBorder),
-            bottom: BorderSide(color: AppColors.glassBorder),
+          margin: const EdgeInsets.symmetric(
+            horizontal: Spacing.md,
+            vertical: Spacing.xs,
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => _showResidentPreview(context, ref),
-                    onLongPress: () => context.push('/residents/${post.residentId}'),
-                    child: Hero(
-                      tag: 'avatar-${post.residentId}',
-                      child: CosmeticAvatar(
-                        imageUrl: post.residentAvatar,
-                        size: 40,
+          decoration: BoxDecoration(
+            color: AppColors.glassBackground,
+            borderRadius: BorderRadius.circular(RadiusTokens.card),
+            border: Border(
+              left: isCouncilPost
+                  ? BorderSide(
+                      color: AppColors.tertiary.withValues(alpha: 0.5),
+                      width: 3,
+                    )
+                  : BorderSide(color: AppColors.glassBorder),
+              top: BorderSide(color: AppColors.glassBorder),
+              right: BorderSide(color: AppColors.glassBorder),
+              bottom: BorderSide(color: AppColors.glassBorder),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _showResidentPreview(context, ref),
+                      onLongPress: () =>
+                          context.push('/residents/${post.residentId}'),
+                      child: Hero(
+                        tag: 'avatar-${post.residentId}',
+                        child: CosmeticAvatar(
+                          imageUrl: post.residentAvatar,
+                          size: 40,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _showResidentPreview(context, ref),
-                          onLongPress: () => context.push('/residents/${post.residentId}'),
-                          child: LuminaryNameplate(
-                            name: post.residentName,
-                            tier: post.tierAtPosting.value,
-                            fontSize: FontSizes.bodyMd,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () => _showResidentPreview(context, ref),
+                            onLongPress: () =>
+                                context.push('/residents/${post.residentId}'),
+                            child: LuminaryNameplate(
+                              name: post.residentName,
+                              tier: post.tierAtPosting.value,
+                              fontSize: FontSizes.bodyMd,
+                            ),
                           ),
+                          const SizedBox(height: 1),
+                          Row(
+                            children: [
+                              TierIcon(
+                                tier: post.tierAtPosting.value,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                formatTimestamp(post.timestamp) +
+                                    (post.isEdited ? ' (edited)' : ''),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.outline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (showOverflow)
+                      PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_horiz,
+                          size: 20,
+                          color: theme.colorScheme.outline,
                         ),
-                        const SizedBox(height: 1),
-                        Row(
-                          children: [
-                            TierIcon(tier: post.tierAtPosting.value, size: 12),
-                            const SizedBox(width: 4),
-                            Text(formatTimestamp(post.timestamp) + (post.isEdited ? ' (edited)' : ''),
-                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
-                          ],
+                        onSelected: (action) {
+                          if (action == 'delete') _onDelete(ref);
+                          if (action == 'report') _onReport(context, ref);
+                          if (action == 'pin') _onTogglePin(ref);
+                          if (action == 'edit') _onEdit(context, ref);
+                        },
+                        itemBuilder: (context) => [
+                          if (isOwnPost)
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit post'),
+                            ),
+                          if (canPin)
+                            PopupMenuItem(
+                              value: 'pin',
+                              child: Text(
+                                post.isPinned ? 'Unpin post' : 'Pin post',
+                              ),
+                            ),
+                          if (canMod)
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete post'),
+                            ),
+                          if (!isOwnPost)
+                            const PopupMenuItem(
+                              value: 'report',
+                              child: Text('Report'),
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
+                if (post.isPinned || post.isAnnouncement || post.isDecree) ...[
+                  const SizedBox(height: 8),
+                  if (post.isDecree) _DecreeLabel(),
+                  if (post.isPinned && !post.isDecree)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.push_pin,
+                          size: 14,
+                          color: theme.colorScheme.tertiary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Pinned',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.tertiary,
+                            fontWeight: FontWeights.bold,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  if (showOverflow)
-                    PopupMenuButton<String>(
-                      icon: Icon(Icons.more_horiz, size: 20, color: theme.colorScheme.outline),
-                      onSelected: (action) {
-                        if (action == 'delete') _onDelete(ref);
-                        if (action == 'report') _onReport(context, ref);
-                        if (action == 'pin') _onTogglePin(ref);
-                        if (action == 'edit') _onEdit(context, ref);
-                      },
-                      itemBuilder: (context) => [
-                        if (isOwnPost)
-                          const PopupMenuItem(value: 'edit', child: Text('Edit post')),
-                        if (canPin)
-                          PopupMenuItem(value: 'pin', child: Text(post.isPinned ? 'Unpin post' : 'Pin post')),
-                        if (canMod)
-                          const PopupMenuItem(value: 'delete', child: Text('Delete post')),
-                        if (!isOwnPost)
-                          const PopupMenuItem(value: 'report', child: Text('Report')),
+                  if (post.isAnnouncement)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.campaign,
+                          size: 14,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Announcement',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeights.bold,
+                          ),
+                        ),
                       ],
                     ),
                 ],
-              ),
-              if (post.isPinned || post.isAnnouncement || post.isDecree) ...[
-                const SizedBox(height: 8),
-                if (post.isDecree)
-                  _DecreeLabel(),
-                if (post.isPinned && !post.isDecree)
-                  Row(
-                    children: [
-                      Icon(Icons.push_pin, size: 14, color: theme.colorScheme.tertiary),
-                      const SizedBox(width: 4),
-                      Text('Pinned', style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.tertiary, fontWeight: FontWeights.bold)),
-                    ],
-                  ),
-                if (post.isAnnouncement)
-                  Row(
-                    children: [
-                      Icon(Icons.campaign, size: 14, color: theme.colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Text('Announcement', style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary, fontWeight: FontWeights.bold)),
-                    ],
-                  ),
-              ],
-              Padding(
-                padding: EdgeInsets.only(top: post.isPinned || post.isAnnouncement ? 6 : 8, bottom: post.imageUri != null || post.poll != null ? 8 : 0),
-                child: _RichPostContent(
-                  content: post.content,
-                  theme: theme,
-                  onMentionTap: (name) {
-                    final id = nameToId[name];
-                    if (id != null) {
-                      context.push('/residents/$id');
-                    }
-                  },
-                  onHashtagTap: (tag) => context.push('/search?q=%23$tag'),
-                ),
-              ),
-              // ── Poll display ──
-              if (post.poll != null) ...[
-                const SizedBox(height: 8),
-                _PollDisplay(post: post),
-              ],
-              if (post.imageUri != null) ...[
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(post.imageUri!, fit: BoxFit.cover, width: double.infinity),
+                  padding: EdgeInsets.only(
+                    top: post.isPinned || post.isAnnouncement ? 6 : 8,
+                    bottom: post.imageUri != null || post.poll != null ? 8 : 0,
+                  ),
+                  child: _RichPostContent(
+                    content: post.content,
+                    theme: theme,
+                    onMentionTap: (name) {
+                      final id = nameToId[name];
+                      if (id != null) {
+                        context.push('/residents/$id');
+                      }
+                    },
+                    onHashtagTap: (tag) => context.push('/search?q=%23$tag'),
                   ),
                 ),
-              ],
-              IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ReactionBar(
-                        reactions: post.reactions,
-                        currentResidentId: resident?.id ?? '',
-                        onReact: (emoji) {
-                          ref.read(postProvider.notifier).addReaction(post.id, emoji, resident?.id ?? '');
-                        },
+                // ── Poll display ──
+                if (post.poll != null) ...[
+                  const SizedBox(height: 8),
+                  _PollDisplay(post: post),
+                ],
+                if (post.imageUri != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        post.imageUri!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
                       ),
                     ),
-                    if (post.comments.isNotEmpty) ...[
-                      Container(width: 1, color: theme.dividerColor),
-                      GestureDetector(
-                        onTap: () => _showComments(context, ref),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Row(
-                            children: [
-                              Icon(Icons.chat_bubble_outline, size: 16, color: theme.colorScheme.outline),
-                              const SizedBox(width: 4),
-                              Text('${post.comments.length}', style: theme.textTheme.labelSmall),
-                            ],
-                          ),
+                  ),
+                ],
+                IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ReactionBar(
+                          reactions: post.reactions,
+                          currentResidentId: resident?.id ?? '',
+                          onReact: (emoji) {
+                            ref
+                                .read(postProvider.notifier)
+                                .addReaction(
+                                  post.id,
+                                  emoji,
+                                  resident?.id ?? '',
+                                );
+                          },
                         ),
                       ),
+                      if (post.comments.isNotEmpty) ...[
+                        Container(width: 1, color: theme.dividerColor),
+                        GestureDetector(
+                          onTap: () => _showComments(context, ref),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 16,
+                                  color: theme.colorScheme.outline,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${post.comments.length}',
+                                  style: theme.textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -230,7 +303,12 @@ class PostItem extends ConsumerWidget {
   bool _canDelete(WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
     if (resident == null || worldId == null) return false;
-    return WorldPermissions.canDeletePost(resident, worldId!, post.residentId, null);
+    return WorldPermissions.canDeletePost(
+      resident,
+      worldId!,
+      post.residentId,
+      null,
+    );
   }
 
   bool _canPin(WidgetRef ref) {
@@ -255,7 +333,10 @@ class PostItem extends ConsumerWidget {
           decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () {
               final text = ctrl.text.trim();
@@ -274,6 +355,9 @@ class PostItem extends ConsumerWidget {
   void _showResidentPreview(BuildContext context, WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
     final isOwn = resident?.id == post.residentId;
+    final isFollowing = ref
+        .read(residentProvider.notifier)
+        .isFollowing(post.residentId);
     final tierLabel = post.tierAtPosting.label;
 
     showGlassSheet(
@@ -285,10 +369,7 @@ class PostItem extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: Spacing.lg),
-            CosmeticAvatar(
-              imageUrl: post.residentAvatar,
-              size: 72,
-            ),
+            CosmeticAvatar(imageUrl: post.residentAvatar, size: 72),
             const SizedBox(height: Spacing.md),
             LuminaryNameplate(
               name: post.residentName,
@@ -312,11 +393,28 @@ class PostItem extends ConsumerWidget {
                 children: [
                   FilledButton.icon(
                     onPressed: () {
-                      // TODO: follow logic
+                      final notifier = ref.read(residentProvider.notifier);
+                      if (isFollowing) {
+                        notifier.unfollow(post.residentId);
+                      } else {
+                        notifier.follow(post.residentId);
+                      }
                       Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isFollowing
+                                ? 'Unfollowed ${post.residentName}'
+                                : 'Following ${post.residentName}',
+                          ),
+                        ),
+                      );
                     },
-                    icon: const Icon(Icons.person_add, size: IconSizes.sm),
-                    label: const Text('Follow'),
+                    icon: Icon(
+                      isFollowing ? Icons.person_remove : Icons.person_add,
+                      size: IconSizes.sm,
+                    ),
+                    label: Text(isFollowing ? 'Unfollow' : 'Follow'),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.tertiary,
                       foregroundColor: AppColors.onTertiary,
@@ -469,7 +567,12 @@ class _ReportSheetState extends State<_ReportSheet> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => widget.onSubmit(_reason, _detailsController.text.trim().isEmpty ? null : _detailsController.text.trim()),
+              onPressed: () => widget.onSubmit(
+                _reason,
+                _detailsController.text.trim().isEmpty
+                    ? null
+                    : _detailsController.text.trim(),
+              ),
               child: const Text('Submit Report'),
             ),
           ),
@@ -478,7 +581,6 @@ class _ReportSheetState extends State<_ReportSheet> {
     );
   }
 }
-
 
 /// Rich post content that renders @mentions and #hashtags as tappable spans.
 class _RichPostContent extends StatefulWidget {
@@ -537,23 +639,27 @@ class _RichPostContentState extends State<_RichPostContent> {
       } else if (match.group(3) != null) {
         // @mention
         final name = match.group(3)!;
-        spans.add(WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: GestureDetector(
-            onTap: () => widget.onMentionTap?.call(name),
-            child: Text('@$name', style: mentionStyle),
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: GestureDetector(
+              onTap: () => widget.onMentionTap?.call(name),
+              child: Text('@$name', style: mentionStyle),
+            ),
           ),
-        ));
+        );
       } else if (match.group(4) != null) {
         // #hashtag
         final tag = match.group(4)!;
-        spans.add(WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: GestureDetector(
-            onTap: () => widget.onHashtagTap?.call(tag.toLowerCase()),
-            child: Text('#${tag.toLowerCase()}', style: hashtagStyle),
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: GestureDetector(
+              onTap: () => widget.onHashtagTap?.call(tag.toLowerCase()),
+              child: Text('#${tag.toLowerCase()}', style: hashtagStyle),
+            ),
           ),
-        ));
+        );
       }
 
       lastEnd = match.end;
@@ -614,7 +720,8 @@ class _PollDisplay extends ConsumerWidget {
     if (poll == null) return const SizedBox.shrink();
 
     final resident = ref.watch(residentProvider).resident;
-    final hasVoted = resident != null && poll.votedResidentIds.contains(resident.id);
+    final hasVoted =
+        resident != null && poll.votedResidentIds.contains(resident.id);
     final totalVotes = poll.totalVotes;
 
     return Container(
@@ -649,7 +756,9 @@ class _PollDisplay extends ConsumerWidget {
             ),
           const SizedBox(height: Spacing.sm),
           ...poll.options.map((option) {
-            final percentage = totalVotes > 0 ? (option.voteCount / totalVotes) : 0.0;
+            final percentage = totalVotes > 0
+                ? (option.voteCount / totalVotes)
+                : 0.0;
             final isSelected = hasVoted && option.voteCount > 0;
             final showResults = hasVoted;
 
@@ -658,16 +767,23 @@ class _PollDisplay extends ConsumerWidget {
               child: GestureDetector(
                 onTap: hasVoted
                     ? null
-                    : () => ref.read(postProvider.notifier).voteOnPoll(post.id, option.id),
+                    : () => ref
+                          .read(postProvider.notifier)
+                          .voteOnPoll(post.id, option.id),
                 child: AnimatedContainer(
                   duration: AnimDurations.slow,
                   curve: AnimCurves.easeInOut,
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm + 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: Spacing.sm + 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.glassBackground,
                     borderRadius: BorderRadius.circular(RadiusTokens.chip),
                     border: Border.all(
-                      color: isSelected ? AppColors.tertiary : AppColors.glassBorder,
+                      color: isSelected
+                          ? AppColors.tertiary
+                          : AppColors.glassBorder,
                     ),
                   ),
                   child: Stack(
@@ -683,11 +799,14 @@ class _PollDisplay extends ConsumerWidget {
                             duration: AnimDurations.slow,
                             curve: AnimCurves.easeInOut,
                             width: percentage > 0
-                                ? (MediaQuery.of(context).size.width - 120) * percentage
+                                ? (MediaQuery.of(context).size.width - 120) *
+                                      percentage
                                 : 0,
                             decoration: BoxDecoration(
                               color: AppColors.tertiary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.chip,
+                              ),
                             ),
                           ),
                         ),
@@ -779,16 +898,23 @@ class _DecreeLabelState extends State<_DecreeLabel>
       animation: _controller,
       builder: (context, child) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.sm,
+            vertical: 2,
+          ),
           decoration: BoxDecoration(
             color: AppColors.tertiary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(RadiusTokens.chip),
             border: Border.all(
-              color: AppColors.tertiary.withValues(alpha: 0.3 + (0.15 * _controller.value)),
+              color: AppColors.tertiary.withValues(
+                alpha: 0.3 + (0.15 * _controller.value),
+              ),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.tertiary.withValues(alpha: 0.15 + (0.2 * _controller.value)),
+                color: AppColors.tertiary.withValues(
+                  alpha: 0.15 + (0.2 * _controller.value),
+                ),
                 blurRadius: 8,
                 spreadRadius: 0,
               ),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -101,14 +100,16 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       if (mounted) {
         setState(() {
           _members = members
-              .map((m) => WorldMemberEntry(
-                    resident: Resident(
-                      id: m['resident_id'] ?? '',
-                      name: m['resident_name'] ?? 'Member',
-                      avatarUrl: m['avatar_url'] ?? '',
-                    ),
-                    rep: m['rep'] ?? 0,
-                  ))
+              .map(
+                (m) => WorldMemberEntry(
+                  resident: Resident(
+                    id: m['resident_id'] ?? '',
+                    name: m['resident_name'] ?? 'Member',
+                    avatarUrl: m['avatar_url'] ?? '',
+                  ),
+                  rep: m['rep'] ?? 0,
+                ),
+              )
               .toList();
           _membersLoading = false;
           _hasError = false;
@@ -145,8 +146,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     _statsAnimated = true;
 
     final world = ref.read(worldProvider).worlds[widget.worldId];
-    final posts =
-        ref.read(postProvider.notifier).getPostsByWorld(widget.worldId);
+    final posts = ref
+        .read(postProvider.notifier)
+        .getPostsByWorld(widget.worldId);
     final events =
         ref.read(eventProvider).eventsByWorld[widget.worldId]?.length ?? 0;
 
@@ -203,7 +205,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       builder: (ctx) => AlertDialog(
         title: Text('Leave ${world?.name ?? widget.worldId}?'),
         content: const Text(
-            'You will lose all your standing and rep in this world. This action cannot be undone.'),
+          'You will lose all your standing and rep in this world. This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -270,22 +273,26 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final worldState = ref.watch(worldProvider);
     final world = worldState.worlds[widget.worldId];
     final resident = ref.watch(residentProvider).resident;
-    final posts =
-        ref.watch(postProvider.notifier).getPostsByWorld(widget.worldId);
+    final posts = ref
+        .watch(postProvider.notifier)
+        .getPostsByWorld(widget.worldId);
     final channels =
         ref.watch(channelProvider).channelsByWorld[widget.worldId] ?? [];
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isJoined = resident?.joinedWorldIds.contains(widget.worldId) ?? false;
 
-    final scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.05), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
-    ]).animate(CurvedAnimation(
-      parent: _joinAnimController,
-      curve: AnimCurves.easeOut,
-    ));
+    final scaleAnimation =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.05), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
+        ]).animate(
+          CurvedAnimation(
+            parent: _joinAnimController,
+            curve: AnimCurves.easeOut,
+          ),
+        );
 
     // ── Loading state ──
     if (worldState.isLoading) {
@@ -344,9 +351,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final prestigeTierColor = _getPrestigeTierColor(world.prestige);
     final prestigeGlowTier = _getPrestigeGlowTier(world.prestige);
 
-    final onSettings = resident != null &&
+    final onSettings =
+        resident != null &&
             WorldPermissions.canManageSettings(
-                resident, widget.worldId, world.sovereignId) &&
+              resident,
+              widget.worldId,
+              world.sovereignId,
+            ) &&
             ref
                 .read(worldProvider.notifier)
                 .featuresForWorld(widget.worldId)
@@ -406,10 +417,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                AppColors.canvas,
-                              ],
+                              colors: [Colors.transparent, AppColors.canvas],
                               stops: const [0.7, 1.0],
                             ),
                           ),
@@ -420,8 +428,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                         top: MediaQuery.of(context).padding.top + Spacing.sm,
                         left: Spacing.sm,
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: AppColors.ink, size: IconSizes.lg),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: AppColors.ink,
+                            size: IconSizes.lg,
+                          ),
                           onPressed: () => context.pop(),
                         ),
                       ),
@@ -430,8 +441,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                         top: MediaQuery.of(context).padding.top + Spacing.sm,
                         right: (onSettings != null ? 56.0 : Spacing.sm),
                         child: IconButton(
-                          icon: const Icon(Icons.share_outlined,
-                              color: AppColors.ink, size: IconSizes.lg),
+                          icon: const Icon(
+                            Icons.share_outlined,
+                            color: AppColors.ink,
+                            size: IconSizes.lg,
+                          ),
                           tooltip: 'Share world',
                           onPressed: () => _showWorldShareSheet(world),
                         ),
@@ -442,8 +456,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           top: MediaQuery.of(context).padding.top + Spacing.sm,
                           right: Spacing.sm,
                           child: IconButton(
-                            icon: const Icon(Icons.settings,
-                                color: AppColors.ink, size: IconSizes.lg),
+                            icon: const Icon(
+                              Icons.settings,
+                              color: AppColors.ink,
+                              size: IconSizes.lg,
+                            ),
                             tooltip: 'World settings',
                             onPressed: onSettings,
                           ),
@@ -461,14 +478,20 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                               // Tier badge — colored by prestige tier
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: Spacing.md,
-                                    vertical: Spacing.xs),
+                                  horizontal: Spacing.md,
+                                  vertical: Spacing.xs,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: prestigeTierColor.withValues(alpha: 0.12),
-                                  borderRadius:
-                                      BorderRadius.circular(RadiusTokens.md),
+                                  color: prestigeTierColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    RadiusTokens.md,
+                                  ),
                                   border: Border.all(
-                                    color: prestigeTierColor.withValues(alpha: 0.25),
+                                    color: prestigeTierColor.withValues(
+                                      alpha: 0.25,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
@@ -512,10 +535,14 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
-                                      borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                                      borderRadius: BorderRadius.circular(
+                                        RadiusTokens.pill,
+                                      ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.tertiary.withValues(alpha: 0.3),
+                                          color: AppColors.tertiary.withValues(
+                                            alpha: 0.3,
+                                          ),
                                           blurRadius: 8,
                                           spreadRadius: 1,
                                         ),
@@ -524,7 +551,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.shield, size: 12, color: AppColors.onTertiary),
+                                        Icon(
+                                          Icons.shield,
+                                          size: 12,
+                                          color: AppColors.onTertiary,
+                                        ),
                                         SizedBox(width: 3),
                                         Text(
                                           'SOVEREIGN',
@@ -555,7 +586,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                 const SizedBox(height: Spacing.sm),
                                 Text(
                                   LegacyService.formatFoundedDate(
-                                    DateTime.fromMillisecondsSinceEpoch(world.createdAt),
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                      world.createdAt,
+                                    ),
                                   ),
                                   style: const TextStyle(
                                     fontSize: FontSizes.labelSm,
@@ -580,8 +613,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                         final btnFg = isJoined
                                             ? AppColors.onError
                                             : (prestigeGlowTier == GlowTier.apex
-                                                ? AppColors.onTertiary
-                                                : AppColors.onPrimary);
+                                                  ? AppColors.onTertiary
+                                                  : AppColors.onPrimary);
                                         return FilledButton(
                                           key: _joinButtonKey,
                                           onPressed: _handleJoin,
@@ -590,24 +623,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                             foregroundColor: btnFg,
                                           ),
                                           child: Text(
-                                              isJoined
-                                                  ? 'LEAVE WORLD'
-                                                  : 'JOIN WORLD'),
+                                            isJoined
+                                                ? 'LEAVE WORLD'
+                                                : 'JOIN WORLD',
+                                          ),
                                         );
                                       },
                                     ),
-                                  ),
-                                  const SizedBox(width: Spacing.sm),
-                                  OutlinedButton(
-                                    onPressed: () {
-                                      // Protocol docs — placeholder
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: AppColors.inkSecondary,
-                                      side: BorderSide(
-                                          color: AppColors.glassBorder),
-                                    ),
-                                    child: const Text('PROTOCOL DOCS'),
                                   ),
                                 ],
                               ),
@@ -649,10 +671,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
               // ── Resource Vault ──
               SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 110,
-                  child: const ResourceVault(),
-                ),
+                child: FadeIn(delayMs: 110, child: const ResourceVault()),
               ),
 
               // ── Alliances Section ──
@@ -707,7 +726,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     channels.isEmpty
                         ? const AppEmptyState(
                             title: 'No content',
-                            description: 'No channels have been created in this world yet.',
+                            description:
+                                'No channels have been created in this world yet.',
                             icon: Icons.chat_bubble_outline,
                             variant: EmptyStateVariant.default_,
                           )
@@ -720,7 +740,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     (!_membersLoading && _members.isEmpty)
                         ? const AppEmptyState(
                             title: 'No content',
-                            description: 'No members have joined this world yet.',
+                            description:
+                                'No members have joined this world yet.',
                             icon: Icons.people_outline,
                             variant: EmptyStateVariant.default_,
                           )
@@ -744,4 +765,3 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     );
   }
 }
-

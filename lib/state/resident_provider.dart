@@ -31,12 +31,11 @@ class ResidentState {
     Resident? resident,
     bool? isLoading,
     VerificationStatus? verificationStatus,
-  }) =>
-      ResidentState(
-        resident: resident ?? this.resident,
-        isLoading: isLoading ?? this.isLoading,
-        verificationStatus: verificationStatus ?? this.verificationStatus,
-      );
+  }) => ResidentState(
+    resident: resident ?? this.resident,
+    isLoading: isLoading ?? this.isLoading,
+    verificationStatus: verificationStatus ?? this.verificationStatus,
+  );
 }
 
 class ResidentNotifier extends Notifier<ResidentState> {
@@ -46,7 +45,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
   Future<void> loadResident() async {
     state = state.copyWith(isLoading: true);
     try {
-      final userId = getSupabase().auth.currentUser?.id;
+      final userId = maybeSupabase()?.auth.currentUser?.id;
       if (userId == null) {
         state = const ResidentState(isLoading: false);
         return;
@@ -63,8 +62,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
       if (json != null) {
         final data = jsonDecode(json) as Map<String, dynamic>;
         final resident = _fromJson(data);
-        if (resident != null) {
+        if (resident != null && resident.id == userId) {
           state = ResidentState(resident: resident, isLoading: false);
+          return;
         }
       }
       state = const ResidentState(isLoading: false);
@@ -123,7 +123,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
     if (r == null) return null;
 
     final today = DateTime.now().toIso8601String().substring(0, 10);
-    final yesterday = DateTime.now().subtract(const Duration(days: 1)).toIso8601String().substring(0, 10);
+    final yesterday = DateTime.now()
+        .subtract(const Duration(days: 1))
+        .toIso8601String()
+        .substring(0, 10);
 
     if (r.lastCheckIn == today) return null;
 
@@ -165,21 +168,36 @@ class ResidentNotifier extends Notifier<ResidentState> {
   }
 
   int _getStreakBonusXp(int streak) {
-    const milestones = {3: 10, 7: 50, 14: 100, 30: 200, 60: 500, 90: 1000, 180: 2500, 365: 5000};
+    const milestones = {
+      3: 10,
+      7: 50,
+      14: 100,
+      30: 200,
+      60: 500,
+      90: 1000,
+      180: 2500,
+      365: 5000,
+    };
     return milestones[streak] ?? 0;
   }
 
   void follow(String residentId) {
     final r = state.resident;
     if (r == null || r.following.contains(residentId)) return;
-    state = state.copyWith(resident: r.copyWith(following: [...r.following, residentId]));
+    state = state.copyWith(
+      resident: r.copyWith(following: [...r.following, residentId]),
+    );
     _persist();
   }
 
   void unfollow(String residentId) {
     final r = state.resident;
     if (r == null) return;
-    state = state.copyWith(resident: r.copyWith(following: r.following.where((id) => id != residentId).toList()));
+    state = state.copyWith(
+      resident: r.copyWith(
+        following: r.following.where((id) => id != residentId).toList(),
+      ),
+    );
     _persist();
   }
 
@@ -209,17 +227,26 @@ class ResidentNotifier extends Notifier<ResidentState> {
     final r = state.resident;
     if (r == null || r.wealthWorldsUnlocked.contains(worldId)) return;
     state = state.copyWith(
-      resident: r.copyWith(wealthWorldsUnlocked: [...r.wealthWorldsUnlocked, worldId]),
+      resident: r.copyWith(
+        wealthWorldsUnlocked: [...r.wealthWorldsUnlocked, worldId],
+      ),
     );
     _persist();
   }
 
-  void muteResident(String worldId, String residentId, {int durationHours = 1}) {
+  void muteResident(
+    String worldId,
+    String residentId, {
+    int durationHours = 1,
+  }) {
     final r = state.resident;
     if (r == null) return;
-    final mutedUntil = DateTime.now().millisecondsSinceEpoch + (durationHours * 3600000);
+    final mutedUntil =
+        DateTime.now().millisecondsSinceEpoch + (durationHours * 3600000);
     state = state.copyWith(
-      resident: r.copyWith(mutedUntil: {...r.mutedUntil, '$worldId:$residentId': mutedUntil}),
+      resident: r.copyWith(
+        mutedUntil: {...r.mutedUntil, '$worldId:$residentId': mutedUntil},
+      ),
     );
     _persist();
     ModerationService.muteUser(
@@ -255,7 +282,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
     final r = state.resident;
     if (r == null) return;
     state = state.copyWith(
-      resident: r.copyWith(bannedWorldIds: [...r.bannedWorldIds, '$worldId:$residentId']),
+      resident: r.copyWith(
+        bannedWorldIds: [...r.bannedWorldIds, '$worldId:$residentId'],
+      ),
     );
     _persist();
     ModerationService.banUser(
@@ -272,7 +301,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
     if (r == null) return;
     state = state.copyWith(
       resident: r.copyWith(
-        bannedWorldIds: r.bannedWorldIds.where((id) => id != '$worldId:$residentId').toList(),
+        bannedWorldIds: r.bannedWorldIds
+            .where((id) => id != '$worldId:$residentId')
+            .toList(),
       ),
     );
     _persist();
@@ -295,21 +326,31 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
     final now = DateTime.now();
     final today = now.toIso8601String().substring(0, 10);
-    final yesterday = now.subtract(const Duration(days: 1)).toIso8601String().substring(0, 10);
-    final dayBeforeYesterday = now.subtract(const Duration(days: 2)).toIso8601String().substring(0, 10);
+    final yesterday = now
+        .subtract(const Duration(days: 1))
+        .toIso8601String()
+        .substring(0, 10);
+    final dayBeforeYesterday = now
+        .subtract(const Duration(days: 2))
+        .toIso8601String()
+        .substring(0, 10);
 
     final lastDate = r.lastCheckIn?.substring(0, 10);
     if (lastDate == null || lastDate == today) return;
 
     if (lastDate == yesterday) {
       final hoursLeft = 23 - now.hour;
-      ref.read(notificationProvider.notifier).streakExpiringAlert(
+      ref
+          .read(notificationProvider.notifier)
+          .streakExpiringAlert(
             hoursLeft: hoursLeft.clamp(1, 23),
             residentName: r.name,
           );
     } else if (lastDate == dayBeforeYesterday && r.streakShields > 0) {
       final hoursLeft = 23 - now.hour;
-      ref.read(notificationProvider.notifier).streakExpiringAlert(
+      ref
+          .read(notificationProvider.notifier)
+          .streakExpiringAlert(
             hoursLeft: hoursLeft.clamp(1, 23),
             residentName: r.name,
           );
@@ -319,10 +360,16 @@ class ResidentNotifier extends Notifier<ResidentState> {
   Future<void> touchPresence() async {
     final r = state.resident;
     if (r == null) return;
-    state = state.copyWith(resident: r.copyWith(lastSeenAt: DateTime.now().millisecondsSinceEpoch));
+    state = state.copyWith(
+      resident: r.copyWith(lastSeenAt: DateTime.now().millisecondsSinceEpoch),
+    );
     _persist();
-    final client = getSupabase();
-    await client.from('profiles').update({'last_seen_at': DateTime.now().millisecondsSinceEpoch}).eq('id', r.id);
+    final client = maybeSupabase();
+    if (client == null) return;
+    await client
+        .from('profiles')
+        .update({'last_seen_at': DateTime.now().millisecondsSinceEpoch})
+        .eq('id', r.id);
   }
 
   void joinWorld(String worldId) {
@@ -364,12 +411,15 @@ class ResidentNotifier extends Notifier<ResidentState> {
     );
     _persist();
     WorldService.leaveWorld(worldId, r.id);
-    ref.read(worldProvider.notifier).updateWorldPrestige(
-      worldId: worldId,
-      memberCount: ref.read(worldProvider).worlds[worldId]?.memberCount ?? 0,
-      memberTiers: {},
-      recentPosts: ref.read(postProvider).posts,
-    );
+    ref
+        .read(worldProvider.notifier)
+        .updateWorldPrestige(
+          worldId: worldId,
+          memberCount:
+              ref.read(worldProvider).worlds[worldId]?.memberCount ?? 0,
+          memberTiers: {},
+          recentPosts: ref.read(postProvider).posts,
+        );
   }
 
   bool isMemberOf(String worldId) {
@@ -439,7 +489,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
     };
     final achievementId = professionToAchievement[profession];
     if (achievementId != null) {
-      ref.read(achievementProvider.notifier).submitAchievement(achievementId, 'submitted');
+      ref
+          .read(achievementProvider.notifier)
+          .submitAchievement(achievementId, 'submitted');
     }
   }
 
@@ -540,7 +592,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
   void _persist() {
     final r = state.resident;
     if (r == null) return;
-    StorageService.setString(StorageService.residentKey, jsonEncode(_toJson(r)));
+    StorageService.setString(
+      StorageService.residentKey,
+      jsonEncode(_toJson(r)),
+    );
   }
 
   static Resident? _fromJson(Map<String, dynamic> json) {
@@ -555,7 +610,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
       bio: (json['bio'] as String?) ?? '',
       avatarUrl: (json['avatarUrl'] as String?) ?? '',
       profession: json['profession'] as String?,
-      verifiedRoles: _toStringList(json['verifiedRoles']) ?? _toStringList(json['verifiedProfessions']) ?? [],
+      verifiedRoles:
+          _toStringList(json['verifiedRoles']) ??
+          _toStringList(json['verifiedProfessions']) ??
+          [],
       decorations: _toStringList(json['decorations']) ?? [],
       wealthWorldsUnlocked: _toStringList(json['wealthWorldsUnlocked']) ?? [],
       badges: _toStringList(json['cosmetics']?['badges']) ?? [],
@@ -566,7 +624,11 @@ class ResidentNotifier extends Notifier<ResidentState> {
       joinedWorldIds: _toStringList(json['joinedWorldIds']) ?? [],
       worldStandings: _parseStandings(json['worldStandings']),
       bannedWorldIds: _toStringList(json['bannedWorldIds']) ?? [],
-      mutedUntil: (json['mutedUntil'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as int?) ?? 0)) ?? {},
+      mutedUntil:
+          (json['mutedUntil'] as Map?)?.map(
+            (k, v) => MapEntry(k.toString(), (v as int?) ?? 0),
+          ) ??
+          {},
       lastSeenAt: (json['lastSeenAt'] as int?) ?? 0,
       referredBy: json['referredBy'] as String?,
       title: json['title'] as String?,
@@ -577,31 +639,33 @@ class ResidentNotifier extends Notifier<ResidentState> {
   }
 
   static Map<String, dynamic> _toJson(Resident r) => {
-        'id': r.id,
-        'name': r.name,
-        'tier': r.tier.value,
-        'bio': r.bio,
-        'avatarUrl': r.avatarUrl,
-        'profession': r.profession,
-        'verifiedRoles': r.verifiedRoles,
-        'decorations': r.decorations,
-        'wealthWorldsUnlocked': r.wealthWorldsUnlocked,
-        'cosmetics': {'badges': r.badges},
-        'lastCheckIn': r.lastCheckIn,
-        'streakCount': r.streakCount,
-        'streakShields': r.streakShields,
-        'following': r.following,
-        'joinedWorldIds': r.joinedWorldIds,
-        'worldStandings': r.worldStandings.map((k, v) => MapEntry(k, {'rep': v.rep})),
-        'bannedWorldIds': r.bannedWorldIds,
-        'mutedUntil': r.mutedUntil,
-        'lastSeenAt': r.lastSeenAt,
-        if (r.referredBy != null) 'referredBy': r.referredBy,
-        if (r.title != null) 'title': r.title,
-        'sovereignCoins': r.sovereignCoins,
-        'onboardingCompleted': r.onboardingCompleted,
-        'gateCompleted': r.gateCompleted,
-      };
+    'id': r.id,
+    'name': r.name,
+    'tier': r.tier.value,
+    'bio': r.bio,
+    'avatarUrl': r.avatarUrl,
+    'profession': r.profession,
+    'verifiedRoles': r.verifiedRoles,
+    'decorations': r.decorations,
+    'wealthWorldsUnlocked': r.wealthWorldsUnlocked,
+    'cosmetics': {'badges': r.badges},
+    'lastCheckIn': r.lastCheckIn,
+    'streakCount': r.streakCount,
+    'streakShields': r.streakShields,
+    'following': r.following,
+    'joinedWorldIds': r.joinedWorldIds,
+    'worldStandings': r.worldStandings.map(
+      (k, v) => MapEntry(k, {'rep': v.rep}),
+    ),
+    'bannedWorldIds': r.bannedWorldIds,
+    'mutedUntil': r.mutedUntil,
+    'lastSeenAt': r.lastSeenAt,
+    if (r.referredBy != null) 'referredBy': r.referredBy,
+    if (r.title != null) 'title': r.title,
+    'sovereignCoins': r.sovereignCoins,
+    'onboardingCompleted': r.onboardingCompleted,
+    'gateCompleted': r.gateCompleted,
+  };
 
   static List<String>? _toStringList(dynamic value) {
     if (value is List) return value.map((e) => e.toString()).toList();
@@ -610,7 +674,12 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
   static Map<String, WorldStanding> _parseStandings(dynamic value) {
     if (value is Map) {
-      return value.map((k, v) => MapEntry(k.toString(), WorldStanding(rep: (v is Map ? (v['rep'] as int?) ?? 0 : 0))));
+      return value.map(
+        (k, v) => MapEntry(
+          k.toString(),
+          WorldStanding(rep: (v is Map ? (v['rep'] as int?) ?? 0 : 0)),
+        ),
+      );
     }
     return {};
   }

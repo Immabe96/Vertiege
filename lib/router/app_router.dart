@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../state/resident_provider.dart';
+import '../services/supabase.dart';
 import '../services/invite_service.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/onboarding/the_gate_screen.dart';
@@ -41,8 +41,9 @@ import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final resident = ref.watch(residentProvider).resident;
-  final supabaseClient = Supabase.instance.client;
+  final residentState = ref.watch(residentProvider);
+  final resident = residentState.resident;
+  final supabaseClient = maybeSupabase();
 
   return GoRouter(
     initialLocation: '/',
@@ -53,11 +54,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (location == '/auth/callback' || location == '/splash') return null;
 
       // Auth pages are always accessible (they handle their own state)
-      final isAuthPage =
-          location == '/login' || location == '/signup';
+      final isAuthPage = location == '/login' || location == '/signup';
 
       // Check for a cached Supabase session (synchronous)
-      final hasSession = supabaseClient.auth.currentSession != null;
+      final hasSession = supabaseClient?.auth.currentSession != null;
 
       if (!hasSession) {
         // Not authenticated — allow access only to auth pages
@@ -66,6 +66,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Authenticated with a session
+      if (residentState.isLoading) return null;
+
       if (resident == null) {
         // No resident profile yet — redirect to onboarding
         if (location != '/onboarding') return '/onboarding';
@@ -74,9 +76,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Authenticated with resident but hasn't completed The Gate
       // The Gate comes AFTER basic onboarding
-      final gateDone = resident.gateCompleted || gateCompletedCache;
+      final gateDone = resident.gateCompleted;
       if (!gateDone) {
-        if (location != '/the-gate' && location != '/onboarding') return '/the-gate';
+        if (location != '/the-gate' && location != '/onboarding') {
+          return '/the-gate';
+        }
         return null;
       }
 
@@ -87,7 +91,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (location == '/subscription' && tier < 2) return '/';
 
       // Authenticated with resident — redirect away from auth/onboarding/gate pages
-      if (isAuthPage || location == '/onboarding' || location == '/the-gate') return '/';
+      if (isAuthPage || location == '/onboarding' || location == '/the-gate') {
+        return '/';
+      }
 
       return null;
     },
@@ -96,10 +102,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignUpScreen(),
@@ -162,8 +165,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'members',
                         builder: (context, state) => WorldMembersScreen(
                           worldId: state.pathParameters['worldId']!,
-                          worldName: state.uri.queryParameters['name'] ?? 'World',
-                          sovereignId: state.uri.queryParameters['sovereign'] ?? '',
+                          worldName:
+                              state.uri.queryParameters['name'] ?? 'World',
+                          sovereignId:
+                              state.uri.queryParameters['sovereign'] ?? '',
                         ),
                       ),
                     ],
@@ -180,9 +185,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':roomId',
-                    builder: (context, state) => ChatRoomScreen(
-                      roomId: state.pathParameters['roomId']!,
-                    ),
+                    builder: (context, state) =>
+                        ChatRoomScreen(roomId: state.pathParameters['roomId']!),
                   ),
                 ],
               ),
@@ -204,9 +208,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/residents/:id',
-        builder: (context, state) => ResidentProfileScreen(
-          residentId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            ResidentProfileScreen(residentId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/achievements',
@@ -295,9 +298,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/invite/:code',
-        builder: (context, state) => _AcceptInviteScreen(
-          code: state.pathParameters['code']!,
-        ),
+        builder: (context, state) =>
+            _AcceptInviteScreen(code: state.pathParameters['code']!),
       ),
     ],
   );
@@ -309,7 +311,8 @@ class _AcceptInviteScreen extends ConsumerStatefulWidget {
   const _AcceptInviteScreen({required this.code});
 
   @override
-  ConsumerState<_AcceptInviteScreen> createState() => _AcceptInviteScreenState();
+  ConsumerState<_AcceptInviteScreen> createState() =>
+      _AcceptInviteScreenState();
 }
 
 class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
@@ -325,13 +328,19 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
   Future<void> _accept() async {
     final invite = await InviteService.validateInvite(widget.code);
     if (invite == null || !invite.isValid) {
-      setState(() { _loading = false; _error = 'Invalid or expired invite code.'; });
+      setState(() {
+        _loading = false;
+        _error = 'Invalid or expired invite code.';
+      });
       return;
     }
 
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
-      setState(() { _loading = false; _error = 'Sign in to accept this invite.'; });
+      setState(() {
+        _loading = false;
+        _error = 'Sign in to accept this invite.';
+      });
       return;
     }
 
@@ -353,9 +362,16 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.link_off, size: 64, color: theme.colorScheme.error),
+                  Icon(
+                    Icons.link_off,
+                    size: 64,
+                    color: theme.colorScheme.error,
+                  ),
                   const SizedBox(height: 16),
-                  Text(_error ?? 'Something went wrong', style: theme.textTheme.bodyLarge),
+                  Text(
+                    _error ?? 'Something went wrong',
+                    style: theme.textTheme.bodyLarge,
+                  ),
                 ],
               ),
       ),
