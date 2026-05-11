@@ -52,11 +52,14 @@ android/build/
 /android/upload-keystore.jks
 /android/key.properties
 
-# Local agent/runtime state
-/.claude/settings.local.json
+# Local AI-agent/tooling state
 /.agents/
+/.claude/
+/.claude-flow/
 /.codex/
-/.swarm/*.db
-/.swarm/*.db-shm
-/.swarm/*.db-wal
+/.superpowers/
+/.swarm/
+/.mcp.json
+/AGENTS.md
+/CLAUDE.md
 /ruvector.db
