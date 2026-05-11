@@ -12,7 +12,10 @@ class MediaService {
     return _allowedImages.contains(ext);
   }
 
-  static Future<String?> uploadAvatar(String filePath, String residentId) async {
+  static Future<String?> uploadAvatar(
+    String filePath,
+    String residentId,
+  ) async {
     if (!isSupabaseConfigured() || !_isValidImage(filePath)) return null;
 
     final file = File(filePath);
@@ -20,7 +23,7 @@ class MediaService {
 
     final client = getSupabase();
     final ext = filePath.split('.').last.toLowerCase();
-    final fileName = '$residentId.$ext'; // Overwrite old avatar
+    final fileName = 'avatars/$residentId.$ext'; // Overwrite old avatar
 
     try {
       // Remove old avatar first (ignore if not found)
@@ -32,7 +35,10 @@ class MediaService {
     }
   }
 
-  static Future<String?> uploadPostImage(String filePath, String residentId) async {
+  static Future<String?> uploadPostImage(
+    String filePath,
+    String residentId,
+  ) async {
     if (!isSupabaseConfigured() || !_isValidImage(filePath)) return null;
 
     final file = File(filePath);
@@ -40,7 +46,8 @@ class MediaService {
 
     final client = getSupabase();
     final ext = filePath.split('.').last.toLowerCase();
-    final fileName = '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final fileName =
+        '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     try {
       await client.storage.from(_postBucket).upload(fileName, file);

@@ -364,12 +364,6 @@ class ResidentNotifier extends Notifier<ResidentState> {
       resident: r.copyWith(lastSeenAt: DateTime.now().millisecondsSinceEpoch),
     );
     _persist();
-    final client = maybeSupabase();
-    if (client == null) return;
-    await client
-        .from('profiles')
-        .update({'last_seen_at': DateTime.now().millisecondsSinceEpoch})
-        .eq('id', r.id);
   }
 
   void joinWorld(String worldId) {

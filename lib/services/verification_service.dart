@@ -32,7 +32,11 @@ class VerificationSubmission {
         proofUrl: data['proof_url'] ?? '',
         status: data['status'] ?? 'pending',
         reviewerNotes: data['reviewer_notes'],
-        createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
+        createdAt:
+            DateTime.tryParse(
+              data['created_at'] ?? '',
+            )?.millisecondsSinceEpoch ??
+            0,
       );
 }
 
@@ -55,7 +59,8 @@ class VerificationService {
     if (fileSize > _maxFileSize) return null;
 
     final client = getSupabase();
-    final fileName = '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final fileName =
+        '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     try {
       await client.storage.from(_bucket).upload(fileName, file);
@@ -100,7 +105,10 @@ class VerificationService {
   }
 
   /// Get a resident's latest verification status.
-  static Future<String?> getVerificationStatus(String residentId, String profession) async {
+  static Future<String?> getVerificationStatus(
+    String residentId,
+    String profession,
+  ) async {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
     final data = await client
@@ -115,28 +123,17 @@ class VerificationService {
   }
 
   /// Approve a verification submission.
-  static Future<void> approve(String submissionId, String residentId, String profession) async {
+  static Future<void> approve(
+    String submissionId,
+    String residentId,
+    String profession,
+  ) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
     await client
         .from('verification_submissions')
         .update({'status': 'approved'})
         .eq('id', submissionId);
-
-    // Update the profile's verified_roles
-    final profile = await client
-        .from('profiles')
-        .select('verified_roles')
-        .eq('id', residentId)
-        .maybeSingle();
-
-    final roles = List<String>.from(profile?['verified_roles'] ?? []);
-    if (!roles.contains(profession)) roles.add(profession);
-
-    await client
-        .from('profiles')
-        .update({'verified_roles': roles})
-        .eq('id', residentId);
   }
 
   /// Reject a verification submission.
@@ -145,10 +142,7 @@ class VerificationService {
     final client = getSupabase();
     await client
         .from('verification_submissions')
-        .update({
-          'status': 'rejected',
-          'reviewer_notes': notes,
-        })
+        .update({'status': 'rejected', 'reviewer_notes': notes})
         .eq('id', submissionId);
   }
 }

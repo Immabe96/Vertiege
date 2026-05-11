@@ -65,8 +65,12 @@ class PostNotifier extends Notifier<PostState> {
     if (resident == null) return;
     final world = ref.read(worldProvider).worlds[worldId];
     final constitution = world?.constitution ?? const WorldConstitution();
-    if (!WorldPermissions.canPost(resident, worldId, world?.sovereignId,
-        constitution: constitution)) {
+    if (!WorldPermissions.canPost(
+      resident,
+      worldId,
+      world?.sovereignId,
+      constitution: constitution,
+    )) {
       return;
     }
     if (WorldPermissions.isMuted(resident, worldId)) return;
@@ -75,7 +79,9 @@ class PostNotifier extends Notifier<PostState> {
     final hashtags = TextParser.extractHashtags(content);
 
     final moderationResult = ModerationFilter.checkContent(content);
-    final postStatus = moderationResult != null ? 'pending_review' : 'published';
+    final postStatus = moderationResult != null
+        ? 'pending_review'
+        : 'published';
 
     final post = Post(
       id: generateId(),
@@ -125,7 +131,9 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   void _checkPostMilestones(String residentId) {
-    final postCount = state.posts.where((p) => p.residentId == residentId).length;
+    final postCount = state.posts
+        .where((p) => p.residentId == residentId)
+        .length;
     final notifier = ref.read(achievementProvider.notifier);
     if (postCount >= 1) notifier.autoAwardAchievement('pioneer-poster');
     if (postCount >= 10) notifier.autoAwardAchievement('voice-of-realm');
@@ -170,7 +178,9 @@ class PostNotifier extends Notifier<PostState> {
 
     final reactedPost = state.posts.where((p) => p.id == postId).firstOrNull;
     ref.read(questProvider.notifier).onReacted();
-    ref.read(notificationProvider.notifier).addNotification(
+    ref
+        .read(notificationProvider.notifier)
+        .addNotification(
           type: NotificationType.like,
           message: 'Someone reacted to your post',
           postId: postId,
@@ -178,8 +188,13 @@ class PostNotifier extends Notifier<PostState> {
         );
 
     if (reactedPost != null) {
-      final totalReactions = reactedPost.reactions.values.fold<int>(0, (sum, c) => sum + c);
-      ref.read(notificationProvider.notifier).reactionMilestone(
+      final totalReactions = reactedPost.reactions.values.fold<int>(
+        0,
+        (sum, c) => sum + c,
+      );
+      ref
+          .read(notificationProvider.notifier)
+          .reactionMilestone(
             postId: postId,
             worldId: reactedPost.worldId,
             count: totalReactions,
@@ -198,7 +213,9 @@ class PostNotifier extends Notifier<PostState> {
 
   void editPost(String postId, String newContent) {
     final posts = state.posts.map((p) {
-      if (p.id == postId) return p.copyWith(content: newContent, isEdited: true);
+      if (p.id == postId) {
+        return p.copyWith(content: newContent, isEdited: true);
+      }
       return p;
     }).toList();
     state = state.copyWith(posts: posts);
@@ -217,7 +234,9 @@ class PostNotifier extends Notifier<PostState> {
   void deletePost(String postId) {
     state = state.copyWith(
       posts: state.posts.where((p) => p.id != postId).toList(),
-      bookmarkedPostIds: state.bookmarkedPostIds.where((id) => id != postId).toSet(),
+      bookmarkedPostIds: state.bookmarkedPostIds
+          .where((id) => id != postId)
+          .toSet(),
     );
     _persist();
     _persistBookmarks();
@@ -240,7 +259,9 @@ class PostNotifier extends Notifier<PostState> {
 
     ref.read(questProvider.notifier).onCommentAdded();
     ref.read(residentProvider.notifier).addRep(post.worldId, 3);
-    ref.read(notificationProvider.notifier).addNotification(
+    ref
+        .read(notificationProvider.notifier)
+        .addNotification(
           type: NotificationType.comment,
           message: 'Someone commented on your post',
           postId: postId,
@@ -261,12 +282,19 @@ class PostNotifier extends Notifier<PostState> {
       if (alreadyVoted && !poll.isMultiChoice) return p;
       if (alreadyVoted) {
         final updatedOptions = poll.options.map((o) {
-          if (o.id == pollOptionId) return o.copyWith(voteCount: (o.voteCount - 1).clamp(0, 999999));
+          if (o.id == pollOptionId) {
+            return o.copyWith(voteCount: (o.voteCount - 1).clamp(0, 999999));
+          }
           return o;
         }).toList();
-        final updatedVoted = poll.votedResidentIds.where((id) => id != resident.id).toList();
+        final updatedVoted = poll.votedResidentIds
+            .where((id) => id != resident.id)
+            .toList();
         return p.copyWith(
-          poll: poll.copyWith(options: updatedOptions, votedResidentIds: updatedVoted),
+          poll: poll.copyWith(
+            options: updatedOptions,
+            votedResidentIds: updatedVoted,
+          ),
         );
       }
 
@@ -278,7 +306,10 @@ class PostNotifier extends Notifier<PostState> {
       }).toList();
       final updatedVoted = [...poll.votedResidentIds, resident.id];
       return p.copyWith(
-        poll: poll.copyWith(options: updatedOptions, votedResidentIds: updatedVoted),
+        poll: poll.copyWith(
+          options: updatedOptions,
+          votedResidentIds: updatedVoted,
+        ),
       );
     }).toList();
 
@@ -342,7 +373,9 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   void repost(String originalPostId) {
-    final original = state.posts.where((p) => p.id == originalPostId).firstOrNull;
+    final original = state.posts
+        .where((p) => p.id == originalPostId)
+        .firstOrNull;
     if (original == null) return;
 
     final resident = ref.read(residentProvider).resident;
@@ -368,7 +401,9 @@ class PostNotifier extends Notifier<PostState> {
     ref.read(residentProvider.notifier).addRep(original.worldId, 5);
     ref.read(questProvider.notifier).onPostCreated();
 
-    ref.read(notificationProvider.notifier).addNotification(
+    ref
+        .read(notificationProvider.notifier)
+        .addNotification(
           type: NotificationType.like,
           message: '${resident.name} reposted your post',
           postId: originalPostId,
@@ -388,11 +423,18 @@ class PostNotifier extends Notifier<PostState> {
     final now = DateTime.now().millisecondsSinceEpoch;
     final decreeExpiry = const Duration(hours: 24).inMilliseconds;
 
-    final sorted = List.of(source)..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    final activeDecrees = sorted.where((p) => p.isDecree && (now - p.timestamp) < decreeExpiry).toList();
+    final sorted = List.of(source)
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final activeDecrees = sorted
+        .where((p) => p.isDecree && (now - p.timestamp) < decreeExpiry)
+        .toList();
     final pinned = sorted.where((p) => p.isPinned && !p.isDecree).toList();
-    final announcements = sorted.where((p) => !p.isPinned && p.isAnnouncement && !p.isDecree).toList();
-    final regular = sorted.where((p) => !p.isPinned && !p.isAnnouncement && !p.isDecree).toList();
+    final announcements = sorted
+        .where((p) => !p.isPinned && p.isAnnouncement && !p.isDecree)
+        .toList();
+    final regular = sorted
+        .where((p) => !p.isPinned && !p.isAnnouncement && !p.isDecree)
+        .toList();
     return [...activeDecrees, ...pinned, ...announcements, ...regular];
   }
 
@@ -423,39 +465,70 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   static Post _postFromJson(Map<String, dynamic> json) {
+    final media = (json['media'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList();
+    final createdAt = json['created_at'];
+
     return Post(
       id: json['id'] ?? '',
-      worldId: json['worldId'] ?? '',
-      residentId: json['residentId'] ?? '',
-      residentName: json['residentName'] ?? '',
-      residentAvatar: json['residentAvatar'] ?? '',
+      worldId: json['worldId'] ?? json['world_id'] ?? '',
+      residentId:
+          json['residentId'] ?? json['resident_id'] ?? json['author_id'] ?? '',
+      residentName:
+          json['residentName'] ??
+          json['resident_name'] ??
+          json['author_name'] ??
+          '',
+      residentAvatar:
+          json['residentAvatar'] ??
+          json['resident_avatar'] ??
+          json['author_avatar'] ??
+          '',
       content: json['content'] ?? '',
-      imageUri: json['imageUri'],
-      imageUris: (json['imageUris'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList(),
-      timestamp: json['timestamp'] ?? 0,
-      tierAtPosting: ResidentTier.fromValue(json['tierAtPosting'] ?? 1),
+      imageUri: json['imageUri'] ?? json['image_url'],
+      imageUris:
+          media ??
+          (json['imageUris'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList(),
+      timestamp:
+          json['timestamp'] ??
+          (createdAt is int
+              ? createdAt
+              : DateTime.tryParse(
+                      createdAt?.toString() ?? '',
+                    )?.millisecondsSinceEpoch ??
+                    0),
+      tierAtPosting: ResidentTier.fromValue(
+        json['tierAtPosting'] ?? json['tier_at_posting'] ?? 1,
+      ),
       reactions: Map<String, int>.from(json['reactions'] ?? {}),
-      comments: (json['comments'] as List<dynamic>?)
-              ?.map((c) => Comment(
-                    id: c['id'] ?? '',
-                    residentId: c['residentId'] ?? '',
-                    residentName: c['residentName'] ?? '',
-                    content: c['content'] ?? '',
-                    timestamp: c['timestamp'] ?? 0,
-                  ))
+      comments:
+          (json['comments'] as List<dynamic>?)
+              ?.map(
+                (c) => Comment(
+                  id: c['id'] ?? '',
+                  residentId: c['residentId'] ?? '',
+                  residentName: c['residentName'] ?? '',
+                  content: c['content'] ?? '',
+                  timestamp: c['timestamp'] ?? 0,
+                ),
+              )
               .toList() ??
           [],
-      isAnnouncement: json['isAnnouncement'] ?? false,
-      isPinned: json['isPinned'] ?? false,
-      isEdited: json['isEdited'] ?? false,
+      isAnnouncement:
+          json['isAnnouncement'] ?? json['is_announcement'] ?? false,
+      isPinned: json['isPinned'] ?? json['is_pinned'] ?? false,
+      isEdited: json['isEdited'] ?? json['is_edited'] ?? false,
       repostOf: json['repostOf'],
-      mentions: (json['mentions'] as List<dynamic>?)
+      mentions:
+          (json['mentions'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      hashtags: (json['hashtags'] as List<dynamic>?)
+      hashtags:
+          (json['hashtags'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -463,7 +536,7 @@ class PostNotifier extends Notifier<PostState> {
           ? Poll.fromJson(json['poll'] as Map<String, dynamic>)
           : null,
       status: json['status'] ?? 'published',
-      isDecree: json['isDecree'] ?? false,
+      isDecree: json['isDecree'] ?? json['is_decree'] ?? false,
     );
   }
 
@@ -473,36 +546,38 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   static Map<String, dynamic> _postToJson(Post p) => {
-        'id': p.id,
-        'worldId': p.worldId,
-        'residentId': p.residentId,
-        'residentName': p.residentName,
-        'residentAvatar': p.residentAvatar,
-        'content': p.content,
-        'imageUri': p.imageUri,
-        'imageUris': p.imageUris,
-        'timestamp': p.timestamp,
-        'tierAtPosting': p.tierAtPosting.value,
-        'reactions': p.reactions,
-        'isAnnouncement': p.isAnnouncement,
-        'isPinned': p.isPinned,
-        'isEdited': p.isEdited,
-        'repostOf': p.repostOf,
-        'mentions': p.mentions,
-        'hashtags': p.hashtags,
-        'poll': p.poll?.toJson(),
-        'isDecree': p.isDecree,
-        'status': p.status,
-        'comments': p.comments
-            .map((c) => {
-                  'id': c.id,
-                  'residentId': c.residentId,
-                  'residentName': c.residentName,
-                  'content': c.content,
-                  'timestamp': c.timestamp,
-                })
-            .toList(),
-      };
+    'id': p.id,
+    'worldId': p.worldId,
+    'residentId': p.residentId,
+    'residentName': p.residentName,
+    'residentAvatar': p.residentAvatar,
+    'content': p.content,
+    'imageUri': p.imageUri,
+    'imageUris': p.imageUris,
+    'timestamp': p.timestamp,
+    'tierAtPosting': p.tierAtPosting.value,
+    'reactions': p.reactions,
+    'isAnnouncement': p.isAnnouncement,
+    'isPinned': p.isPinned,
+    'isEdited': p.isEdited,
+    'repostOf': p.repostOf,
+    'mentions': p.mentions,
+    'hashtags': p.hashtags,
+    'poll': p.poll?.toJson(),
+    'isDecree': p.isDecree,
+    'status': p.status,
+    'comments': p.comments
+        .map(
+          (c) => {
+            'id': c.id,
+            'residentId': c.residentId,
+            'residentName': c.residentName,
+            'content': c.content,
+            'timestamp': c.timestamp,
+          },
+        )
+        .toList(),
+  };
 }
 
 final postProvider = NotifierProvider<PostNotifier, PostState>(

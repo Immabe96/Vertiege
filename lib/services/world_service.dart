@@ -22,7 +22,7 @@ class WorldService {
       'sovereign_name': sovereignName,
       'prestige': 1,
       'icon': icon,
-      'created_at': DateTime.now().toIso8601String(),
+      'created_at': DateTime.now().millisecondsSinceEpoch,
     };
 
     if (!isSupabaseConfigured()) return world;
@@ -43,7 +43,11 @@ class WorldService {
   }
 
   // --- Membership ---
-  static Future<void> joinWorld(String worldId, String residentId, {String residentName = 'Member'}) async {
+  static Future<void> joinWorld(
+    String worldId,
+    String residentId, {
+    String residentName = 'Member',
+  }) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
     await client.from('world_members').upsert({
@@ -93,7 +97,9 @@ class WorldService {
     await client.from('channels').insert(channel.toSupabase());
   }
 
-  static Future<List<WorldChannel>> createDefaultChannels(String worldId) async {
+  static Future<List<WorldChannel>> createDefaultChannels(
+    String worldId,
+  ) async {
     const defaults = [
       ('general', 'General discussion', ChannelType.text),
       ('lounge', 'Off-topic and casual chat', ChannelType.text),
