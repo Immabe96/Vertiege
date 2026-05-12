@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
 
 class AchievementCard extends StatelessWidget {
@@ -9,8 +10,10 @@ class AchievementCard extends StatelessWidget {
   final AchievementStatus status;
   final VoidCallback? onPress;
   final int index;
+
   /// AI confidence score from The Archivist (0.0–1.0).
   final double? aiConfidence;
+
   /// AI verifier notes.
   final String? aiNotes;
 
@@ -35,8 +38,8 @@ class AchievementCard extends StatelessWidget {
     final gradientColors = isVerified
         ? AppColors.gradientPrimary
         : isSubmitted
-            ? AppColors.gradientWarm
-            : AppColors.gradientDark;
+        ? AppColors.gradientWarm
+        : AppColors.gradientDark;
 
     final borderDecoration = isVerified
         ? BoxDecoration(
@@ -51,15 +54,15 @@ class AchievementCard extends StatelessWidget {
             ],
           )
         : isSubmitted
-            ? BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.accentStreak,
-                  width: 2.5,
-                  strokeAlign: BorderSide.strokeAlignOutside,
-                ),
-              )
-            : null;
+        ? BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.accentStreak,
+              width: 2.5,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+          )
+        : null;
 
     final progressFraction = switch (status) {
       AchievementStatus.verified => 1.0,
@@ -77,10 +80,15 @@ class AchievementCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
             side: isVerified
-                ? BorderSide(color: AppColors.semanticSuccess.withValues(alpha: 0.4), width: 1.5)
+                ? BorderSide(
+                    color: AppColors.semanticSuccess.withValues(alpha: 0.4),
+                    width: 1.5,
+                  )
                 : isSubmitted
-                    ? BorderSide(color: AppColors.accentStreak.withValues(alpha: 0.3), width: 1)
-                    : BorderSide(color: AppColors.glassBorder, width: 0.5),
+                ? BorderSide(
+                    color: AppColors.accentStreak.withValues(alpha: 0.3),
+                  )
+                : const BorderSide(color: AppColors.glassBorder, width: 0.5),
           ),
           child: InkWell(
             onTap: status != AchievementStatus.verified ? onPress : null,
@@ -97,6 +105,11 @@ class AchievementCard extends StatelessWidget {
                     borderDecoration: borderDecoration,
                     status: status,
                     iconName: achievement.icon,
+                    imageAsset:
+                        WorldAssets.badgeImageForId(achievement.id) ??
+                        WorldAssets.achievementCategoryImage(
+                          achievement.category.name,
+                        ),
                   ),
                   const SizedBox(height: Spacing.sm + 4),
                   // Title
@@ -115,7 +128,9 @@ class AchievementCard extends StatelessWidget {
                   Text(
                     achievement.description,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.65,
+                      ),
                       fontSize: FontSizes.caption,
                     ),
                     textAlign: TextAlign.center,
@@ -130,7 +145,7 @@ class AchievementCard extends StatelessWidget {
                       _XpBadge(xp: achievement.xpValue),
                       if (isSubmitted) ...[
                         const SizedBox(width: Spacing.xs),
-                        _StatusChip(
+                        const _StatusChip(
                           label: 'Pending Review',
                           color: AppColors.accentStreak,
                           icon: Icons.schedule,
@@ -171,6 +186,7 @@ class _AchievementIcon extends StatelessWidget {
   final BoxDecoration? borderDecoration;
   final AchievementStatus status;
   final String iconName;
+  final String? imageAsset;
 
   const _AchievementIcon({
     required this.progress,
@@ -178,6 +194,7 @@ class _AchievementIcon extends StatelessWidget {
     required this.borderDecoration,
     required this.status,
     required this.iconName,
+    this.imageAsset,
   });
 
   IconData _resolveIcon() {
@@ -252,6 +269,10 @@ class _AchievementIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = IconSizes.xl;
     final ringStrokeWidth = 3.5;
+    final cacheWidth = (size * MediaQuery.devicePixelRatioOf(context))
+        .round()
+        .clamp(96, 256);
+    final hasImage = imageAsset != null;
 
     return SizedBox(
       width: size + 16,
@@ -280,16 +301,28 @@ class _AchievementIcon extends StatelessWidget {
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: gradientColors,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              gradient: hasImage
+                  ? null
+                  : LinearGradient(
+                      colors: gradientColors,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
               border: borderDecoration?.border as Border?,
               boxShadow: borderDecoration?.boxShadow,
             ),
             child: Center(
-              child: Icon(_resolveIcon(), size: 24, color: Colors.white),
+              child: hasImage
+                  ? Image.asset(
+                      imageAsset!,
+                      width: size,
+                      height: size,
+                      fit: BoxFit.contain,
+                      cacheWidth: cacheWidth,
+                      errorBuilder: (_, _, _) =>
+                          Icon(_resolveIcon(), size: 24, color: Colors.white),
+                    )
+                  : Icon(_resolveIcon(), size: 24, color: Colors.white),
             ),
           ),
           // Status overlay badges
@@ -318,7 +351,11 @@ class _AchievementIcon extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: AppColors.accentStreak,
                 ),
-                child: const Icon(Icons.access_time, size: 14, color: Colors.white),
+                child: const Icon(
+                  Icons.access_time,
+                  size: 14,
+                  color: Colors.white,
+                ),
               ),
             ),
           if (status == AchievementStatus.locked)
@@ -384,7 +421,10 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.xs + 2, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.xs + 2,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(RadiusTokens.pill),
@@ -415,10 +455,7 @@ class _AiConfidenceChip extends StatelessWidget {
   final double confidence;
   final String? aiNotes;
 
-  const _AiConfidenceChip({
-    required this.confidence,
-    this.aiNotes,
-  });
+  const _AiConfidenceChip({required this.confidence, this.aiNotes});
 
   @override
   Widget build(BuildContext context) {
@@ -488,12 +525,11 @@ class _AiConfidenceChip extends StatelessWidget {
               child: Text(
                 aiNotes!,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.45),
-                      fontSize: 9,
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.45),
+                  fontSize: 9,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),

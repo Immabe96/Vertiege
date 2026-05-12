@@ -162,11 +162,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               SizedBox(height: Spacing.sm),
               Text('A tier-gated social network built with love.'),
               SizedBox(height: Spacing.md),
-              Text('Design & Development', style: TextStyle(fontWeight: FontWeights.bold)),
+              Text(
+                'Design & Development',
+                style: TextStyle(fontWeight: FontWeights.bold),
+              ),
               SizedBox(height: Spacing.xs),
               Text('The Vertiege Team'),
               SizedBox(height: Spacing.md),
-              Text('Special Thanks', style: TextStyle(fontWeight: FontWeights.bold)),
+              Text(
+                'Special Thanks',
+                style: TextStyle(fontWeight: FontWeights.bold),
+              ),
               SizedBox(height: Spacing.xs),
               Text('Flutter Community'),
               Text('Supabase Team'),
@@ -376,7 +382,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               'To enable, use a Supabase Edge Function that generates a TOTP '
               'secret and QR code. This feature requires the supabase/functions/enroll-totp '
               'edge function to be deployed.',
-              style: TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+              style: TextStyle(
+                fontSize: FontSizes.labelSm,
+                color: AppColors.inkMuted,
+              ),
             ),
           ],
         ),
@@ -406,7 +415,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(
+          title: const Text(
             'Delete Account',
             style: TextStyle(color: AppColors.error),
           ),
@@ -481,7 +490,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Last updated: May 2025', style: TextStyle(fontSize: FontSizes.caption)),
+              Text(
+                'Last updated: May 2025',
+                style: TextStyle(fontSize: FontSizes.caption),
+              ),
               SizedBox(height: Spacing.md),
               Text(
                 'Information We Collect',
@@ -513,10 +525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 'You can request data deletion at any time.',
               ),
               SizedBox(height: Spacing.md),
-              Text(
-                'Contact',
-                style: TextStyle(fontWeight: FontWeights.bold),
-              ),
+              Text('Contact', style: TextStyle(fontWeight: FontWeights.bold)),
               SizedBox(height: Spacing.xs),
               Text('privacy@vertiege.app'),
             ],
@@ -542,7 +551,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Last updated: May 2025', style: TextStyle(fontSize: FontSizes.caption)),
+              Text(
+                'Last updated: May 2025',
+                style: TextStyle(fontSize: FontSizes.caption),
+              ),
               SizedBox(height: Spacing.md),
               Text(
                 '1. Acceptance of Terms',
@@ -656,7 +668,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onPressed: () async {
                 final raw = controller.text.trim();
                 if (raw.isEmpty) {
-                  setDialogState(() => validationError = 'Please paste backup JSON');
+                  setDialogState(
+                    () => validationError = 'Please paste backup JSON',
+                  );
                   return;
                 }
 
@@ -664,21 +678,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 try {
                   final parsed = jsonDecode(raw);
                   if (parsed is! Map<String, dynamic>) {
-                    setDialogState(() => validationError = 'Invalid JSON: expected an object');
+                    setDialogState(
+                      () =>
+                          validationError = 'Invalid JSON: expected an object',
+                    );
                     return;
                   }
                   if (!parsed.containsKey('backup')) {
                     setDialogState(
-                        () => validationError = 'Missing "backup" key — not a valid backup file');
+                      () => validationError =
+                          'Missing "backup" key — not a valid backup file',
+                    );
                     return;
                   }
                   if (parsed['backup'] is! Map<String, dynamic>) {
                     setDialogState(
-                        () => validationError = '"backup" must be an object');
+                      () => validationError = '"backup" must be an object',
+                    );
                     return;
                   }
                 } catch (e) {
-                  setDialogState(() => validationError = 'Invalid JSON: ${e.toString()}');
+                  setDialogState(
+                    () => validationError = 'Invalid JSON: ${e.toString()}',
+                  );
                   return;
                 }
 
@@ -690,9 +712,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(success
-                          ? 'Backup restored successfully'
-                          : 'Restore failed — data may be corrupted'),
+                      content: Text(
+                        success
+                            ? 'Backup restored successfully'
+                            : 'Restore failed — data may be corrupted',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -728,7 +752,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _sectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.md, Spacing.md, Spacing.sm),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.md,
+        Spacing.md,
+        Spacing.sm,
+      ),
       child: Text(
         title,
         style: const TextStyle(
@@ -744,7 +773,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _sectionCard({required List<Widget> children}) {
     _estimateCacheSize();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.xs,
+      ),
       child: GlassPanel(
         padding: EdgeInsets.zero,
         borderRadius: BorderRadius.circular(RadiusTokens.card),
@@ -771,399 +803,469 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final themeState = ref.watch(themeProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: RefreshIndicator(
         onRefresh: () async => _loadPrefs(),
         child: ListView(
           padding: const EdgeInsets.only(bottom: Spacing.xxl),
           children: [
-          // ────────────────────────────────────────────────────
-          // About
-          // ────────────────────────────────────────────────────
-          _sectionHeader('ABOUT'),
-          _sectionCard(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(Spacing.md),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(RadiusTokens.card),
-                      child: Image.asset(
-                        'assets/images/icon.png',
-                        width: 52,
-                        height: 52,
-                        errorBuilder: (_, _, _) => Container(
+            // ────────────────────────────────────────────────────
+            // About
+            // ────────────────────────────────────────────────────
+            _sectionHeader('ABOUT'),
+            _sectionCard(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(Spacing.md),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(RadiusTokens.card),
+                        child: Image.asset(
+                          'assets/images/icon.png',
                           width: 52,
                           height: 52,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(RadiusTokens.card),
-                            gradient: const LinearGradient(
-                              colors: AppColors.gradientPrimary,
-                            ),
-                          ),
-                          child: const Icon(Icons.public, color: AppColors.ink, size: 28),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.md),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Vertiege',
-                            style: TextStyle(
-                              fontSize: FontSizes.headingCard,
-                              fontWeight: FontWeights.bold,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Version 1.0.0 (build 1)',
-                            style: TextStyle(
-                              fontSize: FontSizes.caption,
-                              color: AppColors.inkMuted,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Made with Flutter & Supabase',
-                            style: TextStyle(
-                              fontSize: FontSizes.caption,
-                              color: AppColors.inkMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.celebration, size: IconSizes.md),
-                title: const Text('Credits'),
-                subtitle: const Text('The people behind Vertiege'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showCreditsDialog,
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Moderation
-          // ────────────────────────────────────────────────────
-          _sectionHeader('MODERATION'),
-          _sectionCard(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.verified_user, size: IconSizes.md),
-                title: const Text('Verification Review'),
-                subtitle: const Text('Review pending profession verification requests'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: () => context.push('/admin/verifications'),
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Account
-          // ────────────────────────────────────────────────────
-          _sectionHeader('ACCOUNT'),
-          _sectionCard(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.email_outlined, size: IconSizes.md),
-                title: const Text('Change Email'),
-                subtitle: const Text('Update your email address'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showChangeEmailDialog,
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.lock_outline, size: IconSizes.md),
-                title: const Text('Change Password'),
-                subtitle: const Text('Update your password'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showChangePasswordDialog,
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.security, size: IconSizes.md, color: AppColors.tertiary),
-                title: const Text('Twin Seal (2FA)'),
-                subtitle: const Text('Add an extra layer of security'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showTwinSealSetup,
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: Icon(Icons.delete_outline, size: IconSizes.md, color: AppColors.error),
-                title: Text('Delete Account', style: TextStyle(color: AppColors.error)),
-                subtitle: const Text('Permanently remove your account'),
-                trailing: Icon(Icons.chevron_right, size: IconSizes.md, color: AppColors.error),
-                onTap: _showDeleteAccountDialog,
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Notifications
-          // ────────────────────────────────────────────────────
-          _sectionHeader('NOTIFICATIONS'),
-          _sectionCard(
-            children: [
-              SwitchListTile(
-                secondary: const Icon(Icons.notifications_active, size: IconSizes.md),
-                title: const Text('Push Notifications'),
-                subtitle: const Text('Receive push notifications'),
-                value: _pushEnabled,
-                onChanged: _prefsLoaded
-                    ? (v) {
-                        setState(() => _pushEnabled = v);
-                        _setNotificationPref(_kPrefPushEnabled, v);
-                      }
-                    : null,
-              ),
-              _sectionDivider(),
-              SwitchListTile(
-                secondary: const Icon(Icons.favorite_border, size: IconSizes.md),
-                title: const Text('Likes'),
-                subtitle: const Text('When someone likes your post'),
-                value: _likesEnabled,
-                onChanged: _prefsLoaded
-                    ? (v) {
-                        setState(() => _likesEnabled = v);
-                        _setNotificationPref(_kPrefLikesEnabled, v);
-                      }
-                    : null,
-              ),
-              _sectionDivider(),
-              SwitchListTile(
-                secondary: const Icon(Icons.mode_comment_outlined, size: IconSizes.md),
-                title: const Text('Comments'),
-                subtitle: const Text('When someone comments on your post'),
-                value: _commentsEnabled,
-                onChanged: _prefsLoaded
-                    ? (v) {
-                        setState(() => _commentsEnabled = v);
-                        _setNotificationPref(_kPrefCommentsEnabled, v);
-                      }
-                    : null,
-              ),
-              _sectionDivider(),
-              SwitchListTile(
-                secondary: const Icon(Icons.public, size: IconSizes.md),
-                title: const Text('World Invites'),
-                subtitle: const Text('When invited to a new world'),
-                value: _worldInvitesEnabled,
-                onChanged: _prefsLoaded
-                    ? (v) {
-                        setState(() => _worldInvitesEnabled = v);
-                        _setNotificationPref(_kPrefWorldInvitesEnabled, v);
-                      }
-                    : null,
-              ),
-              _sectionDivider(),
-              SwitchListTile(
-                secondary: const Icon(Icons.military_tech, size: IconSizes.md),
-                title: const Text('Tier Upgrades'),
-                subtitle: const Text('When your tier level changes'),
-                value: _tierUpgradesEnabled,
-                onChanged: _prefsLoaded
-                    ? (v) {
-                        setState(() => _tierUpgradesEnabled = v);
-                        _setNotificationPref(_kPrefTierUpgradesEnabled, v);
-                      }
-                    : null,
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Appearance
-          // ────────────────────────────────────────────────────
-          _sectionHeader('APPEARANCE'),
-          _sectionCard(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.palette, size: IconSizes.md),
-                        SizedBox(width: Spacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Theme', style: TextStyle(fontSize: FontSizes.body)),
-                              Text(
-                                'Light, dark, or follow system',
-                                style: TextStyle(fontSize: FontSizes.body),
+                          cacheWidth: 128,
+                          errorBuilder: (_, _, _) => Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.card,
                               ),
-                            ],
+                              gradient: const LinearGradient(
+                                colors: AppColors.gradientPrimary,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.public,
+                              color: AppColors.ink,
+                              size: 28,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: Spacing.sm),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: SegmentedButton<ThemeScheme>(
-                        segments: const [
-                          ButtonSegment(
-                            value: ThemeScheme.system,
-                            label: Text('Auto'),
-                            icon: Icon(Icons.brightness_auto, size: IconSizes.sm),
-                          ),
-                          ButtonSegment(
-                            value: ThemeScheme.light,
-                            label: Text('Light'),
-                            icon: Icon(Icons.light_mode, size: IconSizes.sm),
-                          ),
-                          ButtonSegment(
-                            value: ThemeScheme.dark,
-                            label: Text('Dark'),
-                            icon: Icon(Icons.dark_mode, size: IconSizes.sm),
+                      ),
+                      const SizedBox(width: Spacing.md),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Vertiege',
+                              style: TextStyle(
+                                fontSize: FontSizes.headingCard,
+                                fontWeight: FontWeights.bold,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Version 1.0.0 (build 1)',
+                              style: TextStyle(
+                                fontSize: FontSizes.caption,
+                                color: AppColors.inkMuted,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Made with Flutter & Supabase',
+                              style: TextStyle(
+                                fontSize: FontSizes.caption,
+                                color: AppColors.inkMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(Icons.celebration, size: IconSizes.md),
+                  title: const Text('Credits'),
+                  subtitle: const Text('The people behind Vertiege'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showCreditsDialog,
+                ),
+              ],
+            ),
+
+            // ────────────────────────────────────────────────────
+            // Moderation
+            // ────────────────────────────────────────────────────
+            _sectionHeader('MODERATION'),
+            _sectionCard(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.verified_user, size: IconSizes.md),
+                  title: const Text('Verification Review'),
+                  subtitle: const Text(
+                    'Review pending profession verification requests',
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: () => context.push('/admin/verifications'),
+                ),
+              ],
+            ),
+
+            // ────────────────────────────────────────────────────
+            // Account
+            // ────────────────────────────────────────────────────
+            _sectionHeader('ACCOUNT'),
+            _sectionCard(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.email_outlined, size: IconSizes.md),
+                  title: const Text('Change Email'),
+                  subtitle: const Text('Update your email address'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showChangeEmailDialog,
+                ),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(Icons.lock_outline, size: IconSizes.md),
+                  title: const Text('Change Password'),
+                  subtitle: const Text('Update your password'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showChangePasswordDialog,
+                ),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(
+                    Icons.security,
+                    size: IconSizes.md,
+                    color: AppColors.tertiary,
+                  ),
+                  title: const Text('Twin Seal (2FA)'),
+                  subtitle: const Text('Add an extra layer of security'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showTwinSealSetup,
+                ),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    size: IconSizes.md,
+                    color: AppColors.error,
+                  ),
+                  title: const Text(
+                    'Delete Account',
+                    style: TextStyle(color: AppColors.error),
+                  ),
+                  subtitle: const Text('Permanently remove your account'),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    size: IconSizes.md,
+                    color: AppColors.error,
+                  ),
+                  onTap: _showDeleteAccountDialog,
+                ),
+              ],
+            ),
+
+            // ────────────────────────────────────────────────────
+            // Notifications
+            // ────────────────────────────────────────────────────
+            _sectionHeader('NOTIFICATIONS'),
+            _sectionCard(
+              children: [
+                SwitchListTile(
+                  secondary: const Icon(
+                    Icons.notifications_active,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Push Notifications'),
+                  subtitle: const Text('Receive push notifications'),
+                  value: _pushEnabled,
+                  onChanged: _prefsLoaded
+                      ? (v) {
+                          setState(() => _pushEnabled = v);
+                          _setNotificationPref(_kPrefPushEnabled, v);
+                        }
+                      : null,
+                ),
+                _sectionDivider(),
+                SwitchListTile(
+                  secondary: const Icon(
+                    Icons.favorite_border,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Likes'),
+                  subtitle: const Text('When someone likes your post'),
+                  value: _likesEnabled,
+                  onChanged: _prefsLoaded
+                      ? (v) {
+                          setState(() => _likesEnabled = v);
+                          _setNotificationPref(_kPrefLikesEnabled, v);
+                        }
+                      : null,
+                ),
+                _sectionDivider(),
+                SwitchListTile(
+                  secondary: const Icon(
+                    Icons.mode_comment_outlined,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Comments'),
+                  subtitle: const Text('When someone comments on your post'),
+                  value: _commentsEnabled,
+                  onChanged: _prefsLoaded
+                      ? (v) {
+                          setState(() => _commentsEnabled = v);
+                          _setNotificationPref(_kPrefCommentsEnabled, v);
+                        }
+                      : null,
+                ),
+                _sectionDivider(),
+                SwitchListTile(
+                  secondary: const Icon(Icons.public, size: IconSizes.md),
+                  title: const Text('World Invites'),
+                  subtitle: const Text('When invited to a new world'),
+                  value: _worldInvitesEnabled,
+                  onChanged: _prefsLoaded
+                      ? (v) {
+                          setState(() => _worldInvitesEnabled = v);
+                          _setNotificationPref(_kPrefWorldInvitesEnabled, v);
+                        }
+                      : null,
+                ),
+                _sectionDivider(),
+                SwitchListTile(
+                  secondary: const Icon(
+                    Icons.military_tech,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Tier Upgrades'),
+                  subtitle: const Text('When your tier level changes'),
+                  value: _tierUpgradesEnabled,
+                  onChanged: _prefsLoaded
+                      ? (v) {
+                          setState(() => _tierUpgradesEnabled = v);
+                          _setNotificationPref(_kPrefTierUpgradesEnabled, v);
+                        }
+                      : null,
+                ),
+              ],
+            ),
+
+            // ────────────────────────────────────────────────────
+            // Appearance
+            // ────────────────────────────────────────────────────
+            _sectionHeader('APPEARANCE'),
+            _sectionCard(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: Spacing.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.palette, size: IconSizes.md),
+                          SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Theme',
+                                  style: TextStyle(fontSize: FontSizes.body),
+                                ),
+                                Text(
+                                  'Light, dark, or follow system',
+                                  style: TextStyle(fontSize: FontSizes.body),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
-                        selected: {themeState.scheme},
-                        onSelectionChanged: (scheme) {
-                          ref.read(themeProvider.notifier).setScheme(scheme.first);
-                        },
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: Spacing.sm),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: SegmentedButton<ThemeScheme>(
+                          segments: const [
+                            ButtonSegment(
+                              value: ThemeScheme.system,
+                              label: Text('Auto'),
+                              icon: Icon(
+                                Icons.brightness_auto,
+                                size: IconSizes.sm,
+                              ),
+                            ),
+                            ButtonSegment(
+                              value: ThemeScheme.light,
+                              label: Text('Light'),
+                              icon: Icon(Icons.light_mode, size: IconSizes.sm),
+                            ),
+                            ButtonSegment(
+                              value: ThemeScheme.dark,
+                              label: Text('Dark'),
+                              icon: Icon(Icons.dark_mode, size: IconSizes.sm),
+                            ),
+                          ],
+                          selected: {themeState.scheme},
+                          onSelectionChanged: (scheme) {
+                            ref
+                                .read(themeProvider.notifier)
+                                .setScheme(scheme.first);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.text_fields, size: IconSizes.md),
-                title: const Text('Text Size'),
-                subtitle: Text(_textSize.label),
-                trailing: DropdownButton<_TextSize>(
-                  value: _textSize,
-                  underline: const SizedBox.shrink(),
-                  items: _TextSize.values
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t.label)))
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) _setTextSize(v);
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(Icons.text_fields, size: IconSizes.md),
+                  title: const Text('Text Size'),
+                  subtitle: Text(_textSize.label),
+                  trailing: DropdownButton<_TextSize>(
+                    value: _textSize,
+                    underline: const SizedBox.shrink(),
+                    items: _TextSize.values
+                        .map(
+                          (t) =>
+                              DropdownMenuItem(value: t, child: Text(t.label)),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) _setTextSize(v);
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            // ────────────────────────────────────────────────────
+            // Privacy & Legal
+            // ────────────────────────────────────────────────────
+            _sectionHeader('PRIVACY & LEGAL'),
+            _sectionCard(
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.privacy_tip_outlined,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Privacy Policy'),
+                  subtitle: const Text('How we handle your data'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showPrivacyPolicyDialog,
+                ),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(Icons.gavel_outlined, size: IconSizes.md),
+                  title: const Text('Terms of Service'),
+                  subtitle: const Text('Rules for using Vertiege'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showTermsDialog,
+                ),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(
+                    Icons.article_outlined,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Open Source Licenses'),
+                  subtitle: const Text('Third-party software licenses'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: () => showLicensePage(
+                    context: context,
+                    applicationName: 'Vertiege',
+                    applicationVersion: '1.0.0',
+                    applicationLegalese: 'Copyright 2025 Vertiege',
+                  ),
+                ),
+              ],
+            ),
+
+            // ────────────────────────────────────────────────────
+            // Data
+            // ────────────────────────────────────────────────────
+            _sectionHeader('DATA'),
+            _sectionCard(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.backup, size: IconSizes.md),
+                  title: const Text('Create Backup'),
+                  subtitle: const Text('Export all app data as JSON'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: () async {
+                    await BackupService.createBackup();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Backup created successfully'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   },
                 ),
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Privacy & Legal
-          // ────────────────────────────────────────────────────
-          _sectionHeader('PRIVACY & LEGAL'),
-          _sectionCard(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.privacy_tip_outlined, size: IconSizes.md),
-                title: const Text('Privacy Policy'),
-                subtitle: const Text('How we handle your data'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showPrivacyPolicyDialog,
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.gavel_outlined, size: IconSizes.md),
-                title: const Text('Terms of Service'),
-                subtitle: const Text('Rules for using Vertiege'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showTermsDialog,
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.article_outlined, size: IconSizes.md),
-                title: const Text('Open Source Licenses'),
-                subtitle: const Text('Third-party software licenses'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: () => showLicensePage(
-                  context: context,
-                  applicationName: 'Vertiege',
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: 'Copyright 2025 Vertiege',
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(Icons.restore, size: IconSizes.md),
+                  title: const Text('Restore Backup'),
+                  subtitle: const Text('Import previously saved data'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _showRestoreBackupDialog,
                 ),
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Data
-          // ────────────────────────────────────────────────────
-          _sectionHeader('DATA'),
-          _sectionCard(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.backup, size: IconSizes.md),
-                title: const Text('Create Backup'),
-                subtitle: const Text('Export all app data as JSON'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: () async {
-                  await BackupService.createBackup();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Backup created successfully'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.restore, size: IconSizes.md),
-                title: const Text('Restore Backup'),
-                subtitle: const Text('Import previously saved data'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _showRestoreBackupDialog,
-              ),
-              _sectionDivider(),
-              ListTile(
-                leading: const Icon(Icons.cleaning_services_outlined, size: IconSizes.md),
-                title: const Text('Clear Cache'),
-                subtitle: Text('Frees up ~${_formatBytes(_cacheSizeBytes)}'),
-                trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
-                onTap: _cacheSizeBytes > 0 ? _clearCache : null,
-                enabled: _cacheSizeBytes > 0,
-              ),
-            ],
-          ),
-
-          // ────────────────────────────────────────────────────
-          // Danger Zone
-          // ────────────────────────────────────────────────────
-          _sectionHeader('DANGER ZONE'),
-          _sectionCard(
-            children: [
-              ListTile(
-                leading: Icon(Icons.delete_forever, size: IconSizes.md, color: AppColors.error),
-                title: Text('Reset All Data', style: TextStyle(color: AppColors.error)),
-                subtitle: Text(
-                  'Clear all local data and start fresh',
-                  style: TextStyle(color: AppColors.error.withValues(alpha: 0.7)),
+                _sectionDivider(),
+                ListTile(
+                  leading: const Icon(
+                    Icons.cleaning_services_outlined,
+                    size: IconSizes.md,
+                  ),
+                  title: const Text('Clear Cache'),
+                  subtitle: Text('Frees up ~${_formatBytes(_cacheSizeBytes)}'),
+                  trailing: const Icon(Icons.chevron_right, size: IconSizes.md),
+                  onTap: _cacheSizeBytes > 0 ? _clearCache : null,
+                  enabled: _cacheSizeBytes > 0,
                 ),
-                trailing: Icon(Icons.chevron_right, size: IconSizes.md, color: AppColors.error),
-                onTap: _showResetDataDialog,
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: Spacing.lg),
-        ],
+            // ────────────────────────────────────────────────────
+            // Danger Zone
+            // ────────────────────────────────────────────────────
+            _sectionHeader('DANGER ZONE'),
+            _sectionCard(
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_forever,
+                    size: IconSizes.md,
+                    color: AppColors.error,
+                  ),
+                  title: const Text(
+                    'Reset All Data',
+                    style: TextStyle(color: AppColors.error),
+                  ),
+                  subtitle: Text(
+                    'Clear all local data and start fresh',
+                    style: TextStyle(
+                      color: AppColors.error.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    size: IconSizes.md,
+                    color: AppColors.error,
+                  ),
+                  onTap: _showResetDataDialog,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: Spacing.lg),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -1176,10 +1278,12 @@ class _ResetDataConfirmationDialog extends StatefulWidget {
   const _ResetDataConfirmationDialog({required this.onConfirmed});
 
   @override
-  State<_ResetDataConfirmationDialog> createState() => _ResetDataConfirmationDialogState();
+  State<_ResetDataConfirmationDialog> createState() =>
+      _ResetDataConfirmationDialogState();
 }
 
-class _ResetDataConfirmationDialogState extends State<_ResetDataConfirmationDialog> {
+class _ResetDataConfirmationDialogState
+    extends State<_ResetDataConfirmationDialog> {
   int _step = 0; // 0 = first confirm, 1 = type RESET
 
   final _confirmController = TextEditingController();
@@ -1194,18 +1298,18 @@ class _ResetDataConfirmationDialogState extends State<_ResetDataConfirmationDial
   void _goToStep2() => setState(() => _step = 1);
 
   void _goBack() => setState(() {
-        _step = 0;
-        _typedText = '';
-        _confirmController.clear();
-      });
+    _step = 0;
+    _typedText = '';
+    _confirmController.clear();
+  });
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.error),
-          const SizedBox(width: Spacing.sm),
+          Icon(Icons.warning_amber_rounded, color: AppColors.error),
+          SizedBox(width: Spacing.sm),
           Text('Reset all data?', style: TextStyle(color: AppColors.error)),
         ],
       ),
@@ -1249,7 +1353,10 @@ class _ResetDataConfirmationDialogState extends State<_ResetDataConfirmationDial
             ),
       actions: _step == 0
           ? [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
               FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: AppColors.error),
                 onPressed: _goToStep2,
@@ -1260,7 +1367,9 @@ class _ResetDataConfirmationDialogState extends State<_ResetDataConfirmationDial
               TextButton(onPressed: _goBack, child: const Text('Back')),
               FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-                onPressed: _typedText.trim() == 'RESET' ? widget.onConfirmed : null,
+                onPressed: _typedText.trim() == 'RESET'
+                    ? widget.onConfirmed
+                    : null,
                 child: const Text('Reset Everything'),
               ),
             ],

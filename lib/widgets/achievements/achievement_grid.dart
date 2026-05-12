@@ -108,6 +108,7 @@ class _AchievementGridState extends ConsumerState<AchievementGrid> {
                             width: 22,
                             height: 22,
                             fit: BoxFit.cover,
+                            cacheWidth: 64,
                             errorBuilder: (_, _, _) =>
                                 Icon(meta.icon, size: IconSizes.sm),
                           ),

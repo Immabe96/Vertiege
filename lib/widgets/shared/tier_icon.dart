@@ -17,6 +17,9 @@ class TierIcon extends StatelessWidget {
         width: size,
         height: size,
         fit: BoxFit.contain,
+        cacheWidth: (size * MediaQuery.devicePixelRatioOf(context))
+            .round()
+            .clamp(48, 256),
         errorBuilder: (_, _, _) => _fallbackIcon(),
       );
     }
