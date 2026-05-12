@@ -12,12 +12,12 @@ begin
     drop policy if exists posts_insert on public.posts;
     create policy posts_insert on public.posts
       for insert with check (
-        author_id = auth.uid()::text
+        author_id = auth.uid()
         and is_world_member(world_id)
       );
 
     drop policy if exists posts_author_delete on public.posts;
     create policy posts_author_delete on public.posts
-      for delete using (author_id = auth.uid()::text);
+      for delete using (author_id = auth.uid());
   end if;
 end $$;

@@ -14,10 +14,8 @@
 -- After creating buckets via dashboard, run these SQL policies:
 
 -- ── Avatars bucket policies ──────────────────────────────────
--- Allow anyone to view avatars
-CREATE POLICY avatars_public_read ON storage.objects
-  FOR SELECT
-  USING (bucket_id = 'avatars');
+-- Public buckets serve known object URLs without a broad SELECT policy.
+-- Do not add public read policies on storage.objects; they allow listing.
 
 -- Allow authenticated users to upload their own avatar
 CREATE POLICY avatars_auth_insert ON storage.objects
@@ -38,9 +36,7 @@ CREATE POLICY avatars_owner_delete ON storage.objects
   USING (bucket_id = 'avatars' AND owner = auth.uid());
 
 -- ── Post media bucket policies ───────────────────────────────
-CREATE POLICY post_media_public_read ON storage.objects
-  FOR SELECT
-  USING (bucket_id = 'post-media');
+-- Public object URLs are enough for feed media display.
 
 CREATE POLICY post_media_auth_insert ON storage.objects
   FOR INSERT
@@ -54,9 +50,8 @@ CREATE POLICY post_media_owner_delete ON storage.objects
   USING (bucket_id = 'post-media' AND owner = auth.uid());
 
 -- ── Verification proofs bucket policies ──────────────────────
-CREATE POLICY proofs_public_read ON storage.objects
-  FOR SELECT
-  USING (bucket_id = 'verification-proofs');
+-- Verification proof URLs should be stored in app data, not discovered by
+-- listing storage.objects.
 
 CREATE POLICY proofs_auth_insert ON storage.objects
   FOR INSERT
