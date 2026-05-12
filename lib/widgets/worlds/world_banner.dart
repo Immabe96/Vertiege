@@ -44,6 +44,9 @@ class WorldBanner extends StatelessWidget {
             Image.asset(
               imagePath,
               fit: BoxFit.cover,
+              cacheWidth: (width * MediaQuery.devicePixelRatioOf(context))
+                  .round()
+                  .clamp(480, 1600),
               errorBuilder: (_, _, _) => CustomPaint(
                 painter: _WorldBannerPainter(
                   worldId: worldId,

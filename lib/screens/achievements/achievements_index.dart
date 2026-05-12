@@ -8,37 +8,80 @@ import '../../models/resident.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../../utils/world_assets.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/status_dot.dart';
 
 class AchievementsIndexScreen extends ConsumerWidget {
   const AchievementsIndexScreen({super.key});
 
-  static const _categoryMeta = <AchievementCategory, ({
-    String label,
-    IconData icon,
-    Color color,
-  })>{
-    AchievementCategory.education: (label: 'Education', icon: Icons.school, color: AppColors.achievementEducation),
-    AchievementCategory.career: (label: 'Career', icon: Icons.work, color: AppColors.achievementCareer),
-    AchievementCategory.relationships: (label: 'Relationships', icon: Icons.favorite, color: AppColors.achievementRelationships),
-    AchievementCategory.health: (label: 'Health', icon: Icons.fitness_center, color: AppColors.achievementHealth),
-    AchievementCategory.skills: (label: 'Skills', icon: Icons.build, color: AppColors.achievementSkills),
-    AchievementCategory.travel: (label: 'Travel', icon: Icons.flight, color: AppColors.achievementTravel),
-    AchievementCategory.finance: (label: 'Finance', icon: Icons.savings, color: AppColors.achievementFinance),
-    AchievementCategory.community: (label: 'Community', icon: Icons.volunteer_activism, color: AppColors.achievementCommunity),
-    AchievementCategory.funny: (label: 'Funny', icon: Icons.emoji_emotions, color: AppColors.achievementFunny),
-    AchievementCategory.creative: (label: 'Creative', icon: Icons.palette, color: AppColors.achievementCreative),
-    AchievementCategory.profession: (label: 'Profession', icon: Icons.verified_user, color: AppColors.achievementProfession),
-  };
+  static const _categoryMeta =
+      <AchievementCategory, ({String label, IconData icon, Color color})>{
+        AchievementCategory.education: (
+          label: 'Education',
+          icon: Icons.school,
+          color: AppColors.achievementEducation,
+        ),
+        AchievementCategory.career: (
+          label: 'Career',
+          icon: Icons.work,
+          color: AppColors.achievementCareer,
+        ),
+        AchievementCategory.relationships: (
+          label: 'Relationships',
+          icon: Icons.favorite,
+          color: AppColors.achievementRelationships,
+        ),
+        AchievementCategory.health: (
+          label: 'Health',
+          icon: Icons.fitness_center,
+          color: AppColors.achievementHealth,
+        ),
+        AchievementCategory.skills: (
+          label: 'Skills',
+          icon: Icons.build,
+          color: AppColors.achievementSkills,
+        ),
+        AchievementCategory.travel: (
+          label: 'Travel',
+          icon: Icons.flight,
+          color: AppColors.achievementTravel,
+        ),
+        AchievementCategory.finance: (
+          label: 'Finance',
+          icon: Icons.savings,
+          color: AppColors.achievementFinance,
+        ),
+        AchievementCategory.community: (
+          label: 'Community',
+          icon: Icons.volunteer_activism,
+          color: AppColors.achievementCommunity,
+        ),
+        AchievementCategory.funny: (
+          label: 'Funny',
+          icon: Icons.emoji_emotions,
+          color: AppColors.achievementFunny,
+        ),
+        AchievementCategory.creative: (
+          label: 'Creative',
+          icon: Icons.palette,
+          color: AppColors.achievementCreative,
+        ),
+        AchievementCategory.profession: (
+          label: 'Profession',
+          icon: Icons.verified_user,
+          color: AppColors.achievementProfession,
+        ),
+      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(achievementProvider);
     final theme = Theme.of(context);
 
-    final verifiedCount =
-        state.userAchievements.where((a) => a.status == AchievementStatus.verified).length;
+    final verifiedCount = state.userAchievements
+        .where((a) => a.status == AchievementStatus.verified)
+        .length;
     final totalAchievements = config.achievements.length;
 
     final currentTier = config.getTierForXp(state.totalXp);
@@ -47,129 +90,138 @@ class AchievementsIndexScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Achievements')),
       body: RefreshIndicator(
-        onRefresh: () async => ref.read(achievementProvider.notifier).loadAchievements(),
+        onRefresh: () async =>
+            ref.read(achievementProvider.notifier).loadAchievements(),
         child: ListView(
           padding: const EdgeInsets.all(Spacing.md),
           children: [
-          // ── Stats Row — glass panel ─────────────────────────
-          GlassPanel(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: Spacing.md,
+            // ── Stats Row — glass panel ─────────────────────────
+            GlassPanel(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.lg,
+                vertical: Spacing.md,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _StatColumn(
+                    value: _AnimatedCount(target: state.totalXp),
+                    label: 'Total XP',
+                    color: AppColors.warning,
+                  ),
+                  _StatColumn(
+                    value: Text(
+                      '$verifiedCount',
+                      style: theme.textTheme.headlineLarge,
+                    ),
+                    label: 'Earned',
+                    color: AppColors.success,
+                  ),
+                  _StatColumn(
+                    value: Text(
+                      '$totalAchievements',
+                      style: theme.textTheme.headlineLarge,
+                    ),
+                    label: 'Total',
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _StatColumn(
-                  value: _AnimatedCount(target: state.totalXp),
-                  label: 'Total XP',
-                  color: AppColors.warning,
-                ),
-                _StatColumn(
-                  value: Text('$verifiedCount', style: theme.textTheme.headlineLarge),
-                  label: 'Earned',
-                  color: AppColors.success,
-                ),
-                _StatColumn(
-                  value: Text('$totalAchievements', style: theme.textTheme.headlineLarge),
-                  label: 'Total',
-                  color: AppColors.primary,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Spacing.md),
+            const SizedBox(height: Spacing.md),
 
-          // ── Progress to Next Tier — glass card ───────────────
-          if (nextTierInfo != null) ...[
-            _NextTierProgress(info: nextTierInfo, currentTier: currentTier),
+            // ── Progress to Next Tier — glass card ───────────────
+            if (nextTierInfo != null) ...[
+              _NextTierProgress(info: nextTierInfo, currentTier: currentTier),
+              const SizedBox(height: Spacing.lg),
+            ],
+
+            // ── Section Header ──────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              child: Row(
+                children: [
+                  // Gold bar
+                  Container(
+                    width: 3,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: AppColors.tertiary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  Text('Categories', style: theme.textTheme.titleMedium),
+                  const Spacer(),
+                  Text(
+                    '$verifiedCount of $totalAchievements earned',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppColors.inkMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Spacing.sm),
+
+            // ── Category Grid — bento glass tiles ───────────────
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: Spacing.sm,
+                crossAxisSpacing: Spacing.sm,
+              ),
+              itemCount: _categoryMeta.length,
+              itemBuilder: (context, index) {
+                final entry = _categoryMeta.entries.elementAt(index);
+                final cat = entry.key;
+                final meta = entry.value;
+                final progress = ref
+                    .read(achievementProvider.notifier)
+                    .getCategoryProgress(cat.name);
+
+                return _CategoryCard(
+                  categoryName: cat.name,
+                  label: meta.label,
+                  icon: meta.icon,
+                  color: meta.color,
+                  earned: progress.earned,
+                  total: progress.total,
+                  onTap: () => context.push('/achievements/${cat.name}'),
+                );
+              },
+            ),
+
             const SizedBox(height: Spacing.lg),
-          ],
 
-          // ── Section Header ──────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.only(bottom: Spacing.sm),
-            child: Row(
-              children: [
-                // Gold bar
-                Container(
-                  width: 3,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: AppColors.tertiary,
-                    borderRadius: BorderRadius.circular(2),
+            // ── Section Header: All Achievements ──────────────────
+            Padding(
+              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: AppColors.tertiary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                Text('Categories', style: theme.textTheme.titleMedium),
-                const Spacer(),
-                Text(
-                  '$verifiedCount of $totalAchievements earned',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppColors.inkMuted,
-                  ),
-                ),
-              ],
+                  const SizedBox(width: Spacing.sm),
+                  Text('All Achievements', style: theme.textTheme.titleMedium),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: Spacing.sm),
+            const SizedBox(height: Spacing.sm),
 
-          // ── Category Grid — bento glass tiles ───────────────
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: Spacing.sm,
-              crossAxisSpacing: Spacing.sm,
-              childAspectRatio: 1.0,
+            // ── Individual Badges Grid ──────────────────────────────
+            _AchievementBadgeGrid(
+              achievements: config.achievements.take(15).toList(),
+              userAchievements: state.userAchievements,
+              currentTier: currentTier,
             ),
-            itemCount: _categoryMeta.length,
-            itemBuilder: (context, index) {
-              final entry = _categoryMeta.entries.elementAt(index);
-              final cat = entry.key;
-              final meta = entry.value;
-              final progress = ref.read(achievementProvider.notifier).getCategoryProgress(cat.name);
-
-              return _CategoryCard(
-                label: meta.label,
-                icon: meta.icon,
-                color: meta.color,
-                earned: progress.earned,
-                total: progress.total,
-                onTap: () => context.push('/achievements/${cat.name}'),
-              );
-            },
-          ),
-
-          const SizedBox(height: Spacing.lg),
-
-          // ── Section Header: All Achievements ──────────────────
-          Padding(
-            padding: const EdgeInsets.only(bottom: Spacing.sm),
-            child: Row(
-              children: [
-                Container(
-                  width: 3,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: AppColors.tertiary,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                Text('All Achievements', style: theme.textTheme.titleMedium),
-              ],
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-
-          // ── Individual Badges Grid ──────────────────────────────
-          _AchievementBadgeGrid(
-            achievements: config.achievements.take(15).toList(),
-            userAchievements: state.userAchievements,
-            currentTier: currentTier,
-          ),
           ],
         ),
       ),
@@ -195,8 +247,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
       progress: totalXp >= next.required
           ? 1.0
           : next.required > 0
-              ? totalXp / next.required
-              : 1.0,
+          ? totalXp / next.required
+          : 1.0,
       xpRemaining: (next.required - totalXp).clamp(0, 999999),
     );
   }
@@ -231,10 +283,7 @@ class _AnimatedCount extends StatelessWidget {
       duration: const Duration(milliseconds: 1200),
       curve: Curves.easeOutCubic,
       builder: (context, value, _) {
-        return Text(
-          '$value',
-          style: theme.textTheme.headlineLarge,
-        );
+        return Text('$value', style: theme.textTheme.headlineLarge);
       },
     );
   }
@@ -261,7 +310,10 @@ class _StatColumn extends StatelessWidget {
         value,
         const SizedBox(height: Spacing.xs),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.sm,
+            vertical: 2,
+          ),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(RadiusTokens.pill),
@@ -299,7 +351,11 @@ class _NextTierProgress extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.trending_up, size: IconSizes.md, color: AppColors.warning),
+              const Icon(
+                Icons.trending_up,
+                size: IconSizes.md,
+                color: AppColors.warning,
+              ),
               const SizedBox(width: Spacing.sm),
               Expanded(
                 child: Text(
@@ -345,6 +401,7 @@ class _NextTierProgress extends StatelessWidget {
 // ─── Category Card — bento glass tile ───────────────────────────────
 
 class _CategoryCard extends StatelessWidget {
+  final String categoryName;
   final String label;
   final IconData icon;
   final Color color;
@@ -353,6 +410,7 @@ class _CategoryCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _CategoryCard({
+    required this.categoryName,
     required this.label,
     required this.icon,
     required this.color,
@@ -366,6 +424,7 @@ class _CategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final fraction = total > 0 ? (earned / total).clamp(0.0, 1.0) : 0.0;
     final isComplete = earned >= total;
+    final imagePath = WorldAssets.achievementCategoryImage(categoryName);
 
     return Material(
       color: AppColors.glassBackground,
@@ -386,15 +445,24 @@ class _CategoryCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Category icon
               Container(
-                width: 36,
-                height: 36,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: color.withValues(alpha: 0.15),
                 ),
-                child: Icon(icon, size: 20, color: color),
+                child: imagePath == null
+                    ? Icon(icon, size: 21, color: color)
+                    : ClipOval(
+                        child: Image.asset(
+                          imagePath,
+                          fit: BoxFit.cover,
+                          cacheWidth: 96,
+                          errorBuilder: (_, _, _) =>
+                              Icon(icon, size: 21, color: color),
+                        ),
+                      ),
               ),
               const SizedBox(height: Spacing.xs + 2),
               // Category name
@@ -417,9 +485,7 @@ class _CategoryCard extends StatelessWidget {
                 '$earned/$total',
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontSize: FontSizes.caption - 1,
-                  color: isComplete
-                      ? AppColors.success
-                      : AppColors.inkMuted,
+                  color: isComplete ? AppColors.success : AppColors.inkMuted,
                   fontWeight: isComplete ? FontWeights.bold : FontWeight.w400,
                 ),
               ),
@@ -472,9 +538,7 @@ class _AchievementBadgeGrid extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final tileWidth = (screenWidth - (Spacing.md * 2) - Spacing.sm) / 2;
 
-    final userMap = {
-      for (final ua in userAchievements) ua.achievementId: ua,
-    };
+    final userMap = {for (final ua in userAchievements) ua.achievementId: ua};
 
     return Wrap(
       spacing: Spacing.sm,
