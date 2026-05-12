@@ -792,7 +792,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(RadiusTokens.card),
                       child: Image.asset(
-                        'assets/icons/app_icon.png',
+                        'assets/images/icon.png',
                         width: 52,
                         height: 52,
                         errorBuilder: (_, _, _) => Container(

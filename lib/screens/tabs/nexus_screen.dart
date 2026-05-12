@@ -80,8 +80,11 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     var posts = switch (_tab) {
       _FeedTab.all => allPosts,
       _FeedTab.following =>
-        allPosts.where((p) => resident?.following.contains(p.residentId) ?? false).toList(),
-      _FeedTab.announcements => allPosts.where((p) => p.isAnnouncement).toList(),
+        allPosts
+            .where((p) => resident?.following.contains(p.residentId) ?? false)
+            .toList(),
+      _FeedTab.announcements =>
+        allPosts.where((p) => p.isAnnouncement).toList(),
     };
 
     posts = _sortPosts(posts, _sort);
@@ -110,9 +113,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                   tooltip: 'Search',
                   onPressed: () => context.push('/search'),
                 ),
-                NotificationBell(
-                  onPress: () => context.push('/notifications'),
-                ),
+                NotificationBell(onPress: () => context.push('/notifications')),
               ],
             ),
           ),
@@ -150,14 +151,16 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                             GlassPanel(
                               padding: const EdgeInsets.all(Spacing.lg),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Row(
                                       children: [
                                         Flexible(
                                           child: LuminaryNameplate(
-                                            name: '$greeting, ${resident?.name ?? 'Traveler'}',
+                                            name:
+                                                '$greeting, ${resident?.name ?? 'Traveler'}',
                                             tier: resident?.tier.value ?? 1,
                                             fontSize: FontSizes.bodyLg,
                                             title: resident?.title,
@@ -172,29 +175,39 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                             ),
                                             decoration: BoxDecoration(
                                               color: AppColors.primaryContainer,
-                                              borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    RadiusTokens.pill,
+                                                  ),
                                             ),
                                             child: Text(
                                               resident.tier.label,
                                               style: const TextStyle(
                                                 fontSize: FontSizes.labelSm,
                                                 fontWeight: FontWeights.bold,
-                                                color: AppColors.onPrimaryContainer,
+                                                color: AppColors
+                                                    .onPrimaryContainer,
                                               ),
                                             ),
                                           ),
                                           if (resident.streakCount > 0) ...[
                                             const SizedBox(width: Spacing.sm),
                                             Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: Spacing.sm,
-                                                vertical: 2,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: Spacing.sm,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color: AppColors.warning.withValues(alpha: 0.15),
-                                                borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                                                color: AppColors.warning
+                                                    .withValues(alpha: 0.15),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      RadiusTokens.pill,
+                                                    ),
                                                 border: Border.all(
-                                                  color: AppColors.warning.withValues(alpha: 0.3),
+                                                  color: AppColors.warning
+                                                      .withValues(alpha: 0.3),
                                                 ),
                                               ),
                                               child: Row(
@@ -209,8 +222,10 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                                   Text(
                                                     '${resident.streakCount}',
                                                     style: const TextStyle(
-                                                      fontSize: FontSizes.labelSm,
-                                                      fontWeight: FontWeights.bold,
+                                                      fontSize:
+                                                          FontSizes.labelSm,
+                                                      fontWeight:
+                                                          FontWeights.bold,
                                                       color: AppColors.warning,
                                                     ),
                                                   ),
@@ -266,31 +281,55 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                     child: FadeIn(
                       delayMs: 30,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        child: Row(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            FeedTabChip(
-                              label: 'All',
-                              selected: _tab == _FeedTab.all,
-                              onTap: () => setState(() => _tab = _FeedTab.all),
-                            ),
-                            const SizedBox(width: 6),
-                            FeedTabChip(
-                              label: 'Following',
-                              selected: _tab == _FeedTab.following,
-                              onTap: () => setState(() => _tab = _FeedTab.following),
-                            ),
-                            const SizedBox(width: 6),
-                            FeedTabChip(
-                              label: 'Announcements',
-                              selected: _tab == _FeedTab.announcements,
-                              icon: Icons.campaign,
-                              onTap: () => setState(() => _tab = _FeedTab.announcements),
-                            ),
-                            const Spacer(),
-                            FeedSortDropdown(
-                              currentSort: _sort,
-                              onChanged: (s) => setState(() => _sort = s),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        FeedTabChip(
+                                          label: 'All',
+                                          selected: _tab == _FeedTab.all,
+                                          onTap: () => setState(
+                                            () => _tab = _FeedTab.all,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        FeedTabChip(
+                                          label: 'Following',
+                                          selected: _tab == _FeedTab.following,
+                                          onTap: () => setState(
+                                            () => _tab = _FeedTab.following,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        FeedTabChip(
+                                          label: 'Announcements',
+                                          selected:
+                                              _tab == _FeedTab.announcements,
+                                          icon: Icons.campaign,
+                                          onTap: () => setState(
+                                            () => _tab = _FeedTab.announcements,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: Spacing.sm),
+                                FeedSortDropdown(
+                                  currentSort: _sort,
+                                  onChanged: (s) => setState(() => _sort = s),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -304,21 +343,20 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                         delayMs: 160,
                         child: AppErrorState(
                           message: postState.error,
-                          onRetry: () => ref.read(postProvider.notifier).loadPosts(),
+                          onRetry: () =>
+                              ref.read(postProvider.notifier).loadPosts(),
                         ),
                       ),
                     )
                   else if (posts.isEmpty)
                     SliverToBoxAdapter(
-                      child: FadeIn(
-                        delayMs: 160,
-                        child: _buildEmptyState(),
-                      ),
+                      child: FadeIn(delayMs: 160, child: _buildEmptyState()),
                     )
                   else
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) => PostItem(post: posts[index], index: index),
+                        (context, index) =>
+                            PostItem(post: posts[index], index: index),
                         childCount: posts.length,
                       ),
                     ),
@@ -338,7 +376,10 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                       tooltip: 'Scroll to top',
                       backgroundColor: AppColors.glassBackground,
                       foregroundColor: AppColors.primary,
-                      child: const Icon(Icons.keyboard_arrow_up, size: IconSizes.lg),
+                      child: const Icon(
+                        Icons.keyboard_arrow_up,
+                        size: IconSizes.lg,
+                      ),
                     ),
                   ),
                 ),
@@ -387,8 +428,14 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
         break;
       case FeedSort.hot:
         sorted.sort((a, b) {
-          final aReactions = a.reactions.values.fold<int>(0, (sum, v) => sum + v);
-          final bReactions = b.reactions.values.fold<int>(0, (sum, v) => sum + v);
+          final aReactions = a.reactions.values.fold<int>(
+            0,
+            (sum, v) => sum + v,
+          );
+          final bReactions = b.reactions.values.fold<int>(
+            0,
+            (sum, v) => sum + v,
+          );
           return bReactions.compareTo(aReactions);
         });
         break;

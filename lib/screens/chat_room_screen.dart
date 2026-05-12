@@ -102,7 +102,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final result = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200);
+    final result = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+    );
     if (result != null) {
       setState(() => _imagePath = result.path);
     }
@@ -120,14 +123,16 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     if (resident == null) return;
 
     HapticFeedback.lightImpact();
-    ref.read(chatProvider.notifier).sendDmMessage(
-      roomId: widget.roomId,
-      senderId: resident.id,
-      senderName: resident.name,
-      senderAvatar: resident.avatarUrl,
-      content: content,
-      imageUrl: _imagePath,
-    );
+    ref
+        .read(chatProvider.notifier)
+        .sendDmMessage(
+          roomId: widget.roomId,
+          senderId: resident.id,
+          senderName: resident.name,
+          senderAvatar: resident.avatarUrl,
+          content: content,
+          imageUrl: _imagePath,
+        );
     _controller.clear();
     setState(() => _imagePath = null);
     _scrollToBottom();
@@ -150,11 +155,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     );
     final recipientName = _recipientName(room, resident?.id ?? '');
     final recipientAvatar = _recipientAvatar(room);
+    final recipientId = _recipientId(room, resident?.id ?? '');
 
     final displayItems = buildChatDisplayItems(messages);
 
     return Scaffold(
-      appBar: _buildAppBar(theme, recipientName, recipientAvatar),
+      appBar: _buildAppBar(theme, recipientName, recipientAvatar, recipientId),
       body: Column(
         children: [
           Expanded(
@@ -203,12 +209,17 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     ThemeData theme,
     String recipientName,
     String? recipientAvatar,
+    String? recipientId,
   ) {
     return AppBar(
       titleSpacing: 4,
       title: Row(
         children: [
-          CosmeticAvatar(imageUrl: recipientAvatar, size: 32),
+          CosmeticAvatar(
+            imageUrl: recipientAvatar,
+            seed: recipientId ?? recipientName,
+            size: 32,
+          ),
           const SizedBox(width: Spacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +234,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const StatusDot(presence: Presence.online, size: 6, borderWidth: 1),
+                  const StatusDot(
+                    presence: Presence.online,
+                    size: 6,
+                    borderWidth: 1,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'Online',
@@ -273,11 +288,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   String _recipientName(Map<String, dynamic>? room, String currentId) {
     if (room == null) return '';
-    final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
-    final otherId = ids.firstWhere(
-      (id) => id != currentId,
-      orElse: () => ids.isNotEmpty ? ids.first : '',
-    );
+    final otherId = _recipientId(room, currentId);
     if (otherId.isEmpty) return '';
 
     final names = room['names'] as Map<String, dynamic>?;
@@ -287,6 +298,15 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final direct = room['other_name'];
     if (direct is String && direct.isNotEmpty) return direct;
     return otherId;
+  }
+
+  String _recipientId(Map<String, dynamic>? room, String currentId) {
+    if (room == null) return '';
+    final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
+    return ids.firstWhere(
+      (id) => id != currentId,
+      orElse: () => ids.isNotEmpty ? ids.first : '',
+    );
   }
 
   String? _recipientAvatar(Map<String, dynamic>? room) {
@@ -335,17 +355,14 @@ class _MessageBubbleState extends State<_MessageBubble>
       vsync: this,
     );
 
-    _opacity = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
+    _opacity = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
-    _slide = Tween(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.elasticOut,
-    ));
+    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
+    );
 
     if (_hasAnimated) {
       _animController.value = 1.0;
@@ -365,7 +382,11 @@ class _MessageBubbleState extends State<_MessageBubble>
 
   static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
     return MarkdownStyleSheet(
-      p: TextStyle(fontSize: FontSizes.bodyMd, color: textColor, height: LineHeight.body),
+      p: TextStyle(
+        fontSize: FontSizes.bodyMd,
+        color: textColor,
+        height: LineHeight.body,
+      ),
       code: TextStyle(
         fontSize: FontSizes.bodyMd - 2,
         color: AppColors.ink,
@@ -386,9 +407,24 @@ class _MessageBubbleState extends State<_MessageBubble>
         border: Border(left: BorderSide(color: AppColors.hustler, width: 3)),
         color: AppColors.hustler.withValues(alpha: 0.05),
       ),
-      h1: TextStyle(fontSize: FontSizes.headlineMd, fontWeight: FontWeights.bold, color: textColor, fontFamily: AppFont.headline),
-      h2: TextStyle(fontSize: FontSizes.bodyLg, fontWeight: FontWeights.bold, color: textColor, fontFamily: AppFont.headline),
-      h3: TextStyle(fontSize: FontSizes.bodyMd, fontWeight: FontWeights.semiBold, color: textColor, fontFamily: AppFont.headline),
+      h1: TextStyle(
+        fontSize: FontSizes.headlineMd,
+        fontWeight: FontWeights.bold,
+        color: textColor,
+        fontFamily: AppFont.headline,
+      ),
+      h2: TextStyle(
+        fontSize: FontSizes.bodyLg,
+        fontWeight: FontWeights.bold,
+        color: textColor,
+        fontFamily: AppFont.headline,
+      ),
+      h3: TextStyle(
+        fontSize: FontSizes.bodyMd,
+        fontWeight: FontWeights.semiBold,
+        color: textColor,
+        fontFamily: AppFont.headline,
+      ),
     );
   }
 
@@ -446,6 +482,7 @@ class _MessageBubbleState extends State<_MessageBubble>
                     children: [
                       CosmeticAvatar(
                         imageUrl: widget.message.senderAvatar,
+                        seed: widget.message.senderId,
                         size: 24,
                       ),
                       const SizedBox(width: Spacing.xs),
@@ -492,7 +529,9 @@ class _MessageBubbleState extends State<_MessageBubble>
                         formatTimestamp(widget.message.createdAt),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: isMe
-                              ? AppColors.onPrimaryContainer.withValues(alpha: 0.6)
+                              ? AppColors.onPrimaryContainer.withValues(
+                                  alpha: 0.6,
+                                )
                               : AppColors.inkMuted,
                           fontSize: FontSizes.caption - 1,
                         ),
@@ -582,8 +621,9 @@ class _TypingIndicatorState extends State<_TypingIndicator>
                         margin: const EdgeInsets.symmetric(horizontal: 2),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.inkMuted
-                              .withValues(alpha: 0.3 + 0.4 * bounce),
+                          color: AppColors.inkMuted.withValues(
+                            alpha: 0.3 + 0.4 * bounce,
+                          ),
                         ),
                       ),
                     );
@@ -623,20 +663,17 @@ class _ImagePreview extends StatelessWidget {
               width: 56,
               height: 56,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Icon(
-                Icons.broken_image,
-                size: 32,
-                color: AppColors.inkMuted,
-              ),
+              errorBuilder: (_, _, _) =>
+                  Icon(Icons.broken_image, size: 32, color: AppColors.inkMuted),
             ),
           ),
           const SizedBox(width: Spacing.sm),
           Expanded(
             child: Text(
               'Image ready to send',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.inkMuted,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
             ),
           ),
           IconButton(

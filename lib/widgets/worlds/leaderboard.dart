@@ -41,15 +41,22 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
     setState(() => _loading = true);
     try {
       final members = await WorldService.getMembers(widget.worldId);
-      final all = members
-          .where((m) => (m['rep'] as int? ?? 0) > 0)
-          .map((m) => _RankedResident(
-                name: m['resident_name'] as String? ?? 'Member',
-                avatarUrl: m['avatar_url'] as String?,
-                rep: m['rep'] as int? ?? 0,
-              ))
-          .toList()
-        ..sort((a, b) => b.rep.compareTo(a.rep));
+      final all =
+          members
+              .where((m) => (m['rep'] as int? ?? 0) > 0)
+              .map(
+                (m) => _RankedResident(
+                  id:
+                      m['resident_id'] as String? ??
+                      m['resident_name'] as String? ??
+                      'member',
+                  name: m['resident_name'] as String? ?? 'Member',
+                  avatarUrl: m['avatar_url'] as String?,
+                  rep: m['rep'] as int? ?? 0,
+                ),
+              )
+              .toList()
+            ..sort((a, b) => b.rep.compareTo(a.rep));
 
       if (mounted) {
         setState(() {
@@ -87,17 +94,24 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
           padding: const EdgeInsets.all(Spacing.lg),
           child: Column(
             children: [
-              Icon(Icons.leaderboard_outlined,
-                  size: IconSizes.xl, color: theme.colorScheme.outline),
+              Icon(
+                Icons.leaderboard_outlined,
+                size: IconSizes.xl,
+                color: theme.colorScheme.outline,
+              ),
               const SizedBox(height: Spacing.sm),
-              Text('Leaderboard',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeights.bold)),
+              Text(
+                'Leaderboard',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeights.bold,
+                ),
+              ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Be the first to earn reputation in this world',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -120,12 +134,18 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
           children: [
             Row(
               children: [
-                Icon(Icons.leaderboard, size: IconSizes.md,
-                    color: AppColors.beeYellow),
+                Icon(
+                  Icons.leaderboard,
+                  size: IconSizes.md,
+                  color: AppColors.beeYellow,
+                ),
                 const SizedBox(width: Spacing.sm),
-                Text('Leaderboard',
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeights.bold)),
+                Text(
+                  'Leaderboard',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeights.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: Spacing.md),
@@ -142,6 +162,7 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
                       const SizedBox(width: Spacing.sm),
                       CosmeticAvatar(
                         imageUrl: resident.avatarUrl,
+                        seed: resident.id,
                         size: 36,
                       ),
                       const SizedBox(width: Spacing.sm),
@@ -172,10 +193,12 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
 }
 
 class _RankedResident {
+  final String id;
   final String name;
   final String? avatarUrl;
   final int rep;
   const _RankedResident({
+    required this.id,
     required this.name,
     this.avatarUrl,
     required this.rep,
@@ -209,12 +232,14 @@ class _RankBadge extends StatelessWidget {
             shape: BoxShape.circle,
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
-          child: Text('$rank',
-              style: TextStyle(
-                fontSize: FontSizes.caption,
-                fontWeight: FontWeights.bold,
-                color: Theme.of(context).colorScheme.outline,
-              )),
+          child: Text(
+            '$rank',
+            style: TextStyle(
+              fontSize: FontSizes.caption,
+              fontWeight: FontWeights.bold,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
         );
     }
     return Container(

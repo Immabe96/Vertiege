@@ -35,19 +35,22 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
       duration: AnimDurations.fast,
       vsync: this,
     );
-    _markAllScale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.85),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.85, end: 1.0),
-        weight: 1,
-      ),
-    ]).animate(CurvedAnimation(
-      parent: _markAllAnimController,
-      curve: Curves.easeInOut,
-    ));
+    _markAllScale =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.0, end: 0.85),
+            weight: 1,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 0.85, end: 1.0),
+            weight: 1,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _markAllAnimController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
@@ -110,10 +113,8 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
           if (hasUnread)
             AnimatedBuilder(
               animation: _markAllScale,
-              builder: (context, child) => Transform.scale(
-                scale: _markAllScale.value,
-                child: child,
-              ),
+              builder: (context, child) =>
+                  Transform.scale(scale: _markAllScale.value, child: child),
               child: TextButton(
                 onPressed: _onMarkAllRead,
                 child: const Text('Mark all read'),
@@ -126,6 +127,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
               title: 'All caught up!',
               description: 'You have no notifications yet.',
               icon: Icons.notifications_outlined,
+              imageAsset: 'assets/generated/empty-notifications.jpg',
               variant: EmptyStateVariant.default_,
             )
           : _buildNotificationList(context, notifications, ref, theme),
@@ -167,17 +169,26 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
           if (todayList.isNotEmpty) ...[
             _SectionHeader(title: _labelForGroup(_DateGroup.today)),
             _NotificationSliverList(
-                notifications: todayList, ref: ref, theme: theme),
+              notifications: todayList,
+              ref: ref,
+              theme: theme,
+            ),
           ],
           if (weekList.isNotEmpty) ...[
             _SectionHeader(title: _labelForGroup(_DateGroup.thisWeek)),
             _NotificationSliverList(
-                notifications: weekList, ref: ref, theme: theme),
+              notifications: weekList,
+              ref: ref,
+              theme: theme,
+            ),
           ],
           if (earlierList.isNotEmpty) ...[
             _SectionHeader(title: _labelForGroup(_DateGroup.earlier)),
             _NotificationSliverList(
-                notifications: earlierList, ref: ref, theme: theme),
+              notifications: earlierList,
+              ref: ref,
+              theme: theme,
+            ),
           ],
           // Bottom padding so content isn't obscured by the nav bar.
           const SliverPadding(padding: EdgeInsets.only(bottom: 96)),
@@ -235,10 +246,10 @@ class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeights.semiBold,
-              letterSpacing: LetterSpacing.label,
-            ),
+          color: textColor,
+          fontWeight: FontWeights.semiBold,
+          letterSpacing: LetterSpacing.label,
+        ),
       ),
     );
   }
@@ -279,89 +290,86 @@ class _NotificationSliverList extends StatelessWidget {
     final notifier = ref.read(notificationProvider.notifier);
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final n = notifications[index];
-          final typeColor = _colorForTypeStatic(n.type);
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final n = notifications[index];
+        final typeColor = _colorForTypeStatic(n.type);
 
-          // Tapping the card navigates based on notification type.
-          void onTap() {
-            ref.read(notificationProvider.notifier).markRead(n.id);
-            switch (n.type) {
-              case NotificationType.like:
-              case NotificationType.comment:
-                if (n.worldId != null) {
-                  context.push('/explore/${n.worldId}');
-                }
-                break;
-              case NotificationType.worldUnlocked:
-              case NotificationType.mention:
-                if (n.worldId != null) {
-                  context.push('/explore/${n.worldId}');
-                }
-                break;
-              case NotificationType.tierUpgrade:
-              case NotificationType.allegianceRequest:
-                context.go('/identity');
-                break;
-              case NotificationType.welcome:
-              case NotificationType.modAction:
-              case NotificationType.ranking:
-              case NotificationType.streakReminder:
-              case NotificationType.reactionMilestone:
-                break;
-            }
+        // Tapping the card navigates based on notification type.
+        void onTap() {
+          ref.read(notificationProvider.notifier).markRead(n.id);
+          switch (n.type) {
+            case NotificationType.like:
+            case NotificationType.comment:
+              if (n.worldId != null) {
+                context.push('/explore/${n.worldId}');
+              }
+              break;
+            case NotificationType.worldUnlocked:
+            case NotificationType.mention:
+              if (n.worldId != null) {
+                context.push('/explore/${n.worldId}');
+              }
+              break;
+            case NotificationType.tierUpgrade:
+            case NotificationType.allegianceRequest:
+              context.go('/identity');
+              break;
+            case NotificationType.welcome:
+            case NotificationType.modAction:
+            case NotificationType.ranking:
+            case NotificationType.streakReminder:
+            case NotificationType.reactionMilestone:
+              break;
           }
+        }
 
-          return FadeIn(
-            delayMs: index * 60,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.xs,
+        return FadeIn(
+          delayMs: index * 60,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md,
+              vertical: Spacing.xs,
+            ),
+            child: Dismissible(
+              key: ValueKey(n.id),
+              direction: DismissDirection.horizontal,
+              confirmDismiss: (direction) async {
+                if (direction == DismissDirection.startToEnd) {
+                  // Swipe right → mark as read, keep in list.
+                  HapticFeedback.lightImpact();
+                  notifier.markRead(n.id);
+                  return false;
+                } else {
+                  // Swipe left → archive (mark as read and dismiss).
+                  HapticFeedback.lightImpact();
+                  notifier.markRead(n.id);
+                  return true;
+                }
+              },
+              background: _SwipeBackground(
+                color: AppColors.online,
+                icon: Icons.check,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: Spacing.lg),
               ),
-              child: Dismissible(
-                key: ValueKey(n.id),
-                direction: DismissDirection.horizontal,
-                confirmDismiss: (direction) async {
-                  if (direction == DismissDirection.startToEnd) {
-                    // Swipe right → mark as read, keep in list.
-                    HapticFeedback.lightImpact();
-                    notifier.markRead(n.id);
-                    return false;
-                  } else {
-                    // Swipe left → archive (mark as read and dismiss).
-                    HapticFeedback.lightImpact();
-                    notifier.markRead(n.id);
-                    return true;
-                  }
-                },
-                background: _SwipeBackground(
-                  color: AppColors.online,
-                  icon: Icons.check,
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: Spacing.lg),
-                ),
-                secondaryBackground: _SwipeBackground(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.45),
-                  icon: Icons.archive,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: Spacing.lg),
-                ),
-                child: _NotificationCard(
-                  notification: n,
-                  typeColor: typeColor,
-                  onTap: onTap,
-                  actions: n.type == NotificationType.allegianceRequest
-                      ? _AllegianceRequestActions(notification: n)
-                      : null,
-                ),
+              secondaryBackground: _SwipeBackground(
+                color: theme.colorScheme.outline.withValues(alpha: 0.45),
+                icon: Icons.archive,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: Spacing.lg),
+              ),
+              child: _NotificationCard(
+                notification: n,
+                typeColor: typeColor,
+                onTap: onTap,
+                actions: n.type == NotificationType.allegianceRequest
+                    ? _AllegianceRequestActions(notification: n)
+                    : null,
               ),
             ),
-          );
-        },
-        childCount: notifications.length,
-      ),
+          ),
+        );
+      }, childCount: notifications.length),
     );
   }
 
@@ -476,8 +484,9 @@ class _NotificationCard extends StatelessWidget {
                                 color: typeColor.withValues(
                                   alpha: AppColors.alphaSelected,
                                 ),
-                                borderRadius:
-                                    BorderRadius.circular(RadiusTokens.input),
+                                borderRadius: BorderRadius.circular(
+                                  RadiusTokens.input,
+                                ),
                               ),
                               child: Icon(
                                 _iconForTypeStatic(n.type),
@@ -520,7 +529,12 @@ class _NotificationCard extends StatelessWidget {
               ),
               if (actions != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.md,
+                    0,
+                    Spacing.md,
+                    Spacing.sm,
+                  ),
                   child: actions!,
                 ),
             ],
@@ -565,7 +579,9 @@ class _AllegianceRequestActions extends ConsumerWidget {
             child: OutlinedButton(
               onPressed: () async {
                 // Decline — mark notification as read and remove from list
-                ref.read(notificationProvider.notifier).markRead(notification.id);
+                ref
+                    .read(notificationProvider.notifier)
+                    .markRead(notification.id);
                 // Attempt to decline based on pending list
                 final pending = ref.read(allyProvider).pendingRequests;
                 if (pending.isNotEmpty) {
@@ -580,7 +596,10 @@ class _AllegianceRequestActions extends ConsumerWidget {
                 ),
                 padding: EdgeInsets.zero,
               ),
-              child: const Text('DECLINE', style: TextStyle(fontSize: FontSizes.labelSm)),
+              child: const Text(
+                'DECLINE',
+                style: TextStyle(fontSize: FontSizes.labelSm),
+              ),
             ),
           ),
         ),
@@ -590,7 +609,9 @@ class _AllegianceRequestActions extends ConsumerWidget {
             height: 36,
             child: FilledButton(
               onPressed: () async {
-                ref.read(notificationProvider.notifier).markRead(notification.id);
+                ref
+                    .read(notificationProvider.notifier)
+                    .markRead(notification.id);
                 final pending = ref.read(allyProvider).pendingRequests;
                 if (pending.isNotEmpty) {
                   await allyNotifier.acceptRequest(pending.first.id);
@@ -604,7 +625,10 @@ class _AllegianceRequestActions extends ConsumerWidget {
                 ),
                 padding: EdgeInsets.zero,
               ),
-              child: const Text('ACCEPT', style: TextStyle(fontSize: FontSizes.labelSm)),
+              child: const Text(
+                'ACCEPT',
+                style: TextStyle(fontSize: FontSizes.labelSm),
+              ),
             ),
           ),
         ),

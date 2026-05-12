@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/post.dart';
+import '../../models/world.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/glass_panel.dart';
@@ -24,6 +25,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _bodyController = TextEditingController();
   bool _isSovereignAnnouncement = false;
   bool _isSovereignDecree = false;
+  String? _selectedWorldId;
 
   // Poll state
   String? _imagePath;
@@ -132,7 +134,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     if (resident == null) return;
 
     final worlds = ref.read(worldProvider).worlds.values.toList();
-    final worldId = worlds.isNotEmpty ? worlds.first.id : 'nexus';
+    final worldId =
+        _selectedWorldId ?? (worlds.isNotEmpty ? worlds.first.id : null);
+    if (worldId == null) return;
 
     final content = title.isEmpty ? body : '$title\n\n$body';
     final poll = _buildPoll();
@@ -158,6 +162,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     final worlds = ref.watch(worldProvider).worlds.values.toList();
+    final selectedWorld = worlds.firstWhere(
+      (world) => world.id == _selectedWorldId,
+      orElse: () => worlds.isNotEmpty
+          ? worlds.first
+          : const World(
+              id: 'nexus',
+              name: 'Nexus',
+              type: WorldType.wealth,
+              description: '',
+              sovereignId: '',
+              sovereignName: '',
+            ),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -220,12 +237,36 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     ),
                     const SizedBox(width: Spacing.md),
                     Expanded(
-                      child: Text(
-                        worlds.first.name,
-                        style: const TextStyle(
-                          fontSize: FontSizes.headlineMd,
-                          fontWeight: FontWeights.semiBold,
-                          color: AppColors.ink,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedWorld.id,
+                          dropdownColor: AppColors.surfaceHigh,
+                          iconEnabledColor: AppColors.inkSecondary,
+                          isExpanded: true,
+                          style: const TextStyle(
+                            fontSize: FontSizes.headlineMd,
+                            fontWeight: FontWeights.semiBold,
+                            color: AppColors.ink,
+                          ),
+                          items: worlds
+                              .map(
+                                (world) => DropdownMenuItem<String>(
+                                  value: world.id,
+                                  child: Text(
+                                    world.name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setState(() {
+                              _selectedWorldId = value;
+                              _isSovereignAnnouncement = false;
+                              _isSovereignDecree = false;
+                            });
+                          },
                         ),
                       ),
                     ),
@@ -243,16 +284,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             Consumer(
               builder: (context, ref, _) {
                 final resident = ref.watch(residentProvider).resident;
-                final worlds = ref.watch(worldProvider).worlds;
-                final selectedWorld = worlds.values.firstOrNull;
                 final isCouncil =
                     resident != null &&
-                    selectedWorld != null &&
                     resident.worldStandings[selectedWorld.id]?.rep != null &&
                     resident.worldStandings[selectedWorld.id]!.rep >= 5000;
                 final isSov =
                     resident != null &&
-                    selectedWorld != null &&
                     resident.id == selectedWorld.sovereignId;
                 if (!isCouncil && !isSov) return const SizedBox.shrink();
 
@@ -318,11 +355,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             Consumer(
               builder: (context, ref, _) {
                 final resident = ref.watch(residentProvider).resident;
-                final worlds = ref.watch(worldProvider).worlds;
-                final selectedWorld = worlds.values.firstOrNull;
                 final isSovereign =
                     resident != null &&
-                    selectedWorld != null &&
                     resident.id == selectedWorld.sovereignId;
 
                 if (!isSovereign) return const SizedBox.shrink();

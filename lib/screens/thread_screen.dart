@@ -91,15 +91,17 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     if (resident == null) return;
 
     HapticFeedback.lightImpact();
-    ref.read(chatProvider.notifier).sendThreadReply(
-      channelId: widget.channelId,
-      senderId: resident.id,
-      senderName: resident.name,
-      senderAvatar: resident.avatarUrl,
-      worldId: widget.worldId,
-      content: content,
-      threadId: widget.parentMessage.id,
-    );
+    ref
+        .read(chatProvider.notifier)
+        .sendThreadReply(
+          channelId: widget.channelId,
+          senderId: resident.id,
+          senderName: resident.name,
+          senderAvatar: resident.avatarUrl,
+          worldId: widget.worldId,
+          content: content,
+          threadId: widget.parentMessage.id,
+        );
     _controller.clear();
     _scrollToBottom();
   }
@@ -107,8 +109,12 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
-    final messages = ref.watch(chatProvider).channelMessages[widget.parentMessage.id] ?? [];
-    final isLoading = !ref.watch(chatProvider).channelMessages.containsKey(widget.parentMessage.id);
+    final messages =
+        ref.watch(chatProvider).channelMessages[widget.parentMessage.id] ?? [];
+    final isLoading = !ref
+        .watch(chatProvider)
+        .channelMessages
+        .containsKey(widget.parentMessage.id);
     final displayItems = buildChatDisplayItems(messages);
 
     return Scaffold(
@@ -137,38 +143,41 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
       body: Column(
         children: [
           // Parent message pinned at top
-          _ParentMessageCard(message: widget.parentMessage, residentId: resident?.id ?? ''),
+          _ParentMessageCard(
+            message: widget.parentMessage,
+            residentId: resident?.id ?? '',
+          ),
           Expanded(
             child: isLoading
                 ? const GlassLoadingList(itemCount: 5)
                 : messages.isEmpty
-                    ? const AppEmptyState(
-                        title: 'No replies yet',
-                        description: 'Be the first to reply in this thread',
-                        icon: Icons.chat_bubble_outline,
-                      )
-                    : Stack(
-                        children: [
-                          ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Spacing.sm,
-                              vertical: Spacing.sm,
-                            ),
-                            itemCount: displayItems.length,
-                            itemBuilder: (context, index) {
-                              final item = displayItems[index];
-                              return _buildItem(item, resident?.id ?? '');
-                            },
-                          ),
-                          if (_showScrollFab)
-                            Positioned(
-                              right: Spacing.md,
-                              bottom: Spacing.sm,
-                              child: ChatScrollFab(onTap: _scrollToBottom),
-                            ),
-                        ],
+                ? const AppEmptyState(
+                    title: 'No replies yet',
+                    description: 'Be the first to reply in this thread',
+                    icon: Icons.chat_bubble_outline,
+                  )
+                : Stack(
+                    children: [
+                      ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Spacing.sm,
+                          vertical: Spacing.sm,
+                        ),
+                        itemCount: displayItems.length,
+                        itemBuilder: (context, index) {
+                          final item = displayItems[index];
+                          return _buildItem(item, resident?.id ?? '');
+                        },
                       ),
+                      if (_showScrollFab)
+                        Positioned(
+                          right: Spacing.md,
+                          bottom: Spacing.sm,
+                          child: ChatScrollFab(onTap: _scrollToBottom),
+                        ),
+                    ],
+                  ),
           ),
           ChatInputBar(
             controller: _controller,
@@ -201,12 +210,18 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             maxWidth: MediaQuery.of(context).size.width * 0.75,
           ),
           child: Column(
-            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: isMe
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CosmeticAvatar(imageUrl: message.senderAvatar, size: 20),
+                  CosmeticAvatar(
+                    imageUrl: message.senderAvatar,
+                    seed: message.senderId,
+                    size: 20,
+                  ),
                   const SizedBox(width: Spacing.xs),
                   LuminaryNameplate(
                     name: message.senderName,
@@ -217,7 +232,10 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
               ),
               const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: isMe ? AppColors.primary : AppColors.glassBackground,
                   borderRadius: isMe
@@ -233,7 +251,9 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                           bottomRight: Radius.circular(RadiusTokens.xl),
                           bottomLeft: Radius.circular(RadiusTokens.sm),
                         ),
-                  border: isMe ? null : Border.all(color: AppColors.glassBorder),
+                  border: isMe
+                      ? null
+                      : Border.all(color: AppColors.glassBorder),
                 ),
                 child: MarkdownBody(
                   data: message.content,
@@ -259,7 +279,11 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
 
   static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
     return MarkdownStyleSheet(
-      p: TextStyle(fontSize: FontSizes.bodyMd, color: textColor, height: LineHeight.body),
+      p: TextStyle(
+        fontSize: FontSizes.bodyMd,
+        color: textColor,
+        height: LineHeight.body,
+      ),
       code: TextStyle(
         fontSize: FontSizes.bodyMd - 2,
         color: AppColors.ink,
@@ -296,7 +320,11 @@ class _ParentMessageCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              CosmeticAvatar(imageUrl: message.senderAvatar, size: 28),
+              CosmeticAvatar(
+                imageUrl: message.senderAvatar,
+                seed: message.senderId,
+                size: 28,
+              ),
               const SizedBox(width: Spacing.sm),
               LuminaryNameplate(
                 name: message.senderName,
@@ -306,7 +334,10 @@ class _ParentMessageCard extends StatelessWidget {
               const Spacer(),
               Text(
                 formatTimestamp(message.createdAt),
-                style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+                style: const TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  color: AppColors.inkMuted,
+                ),
               ),
             ],
           ),
@@ -323,7 +354,10 @@ class _ParentMessageCard extends StatelessWidget {
           const SizedBox(height: Spacing.xs),
           Text(
             '${message.threadCount} ${message.threadCount == 1 ? 'reply' : 'replies'}',
-            style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+            style: const TextStyle(
+              fontSize: FontSizes.labelSm,
+              color: AppColors.inkMuted,
+            ),
           ),
         ],
       ),
@@ -332,7 +366,11 @@ class _ParentMessageCard extends StatelessWidget {
 
   static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
     return MarkdownStyleSheet(
-      p: TextStyle(fontSize: FontSizes.bodyMd, color: textColor, height: LineHeight.body),
+      p: TextStyle(
+        fontSize: FontSizes.bodyMd,
+        color: textColor,
+        height: LineHeight.body,
+      ),
       code: TextStyle(
         fontSize: FontSizes.bodyMd - 2,
         color: AppColors.ink,

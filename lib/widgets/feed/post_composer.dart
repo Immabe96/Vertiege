@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -116,11 +117,18 @@ class _PostComposerState extends ConsumerState<PostComposer>
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    final joinedWorlds = ref.read(worldProvider).worlds.values
+    final joinedWorlds = ref
+        .read(worldProvider)
+        .worlds
+        .values
         .where((w) => resident.joinedWorldIds.contains(w.id))
         .toList();
-    final targetWorldId = _selectedWorldId ?? (joinedWorlds.isNotEmpty ? joinedWorlds.first.id : null);
+    final targetWorldId =
+        _selectedWorldId ??
+        (joinedWorlds.isNotEmpty ? joinedWorlds.first.id : null);
     if (targetWorldId == null) return;
+    final imageUri = _imageUri;
+    final isAnnouncement = _isAnnouncement;
 
     _controller.clear();
     setState(() {
@@ -135,22 +143,26 @@ class _PostComposerState extends ConsumerState<PostComposer>
     StorageService.remove(_draftKey);
 
     try {
-      await ref.read(postProvider.notifier).addPost(
+      await ref
+          .read(postProvider.notifier)
+          .addPost(
             worldId: targetWorldId,
             residentId: resident.id,
             residentName: resident.name,
             residentAvatar: resident.avatarUrl,
             content: content,
-            imageUri: _imageUri,
+            imageUri: imageUri,
             tierValue: resident.tier.value,
-            isAnnouncement: _isAnnouncement,
+            isAnnouncement: isAnnouncement,
           );
     } catch (_) {
       // Post failed — the provider will have reverted the optimistic update
       if (mounted) {
         setState(() => _sent = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to publish post. Please try again.')),
+          const SnackBar(
+            content: Text('Failed to publish post. Please try again.'),
+          ),
         );
       }
       return;
@@ -171,7 +183,10 @@ class _PostComposerState extends ConsumerState<PostComposer>
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
-    final worlds = ref.watch(worldProvider).worlds.values
+    final worlds = ref
+        .watch(worldProvider)
+        .worlds
+        .values
         .where((w) => resident?.joinedWorldIds.contains(w.id) ?? false)
         .toList();
     final canAnnounce = resident != null && worlds.isNotEmpty;
@@ -192,7 +207,10 @@ class _PostComposerState extends ConsumerState<PostComposer>
             // ── Drag handle ──────────────────────────────
             Center(
               child: Container(
-                margin: const EdgeInsets.only(top: Spacing.sm, bottom: Spacing.xs),
+                margin: const EdgeInsets.only(
+                  top: Spacing.sm,
+                  bottom: Spacing.xs,
+                ),
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
@@ -222,7 +240,10 @@ class _PostComposerState extends ConsumerState<PostComposer>
                       padding: const EdgeInsets.only(right: Spacing.sm),
                       child: TextButton.icon(
                         onPressed: _discardDraft,
-                        icon: const Icon(Icons.delete_outline, size: IconSizes.sm),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: IconSizes.sm,
+                        ),
                         label: const Text(
                           'Discard',
                           style: TextStyle(
@@ -256,7 +277,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   separatorBuilder: (_, _) => const SizedBox(width: Spacing.sm),
                   itemBuilder: (context, i) {
                     final world = worlds[i];
-                    final selected = _selectedWorldId == world.id ||
+                    final selected =
+                        _selectedWorldId == world.id ||
                         (_selectedWorldId == null && i == 0);
                     return GestureDetector(
                       onTap: () => setState(() => _selectedWorldId = world.id),
@@ -267,12 +289,18 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.primary.withValues(alpha: AppColors.alphaSelected)
+                              ? AppColors.primary.withValues(
+                                  alpha: AppColors.alphaSelected,
+                                )
                               : AppColors.surfaceElevated,
-                          borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                          borderRadius: BorderRadius.circular(
+                            RadiusTokens.pill,
+                          ),
                           border: Border.all(
                             color: selected
-                                ? AppColors.primary.withValues(alpha: AppColors.alphaBorder)
+                                ? AppColors.primary.withValues(
+                                    alpha: AppColors.alphaBorder,
+                                  )
                                 : AppColors.glassBorder,
                           ),
                         ),
@@ -282,15 +310,21 @@ class _PostComposerState extends ConsumerState<PostComposer>
                             Icon(
                               Icons.public,
                               size: IconSizes.xs,
-                              color: selected ? AppColors.primary : AppColors.inkSecondary,
+                              color: selected
+                                  ? AppColors.primary
+                                  : AppColors.inkSecondary,
                             ),
                             const SizedBox(width: Spacing.xs),
                             Text(
                               world.name,
                               style: TextStyle(
                                 fontSize: FontSizes.caption,
-                                fontWeight: selected ? FontWeights.bold : FontWeights.regular,
-                                color: selected ? AppColors.primary : AppColors.inkSecondary,
+                                fontWeight: selected
+                                    ? FontWeights.bold
+                                    : FontWeights.regular,
+                                color: selected
+                                    ? AppColors.primary
+                                    : AppColors.inkSecondary,
                               ),
                             ),
                           ],
@@ -312,10 +346,15 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 maxLines: 5,
                 minLines: 3,
                 maxLength: _maxChars,
-                buildCounter: (context,
-                    {required currentLength, required isFocused, maxLength}) {
-                  return null;
-                },
+                buildCounter:
+                    (
+                      context, {
+                      required currentLength,
+                      required isFocused,
+                      maxLength,
+                    }) {
+                      return null;
+                    },
                 style: const TextStyle(
                   fontSize: FontSizes.body,
                   fontWeight: FontWeights.regular,
@@ -342,16 +381,20 @@ class _PostComposerState extends ConsumerState<PostComposer>
             // ── Image preview ─────────────────────────────
             if (_imageUri != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(Spacing.lg, 0, Spacing.lg, Spacing.sm),
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.lg,
+                  0,
+                  Spacing.lg,
+                  Spacing.sm,
+                ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(RadiusTokens.card),
                   child: Stack(
                     children: [
-                      Image.network(
-                        _imageUri!,
+                      _ImagePreview(
+                        uri: _imageUri!,
                         height: 160,
                         width: double.infinity,
-                        fit: BoxFit.cover,
                       ),
                       Positioned(
                         top: Spacing.sm,
@@ -396,7 +439,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   _CompactTool(
                     icon: Icons.drafts_outlined,
                     tooltip: 'Save draft',
-                    onTap: _controller.text.trim().isNotEmpty || _imageUri != null
+                    onTap:
+                        _controller.text.trim().isNotEmpty || _imageUri != null
                         ? _saveDraft
                         : null,
                   ),
@@ -444,7 +488,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   ScaleTransition(
                     scale: _sendScale,
                     child: GestureDetector(
-                      onTap: (_sent || charLength > _maxChars || charLength == 0)
+                      onTap:
+                          (_sent || charLength > _maxChars || charLength == 0)
                           ? null
                           : _submit,
                       child: AnimatedContainer(
@@ -515,6 +560,43 @@ class _CompactTool extends StatelessWidget {
             color: active ? AppColors.primary : AppColors.inkSecondary,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ImagePreview extends StatelessWidget {
+  final String uri;
+  final double height;
+  final double width;
+
+  const _ImagePreview({
+    required this.uri,
+    required this.height,
+    required this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (uri.startsWith('http')) {
+      return Image.network(
+        uri,
+        height: height,
+        width: width,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.file(
+      File(uri),
+      height: height,
+      width: width,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        height: height,
+        width: width,
+        color: AppColors.surfaceHigh,
+        alignment: Alignment.center,
+        child: const Icon(Icons.broken_image, color: AppColors.inkMuted),
       ),
     );
   }

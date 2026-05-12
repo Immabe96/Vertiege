@@ -54,13 +54,10 @@ class _TabLayoutState extends ConsumerState<TabLayout> {
               ),
             )
           : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          const _CampfireBar(),
-          _buildBottomBar(index, unread),
-        ],
+        children: [const _CampfireBar(), _buildBottomBar(index, unread)],
       ),
     );
   }
@@ -82,7 +79,12 @@ class _TabLayoutState extends ConsumerState<TabLayout> {
   Widget _buildBottomBar(int index, int unread) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(Spacing.marginMobile, Spacing.sm, Spacing.marginMobile, Spacing.sm),
+        padding: const EdgeInsets.fromLTRB(
+          Spacing.marginMobile,
+          Spacing.sm,
+          Spacing.marginMobile,
+          Spacing.sm,
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(RadiusTokens.full),
           child: Container(
@@ -114,23 +116,43 @@ class _TabLayoutState extends ConsumerState<TabLayout> {
                       if (i == index) {
                         ref.read(scrollToTopProvider.notifier).state++;
                       }
-                      widget.navigationShell.goBranch(i, initialLocation: i == index);
+                      widget.navigationShell.goBranch(
+                        i,
+                        initialLocation: i == index,
+                      );
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          dest.icon,
-                          size: IconSizes.md,
-                          color: isActive ? AppColors.tertiary : AppColors.inkMuted,
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              dest.icon,
+                              size: IconSizes.md,
+                              color: isActive
+                                  ? AppColors.tertiary
+                                  : AppColors.inkMuted,
+                            ),
+                            if (i == 0 && unread > 0)
+                              Positioned(
+                                top: -6,
+                                right: -8,
+                                child: _UnreadBadge(count: unread),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 3),
                         Text(
                           dest.label,
                           style: TextStyle(
                             fontSize: FontSizes.labelSm,
-                            fontWeight: isActive ? FontWeights.semiBold : FontWeights.regular,
-                            color: isActive ? AppColors.tertiary : AppColors.inkMuted,
+                            fontWeight: isActive
+                                ? FontWeights.semiBold
+                                : FontWeights.regular,
+                            color: isActive
+                                ? AppColors.tertiary
+                                : AppColors.inkMuted,
                             letterSpacing: LetterSpacing.label,
                           ),
                         ),
@@ -160,7 +182,8 @@ class _CampfireBar extends ConsumerWidget {
         final campfireId = voice.activeCampfireId;
         final campfireName = voice.activeCampfireName ?? 'Campfire';
         if (campfireId != null) {
-          context.push('/campfire/$campfireId?name=$campfireName');
+          final encodedName = Uri.encodeComponent(campfireName);
+          context.push('/campfire/$campfireId?name=$encodedName');
         }
       },
       child: Container(
@@ -169,7 +192,11 @@ class _CampfireBar extends ConsumerWidget {
         child: Row(
           children: [
             const SizedBox(width: Spacing.lg),
-            const Icon(Icons.local_fire_department, color: AppColors.warning, size: IconSizes.sm),
+            const Icon(
+              Icons.local_fire_department,
+              color: AppColors.warning,
+              size: IconSizes.sm,
+            ),
             const SizedBox(width: Spacing.sm),
             Expanded(
               child: Text(
@@ -189,10 +216,41 @@ class _CampfireBar extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.call_end, size: IconSizes.sm, color: AppColors.error),
+              icon: const Icon(
+                Icons.call_end,
+                size: IconSizes.sm,
+                color: AppColors.error,
+              ),
               onPressed: () => ref.read(voiceProvider.notifier).leaveCampfire(),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UnreadBadge extends StatelessWidget {
+  final int count;
+
+  const _UnreadBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: const BoxDecoration(
+        color: AppColors.error,
+        borderRadius: BorderRadius.all(Radius.circular(999)),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        count > 9 ? '9+' : '$count',
+        style: const TextStyle(
+          color: AppColors.onError,
+          fontSize: 9,
+          fontWeight: FontWeights.bold,
         ),
       ),
     );

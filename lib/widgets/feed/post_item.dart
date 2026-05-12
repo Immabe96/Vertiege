@@ -94,6 +94,7 @@ class PostItem extends ConsumerWidget {
                         tag: 'avatar-${post.residentId}',
                         child: CosmeticAvatar(
                           imageUrl: post.residentAvatar,
+                          seed: post.residentId,
                           size: 40,
                         ),
                       ),
@@ -369,7 +370,11 @@ class PostItem extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: Spacing.lg),
-            CosmeticAvatar(imageUrl: post.residentAvatar, size: 72),
+            CosmeticAvatar(
+              imageUrl: post.residentAvatar,
+              seed: post.residentId,
+              size: 72,
+            ),
             const SizedBox(height: Spacing.md),
             LuminaryNameplate(
               name: post.residentName,

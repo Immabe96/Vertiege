@@ -22,6 +22,7 @@ class AppEmptyState extends ConsumerStatefulWidget {
   final String title;
   final String? description;
   final IconData icon;
+  final String? imageAsset;
   final String? actionLabel;
   final VoidCallback? onAction;
   final EmptyStateVariant variant;
@@ -31,6 +32,7 @@ class AppEmptyState extends ConsumerStatefulWidget {
     required this.title,
     this.description,
     this.icon = Icons.inbox_outlined,
+    this.imageAsset,
     this.actionLabel,
     this.onAction,
     this.variant = EmptyStateVariant.default_,
@@ -73,15 +75,13 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
         curve: const Interval(0.25, 0.55, curve: Curves.easeInOut),
       ),
     );
-    _textSlide = Tween<Offset>(
-      begin: const Offset(0.0, 0.15),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.25, 0.55, curve: Curves.easeInOut),
-      ),
-    );
+    _textSlide = Tween<Offset>(begin: const Offset(0.0, 0.15), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.25, 0.55, curve: Curves.easeInOut),
+          ),
+        );
 
     // Button fades in last.
     _buttonFade = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -152,10 +152,13 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
               mainAxisSize: MainAxisSize.min,
               children: [
                 // ── Icon container with animated glow ──
-                _buildIconContainer(
-                  variantColor: variantColor,
-                  variantBg: variantBg,
-                ),
+                if (widget.imageAsset != null)
+                  _buildImageContainer(variantColor: variantColor)
+                else
+                  _buildIconContainer(
+                    variantColor: variantColor,
+                    variantBg: variantBg,
+                  ),
 
                 const SizedBox(height: Spacing.lg),
 
@@ -186,8 +189,9 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                       child: Text(
                         widget.description!,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.65),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.65,
+                          ),
                           height: LineHeight.body,
                         ),
                         textAlign: TextAlign.center,
@@ -211,8 +215,9 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                           vertical: Spacing.md,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(RadiusTokens.pill),
+                          borderRadius: BorderRadius.circular(
+                            RadiusTokens.pill,
+                          ),
                         ),
                       ),
                     ),
@@ -242,8 +247,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.glassBackground,
-                      borderRadius:
-                          BorderRadius.circular(RadiusTokens.full),
+                      borderRadius: BorderRadius.circular(RadiusTokens.full),
                     ),
                     child: inner,
                   ),
@@ -281,17 +285,13 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
               boxShadow: [
                 // Ambient shadow
                 BoxShadow(
-                  color: variantColor.withValues(
-                    alpha: 0.12 * glowOpacity,
-                  ),
+                  color: variantColor.withValues(alpha: 0.12 * glowOpacity),
                   blurRadius: 12,
                   offset: const Offset(0, 2),
                 ),
                 // Glow ring
                 BoxShadow(
-                  color: variantColor.withValues(
-                    alpha: 0.20 * glowOpacity,
-                  ),
+                  color: variantColor.withValues(alpha: 0.20 * glowOpacity),
                   blurRadius: 32,
                   offset: Offset.zero,
                 ),
@@ -303,10 +303,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 return LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    variantColor,
-                    variantColor.withValues(alpha: 0.85),
-                  ],
+                  colors: [variantColor, variantColor.withValues(alpha: 0.85)],
                 ).createShader(bounds);
               },
               child: Icon(
@@ -315,6 +312,36 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 color: Colors.white,
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageContainer({required Color variantColor}) {
+    final glowOpacity = _glowOpacity.value;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(RadiusTokens.xl),
+      child: Container(
+        width: 180,
+        height: 132,
+        decoration: BoxDecoration(
+          color: AppColors.glassBackground,
+          border: Border.all(color: AppColors.glassBorder),
+          boxShadow: [
+            BoxShadow(
+              color: variantColor.withValues(alpha: 0.18 * glowOpacity),
+              blurRadius: 28,
+              offset: Offset.zero,
+            ),
+          ],
+        ),
+        child: Image.asset(
+          widget.imageAsset!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => _buildIconContainer(
+            variantColor: variantColor,
+            variantBg: _variantBackground(variantColor),
           ),
         ),
       ),
@@ -349,20 +376,19 @@ class _DashedBorderPainter extends CustomPainter {
       ..strokeWidth = strokeWidth;
 
     final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Radius.circular(borderRadius),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(borderRadius),
+        ),
+      );
 
     final metrics = path.computeMetrics();
     for (final metric in metrics) {
       double distance = 0;
       while (distance < metric.length) {
         final end = (distance + dashLength).clamp(0, metric.length).toDouble();
-        canvas.drawPath(
-          metric.extractPath(distance, end),
-          paint,
-        );
+        canvas.drawPath(metric.extractPath(distance, end), paint);
         distance = end + gapLength;
       }
     }
@@ -380,18 +406,13 @@ class AppErrorState extends StatelessWidget {
   final String? message;
   final VoidCallback? onRetry;
 
-  const AppErrorState({
-    super.key,
-    this.message,
-    this.onRetry,
-  });
+  const AppErrorState({super.key, this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     return AppEmptyState(
       title: 'Something went wrong',
-      description:
-          message ?? 'An unexpected error occurred. Please try again.',
+      description: message ?? 'An unexpected error occurred. Please try again.',
       icon: Icons.error_outline,
       actionLabel: 'Retry',
       onAction: onRetry,

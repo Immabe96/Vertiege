@@ -23,7 +23,8 @@ class ResidentProfileScreen extends ConsumerStatefulWidget {
   const ResidentProfileScreen({super.key, required this.residentId});
 
   @override
-  ConsumerState<ResidentProfileScreen> createState() => _ResidentProfileScreenState();
+  ConsumerState<ResidentProfileScreen> createState() =>
+      _ResidentProfileScreenState();
 }
 
 class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
@@ -40,14 +41,24 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
   Future<void> _loadProfile() async {
     final currentResident = ref.read(residentProvider).resident;
     if (currentResident?.id == widget.residentId) {
-      setState(() { _profile = currentResident; _loading = false; });
+      setState(() {
+        _profile = currentResident;
+        _loading = false;
+      });
       return;
     }
     try {
       final fetched = await ProfileService.getProfile(widget.residentId);
-      setState(() { _profile = fetched; _loading = false; _error = fetched == null ? 'Resident not found' : null; });
+      setState(() {
+        _profile = fetched;
+        _loading = false;
+        _error = fetched == null ? 'Resident not found' : null;
+      });
     } catch (_) {
-      setState(() { _loading = false; _error = 'Failed to load profile'; });
+      setState(() {
+        _loading = false;
+        _error = 'Failed to load profile';
+      });
     }
   }
 
@@ -73,7 +84,10 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           children: [
             Icon(Icons.person_off, size: 64, color: AppColors.inkMuted),
             const SizedBox(height: 16),
-            Text(_error ?? 'Resident not found', style: theme.textTheme.bodyLarge),
+            Text(
+              _error ?? 'Resident not found',
+              style: theme.textTheme.bodyLarge,
+            ),
           ],
         ),
       );
@@ -91,9 +105,13 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                 child: Hero(
                   tag: 'avatar-${resident.id}',
                   child: CosmeticAvatar(
-                    totalXp: resident.id == ref.read(residentProvider).resident?.id ? achievements.totalXp : 0,
+                    totalXp:
+                        resident.id == ref.read(residentProvider).resident?.id
+                        ? achievements.totalXp
+                        : 0,
                     size: 80,
                     imageUrl: resident.avatarUrl,
+                    seed: resident.id,
                   ),
                 ),
               ),
@@ -199,7 +217,10 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                   onPressed: () async {
                     final currentId = ref.read(residentProvider).resident?.id;
                     if (currentId == null) return;
-                    final room = await ChatService.getOrCreateRoom(currentId, resident.id);
+                    final room = await ChatService.getOrCreateRoom(
+                      currentId,
+                      resident.id,
+                    );
                     if (room != null && mounted) {
                       final roomId = room['id'] as String;
                       context.push('/chat/$roomId');
@@ -223,7 +244,9 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       (a) => a.otherId(currentId) == resident.id,
                     );
                     final isPending = allyState.pendingRequests.any(
-                      (r) => r.requesterId == currentId && r.receiverId == resident.id,
+                      (r) =>
+                          r.requesterId == currentId &&
+                          r.receiverId == resident.id,
                     );
                     if (isAlly) {
                       return OutlinedButton.icon(
@@ -248,10 +271,12 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       );
                     }
                     return OutlinedButton.icon(
-                      onPressed: () => ref.read(allyProvider.notifier).sendRequest(
-                        requesterId: currentId,
-                        receiverId: resident.id,
-                      ),
+                      onPressed: () => ref
+                          .read(allyProvider.notifier)
+                          .sendRequest(
+                            requesterId: currentId,
+                            receiverId: resident.id,
+                          ),
                       icon: const Icon(Icons.handshake_outlined),
                       label: const Text('Send Allegiance'),
                       style: OutlinedButton.styleFrom(
@@ -264,21 +289,31 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                 const SizedBox(width: Spacing.sm),
                 Consumer(
                   builder: (context, ref, _) {
-                    final isFollowing = ref.watch(residentProvider.select(
-                      (s) => s.resident?.following.contains(resident.id) ?? false,
-                    ));
+                    final isFollowing = ref.watch(
+                      residentProvider.select(
+                        (s) =>
+                            s.resident?.following.contains(resident.id) ??
+                            false,
+                      ),
+                    );
                     return isFollowing
                         ? OutlinedButton.icon(
-                            onPressed: () => ref.read(residentProvider.notifier).unfollow(resident.id),
+                            onPressed: () => ref
+                                .read(residentProvider.notifier)
+                                .unfollow(resident.id),
                             icon: const Icon(Icons.person_remove),
                             label: const Text('Unfollow'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.inkSecondary,
-                              side: const BorderSide(color: AppColors.glassBorder),
+                              side: const BorderSide(
+                                color: AppColors.glassBorder,
+                              ),
                             ),
                           )
                         : OutlinedButton.icon(
-                            onPressed: () => ref.read(residentProvider.notifier).follow(resident.id),
+                            onPressed: () => ref
+                                .read(residentProvider.notifier)
+                                .follow(resident.id),
                             icon: const Icon(Icons.person_add),
                             label: const Text('Follow'),
                             style: OutlinedButton.styleFrom(
@@ -296,7 +331,10 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
         // ── Decorations / badges ────────────────────────
         if (resident.decorations.isNotEmpty) ...[
           const SizedBox(height: Spacing.lg),
-          FadeIn(delayMs: 180, child: BadgeDisplay(earnedBadgeIds: resident.decorations)),
+          FadeIn(
+            delayMs: 180,
+            child: BadgeDisplay(earnedBadgeIds: resident.decorations),
+          ),
         ],
       ],
     );

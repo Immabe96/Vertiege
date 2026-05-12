@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/permission_service.dart';
@@ -27,7 +28,45 @@ class PostInput extends ConsumerStatefulWidget {
   ConsumerState<PostInput> createState() => _PostInputState();
 }
 
-class _PostInputState extends ConsumerState<PostInput> with SingleTickerProviderStateMixin {
+class _ImagePreview extends StatelessWidget {
+  final String uri;
+  final double height;
+  final double width;
+
+  const _ImagePreview({
+    required this.uri,
+    required this.height,
+    required this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (uri.startsWith('http')) {
+      return Image.network(
+        uri,
+        height: height,
+        width: width,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.file(
+      File(uri),
+      height: height,
+      width: width,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        height: height,
+        width: width,
+        color: AppColors.surfaceHigh,
+        alignment: Alignment.center,
+        child: const Icon(Icons.broken_image, color: AppColors.inkMuted),
+      ),
+    );
+  }
+}
+
+class _PostInputState extends ConsumerState<PostInput>
+    with SingleTickerProviderStateMixin {
   static const String _draftKey = '@post_draft';
   static const int _maxChars = 500;
   static const int _warnChars = 400;
@@ -53,7 +92,10 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _sendAnim = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
+    _sendAnim = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
     _sendScale = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.3), weight: 20),
       TweenSequenceItem(tween: Tween(begin: 1.3, end: 0.9), weight: 20),
@@ -76,8 +118,16 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
   // ── Autocomplete ────────────────────────────────────────────
 
   static const List<String> _trendingHashtags = [
-    'vertiege', 'design', 'nexus', 'sovereign', 'prestige',
-    'worlds', 'realm', 'flutter', 'council', 'quest',
+    'vertiege',
+    'design',
+    'nexus',
+    'sovereign',
+    'prestige',
+    'worlds',
+    'realm',
+    'flutter',
+    'council',
+    'quest',
   ];
 
   void _onTextChanged(String text) {
@@ -123,10 +173,11 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
       names.add(post.residentName);
     }
 
-    _filteredSuggestions = names
-        .where((n) => n.toLowerCase().contains(query.toLowerCase()))
-        .toList()
-      ..sort();
+    _filteredSuggestions =
+        names
+            .where((n) => n.toLowerCase().contains(query.toLowerCase()))
+            .toList()
+          ..sort();
 
     if (_filteredSuggestions.isNotEmpty) {
       _showSuggestionsOverlay();
@@ -144,10 +195,11 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
       tags.addAll(post.hashtags);
     }
 
-    _filteredSuggestions = tags
-        .where((t) => t.toLowerCase().contains(query.toLowerCase()))
-        .toList()
-      ..sort();
+    _filteredSuggestions =
+        tags
+            .where((t) => t.toLowerCase().contains(query.toLowerCase()))
+            .toList()
+          ..sort();
 
     if (_filteredSuggestions.isNotEmpty) {
       _showSuggestionsOverlay();
@@ -218,7 +270,8 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
     final before = text.substring(0, _triggerPosition);
     final after = text.substring(cursorPos);
     final newText = '$before$_suggestionType$suggestion $after';
-    final newCursor = _triggerPosition + suggestion.length + 2; // +2 for @/# and space
+    final newCursor =
+        _triggerPosition + suggestion.length + 2; // +2 for @/# and space
 
     _controller.text = newText;
     _controller.selection = TextSelection.collapsed(offset: newCursor);
@@ -248,14 +301,14 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
   Future<void> _saveDraft() async {
     final text = _controller.text.trim();
     if (text.isEmpty && _imageUri == null) return;
-    final data = jsonEncode({
-      'text': text,
-      'imageUri': _imageUri,
-    });
+    final data = jsonEncode({'text': text, 'imageUri': _imageUri});
     await StorageService.setString(_draftKey, data);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Draft saved'), duration: Duration(seconds: 1)),
+        const SnackBar(
+          content: Text('Draft saved'),
+          duration: Duration(seconds: 1),
+        ),
       );
     }
   }
@@ -284,7 +337,9 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
 
     final targetWorldId = _selectedWorldId ?? widget.worldId;
 
-    ref.read(postProvider.notifier).addPost(
+    ref
+        .read(postProvider.notifier)
+        .addPost(
           worldId: targetWorldId,
           residentId: resident.id,
           residentName: resident.name,
@@ -329,8 +384,13 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
     final worlds = allWorlds.values
         .where((w) => resident?.joinedWorldIds.contains(w.id) ?? false)
         .toList();
-    final canAnnounce = resident != null &&
-        WorldPermissions.canAnnounce(resident, widget.worldId, widget.sovereignId);
+    final canAnnounce =
+        resident != null &&
+        WorldPermissions.canAnnounce(
+          resident,
+          widget.worldId,
+          widget.sovereignId,
+        );
 
     final charLength = _controller.text.length;
     final charColor = _charCountColor(charLength);
@@ -346,14 +406,21 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
             if (_hasDraft)
               Container(
                 margin: const EdgeInsets.only(bottom: Spacing.sm),
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.md,
+                  vertical: Spacing.sm,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(RadiusTokens.chip),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.drafts, size: IconSizes.sm, color: theme.colorScheme.tertiary),
+                    Icon(
+                      Icons.drafts,
+                      size: IconSizes.sm,
+                      color: theme.colorScheme.tertiary,
+                    ),
                     const SizedBox(width: Spacing.sm),
                     Expanded(
                       child: Text(
@@ -365,11 +432,23 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                     ),
                     TextButton(
                       onPressed: _discardDraft,
-                      child: Text('Discard', style: TextStyle(color: theme.colorScheme.error, fontSize: FontSizes.caption)),
+                      child: Text(
+                        'Discard',
+                        style: TextStyle(
+                          color: theme.colorScheme.error,
+                          fontSize: FontSizes.caption,
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: _continueDraft,
-                      child: Text('Continue', style: TextStyle(fontSize: FontSizes.caption, fontWeight: FontWeights.bold)),
+                      child: Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontSize: FontSizes.caption,
+                          fontWeight: FontWeights.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -384,8 +463,13 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                   isDense: true,
                   decoration: InputDecoration(
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(RadiusTokens.input)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.md,
+                      vertical: Spacing.sm,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(RadiusTokens.input),
+                    ),
                     labelText: 'Post to',
                     labelStyle: theme.textTheme.labelSmall,
                   ),
@@ -395,18 +479,28 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.public, size: IconSizes.sm, color: theme.colorScheme.outline),
+                          Icon(
+                            Icons.public,
+                            size: IconSizes.sm,
+                            color: theme.colorScheme.outline,
+                          ),
                           const SizedBox(width: Spacing.xs),
                           Text('My Feed', style: theme.textTheme.labelMedium),
                         ],
                       ),
                     ),
-                    ...worlds.map((world) => DropdownMenuItem<String>(
-                          value: world.id,
-                          child: Text(world.name, style: theme.textTheme.labelMedium),
-                        )),
+                    ...worlds.map(
+                      (world) => DropdownMenuItem<String>(
+                        value: world.id,
+                        child: Text(
+                          world.name,
+                          style: theme.textTheme.labelMedium,
+                        ),
+                      ),
+                    ),
                   ],
-                  onChanged: (value) => setState(() => _selectedWorldId = value),
+                  onChanged: (value) =>
+                      setState(() => _selectedWorldId = value),
                 ),
               ),
 
@@ -416,9 +510,13 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                 padding: const EdgeInsets.only(bottom: Spacing.sm),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(RadiusTokens.chip),
-                  onTap: () => setState(() => _isAnnouncement = !_isAnnouncement),
+                  onTap: () =>
+                      setState(() => _isAnnouncement = !_isAnnouncement),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.md,
+                      vertical: Spacing.xs,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(RadiusTokens.chip),
                       color: _isAnnouncement
@@ -428,12 +526,20 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.campaign, size: IconSizes.sm, color: _isAnnouncement ? theme.colorScheme.primary : theme.colorScheme.outline),
+                        Icon(
+                          Icons.campaign,
+                          size: IconSizes.sm,
+                          color: _isAnnouncement
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.outline,
+                        ),
                         const SizedBox(width: Spacing.xs),
                         Text(
                           'Announcement',
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: _isAnnouncement ? theme.colorScheme.primary : theme.colorScheme.outline,
+                            color: _isAnnouncement
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outline,
                             fontWeight: FontWeights.bold,
                           ),
                         ),
@@ -459,24 +565,38 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                           maxLines: 3,
                           minLines: 1,
                           maxLength: _maxChars,
-                          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                          buildCounter:
+                              (
+                                context, {
+                                required currentLength,
+                                required isFocused,
+                                maxLength,
+                              }) => null,
                           decoration: const InputDecoration(
                             hintText: "What's on your mind?",
                             border: OutlineInputBorder(),
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: Spacing.md,
+                              vertical: Spacing.sm,
+                            ),
                           ),
                           onChanged: _onTextChanged,
                         ),
                       ),
                       // Character count
                       Padding(
-                        padding: const EdgeInsets.only(top: Spacing.xs, left: Spacing.xs),
+                        padding: const EdgeInsets.only(
+                          top: Spacing.xs,
+                          left: Spacing.xs,
+                        ),
                         child: AnimatedDefaultTextStyle(
                           duration: AnimDurations.fast,
                           style: theme.textTheme.labelSmall!.copyWith(
                             color: charColor,
-                            fontWeight: charLength >= _warnChars ? FontWeights.bold : FontWeights.regular,
+                            fontWeight: charLength >= _warnChars
+                                ? FontWeights.bold
+                                : FontWeights.regular,
                           ),
                           child: Text('$charLength/$_maxChars'),
                         ),
@@ -490,7 +610,9 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                     // Save draft button
                     IconButton(
                       icon: const Icon(Icons.drafts_outlined),
-                      onPressed: _controller.text.trim().isNotEmpty ? _saveDraft : null,
+                      onPressed: _controller.text.trim().isNotEmpty
+                          ? _saveDraft
+                          : null,
                       tooltip: 'Save draft',
                       iconSize: IconSizes.md,
                       color: theme.colorScheme.outline,
@@ -500,7 +622,9 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                       scale: _sendScale,
                       child: IconButton(
                         icon: Icon(_sent ? Icons.check : Icons.send),
-                        onPressed: _sent || charLength > _maxChars ? null : _submit,
+                        onPressed: _sent || charLength > _maxChars
+                            ? null
+                            : _submit,
                         color: _sent ? Colors.green : theme.colorScheme.primary,
                         iconSize: IconSizes.md,
                       ),
@@ -520,7 +644,11 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(RadiusTokens.chip),
-                    child: Image.network(_imageUri!, height: 80, width: 80, fit: BoxFit.cover),
+                    child: _ImagePreview(
+                      uri: _imageUri!,
+                      height: 80,
+                      width: 80,
+                    ),
                   ),
                   Positioned(
                     top: 0,
@@ -528,7 +656,9 @@ class _PostInputState extends ConsumerState<PostInput> with SingleTickerProvider
                     child: IconButton(
                       icon: const Icon(Icons.close, size: 18),
                       onPressed: () => setState(() => _imageUri = null),
-                      style: IconButton.styleFrom(backgroundColor: theme.colorScheme.error),
+                      style: IconButton.styleFrom(
+                        backgroundColor: theme.colorScheme.error,
+                      ),
                     ),
                   ),
                 ],

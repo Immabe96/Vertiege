@@ -35,10 +35,12 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
       final members = await WorldService.getMembers(widget.world.id);
       if (mounted) {
         setState(() {
-          _residents = members.map((m) => _MemberEntry(
-            resident: _toResident(m),
-            rep: m['rep'] ?? 0,
-          )).toList();
+          _residents = members
+              .map(
+                (m) =>
+                    _MemberEntry(resident: _toResident(m), rep: m['rep'] ?? 0),
+              )
+              .toList();
           _loading = false;
         });
       }
@@ -48,12 +50,12 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
   }
 
   Resident _toResident(Map<String, dynamic> m) => Resident(
-        id: m['resident_id'] ?? '',
-        name: m['resident_name'] ?? 'Member',
-        tier: ResidentTier.fromValue(m['standing'] ?? 1),
-        avatarUrl: 'assets/generated/avatar-1.png',
-        streakCount: 0,
-      );
+    id: m['resident_id'] ?? '',
+    name: m['resident_name'] ?? 'Member',
+    tier: ResidentTier.fromValue(m['standing'] ?? 1),
+    avatarUrl: 'assets/generated/avatar-1.png',
+    streakCount: 0,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +64,10 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Residents (${_residents.length})', style: theme.textTheme.titleMedium),
+        Text(
+          'Residents (${_residents.length})',
+          style: theme.textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         if (_loading)
           const GlassLoadingCard()
@@ -78,10 +83,10 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
             final medalColor = idx == 0
                 ? AppColors.tertiary
                 : idx == 1
-                    ? AppColors.silver
-                    : idx == 2
-                        ? AppColors.bronze
-                        : null;
+                ? AppColors.silver
+                : idx == 2
+                ? AppColors.bronze
+                : null;
 
             return FadeIn(
               delayMs: idx * 50,
@@ -89,39 +94,61 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
                 leading: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CosmeticAvatar(imageUrl: resident.avatarUrl, size: 40),
+                    CosmeticAvatar(
+                      imageUrl: resident.avatarUrl,
+                      seed: resident.id,
+                      size: 40,
+                    ),
                     if (medalColor != null)
-                      Text('${idx + 1}',
-                          style: TextStyle(color: medalColor, fontWeight: FontWeights.bold, fontSize: FontSizes.body)),
+                      Text(
+                        '${idx + 1}',
+                        style: TextStyle(
+                          color: medalColor,
+                          fontWeight: FontWeights.bold,
+                          fontSize: FontSizes.body,
+                        ),
+                      ),
                   ],
                 ),
                 title: Row(
                   children: [
-                    Flexible(child: Text(resident.name, overflow: TextOverflow.ellipsis)),
+                    Flexible(
+                      child: Text(
+                        resident.name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     if (isSovereign) ...[
                       const SizedBox(width: 6),
-                      Icon(Icons.auto_awesome, size: 14, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: theme.colorScheme.primary,
+                      ),
                     ],
                   ],
                 ),
                 subtitle: Text(standing.title),
-                trailing: Text('Rep ${member.rep}', style: theme.textTheme.labelSmall),
+                trailing: Text(
+                  'Rep ${member.rep}',
+                  style: theme.textTheme.labelSmall,
+                ),
                 onTap: () => context.push('/residents/${resident.id}'),
               ),
             );
           }),
-          if (_residents.length > 5)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: TextButton(
-                onPressed: () => context.push(
-                  '/explore/${widget.world.id}/members'
-                  '?name=${Uri.encodeComponent(widget.world.name)}'
-                  '&sovereign=${Uri.encodeComponent(widget.world.sovereignId)}',
-                ),
-                child: Text('See all ${_residents.length} members'),
+        if (_residents.length > 5)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: TextButton(
+              onPressed: () => context.push(
+                '/explore/${widget.world.id}/members'
+                '?name=${Uri.encodeComponent(widget.world.name)}'
+                '&sovereign=${Uri.encodeComponent(widget.world.sovereignId)}',
               ),
+              child: Text('See all ${_residents.length} members'),
             ),
+          ),
       ],
     );
   }

@@ -39,8 +39,7 @@ class WorldChannelScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WorldChannelScreen> createState() =>
-      _WorldChannelScreenState();
+  ConsumerState<WorldChannelScreen> createState() => _WorldChannelScreenState();
 }
 
 class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
@@ -106,14 +105,16 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     if (resident == null) return;
 
     HapticFeedback.lightImpact();
-    ref.read(chatProvider.notifier).sendChannelMessage(
-      worldId: widget.worldId,
-      channelId: widget.channelId,
-      senderId: resident.id,
-      senderName: resident.name,
-      senderAvatar: resident.avatarUrl,
-      content: content,
-    );
+    ref
+        .read(chatProvider.notifier)
+        .sendChannelMessage(
+          worldId: widget.worldId,
+          channelId: widget.channelId,
+          senderId: resident.id,
+          senderName: resident.name,
+          senderAvatar: resident.avatarUrl,
+          content: content,
+        );
     _controller.clear();
     _scrollToBottom();
   }
@@ -123,26 +124,35 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final resident = ref.watch(residentProvider).resident;
     final messages =
         ref.watch(chatProvider).channelMessages[widget.channelId] ?? [];
-    final isLoading =
-        !ref.watch(chatProvider).channelMessages.containsKey(widget.channelId);
+    final isLoading = !ref
+        .watch(chatProvider)
+        .channelMessages
+        .containsKey(widget.channelId);
 
     final pinnedMessages = messages.where((m) => m.isPinned).toList();
     final unpinnedMessages = messages.where((m) => !m.isPinned).toList();
     final displayItems = buildChatDisplayItems(unpinnedMessages);
 
     // Check if resident can pin messages (Sovereign or Council)
-    final sovereignId = ref.watch(worldProvider).worlds[widget.worldId]?.sovereignId;
-    final canPin = resident != null &&
+    final sovereignId = ref
+        .watch(worldProvider)
+        .worlds[widget.worldId]
+        ?.sovereignId;
+    final canPin =
+        resident != null &&
         WorldPermissions.resolveStanding(
-          resident,
-          widget.worldId,
-          sovereignId,
-        ).level >= 7; // Council+
+              resident,
+              widget.worldId,
+              sovereignId,
+            ).level >=
+            7; // Council+
 
     final activeMembers = messages.map((m) => m.senderId).toSet().length;
 
     // Check if this is an announcement channel where posting is restricted
-    final channel = ref.watch(channelProvider).channelsByWorld[widget.worldId]
+    final channel = ref
+        .watch(channelProvider)
+        .channelsByWorld[widget.worldId]
         ?.where((c) => c.id == widget.channelId)
         .firstOrNull;
     final isAnnouncement = channel?.channelType == ChannelType.announcement;
@@ -155,6 +165,8 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
           children: [
             Text(
               '# ${widget.channelName}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: FontSizes.headlineMd,
                 fontWeight: FontWeights.bold,
@@ -178,60 +190,82 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             child: isLoading
                 ? const GlassLoadingList(itemCount: 8)
                 : messages.isEmpty
-                    ? _buildEmpty()
-                    : Stack(
-                        children: [
-                          ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Spacing.sm,
-                              vertical: Spacing.sm,
-                            ),
-                            itemCount: displayItems.length + (pinnedMessages.isNotEmpty ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (pinnedMessages.isNotEmpty && index == 0) {
-                                return _PinnedMessagesPanel(
-                                  pinnedMessages: pinnedMessages,
-                                  residentId: resident?.id ?? '',
-                                  canPin: canPin,
-                                  onTogglePin: (msgId, pin) {
-                                    ref.read(chatProvider.notifier).togglePin(
+                ? _buildEmpty()
+                : Stack(
+                    children: [
+                      ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Spacing.sm,
+                          vertical: Spacing.sm,
+                        ),
+                        itemCount:
+                            displayItems.length +
+                            (pinnedMessages.isNotEmpty ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (pinnedMessages.isNotEmpty && index == 0) {
+                            return _PinnedMessagesPanel(
+                              pinnedMessages: pinnedMessages,
+                              residentId: resident?.id ?? '',
+                              worldId: widget.worldId,
+                              channelName: widget.channelName,
+                              canPin: canPin,
+                              onTogglePin: (msgId, pin) {
+                                ref
+                                    .read(chatProvider.notifier)
+                                    .togglePin(
                                       channelId: widget.channelId,
                                       messageId: msgId,
                                       isPinned: pin,
                                     );
-                                  },
-                                );
-                              }
-                              final itemIndex = pinnedMessages.isNotEmpty ? index - 1 : index;
-                              final item = displayItems[itemIndex];
-                              return _buildItem(item, resident?.id ?? '', canPin: canPin);
-                            },
-                          ),
-                          if (_showScrollFab)
-                            Positioned(
-                              right: Spacing.md,
-                              bottom: Spacing.sm,
-                              child: ChatScrollFab(
-                                onTap: _scrollToBottom,
-                                backgroundColor: AppColors.surfaceContainerHigh,
-                              ),
-                            ),
-                        ],
+                              },
+                            );
+                          }
+                          final itemIndex = pinnedMessages.isNotEmpty
+                              ? index - 1
+                              : index;
+                          final item = displayItems[itemIndex];
+                          return _buildItem(
+                            item,
+                            resident?.id ?? '',
+                            canPin: canPin,
+                          );
+                        },
                       ),
+                      if (_showScrollFab)
+                        Positioned(
+                          right: Spacing.md,
+                          bottom: Spacing.sm,
+                          child: ChatScrollFab(
+                            onTap: _scrollToBottom,
+                            backgroundColor: AppColors.surfaceContainerHigh,
+                          ),
+                        ),
+                    ],
+                  ),
           ),
           if (!canPostInChannel)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.lg,
+                vertical: Spacing.sm,
+              ),
               color: AppColors.warning.withValues(alpha: 0.10),
               child: const Row(
                 children: [
-                  Icon(Icons.info_outline, size: IconSizes.sm, color: AppColors.warning),
+                  Icon(
+                    Icons.info_outline,
+                    size: IconSizes.sm,
+                    color: AppColors.warning,
+                  ),
                   SizedBox(width: Spacing.sm),
                   Expanded(
                     child: Text(
                       'This announcement channel is read-only for your rank.',
-                      style: TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary),
+                      style: TextStyle(
+                        fontSize: FontSizes.labelSm,
+                        color: AppColors.inkSecondary,
+                      ),
                     ),
                   ),
                 ],
@@ -257,7 +291,11 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     );
   }
 
-  Widget _buildItem(ChatDisplayItem item, String residentId, {bool canPin = false}) {
+  Widget _buildItem(
+    ChatDisplayItem item,
+    String residentId, {
+    bool canPin = false,
+  }) {
     switch (item.type) {
       case ChatItemType.dateSeparator:
         return ChatDateSeparator(label: item.dateLabel);
@@ -265,34 +303,44 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
         return _MessageBubble(
           message: item.message!,
           isMe: item.message!.senderId == residentId,
-          isSystem: item.message!.senderId == 'system' ||
+          isSystem:
+              item.message!.senderId == 'system' ||
               item.message!.senderName == 'System',
           showHeader: true,
           canPin: canPin,
           animatedMessageIds: _animatedMessageIds,
+          worldId: widget.worldId,
+          channelName: widget.channelName,
           onTogglePin: (msgId, pin) {
-            ref.read(chatProvider.notifier).togglePin(
-              channelId: widget.channelId,
-              messageId: msgId,
-              isPinned: pin,
-            );
+            ref
+                .read(chatProvider.notifier)
+                .togglePin(
+                  channelId: widget.channelId,
+                  messageId: msgId,
+                  isPinned: pin,
+                );
           },
         );
       case ChatItemType.subsequent:
         return _MessageBubble(
           message: item.message!,
           isMe: item.message!.senderId == residentId,
-          isSystem: item.message!.senderId == 'system' ||
+          isSystem:
+              item.message!.senderId == 'system' ||
               item.message!.senderName == 'System',
           showHeader: false,
           canPin: canPin,
           animatedMessageIds: _animatedMessageIds,
+          worldId: widget.worldId,
+          channelName: widget.channelName,
           onTogglePin: (msgId, pin) {
-            ref.read(chatProvider.notifier).togglePin(
-              channelId: widget.channelId,
-              messageId: msgId,
-              isPinned: pin,
-            );
+            ref
+                .read(chatProvider.notifier)
+                .togglePin(
+                  channelId: widget.channelId,
+                  messageId: msgId,
+                  isPinned: pin,
+                );
           },
         );
     }
@@ -309,6 +357,8 @@ class _MessageBubble extends StatefulWidget {
   final bool isSystem;
   final bool showHeader;
   final bool canPin;
+  final String worldId;
+  final String channelName;
   final Set<String> animatedMessageIds;
   final void Function(String messageId, bool isPinned)? onTogglePin;
 
@@ -318,6 +368,8 @@ class _MessageBubble extends StatefulWidget {
     required this.isSystem,
     required this.showHeader,
     this.canPin = false,
+    required this.worldId,
+    required this.channelName,
     required this.animatedMessageIds,
     this.onTogglePin,
   });
@@ -343,17 +395,14 @@ class _MessageBubbleState extends State<_MessageBubble>
       vsync: this,
     );
 
-    _opacity = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
+    _opacity = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
-    _slide = Tween(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.elasticOut,
-    ));
+    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
+    );
 
     if (_hasAnimated) {
       _animController.value = 1.0;
@@ -373,7 +422,11 @@ class _MessageBubbleState extends State<_MessageBubble>
 
   static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
     return MarkdownStyleSheet(
-      p: TextStyle(fontSize: FontSizes.bodyMd, color: textColor, height: LineHeight.body),
+      p: TextStyle(
+        fontSize: FontSizes.bodyMd,
+        color: textColor,
+        height: LineHeight.body,
+      ),
       code: TextStyle(
         fontSize: FontSizes.bodyMd - 2,
         color: AppColors.ink,
@@ -394,9 +447,24 @@ class _MessageBubbleState extends State<_MessageBubble>
         border: Border(left: BorderSide(color: AppColors.hustler, width: 3)),
         color: AppColors.hustler.withValues(alpha: 0.05),
       ),
-      h1: TextStyle(fontSize: FontSizes.headlineMd, fontWeight: FontWeights.bold, color: textColor, fontFamily: AppFont.headline),
-      h2: TextStyle(fontSize: FontSizes.bodyLg, fontWeight: FontWeights.bold, color: textColor, fontFamily: AppFont.headline),
-      h3: TextStyle(fontSize: FontSizes.bodyMd, fontWeight: FontWeights.semiBold, color: textColor, fontFamily: AppFont.headline),
+      h1: TextStyle(
+        fontSize: FontSizes.headlineMd,
+        fontWeight: FontWeights.bold,
+        color: textColor,
+        fontFamily: AppFont.headline,
+      ),
+      h2: TextStyle(
+        fontSize: FontSizes.bodyLg,
+        fontWeight: FontWeights.bold,
+        color: textColor,
+        fontFamily: AppFont.headline,
+      ),
+      h3: TextStyle(
+        fontSize: FontSizes.bodyMd,
+        fontWeight: FontWeights.semiBold,
+        color: textColor,
+        fontFamily: AppFont.headline,
+      ),
     );
   }
 
@@ -418,8 +486,8 @@ class _MessageBubbleState extends State<_MessageBubble>
           alignment: isSystem
               ? Alignment.center
               : isMe
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
+              ? Alignment.centerRight
+              : Alignment.centerLeft,
           child: Container(
             margin: margin,
             constraints: BoxConstraints(
@@ -428,16 +496,18 @@ class _MessageBubbleState extends State<_MessageBubble>
             child: isSystem
                 ? _buildSystemBubble()
                 : isMe
-                    ? GestureDetector(
-                        onLongPress: widget.canPin
-                            ? () => _showPinContextMenu(context)
-                            : null,
-                        child: _buildSentBubble(showHeader))
-                    : GestureDetector(
-                        onLongPress: widget.canPin
-                            ? () => _showPinContextMenu(context)
-                            : null,
-                        child: _buildReceivedBubble(showHeader)),
+                ? GestureDetector(
+                    onLongPress: widget.canPin
+                        ? () => _showPinContextMenu(context)
+                        : null,
+                    child: _buildSentBubble(showHeader),
+                  )
+                : GestureDetector(
+                    onLongPress: widget.canPin
+                        ? () => _showPinContextMenu(context)
+                        : null,
+                    child: _buildReceivedBubble(showHeader),
+                  ),
           ),
         ),
       ),
@@ -450,7 +520,9 @@ class _MessageBubbleState extends State<_MessageBubble>
       context: context,
       backgroundColor: AppColors.surfaceHigh,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(RadiusTokens.full)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(RadiusTokens.full),
+        ),
       ),
       builder: (_) => SafeArea(
         child: Column(
@@ -463,22 +535,29 @@ class _MessageBubbleState extends State<_MessageBubble>
               onTap: () {
                 Navigator.pop(context);
                 final router = GoRouter.of(context);
-                router.push('/thread/${widget.message.id}', extra: {
-                  'message': widget.message,
-                  'channelId': widget.message.channelId,
-                  'worldId': '', // filled by caller context
-                  'channelName': '',
-                });
+                router.push(
+                  '/thread/${widget.message.id}',
+                  extra: {
+                    'message': widget.message,
+                    'channelId': widget.message.channelId,
+                    'worldId': widget.worldId,
+                    'channelName': widget.channelName,
+                  },
+                );
               },
             ),
             if (widget.canPin)
               ListTile(
-                leading: Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                  color: isPinned ? AppColors.warning : AppColors.primary),
+                leading: Icon(
+                  isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                  color: isPinned ? AppColors.warning : AppColors.primary,
+                ),
                 title: Text(isPinned ? 'Unpin Message' : 'Pin Message'),
-                subtitle: Text(isPinned
-                    ? 'Remove this message from pinned notices'
-                    : 'Show this message at the top of the channel'),
+                subtitle: Text(
+                  isPinned
+                      ? 'Remove this message from pinned notices'
+                      : 'Show this message at the top of the channel',
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onTogglePin?.call(widget.message.id, !isPinned);
@@ -496,9 +575,7 @@ class _MessageBubbleState extends State<_MessageBubble>
       decoration: BoxDecoration(
         color: AppColors.hustler.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border(
-          left: BorderSide(color: AppColors.hustler, width: 3),
-        ),
+        border: Border(left: BorderSide(color: AppColors.hustler, width: 3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,9 +640,7 @@ class _MessageBubbleState extends State<_MessageBubble>
                   if (widget.message.threadCount > 0) ...[
                     const SizedBox(width: Spacing.sm),
                     GestureDetector(
-                      onTap: () {
-                        // Navigate to thread
-                      },
+                      onTap: _openThread,
                       child: Text(
                         '${widget.message.threadCount} ${widget.message.threadCount == 1 ? 'reply' : 'replies'}',
                         style: TextStyle(
@@ -582,6 +657,18 @@ class _MessageBubbleState extends State<_MessageBubble>
           ),
         ),
       ],
+    );
+  }
+
+  void _openThread() {
+    GoRouter.of(context).push(
+      '/thread/${widget.message.id}',
+      extra: {
+        'message': widget.message,
+        'channelId': widget.message.channelId,
+        'worldId': widget.worldId,
+        'channelName': widget.channelName,
+      },
     );
   }
 
@@ -651,12 +738,15 @@ class _MessageBubbleState extends State<_MessageBubble>
                   ),
                   if (widget.message.threadCount > 0) ...[
                     const SizedBox(width: Spacing.sm),
-                    Text(
-                      '${widget.message.threadCount} ${widget.message.threadCount == 1 ? 'reply' : 'replies'}',
-                      style: const TextStyle(
-                        fontSize: FontSizes.labelSm,
-                        color: AppColors.inkSecondary,
-                        fontWeight: FontWeights.semiBold,
+                    GestureDetector(
+                      onTap: _openThread,
+                      child: Text(
+                        '${widget.message.threadCount} ${widget.message.threadCount == 1 ? 'reply' : 'replies'}',
+                        style: const TextStyle(
+                          fontSize: FontSizes.labelSm,
+                          color: AppColors.inkSecondary,
+                          fontWeight: FontWeights.semiBold,
+                        ),
                       ),
                     ),
                   ],
@@ -673,12 +763,16 @@ class _MessageBubbleState extends State<_MessageBubble>
 class _PinnedMessagesPanel extends StatefulWidget {
   final List<ChannelMessage> pinnedMessages;
   final String residentId;
+  final String worldId;
+  final String channelName;
   final bool canPin;
   final void Function(String messageId, bool isPinned) onTogglePin;
 
   const _PinnedMessagesPanel({
     required this.pinnedMessages,
     required this.residentId,
+    required this.worldId,
+    required this.channelName,
     required this.canPin,
     required this.onTogglePin,
   });
@@ -727,15 +821,20 @@ class _PinnedMessagesPanelState extends State<_PinnedMessagesPanel> {
           ),
           if (_expanded) ...[
             const SizedBox(height: Spacing.xs),
-            ...widget.pinnedMessages.map((msg) => _MessageBubble(
-              message: msg,
-              isMe: msg.senderId == widget.residentId,
-              isSystem: msg.senderId == 'system' || msg.senderName == 'System',
-              showHeader: true,
-              canPin: widget.canPin,
-              animatedMessageIds: _animatedIds,
-              onTogglePin: widget.onTogglePin,
-            )),
+            ...widget.pinnedMessages.map(
+              (msg) => _MessageBubble(
+                message: msg,
+                isMe: msg.senderId == widget.residentId,
+                isSystem:
+                    msg.senderId == 'system' || msg.senderName == 'System',
+                showHeader: true,
+                canPin: widget.canPin,
+                worldId: widget.worldId,
+                channelName: widget.channelName,
+                animatedMessageIds: _animatedIds,
+                onTogglePin: widget.onTogglePin,
+              ),
+            ),
           ],
         ],
       ),

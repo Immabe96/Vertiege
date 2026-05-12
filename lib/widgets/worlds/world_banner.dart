@@ -33,6 +33,58 @@ class WorldBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = WorldAssets.imageForWorld(worldId);
+    if (imagePath != null) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => CustomPaint(
+                painter: _WorldBannerPainter(
+                  worldId: worldId,
+                  worldType: worldType,
+                  tierColor: tierColor,
+                  prestige: prestige,
+                ),
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.canvas.withValues(alpha: 0.04),
+                    AppColors.canvas.withValues(alpha: 0.58),
+                  ],
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      tierColor.withValues(alpha: 0),
+                      tierColor.withValues(alpha: 0.75),
+                      tierColor.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SizedBox(
       width: width,
       height: height,
@@ -249,10 +301,7 @@ class _WorldBannerPainter extends CustomPainter {
       ..shader = RadialGradient(
         center: const Alignment(0, -0.1),
         radius: 0.9,
-        colors: [
-          Colors.transparent,
-          AppColors.canvas.withValues(alpha: 0.55),
-        ],
+        colors: [Colors.transparent, AppColors.canvas.withValues(alpha: 0.55)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
@@ -261,16 +310,17 @@ class _WorldBannerPainter extends CustomPainter {
   void _drawBottomGlow(Canvas canvas, Size size) {
     const glowHeight = 4.0;
     final paint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          tierColor.withValues(alpha: 0.0),
-          tierColor.withValues(alpha: 0.30),
-        ],
-      ).createShader(
-        Rect.fromLTWH(0, size.height - glowHeight, size.width, glowHeight),
-      );
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              tierColor.withValues(alpha: 0.0),
+              tierColor.withValues(alpha: 0.30),
+            ],
+          ).createShader(
+            Rect.fromLTWH(0, size.height - glowHeight, size.width, glowHeight),
+          );
     canvas.drawRect(
       Rect.fromLTWH(0, size.height - glowHeight, size.width, glowHeight),
       paint,

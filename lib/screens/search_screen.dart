@@ -138,7 +138,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Worlds
     final allWorlds = ref.read(worldProvider).worlds.values;
     for (final w in allWorlds) {
-      if (w.name.toLowerCase().contains(lower) || w.description.toLowerCase().contains(lower)) {
+      if (w.name.toLowerCase().contains(lower) ||
+          w.description.toLowerCase().contains(lower)) {
         worlds.add(w);
       }
     }
@@ -148,7 +149,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     for (final entry in _allResidents) {
       final r = entry.resident;
       if (r.name.toLowerCase().contains(lower) ||
-          (r.profession != null && r.profession!.toLowerCase().contains(lower))) {
+          (r.profession != null &&
+              r.profession!.toLowerCase().contains(lower))) {
         residents.add(entry);
       }
     }
@@ -157,7 +159,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Posts
     final allPosts = ref.read(postProvider).posts;
     for (final p in allPosts) {
-      if (p.content.toLowerCase().contains(lower) || p.residentName.toLowerCase().contains(lower)) {
+      if (p.content.toLowerCase().contains(lower) ||
+          p.residentName.toLowerCase().contains(lower)) {
         posts.add(p);
       }
     }
@@ -180,7 +183,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isFocused = _focusNode.hasFocus;
-    final showRecent = isFocused && _controller.text.isEmpty && _recentSearches.isNotEmpty;
+    final showRecent =
+        isFocused && _controller.text.isEmpty && _recentSearches.isNotEmpty;
     final results = _query.length >= 2 ? _search(_query) : null;
 
     return Scaffold(
@@ -243,11 +247,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             Icon(Icons.search, size: IconSizes.hero, color: AppColors.inkMuted),
             const SizedBox(height: Spacing.md),
-            Text('Search worlds, people, and posts',
-              style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.inkSecondary)),
+            Text(
+              'Search worlds, people, and posts',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: AppColors.inkSecondary,
+              ),
+            ),
             const SizedBox(height: Spacing.xs),
-            Text('Type at least 2 characters',
-              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkMuted)),
+            Text(
+              'Type at least 2 characters',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.inkMuted,
+              ),
+            ),
           ],
         ),
       );
@@ -259,7 +271,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off, size: IconSizes.xl, color: AppColors.inkMuted),
+            Icon(
+              Icons.search_off,
+              size: IconSizes.xl,
+              color: AppColors.inkMuted,
+            ),
             const SizedBox(height: Spacing.sm + 4),
             Text('No results for "$_query"', style: theme.textTheme.bodyLarge),
           ],
@@ -276,35 +292,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       child: ListView(
         padding: const EdgeInsets.only(bottom: Spacing.lg),
         children: [
-        // ── Worlds Section ─────────────────
-        _SectionHeader(icon: Icons.public, title: 'Worlds', count: results.worlds.length),
-        if (results.worlds.isEmpty)
-          _EmptySection(text: 'No worlds found')
-        else
-          ...results.worlds.map((w) => _WorldTile(world: w)),
+          // ── Worlds Section ─────────────────
+          _SectionHeader(
+            icon: Icons.public,
+            title: 'Worlds',
+            count: results.worlds.length,
+          ),
+          if (results.worlds.isEmpty)
+            _EmptySection(text: 'No worlds found')
+          else
+            ...results.worlds.map((w) => _WorldTile(world: w)),
 
-        const Divider(height: 1, color: AppColors.glassBorder),
+          const Divider(height: 1, color: AppColors.glassBorder),
 
-        // ── People Section ─────────────────
-        _SectionHeader(icon: Icons.people, title: 'People', count: results.residents.length),
-        if (_loadingResidents)
-          Padding(
-            padding: const EdgeInsets.all(Spacing.md),
-            child: const Pulse(width: double.infinity, height: 48),
-          )
-        else if (results.residents.isEmpty)
-          _EmptySection(text: 'No people found')
-        else
-          ...results.residents.take(20).map((r) => _PersonTile(entry: r)),
+          // ── People Section ─────────────────
+          _SectionHeader(
+            icon: Icons.people,
+            title: 'People',
+            count: results.residents.length,
+          ),
+          if (_loadingResidents)
+            Padding(
+              padding: const EdgeInsets.all(Spacing.md),
+              child: const Pulse(width: double.infinity, height: 48),
+            )
+          else if (results.residents.isEmpty)
+            _EmptySection(text: 'No people found')
+          else
+            ...results.residents.take(20).map((r) => _PersonTile(entry: r)),
 
-        const Divider(height: 1, color: AppColors.glassBorder),
+          const Divider(height: 1, color: AppColors.glassBorder),
 
-        // ── Posts Section ─────────────────
-        _SectionHeader(icon: Icons.forum, title: 'Posts', count: results.posts.length),
-        if (results.posts.isEmpty)
-          _EmptySection(text: 'No posts found')
-        else
-          ...results.posts.take(20).map((p) => _PostTile(post: p)),
+          // ── Posts Section ─────────────────
+          _SectionHeader(
+            icon: Icons.forum,
+            title: 'Posts',
+            count: results.posts.length,
+          ),
+          if (results.posts.isEmpty)
+            _EmptySection(text: 'No posts found')
+          else
+            ...results.posts.take(20).map((p) => _PostTile(post: p)),
         ],
       ),
     );
@@ -315,15 +343,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.md, Spacing.md, Spacing.sm),
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.md,
+            Spacing.md,
+            Spacing.md,
+            Spacing.sm,
+          ),
           child: Row(
             children: [
-              Icon(Icons.history, size: IconSizes.md, color: AppColors.inkMuted),
+              Icon(
+                Icons.history,
+                size: IconSizes.md,
+                color: AppColors.inkMuted,
+              ),
               const SizedBox(width: Spacing.sm),
-              Text('Recent searches', style: theme.textTheme.labelLarge?.copyWith(
-                color: AppColors.inkSecondary,
-                fontWeight: FontWeights.bold,
-              )),
+              Text(
+                'Recent searches',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: AppColors.inkSecondary,
+                  fontWeight: FontWeights.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -332,20 +372,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           child: Wrap(
             spacing: Spacing.sm,
             runSpacing: Spacing.xs,
-            children: _recentSearches.map((q) => InputChip(
-              label: Text(q, style: theme.textTheme.labelSmall),
-              onPressed: () {
-                _controller.text = q;
-                setState(() => _query = q);
-                _focusNode.unfocus();
-              },
-              onDeleted: () => _removeRecentSearch(q),
-              deleteIcon: const Icon(Icons.close, size: IconSizes.xs + 2),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-              backgroundColor: AppColors.glassBackground,
-              side: const BorderSide(color: AppColors.glassBorder),
-            )).toList(),
+            children: _recentSearches
+                .map(
+                  (q) => InputChip(
+                    label: Text(q, style: theme.textTheme.labelSmall),
+                    onPressed: () {
+                      _controller.text = q;
+                      setState(() => _query = q);
+                      _focusNode.unfocus();
+                    },
+                    onDeleted: () => _removeRecentSearch(q),
+                    deleteIcon: const Icon(Icons.close, size: IconSizes.xs + 2),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: AppColors.glassBackground,
+                    side: const BorderSide(color: AppColors.glassBorder),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ],
@@ -362,13 +406,22 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final int count;
 
-  const _SectionHeader({required this.icon, required this.title, required this.count});
+  const _SectionHeader({
+    required this.icon,
+    required this.title,
+    required this.count,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.md, Spacing.md, Spacing.xs),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.md,
+        Spacing.md,
+        Spacing.xs,
+      ),
       child: Row(
         children: [
           // Gold bar
@@ -383,12 +436,18 @@ class _SectionHeader extends StatelessWidget {
           const SizedBox(width: Spacing.sm),
           Icon(icon, size: IconSizes.md, color: AppColors.primary),
           const SizedBox(width: Spacing.sm),
-          Text(title, style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeights.bold,
-          )),
+          Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeights.bold,
+            ),
+          ),
           const SizedBox(width: Spacing.sm),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.sm,
+              vertical: 2,
+            ),
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(RadiusTokens.pill),
@@ -419,10 +478,15 @@ class _EmptySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.sm,
+      ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
       ),
     );
   }
@@ -443,15 +507,25 @@ class _WorldTile extends StatelessWidget {
     return FadeIn(
       delayMs: 30,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.md,
+          vertical: Spacing.xs,
+        ),
         child: GlassPanel(
           padding: EdgeInsets.zero,
           child: ListTile(
             leading: WorldIcon(worldId: world.id, size: 36),
-            title: Text(world.name, style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeights.bold,
-            )),
-            subtitle: Text(world.description, maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: Text(
+              world.name,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeights.bold,
+              ),
+            ),
+            subtitle: Text(
+              world.description,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/explore/${world.id}'),
           ),
@@ -498,12 +572,16 @@ class _PersonTile extends StatelessWidget {
     return FadeIn(
       delayMs: 30,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.md,
+          vertical: Spacing.xs,
+        ),
         child: GlassPanel(
           padding: EdgeInsets.zero,
           child: ListTile(
             leading: CosmeticAvatar(
               imageUrl: resident.avatarUrl,
+              seed: resident.id,
               size: 40,
             ),
             title: Row(
@@ -511,18 +589,26 @@ class _PersonTile extends StatelessWidget {
                 Flexible(
                   child: Text(
                     resident.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeights.bold),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeights.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: Spacing.xs),
-                Icon(_tierIcon(resident.tier), size: IconSizes.xs + 4, color: _tierColor(resident.tier)),
+                Icon(
+                  _tierIcon(resident.tier),
+                  size: IconSizes.xs + 4,
+                  color: _tierColor(resident.tier),
+                ),
               ],
             ),
             subtitle: resident.profession != null
                 ? Text(
                     resident.profession!,
-                    style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.inkMuted,
+                    ),
                   )
                 : null,
             trailing: TextButton(
@@ -552,19 +638,33 @@ class _PostTile extends StatelessWidget {
     return FadeIn(
       delayMs: 30,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.md,
+          vertical: Spacing.xs,
+        ),
         child: GlassPanel(
           padding: EdgeInsets.zero,
           child: ListTile(
             leading: CosmeticAvatar(
               imageUrl: post.residentAvatar,
+              seed: post.residentId,
               size: 36,
             ),
-            title: Text(post.residentName, style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeights.bold,
-            )),
-            subtitle: Text(post.content, maxLines: 2, overflow: TextOverflow.ellipsis),
-            trailing: Text('#${post.worldId}', style: theme.textTheme.labelSmall),
+            title: Text(
+              post.residentName,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeights.bold,
+              ),
+            ),
+            subtitle: Text(
+              post.content,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: Text(
+              '#${post.worldId}',
+              style: theme.textTheme.labelSmall,
+            ),
             onTap: () => context.push('/explore/${post.worldId}'),
           ),
         ),

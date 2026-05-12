@@ -514,6 +514,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           totalXp: currentXp,
                           size: _avatarRadius * 2,
                           imageUrl: resident.avatarUrl,
+                          seed: resident.id,
                         ),
                       ),
                     ),
@@ -863,7 +864,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     subtitle: Text(
                       allies.isNotEmpty
                           ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
-                          : 'No allies yet',
+                          : 'Find residents to connect',
                     ),
                     trailing: Icon(
                       Icons.chevron_right,
@@ -872,6 +873,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(RadiusTokens.card),
                     ),
+                    onTap: () => context.push('/search'),
                   );
                 },
               ),

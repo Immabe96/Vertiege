@@ -33,7 +33,10 @@ class WorldMemberRow extends StatelessWidget {
     final remaining = members.length - displayMembers.length;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.xs,
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
         onTap: onTap,
@@ -43,10 +46,17 @@ class WorldMemberRow extends StatelessWidget {
             children: [
               if (isLoading) ...[
                 Row(
-                  children: List.generate(5, (i) => Padding(
-                    padding: EdgeInsets.only(left: i == 0 ? 0 : 4),
-                    child: const Pulse(width: 32, height: 32, borderRadius: RadiusTokens.pill),
-                  )),
+                  children: List.generate(
+                    5,
+                    (i) => Padding(
+                      padding: EdgeInsets.only(left: i == 0 ? 0 : 4),
+                      child: const Pulse(
+                        width: 32,
+                        height: 32,
+                        borderRadius: RadiusTokens.pill,
+                      ),
+                    ),
+                  ),
                 ),
               ] else ...[
                 SizedBox(
@@ -61,13 +71,17 @@ class WorldMemberRow extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isCouncil ? AppColors.tertiary : cs.surface,
+                              color: isCouncil
+                                  ? AppColors.tertiary
+                                  : cs.surface,
                               width: isCouncil ? 2.5 : 2,
                             ),
                             boxShadow: isCouncil
                                 ? [
                                     BoxShadow(
-                                      color: AppColors.tertiary.withValues(alpha: 0.35),
+                                      color: AppColors.tertiary.withValues(
+                                        alpha: 0.35,
+                                      ),
                                       blurRadius: 4,
                                       spreadRadius: 0,
                                     ),
@@ -76,6 +90,7 @@ class WorldMemberRow extends StatelessWidget {
                           ),
                           child: CosmeticAvatar(
                             imageUrl: member.resident.avatarUrl,
+                            seed: member.resident.id,
                             size: 32,
                           ),
                         ),
@@ -87,7 +102,9 @@ class WorldMemberRow extends StatelessWidget {
                 if (remaining > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.sm, vertical: Spacing.xs),
+                      horizontal: Spacing.sm,
+                      vertical: Spacing.xs,
+                    ),
                     decoration: BoxDecoration(
                       color: cs.primaryContainer.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(RadiusTokens.pill),
@@ -119,8 +136,7 @@ class WorldMemberRow extends StatelessWidget {
                 ),
               ],
               const Spacer(),
-              Icon(Icons.chevron_right,
-                  size: IconSizes.md, color: cs.outline),
+              Icon(Icons.chevron_right, size: IconSizes.md, color: cs.outline),
             ],
           ),
         ),
