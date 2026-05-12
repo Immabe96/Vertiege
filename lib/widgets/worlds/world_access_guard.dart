@@ -11,6 +11,7 @@ import '../../services/access_control.dart';
 import '../../services/store_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../../widgets/core/loading_state.dart';
 import 'access_icon.dart';
 
 class WorldAccessGuard extends ConsumerWidget {
@@ -62,7 +63,7 @@ class WorldAccessGuard extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const AccessIcon(type: AccessIconType.locked, size: 48),
+              const AccessIcon(size: 48),
               const SizedBox(height: 16),
               Text('Access Restricted', style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
@@ -75,7 +76,7 @@ class WorldAccessGuard extends ConsumerWidget {
               if (isVerifying)
                 const Column(
                   children: [
-                    CircularProgressIndicator(strokeWidth: 2),
+                    GlassLoadingCard(),
                     SizedBox(height: 12),
                     Text('Submitting verification...'),
                   ],

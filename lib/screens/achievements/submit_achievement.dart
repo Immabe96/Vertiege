@@ -22,6 +22,7 @@ class _SubmitAchievementScreenState extends ConsumerState<SubmitAchievementScree
   Future<void> _pickProofImage() async {
     final picker = ImagePicker();
     final result = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200);
+    if (!mounted) return;
     if (result != null) {
       setState(() => _proofImagePath = result.path);
     }
@@ -35,6 +36,7 @@ class _SubmitAchievementScreenState extends ConsumerState<SubmitAchievementScree
     String? proofUrl;
     if (_proofImagePath != null) {
       proofUrl = await _uploadToSupabase(_proofImagePath!);
+      if (!mounted) return;
     }
 
     ref.read(achievementProvider.notifier).submitAchievement(

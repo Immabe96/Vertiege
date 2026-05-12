@@ -8,6 +8,7 @@ import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../../widgets/core/loading_state.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/journey/progress_trail.dart';
 
@@ -23,7 +24,7 @@ class AscensionPathScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: AppColors.canvas,
         appBar: AppBar(title: const Text('Ascension Path')),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const SafeArea(child: GlassLoadingList(itemCount: 3)),
       );
     }
 
@@ -74,9 +75,9 @@ class AscensionPathScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: Spacing.xs),
-              Text(
+              const Text(
                 'Your journey through the tiers',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: FontSizes.bodyMd,
                   color: AppColors.inkSecondary,
                 ),

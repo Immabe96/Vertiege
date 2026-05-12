@@ -106,6 +106,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       source: ImageSource.gallery,
       maxWidth: 1200,
     );
+    if (!mounted) return;
     if (result != null) {
       setState(() => _imagePath = result.path);
     }
@@ -261,7 +262,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       title: 'No messages yet',
       description: 'Send a message to start the conversation',
       icon: Icons.chat_bubble_outline,
-      variant: EmptyStateVariant.default_,
     );
   }
 
@@ -387,7 +387,7 @@ class _MessageBubbleState extends State<_MessageBubble>
         color: textColor,
         height: LineHeight.body,
       ),
-      code: TextStyle(
+      code: const TextStyle(
         fontSize: FontSizes.bodyMd - 2,
         color: AppColors.ink,
         backgroundColor: AppColors.surface,
@@ -404,7 +404,9 @@ class _MessageBubbleState extends State<_MessageBubble>
         decoration: TextDecoration.underline,
       ),
       blockquoteDecoration: BoxDecoration(
-        border: Border(left: BorderSide(color: AppColors.hustler, width: 3)),
+        border: const Border(
+          left: BorderSide(color: AppColors.hustler, width: 3),
+        ),
         color: AppColors.hustler.withValues(alpha: 0.05),
       ),
       h1: TextStyle(
@@ -488,7 +490,6 @@ class _MessageBubbleState extends State<_MessageBubble>
                       const SizedBox(width: Spacing.xs),
                       LuminaryNameplate(
                         name: widget.message.senderName,
-                        tier: 1,
                         fontSize: FontSizes.labelSm,
                       ),
                     ],
@@ -664,7 +665,11 @@ class _ImagePreview extends StatelessWidget {
               height: 56,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) =>
-                  Icon(Icons.broken_image, size: 32, color: AppColors.inkMuted),
+                  const Icon(
+                    Icons.broken_image,
+                    size: 32,
+                    color: AppColors.inkMuted,
+                  ),
             ),
           ),
           const SizedBox(width: Spacing.sm),

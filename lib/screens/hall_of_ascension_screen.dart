@@ -10,6 +10,7 @@ import '../theme/design_system.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/empty_state.dart';
+import '../widgets/core/loading_state.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 
@@ -149,7 +150,7 @@ class _XpLeaderboard extends ConsumerWidget {
     final resident = ref.watch(residentProvider).resident;
 
     if (resident == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const GlassLoadingList(itemCount: 4);
     }
 
     final entries = <_LeaderEntry>[

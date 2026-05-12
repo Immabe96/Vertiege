@@ -8,6 +8,7 @@ import '../state/resident_provider.dart';
 import '../theme/colors.dart';
 import '../theme/design_system.dart';
 import '../widgets/core/glass_panel.dart';
+import '../widgets/core/loading_state.dart';
 
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
@@ -98,9 +99,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ),
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.tertiary),
-            )
+          ? const SafeArea(child: GlassLoadingList(itemCount: 3))
           : ListView(
               padding: const EdgeInsets.all(Spacing.lg),
               children: [
@@ -230,7 +229,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         );
                       }
                     },
-                    child: Text(
+                    child: const Text(
                       'Restore Purchases',
                       style: TextStyle(color: AppColors.primary),
                     ),
@@ -262,7 +261,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       included: shields > 0,
     ));
 
-    features.add(_TierFeature(
+    features.add(const _TierFeature(
       label: 'Gold profile frame',
       included: true,
     ));
@@ -292,7 +291,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       included: goldN,
     ));
 
-    features.add(_TierFeature(
+    features.add(const _TierFeature(
       label: 'Exclusive tier badge',
       included: true,
     ));

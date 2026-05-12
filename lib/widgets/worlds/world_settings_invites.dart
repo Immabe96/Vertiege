@@ -4,6 +4,7 @@ import '../../theme/design_system.dart';
 import '../../models/invite.dart';
 import '../../utils/date_format.dart';
 import '../../widgets/core/glass_panel.dart';
+import '../../widgets/core/loading_state.dart';
 
 class WorldSettingsInvites extends StatelessWidget {
   final String? sovereignId;
@@ -94,7 +95,7 @@ class WorldSettingsInvites extends StatelessWidget {
         ],
         if (isLoadingInvites) ...[
           const SizedBox(height: Spacing.md),
-          const Center(child: CircularProgressIndicator()),
+          const GlassLoadingCard(),
         ] else if (invites.isNotEmpty) ...[
           const SizedBox(height: Spacing.md),
           const Divider(),

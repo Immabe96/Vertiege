@@ -1,6 +1,6 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-05 (Phase 2 complete — all 9 gaps closed)
+**Updated:** 2026-05-12 (UI/UX polish pass active)
 
 ## Vision
 
@@ -8,7 +8,22 @@ Vertiege is a semi-social, semi-gamified gateway to a **Realm** of **Worlds**. R
 
 Full vision: `.claude/../memory/vertiege-vision.md`
 
-## Current: Phase 2 — 9/9 gaps closed, Phase 2 complete
+## Current: Phase 3 - UI/UX Polish
+
+### Completed in Phase 3 (2026-05-12)
+- Rebuilt World Discover with image-led world cards, visual rails, search, and consistent generated world artwork.
+- Rebuilt Chat tab so DMs are separate from joined-world channel navigation.
+- Replaced remaining generated placeholder artwork sets: world banners, avatars, badges, achievement medallions, profession medallions, tier emblems, empty states, splash/onboarding backgrounds, and app icon assets.
+- Replaced inconsistent full-screen/section spinners in ascension, hall, subscriptions, world invites, and access verification with glass loading states.
+- Added branded error state handling for resident profile failures and tightened mounted checks after async image/profile loads.
+- Removed visible placeholder-style event date copy (`TBD`) from event cards.
+
+### UI/UX QA Gate
+- Device smoke test on the next release build for real scrolling, tap targets, and tab flow.
+- Small inline activity indicators remain only where they are direct button/progress feedback.
+- Feature work should resume after this QA pass stays stable on-device.
+
+## Completed: Phase 2 - 9/9 gaps closed
 
 ### Completed in Phase 1 (Build & Sign)
 - Release keystore (`android/upload-keystore.jks`, RSA 2048)

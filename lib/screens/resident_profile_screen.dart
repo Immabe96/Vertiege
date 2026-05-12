@@ -14,6 +14,7 @@ import '../widgets/core/glass_panel.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/profile/badge_display.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/shared/tier_icon.dart';
 
@@ -49,12 +50,14 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     }
     try {
       final fetched = await ProfileService.getProfile(widget.residentId);
+      if (!mounted) return;
       setState(() {
         _profile = fetched;
         _loading = false;
         _error = fetched == null ? 'Resident not found' : null;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() {
         _loading = false;
         _error = 'Failed to load profile';
@@ -78,18 +81,9 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       return const ScreenLoading.profile();
     }
     if (_error != null || _profile == null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.person_off, size: 64, color: AppColors.inkMuted),
-            const SizedBox(height: 16),
-            Text(
-              _error ?? 'Resident not found',
-              style: theme.textTheme.bodyLarge,
-            ),
-          ],
-        ),
+      return AppErrorState(
+        message: _error ?? 'Resident not found',
+        onRetry: _loadProfile,
       );
     }
     final resident = _profile!;
@@ -109,7 +103,6 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                         resident.id == ref.read(residentProvider).resident?.id
                         ? achievements.totalXp
                         : 0,
-                    size: 80,
                     imageUrl: resident.avatarUrl,
                     seed: resident.id,
                   ),

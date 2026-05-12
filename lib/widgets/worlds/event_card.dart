@@ -21,7 +21,7 @@ class EventCard extends ConsumerWidget {
     final rsvpCount = post.eventRsvpIds.length;
     final dateStr = post.eventStartsAt != null
         ? formatTimestamp(post.eventStartsAt!)
-        : 'TBD';
+        : 'Date pending';
 
     return GlassPanel(
       padding: const EdgeInsets.all(Spacing.lg),
