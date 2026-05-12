@@ -139,26 +139,24 @@ class AchievementCard extends StatelessWidget {
                   ),
                   const SizedBox(height: Spacing.sm),
                   // XP badge + status indicator
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    runAlignment: WrapAlignment.center,
+                    spacing: Spacing.xs,
+                    runSpacing: Spacing.xs,
                     children: [
                       _XpBadge(xp: achievement.xpValue),
-                      if (isSubmitted) ...[
-                        const SizedBox(width: Spacing.xs),
+                      if (isSubmitted)
                         const _StatusChip(
                           label: 'Pending Review',
                           color: AppColors.accentStreak,
                           icon: Icons.schedule,
                         ),
-                      ],
                       if (isVerified)
-                        const Padding(
-                          padding: EdgeInsets.only(left: Spacing.xs),
-                          child: Icon(
-                            Icons.check_circle,
-                            size: IconSizes.sm,
-                            color: AppColors.semanticSuccess,
-                          ),
+                        const Icon(
+                          Icons.check_circle,
+                          size: IconSizes.sm,
+                          color: AppColors.semanticSuccess,
                         ),
                     ],
                   ),

@@ -393,22 +393,25 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   Widget _buildEmptyState() {
     switch (_tab) {
       case _FeedTab.following:
-        return AppEmptyState(
+        return const AppEmptyState(
           title: 'No posts from followed residents',
           description: 'Follow residents to see their posts here',
           icon: Icons.people_outline,
+          imageAsset: 'assets/generated/empty-feed.jpg',
         );
       case _FeedTab.announcements:
-        return AppEmptyState(
+        return const AppEmptyState(
           title: 'No announcements yet',
           description: 'Announcements from world moderators will appear here',
           icon: Icons.campaign_outlined,
+          imageAsset: 'assets/generated/empty-feed.jpg',
         );
       case _FeedTab.all:
-        return AppEmptyState(
+        return const AppEmptyState(
           title: 'No posts yet',
           description: 'Be the first to share something with the community!',
           icon: Icons.auto_awesome,
+          imageAsset: 'assets/generated/empty-feed.jpg',
         );
     }
   }

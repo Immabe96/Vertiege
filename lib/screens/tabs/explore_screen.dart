@@ -80,7 +80,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           NotificationBell(onPress: () => context.push('/notifications')),
           Consumer(
             builder: (context, ref, _) {
-              final tier = ref.watch(residentProvider).resident?.tier.value ?? 0;
+              final tier =
+                  ref.watch(residentProvider).resident?.tier.value ?? 0;
               if (tier < 2) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.add, color: AppColors.inkSecondary),
@@ -100,7 +101,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           children: [
             // Search bar
             Padding(
-              padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.sm, Spacing.md, Spacing.xs),
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.md,
+                Spacing.sm,
+                Spacing.md,
+                Spacing.xs,
+              ),
               child: TextField(
                 controller: _searchController,
                 onChanged: (v) => setState(() => _searchQuery = v),
@@ -108,7 +114,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search worlds...',
                   hintStyle: const TextStyle(color: AppColors.inkMuted),
-                  prefixIcon: const Icon(Icons.search, size: IconSizes.md, color: AppColors.inkMuted),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    size: IconSizes.md,
+                    color: AppColors.inkMuted,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear, size: IconSizes.sm),
@@ -130,7 +140,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     borderSide: BorderSide(color: AppColors.primary),
                   ),
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ),
@@ -138,7 +151,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             // Season banner (only when not filtering)
             if (!isFiltering)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.md,
+                  vertical: Spacing.xs,
+                ),
                 child: _SeasonBannerCard(
                   worlds: allWorlds,
                   onTap: () => context.push('/season'),
@@ -162,21 +178,24 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     label: 'Wealth',
                     icon: Icons.diamond,
                     selected: _selectedType == WorldType.wealth,
-                    onTap: () => setState(() => _selectedType = WorldType.wealth),
+                    onTap: () =>
+                        setState(() => _selectedType = WorldType.wealth),
                   ),
                   const SizedBox(width: Spacing.sm),
                   FilterPill(
                     label: 'Profession',
                     icon: Icons.work,
                     selected: _selectedType == WorldType.profession,
-                    onTap: () => setState(() => _selectedType = WorldType.profession),
+                    onTap: () =>
+                        setState(() => _selectedType = WorldType.profession),
                   ),
                   const SizedBox(width: Spacing.sm),
                   FilterPill(
                     label: 'Dominion',
                     icon: Icons.shield,
                     selected: _selectedType == WorldType.dominion,
-                    onTap: () => setState(() => _selectedType = WorldType.dominion),
+                    onTap: () =>
+                        setState(() => _selectedType = WorldType.dominion),
                   ),
                 ],
               ),
@@ -187,10 +206,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             // Featured worlds row (only when not filtering)
             if (!isFiltering && featured.isNotEmpty) ...[
               const ExploreSectionHeader(title: 'Featured Worlds'),
-              SizedBox(
-                height: 260,
-                child: FeaturedWorldsRow(worlds: featured),
-              ),
+              SizedBox(height: 260, child: FeaturedWorldsRow(worlds: featured)),
               const SizedBox(height: Spacing.md),
             ],
 
@@ -202,8 +218,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ],
 
             // Trending & Rising sections (only when not filtering)
-            if (!isFiltering)
-              ..._buildTrendingRising(allWorlds),
+            if (!isFiltering) ..._buildTrendingRising(allWorlds),
 
             // View mode toggle
             Padding(
@@ -214,9 +229,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             const SizedBox(height: Spacing.sm),
 
             // Section header
-            ExploreSectionHeader(
-              title: isFiltering ? 'Results' : 'All Worlds',
-            ),
+            ExploreSectionHeader(title: isFiltering ? 'Results' : 'All Worlds'),
 
             const SizedBox(height: Spacing.sm),
 
@@ -225,11 +238,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               Padding(
                 padding: const EdgeInsets.all(Spacing.xl),
                 child: AppEmptyState(
-                  title: _searchQuery.isNotEmpty ? 'No worlds found' : 'No worlds available',
+                  title: _searchQuery.isNotEmpty
+                      ? 'No worlds found'
+                      : 'No worlds available',
                   description: _searchQuery.isNotEmpty
                       ? 'No worlds match "$_searchQuery". Try a different search.'
                       : 'No worlds have been created yet.',
-                  icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.public_off,
+                  icon: _searchQuery.isNotEmpty
+                      ? Icons.search_off
+                      : Icons.public_off,
+                  imageAsset: 'assets/generated/empty-worlds.jpg',
                 ),
               )
             else if (_viewMode == _ViewMode.grid)
@@ -287,7 +305,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.xxl),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        0,
+        Spacing.md,
+        Spacing.xxl,
+      ),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: Spacing.sm + 4,
@@ -303,7 +326,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   Widget _buildTierView(List<World> worlds) {
     final apex = worlds.where((w) => w.prestige >= 40).toList();
-    final elite = worlds.where((w) => w.prestige >= 20 && w.prestige < 40).toList();
+    final elite = worlds
+        .where((w) => w.prestige >= 20 && w.prestige < 40)
+        .toList();
     final hustler = worlds.where((w) => w.prestige < 20).toList();
 
     final sections = [
@@ -320,13 +345,20 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.sm, Spacing.md, Spacing.xs),
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.md,
+                  Spacing.sm,
+                  Spacing.md,
+                  Spacing.xs,
+                ),
                 child: Row(
                   children: [
                     Container(
-                      width: 3, height: 20,
+                      width: 3,
+                      height: 20,
                       decoration: BoxDecoration(
-                        color: s.$2, borderRadius: BorderRadius.circular(2),
+                        color: s.$2,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                     const SizedBox(width: Spacing.sm),
@@ -344,7 +376,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.xxl),
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.md,
+                  0,
+                  Spacing.md,
+                  Spacing.xxl,
+                ),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: Spacing.sm + 4,
@@ -352,7 +389,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   childAspectRatio: 0.72,
                 ),
                 itemCount: s.$3.length,
-                itemBuilder: (_, i) => WorldCard(world: s.$3[i], index: i, wide: false),
+                itemBuilder: (_, i) =>
+                    WorldCard(world: s.$3[i], index: i, wide: false),
               ),
             ],
           ),
@@ -369,7 +407,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       child: Column(
         children: worlds.asMap().entries.map((e) {
           return Padding(
-            padding: EdgeInsets.only(bottom: e.key < worlds.length - 1 ? Spacing.sm + 4 : 0),
+            padding: EdgeInsets.only(
+              bottom: e.key < worlds.length - 1 ? Spacing.sm + 4 : 0,
+            ),
             child: WorldCard(world: e.value, index: e.key, wide: true),
           );
         }).toList(),
@@ -382,7 +422,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   List<Widget> _buildTrendingRising(List<World> allWorlds) {
     final now = DateTime.now();
     final scored = allWorlds.map((w) {
-      final ageDays = ((now.millisecondsSinceEpoch - w.createdAt) / 86400000).clamp(0.5, 9999);
+      final ageDays = ((now.millisecondsSinceEpoch - w.createdAt) / 86400000)
+          .clamp(0.5, 9999);
       final velocity = (w.memberCount * 10 + w.prestige) / ageDays;
       return (world: w, velocity: velocity);
     }).toList();
@@ -394,8 +435,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final rising = scored.where((s) {
       final age = ((now.millisecondsSinceEpoch - s.world.createdAt) / 86400000);
       return age < 30;
-    }).toList()
-      ..sort((a, b) => b.velocity.compareTo(a.velocity));
+    }).toList()..sort((a, b) => b.velocity.compareTo(a.velocity));
     final topRising = rising.take(3).toList();
 
     return [
@@ -444,22 +484,36 @@ class _ToggleBtn extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.sm,
+            vertical: Spacing.sm,
+          ),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary.withValues(alpha: 0.12) : Colors.transparent,
+            color: selected
+                ? AppColors.primary.withValues(alpha: 0.12)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: IconSizes.sm, color: selected ? AppColors.primary : AppColors.inkMuted),
-              const SizedBox(width: Spacing.xs),
-              Text(label, style: TextStyle(
-                fontSize: FontSizes.labelSm,
-                fontWeight: selected ? FontWeights.semiBold : FontWeights.regular,
+              Icon(
+                icon,
+                size: IconSizes.sm,
                 color: selected ? AppColors.primary : AppColors.inkMuted,
-              )),
+              ),
+              const SizedBox(width: Spacing.xs),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  fontWeight: selected
+                      ? FontWeights.semiBold
+                      : FontWeights.regular,
+                  color: selected ? AppColors.primary : AppColors.inkMuted,
+                ),
+              ),
             ],
           ),
         ),
@@ -488,14 +542,13 @@ class _SeasonBannerCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.card),
-          border: Border.all(
-            color: AppColors.tertiary.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
             Container(
-              width: 3, height: 56,
+              width: 3,
+              height: 56,
               decoration: BoxDecoration(
                 color: AppColors.tertiary,
                 borderRadius: BorderRadius.circular(2),
@@ -507,23 +560,42 @@ class _SeasonBannerCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(season.name.toUpperCase(), style: GoogleFonts.spaceGrotesk(
-                    fontSize: FontSizes.bodyMd, fontWeight: FontWeights.bold, color: AppColors.tertiary,
-                  )),
+                  Text(
+                    season.name.toUpperCase(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: FontSizes.bodyMd,
+                      fontWeight: FontWeights.bold,
+                      color: AppColors.tertiary,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary)),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: FontSizes.labelSm,
+                      color: AppColors.inkSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.md,
+                vertical: Spacing.sm,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.tertiary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(RadiusTokens.lg),
               ),
-              child: const Text('VIEW', style: TextStyle(
-                fontSize: FontSizes.labelSm, fontWeight: FontWeights.bold, color: AppColors.tertiary,
-              )),
+              child: const Text(
+                'VIEW',
+                style: TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  fontWeight: FontWeights.bold,
+                  color: AppColors.tertiary,
+                ),
+              ),
             ),
           ],
         ),

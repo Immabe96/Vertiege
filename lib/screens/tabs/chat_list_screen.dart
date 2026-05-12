@@ -28,8 +28,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final residentId =
-        ref.watch(residentProvider.select((s) => s.resident?.id));
+    final residentId = ref.watch(
+      residentProvider.select((s) => s.resident?.id),
+    );
     final chatState = ref.watch(chatProvider);
 
     // Trigger initial load once per screen lifetime
@@ -56,7 +57,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               title: const Text('Chats'),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.edit_square, color: AppColors.inkSecondary),
+                  icon: const Icon(
+                    Icons.edit_square,
+                    color: AppColors.inkSecondary,
+                  ),
                   tooltip: 'New Chat',
                   onPressed: () => context.push('/search'),
                 ),
@@ -105,7 +109,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       title: 'No messages yet',
       description: 'Join a world and start connecting with the community',
       icon: Icons.chat_bubble_outline,
-      variant: EmptyStateVariant.default_,
+      imageAsset: 'assets/generated/empty-chat.jpg',
       actionLabel: 'Explore Worlds',
       onAction: () => context.go('/explore'),
     );
@@ -130,7 +134,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         return FadeIn(
           delayMs: index * 40,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md,
+              vertical: Spacing.xs,
+            ),
             child: GlassPanel(
               padding: const EdgeInsets.all(Spacing.md),
               borderRadius: BorderRadius.circular(RadiusTokens.xl),
@@ -172,7 +179,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  lastMessage.isNotEmpty ? lastMessage : 'No messages yet',
+                                  lastMessage.isNotEmpty
+                                      ? lastMessage
+                                      : 'No messages yet',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: unreadCount > 0
                                         ? AppColors.ink
@@ -210,10 +219,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       ),
                     ),
                     const SizedBox(width: Spacing.sm),
-                    StatusDot(
-                      presence: _presence(room),
-                      size: 8,
-                    ),
+                    StatusDot(presence: _presence(room), size: 8),
                   ],
                 ),
               ),
@@ -232,7 +238,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     );
     if (otherId.isEmpty) return '';
     final names = room['names'] as Map<String, dynamic>?;
-    if (names != null && names[otherId] is String) return names[otherId] as String;
+    if (names != null && names[otherId] is String) {
+      return names[otherId] as String;
+    }
     final direct = room['other_name'];
     if (direct is String && direct.isNotEmpty) return direct;
     return otherId;

@@ -293,7 +293,6 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 BoxShadow(
                   color: variantColor.withValues(alpha: 0.20 * glowOpacity),
                   blurRadius: 32,
-                  offset: Offset.zero,
                 ),
               ],
             ),
@@ -332,13 +331,15 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
             BoxShadow(
               color: variantColor.withValues(alpha: 0.18 * glowOpacity),
               blurRadius: 28,
-              offset: Offset.zero,
             ),
           ],
         ),
         child: Image.asset(
           widget.imageAsset!,
           fit: BoxFit.cover,
+          cacheWidth: (180 * MediaQuery.devicePixelRatioOf(context))
+              .round()
+              .clamp(360, 720),
           errorBuilder: (_, _, _) => _buildIconContainer(
             variantColor: variantColor,
             variantBg: _variantBackground(variantColor),

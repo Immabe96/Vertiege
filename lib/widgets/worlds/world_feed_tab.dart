@@ -29,16 +29,19 @@ class WorldFeedTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final eventPosts = posts.where((p) => (p as dynamic).isEvent == true).toList();
-    final regularPosts = posts.where((p) => (p as dynamic).isEvent != true).toList();
+    final eventPosts = posts
+        .where((p) => (p as dynamic).isEvent == true)
+        .toList();
+    final regularPosts = posts
+        .where((p) => (p as dynamic).isEvent != true)
+        .toList();
 
     return Column(
       children: [
         // Post input or locked notice
         if (resident != null &&
             world != null &&
-            WorldPermissions.canPost(
-                resident!, worldId, world.sovereignId))
+            WorldPermissions.canPost(resident!, worldId, world.sovereignId))
           PostInput(worldId: worldId, sovereignId: world.sovereignId)
         else
           Padding(
@@ -47,14 +50,18 @@ class WorldFeedTab extends ConsumerWidget {
               padding: const EdgeInsets.all(Spacing.md),
               child: Row(
                 children: [
-                  Icon(Icons.lock,
-                      size: IconSizes.md, color: AppColors.inkMuted),
+                  const Icon(
+                    Icons.lock,
+                    size: IconSizes.md,
+                    color: AppColors.inkMuted,
+                  ),
                   const SizedBox(width: Spacing.sm + 4),
                   Expanded(
                     child: Text(
                       'Member+ required to post',
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: AppColors.inkMuted),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.inkMuted,
+                      ),
                     ),
                   ),
                 ],
@@ -87,11 +94,12 @@ class WorldFeedTab extends ConsumerWidget {
                   title: 'No posts yet',
                   description: 'Be the first to post in this world',
                   icon: Icons.auto_awesome,
-                  variant: EmptyStateVariant.default_,
+                  imageAsset: 'assets/generated/empty-feed.jpg',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.only(
-                      bottom: Spacing.xxl + Spacing.xxl),
+                    bottom: Spacing.xxl + Spacing.xxl,
+                  ),
                   itemCount: regularPosts.length,
                   itemBuilder: (context, index) => PostItem(
                     post: regularPosts[index],
