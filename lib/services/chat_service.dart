@@ -298,19 +298,39 @@ class ChatService {
   }
 
   static Future<DateTime?> getLastMessageTimestamp(String channelId) async {
-    if (!isSupabaseConfigured()) return null;
-    final client = getSupabase();
-    final data = await client
+    return _getLatestChannelMessageTimestamp(channelId);
+  }
+
+  static Future<Map<String, DateTime>> getLatestChannelMessageTimestamps(
+    List<String> channelIds,
+  ) async {
+    final ids = channelIds.toSet().where((id) => id.isNotEmpty).toList();
+    if (!isSupabaseConfigured() || ids.isEmpty) return {};
+    final entries = await Future.wait(
+      ids.map(
+        (id) async => MapEntry(id, await _getLatestChannelMessageTimestamp(id)),
+      ),
+    );
+    final latest = <String, DateTime>{};
+    for (final entry in entries) {
+      final createdAt = entry.value;
+      if (createdAt != null) latest[entry.key] = createdAt;
+    }
+    return latest;
+  }
+
+  static Future<DateTime?> _getLatestChannelMessageTimestamp(
+    String channelId,
+  ) async {
+    if (!isSupabaseConfigured() || channelId.isEmpty) return null;
+    final data = await getSupabase()
         .from('channel_messages')
         .select('created_at')
         .eq('channel_id', channelId)
         .order('created_at', ascending: false)
         .limit(1)
         .maybeSingle();
-    if (data != null) {
-      return DateTime.tryParse(data['created_at'] ?? '');
-    }
-    return null;
+    return data == null ? null : DateTime.tryParse(data['created_at'] ?? '');
   }
 
   // ── Wards (districts) ────────────────────────────────────

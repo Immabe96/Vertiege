@@ -32,6 +32,11 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
       if (c.name == 'lounge' && !features.lounge) return false;
       return true;
     }).toList();
+    Future.microtask(
+      () => ref
+          .read(chatProvider.notifier)
+          .loadChannelActivity(channels.map((c) => c.id).toList()),
+    );
     final theme = Theme.of(context);
 
     if (channels.isEmpty) {
@@ -39,7 +44,6 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
         title: 'No channels yet',
         description: 'This world does not have a public channel available.',
         icon: Icons.forum_outlined,
-        variant: EmptyStateVariant.default_,
       );
     }
 

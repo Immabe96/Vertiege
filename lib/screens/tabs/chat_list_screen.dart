@@ -106,6 +106,14 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             final selected = _selectedWorldId;
             if (selected != null) {
               await ref.read(channelProvider.notifier).loadChannels(selected);
+              final channels =
+                  ref.read(channelProvider).channelsByWorld[selected] ?? [];
+              await ref
+                  .read(chatProvider.notifier)
+                  .loadChannelActivity(
+                    channels.map((channel) => channel.id).toList(),
+                    force: true,
+                  );
             }
           }
         },
@@ -597,6 +605,11 @@ class _ChannelList extends ConsumerWidget {
         icon: Icons.forum_outlined,
       );
     }
+    Future.microtask(
+      () => ref
+          .read(chatProvider.notifier)
+          .loadChannelActivity(visible.map((channel) => channel.id).toList()),
+    );
 
     return Column(
       children: [

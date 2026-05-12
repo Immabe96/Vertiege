@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
 import '../services/media_service.dart';
+import '../utils/chat_unread.dart';
 import '../utils/id_generator.dart';
 
 class ChatState {
@@ -10,6 +11,7 @@ class ChatState {
   final Map<String, List<ChannelMessage>> dmMessages;
   final Map<String, List<ChannelMessage>> channelMessages;
   final Map<String, DateTime> channelReads;
+  final Map<String, DateTime> channelLatestMessageTimes;
   final bool isLoadingRooms;
 
   const ChatState({
@@ -17,6 +19,7 @@ class ChatState {
     this.dmMessages = const {},
     this.channelMessages = const {},
     this.channelReads = const {},
+    this.channelLatestMessageTimes = const {},
     this.isLoadingRooms = false,
   });
 
@@ -25,12 +28,15 @@ class ChatState {
     Map<String, List<ChannelMessage>>? dmMessages,
     Map<String, List<ChannelMessage>>? channelMessages,
     Map<String, DateTime>? channelReads,
+    Map<String, DateTime>? channelLatestMessageTimes,
     bool? isLoadingRooms,
   }) => ChatState(
     dmRooms: dmRooms ?? this.dmRooms,
     dmMessages: dmMessages ?? this.dmMessages,
     channelMessages: channelMessages ?? this.channelMessages,
     channelReads: channelReads ?? this.channelReads,
+    channelLatestMessageTimes:
+        channelLatestMessageTimes ?? this.channelLatestMessageTimes,
     isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
   );
 }
@@ -38,6 +44,8 @@ class ChatState {
 class ChatNotifier extends Notifier<ChatState> {
   final Map<String, RealtimeChannel> _subscriptions = {};
   final Map<String, RealtimeChannel> _dmSubscriptions = {};
+  static final DateTime _emptyChannelActivity =
+      DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   ChatState build() {
@@ -164,6 +172,7 @@ class ChatNotifier extends Notifier<ChatState> {
       void Function(Map<String, dynamic>),
     )
     subscribe,
+    bool trackChannelActivity = false,
   }) {
     if (subscriptions.containsKey(roomId)) return;
     final channel = subscribe(roomId, (data) {
@@ -171,10 +180,20 @@ class ChatNotifier extends Notifier<ChatState> {
       final messages = getMessageMap();
       final existing = messages[roomId] ?? [];
       if (existing.any((m) => m.id == msg.id)) return;
-      state = updateState({
+      var nextState = updateState({
         ...messages,
         roomId: [...existing, msg],
       });
+      if (trackChannelActivity && msg.createdAt > 0) {
+        nextState = nextState.copyWith(
+          channelLatestMessageTimes: _mergeLatestMessageTime(
+            nextState.channelLatestMessageTimes,
+            roomId,
+            DateTime.fromMillisecondsSinceEpoch(msg.createdAt),
+          ),
+        );
+      }
+      state = nextState;
     });
     if (channel != null) {
       subscriptions[roomId] = channel;
@@ -267,6 +286,11 @@ class ChatNotifier extends Notifier<ChatState> {
     final allMessages = [...existing, msg];
     state = state.copyWith(
       channelMessages: {...state.channelMessages, channelId: allMessages},
+      channelLatestMessageTimes: _mergeLatestMessageTime(
+        state.channelLatestMessageTimes,
+        channelId,
+        DateTime.fromMillisecondsSinceEpoch(msg.createdAt),
+      ),
     );
 
     try {
@@ -284,6 +308,12 @@ class ChatNotifier extends Notifier<ChatState> {
       final reverted = allMessages.where((m) => m.id != msg.id).toList();
       state = state.copyWith(
         channelMessages: {...state.channelMessages, channelId: reverted},
+        channelLatestMessageTimes: _mergeLatestMessageTime(
+          state.channelLatestMessageTimes,
+          channelId,
+          latestMessageTime(reverted) ?? _emptyChannelActivity,
+          replace: true,
+        ),
       );
       rethrow;
     }
@@ -296,6 +326,7 @@ class ChatNotifier extends Notifier<ChatState> {
       getMessageMap: () => state.channelMessages,
       updateState: (updated) => state.copyWith(channelMessages: updated),
       subscribe: ChatService.subscribeToChannelMessages,
+      trackChannelActivity: true,
     );
   }
 
@@ -309,6 +340,27 @@ class ChatNotifier extends Notifier<ChatState> {
   Future<void> loadChannelReads(String residentId) async {
     final reads = await ChatService.getChannelReads(residentId);
     state = state.copyWith(channelReads: reads);
+  }
+
+  Future<void> loadChannelActivity(
+    List<String> channelIds, {
+    bool force = false,
+  }) async {
+    final ids = channelIds.toSet().where((id) => id.isNotEmpty).toList();
+    if (ids.isEmpty) return;
+    final toLoad = force
+        ? ids
+        : ids
+              .where((id) => !state.channelLatestMessageTimes.containsKey(id))
+              .toList();
+    if (toLoad.isEmpty) return;
+
+    final latest = await ChatService.getLatestChannelMessageTimestamps(toLoad);
+    final merged = {...state.channelLatestMessageTimes};
+    for (final id in toLoad) {
+      merged[id] = latest[id] ?? _emptyChannelActivity;
+    }
+    state = state.copyWith(channelLatestMessageTimes: merged);
   }
 
   Future<void> markChannelRead({
@@ -386,27 +438,24 @@ class ChatNotifier extends Notifier<ChatState> {
 
   int unreadCount(String channelId) {
     final messages = state.channelMessages[channelId] ?? [];
-    if (messages.isEmpty) return 0;
     final lastRead = state.channelReads[channelId];
-    if (lastRead == null) return messages.length;
-    return messages
-        .where(
-          (m) => DateTime.fromMillisecondsSinceEpoch(
-            m.createdAt,
-          ).isAfter(lastRead),
-        )
-        .length;
+    final latest = state.channelLatestMessageTimes[channelId];
+    return countUnreadMessages(
+      loadedMessages: messages,
+      lastReadAt: lastRead,
+      latestMessageAt: latest == _emptyChannelActivity ? null : latest,
+    );
   }
 
   bool hasUnread(String channelId) {
     final messages = state.channelMessages[channelId] ?? [];
-    if (messages.isEmpty) return false;
     final lastRead = state.channelReads[channelId];
-    if (lastRead == null) return true; // never read
-    final lastMessageTime = DateTime.fromMillisecondsSinceEpoch(
-      messages.last.createdAt,
+    final latest = state.channelLatestMessageTimes[channelId];
+    return hasUnreadMessages(
+      loadedMessages: messages,
+      lastReadAt: lastRead,
+      latestMessageAt: latest == _emptyChannelActivity ? null : latest,
     );
-    return lastMessageTime.isAfter(lastRead);
   }
 
   void unsubscribeAll() {
@@ -442,6 +491,22 @@ class ChatNotifier extends Notifier<ChatState> {
         ),
       )
       .toList();
+
+  Map<String, DateTime> _mergeLatestMessageTime(
+    Map<String, DateTime> existing,
+    String channelId,
+    DateTime createdAt, {
+    bool replace = false,
+  }) {
+    if (createdAt == _emptyChannelActivity) {
+      return {...existing, channelId: createdAt};
+    }
+    final current = existing[channelId];
+    if (!replace && current != null && current.isAfter(createdAt)) {
+      return existing;
+    }
+    return {...existing, channelId: createdAt};
+  }
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(
