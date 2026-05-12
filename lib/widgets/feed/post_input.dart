@@ -67,7 +67,6 @@ class _ImagePreview extends StatelessWidget {
 
 class _PostInputState extends ConsumerState<PostInput>
     with SingleTickerProviderStateMixin {
-  static const String _draftKey = '@post_draft';
   static const int _maxChars = 500;
   static const int _warnChars = 400;
 
@@ -281,6 +280,12 @@ class _PostInputState extends ConsumerState<PostInput>
 
   // ── Drafts ─────────────────────────────────────────────────
 
+  String get _draftKey {
+    final residentId = ref.read(residentProvider).resident?.id ?? 'anon';
+    final worldId = _selectedWorldId ?? widget.worldId;
+    return '@post_draft:$residentId:$worldId';
+  }
+
   Future<void> _loadDraft() async {
     final raw = await StorageService.getString(_draftKey);
     if (raw == null || raw.isEmpty) return;
@@ -328,7 +333,7 @@ class _PostInputState extends ConsumerState<PostInput>
 
   // ── Submit ─────────────────────────────────────────────────
 
-  void _submit() {
+  Future<void> _submit() async {
     final content = _controller.text.trim();
     if (content.isEmpty) return;
 
@@ -336,19 +341,8 @@ class _PostInputState extends ConsumerState<PostInput>
     if (resident == null) return;
 
     final targetWorldId = _selectedWorldId ?? widget.worldId;
-
-    ref
-        .read(postProvider.notifier)
-        .addPost(
-          worldId: targetWorldId,
-          residentId: resident.id,
-          residentName: resident.name,
-          residentAvatar: resident.avatarUrl,
-          content: content,
-          imageUri: _imageUri,
-          tierValue: resident.tier.value,
-          isAnnouncement: _isAnnouncement,
-        );
+    final imageUri = _imageUri;
+    final isAnnouncement = _isAnnouncement;
 
     _controller.clear();
     _sendAnim.forward(from: 0);
@@ -359,7 +353,32 @@ class _PostInputState extends ConsumerState<PostInput>
       _sent = true;
       _hasDraft = false;
     });
-    StorageService.remove(_draftKey);
+    await StorageService.remove(_draftKey);
+
+    try {
+      await ref
+          .read(postProvider.notifier)
+          .addPost(
+            worldId: targetWorldId,
+            residentId: resident.id,
+            residentName: resident.name,
+            residentAvatar: resident.avatarUrl,
+            content: content,
+            imageUri: imageUri,
+            tierValue: resident.tier.value,
+            isAnnouncement: isAnnouncement,
+          );
+    } catch (_) {
+      if (mounted) {
+        setState(() => _sent = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to publish post. Please try again.'),
+          ),
+        );
+      }
+      return;
+    }
 
     Future.delayed(const Duration(milliseconds: 600), () {
       if (mounted) setState(() => _sent = false);
@@ -610,7 +629,9 @@ class _PostInputState extends ConsumerState<PostInput>
                     // Save draft button
                     IconButton(
                       icon: const Icon(Icons.drafts_outlined),
-                      onPressed: _controller.text.trim().isNotEmpty
+                      onPressed:
+                          _controller.text.trim().isNotEmpty ||
+                              _imageUri != null
                           ? _saveDraft
                           : null,
                       tooltip: 'Save draft',

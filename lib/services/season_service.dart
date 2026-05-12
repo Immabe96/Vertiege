@@ -4,10 +4,11 @@ import '../models/world.dart';
 class SeasonService {
   SeasonService._();
 
-  /// Current season info (mock data for now).
+  /// Current season info derived from the available world activity snapshot.
   static Season getCurrentSeason({List<World>? worlds}) {
-    final startDate = DateTime.now().subtract(const Duration(days: 7));
-    final endDate = DateTime.now().add(const Duration(days: 21));
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, 1);
+    final endDate = DateTime(now.year, now.month + 1, 1);
 
     final scores = worlds != null && worlds.isNotEmpty
         ? getRankings(worlds)
@@ -15,7 +16,7 @@ class SeasonService {
 
     return Season(
       id: 'season-1',
-      name: 'Season of the Forge',
+      name: 'Current Season',
       startDate: startDate,
       endDate: endDate,
       isActive: true,
@@ -33,14 +34,16 @@ class SeasonService {
     return (activity * 2) + (memberGrowth * 10) + (achievements * 5);
   }
 
-  /// Derive mock seasonal stats from a [World] instance.
+  /// Derive seasonal stats from fields already tracked by the app.
   static SeasonWorldScore scoreFromWorld(World world) {
     final activity = world.activityScore;
-    // Mock member growth: a fraction of member count as if joined this season
-    final memberGrowth = (world.memberCount * 0.3).round();
-    // Mock achievements: correlated with prestige
-    final achievements = (world.prestige * 0.4).round();
-    final composite = calculateCompositeScore(activity, memberGrowth, achievements);
+    final memberGrowth = 0;
+    final achievements = 0;
+    final composite = calculateCompositeScore(
+      activity,
+      memberGrowth,
+      achievements,
+    );
 
     return SeasonWorldScore(
       worldId: world.id,
@@ -56,9 +59,7 @@ class SeasonService {
   /// Get ranked worlds for current season.
   /// Returns top 10 entries sorted by composite score descending.
   static List<SeasonWorldScore> getRankings(List<World> worlds) {
-    final scored = worlds
-        .map(scoreFromWorld)
-        .toList()
+    final scored = worlds.map(scoreFromWorld).toList()
       ..sort((a, b) => b.compositeScore.compareTo(a.compositeScore));
 
     final top10 = scored.take(10).toList();

@@ -136,6 +136,8 @@ class ChatService {
     required String senderName,
     required String worldId,
     required String content,
+    String? senderAvatar,
+    String? imageUrl,
   }) async {
     if (!isSupabaseConfigured()) throw Exception('Supabase not configured');
     final client = getSupabase();
@@ -144,16 +146,32 @@ class ChatService {
     final moderationResult = ModerationFilter.checkContent(content);
     final isFlagged = moderationResult != null;
 
-    await client.from('channel_messages').insert({
+    final payload = <String, dynamic>{
       'id': generateId(),
       'channel_id': channelId,
       'sender_id': senderId,
       'sender_name': senderName,
+      'sender_avatar': senderAvatar,
       'world_id': worldId,
       'content': content,
+      'image_url': imageUrl,
       'flagged': isFlagged,
       'created_at': DateTime.now().toIso8601String(),
-    });
+    };
+    try {
+      await client.from('channel_messages').insert(payload);
+    } on PostgrestException catch (e) {
+      final missingOptionalColumns =
+          e.message.contains('sender_avatar') ||
+          e.message.contains('image_url') ||
+          e.message.contains('flagged');
+      if (!missingOptionalColumns) rethrow;
+      final fallbackPayload = Map<String, dynamic>.from(payload)
+        ..remove('sender_avatar')
+        ..remove('image_url')
+        ..remove('flagged');
+      await client.from('channel_messages').insert(fallbackPayload);
+    }
 
     // Broadcast @AllResidents notifications
     if (TextParser.containsAllResidents(content)) {
@@ -365,19 +383,29 @@ class ChatService {
     required String worldId,
     required String content,
     required String threadId,
+    String? senderAvatar,
   }) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    await client.from('channel_messages').insert({
+    final payload = <String, dynamic>{
       'id': generateId(),
       'channel_id': channelId,
       'sender_id': senderId,
       'sender_name': senderName,
+      'sender_avatar': senderAvatar,
       'world_id': worldId,
       'content': content,
       'thread_id': threadId,
       'created_at': DateTime.now().toIso8601String(),
-    });
+    };
+    try {
+      await client.from('channel_messages').insert(payload);
+    } on PostgrestException catch (e) {
+      if (!e.message.contains('sender_avatar')) rethrow;
+      await client
+          .from('channel_messages')
+          .insert(Map<String, dynamic>.from(payload)..remove('sender_avatar'));
+    }
     // Increment thread count on parent
     await client.rpc('increment_thread_count', params: {'msg_id': threadId});
   }

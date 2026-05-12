@@ -112,16 +112,25 @@ class PostNotifier extends Notifier<PostState> {
     state = state.copyWith(posts: [post, ...state.posts]);
     _persist();
 
-    await PostService.createPost(
-      residentId: residentId,
-      residentName: residentName,
-      worldId: worldId,
-      content: content,
-      imageUrl: cloudImageUrl,
-      residentAvatar: residentAvatar,
-      tierAtPosting: tierValue,
-      isAnnouncement: isAnnouncement,
-    );
+    try {
+      await PostService.createPost(
+        residentId: residentId,
+        residentName: residentName,
+        worldId: worldId,
+        content: content,
+        imageUrl: cloudImageUrl,
+        residentAvatar: residentAvatar,
+        tierAtPosting: tierValue,
+        isAnnouncement: isAnnouncement,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        posts: state.posts.where((p) => p.id != post.id).toList(),
+        error: 'Failed to publish post',
+      );
+      _persist();
+      rethrow;
+    }
 
     ref.read(residentProvider.notifier).addRep(worldId, 5);
     ref.read(questProvider.notifier).onPostCreated();

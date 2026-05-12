@@ -36,7 +36,6 @@ final _iconChoices = const [
   (icon: Icons.code, id: 'code'),
 ];
 
-
 class WorldSettingsScreen extends ConsumerStatefulWidget {
   final String worldId;
 
@@ -87,8 +86,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   Future<void> _loadInvites() async {
     setState(() => _isLoadingInvites = true);
     try {
-      final invites =
-          await InviteService.getInvitesForWorld(widget.worldId);
+      final invites = await InviteService.getInvitesForWorld(widget.worldId);
       if (mounted) {
         setState(() {
           _invites = invites;
@@ -108,7 +106,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     setState(() => _isSaving = true);
 
     try {
-      ref.read(worldProvider.notifier).updateWorldSettings(
+      ref
+          .read(worldProvider.notifier)
+          .updateWorldSettings(
             worldId: widget.worldId,
             name: _nameController.text.trim(),
             description: _descController.text.trim(),
@@ -124,9 +124,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save settings: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save settings: $e')));
       }
     }
   }
@@ -147,11 +147,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   }
 
   Future<void> _muteMember(String residentId, String name, int hours) async {
-    ref.read(residentProvider.notifier).muteResident(widget.worldId, residentId, durationHours: hours);
+    ref
+        .read(residentProvider.notifier)
+        .muteResident(widget.worldId, residentId, durationHours: hours);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$name muted for $hours hour(s)')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$name muted for $hours hour(s)')));
     }
   }
 
@@ -160,11 +162,18 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Ban $name?'),
-        content: const Text('They will be removed from the world and cannot rejoin.'),
+        content: const Text(
+          'They will be removed from the world and cannot rejoin.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Ban'),
           ),
@@ -172,9 +181,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
       ),
     );
     if (confirmed == true) {
-      ref.read(residentProvider.notifier).banResident(widget.worldId, residentId);
+      ref
+          .read(residentProvider.notifier)
+          .banResident(widget.worldId, residentId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name banned')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$name banned')));
         _loadMembers();
       }
     }
@@ -182,9 +195,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
   void _deleteChannel(String channelId, String name) {
     ref.read(channelProvider.notifier).deleteChannel(widget.worldId, channelId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Channel "$name" deleted')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Channel "$name" deleted')));
   }
 
   void _renameChannel(String channelId, String currentName) {
@@ -196,17 +209,20 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: _ghostInputDecoration(
-            hintText: 'New channel name',
-          ),
+          decoration: _ghostInputDecoration(hintText: 'New channel name'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
-                ref.read(channelProvider.notifier).renameChannel(widget.worldId, channelId, name);
+                ref
+                    .read(channelProvider.notifier)
+                    .renameChannel(widget.worldId, channelId, name);
                 Navigator.pop(ctx);
               }
             },
@@ -230,9 +246,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: _ghostInputDecoration(
-                hintText: 'Channel name',
-              ),
+              decoration: _ghostInputDecoration(hintText: 'Channel name'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -244,16 +258,23 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () {
               final name = nameController.text.trim();
               if (name.isNotEmpty) {
-                ref.read(channelProvider.notifier).createChannel(
-                  worldId: widget.worldId,
-                  name: name,
-                  description: descController.text.trim().isEmpty ? null : descController.text.trim(),
-                );
+                ref
+                    .read(channelProvider.notifier)
+                    .createChannel(
+                      worldId: widget.worldId,
+                      name: name,
+                      description: descController.text.trim().isEmpty
+                          ? null
+                          : descController.text.trim(),
+                    );
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Channel "$name" created')),
@@ -271,8 +292,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('No resident profile found.')),
+        const SnackBar(content: Text('No resident profile found.')),
       );
       return;
     }
@@ -339,16 +359,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     if (confirmed == true && mounted) {
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
-        ref
-            .read(residentProvider.notifier)
-            .leaveWorld(widget.worldId);
+        ref.read(residentProvider.notifier).leaveWorld(widget.worldId);
       }
 
       context.go('/explore');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('World has been deleted.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('World has been deleted.')));
     }
   }
 
@@ -396,7 +414,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
               ),
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(Spacing.lg, 0, Spacing.lg, Spacing.lg),
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.lg,
+                    0,
+                    Spacing.lg,
+                    Spacing.lg,
+                  ),
                   child: BannerGenerator(
                     worldId: world.id,
                     worldName: world.name,
@@ -407,7 +430,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Banner Variant ${variant + 1} selected!'),
+                          content: Text(
+                            'Banner Variant ${variant + 1} selected!',
+                          ),
                           backgroundColor: AppColors.success,
                         ),
                       );
@@ -446,9 +471,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   Widget _fieldLabel(String text) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.tertiary,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.labelSmall?.copyWith(color: AppColors.tertiary),
     );
   }
 
@@ -482,9 +507,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final resident = ref.watch(residentProvider).resident;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('World Settings'),
-      ),
+      appBar: AppBar(title: const Text('World Settings')),
       body: world == null
           ? const GlassLoadingList()
           : Form(
@@ -533,8 +556,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             hintText: 'What is your world about?',
                             prefixIcon: const Icon(Icons.description),
                           ),
-                          textCapitalization:
-                              TextCapitalization.sentences,
+                          textCapitalization: TextCapitalization.sentences,
                           maxLines: 3,
                           maxLength: 500,
                           validator: (value) {
@@ -557,8 +579,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           spacing: Spacing.sm,
                           runSpacing: Spacing.sm,
                           children: _iconChoices.map((choice) {
-                            final isSelected =
-                                _selectedIcon == choice.id;
+                            final isSelected = _selectedIcon == choice.id;
                             return ChoiceChip(
                               label: Icon(
                                 choice.icon,
@@ -570,15 +591,15 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               selected: isSelected,
                               onSelected: (selected) {
                                 if (selected) {
-                                  setState(
-                                      () => _selectedIcon = choice.id);
+                                  setState(() => _selectedIcon = choice.id);
                                 }
                               },
                               avatar: isSelected
-                                  ? Icon(Icons.check_circle,
+                                  ? Icon(
+                                      Icons.check_circle,
                                       size: 16,
-                                      color:
-                                          colorScheme.onPrimaryContainer)
+                                      color: colorScheme.onPrimaryContainer,
+                                    )
                                   : null,
                               selectedColor: colorScheme.primaryContainer,
                               visualDensity: VisualDensity.compact,
@@ -605,7 +626,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                   )
                                 : const Icon(Icons.save),
                             label: Text(
-                                _isSaving ? 'SAVING...' : 'PUBLISH CHANGES'),
+                              _isSaving ? 'SAVING...' : 'PUBLISH CHANGES',
+                            ),
                           ),
                         ),
                       ],
@@ -698,8 +720,10 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         if (_isLoadingMembers)
                           const Center(child: GlassLoadingCard())
                         else if (_members.isEmpty)
-                          Text('No members found',
-                              style: theme.textTheme.bodyMedium)
+                          Text(
+                            'No members found',
+                            style: theme.textTheme.bodyMedium,
+                          )
                         else
                           ..._members.map((m) {
                             final residentId =
@@ -708,24 +732,30 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 m['resident_name'] as String? ?? 'Member';
                             final rep = m['rep'] as int? ?? 0;
                             final standing = getStanding(rep);
-                            final isSovereign =
-                                residentId == world.sovereignId;
-                            final isCurrentUser =
-                                residentId == resident?.id;
-                            final canMod = resident != null &&
+                            final isSovereign = residentId == world.sovereignId;
+                            final isCurrentUser = residentId == resident?.id;
+                            final canMod =
+                                resident != null &&
                                 WorldPermissions.canModerate(
-                                    resident, widget.worldId, world.sovereignId);
+                                  resident,
+                                  widget.worldId,
+                                  world.sovereignId,
+                                );
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: Spacing.sm),
+                              padding: const EdgeInsets.only(
+                                bottom: Spacing.sm,
+                              ),
                               child: GlassPanel(
                                 padding: const EdgeInsets.all(Spacing.md),
-                                borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                                borderRadius: BorderRadius.circular(
+                                  RadiusTokens.xl,
+                                ),
                                 child: Row(
                                   children: [
                                     CircleAvatar(
-                                      child: Text(name
-                                          .substring(0, 1)
-                                          .toUpperCase()),
+                                      child: Text(
+                                        name.substring(0, 1).toUpperCase(),
+                                      ),
                                     ),
                                     const SizedBox(width: Spacing.md),
                                     Expanded(
@@ -741,35 +771,41 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: theme
-                                                      .textTheme.bodyMedium
+                                                      .textTheme
+                                                      .bodyMedium
                                                       ?.copyWith(
-                                                    fontWeight:
-                                                        FontWeights.semiBold,
-                                                    color: AppColors.ink,
-                                                  ),
+                                                        fontWeight: FontWeights
+                                                            .semiBold,
+                                                        color: AppColors.ink,
+                                                      ),
                                                 ),
                                               ),
                                               if (isSovereign) ...[
-                                                const SizedBox(width: Spacing.sm),
+                                                const SizedBox(
+                                                  width: Spacing.sm,
+                                                ),
                                                 Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: Spacing.sm,
-                                                    vertical: 2,
-                                                  ),
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: Spacing.sm,
+                                                        vertical: 2,
+                                                      ),
                                                   decoration: BoxDecoration(
                                                     color: AppColors.tertiary,
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            RadiusTokens.pill),
+                                                          RadiusTokens.pill,
+                                                        ),
                                                   ),
                                                   child: Text(
                                                     'SOVEREIGN',
                                                     style: theme
-                                                        .textTheme.labelSmall
+                                                        .textTheme
+                                                        .labelSmall
                                                         ?.copyWith(
-                                                      color:
-                                                          AppColors.onTertiary,
-                                                    ),
+                                                          color: AppColors
+                                                              .onTertiary,
+                                                        ),
                                                   ),
                                                 ),
                                               ],
@@ -779,36 +815,42 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                           Row(
                                             children: [
                                               Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: Spacing.sm,
-                                                  vertical: 1,
-                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: Spacing.sm,
+                                                      vertical: 1,
+                                                    ),
                                                 decoration: BoxDecoration(
                                                   color: tierStandingColor(
-                                                          standing.level)
-                                                      .withValues(alpha: 0.15),
+                                                    standing.level,
+                                                  ).withValues(alpha: 0.15),
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                          RadiusTokens.pill),
+                                                        RadiusTokens.pill,
+                                                      ),
                                                 ),
                                                 child: Text(
                                                   standing.title,
                                                   style: theme
-                                                      .textTheme.labelSmall
+                                                      .textTheme
+                                                      .labelSmall
                                                       ?.copyWith(
-                                                    color: tierStandingColor(
-                                                        standing.level),
-                                                  ),
+                                                        color:
+                                                            tierStandingColor(
+                                                              standing.level,
+                                                            ),
+                                                      ),
                                                 ),
                                               ),
                                               const SizedBox(width: Spacing.sm),
                                               Text(
                                                 'Rep $rep',
                                                 style: theme
-                                                    .textTheme.labelSmall
+                                                    .textTheme
+                                                    .labelSmall
                                                     ?.copyWith(
-                                                  color: AppColors.tertiary,
-                                                ),
+                                                      color: AppColors.tertiary,
+                                                    ),
                                               ),
                                             ],
                                           ),
@@ -817,30 +859,34 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                     ),
                                     if (!isCurrentUser && canMod)
                                       PopupMenuButton<String>(
-                                        icon: Icon(Icons.more_vert,
-                                            size: 18,
-                                            color: AppColors.outline),
+                                        icon: Icon(
+                                          Icons.more_vert,
+                                          size: 18,
+                                          color: AppColors.outline,
+                                        ),
                                         onSelected: (action) {
                                           switch (action) {
                                             case 'mute1':
                                               _muteMember(residentId, name, 1);
                                             case 'mute24':
-                                              _muteMember(
-                                                  residentId, name, 24);
+                                              _muteMember(residentId, name, 24);
                                             case 'ban':
                                               _banMember(residentId, name);
                                           }
                                         },
                                         itemBuilder: (ctx) => [
                                           const PopupMenuItem(
-                                              value: 'mute1',
-                                              child: Text('Mute 1 hour')),
+                                            value: 'mute1',
+                                            child: Text('Mute 1 hour'),
+                                          ),
                                           const PopupMenuItem(
-                                              value: 'mute24',
-                                              child: Text('Mute 24 hours')),
+                                            value: 'mute24',
+                                            child: Text('Mute 24 hours'),
+                                          ),
                                           const PopupMenuItem(
-                                              value: 'ban',
-                                              child: Text('Ban')),
+                                            value: 'ban',
+                                            child: Text('Ban'),
+                                          ),
                                         ],
                                       ),
                                   ],
@@ -862,19 +908,34 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   // ── Ranks ────────────────────────────────────────
                   if (resident?.id == world.sovereignId)
-                    _RanksSection(worldId: widget.worldId, worldWorldId: widget.worldId),
+                    _RanksSection(
+                      worldId: widget.worldId,
+                      worldWorldId: widget.worldId,
+                    ),
 
                   const SizedBox(height: Spacing.md),
 
                   // ── Realm Audit ──────────────────────────────────
                   if (resident?.id == world.sovereignId)
                     ListTile(
-                      leading: const Icon(Icons.history, color: AppColors.tertiary),
+                      leading: const Icon(
+                        Icons.history,
+                        color: AppColors.tertiary,
+                      ),
                       title: const Text('Realm Audit'),
-                      subtitle: const Text('View moderation history and action logs'),
-                      trailing: const Icon(Icons.chevron_right, color: AppColors.outline),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.xl)),
-                      onTap: () => context.push('/audit-log/${widget.worldId}?name=${Uri.encodeComponent(world.name)}'),
+                      subtitle: const Text(
+                        'View moderation history and action logs',
+                      ),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.outline,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                      ),
+                      onTap: () => context.push(
+                        '/audit-log/${widget.worldId}?name=${Uri.encodeComponent(world.name)}',
+                      ),
                     ),
 
                   const SizedBox(height: Spacing.md),
@@ -884,8 +945,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     padding: const EdgeInsets.all(Spacing.lg),
                     decoration: BoxDecoration(
                       color: AppColors.errorContainer,
-                      borderRadius:
-                          BorderRadius.circular(RadiusTokens.xl),
+                      borderRadius: BorderRadius.circular(RadiusTokens.xl),
                       border: Border.all(
                         color: AppColors.error.withValues(alpha: 0.3),
                       ),
@@ -895,13 +955,17 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded,
-                                color: AppColors.error, size: IconSizes.md),
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: AppColors.error,
+                              size: IconSizes.md,
+                            ),
                             const SizedBox(width: Spacing.sm),
                             Text(
                               'Danger Zone',
                               style: theme.textTheme.titleMedium?.copyWith(
-                                  color: AppColors.error),
+                                color: AppColors.error,
+                              ),
                             ),
                           ],
                         ),
@@ -920,10 +984,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.error,
-                              side: const BorderSide(
-                                  color: AppColors.error),
+                              side: const BorderSide(color: AppColors.error),
                             ),
-                            onPressed: resident?.id == world.sovereignId ? _deleteWorld : null,
+                            onPressed: resident?.id == world.sovereignId
+                                ? _deleteWorld
+                                : null,
                             icon: const Icon(Icons.delete_forever),
                             label: const Text('Delete World'),
                           ),
@@ -962,13 +1027,13 @@ class _BoostWorldCard extends ConsumerWidget {
     final currentThreshold = worldLevelThresholds[currentLevel] ?? 0;
     final progress = world.activityScore - currentThreshold;
     final range = nextThreshold - currentThreshold;
-    final progressFraction =
-        range > 0 ? (progress / range).clamp(0.0, 1.0) : 1.0;
+    final progressFraction = range > 0
+        ? (progress / range).clamp(0.0, 1.0)
+        : 1.0;
     final isMaxLevel = currentLevel >= 10;
 
     final enabled = StoreService.isEnabled;
-    final canBoost =
-        enabled && world.boostsRemaining > 0 && !isMaxLevel;
+    final canBoost = enabled && world.boostsRemaining > 0 && !isMaxLevel;
 
     return GlassPanel(
       padding: const EdgeInsets.all(Spacing.lg),
@@ -977,11 +1042,13 @@ class _BoostWorldCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.rocket_launch,
-                  color: AppColors.tertiary, size: IconSizes.md),
+              Icon(
+                Icons.rocket_launch,
+                color: AppColors.tertiary,
+                size: IconSizes.md,
+              ),
               const SizedBox(width: Spacing.sm),
-              Text('Boost World',
-                  style: theme.textTheme.titleMedium),
+              Text('Boost World', style: theme.textTheme.titleMedium),
             ],
           ),
           const SizedBox(height: Spacing.sm),
@@ -1003,8 +1070,7 @@ class _BoostWorldCard extends ConsumerWidget {
                 ),
                 decoration: BoxDecoration(
                   color: cs.primaryContainer,
-                  borderRadius:
-                      BorderRadius.circular(RadiusTokens.pill),
+                  borderRadius: BorderRadius.circular(RadiusTokens.pill),
                 ),
                 child: Text(
                   'Level $currentLevel',
@@ -1016,9 +1082,12 @@ class _BoostWorldCard extends ConsumerWidget {
               ),
               const SizedBox(width: Spacing.sm),
               if (isMaxLevel)
-                Text('Max level reached',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.gold))
+                Text(
+                  'Max level reached',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.gold,
+                  ),
+                )
               else
                 Expanded(
                   child: Text(
@@ -1035,8 +1104,7 @@ class _BoostWorldCard extends ConsumerWidget {
           // Progress bar
           if (!isMaxLevel)
             ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(RadiusTokens.input),
+              borderRadius: BorderRadius.circular(RadiusTokens.input),
               child: LinearProgressIndicator(
                 value: progressFraction,
                 minHeight: 6,
@@ -1062,7 +1130,7 @@ class _BoostWorldCard extends ConsumerWidget {
               Text(
                 enabled
                     ? '${world.boostsRemaining} of ${World.maxBoostsPerMonth} remaining'
-                    : 'Coming in release',
+                    : 'Store disabled in this build',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: enabled ? AppColors.outline : AppColors.error,
                   fontWeight: FontWeights.regular,
@@ -1082,15 +1150,11 @@ class _BoostWorldCard extends ConsumerWidget {
                   : null,
               icon: const Icon(Icons.rocket_launch, size: 20),
               label: Text(
-                enabled
-                    ? 'Boost World — \$4.99'
-                    : 'Boost (Available at Launch)',
+                enabled ? 'Boost World — \$4.99' : 'Boost unavailable',
               ),
               style: FilledButton.styleFrom(
-                backgroundColor:
-                    canBoost ? AppColors.gold : null,
-                foregroundColor:
-                    canBoost ? Colors.black : null,
+                backgroundColor: canBoost ? AppColors.gold : null,
+                foregroundColor: canBoost ? Colors.black : null,
               ),
             ),
           ),
@@ -1104,24 +1168,20 @@ class _BoostWorldCard extends ConsumerWidget {
     WidgetRef ref,
     World world,
   ) async {
-    final result =
-        await ref.read(worldProvider.notifier).boostWorld(worldId);
+    final result = await ref.read(worldProvider.notifier).boostWorld(worldId);
 
     if (!context.mounted) return;
 
     switch (result) {
       case StorePurchaseState.purchased:
-        final updated =
-            ref.read(worldProvider).worlds[worldId];
+        final updated = ref.read(worldProvider).worlds[worldId];
         final newLevel = updated != null
             ? getWorldLevel(updated.activityScore)
             : null;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              newLevel != null &&
-                      newLevel >
-                          getWorldLevel(world.activityScore)
+              newLevel != null && newLevel > getWorldLevel(world.activityScore)
                   ? 'Boost applied! World advanced to Level $newLevel!'
                   : 'Boost applied! +${World.boostActivityPoints} activity points.',
             ),
@@ -1130,8 +1190,8 @@ class _BoostWorldCard extends ConsumerWidget {
       case StorePurchaseState.error:
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text(
-                  'Boost purchase failed. Please try again.')),
+            content: Text('Boost purchase failed. Please try again.'),
+          ),
         );
       case StorePurchaseState.disabled:
         break;
@@ -1161,7 +1221,11 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
 
   Future<void> _load() async {
     final ranks = await RankService.fetchWorldRanks(widget.worldId);
-    if (mounted) setState(() { _ranks = ranks; _loading = false; });
+    if (mounted)
+      setState(() {
+        _ranks = ranks;
+        _loading = false;
+      });
   }
 
   void _showCreateDialog() {
@@ -1170,7 +1234,9 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceHigh,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RadiusTokens.full)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.full),
+        ),
         title: const Text('Create Rank'),
         content: TextField(
           controller: controller,
@@ -1178,7 +1244,10 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () async {
               final name = controller.text.trim();
@@ -1203,9 +1272,21 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
         children: [
           Row(
             children: [
-              const Icon(Icons.military_tech, color: AppColors.tertiary, size: IconSizes.md),
+              const Icon(
+                Icons.military_tech,
+                color: AppColors.tertiary,
+                size: IconSizes.md,
+              ),
               const SizedBox(width: Spacing.sm),
-              const Expanded(child: Text('Ranks', style: TextStyle(fontSize: FontSizes.headlineMd, fontWeight: FontWeights.bold))),
+              const Expanded(
+                child: Text(
+                  'Ranks',
+                  style: TextStyle(
+                    fontSize: FontSizes.headlineMd,
+                    fontWeight: FontWeights.bold,
+                  ),
+                ),
+              ),
               TextButton.icon(
                 onPressed: _showCreateDialog,
                 icon: const Icon(Icons.add, size: IconSizes.sm),
@@ -1217,30 +1298,37 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
           if (_loading)
             const Center(child: GlassLoadingCard())
           else if (_ranks.isEmpty)
-            const Text('No ranks yet. Create one to assign privileges.', style: TextStyle(color: AppColors.inkMuted))
+            const Text(
+              'No ranks yet. Create one to assign privileges.',
+              style: TextStyle(color: AppColors.inkMuted),
+            )
           else
-            ..._ranks.map((r) => ListTile(
-              dense: true,
-              leading: Container(
-                width: 16, height: 16,
-                decoration: BoxDecoration(
-                  color: _parseHex(r.colorHex),
-                  shape: BoxShape.circle,
+            ..._ranks.map(
+              (r) => ListTile(
+                dense: true,
+                leading: Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: _parseHex(r.colorHex),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                title: Text(r.name),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, size: IconSizes.sm),
+                  onPressed: () async {
+                    await RankService.deleteRank(r.id);
+                    _load();
+                  },
                 ),
               ),
-              title: Text(r.name),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline, size: IconSizes.sm),
-                onPressed: () async {
-                  await RankService.deleteRank(r.id);
-                  _load();
-                },
-              ),
-            )),
+            ),
         ],
       ),
     );
   }
 }
 
-Color _parseHex(String hex) => Color(int.parse('FF${hex.substring(1)}', radix: 16));
+Color _parseHex(String hex) =>
+    Color(int.parse('FF${hex.substring(1)}', radix: 16));

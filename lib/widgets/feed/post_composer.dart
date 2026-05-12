@@ -21,7 +21,6 @@ class PostComposer extends ConsumerStatefulWidget {
 
 class _PostComposerState extends ConsumerState<PostComposer>
     with SingleTickerProviderStateMixin {
-  static const String _draftKey = '@post_composer_draft';
   static const int _maxChars = 500;
   static const int _warnChars = 400;
 
@@ -62,6 +61,12 @@ class _PostComposerState extends ConsumerState<PostComposer>
     _focusNode.dispose();
     _sendAnim.dispose();
     super.dispose();
+  }
+
+  String get _draftKey {
+    final residentId = ref.read(residentProvider).resident?.id ?? 'anon';
+    final worldId = _selectedWorldId ?? 'default';
+    return '@post_composer_draft:$residentId:$worldId';
   }
 
   Future<void> _loadDraft() async {

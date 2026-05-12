@@ -29,10 +29,15 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
     final rankings = season.scores;
     final isLoaded = !worldState.isLoading;
 
-    // User's worlds (mocked for now — filter by sovereignId of current resident)
     final resident = ref.read(residentProvider).resident;
     final myWorlds = resident != null
-        ? allWorlds.where((w) => w.sovereignId == resident.id).toList()
+        ? allWorlds
+              .where(
+                (w) =>
+                    w.sovereignId == resident.id ||
+                    resident.joinedWorldIds.contains(w.id),
+              )
+              .toList()
         : <dynamic>[];
     final myRankedWorlds = rankings
         .where((s) => myWorlds.any((w) => w.id == s.worldId))
@@ -56,25 +61,17 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
           ? CustomScrollView(
               slivers: [
                 // ── Hero section ──────────────────────────────
-                SliverToBoxAdapter(
-                  child: _SeasonHero(season: season),
-                ),
+                SliverToBoxAdapter(child: _SeasonHero(season: season)),
 
                 // ── Progress bar ──────────────────────────────
-                SliverToBoxAdapter(
-                  child: _SeasonProgress(season: season),
-                ),
+                SliverToBoxAdapter(child: _SeasonProgress(season: season)),
 
                 // ── Countdown ─────────────────────────────────
-                SliverToBoxAdapter(
-                  child: _CountdownBanner(season: season),
-                ),
+                SliverToBoxAdapter(child: _CountdownBanner(season: season)),
 
                 // ── Podium (top 3) ────────────────────────────
                 if (rankings.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: _PodiumSection(rankings: rankings),
-                  ),
+                  SliverToBoxAdapter(child: _PodiumSection(rankings: rankings)),
 
                 // ── Full rankings header ──────────────────────
                 if (rankings.length > 3)
@@ -85,16 +82,10 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                 // ── Rankings list (rest of top 10) ────────────
                 if (rankings.length > 3)
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final score = rankings[index + 3];
-                        return _RankingRow(
-                          score: score,
-                          index: index + 3,
-                        );
-                      },
-                      childCount: rankings.length - 3,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final score = rankings[index + 3];
+                      return _RankingRow(score: score, index: index + 3);
+                    }, childCount: rankings.length - 3),
                   ),
 
                 // ── My Worlds section ─────────────────────────
@@ -103,16 +94,10 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                     child: _SectionHeader(title: 'Your Worlds'),
                   ),
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final score = myRankedWorlds[index];
-                        return _RankingRow(
-                          score: score,
-                          index: index,
-                        );
-                      },
-                      childCount: myRankedWorlds.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final score = myRankedWorlds[index];
+                      return _RankingRow(score: score, index: index);
+                    }, childCount: myRankedWorlds.length),
                   ),
                 ],
 
@@ -129,7 +114,11 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
   Widget _buildLoading() {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md, Spacing.sm, Spacing.md, Spacing.sm),
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+      ),
       itemCount: 6,
       itemBuilder: (_, index) => Padding(
         padding: const EdgeInsets.only(bottom: Spacing.sm + 4),
@@ -161,7 +150,11 @@ class _SeasonHero extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
-        Spacing.xl, Spacing.section + Spacing.xxl, Spacing.xl, Spacing.xl),
+        Spacing.xl,
+        Spacing.section + Spacing.xxl,
+        Spacing.xl,
+        Spacing.xl,
+      ),
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.topCenter,
@@ -208,7 +201,7 @@ class _SeasonHero extends StatelessWidget {
           FadeIn(
             delayMs: 180,
             child: Text(
-              'Worlds compete for dominance in 4-week seasonal competitions',
+              'World activity is ranked from live activity signals',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: FontSizes.bodyMd,
@@ -235,7 +228,10 @@ class _SeasonProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.xl, vertical: Spacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.xl,
+        vertical: Spacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -267,7 +263,9 @@ class _SeasonProgress extends StatelessWidget {
               value: season.progress,
               minHeight: 6,
               backgroundColor: AppColors.glassBorder,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.tertiary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.tertiary,
+              ),
             ),
           ),
         ],
@@ -291,13 +289,13 @@ class _CountdownBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.lg, vertical: Spacing.md),
+          horizontal: Spacing.lg,
+          vertical: Spacing.md,
+        ),
         decoration: BoxDecoration(
           color: AppColors.tertiary.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(RadiusTokens.xl),
-          border: Border.all(
-            color: AppColors.tertiary.withValues(alpha: 0.15),
-          ),
+          border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.15)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -345,7 +343,11 @@ class _PodiumSection extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md, Spacing.xl, Spacing.md, Spacing.md),
+        Spacing.md,
+        Spacing.xl,
+        Spacing.md,
+        Spacing.md,
+      ),
       child: Column(
         children: [
           _SectionHeader(title: 'Leaderboard'),
@@ -360,11 +362,21 @@ class _PodiumSection extends StatelessWidget {
               return Expanded(
                 child: _PodiumCard(
                   score: score,
-                  height: isGold ? 220.0 : isSilver ? 180.0 : 150.0,
-                  medalColor:
-                      isGold ? AppColors.tertiary : isSilver ? AppColors.silver : AppColors.bronze,
-                  medalIcon:
-                      isGold ? Icons.emoji_events : isSilver ? Icons.workspace_premium : Icons.military_tech,
+                  height: isGold
+                      ? 220.0
+                      : isSilver
+                      ? 180.0
+                      : 150.0,
+                  medalColor: isGold
+                      ? AppColors.tertiary
+                      : isSilver
+                      ? AppColors.silver
+                      : AppColors.bronze,
+                  medalIcon: isGold
+                      ? Icons.emoji_events
+                      : isSilver
+                      ? Icons.workspace_premium
+                      : Icons.military_tech,
                 ),
               );
             }).toList(),
@@ -403,9 +415,7 @@ class _PodiumCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.glassBackground,
             borderRadius: BorderRadius.circular(RadiusTokens.xl),
-            border: Border.all(
-              color: medalColor.withValues(alpha: 0.3),
-            ),
+            border: Border.all(color: medalColor.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
                 color: medalColor.withValues(alpha: 0.12),
@@ -476,7 +486,11 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md, Spacing.sm + 4, Spacing.md, Spacing.xs),
+        Spacing.md,
+        Spacing.sm + 4,
+        Spacing.md,
+        Spacing.xs,
+      ),
       child: Row(
         children: [
           Container(
@@ -533,12 +547,16 @@ class _RankingRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md, vertical: Spacing.xs),
+        horizontal: Spacing.md,
+        vertical: Spacing.xs,
+      ),
       child: GestureDetector(
         onTap: () => context.push('/explore/${score.worldId}'),
         child: GlassPanel(
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.lg, vertical: Spacing.md),
+            horizontal: Spacing.lg,
+            vertical: Spacing.md,
+          ),
           borderRadius: BorderRadius.circular(RadiusTokens.xl),
           child: Row(
             children: [
@@ -551,7 +569,9 @@ class _RankingRow extends StatelessWidget {
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: FontSizes.headlineMd,
                     fontWeight: FontWeights.bold,
-                    color: score.rank <= 3 ? AppColors.tertiary : AppColors.inkMuted,
+                    color: score.rank <= 3
+                        ? AppColors.tertiary
+                        : AppColors.inkMuted,
                   ),
                 ),
               ),
@@ -563,9 +583,7 @@ class _RankingRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: worldAccent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                  border: Border.all(
-                    color: worldAccent.withValues(alpha: 0.2),
-                  ),
+                  border: Border.all(color: worldAccent.withValues(alpha: 0.2)),
                 ),
                 child: Icon(worldIcon, size: IconSizes.md, color: worldAccent),
               ),
@@ -587,7 +605,7 @@ class _RankingRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Activity: ${score.activityScore}  |  Growth: +${score.memberGrowth}  |  Achievements: ${score.achievementCount}',
+                      'Activity: ${score.activityScore}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -613,7 +631,11 @@ class _RankingRow extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(_trendIcon(), size: IconSizes.xs, color: _trendColor()),
+                      Icon(
+                        _trendIcon(),
+                        size: IconSizes.xs,
+                        color: _trendColor(),
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         'pts',

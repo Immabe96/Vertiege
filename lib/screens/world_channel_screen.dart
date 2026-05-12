@@ -55,7 +55,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     super.initState();
     final notifier = ref.read(chatProvider.notifier);
     final resident = ref.read(residentProvider).resident;
-    notifier.loadChannelMessages(widget.channelId);
+    notifier.loadChannelMessages(widget.channelId, force: true);
     notifier.subscribeToChannel(widget.channelId);
     if (resident != null) {
       notifier.markChannelRead(
@@ -114,7 +114,13 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
           senderName: resident.name,
           senderAvatar: resident.avatarUrl,
           content: content,
-        );
+        )
+        .catchError((_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to send message.')),
+          );
+        });
     _controller.clear();
     _scrollToBottom();
   }

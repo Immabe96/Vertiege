@@ -52,7 +52,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     super.initState();
     final roomId = widget.roomId;
     final notifier = ref.read(chatProvider.notifier);
-    notifier.loadDmMessages(roomId);
+    notifier.loadDmMessages(roomId, force: true);
     notifier.subscribeToDm(roomId);
 
     _scrollController.addListener(_onScroll);

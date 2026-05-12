@@ -26,14 +26,13 @@ class ChatState {
     Map<String, List<ChannelMessage>>? channelMessages,
     Map<String, DateTime>? channelReads,
     bool? isLoadingRooms,
-  }) =>
-      ChatState(
-        dmRooms: dmRooms ?? this.dmRooms,
-        dmMessages: dmMessages ?? this.dmMessages,
-        channelMessages: channelMessages ?? this.channelMessages,
-        channelReads: channelReads ?? this.channelReads,
-        isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
-      );
+  }) => ChatState(
+    dmRooms: dmRooms ?? this.dmRooms,
+    dmMessages: dmMessages ?? this.dmMessages,
+    channelMessages: channelMessages ?? this.channelMessages,
+    channelReads: channelReads ?? this.channelReads,
+    isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
+  );
 }
 
 class ChatNotifier extends Notifier<ChatState> {
@@ -55,8 +54,9 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(isLoadingRooms: true);
 
     try {
-      final rooms = await ChatService.getRooms(residentId)
-          .timeout(const Duration(seconds: 5));
+      final rooms = await ChatService.getRooms(
+        residentId,
+      ).timeout(const Duration(seconds: 5));
       state = state.copyWith(dmRooms: rooms, isLoadingRooms: false);
     } catch (_) {
       state = state.copyWith(isLoadingRooms: false);
@@ -66,8 +66,8 @@ class ChatNotifier extends Notifier<ChatState> {
   List<ChannelMessage> dmMessagesFor(String roomId) =>
       state.dmMessages[roomId] ?? [];
 
-  Future<void> loadDmMessages(String roomId) async {
-    if (state.dmMessages.containsKey(roomId)) return;
+  Future<void> loadDmMessages(String roomId, {bool force = false}) async {
+    if (!force && state.dmMessages.containsKey(roomId)) return;
     final msgs = await ChatService.getMessages(roomId);
     state = state.copyWith(
       dmMessages: {...state.dmMessages, roomId: _toChannelMessages(msgs)},
@@ -103,7 +103,10 @@ class ChatNotifier extends Notifier<ChatState> {
 
     final existing = state.dmMessages[roomId] ?? [];
     state = state.copyWith(
-      dmMessages: {...state.dmMessages, roomId: [...existing, msg]},
+      dmMessages: {
+        ...state.dmMessages,
+        roomId: [...existing, msg],
+      },
     );
 
     try {
@@ -116,9 +119,8 @@ class ChatNotifier extends Notifier<ChatState> {
         imageUrl: durableImageUrl,
       );
     } catch (_) {
-      final reverted = state.dmMessages[roomId]
-              ?.where((m) => m.id != msg.id)
-              .toList() ??
+      final reverted =
+          state.dmMessages[roomId]?.where((m) => m.id != msg.id).toList() ??
           const <ChannelMessage>[];
       state = state.copyWith(
         dmMessages: {...state.dmMessages, roomId: reverted},
@@ -129,7 +131,10 @@ class ChatNotifier extends Notifier<ChatState> {
 
   // ── Shared realtime subscription helper ──────────────────
 
-  static ChannelMessage _parseRealtimeMessage(Map<String, dynamic> data, String roomId) {
+  static ChannelMessage _parseRealtimeMessage(
+    Map<String, dynamic> data,
+    String roomId,
+  ) {
     return ChannelMessage(
       id: data['id'] ?? '',
       channelId: roomId,
@@ -142,7 +147,9 @@ class ChatNotifier extends Notifier<ChatState> {
       threadId: data['thread_id'],
       threadCount: data['thread_count'] ?? 0,
       isThreadStarter: data['is_thread_starter'] ?? false,
-      createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
+      createdAt:
+          DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ??
+          0,
     );
   }
 
@@ -150,8 +157,13 @@ class ChatNotifier extends Notifier<ChatState> {
     required String roomId,
     required Map<String, RealtimeChannel> subscriptions,
     required Map<String, List<ChannelMessage>> Function() getMessageMap,
-    required ChatState Function(Map<String, List<ChannelMessage>> updatedMap) updateState,
-    required RealtimeChannel? Function(String, void Function(Map<String, dynamic>)) subscribe,
+    required ChatState Function(Map<String, List<ChannelMessage>> updatedMap)
+    updateState,
+    required RealtimeChannel? Function(
+      String,
+      void Function(Map<String, dynamic>),
+    )
+    subscribe,
   }) {
     if (subscriptions.containsKey(roomId)) return;
     final channel = subscribe(roomId, (data) {
@@ -159,7 +171,10 @@ class ChatNotifier extends Notifier<ChatState> {
       final messages = getMessageMap();
       final existing = messages[roomId] ?? [];
       if (existing.any((m) => m.id == msg.id)) return;
-      state = updateState({...messages, roomId: [...existing, msg]});
+      state = updateState({
+        ...messages,
+        roomId: [...existing, msg],
+      });
     });
     if (channel != null) {
       subscriptions[roomId] = channel;
@@ -206,11 +221,17 @@ class ChatNotifier extends Notifier<ChatState> {
     await ChatService.pinMessage(messageId: messageId, isPinned: isPinned);
   }
 
-  Future<void> loadChannelMessages(String channelId) async {
-    if (state.channelMessages.containsKey(channelId)) return;
+  Future<void> loadChannelMessages(
+    String channelId, {
+    bool force = false,
+  }) async {
+    if (!force && state.channelMessages.containsKey(channelId)) return;
     final msgs = await ChatService.getChannelMessages(channelId);
     state = state.copyWith(
-      channelMessages: {...state.channelMessages, channelId: _toChannelMessages(msgs)},
+      channelMessages: {
+        ...state.channelMessages,
+        channelId: _toChannelMessages(msgs),
+      },
     );
   }
 
@@ -223,6 +244,14 @@ class ChatNotifier extends Notifier<ChatState> {
     required String content,
     String? imageUrl,
   }) async {
+    String? durableImageUrl = imageUrl;
+    if (durableImageUrl != null && !durableImageUrl.startsWith('http')) {
+      durableImageUrl = await MediaService.uploadPostImage(
+        durableImageUrl,
+        senderId,
+      );
+    }
+
     final msg = ChannelMessage(
       id: generateId(),
       channelId: channelId,
@@ -230,7 +259,7 @@ class ChatNotifier extends Notifier<ChatState> {
       senderName: senderName,
       senderAvatar: senderAvatar,
       content: content,
-      imageUrl: imageUrl,
+      imageUrl: durableImageUrl ?? imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
@@ -245,8 +274,10 @@ class ChatNotifier extends Notifier<ChatState> {
         channelId: channelId,
         senderId: senderId,
         senderName: senderName,
+        senderAvatar: senderAvatar,
         worldId: worldId,
         content: content,
+        imageUrl: durableImageUrl,
       );
     } catch (_) {
       // Remove the optimistic message if the send failed
@@ -327,16 +358,30 @@ class ChatNotifier extends Notifier<ChatState> {
     );
     final existing = state.channelMessages[threadId] ?? [];
     state = state.copyWith(
-      channelMessages: {...state.channelMessages, threadId: [...existing, msg]},
+      channelMessages: {
+        ...state.channelMessages,
+        threadId: [...existing, msg],
+      },
     );
-    await ChatService.sendThreadReply(
-      channelId: channelId,
-      senderId: senderId,
-      senderName: senderName,
-      worldId: worldId,
-      content: content,
-      threadId: threadId,
-    );
+    try {
+      await ChatService.sendThreadReply(
+        channelId: channelId,
+        senderId: senderId,
+        senderName: senderName,
+        senderAvatar: senderAvatar,
+        worldId: worldId,
+        content: content,
+        threadId: threadId,
+      );
+    } catch (_) {
+      final reverted = (state.channelMessages[threadId] ?? [])
+          .where((m) => m.id != msg.id)
+          .toList();
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, threadId: reverted},
+      );
+      rethrow;
+    }
   }
 
   int unreadCount(String channelId) {
@@ -344,9 +389,13 @@ class ChatNotifier extends Notifier<ChatState> {
     if (messages.isEmpty) return 0;
     final lastRead = state.channelReads[channelId];
     if (lastRead == null) return messages.length;
-    return messages.where((m) =>
-      DateTime.fromMillisecondsSinceEpoch(m.createdAt).isAfter(lastRead)
-    ).length;
+    return messages
+        .where(
+          (m) => DateTime.fromMillisecondsSinceEpoch(
+            m.createdAt,
+          ).isAfter(lastRead),
+        )
+        .length;
   }
 
   bool hasUnread(String channelId) {
@@ -354,8 +403,9 @@ class ChatNotifier extends Notifier<ChatState> {
     if (messages.isEmpty) return false;
     final lastRead = state.channelReads[channelId];
     if (lastRead == null) return true; // never read
-    final lastMessageTime = DateTime
-        .fromMillisecondsSinceEpoch(messages.last.createdAt);
+    final lastMessageTime = DateTime.fromMillisecondsSinceEpoch(
+      messages.last.createdAt,
+    );
     return lastMessageTime.isAfter(lastRead);
   }
 
@@ -370,21 +420,28 @@ class ChatNotifier extends Notifier<ChatState> {
     _subscriptions.clear();
   }
 
-  List<ChannelMessage> _toChannelMessages(List<Map<String, dynamic>> raw) =>
-      raw.map((e) => ChannelMessage(
-            id: e['id'] ?? '',
-            channelId: e['room_id'] ?? e['channel_id'] ?? '',
-            senderId: e['sender_id'] ?? '',
-            senderName: e['sender_name'] ?? '',
-            senderAvatar: e['sender_avatar'],
-            content: e['content'] ?? '',
-            imageUrl: e['image_url'],
-            isPinned: e['is_pinned'] ?? false,
-            threadId: e['thread_id'],
-            threadCount: e['thread_count'] ?? 0,
-            isThreadStarter: e['is_thread_starter'] ?? false,
-            createdAt: DateTime.tryParse(e['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
-          )).toList();
+  List<ChannelMessage> _toChannelMessages(List<Map<String, dynamic>> raw) => raw
+      .map(
+        (e) => ChannelMessage(
+          id: e['id'] ?? '',
+          channelId: e['room_id'] ?? e['channel_id'] ?? '',
+          senderId: e['sender_id'] ?? '',
+          senderName: e['sender_name'] ?? '',
+          senderAvatar: e['sender_avatar'],
+          content: e['content'] ?? '',
+          imageUrl: e['image_url'],
+          isPinned: e['is_pinned'] ?? false,
+          threadId: e['thread_id'],
+          threadCount: e['thread_count'] ?? 0,
+          isThreadStarter: e['is_thread_starter'] ?? false,
+          createdAt:
+              DateTime.tryParse(
+                e['created_at'] ?? '',
+              )?.millisecondsSinceEpoch ??
+              0,
+        ),
+      )
+      .toList();
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(

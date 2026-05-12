@@ -100,7 +100,13 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
           worldId: widget.worldId,
           content: content,
           threadId: widget.parentMessage.id,
-        );
+        )
+        .catchError((_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to send reply.')),
+          );
+        });
     _controller.clear();
     _scrollToBottom();
   }
