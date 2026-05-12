@@ -97,4 +97,30 @@ class RankService {
         .eq('resident_id', residentId);
     return (data as List).map((e) => e['rank_id'] as String).toList();
   }
+
+  static Future<Map<String, List<String>>> fetchWorldRankAssignments({
+    required String worldId,
+    required List<String> residentIds,
+  }) async {
+    final ids = residentIds.toSet().where((id) => id.isNotEmpty).toList();
+    if (!isSupabaseConfigured() || ids.isEmpty) return {};
+
+    final ranks = await fetchWorldRanks(worldId);
+    final rankIds = ranks.map((rank) => rank.id).toList();
+    if (rankIds.isEmpty) return {};
+
+    final data = await getSupabase()
+        .from('resident_ranks')
+        .select('resident_id, rank_id')
+        .inFilter('resident_id', ids)
+        .inFilter('rank_id', rankIds);
+    final byResident = <String, List<String>>{};
+    for (final row in (data as List)) {
+      final residentId = row['resident_id'] as String?;
+      final rankId = row['rank_id'] as String?;
+      if (residentId == null || rankId == null) continue;
+      byResident.putIfAbsent(residentId, () => []).add(rankId);
+    }
+    return byResident;
+  }
 }
