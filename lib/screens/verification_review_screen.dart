@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../services/verification_service.dart';
 import '../state/post_provider.dart';
+import '../theme/colors.dart';
 import '../theme/design_system.dart';
+import '../widgets/core/empty_state.dart';
+import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 
 class VerificationReviewScreen extends ConsumerStatefulWidget {
@@ -126,80 +129,103 @@ class _VerificationReviewScreenState
   Widget _buildVerificationsTab(ThemeData theme) {
     if (_loading) return const GlassLoadingList();
     if (_submissions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_outline,
-                size: 48, color: theme.colorScheme.outline),
-            const SizedBox(height: 12),
-            Text('No pending verifications',
-                style: theme.textTheme.bodyLarge),
-          ],
-        ),
+      return const AppEmptyState(
+        title: 'No pending verifications',
+        description: 'Profession reviews will appear here when residents submit proof.',
+        icon: Icons.verified_user_outlined,
       );
     }
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.builder(
+        padding: const EdgeInsets.all(Spacing.md),
         itemCount: _submissions.length,
         itemBuilder: (_, i) {
           final s = _submissions[i];
-          return Card(
-            margin:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: i < _submissions.length - 1 ? Spacing.sm : 0,
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(Spacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(s.residentName,
-                                style: theme.textTheme.titleSmall),
-                            Text(s.profession,
+              padding: EdgeInsets.zero,
+              child: GlassPanel(
+                padding: const EdgeInsets.all(Spacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(RadiusTokens.full),
+                          ),
+                          child: const Icon(
+                            Icons.badge_outlined,
+                            color: AppColors.primary,
+                            size: IconSizes.md,
+                          ),
+                        ),
+                        const SizedBox(width: Spacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s.residentName,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeights.bold,
+                                ),
+                              ),
+                              Text(
+                                s.profession,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                )),
-                          ],
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: AppColors.error),
+                          tooltip: 'Reject',
+                          onPressed: () => _reject(s),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.check, color: AppColors.success),
+                          tooltip: 'Approve',
+                          onPressed: () => _approve(s),
+                        ),
+                      ],
+                    ),
+                    if (s.proofUrl.isNotEmpty) ...[
+                      const SizedBox(height: Spacing.md),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(RadiusTokens.full),
+                        child: Image.network(
+                          s.proofUrl,
+                          height: 176,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            height: 96,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceElevated.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(RadiusTokens.full),
+                            ),
+                            child: const Icon(
+                              Icons.broken_image_outlined,
+                              color: AppColors.inkMuted,
+                            ),
+                          ),
                         ),
                       ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.close,
-                                color: Colors.red),
-                            tooltip: 'Reject',
-                            onPressed: () => _reject(s),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.check,
-                                color: Colors.green),
-                            tooltip: 'Approve',
-                            onPressed: () => _approve(s),
-                          ),
-                        ],
-                      ),
                     ],
-                  ),
-                  if (s.proofUrl.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        s.proofUrl,
-                        height: 160,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const SizedBox(),
-                      ),
-                    ),
                   ],
-                ],
+                ),
               ),
             ),
           );
@@ -215,24 +241,10 @@ class _VerificationReviewScreenState
         .toList();
 
     if (flaggedPosts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.shield_outlined,
-                size: 48, color: theme.colorScheme.outline),
-            const SizedBox(height: 12),
-            Text('No flagged posts',
-                style: theme.textTheme.bodyLarge),
-            const SizedBox(height: 4),
-            Text(
-              'Posts flagged by The Sentinel will appear here',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
-        ),
+      return const AppEmptyState(
+        title: 'No flagged posts',
+        description: 'Posts flagged by The Sentinel will appear here.',
+        icon: Icons.shield_outlined,
       );
     }
 
@@ -241,9 +253,11 @@ class _VerificationReviewScreenState
       padding: const EdgeInsets.all(Spacing.md),
       itemBuilder: (_, i) {
         final post = flaggedPosts[i];
-        return Card(
-          margin: EdgeInsets.only(bottom: i < flaggedPosts.length - 1 ? Spacing.sm : 0),
-          child: Padding(
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: i < flaggedPosts.length - 1 ? Spacing.sm : 0,
+          ),
+          child: GlassPanel(
             padding: const EdgeInsets.all(Spacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,13 +282,13 @@ class _VerificationReviewScreenState
                           Text(post.residentName,
                               style: theme.textTheme.titleSmall),
                           Text(
-                            post.status == 'pending_review'
-                                ? 'Pending Review'
-                                : 'Flagged',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: post.status == 'pending_review'
-                                  ? Colors.orange
-                                  : Colors.red,
+                          post.status == 'pending_review'
+                              ? 'Pending Review'
+                              : 'Flagged',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: post.status == 'pending_review'
+                                  ? AppColors.warning
+                                  : AppColors.error,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -285,13 +299,13 @@ class _VerificationReviewScreenState
                       children: [
                         IconButton(
                           icon: const Icon(Icons.delete_outline,
-                              color: Colors.red),
+                              color: AppColors.error),
                           tooltip: 'Remove post',
                           onPressed: () => _removePost(post),
                         ),
                         IconButton(
                           icon: const Icon(Icons.check_circle_outline,
-                              color: Colors.green),
+                              color: AppColors.success),
                           tooltip: 'Approve post',
                           onPressed: () => _approvePost(post),
                         ),
