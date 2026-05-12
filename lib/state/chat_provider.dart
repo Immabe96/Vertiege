@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
+import '../services/media_service.dart';
 import '../utils/id_generator.dart';
 
 class ChatState {
@@ -81,6 +82,14 @@ class ChatNotifier extends Notifier<ChatState> {
     required String content,
     String? imageUrl,
   }) async {
+    String? durableImageUrl = imageUrl;
+    if (durableImageUrl != null && !durableImageUrl.startsWith('http')) {
+      durableImageUrl = await MediaService.uploadPostImage(
+        durableImageUrl,
+        senderId,
+      );
+    }
+
     final msg = ChannelMessage(
       id: generateId(),
       channelId: roomId,
@@ -88,7 +97,7 @@ class ChatNotifier extends Notifier<ChatState> {
       senderName: senderName,
       senderAvatar: senderAvatar,
       content: content,
-      imageUrl: imageUrl,
+      imageUrl: durableImageUrl ?? imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
@@ -97,11 +106,25 @@ class ChatNotifier extends Notifier<ChatState> {
       dmMessages: {...state.dmMessages, roomId: [...existing, msg]},
     );
 
-    await ChatService.sendMessage(
-      roomId: roomId,
-      senderId: senderId,
-      content: content,
-    );
+    try {
+      await ChatService.sendMessage(
+        roomId: roomId,
+        senderId: senderId,
+        senderName: senderName,
+        senderAvatar: senderAvatar,
+        content: content,
+        imageUrl: durableImageUrl,
+      );
+    } catch (_) {
+      final reverted = state.dmMessages[roomId]
+              ?.where((m) => m.id != msg.id)
+              .toList() ??
+          const <ChannelMessage>[];
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: reverted},
+      );
+      rethrow;
+    }
   }
 
   // ── Shared realtime subscription helper ──────────────────

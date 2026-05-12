@@ -30,7 +30,6 @@ import '../widgets/core/loading_state.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/error_banner.dart';
 import '../widgets/core/glow_border.dart';
-import '../widgets/core/protocol_logs.dart';
 import '../state/post_provider.dart';
 import '../models/resident.dart';
 import '../models/world.dart' show World;
@@ -304,12 +303,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
     // ── Error state ──
     if (_hasError && world == null) {
-      final sampleLogs = [
-        '[${DateTime.now().toString().substring(11, 19)}] ERROR: Failed to resolve forge.sovereign.nexus:443',
-        '[${DateTime.now().toString().substring(11, 19)}] Re-attempting handshake in 5000ms...',
-        '[${DateTime.now().toString().substring(11, 19)}] ERROR: Handshake timeout. TLS negotiation failed.',
-        '[${DateTime.now().toString().substring(11, 19)}] Protocol state: STANDBY_MODE',
-      ];
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
         body: ListView(
@@ -320,9 +313,15 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               onRetry: _retryLoad,
             ),
             const SizedBox(height: Spacing.md),
-            ProtocolLogs(logs: sampleLogs),
-            const SizedBox(height: Spacing.md),
-            const GlassLoadingList(itemCount: 3),
+            AppEmptyState(
+              title: 'Could not load this world',
+              description:
+                  'Check your connection and try again. If this keeps happening, the world may have been removed.',
+              icon: Icons.public_off,
+              variant: EmptyStateVariant.error,
+              actionLabel: 'Retry',
+              onAction: _retryLoad,
+            ),
           ],
         ),
       );
@@ -350,6 +349,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     // Prestige-based tier for hero glow, badge, and button colors
     final prestigeTierColor = _getPrestigeTierColor(world.prestige);
     final prestigeGlowTier = _getPrestigeGlowTier(world.prestige);
+    final heroHeight = (MediaQuery.of(context).size.height * 0.42)
+        .clamp(300.0, 400.0)
+        .toDouble();
 
     final onSettings =
         resident != null &&
@@ -399,14 +401,16 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     children: [
                       // Banner image
                       SizedBox(
-                        height: 400,
+                        height: heroHeight,
                         width: double.infinity,
                         child: Hero(
                           tag: 'world-icon-${widget.worldId}',
                           child: WorldBanner(
                             worldId: world.id,
                             width: double.infinity,
-                            height: 400,
+                            height: heroHeight,
+                            worldType: world.type,
+                            prestige: world.prestige,
                           ),
                         ),
                       ),
@@ -514,10 +518,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                     child: Text(
                                       world.name,
                                       style: GoogleFonts.spaceGrotesk(
-                                        fontSize: FontSizes.displayXl,
+                                        fontSize: FontSizes.headlineLg,
                                         fontWeight: FontWeights.bold,
                                         color: AppColors.ink,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   const SizedBox(width: Spacing.sm),
@@ -580,6 +586,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                   color: AppColors.inkSecondary,
                                 ),
                                 maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               // Founded date (legacy)
                               if (world.createdAt > 0) ...[

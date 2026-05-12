@@ -447,19 +447,18 @@ class PostNotifier extends Notifier<PostState> {
     try {
       // Fetch from Supabase first
       final remote = await PostService.getPosts();
-      if (remote.isNotEmpty) {
-        final posts = remote.map((e) => _postFromJson(e)).toList();
+      final posts = remote.map((e) => _postFromJson(e)).toList();
+      state = state.copyWith(posts: posts, clearError: true);
+      _persist();
+    } catch (e) {
+      // Fallback to local cache only when the remote request itself failed.
+      final raw = await StorageService.getString(StorageService.postsKey);
+      if (raw != null && raw.isNotEmpty) {
+        final list = jsonDecode(raw) as List<dynamic>;
+        final posts = list.map((e) => _postFromJson(e)).toList();
         state = state.copyWith(posts: posts, clearError: true);
-        _persist();
         return;
       }
-      // Fallback to local cache
-      final raw = await StorageService.getString(StorageService.postsKey);
-      if (raw == null || raw.isEmpty) return;
-      final list = jsonDecode(raw) as List<dynamic>;
-      final posts = list.map((e) => _postFromJson(e)).toList();
-      state = state.copyWith(posts: posts, clearError: true);
-    } catch (e) {
       state = state.copyWith(error: 'Failed to load posts: $e');
     }
   }

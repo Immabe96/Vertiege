@@ -53,7 +53,7 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
     id: m['resident_id'] ?? '',
     name: m['resident_name'] ?? 'Member',
     tier: ResidentTier.fromValue(m['standing'] ?? 1),
-    avatarUrl: 'assets/generated/avatar-1.png',
+    avatarUrl: m['avatar_url'] ?? m['avatarUrl'] ?? '',
     streakCount: 0,
   );
 

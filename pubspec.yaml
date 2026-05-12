@@ -39,8 +39,5 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - assets/banners/
-    - assets/decorations/
     - assets/generated/
-    - assets/icons/
     - assets/images/

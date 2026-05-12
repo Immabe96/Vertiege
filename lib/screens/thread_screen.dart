@@ -44,7 +44,6 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   bool _showScrollFab = false;
-  final Set<String> _animatedMessageIds = {};
 
   @override
   void initState() {

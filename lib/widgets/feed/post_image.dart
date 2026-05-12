@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
+import '../core/broken_media.dart';
 import '../core/shimmer.dart';
 
 class PostImage extends StatelessWidget {
@@ -20,7 +21,8 @@ class PostImage extends StatelessWidget {
           if (loadingProgress == null) return child;
           return const Pulse(height: 200);
         },
-        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+        errorBuilder: (context, error, stackTrace) =>
+            const BrokenMediaTile(height: 200),
       ),
     );
   }

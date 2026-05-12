@@ -39,6 +39,12 @@ class WorldAssets {
   ];
 
   static const _badgeImagePaths = <String, String>{
+    'Medical_badge': 'assets/generated/badge-doctor.png',
+    'Engineering_badge': 'assets/generated/badge-engineer.png',
+    'Legal_badge': 'assets/generated/badge-attorney.png',
+    'Finance_badge': 'assets/generated/badge-finance.png',
+    'Arts_badge': 'assets/generated/badge-artist.png',
+    'Aviation_badge': 'assets/generated/badge-pilot.png',
     'badge-marathon': 'assets/generated/badge-marathon.png',
     'badge-author': 'assets/generated/badge-author.png',
     'badge-founder': 'assets/generated/badge-founder.png',
@@ -52,6 +58,27 @@ class WorldAssets {
     'badge-finance': 'assets/generated/badge-finance.png',
     'badge-artist': 'assets/generated/badge-artist.png',
     'badge-pilot': 'assets/generated/badge-pilot.png',
+  };
+
+  static const _tierImagePaths = <int, String>{
+    1: 'assets/generated/tier-bronze.png',
+    2: 'assets/generated/tier-silver.png',
+    3: 'assets/generated/tier-gold.png',
+    4: 'assets/generated/tier-diamond.png',
+    5: 'assets/generated/tier-diamond.png',
+  };
+
+  static const _achievementCategoryPaths = <String, String>{
+    'education': 'assets/generated/ach-education.png',
+    'career': 'assets/generated/ach-career.png',
+    'relationships': 'assets/generated/ach-relationships.png',
+    'health': 'assets/generated/ach-health.png',
+    'skills': 'assets/generated/ach-skills.png',
+    'travel': 'assets/generated/ach-travel.png',
+    'finance': 'assets/generated/ach-finance.png',
+    'community': 'assets/generated/ach-community.png',
+    'funny': 'assets/generated/ach-funny.png',
+    'creative': 'assets/generated/ach-creative.png',
   };
 
   /// Pool of pre-approved accent colors drawn from AppColors.
@@ -119,6 +146,11 @@ class WorldAssets {
   }
 
   static String? badgeImageForId(String badgeId) => _badgeImagePaths[badgeId];
+
+  static String? tierImageForValue(int tier) => _tierImagePaths[tier];
+
+  static String? achievementCategoryImage(String categoryName) =>
+      _achievementCategoryPaths[categoryName];
 
   /// Returns a unique Material icon for a world based on its ID hash.
   static IconData iconForWorld(String worldId) {

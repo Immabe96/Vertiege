@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
+import '../core/broken_media.dart';
 
 class ChatImage extends StatelessWidget {
   final String url;
@@ -12,7 +13,11 @@ class ChatImage extends StatelessWidget {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(RadiusTokens.card),
-        child: Image.network(url, fit: BoxFit.cover),
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => const BrokenMediaTile(height: 160),
+        ),
       );
     }
     final file = File(url);
@@ -22,6 +27,6 @@ class ChatImage extends StatelessWidget {
         child: Image.file(file, fit: BoxFit.cover),
       );
     }
-    return const SizedBox.shrink();
+    return const BrokenMediaTile(height: 160);
   }
 }

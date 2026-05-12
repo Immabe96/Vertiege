@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
+import '../../utils/world_assets.dart';
 
 class TierIcon extends StatelessWidget {
   final int tier;
@@ -9,6 +10,21 @@ class TierIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = WorldAssets.tierImageForValue(tier);
+    if (imagePath != null) {
+      return Image.asset(
+        imagePath,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => _fallbackIcon(),
+      );
+    }
+
+    return _fallbackIcon();
+  }
+
+  Widget _fallbackIcon() {
     final icon = switch (tier) {
       5 => Icons.flag,
       4 => Icons.shield,

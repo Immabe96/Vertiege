@@ -17,7 +17,11 @@ class WorldAccessGuard extends ConsumerWidget {
   final String worldId;
   final Widget child;
 
-  const WorldAccessGuard({super.key, required this.worldId, required this.child});
+  const WorldAccessGuard({
+    super.key,
+    required this.worldId,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +31,9 @@ class WorldAccessGuard extends ConsumerWidget {
     final theme = Theme.of(context);
 
     if (world == null) {
-      return Center(child: Text('World not found', style: theme.textTheme.bodyLarge));
+      return Center(
+        child: Text('World not found', style: theme.textTheme.bodyLarge),
+      );
     }
 
     if (resident == null) {
@@ -60,7 +66,11 @@ class WorldAccessGuard extends ConsumerWidget {
               const SizedBox(height: 16),
               Text('Access Restricted', style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(world.description, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+              Text(
+                world.description,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
               const SizedBox(height: 16),
               if (isVerifying)
                 const Column(
@@ -73,7 +83,11 @@ class WorldAccessGuard extends ConsumerWidget {
               else
                 FilledButton(
                   onPressed: () => _handleAccess(context, ref, world, resident),
-                  child: Text(world.type == WorldType.wealth ? 'Unlock Access' : 'Verify Profession'),
+                  child: Text(
+                    world.type == WorldType.wealth
+                        ? 'Unlock Access'
+                        : 'Verify Profession',
+                  ),
                 ),
             ],
           ),
@@ -82,13 +96,22 @@ class WorldAccessGuard extends ConsumerWidget {
     );
   }
 
-  void _handleAccess(BuildContext context, WidgetRef ref, World world, Resident resident) {
+  void _handleAccess(
+    BuildContext context,
+    WidgetRef ref,
+    World world,
+    Resident resident,
+  ) {
     if (world.type == WorldType.wealth) {
       if (StoreService.isEnabled) {
         _showPurchaseSheet(context, ref, world);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Purchases will be available at launch.')),
+          const SnackBar(
+            content: Text(
+              'Store access is disabled for this build. Try profession or open worlds for now.',
+            ),
+          ),
         );
       }
     } else if (world.type == WorldType.profession) {
@@ -110,21 +133,34 @@ class WorldAccessGuard extends ConsumerWidget {
       context: context,
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
-          left: 16, right: 16, top: 16,
+          left: 16,
+          right: 16,
+          top: 16,
           bottom: MediaQuery.of(context).viewInsets.bottom + 16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Unlock ${world.name}', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Unlock ${world.name}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
-            Text(world.description, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              world.description,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 16),
-            Text('$title — $price', style: Theme.of(context).textTheme.bodyLarge),
+            Text(
+              '$title — $price',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             const SizedBox(height: 4),
-            Text('One-time purchase. Permanent access.',
-                style: Theme.of(context).textTheme.labelSmall),
+            Text(
+              'One-time purchase. Permanent access.',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -136,13 +172,17 @@ class WorldAccessGuard extends ConsumerWidget {
                   final result = await StoreService.buyWealthTier(tier);
                   if (ctx.mounted) {
                     if (result == StorePurchaseState.purchased) {
-                      ref.read(residentProvider.notifier).unlockWealthWorld(world.id);
+                      ref
+                          .read(residentProvider.notifier)
+                          .unlockWealthWorld(world.id);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Welcome to ${world.name}!')),
                       );
                     } else if (result == StorePurchaseState.error) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Purchase failed. Please try again.')),
+                        const SnackBar(
+                          content: Text('Purchase failed. Please try again.'),
+                        ),
                       );
                     }
                   }
@@ -166,7 +206,11 @@ class WorldAccessGuard extends ConsumerWidget {
     );
   }
 
-  void _showVerificationSheet(BuildContext context, WidgetRef ref, String profession) {
+  void _showVerificationSheet(
+    BuildContext context,
+    WidgetRef ref,
+    String profession,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -174,13 +218,14 @@ class WorldAccessGuard extends ConsumerWidget {
         profession: profession,
         onSubmit: (proofPath) {
           Navigator.pop(ctx);
-          ref.read(residentProvider.notifier).verifyProfession(
-                profession,
-                proofPath: proofPath,
-              );
+          ref
+              .read(residentProvider.notifier)
+              .verifyProfession(profession, proofPath: proofPath);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Verification submitted. You will be notified when it is reviewed.'),
+              content: Text(
+                'Verification submitted. You will be notified when it is reviewed.',
+              ),
             ),
           );
         },
@@ -208,19 +253,26 @@ class _VerificationSheetState extends State<_VerificationSheet> {
     final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(
-        left: 16, right: 16, top: 16,
+        left: 16,
+        right: 16,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 16,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Verify ${widget.profession}', style: theme.textTheme.titleMedium),
+          Text(
+            'Verify ${widget.profession}',
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
             'Upload proof of your profession (job letter, certificate, or qualification document).'
             ' Verification is manual and may take some time.',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 16),
           if (_proofPath != null)

@@ -7,6 +7,7 @@ import '../../state/chat_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../core/empty_state.dart';
 
 class WorldChannelList extends ConsumerStatefulWidget {
   final String worldId;
@@ -22,15 +23,25 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
 
   @override
   Widget build(BuildContext context) {
-    final allChannels = ref.watch(channelProvider).channelsByWorld[widget.worldId] ?? [];
-    final features = ref.read(worldProvider.notifier).featuresForWorld(widget.worldId);
+    final allChannels =
+        ref.watch(channelProvider).channelsByWorld[widget.worldId] ?? [];
+    final features = ref
+        .read(worldProvider.notifier)
+        .featuresForWorld(widget.worldId);
     final channels = allChannels.where((c) {
       if (c.name == 'lounge' && !features.lounge) return false;
       return true;
     }).toList();
     final theme = Theme.of(context);
 
-    if (channels.isEmpty) return const SizedBox.shrink();
+    if (channels.isEmpty) {
+      return const AppEmptyState(
+        title: 'No channels yet',
+        description: 'This world does not have a public channel available.',
+        icon: Icons.forum_outlined,
+        variant: EmptyStateVariant.default_,
+      );
+    }
 
     // Group channels by ward
     final ungrouped = channels.where((c) => c.wardId == null).toList();
@@ -45,11 +56,19 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 4),
-          child: Text('Channels', style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeights.bold,
-          )),
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 8,
+            bottom: 4,
+          ),
+          child: Text(
+            'Channels',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeights.bold,
+            ),
+          ),
         ),
         // Render wards with collapsible headers
         for (final entry in wardMap.entries)
@@ -63,20 +82,31 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
           _ChannelTile(
             channel: ch,
             unreadCount: ref.read(chatProvider.notifier).unreadCount(ch.id),
-            onTap: () => context.push('/explore/${widget.worldId}/${ch.name}?id=${ch.id}'),
+            onTap: () => context.push(
+              '/explore/${widget.worldId}/${ch.name}?id=${ch.id}',
+            ),
           ),
       ],
     );
   }
 
-  Widget _buildWardGroup(String wardId, String wardName, List<WorldChannel> wardChannels) {
+  Widget _buildWardGroup(
+    String wardId,
+    String wardName,
+    List<WorldChannel> wardChannels,
+  ) {
     final expanded = _wardExpanded[wardId] ?? true;
     return Column(
       children: [
         GestureDetector(
           onTap: () => setState(() => _wardExpanded[wardId] = !expanded),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.xs),
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              Spacing.sm,
+              Spacing.lg,
+              Spacing.xs,
+            ),
             child: Row(
               children: [
                 Icon(
@@ -103,7 +133,9 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
             _ChannelTile(
               channel: ch,
               unreadCount: ref.read(chatProvider.notifier).unreadCount(ch.id),
-              onTap: () => context.push('/explore/${widget.worldId}/${ch.name}?id=${ch.id}'),
+              onTap: () => context.push(
+                '/explore/${widget.worldId}/${ch.name}?id=${ch.id}',
+              ),
             ),
       ],
     );
@@ -122,11 +154,11 @@ class _ChannelTile extends StatelessWidget {
   });
 
   IconData get _icon => switch (channel.channelType) {
-        ChannelType.announcement => Icons.campaign,
-        ChannelType.feed => Icons.dynamic_feed,
-        ChannelType.text => Icons.tag,
-        ChannelType.voice => Icons.volume_up,
-      };
+    ChannelType.announcement => Icons.campaign,
+    ChannelType.feed => Icons.dynamic_feed,
+    ChannelType.text => Icons.tag,
+    ChannelType.voice => Icons.volume_up,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +166,9 @@ class _ChannelTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
-      leading: Icon(_icon, size: 20,
+      leading: Icon(
+        _icon,
+        size: 20,
         color: unreadCount > 0
             ? AppColors.ink
             : theme.colorScheme.onSurfaceVariant,
@@ -145,7 +179,9 @@ class _ChannelTile extends StatelessWidget {
             child: Text(
               '# ${channel.name}',
               style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: unreadCount > 0 ? FontWeights.bold : FontWeights.regular,
+                fontWeight: unreadCount > 0
+                    ? FontWeights.bold
+                    : FontWeights.regular,
               ),
             ),
           ),
@@ -168,7 +204,11 @@ class _ChannelTile extends StatelessWidget {
         ],
       ),
       subtitle: channel.description != null
-          ? Text(channel.description!, style: theme.textTheme.labelSmall, maxLines: 1)
+          ? Text(
+              channel.description!,
+              style: theme.textTheme.labelSmall,
+              maxLines: 1,
+            )
           : null,
       onTap: onTap,
     );

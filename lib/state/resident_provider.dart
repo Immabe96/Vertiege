@@ -53,19 +53,19 @@ class ResidentNotifier extends Notifier<ResidentState> {
       // Fetch from Supabase first
       final remote = await ProfileService.getProfile(userId);
       if (remote != null) {
-        state = ResidentState(resident: remote, isLoading: false);
+        final cached = await _cachedResidentFor(userId);
+        final resident = cached != null && remote.joinedWorldIds.isEmpty
+            ? remote.copyWith(joinedWorldIds: cached.joinedWorldIds)
+            : remote;
+        state = ResidentState(resident: resident, isLoading: false);
         _persist(); // cache locally
         return;
       }
       // Fallback to local cache
-      final json = await StorageService.getString(StorageService.residentKey);
-      if (json != null) {
-        final data = jsonDecode(json) as Map<String, dynamic>;
-        final resident = _fromJson(data);
-        if (resident != null && resident.id == userId) {
-          state = ResidentState(resident: resident, isLoading: false);
-          return;
-        }
+      final cached = await _cachedResidentFor(userId);
+      if (cached != null) {
+        state = ResidentState(resident: cached, isLoading: false);
+        return;
       }
       state = const ResidentState(isLoading: false);
     } catch (_) {
@@ -76,7 +76,37 @@ class ResidentNotifier extends Notifier<ResidentState> {
   void setResident(Resident resident) {
     state = state.copyWith(resident: resident);
     _persist();
-    ProfileService.upsertProfile(resident);
+    _saveResidentProfile(resident);
+  }
+
+  Future<void> _saveResidentProfile(Resident resident) async {
+    var durableResident = resident;
+    if (resident.avatarUrl.isNotEmpty &&
+        !resident.avatarUrl.startsWith('http') &&
+        !resident.avatarUrl.startsWith('assets/')) {
+      final uploaded = await MediaService.uploadAvatar(
+        resident.avatarUrl,
+        resident.id,
+      );
+      if (uploaded != null && state.resident?.id == resident.id) {
+        durableResident = resident.copyWith(avatarUrl: uploaded);
+        state = state.copyWith(resident: durableResident);
+        _persist();
+      }
+    }
+
+    await ProfileService.upsertProfile(durableResident);
+    for (final worldId in durableResident.joinedWorldIds) {
+      try {
+        await WorldService.joinWorld(
+          worldId,
+          durableResident.id,
+          residentName: durableResident.name,
+        );
+      } catch (_) {
+        // Some seeded worlds are local catalog ids until the database is seeded.
+      }
+    }
   }
 
   Future<void> updateProfile({
@@ -107,7 +137,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
     // Save to Supabase
     if (state.resident != null) {
-      ProfileService.upsertProfile(state.resident!);
+      _saveResidentProfile(state.resident!);
     }
   }
 
@@ -630,6 +660,15 @@ class ResidentNotifier extends Notifier<ResidentState> {
       onboardingCompleted: (json['onboardingCompleted'] as bool?) ?? false,
       gateCompleted: (json['gateCompleted'] as bool?) ?? false,
     );
+  }
+
+  static Future<Resident?> _cachedResidentFor(String userId) async {
+    final raw = await StorageService.getString(StorageService.residentKey);
+    if (raw == null) return null;
+    final data = jsonDecode(raw) as Map<String, dynamic>;
+    final resident = _fromJson(data);
+    if (resident == null || resident.id != userId) return null;
+    return resident;
   }
 
   static Map<String, dynamic> _toJson(Resident r) => {

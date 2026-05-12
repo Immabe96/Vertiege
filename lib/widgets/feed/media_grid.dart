@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
+import '../core/broken_media.dart';
 import '../core/shimmer.dart';
 
 class MediaGrid extends StatelessWidget {
@@ -22,7 +23,9 @@ class MediaGrid extends StatelessWidget {
       itemCount: images.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: onImagePress != null ? () => onImagePress!(images[index]) : null,
+          onTap: onImagePress != null
+              ? () => onImagePress!(images[index])
+              : null,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(RadiusTokens.card),
             child: Image.network(
@@ -32,7 +35,8 @@ class MediaGrid extends StatelessWidget {
                 if (loadingProgress == null) return child;
                 return const Pulse();
               },
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              errorBuilder: (context, error, stackTrace) =>
+                  const BrokenMediaTile(label: 'Unavailable'),
             ),
           ),
         );

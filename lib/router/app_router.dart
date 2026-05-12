@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../state/resident_provider.dart';
 import '../services/supabase.dart';
 import '../services/invite_service.dart';
+import '../services/chat_service.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/onboarding/the_gate_screen.dart';
 import '../screens/subscription_screen.dart';
@@ -37,6 +38,7 @@ import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
 import '../models/message.dart';
+import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
 
@@ -216,14 +218,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AchievementsIndexScreen(),
         routes: [
           GoRoute(
+            path: 'submit',
+            builder: (context, state) => const SubmitAchievementScreen(),
+          ),
+          GoRoute(
             path: ':category',
             builder: (context, state) => AchievementCategoryScreen(
               category: state.pathParameters['category']!,
             ),
-          ),
-          GoRoute(
-            path: 'submit',
-            builder: (context, state) => const SubmitAchievementScreen(),
           ),
         ],
       ),
@@ -275,7 +277,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final parentMessage = extra?['message'] as ChannelMessage?;
           if (parentMessage == null) {
-            return const NexusScreen(); // fallback
+            return _ThreadDeepLinkScreen(
+              messageId: state.pathParameters['messageId']!,
+            );
           }
           return ThreadScreen(
             channelId: extra?['channelId'] ?? '',
@@ -375,6 +379,86 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
                 ],
               ),
       ),
+    );
+  }
+}
+
+class _ThreadDeepLinkScreen extends StatefulWidget {
+  final String messageId;
+
+  const _ThreadDeepLinkScreen({required this.messageId});
+
+  @override
+  State<_ThreadDeepLinkScreen> createState() => _ThreadDeepLinkScreenState();
+}
+
+class _ThreadDeepLinkScreenState extends State<_ThreadDeepLinkScreen> {
+  late final Future<ChannelMessage?> _messageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _messageFuture = _loadMessage();
+  }
+
+  Future<ChannelMessage?> _loadMessage() async {
+    final row = await ChatService.getChannelMessage(widget.messageId);
+    if (row == null) return null;
+    return ChannelMessage(
+      id: row['id'] ?? '',
+      channelId: row['channel_id'] ?? '',
+      senderId: row['sender_id'] ?? '',
+      senderName: row['sender_name'] ?? '',
+      senderAvatar: row['sender_avatar'],
+      content: row['content'] ?? '',
+      imageUrl: row['image_url'],
+      isPinned: row['is_pinned'] ?? false,
+      threadId: row['thread_id'],
+      threadCount: row['thread_count'] ?? 0,
+      isThreadStarter: row['is_thread_starter'] ?? false,
+      createdAt:
+          DateTime.tryParse(
+            row['created_at']?.toString() ?? '',
+          )?.millisecondsSinceEpoch ??
+          0,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ChannelMessage?>(
+      future: _messageFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Thread')),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final message = snapshot.data;
+        if (message == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Thread')),
+            body: AppEmptyState(
+              title: 'Thread unavailable',
+              description:
+                  'The original message could not be found or is no longer available.',
+              icon: Icons.forum_outlined,
+              variant: EmptyStateVariant.error,
+              actionLabel: 'Back to Nexus',
+              onAction: () => context.go('/'),
+            ),
+          );
+        }
+
+        return ThreadScreen(
+          channelId: message.channelId,
+          worldId: '',
+          parentMessage: message,
+          channelName: '',
+        );
+      },
     );
   }
 }

@@ -48,23 +48,50 @@ class ChatService {
   static Future<void> sendMessage({
     required String roomId,
     required String senderId,
+    required String senderName,
     required String content,
+    String? senderAvatar,
+    String? imageUrl,
   }) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    await client.from('chat_messages').insert({
+    final payload = <String, dynamic>{
       'room_id': roomId,
       'sender_id': senderId,
+      'sender_name': senderName,
+      'sender_avatar': senderAvatar,
       'content': content,
+      'image_url': imageUrl,
       'created_at': DateTime.now().toIso8601String(),
-    });
-    await client.from('dm_rooms').update({
-      'last_message': content,
-      'last_message_at': DateTime.now().toIso8601String(),
-    }).eq('id', roomId);
+    };
+    try {
+      await client.from('chat_messages').insert(payload);
+    } on PostgrestException catch (e) {
+      final missingDisplayColumns =
+          e.message.contains('sender_name') ||
+          e.message.contains('sender_avatar') ||
+          e.message.contains('image_url');
+      if (!missingDisplayColumns) rethrow;
+      await client.from('chat_messages').insert({
+        'room_id': roomId,
+        'sender_id': senderId,
+        'content': content,
+        'created_at': payload['created_at'],
+      });
+    }
+    await client
+        .from('dm_rooms')
+        .update({
+          'last_message': content.isNotEmpty ? content : 'Image',
+          'last_message_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', roomId);
   }
 
-  static Future<List<Map<String, dynamic>>> getMessages(String roomId, {int limit = 100}) async {
+  static Future<List<Map<String, dynamic>>> getMessages(
+    String roomId, {
+    int limit = 100,
+  }) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
     final data = await client
@@ -88,7 +115,11 @@ class ChatService {
           event: PostgresChangeEvent.insert,
           schema: 'public',
           table: 'chat_messages',
-          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'room_id', value: roomId),
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'room_id',
+            value: roomId,
+          ),
           callback: (payload) {
             onInsert(payload.newRecord);
           },
@@ -172,6 +203,19 @@ class ChatService {
     return (data as List).cast<Map<String, dynamic>>();
   }
 
+  static Future<Map<String, dynamic>?> getChannelMessage(
+    String messageId,
+  ) async {
+    if (!isSupabaseConfigured()) return null;
+    final client = getSupabase();
+    final data = await client
+        .from('channel_messages')
+        .select()
+        .eq('id', messageId)
+        .maybeSingle();
+    return data == null ? null : Map<String, dynamic>.from(data);
+  }
+
   // ── Channel read tracking ──────────────────────────────
 
   static Future<void> markChannelRead({
@@ -187,7 +231,9 @@ class ChatService {
     });
   }
 
-  static Future<Map<String, DateTime>> getChannelReads(String residentId) async {
+  static Future<Map<String, DateTime>> getChannelReads(
+    String residentId,
+  ) async {
     if (!isSupabaseConfigured()) return {};
     final client = getSupabase();
     final data = await client
@@ -259,7 +305,9 @@ class ChatService {
         .select()
         .eq('world_id', worldId)
         .order('position');
-    return (data as List).map((e) => District.fromSupabase(e as Map<String, dynamic>)).toList();
+    return (data as List)
+        .map((e) => District.fromSupabase(e as Map<String, dynamic>))
+        .toList();
   }
 
   static Future<void> createDistrict({

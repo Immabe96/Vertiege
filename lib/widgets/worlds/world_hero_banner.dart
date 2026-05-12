@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
 import '../../theme/colors.dart';
+import '../../models/world.dart';
 import 'world_banner.dart';
 
 class WorldHeroBanner extends StatelessWidget {
@@ -13,6 +14,8 @@ class WorldHeroBanner extends StatelessWidget {
   final GlobalKey joinButtonKey;
   final VoidCallback onJoin;
   final VoidCallback? onSettings;
+  final WorldType worldType;
+  final int prestige;
 
   const WorldHeroBanner({
     super.key,
@@ -25,6 +28,8 @@ class WorldHeroBanner extends StatelessWidget {
     required this.joinButtonKey,
     required this.onJoin,
     this.onSettings,
+    this.worldType = WorldType.wealth,
+    this.prestige = 0,
   });
 
   @override
@@ -94,7 +99,11 @@ class WorldHeroBanner extends StatelessWidget {
             height: expandedHeight,
             child: Hero(
               tag: 'world-icon-$worldId',
-              child: WorldBanner(worldId: worldId),
+              child: WorldBanner(
+                worldId: worldId,
+                worldType: worldType,
+                prestige: prestige,
+              ),
             ),
           ),
           // Gradient overlay for readability
@@ -134,9 +143,10 @@ class WorldHeroBanner extends StatelessWidget {
                   letterSpacing: LetterSpacing.section,
                   shadows: const [
                     Shadow(
-                        color: Colors.black54,
-                        blurRadius: 10,
-                        offset: Offset(0, 2)),
+                      color: Colors.black54,
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
+                    ),
                   ],
                 ),
                 maxLines: 2,

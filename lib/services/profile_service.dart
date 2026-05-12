@@ -18,7 +18,12 @@ class ProfileService {
         .maybeSingle();
     if (data == null) return null;
     final verifiedRoles = await _getVerifiedRoles(userId);
-    return _toResident(data, verifiedRoles: verifiedRoles);
+    final joinedWorldIds = await _getJoinedWorldIds(userId);
+    return _toResident(
+      data,
+      verifiedRoles: verifiedRoles,
+      joinedWorldIds: joinedWorldIds,
+    );
   }
 
   static Future<List<Resident>> searchResidents(
@@ -73,6 +78,7 @@ class ProfileService {
   static Resident _toResident(
     Map<String, dynamic> data, {
     List<String> verifiedRoles = const [],
+    List<String>? joinedWorldIds,
   }) => Resident(
     id: data['id'] ?? '',
     name: data['name'] ?? 'Member',
@@ -88,7 +94,8 @@ class ProfileService {
     streakCount: (data['streak_count'] as int?) ?? 0,
     streakShields: (data['streak_shields'] as int?) ?? 0,
     following: List<String>.from(data['following'] ?? []),
-    joinedWorldIds: List<String>.from(data['joined_world_ids'] ?? []),
+    joinedWorldIds:
+        joinedWorldIds ?? List<String>.from(data['joined_world_ids'] ?? []),
     worldStandings: const {},
     bannedWorldIds: const [],
     mutedUntil: const {},
@@ -110,6 +117,23 @@ class ProfileService {
           .eq('status', 'approved');
       return (data as List)
           .map((e) => (e as Map<String, dynamic>)['profession']?.toString())
+          .whereType<String>()
+          .toSet()
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  static Future<List<String>> _getJoinedWorldIds(String userId) async {
+    try {
+      final client = getSupabase();
+      final data = await client
+          .from('world_members')
+          .select('world_id')
+          .eq('resident_id', userId);
+      return (data as List)
+          .map((e) => (e as Map<String, dynamic>)['world_id']?.toString())
           .whereType<String>()
           .toSet()
           .toList();
