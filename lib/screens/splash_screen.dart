@@ -118,14 +118,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppColors.tertiary,
-                        AppColors.tertiaryFixedDim,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: AppColors.surfaceElevated.withValues(alpha: 0.72),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.tertiary.withValues(
@@ -136,10 +129,13 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.public,
-                    size: 56,
-                    color: AppColors.onTertiary,
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.sm),
+                    child: Image.asset(
+                      'assets/images/splash-icon.png',
+                      fit: BoxFit.contain,
+                      cacheWidth: 180,
+                    ),
                   ),
                 ),
               ),

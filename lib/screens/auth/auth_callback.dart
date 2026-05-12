@@ -81,15 +81,19 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.seed.withValues(alpha: 0.12),
+                    color: AppColors.surfaceElevated.withValues(alpha: 0.72),
                     borderRadius: BorderRadius.circular(
                       RadiusTokens.cardFeatured,
                     ),
+                    border: Border.all(color: AppColors.glassBorder),
                   ),
-                  child: const Icon(
-                    Icons.public,
-                    size: IconSizes.xl,
-                    color: AppColors.seed,
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.xs),
+                    child: Image.asset(
+                      'assets/images/splash-icon.png',
+                      fit: BoxFit.contain,
+                      cacheWidth: 128,
+                    ),
                   ),
                 ),
                 const SizedBox(height: Spacing.lg),
