@@ -1150,7 +1150,7 @@ class _BoostWorldCard extends ConsumerWidget {
                   : null,
               icon: const Icon(Icons.rocket_launch, size: 20),
               label: Text(
-                enabled ? 'Boost World — \$4.99' : 'Boost unavailable',
+                enabled ? 'Boost World - \$4.99' : 'Boost unavailable',
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: canBoost ? AppColors.gold : null,

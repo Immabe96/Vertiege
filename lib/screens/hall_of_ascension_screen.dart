@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -153,7 +152,6 @@ class _XpLeaderboard extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Build entries from current resident data + sample entries (debug only)
     final entries = <_LeaderEntry>[
       _LeaderEntry(
         id: resident.id,
@@ -163,81 +161,6 @@ class _XpLeaderboard extends ConsumerWidget {
         score: achievementState.totalXp,
         title: resident.title,
       ),
-      if (kDebugMode) ...[
-        _LeaderEntry(
-          id: 's1',
-          name: 'Aria Voss',
-          tier: 5,
-          avatarUrl: '',
-          score: 52000,
-          title: 'the Relentless',
-        ),
-        _LeaderEntry(
-          id: 's2',
-          name: 'Kai Zenith',
-          tier: 5,
-          avatarUrl: '',
-          score: 48700,
-        ),
-        _LeaderEntry(
-          id: 's3',
-          name: 'Luna Frost',
-          tier: 4,
-          avatarUrl: '',
-          score: 43100,
-          title: 'the Storyteller',
-        ),
-        _LeaderEntry(
-          id: 's4',
-          name: 'Marcus Cole',
-          tier: 4,
-          avatarUrl: '',
-          score: 37500,
-        ),
-        _LeaderEntry(
-          id: 's5',
-          name: 'Nova Hart',
-          tier: 4,
-          avatarUrl: '',
-          score: 29100,
-          title: 'the Wayfarer',
-        ),
-        _LeaderEntry(
-          id: 's6',
-          name: 'Orion Shade',
-          tier: 3,
-          avatarUrl: '',
-          score: 18500,
-        ),
-        _LeaderEntry(
-          id: 's7',
-          name: 'Sage River',
-          tier: 3,
-          avatarUrl: '',
-          score: 15200,
-        ),
-        _LeaderEntry(
-          id: 's8',
-          name: 'Vex Crow',
-          tier: 3,
-          avatarUrl: '',
-          score: 12100,
-        ),
-        _LeaderEntry(
-          id: 's9',
-          name: 'Zara Nyx',
-          tier: 2,
-          avatarUrl: '',
-          score: 9800,
-        ),
-        _LeaderEntry(
-          id: 's10',
-          name: 'Ash Dune',
-          tier: 2,
-          avatarUrl: '',
-          score: 7200,
-        ),
-      ],
     ]..sort((a, b) => b.score.compareTo(a.score));
 
     return _buildLeaderboardList(context, ref, entries.take(20).toList());
@@ -291,81 +214,6 @@ class _AchievementLeaderboard extends ConsumerWidget {
           score: verifiedCount,
           title: resident.title,
         ),
-      if (kDebugMode) ...[
-        _LeaderEntry(
-          id: 's1',
-          name: 'Aria Voss',
-          tier: 5,
-          avatarUrl: '',
-          score: 47,
-          title: 'the Ancient',
-        ),
-        _LeaderEntry(
-          id: 's2',
-          name: 'Kai Zenith',
-          tier: 5,
-          avatarUrl: '',
-          score: 42,
-        ),
-        _LeaderEntry(
-          id: 's3',
-          name: 'Luna Frost',
-          tier: 4,
-          avatarUrl: '',
-          score: 38,
-          title: 'the Seasoned',
-        ),
-        _LeaderEntry(
-          id: 's4',
-          name: 'Marcus Cole',
-          tier: 4,
-          avatarUrl: '',
-          score: 35,
-        ),
-        _LeaderEntry(
-          id: 's5',
-          name: 'Nova Hart',
-          tier: 4,
-          avatarUrl: '',
-          score: 31,
-        ),
-        _LeaderEntry(
-          id: 's6',
-          name: 'Orion Shade',
-          tier: 3,
-          avatarUrl: '',
-          score: 28,
-        ),
-        _LeaderEntry(
-          id: 's7',
-          name: 'Sage River',
-          tier: 3,
-          avatarUrl: '',
-          score: 25,
-          title: 'the Pathfinder',
-        ),
-        _LeaderEntry(
-          id: 's8',
-          name: 'Vex Crow',
-          tier: 3,
-          avatarUrl: '',
-          score: 22,
-        ),
-        _LeaderEntry(
-          id: 's9',
-          name: 'Zara Nyx',
-          tier: 2,
-          avatarUrl: '',
-          score: 18,
-        ),
-        _LeaderEntry(
-          id: 's10',
-          name: 'Ash Dune',
-          tier: 2,
-          avatarUrl: '',
-          score: 15,
-        ),
-      ],
     ]..sort((a, b) => b.score.compareTo(a.score));
 
     return _buildLeaderboardList(context, ref, entries.take(20).toList());
@@ -389,79 +237,6 @@ class _ReferralLeaderboard extends ConsumerWidget {
           score: resident.referredBy != null ? 1 : 0,
           title: resident.title,
         ),
-      if (kDebugMode) ...[
-        _LeaderEntry(
-          id: 's1',
-          name: 'Aria Voss',
-          tier: 5,
-          avatarUrl: '',
-          score: 24,
-          title: 'the Voice',
-        ),
-        _LeaderEntry(
-          id: 's2',
-          name: 'Kai Zenith',
-          tier: 5,
-          avatarUrl: '',
-          score: 19,
-        ),
-        _LeaderEntry(
-          id: 's3',
-          name: 'Luna Frost',
-          tier: 4,
-          avatarUrl: '',
-          score: 15,
-        ),
-        _LeaderEntry(
-          id: 's4',
-          name: 'Marcus Cole',
-          tier: 4,
-          avatarUrl: '',
-          score: 12,
-        ),
-        _LeaderEntry(
-          id: 's5',
-          name: 'Nova Hart',
-          tier: 4,
-          avatarUrl: '',
-          score: 9,
-        ),
-        _LeaderEntry(
-          id: 's6',
-          name: 'Orion Shade',
-          tier: 3,
-          avatarUrl: '',
-          score: 7,
-        ),
-        _LeaderEntry(
-          id: 's7',
-          name: 'Sage River',
-          tier: 3,
-          avatarUrl: '',
-          score: 5,
-        ),
-        _LeaderEntry(
-          id: 's8',
-          name: 'Vex Crow',
-          tier: 3,
-          avatarUrl: '',
-          score: 4,
-        ),
-        _LeaderEntry(
-          id: 's9',
-          name: 'Zara Nyx',
-          tier: 2,
-          avatarUrl: '',
-          score: 3,
-        ),
-        _LeaderEntry(
-          id: 's10',
-          name: 'Ash Dune',
-          tier: 2,
-          avatarUrl: '',
-          score: 2,
-        ),
-      ],
     ]..sort((a, b) => b.score.compareTo(a.score));
 
     return _buildLeaderboardList(context, ref, entries.take(20).toList());
@@ -480,7 +255,6 @@ Widget _buildLeaderboardList(
       title: 'No rankings yet',
       description: 'Rankings will appear once residents start earning here.',
       icon: Icons.leaderboard_outlined,
-      variant: EmptyStateVariant.default_,
     );
   }
 

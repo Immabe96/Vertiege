@@ -153,7 +153,7 @@ class WorldAccessGuard extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              '$title — $price',
+              '$title - $price',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 4),
