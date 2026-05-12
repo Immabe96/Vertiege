@@ -18,7 +18,7 @@ class ProfileService {
         .maybeSingle();
     if (data == null) return null;
     final verifiedRoles = await _getVerifiedRoles(userId);
-    final joinedWorldIds = await _getJoinedWorldIds(userId);
+    final joinedWorldIds = await _getJoinedWorldIds(userId, data);
     return _toResident(
       data,
       verifiedRoles: verifiedRoles,
@@ -68,6 +68,7 @@ class ProfileService {
     'streak_shields': r.streakShields,
     'following': _uuidList(r.following),
     'joined_world_ids': _uuidList(r.joinedWorldIds),
+    'local_world_ids': _localWorldIds(r.joinedWorldIds),
     if (r.referredBy != null) 'referred_by': r.referredBy,
     'referral_code': r.referralCode,
     'sovereign_coins': r.sovereignCoins,
@@ -88,20 +89,13 @@ class ProfileService {
     profession: data['profession'],
     verifiedRoles: verifiedRoles,
     decorations: List<String>.from(data['decorations'] ?? []),
-    wealthWorldsUnlocked: const [],
-    badges: const [],
     lastCheckIn: data['last_check_in'] as String?,
     streakCount: (data['streak_count'] as int?) ?? 0,
     streakShields: (data['streak_shields'] as int?) ?? 0,
     following: List<String>.from(data['following'] ?? []),
     joinedWorldIds:
         joinedWorldIds ?? List<String>.from(data['joined_world_ids'] ?? []),
-    worldStandings: const {},
-    bannedWorldIds: const [],
-    mutedUntil: const {},
-    lastSeenAt: 0,
     referredBy: data['referred_by'] as String?,
-    title: null,
     sovereignCoins: (data['sovereign_coins'] as int?) ?? 100,
     onboardingCompleted: data['onboarding_completed'] ?? false,
     gateCompleted: data['gate_completed'] ?? false,
@@ -125,25 +119,37 @@ class ProfileService {
     }
   }
 
-  static Future<List<String>> _getJoinedWorldIds(String userId) async {
+  static Future<List<String>> _getJoinedWorldIds(
+    String userId,
+    Map<String, dynamic> profile,
+  ) async {
+    final ids = <String>{
+      ...List<String>.from(profile['joined_world_ids'] ?? []),
+      ...List<String>.from(profile['local_world_ids'] ?? []),
+    };
     try {
       final client = getSupabase();
       final data = await client
           .from('world_members')
           .select('world_id')
           .eq('resident_id', userId);
-      return (data as List)
-          .map((e) => (e as Map<String, dynamic>)['world_id']?.toString())
-          .whereType<String>()
-          .toSet()
-          .toList();
+      ids.addAll(
+        (data as List)
+            .map((e) => (e as Map<String, dynamic>)['world_id']?.toString())
+            .whereType<String>(),
+      );
     } catch (_) {
-      return const [];
+      // Profile arrays still preserve local catalog membership when the
+      // membership table is unreachable.
     }
+    return ids.toList();
   }
 
   static List<String> _uuidList(Iterable<String> values) =>
       values.where(_isUuid).toList();
+
+  static List<String> _localWorldIds(Iterable<String> values) =>
+      values.where((id) => !_isUuid(id)).toSet().toList();
 
   static bool _isUuid(String value) => RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',

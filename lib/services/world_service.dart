@@ -3,6 +3,10 @@ import '../utils/id_generator.dart';
 import 'supabase.dart';
 
 class WorldService {
+  static bool isRemoteWorldId(String worldId) => RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+  ).hasMatch(worldId);
+
   // --- World CRUD ---
 
   static Future<Map<String, dynamic>?> createWorld({
@@ -48,7 +52,7 @@ class WorldService {
     String residentId, {
     String residentName = 'Member',
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured() || !isRemoteWorldId(worldId)) return;
     final client = getSupabase();
     await client.from('world_members').upsert({
       'world_id': worldId,
@@ -60,7 +64,7 @@ class WorldService {
   }
 
   static Future<void> leaveWorld(String worldId, String residentId) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured() || !isRemoteWorldId(worldId)) return;
     final client = getSupabase();
     await client
         .from('world_members')
@@ -70,7 +74,7 @@ class WorldService {
   }
 
   static Future<List<Map<String, dynamic>>> getMembers(String worldId) async {
-    if (!isSupabaseConfigured()) return [];
+    if (!isSupabaseConfigured() || !isRemoteWorldId(worldId)) return [];
     final client = getSupabase();
     final data = await client
         .from('world_members')
@@ -81,7 +85,7 @@ class WorldService {
   }
 
   static Future<List<WorldChannel>> getChannels(String worldId) async {
-    if (!isSupabaseConfigured()) return [];
+    if (!isSupabaseConfigured() || !isRemoteWorldId(worldId)) return [];
     final client = getSupabase();
     final data = await client
         .from('channels')
