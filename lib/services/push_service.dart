@@ -12,20 +12,28 @@ class PushService {
   static RealtimeChannel? _channel;
   static final _tapController = StreamController<AppNotification>.broadcast();
   static bool _initialized = false;
+  static String? _userId;
 
-  static Stream<AppNotification> get onNotificationTap =>
+  static Stream<AppNotification> get onNotificationTap => _tapController.stream;
+
+  static Stream<AppNotification> get onNotificationReceived =>
       _tapController.stream;
 
-  static Future<void> initialize() async {
-    if (_initialized || !isSupabaseConfigured()) return;
-    _initialized = true;
-
+  static Future<void> initialize({String? userId}) async {
+    if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    final userId = client.auth.currentUser?.id;
-    if (userId == null) return;
+    final resolvedUserId = userId ?? client.auth.currentUser?.id;
+    if (resolvedUserId == null) return;
+
+    if (_initialized && _userId == resolvedUserId) return;
+    if (_initialized && _userId != resolvedUserId) {
+      await dispose();
+    }
+    _initialized = true;
+    _userId = resolvedUserId;
 
     _channel = client
-        .channel('push_$userId')
+        .channel('push_$resolvedUserId')
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
@@ -33,7 +41,7 @@ class PushService {
           filter: PostgresChangeFilter(
             type: PostgresChangeFilterType.eq,
             column: 'recipient_id',
-            value: userId,
+            value: resolvedUserId,
           ),
           callback: (payload) {
             try {
@@ -49,5 +57,6 @@ class PushService {
     await _channel?.unsubscribe();
     _channel = null;
     _initialized = false;
+    _userId = null;
   }
 }

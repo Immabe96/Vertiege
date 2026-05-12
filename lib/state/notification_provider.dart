@@ -1,23 +1,42 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/notification.dart';
 import '../services/storage_service.dart';
 import '../services/notification_service.dart';
+import '../services/push_service.dart';
 import '../utils/id_generator.dart';
 import 'resident_provider.dart';
 
 class NotificationState {
   final List<AppNotification> notifications;
   final bool isLoading;
-  const NotificationState({this.notifications = const [], this.isLoading = true});
+  const NotificationState({
+    this.notifications = const [],
+    this.isLoading = true,
+  });
 
-  NotificationState copyWith({List<AppNotification>? notifications, bool? isLoading}) =>
-      NotificationState(notifications: notifications ?? this.notifications, isLoading: isLoading ?? this.isLoading);
+  NotificationState copyWith({
+    List<AppNotification>? notifications,
+    bool? isLoading,
+  }) => NotificationState(
+    notifications: notifications ?? this.notifications,
+    isLoading: isLoading ?? this.isLoading,
+  );
 }
 
 class NotificationNotifier extends Notifier<NotificationState> {
+  StreamSubscription<AppNotification>? _realtimeSubscription;
+  String? _realtimeResidentId;
+
   @override
-  NotificationState build() => const NotificationState();
+  NotificationState build() {
+    ref.onDispose(() {
+      _realtimeSubscription?.cancel();
+      unawaited(PushService.dispose());
+    });
+    return const NotificationState();
+  }
 
   void addNotification({
     required NotificationType type,
@@ -47,7 +66,9 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
   void markRead(String id) {
     state = state.copyWith(
-      notifications: state.notifications.map((n) => n.id == id ? n.copyWith(read: true) : n).toList(),
+      notifications: state.notifications
+          .map((n) => n.id == id ? n.copyWith(read: true) : n)
+          .toList(),
     );
     _persist();
 
@@ -56,7 +77,9 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
   void markAllRead() {
     state = state.copyWith(
-      notifications: state.notifications.map((n) => n.copyWith(read: true)).toList(),
+      notifications: state.notifications
+          .map((n) => n.copyWith(read: true))
+          .toList(),
     );
     _persist();
 
@@ -71,20 +94,34 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
-      final remoteNotifications = await NotificationService.getNotifications(resident.id);
+      unawaited(_subscribeRealtime(resident.id));
+      final remoteNotifications = await NotificationService.getNotifications(
+        resident.id,
+      );
       if (remoteNotifications.isNotEmpty) {
-        state = NotificationState(notifications: remoteNotifications, isLoading: false);
+        state = NotificationState(
+          notifications: remoteNotifications,
+          isLoading: false,
+        );
         _persist();
         return;
       }
     }
 
     try {
-      final json = await StorageService.getString(StorageService.notificationsKey);
+      final json = await StorageService.getString(
+        StorageService.notificationsKey,
+      );
       if (json != null) {
         final list = jsonDecode(json) as List;
-        final notifications = list.map((e) => _fromJson(e as Map<String, dynamic>)).whereType<AppNotification>().toList();
-        state = NotificationState(notifications: notifications, isLoading: false);
+        final notifications = list
+            .map((e) => _fromJson(e as Map<String, dynamic>))
+            .whereType<AppNotification>()
+            .toList();
+        state = NotificationState(
+          notifications: notifications,
+          isLoading: false,
+        );
         return;
       }
     } catch (_) {}
@@ -92,6 +129,26 @@ class NotificationNotifier extends Notifier<NotificationState> {
   }
 
   int get unreadCount => state.notifications.where((n) => !n.read).length;
+
+  Future<void> _subscribeRealtime(String residentId) async {
+    if (_realtimeResidentId == residentId) return;
+    await _realtimeSubscription?.cancel();
+    await PushService.dispose();
+    await PushService.initialize(userId: residentId);
+    _realtimeResidentId = residentId;
+    _realtimeSubscription = PushService.onNotificationReceived.listen(
+      _addRemoteNotification,
+    );
+  }
+
+  void _addRemoteNotification(AppNotification notification) {
+    if (state.notifications.any((n) => n.id == notification.id)) return;
+    state = state.copyWith(
+      notifications: [notification, ...state.notifications],
+      isLoading: false,
+    );
+    _persist();
+  }
 
   void worldRankingAlert({
     required String worldId,
@@ -103,7 +160,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
       message = 'Your world $worldName is ranked #1! The reigning sovereign.';
     } else {
       final toGo = rank - 1;
-      message = 'Your world $worldName is ranked #$rank! $toGo more ${toGo == 1 ? 'boost' : 'boosts'} to reach #1.';
+      message =
+          'Your world $worldName is ranked #$rank! $toGo more ${toGo == 1 ? 'boost' : 'boosts'} to reach #1.';
     }
     addNotification(
       type: NotificationType.ranking,
@@ -112,7 +170,10 @@ class NotificationNotifier extends Notifier<NotificationState> {
     );
   }
 
-  void streakExpiringAlert({required int hoursLeft, required String residentName}) {
+  void streakExpiringAlert({
+    required int hoursLeft,
+    required String residentName,
+  }) {
     final scheduleMsg = hoursLeft <= 1
         ? 'Your streak expires in 1 hour! Open now to keep it.'
         : 'Your streak expires in $hoursLeft hours! Open now to keep it.';
@@ -159,16 +220,17 @@ class NotificationNotifier extends Notifier<NotificationState> {
   }
 
   static Map<String, dynamic> _toJson(AppNotification n) => {
-        'id': n.id,
-        'type': n.type.name,
-        'message': n.message,
-        'worldId': n.worldId,
-        'postId': n.postId,
-        'read': n.read,
-        'createdAt': n.createdAt,
-      };
+    'id': n.id,
+    'type': n.type.name,
+    'message': n.message,
+    'worldId': n.worldId,
+    'postId': n.postId,
+    'read': n.read,
+    'createdAt': n.createdAt,
+  };
 }
 
-final notificationProvider = NotifierProvider<NotificationNotifier, NotificationState>(
-  NotificationNotifier.new,
-);
+final notificationProvider =
+    NotifierProvider<NotificationNotifier, NotificationState>(
+      NotificationNotifier.new,
+    );
