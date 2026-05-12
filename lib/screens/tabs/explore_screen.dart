@@ -2,22 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../models/resident.dart';
 import '../../models/world.dart';
+import '../../services/access_control.dart';
 import '../../services/season_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../../utils/world_assets.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/fade_in.dart';
 import '../../widgets/core/notification_bell.dart';
-import '../../widgets/explore/boosted_worlds_row.dart';
-import '../../widgets/explore/featured_worlds_row.dart';
-import '../../widgets/explore/section_header.dart';
-import '../../widgets/explore/trending_rising_section.dart';
-import '../../widgets/shared/filter_pill.dart';
-import '../../widgets/worlds/world_card.dart';
-
-enum _ViewMode { grid, tier, list }
+import '../../widgets/worlds/world_banner.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -30,7 +28,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   WorldType? _selectedType;
-  _ViewMode _viewMode = _ViewMode.grid;
 
   @override
   void dispose() {
@@ -39,29 +36,59 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 
   List<World> _filter(Iterable<World> worlds) {
-    return worlds.where((w) {
-      if (_selectedType != null && w.type != _selectedType) return false;
-      if (_searchQuery.isNotEmpty &&
-          !w.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
-        return false;
-      }
-      return true;
+    final query = _searchQuery.trim().toLowerCase();
+    return worlds.where((world) {
+      if (_selectedType != null && world.type != _selectedType) return false;
+      if (query.isEmpty) return true;
+      return world.name.toLowerCase().contains(query) ||
+          world.description.toLowerCase().contains(query) ||
+          world.sovereignName.toLowerCase().contains(query);
     }).toList();
   }
 
-  List<World> _sortedByPrestige(List<World> worlds) {
-    final sorted = List<World>.from(worlds);
-    sorted.sort((a, b) => b.prestige.compareTo(a.prestige));
-    return sorted;
+  List<World> _ranked(List<World> worlds) {
+    final ranked = List<World>.from(worlds);
+    ranked.sort((a, b) => _discoverScore(b).compareTo(_discoverScore(a)));
+    return ranked;
+  }
+
+  double _discoverScore(World world) {
+    final boost = world.isBoosted ? 120 : 0;
+    return world.prestige * 4 +
+        world.memberCount * 1.4 +
+        world.activityScore * 0.5 +
+        boost;
+  }
+
+  List<World> _trending(List<World> worlds) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final trending = List<World>.from(worlds);
+    trending.sort((a, b) {
+      double velocity(World world) {
+        final ageDays = ((now - world.createdAt) / 86400000).clamp(0.5, 9999);
+        return (world.memberCount * 10 + world.prestige + world.activityScore) /
+            ageDays;
+      }
+
+      return velocity(b).compareTo(velocity(a));
+    });
+    return trending;
   }
 
   @override
   Widget build(BuildContext context) {
-    final allWorlds = ref.watch(worldProvider).worlds.values.toList();
-    final filtered = _filter(allWorlds);
-    final isFiltering = _selectedType != null || _searchQuery.isNotEmpty;
-    final featured = _sortedByPrestige(allWorlds).take(5).toList();
-    final boosted = allWorlds.where((w) => w.isBoosted).toList();
+    final state = ref.watch(worldProvider);
+    final resident = ref.watch(residentProvider).resident;
+    final worlds = state.worlds.values.toList();
+    final rankedWorlds = _ranked(worlds);
+    final filtered = _ranked(_filter(worlds));
+    final isFiltering = _selectedType != null || _searchQuery.trim().isNotEmpty;
+    final spotlight = rankedWorlds.take(5).toList();
+    final boosted = rankedWorlds
+        .where((world) => world.isBoosted)
+        .take(6)
+        .toList();
+    final trending = _trending(worlds).take(6).toList();
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -69,449 +96,643 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         backgroundColor: AppColors.canvas,
         elevation: 0,
         title: Text(
-          'Discovery',
+          'Discover',
           style: GoogleFonts.spaceGrotesk(
             fontSize: FontSizes.headlineMd,
             fontWeight: FontWeights.bold,
-            color: AppColors.primary,
+            color: AppColors.ink,
           ),
         ),
         actions: [
           NotificationBell(onPress: () => context.push('/notifications')),
-          Consumer(
-            builder: (context, ref, _) {
-              final tier =
-                  ref.watch(residentProvider).resident?.tier.value ?? 0;
-              if (tier < 2) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.add, color: AppColors.inkSecondary),
-                tooltip: 'Create World',
-                onPressed: () => context.push('/create-world'),
-              );
-            },
-          ),
+          if ((resident?.tier.value ?? 0) >= 2)
+            IconButton(
+              icon: const Icon(Icons.add, color: AppColors.inkSecondary),
+              tooltip: 'Create World',
+              onPressed: () => context.push('/create-world'),
+            ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(worldProvider.notifier).loadWorlds();
-        },
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Spacing.md,
-                Spacing.sm,
-                Spacing.md,
-                Spacing.xs,
-              ),
-              child: TextField(
+        onRefresh: () => ref.read(worldProvider.notifier).loadWorlds(),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: _DiscoverHeader(
                 controller: _searchController,
-                onChanged: (v) => setState(() => _searchQuery = v),
-                style: const TextStyle(color: AppColors.ink),
-                decoration: InputDecoration(
-                  hintText: 'Search worlds...',
-                  hintStyle: const TextStyle(color: AppColors.inkMuted),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    size: IconSizes.md,
-                    color: AppColors.inkMuted,
-                  ),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: IconSizes.sm),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: AppColors.glassBackground,
-                  border: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.glassBorder),
-                  ),
-                  enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.glassBorder),
-                  ),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
-                  ),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.md,
-                    vertical: 12,
-                  ),
-                ),
+                query: _searchQuery,
+                worlds: worlds,
+                onQueryChanged: (value) => setState(() => _searchQuery = value),
+                onClear: () {
+                  _searchController.clear();
+                  setState(() => _searchQuery = '');
+                },
               ),
             ),
-
-            // Season banner (only when not filtering)
-            if (!isFiltering)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md,
-                  vertical: Spacing.xs,
-                ),
-                child: _SeasonBannerCard(
-                  worlds: allWorlds,
-                  onTap: () => context.push('/season'),
-                ),
-              ),
-
-            // Filter chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-              child: Row(
-                children: [
-                  FilterPill(
-                    label: 'All',
-                    icon: Icons.public,
-                    selected: _selectedType == null,
-                    onTap: () => setState(() => _selectedType = null),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  FilterPill(
-                    label: 'Wealth',
-                    icon: Icons.diamond,
-                    selected: _selectedType == WorldType.wealth,
-                    onTap: () =>
-                        setState(() => _selectedType = WorldType.wealth),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  FilterPill(
-                    label: 'Profession',
-                    icon: Icons.work,
-                    selected: _selectedType == WorldType.profession,
-                    onTap: () =>
-                        setState(() => _selectedType = WorldType.profession),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  FilterPill(
-                    label: 'Dominion',
-                    icon: Icons.shield,
-                    selected: _selectedType == WorldType.dominion,
-                    onTap: () =>
-                        setState(() => _selectedType = WorldType.dominion),
-                  ),
-                ],
+            SliverToBoxAdapter(
+              child: _WorldTypeStrip(
+                selectedType: _selectedType,
+                worlds: worlds,
+                onSelected: (type) => setState(() => _selectedType = type),
               ),
             ),
-
-            const SizedBox(height: Spacing.md),
-
-            // Featured worlds row (only when not filtering)
-            if (!isFiltering && featured.isNotEmpty) ...[
-              const ExploreSectionHeader(title: 'Featured Worlds'),
-              SizedBox(height: 260, child: FeaturedWorldsRow(worlds: featured)),
-              const SizedBox(height: Spacing.md),
+            if (!isFiltering && spotlight.isNotEmpty) ...[
+              const SliverToBoxAdapter(child: _SectionTitle('Spotlight')),
+              SliverToBoxAdapter(
+                child: _SpotlightRail(worlds: spotlight, resident: resident),
+              ),
             ],
-
-            // Boosted realms (only when not filtering and boosted exist)
             if (!isFiltering && boosted.isNotEmpty) ...[
-              const ExploreSectionHeader(title: 'Boosted Realms'),
-              BoostedWorldsRow(worlds: boosted.take(6).toList()),
-              const SizedBox(height: Spacing.md),
+              const SliverToBoxAdapter(child: _SectionTitle('Boosted Realms')),
+              SliverToBoxAdapter(
+                child: _MiniWorldRail(
+                  worlds: boosted,
+                  resident: resident,
+                  badgeLabel: 'Boosted',
+                  badgeIcon: Icons.rocket_launch,
+                  badgeColor: AppColors.tertiary,
+                ),
+              ),
             ],
-
-            // Trending & Rising sections (only when not filtering)
-            if (!isFiltering) ..._buildTrendingRising(allWorlds),
-
-            // View mode toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-              child: _buildViewModeToggle(),
+            if (!isFiltering && trending.isNotEmpty) ...[
+              const SliverToBoxAdapter(child: _SectionTitle('Trending Now')),
+              SliverToBoxAdapter(
+                child: _MiniWorldRail(
+                  worlds: trending,
+                  resident: resident,
+                  badgeLabel: 'Active',
+                  badgeIcon: Icons.trending_up,
+                  badgeColor: AppColors.success,
+                ),
+              ),
+            ],
+            SliverToBoxAdapter(
+              child: _SectionTitle(
+                isFiltering ? 'Matching Worlds' : 'Browse All Worlds',
+              ),
             ),
-
-            const SizedBox(height: Spacing.sm),
-
-            // Section header
-            ExploreSectionHeader(title: isFiltering ? 'Results' : 'All Worlds'),
-
-            const SizedBox(height: Spacing.sm),
-
-            // Content by view mode
             if (filtered.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(Spacing.xl),
-                child: AppEmptyState(
-                  title: _searchQuery.isNotEmpty
-                      ? 'No worlds found'
-                      : 'No worlds available',
-                  description: _searchQuery.isNotEmpty
-                      ? 'No worlds match "$_searchQuery". Try a different search.'
-                      : 'No worlds have been created yet.',
-                  icon: _searchQuery.isNotEmpty
-                      ? Icons.search_off
-                      : Icons.public_off,
-                  imageAsset: 'assets/generated/empty-worlds.jpg',
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(Spacing.xl),
+                  child: AppEmptyState(
+                    title: _searchQuery.isNotEmpty
+                        ? 'No worlds found'
+                        : 'No worlds available',
+                    description: _searchQuery.isNotEmpty
+                        ? 'No worlds match "$_searchQuery". Try a different search.'
+                        : 'No worlds have been created yet.',
+                    icon: _searchQuery.isNotEmpty
+                        ? Icons.search_off
+                        : Icons.public_off,
+                    imageAsset: 'assets/generated/empty-worlds.jpg',
+                  ),
                 ),
               )
-            else if (_viewMode == _ViewMode.grid)
-              _buildGrid(filtered)
-            else if (_viewMode == _ViewMode.tier)
-              _buildTierView(filtered)
             else
-              _buildListView(filtered),
-
-            const SizedBox(height: Spacing.xxl + Spacing.xl),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.md,
+                  0,
+                  Spacing.md,
+                  Spacing.xxl + Spacing.xl,
+                ),
+                sliver: SliverList.separated(
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: Spacing.md),
+                  itemBuilder: (context, index) => FadeIn(
+                    delayMs: (index * 45).clamp(0, 360),
+                    child: _DiscoveryWorldCard(
+                      world: filtered[index],
+                      resident: resident,
+                      compact: index > 2 && !isFiltering,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
 
-  // ── View mode toggle ──────────────────────────────────────
+class _DiscoverHeader extends StatelessWidget {
+  final TextEditingController controller;
+  final String query;
+  final List<World> worlds;
+  final ValueChanged<String> onQueryChanged;
+  final VoidCallback onClear;
 
-  Widget _buildViewModeToggle() {
-    return Container(
-      padding: const EdgeInsets.all(Spacing.xs),
-      decoration: BoxDecoration(
-        color: AppColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border.all(color: AppColors.glassBorder),
-      ),
-      child: Row(
-        children: [
-          _ToggleBtn(
-            icon: Icons.grid_view_rounded,
-            label: 'Grid',
-            selected: _viewMode == _ViewMode.grid,
-            onTap: () => setState(() => _viewMode = _ViewMode.grid),
-          ),
-          _ToggleBtn(
-            icon: Icons.stacked_bar_chart,
-            label: 'Tier',
-            selected: _viewMode == _ViewMode.tier,
-            onTap: () => setState(() => _viewMode = _ViewMode.tier),
-          ),
-          _ToggleBtn(
-            icon: Icons.view_list_rounded,
-            label: 'List',
-            selected: _viewMode == _ViewMode.list,
-            onTap: () => setState(() => _viewMode = _ViewMode.list),
-          ),
-        ],
-      ),
+  const _DiscoverHeader({
+    required this.controller,
+    required this.query,
+    required this.worlds,
+    required this.onQueryChanged,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final featured = List<World>.from(worlds)
+      ..sort((a, b) => b.prestige.compareTo(a.prestige));
+    final heroWorld = featured.isEmpty ? null : featured.first;
+    final memberTotal = worlds.fold<int>(
+      0,
+      (sum, world) => sum + world.memberCount,
     );
-  }
+    final season = SeasonService.getCurrentSeason(worlds: worlds);
 
-  // ── Grid view ─────────────────────────────────────────────
-
-  Widget _buildGrid(List<World> worlds) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        0,
-        Spacing.md,
-        Spacing.xxl,
-      ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: Spacing.sm + 4,
-        crossAxisSpacing: Spacing.sm + 4,
-        childAspectRatio: 0.72,
-      ),
-      itemCount: worlds.length,
-      itemBuilder: (_, i) => WorldCard(world: worlds[i], index: i, wide: false),
-    );
-  }
-
-  // ── Tier view ─────────────────────────────────────────────
-
-  Widget _buildTierView(List<World> worlds) {
-    final apex = worlds.where((w) => w.prestige >= 40).toList();
-    final elite = worlds
-        .where((w) => w.prestige >= 20 && w.prestige < 40)
-        .toList();
-    final hustler = worlds.where((w) => w.prestige < 20).toList();
-
-    final sections = [
-      if (apex.isNotEmpty) ('Apex', AppColors.tertiary, apex),
-      if (elite.isNotEmpty) ('Elite', AppColors.primary, elite),
-      if (hustler.isNotEmpty) ('Hustler', AppColors.hustler, hustler),
-    ];
-
-    return Column(
-      children: sections.map((s) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: Spacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(RadiusTokens.full),
+        child: SizedBox(
+          height: 250,
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  Spacing.md,
-                  Spacing.sm,
-                  Spacing.md,
-                  Spacing.xs,
+              if (heroWorld != null)
+                WorldBanner(
+                  worldId: heroWorld.id,
+                  worldType: heroWorld.type,
+                  prestige: heroWorld.prestige,
+                  height: 250,
+                )
+              else
+                Container(color: AppColors.surface),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.canvas.withValues(alpha: 0.1),
+                      AppColors.canvas.withValues(alpha: 0.72),
+                      AppColors.canvas.withValues(alpha: 0.94),
+                    ],
+                  ),
                 ),
-                child: Row(
+              ),
+              Padding(
+                padding: const EdgeInsets.all(Spacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 3,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: s.$2,
-                        borderRadius: BorderRadius.circular(2),
+                    const Spacer(),
+                    Text(
+                      'Find your next realm',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 34,
+                        height: 1.05,
+                        fontWeight: FontWeights.bold,
+                        color: AppColors.ink,
                       ),
                     ),
-                    const SizedBox(width: Spacing.sm),
+                    const SizedBox(height: Spacing.sm),
                     Text(
-                      s.$1,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: FontSizes.headlineLg,
-                        fontWeight: FontWeights.semiBold,
-                        color: s.$2,
+                      '${worlds.length} worlds, $memberTotal residents, ${season.name}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkSecondary,
                       ),
+                    ),
+                    const SizedBox(height: Spacing.lg),
+                    _SearchField(
+                      controller: controller,
+                      query: query,
+                      onQueryChanged: onQueryChanged,
+                      onClear: onClear,
                     ),
                   ],
                 ),
               ),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  Spacing.md,
-                  0,
-                  Spacing.md,
-                  Spacing.xxl,
-                ),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: Spacing.sm + 4,
-                  crossAxisSpacing: Spacing.sm + 4,
-                  childAspectRatio: 0.72,
-                ),
-                itemCount: s.$3.length,
-                itemBuilder: (_, i) =>
-                    WorldCard(world: s.$3[i], index: i, wide: false),
-              ),
             ],
           ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ── List view ─────────────────────────────────────────────
-
-  Widget _buildListView(List<World> worlds) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-      child: Column(
-        children: worlds.asMap().entries.map((e) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: e.key < worlds.length - 1 ? Spacing.sm + 4 : 0,
-            ),
-            child: WorldCard(world: e.value, index: e.key, wide: true),
-          );
-        }).toList(),
+        ),
       ),
     );
   }
+}
 
-  // ── Trending & Rising ─────────────────────────────────────
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final String query;
+  final ValueChanged<String> onQueryChanged;
+  final VoidCallback onClear;
 
-  List<Widget> _buildTrendingRising(List<World> allWorlds) {
-    final now = DateTime.now();
-    final scored = allWorlds.map((w) {
-      final ageDays = ((now.millisecondsSinceEpoch - w.createdAt) / 86400000)
-          .clamp(0.5, 9999);
-      final velocity = (w.memberCount * 10 + w.prestige) / ageDays;
-      return (world: w, velocity: velocity);
-    }).toList();
+  const _SearchField({
+    required this.controller,
+    required this.query,
+    required this.onQueryChanged,
+    required this.onClear,
+  });
 
-    final trending = List<({World world, double velocity})>.from(scored)
-      ..sort((a, b) => b.velocity.compareTo(a.velocity));
-    final topTrending = trending.take(3).toList();
-
-    final rising = scored.where((s) {
-      final age = ((now.millisecondsSinceEpoch - s.world.createdAt) / 86400000);
-      return age < 30;
-    }).toList()..sort((a, b) => b.velocity.compareTo(a.velocity));
-    final topRising = rising.take(3).toList();
-
-    return [
-      if (topTrending.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(bottom: Spacing.xs),
-          child: TrendingRisingSection(
-            title: 'Trending',
-            worlds: topTrending.map((s) => s.world).toList(),
-            badgeLabel: 'HOT',
-            badgeColor: AppColors.semanticError,
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onQueryChanged,
+      style: const TextStyle(color: AppColors.ink),
+      decoration: InputDecoration(
+        hintText: 'Search by name, topic, or sovereign',
+        hintStyle: const TextStyle(color: AppColors.inkMuted),
+        prefixIcon: const Icon(Icons.search, color: AppColors.inkMuted),
+        suffixIcon: query.isEmpty
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.close, size: IconSizes.md),
+                onPressed: onClear,
+              ),
+        filled: true,
+        fillColor: AppColors.canvas.withValues(alpha: 0.72),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
         ),
-      if (topRising.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(bottom: Spacing.md),
-          child: TrendingRisingSection(
-            title: 'Rising',
-            worlds: topRising.map((s) => s.world).toList(),
-            badgeLabel: 'NEW',
-            badgeColor: AppColors.semanticSuccess,
-          ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
         ),
-    ];
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          borderSide: const BorderSide(color: AppColors.tertiary),
+        ),
+        isDense: true,
+      ),
+    );
   }
 }
 
-// ── View mode toggle button ──────────────────────────────────
+class _WorldTypeStrip extends StatelessWidget {
+  final WorldType? selectedType;
+  final List<World> worlds;
+  final ValueChanged<WorldType?> onSelected;
 
-class _ToggleBtn extends StatelessWidget {
-  final IconData icon;
+  const _WorldTypeStrip({
+    required this.selectedType,
+    required this.worlds,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final counts = <WorldType, int>{
+      for (final type in WorldType.values)
+        type: worlds.where((world) => world.type == type).length,
+    };
+
+    return SizedBox(
+      height: 82,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(
+          Spacing.md,
+          Spacing.md,
+          Spacing.md,
+          Spacing.sm,
+        ),
+        children: [
+          _TypeChip(
+            label: 'All',
+            count: worlds.length,
+            icon: Icons.public,
+            selected: selectedType == null,
+            color: AppColors.primary,
+            onTap: () => onSelected(null),
+          ),
+          for (final type in WorldType.values) ...[
+            const SizedBox(width: Spacing.sm),
+            _TypeChip(
+              label: _typeLabel(type),
+              count: counts[type] ?? 0,
+              icon: _typeIcon(type),
+              selected: selectedType == type,
+              color: _typeColor(type),
+              onTap: () => onSelected(type),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TypeChip extends StatelessWidget {
   final String label;
+  final int count;
+  final IconData icon;
   final bool selected;
+  final Color color;
   final VoidCallback onTap;
 
-  const _ToggleBtn({
-    required this.icon,
+  const _TypeChip({
     required this.label,
+    required this.count,
+    required this.icon,
     required this.selected,
+    required this.color,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.sm,
-            vertical: Spacing.sm,
-          ),
-          decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: AnimDurations.fast,
+        width: 126,
+        padding: const EdgeInsets.all(Spacing.md),
+        decoration: BoxDecoration(
+          color: selected
+              ? color.withValues(alpha: 0.16)
+              : AppColors.glassBackground,
+          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          border: Border.all(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
+                ? color.withValues(alpha: 0.55)
+                : AppColors.glassBorder,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: IconSizes.sm,
-                color: selected ? AppColors.primary : AppColors.inkMuted,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: IconSizes.md,
+              color: selected ? color : AppColors.inkMuted,
+            ),
+            const SizedBox(width: Spacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: selected ? AppColors.ink : AppColors.inkSecondary,
+                      fontWeight: FontWeights.semiBold,
+                    ),
+                  ),
+                  Text(
+                    '$count worlds',
+                    style: const TextStyle(
+                      color: AppColors.inkMuted,
+                      fontSize: FontSizes.labelSm,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: Spacing.xs),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: selected
-                      ? FontWeights.semiBold
-                      : FontWeights.regular,
-                  color: selected ? AppColors.primary : AppColors.inkMuted,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+
+  const _SectionTitle(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.lg,
+        Spacing.md,
+        Spacing.sm,
+      ),
+      child: Text(
+        title,
+        style: GoogleFonts.spaceGrotesk(
+          fontSize: FontSizes.bodyLg,
+          fontWeight: FontWeights.bold,
+          color: AppColors.ink,
+        ),
+      ),
+    );
+  }
+}
+
+class _SpotlightRail extends StatelessWidget {
+  final List<World> worlds;
+  final Resident? resident;
+
+  const _SpotlightRail({required this.worlds, required this.resident});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 310,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        itemCount: worlds.length,
+        separatorBuilder: (_, _) => const SizedBox(width: Spacing.md),
+        itemBuilder: (context, index) => SizedBox(
+          width: 292,
+          child: _DiscoveryWorldCard(
+            world: worlds[index],
+            resident: resident,
+            spotlight: true,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniWorldRail extends StatelessWidget {
+  final List<World> worlds;
+  final Resident? resident;
+  final String badgeLabel;
+  final IconData badgeIcon;
+  final Color badgeColor;
+
+  const _MiniWorldRail({
+    required this.worlds,
+    required this.resident,
+    required this.badgeLabel,
+    required this.badgeIcon,
+    required this.badgeColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 172,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        itemCount: worlds.length,
+        separatorBuilder: (_, _) => const SizedBox(width: Spacing.md),
+        itemBuilder: (context, index) => SizedBox(
+          width: 236,
+          child: _MiniWorldCard(
+            world: worlds[index],
+            resident: resident,
+            badgeLabel: badgeLabel,
+            badgeIcon: badgeIcon,
+            badgeColor: badgeColor,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DiscoveryWorldCard extends StatelessWidget {
+  final World world;
+  final Resident? resident;
+  final bool spotlight;
+  final bool compact;
+
+  const _DiscoveryWorldCard({
+    required this.world,
+    required this.resident,
+    this.spotlight = false,
+    this.compact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final locked = resident != null && !canAccessWorld(resident!, world);
+    final bannerHeight = spotlight ? 184.0 : (compact ? 116.0 : 158.0);
+    final accent = WorldAssets.colorForPrestige(world.prestige);
+
+    return GestureDetector(
+      onTap: () => context.push('/explore/${world.id}'),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(RadiusTokens.full),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.glassBackground,
+            border: Border.all(color: accent.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: bannerHeight,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Hero(
+                      tag: 'world-icon-${world.id}',
+                      child: WorldBanner(
+                        worldId: world.id,
+                        worldType: world.type,
+                        prestige: world.prestige,
+                        height: bannerHeight,
+                      ),
+                    ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            AppColors.canvas.withValues(alpha: 0.78),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: Spacing.md,
+                      right: Spacing.md,
+                      bottom: Spacing.md,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              world.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: spotlight
+                                    ? FontSizes.headlineMd
+                                    : FontSizes.bodyLg,
+                                height: 1.08,
+                                fontWeight: FontWeights.bold,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ),
+                          if (locked)
+                            const _GlassBadge(
+                              label: 'Locked',
+                              icon: Icons.lock,
+                              color: AppColors.error,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(Spacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      world.description,
+                      maxLines: compact ? 2 : 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.md),
+                    Wrap(
+                      spacing: Spacing.xs,
+                      runSpacing: Spacing.xs,
+                      children: [
+                        _GlassBadge(
+                          label: _typeLabel(world.type),
+                          icon: _typeIcon(world.type),
+                          color: _typeColor(world.type),
+                        ),
+                        _GlassBadge(
+                          label: '${world.memberCount} residents',
+                          icon: Icons.people,
+                          color: AppColors.inkSecondary,
+                        ),
+                        _GlassBadge(
+                          label: 'P${world.prestige}',
+                          icon: Icons.auto_awesome,
+                          color: accent,
+                        ),
+                        if (world.isBoosted)
+                          const _GlassBadge(
+                            label: 'Boosted',
+                            icon: Icons.rocket_launch,
+                            color: AppColors.tertiary,
+                          ),
+                      ],
+                    ),
+                    if (!compact || spotlight) ...[
+                      const SizedBox(height: Spacing.sm),
+                      Text(
+                        'Sovereign: ${world.sovereignName}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.inkMuted,
+                          fontSize: FontSizes.labelSm,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -522,79 +743,78 @@ class _ToggleBtn extends StatelessWidget {
   }
 }
 
-// ── Season banner card ───────────────────────────────────────
+class _MiniWorldCard extends StatelessWidget {
+  final World world;
+  final Resident? resident;
+  final String badgeLabel;
+  final IconData badgeIcon;
+  final Color badgeColor;
 
-class _SeasonBannerCard extends StatelessWidget {
-  final List<World> worlds;
-  final VoidCallback onTap;
-
-  const _SeasonBannerCard({required this.worlds, required this.onTap});
+  const _MiniWorldCard({
+    required this.world,
+    required this.resident,
+    required this.badgeLabel,
+    required this.badgeIcon,
+    required this.badgeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final season = SeasonService.getCurrentSeason(worlds: worlds);
-    final subtitle = SeasonService.bannerSubtitle(season.scores);
-
+    final locked = resident != null && !canAccessWorld(resident!, world);
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(Spacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.card),
-          border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.3)),
-        ),
-        child: Row(
+      onTap: () => context.push('/explore/${world.id}'),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Container(
-              width: 3,
-              height: 56,
+            WorldBanner(
+              worldId: world.id,
+              worldType: world.type,
+              prestige: world.prestige,
+              height: 172,
+            ),
+            DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.tertiary,
-                borderRadius: BorderRadius.circular(2),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.canvas.withValues(alpha: 0.04),
+                    AppColors.canvas.withValues(alpha: 0.88),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: Spacing.md),
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.all(Spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
+                  _GlassBadge(
+                    label: locked ? 'Locked' : badgeLabel,
+                    icon: locked ? Icons.lock : badgeIcon,
+                    color: locked ? AppColors.error : badgeColor,
+                  ),
+                  const Spacer(),
                   Text(
-                    season.name.toUpperCase(),
+                    world.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: FontSizes.bodyMd,
                       fontWeight: FontWeights.bold,
-                      color: AppColors.tertiary,
+                      color: AppColors.ink,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: Spacing.xs),
                   Text(
-                    subtitle,
+                    '${world.memberCount} residents  P${world.prestige}',
                     style: const TextStyle(
-                      fontSize: FontSizes.labelSm,
                       color: AppColors.inkSecondary,
+                      fontSize: FontSizes.labelSm,
                     ),
                   ),
                 ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.tertiary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(RadiusTokens.lg),
-              ),
-              child: const Text(
-                'VIEW',
-                style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.bold,
-                  color: AppColors.tertiary,
-                ),
               ),
             ),
           ],
@@ -602,4 +822,70 @@ class _SeasonBannerCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _GlassBadge extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _GlassBadge({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.canvas.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: IconSizes.xs, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: FontSizes.labelSm,
+              fontWeight: FontWeights.semiBold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _typeLabel(WorldType type) {
+  return switch (type) {
+    WorldType.wealth => 'Wealth',
+    WorldType.profession => 'Profession',
+    WorldType.dominion => 'Dominion',
+  };
+}
+
+IconData _typeIcon(WorldType type) {
+  return switch (type) {
+    WorldType.wealth => Icons.diamond,
+    WorldType.profession => Icons.work,
+    WorldType.dominion => Icons.shield,
+  };
+}
+
+Color _typeColor(WorldType type) {
+  return switch (type) {
+    WorldType.wealth => AppColors.tertiary,
+    WorldType.profession => AppColors.primary,
+    WorldType.dominion => AppColors.success,
+  };
 }
