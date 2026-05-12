@@ -38,6 +38,9 @@ class CosmeticAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final frame = getFrameForXp(totalXp);
+    final cacheWidth = (size * MediaQuery.devicePixelRatioOf(context))
+        .round()
+        .clamp(64, 512);
 
     return Container(
       width: size + 8,
@@ -55,7 +58,10 @@ class CosmeticAvatar extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: size / 2,
-        backgroundImage: _resolveImage(imageUrl, seed ?? '$totalXp'),
+        backgroundImage: ResizeImage(
+          _resolveImage(imageUrl, seed ?? '$totalXp'),
+          width: cacheWidth,
+        ),
       ),
     );
   }

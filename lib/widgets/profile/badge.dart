@@ -22,6 +22,7 @@ class Badge extends StatelessWidget {
                 width: 22,
                 height: 22,
                 fit: BoxFit.contain,
+                cacheWidth: 64,
                 errorBuilder: (_, _, _) => const Icon(Icons.star, size: 16),
               ),
             )
