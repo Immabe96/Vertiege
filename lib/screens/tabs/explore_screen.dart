@@ -256,6 +256,7 @@ class _DiscoverHeader extends StatelessWidget {
               if (heroWorld != null)
                 WorldBanner(
                   worldId: heroWorld.id,
+                  assetKey: heroWorld.assetKey,
                   worldType: heroWorld.type,
                   prestige: heroWorld.prestige,
                   height: 250,
@@ -627,6 +628,7 @@ class _DiscoveryWorldCard extends StatelessWidget {
                       tag: 'world-icon-${world.id}',
                       child: WorldBanner(
                         worldId: world.id,
+                        assetKey: world.assetKey,
                         worldType: world.type,
                         prestige: world.prestige,
                         height: bannerHeight,
@@ -770,6 +772,7 @@ class _MiniWorldCard extends StatelessWidget {
           children: [
             WorldBanner(
               worldId: world.id,
+              assetKey: world.assetKey,
               worldType: world.type,
               prestige: world.prestige,
               height: 172,

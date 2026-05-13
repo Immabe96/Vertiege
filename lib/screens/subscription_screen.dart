@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
 import '../theme/colors.dart';
 import '../theme/design_system.dart';
+import '../utils/navigation.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 
@@ -66,7 +66,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         setState(() {
           _currentTier = tier;
           _purchasing = false;
-          _purchaseMessage = 'Subscription activated! Welcome to ${SubscriptionService.getBenefits(tier)['label']}.';
+          _purchaseMessage =
+              'Subscription activated! Welcome to ${SubscriptionService.getBenefits(tier)['label']}.';
         });
       }
     } catch (_) {
@@ -95,7 +96,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         title: const Text('The Vault'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => safeBack(context),
         ),
       ),
       body: _loading
@@ -112,7 +113,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         height: 64,
                         decoration: BoxDecoration(
                           color: AppColors.tertiary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+                          borderRadius: BorderRadius.circular(
+                            RadiusTokens.cardFeatured,
+                          ),
                         ),
                         child: const Icon(
                           Icons.diamond_outlined,
@@ -155,7 +158,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+                        const Icon(
+                          Icons.check_circle,
+                          color: AppColors.success,
+                          size: 20,
+                        ),
                         const SizedBox(width: Spacing.sm),
                         Expanded(
                           child: Text(
@@ -177,15 +184,19 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   final price = tier == SubscriptionTier.resident
                       ? 'Free'
                       : tier == SubscriptionTier.patrician
-                          ? '\$4.99'
-                          : '\$14.99';
-                  final pricePeriod = tier == SubscriptionTier.resident ? '' : '/month';
+                      ? '\$4.99'
+                      : '\$14.99';
+                  final pricePeriod = tier == SubscriptionTier.resident
+                      ? ''
+                      : '/month';
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: Spacing.md),
                     child: _TierCard(
                       tierName: benefits['label'] as String,
-                      tierColor: (benefits['color'] as Color?) ?? AppColors.inkSecondary,
+                      tierColor:
+                          (benefits['color'] as Color?) ??
+                          AppColors.inkSecondary,
                       price: price,
                       pricePeriod: pricePeriod,
                       isActive: isActive,
@@ -251,50 +262,47 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     final customBg = benefits['customBackground'] as bool;
     final analytics = benefits['analytics'] as bool;
 
-    features.add(_TierFeature(
-      label: worldLimit >= 999 ? 'Create unlimited worlds' : 'Create up to $worldLimit worlds',
-      included: true,
-    ));
+    features.add(
+      _TierFeature(
+        label: worldLimit >= 999
+            ? 'Create unlimited worlds'
+            : 'Create up to $worldLimit worlds',
+        included: true,
+      ),
+    );
 
-    features.add(_TierFeature(
-      label: shields > 0 ? '$shields streak shield${shields > 1 ? "s" : ""}/month' : 'No streak shields',
-      included: shields > 0,
-    ));
+    features.add(
+      _TierFeature(
+        label: shields > 0
+            ? '$shields streak shield${shields > 1 ? "s" : ""}/month'
+            : 'No streak shields',
+        included: shields > 0,
+      ),
+    );
 
-    features.add(const _TierFeature(
-      label: 'Gold profile frame',
-      included: true,
-    ));
+    features.add(
+      const _TierFeature(label: 'Gold profile frame', included: true),
+    );
 
-    features.add(_TierFeature(
-      label: 'Priority verification queue',
-      included: priorityV,
-    ));
+    features.add(
+      _TierFeature(label: 'Priority verification queue', included: priorityV),
+    );
 
-    features.add(_TierFeature(
-      label: 'Gold name treatment',
-      included: goldN,
-    ));
+    features.add(_TierFeature(label: 'Gold name treatment', included: goldN));
 
-    features.add(_TierFeature(
-      label: 'Custom profile background',
-      included: customBg,
-    ));
+    features.add(
+      _TierFeature(label: 'Custom profile background', included: customBg),
+    );
 
-    features.add(_TierFeature(
-      label: 'Analytics dashboard',
-      included: analytics,
-    ));
+    features.add(
+      _TierFeature(label: 'Analytics dashboard', included: analytics),
+    );
 
-    features.add(_TierFeature(
-      label: 'Early access features',
-      included: goldN,
-    ));
+    features.add(_TierFeature(label: 'Early access features', included: goldN));
 
-    features.add(const _TierFeature(
-      label: 'Exclusive tier badge',
-      included: true,
-    ));
+    features.add(
+      const _TierFeature(label: 'Exclusive tier badge', included: true),
+    );
 
     return features;
   }
@@ -359,9 +367,7 @@ class _TierCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: tierColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                    border: Border.all(
-                      color: tierColor.withValues(alpha: 0.4),
-                    ),
+                    border: Border.all(color: tierColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
                     'CURRENT',
@@ -405,39 +411,40 @@ class _TierCard extends StatelessWidget {
           const SizedBox(height: Spacing.lg),
 
           // ── Divider ─────────────────────────────────────────
-          Container(
-            height: 1,
-            color: AppColors.glassBorder,
-          ),
+          Container(height: 1, color: AppColors.glassBorder),
           const SizedBox(height: Spacing.lg),
 
           // ── Features ────────────────────────────────────────
-          ...features.map((feature) => Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.sm),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      feature.included ? Icons.check_circle : Icons.remove_circle_outline,
-                      size: 18,
-                      color: feature.included
-                          ? AppColors.success
-                          : AppColors.inkMuted.withValues(alpha: 0.4),
-                    ),
-                    const SizedBox(width: Spacing.sm),
-                    Expanded(
-                      child: Text(
-                        feature.label,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: feature.included
-                              ? AppColors.inkSecondary
-                              : AppColors.inkMuted.withValues(alpha: 0.5),
-                        ),
+          ...features.map(
+            (feature) => Padding(
+              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    feature.included
+                        ? Icons.check_circle
+                        : Icons.remove_circle_outline,
+                    size: 18,
+                    color: feature.included
+                        ? AppColors.success
+                        : AppColors.inkMuted.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  Expanded(
+                    child: Text(
+                      feature.label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: feature.included
+                            ? AppColors.inkSecondary
+                            : AppColors.inkMuted.withValues(alpha: 0.5),
                       ),
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
           const SizedBox(height: Spacing.lg),
 

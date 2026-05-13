@@ -45,6 +45,7 @@ class WorldConstitution {
 
 class WorldBase {
   final String id;
+  final String slug;
   final String name;
   final WorldType type;
   final String description;
@@ -58,6 +59,7 @@ class WorldBase {
 
   const WorldBase({
     required this.id,
+    this.slug = '',
     required this.name,
     required this.type,
     required this.description,
@@ -77,12 +79,16 @@ class World extends WorldBase {
   final WorldConstitution constitution;
   final int boostCount;
   final int lastBoostMonth;
+  final bool isDefault;
+  final int sortOrder;
+  final String? bannerKey;
 
   static const int maxBoostsPerMonth = 3;
   static const int boostActivityPoints = 50;
 
   const World({
     required super.id,
+    super.slug,
     required super.name,
     required super.type,
     required super.description,
@@ -98,7 +104,12 @@ class World extends WorldBase {
     this.constitution = const WorldConstitution(),
     this.boostCount = 0,
     this.lastBoostMonth = 0,
+    this.isDefault = false,
+    this.sortOrder = 0,
+    this.bannerKey,
   });
+
+  String get assetKey => bannerKey ?? (slug.isNotEmpty ? slug : id);
 
   /// Whether this world has been boosted (any boost count > 0 this month).
   bool get isBoosted => boostCount > 0 && boostsRemaining < maxBoostsPerMonth;
@@ -113,6 +124,7 @@ class World extends WorldBase {
 
   World copyWith({
     String? id,
+    String? slug,
     String? name,
     WorldType? type,
     String? description,
@@ -128,8 +140,12 @@ class World extends WorldBase {
     WorldConstitution? constitution,
     int? boostCount,
     int? lastBoostMonth,
+    bool? isDefault,
+    int? sortOrder,
+    String? bannerKey,
   }) => World(
     id: id ?? this.id,
+    slug: slug ?? this.slug,
     name: name ?? this.name,
     type: type ?? this.type,
     description: description ?? this.description,
@@ -145,10 +161,14 @@ class World extends WorldBase {
     constitution: constitution ?? this.constitution,
     boostCount: boostCount ?? this.boostCount,
     lastBoostMonth: lastBoostMonth ?? this.lastBoostMonth,
+    isDefault: isDefault ?? this.isDefault,
+    sortOrder: sortOrder ?? this.sortOrder,
+    bannerKey: bannerKey ?? this.bannerKey,
   );
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'slug': slug,
     'name': name,
     'type': type.name,
     'description': description,
@@ -161,6 +181,9 @@ class World extends WorldBase {
     'activityScore': activityScore,
     'boostCount': boostCount,
     'lastBoostMonth': lastBoostMonth,
+    'isDefault': isDefault,
+    'sortOrder': sortOrder,
+    'bannerKey': bannerKey,
     'constitution': constitution.toJson(),
     if (requiredTier != null) 'requiredTier': requiredTier,
     if (requiredProfession != null) 'requiredProfession': requiredProfession,
@@ -168,6 +191,7 @@ class World extends WorldBase {
 
   static World fromJson(Map<String, dynamic> json) => World(
     id: json['id'] ?? '',
+    slug: json['slug'] ?? json['id'] ?? '',
     name: json['name'] ?? '',
     type: _parseType(json['type']),
     description: json['description'] ?? '',
@@ -180,6 +204,9 @@ class World extends WorldBase {
     activityScore: json['activityScore'] ?? 0,
     boostCount: json['boostCount'] ?? 0,
     lastBoostMonth: json['lastBoostMonth'] ?? 0,
+    isDefault: json['isDefault'] ?? false,
+    sortOrder: json['sortOrder'] ?? 0,
+    bannerKey: json['bannerKey'],
     constitution: json['constitution'] != null
         ? WorldConstitution.fromJson(json['constitution'])
         : const WorldConstitution(),
@@ -189,6 +216,7 @@ class World extends WorldBase {
 
   static World fromSupabase(Map<String, dynamic> data) => World(
     id: data['id'] ?? '',
+    slug: data['slug'] ?? '',
     name: data['name'] ?? '',
     type: _parseType(data['type']),
     description: data['description'] ?? '',
@@ -206,6 +234,9 @@ class World extends WorldBase {
     activityScore: data['activity_score'] ?? 0,
     boostCount: data['boost_count'] ?? 0,
     lastBoostMonth: data['last_boost_month'] ?? 0,
+    isDefault: data['is_default'] ?? false,
+    sortOrder: data['sort_order'] ?? 0,
+    bannerKey: data['banner_key'] ?? data['banner'],
     constitution: data['constitution'] != null
         ? WorldConstitution.fromJson(data['constitution'])
         : const WorldConstitution(),

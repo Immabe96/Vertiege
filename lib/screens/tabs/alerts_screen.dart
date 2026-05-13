@@ -12,6 +12,7 @@ import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../theme/design_system.dart';
+import '../../utils/navigation.dart';
 import '../../theme/colors.dart';
 
 enum _DateGroup { today, thisWeek, earlier }
@@ -106,7 +107,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => safeBack(context),
         ),
         title: const Text('Alerts'),
         actions: [

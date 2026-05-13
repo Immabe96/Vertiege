@@ -53,11 +53,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       // Fetch from Supabase first
       final remote = await ProfileService.getProfile(userId);
       if (remote != null) {
-        final cached = await _cachedResidentFor(userId);
-        final resident = cached != null && remote.joinedWorldIds.isEmpty
-            ? remote.copyWith(joinedWorldIds: cached.joinedWorldIds)
-            : remote;
-        state = ResidentState(resident: resident, isLoading: false);
+        state = ResidentState(resident: remote, isLoading: false);
         _persist(); // cache locally
         return;
       }
@@ -103,9 +99,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
           durableResident.id,
           residentName: durableResident.name,
         );
-      } catch (_) {
-        // Some seeded worlds are local catalog ids until the database is seeded.
-      }
+      } catch (_) {}
     }
   }
 

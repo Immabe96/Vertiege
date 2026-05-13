@@ -37,8 +37,12 @@ class _VirtualStatusWorldsAppState
     });
     // Loads run independently in the background after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      try { _startBackgroundLoads(); } catch (_) {}
-      try { _checkDailyReward(); } catch (_) {}
+      try {
+        _startBackgroundLoads();
+      } catch (_) {}
+      try {
+        _checkDailyReward();
+      } catch (_) {}
     });
   }
 
@@ -47,11 +51,25 @@ class _VirtualStatusWorldsAppState
     // Each provider loads independently — failures are silent and non-blocking
     ref.read(themeProvider.notifier).loadTheme(); // fire-and-forget
     unawaited(_safeLoad('worlds', ref.read(worldProvider.notifier).loadWorlds));
-    unawaited(_safeLoad('resident', ref.read(residentProvider.notifier).loadResident));
+    unawaited(
+      _safeLoad('resident', ref.read(residentProvider.notifier).loadResident),
+    );
     unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
-    unawaited(_safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks));
-    unawaited(_safeLoad('notifications', ref.read(notificationProvider.notifier).loadNotifications));
-    unawaited(_safeLoad('achievements', ref.read(achievementProvider.notifier).loadAchievements));
+    unawaited(
+      _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
+    );
+    unawaited(
+      _safeLoad(
+        'notifications',
+        ref.read(notificationProvider.notifier).loadNotifications,
+      ),
+    );
+    unawaited(
+      _safeLoad(
+        'achievements',
+        ref.read(achievementProvider.notifier).loadAchievements,
+      ),
+    );
     unawaited(_safeLoad('events', ref.read(eventProvider.notifier).loadEvents));
     unawaited(_safeLoad('quests', ref.read(questProvider.notifier).loadQuests));
     ref.read(residentProvider.notifier).touchPresence(); // fire-and-forget
@@ -85,7 +103,9 @@ class _VirtualStatusWorldsAppState
             if (reward.isShield) {
               ref.read(residentProvider.notifier).addStreakShield();
             } else if (reward.xpValue > 0) {
-              ref.read(residentProvider.notifier).addXpFromDailyReward(reward.xpValue);
+              ref
+                  .read(residentProvider.notifier)
+                  .addXpFromDailyReward(reward.xpValue);
             }
           },
         );
@@ -99,7 +119,8 @@ class _VirtualStatusWorldsAppState
       return MaterialApp(
         title: 'Vertiege',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.theme,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
         home: const SplashScreen(),
       );
     }
@@ -110,7 +131,8 @@ class _VirtualStatusWorldsAppState
     return MaterialApp.router(
       title: 'Vertiege',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: themeState.themeMode,
       routerConfig: router,
     );

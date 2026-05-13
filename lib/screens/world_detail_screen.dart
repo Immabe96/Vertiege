@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_system.dart';
 import '../theme/colors.dart';
 import '../config/tiers.dart';
+import '../models/channel.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/channel_provider.dart';
@@ -24,11 +25,14 @@ import '../services/permission_service.dart';
 import '../services/world_service.dart';
 import '../services/legacy_service.dart';
 import '../state/event_provider.dart';
+import '../utils/world_foundations.dart';
+import '../utils/navigation.dart';
 
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/error_banner.dart';
+import '../widgets/core/glass_panel.dart';
 import '../widgets/core/glow_border.dart';
 import '../state/post_provider.dart';
 import '../models/resident.dart';
@@ -228,15 +232,30 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   }
 
   Color _getPrestigeTierColor(int prestige) {
-    if (prestige >= 600) return AppColors.tertiary;
-    if (prestige >= 300) return AppColors.primary;
+    if (prestige >= 40) return AppColors.tertiary;
+    if (prestige >= 20) return AppColors.primary;
     return AppColors.hustler;
   }
 
   GlowTier _getPrestigeGlowTier(int prestige) {
-    if (prestige >= 600) return GlowTier.apex;
-    if (prestige >= 300) return GlowTier.elite;
+    if (prestige >= 40) return GlowTier.apex;
+    if (prestige >= 20) return GlowTier.elite;
     return GlowTier.hustler;
+  }
+
+  void _openChannelByName(String channelName, List<WorldChannel> channels) {
+    final normalized = channelName.toLowerCase();
+    final channel = channels
+        .where((c) => c.name.toLowerCase() == normalized)
+        .firstOrNull;
+    if (channel == null) {
+      ref.read(channelProvider.notifier).ensureDefaultChannels(widget.worldId);
+      return;
+    }
+    context.push(
+      '/explore/${widget.worldId}/${Uri.encodeComponent(channel.name)}'
+      '?id=${Uri.encodeComponent(channel.id)}',
+    );
   }
 
   void _showWorldShareSheet(World world) {
@@ -349,8 +368,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     // Prestige-based tier for hero glow, badge, and button colors
     final prestigeTierColor = _getPrestigeTierColor(world.prestige);
     final prestigeGlowTier = _getPrestigeGlowTier(world.prestige);
-    final heroHeight = (MediaQuery.of(context).size.height * 0.42)
-        .clamp(300.0, 400.0)
+    final heroHeight = (MediaQuery.of(context).size.height * 0.28)
+        .clamp(210.0, 300.0)
         .toDouble();
 
     final onSettings =
@@ -373,6 +392,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         body: RefreshIndicator(
           onRefresh: () async {
             await ref.read(postProvider.notifier).loadPosts();
+            await ref
+                .read(channelProvider.notifier)
+                .ensureDefaultChannels(widget.worldId);
             await _loadMembers();
             _statsAnimated = false;
             await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -407,6 +429,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           tag: 'world-icon-${widget.worldId}',
                           child: WorldBanner(
                             worldId: world.id,
+                            assetKey: world.assetKey,
                             width: double.infinity,
                             height: heroHeight,
                             worldType: world.type,
@@ -437,7 +460,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             color: AppColors.ink,
                             size: IconSizes.lg,
                           ),
-                          onPressed: () => context.pop(),
+                          onPressed: () =>
+                              safeBack(context, fallback: '/explore'),
                         ),
                       ),
                       // Share button (top-right, left of settings)
@@ -671,48 +695,51 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               // ── Live Chat Preview ──
               SliverToBoxAdapter(
                 child: FadeIn(
-                  delayMs: 100,
-                  child: ChatPreviewPanel(worldId: widget.worldId),
+                  delayMs: 80,
+                  child: _WorldFoundationSummary(
+                    world: world,
+                    channels: channels,
+                    onOpenChannel: (name) => _openChannelByName(name, channels),
+                  ),
                 ),
               ),
 
               // ── Resource Vault ──
               SliverToBoxAdapter(
-                child: FadeIn(delayMs: 110, child: const ResourceVault()),
+                child: FadeIn(
+                  delayMs: 100,
+                  child: ResourceVault(
+                    worldId: widget.worldId,
+                    channels: channels,
+                    vaultUnlocked: ref
+                        .read(worldProvider.notifier)
+                        .featuresForWorld(widget.worldId)
+                        .vault,
+                  ),
+                ),
               ),
 
               // ── Alliances Section ──
               SliverToBoxAdapter(
                 child: FadeIn(
                   delayMs: 115,
+                  child: ChatPreviewPanel(worldId: widget.worldId),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: FadeIn(
+                  delayMs: 130,
                   child: AllianceSection(worldId: widget.worldId, world: world),
                 ),
               ),
 
               // ── Tab Bar — Tertiary label, uppercase ──
-              SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 90,
-                  child: TabBar(
-                    controller: _tabController,
-                    labelColor: AppColors.tertiary,
-                    unselectedLabelColor: AppColors.inkMuted,
-                    labelStyle: TextStyle(
-                      fontSize: FontSizes.labelSm,
-                      fontWeight: FontWeights.semiBold,
-                      letterSpacing: LetterSpacing.label,
-                    ),
-                    unselectedLabelStyle: TextStyle(
-                      fontSize: FontSizes.labelSm,
-                      fontWeight: FontWeights.regular,
-                      letterSpacing: LetterSpacing.label,
-                    ),
-                    tabs: const [
-                      Tab(text: 'FEED'),
-                      Tab(text: 'CHANNELS'),
-                      Tab(text: 'MEMBERS'),
-                    ],
-                  ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _WorldTabBarDelegate(
+                  controller: _tabController,
+                  color: prestigeTierColor,
                 ),
               ),
 
@@ -731,12 +758,15 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     ),
                     // Channels tab: list or empty via GlassPanel
                     channels.isEmpty
-                        ? const AppEmptyState(
-                            title: 'No content',
+                        ? AppEmptyState(
+                            title: 'Preparing channels',
                             description:
-                                'No channels have been created in this world yet.',
-                            icon: Icons.chat_bubble_outline,
-                            variant: EmptyStateVariant.default_,
+                                'This world is getting its starter channels.',
+                            icon: Icons.forum_outlined,
+                            actionLabel: 'Retry',
+                            onAction: () => ref
+                                .read(channelProvider.notifier)
+                                .ensureDefaultChannels(widget.worldId),
                           )
                         : SingleChildScrollView(
                             padding: const EdgeInsets.all(Spacing.md),
@@ -767,6 +797,410 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabController controller;
+  final Color color;
+
+  const _WorldTabBarDelegate({required this.controller, required this.color});
+
+  @override
+  double get minExtent => 56;
+
+  @override
+  double get maxExtent => 56;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return ColoredBox(
+      color: AppColors.canvas.withValues(alpha: 0.96),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.glassBorder),
+            top: BorderSide(
+              color: AppColors.glassBorder.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        child: TabBar(
+          controller: controller,
+          labelColor: color,
+          unselectedLabelColor: AppColors.inkMuted,
+          indicatorColor: color,
+          labelStyle: const TextStyle(
+            fontSize: FontSizes.labelSm,
+            fontWeight: FontWeights.semiBold,
+            letterSpacing: LetterSpacing.label,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: FontSizes.labelSm,
+            fontWeight: FontWeights.regular,
+            letterSpacing: LetterSpacing.label,
+          ),
+          tabs: const [
+            Tab(text: 'FEED'),
+            Tab(text: 'CHANNELS'),
+            Tab(text: 'MEMBERS'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _WorldTabBarDelegate oldDelegate) {
+    return oldDelegate.controller != controller || oldDelegate.color != color;
+  }
+}
+
+class _WorldFoundationSummary extends StatelessWidget {
+  final World world;
+  final List<WorldChannel> channels;
+  final ValueChanged<String> onOpenChannel;
+
+  const _WorldFoundationSummary({
+    required this.world,
+    required this.channels,
+    required this.onOpenChannel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final foundation = foundationForWorld(world);
+    final guideChannels = _guideChannels;
+    final orientation = orientationStepsForWorld(world);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(Spacing.lg),
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.tertiary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                  ),
+                  child: const Icon(
+                    Icons.account_tree_outlined,
+                    color: AppColors.tertiary,
+                    size: IconSizes.md,
+                  ),
+                ),
+                const SizedBox(width: Spacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'World Foundation',
+                        style: TextStyle(
+                          color: AppColors.ink,
+                          fontWeight: FontWeights.bold,
+                          fontSize: FontSizes.bodyLg,
+                        ),
+                      ),
+                      Text(
+                        _accessLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.inkMuted,
+                          fontSize: FontSizes.labelSm,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.md),
+            Text(
+              foundation.premise,
+              style: const TextStyle(
+                color: AppColors.inkSecondary,
+                fontSize: FontSizes.bodyMd,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+            Wrap(
+              spacing: Spacing.xs,
+              runSpacing: Spacing.xs,
+              children: [
+                for (final item in foundation.focus.take(3))
+                  _FoundationChip(label: item),
+              ],
+            ),
+            const SizedBox(height: Spacing.lg),
+            const Text(
+              'Orientation Path',
+              style: TextStyle(
+                color: AppColors.ink,
+                fontWeight: FontWeights.bold,
+                fontSize: FontSizes.bodyMd,
+              ),
+            ),
+            const SizedBox(height: Spacing.sm),
+            for (var i = 0; i < orientation.length; i++)
+              _OrientationStepTile(
+                index: i + 1,
+                title: orientation[i].title,
+                description: orientation[i].description,
+                channel: orientation[i].channel,
+                onTap: () => onOpenChannel(orientation[i].channel),
+              ),
+            const SizedBox(height: Spacing.md),
+            Row(
+              children: [
+                for (final channel in guideChannels)
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: channel == guideChannels.last ? 0 : Spacing.sm,
+                      ),
+                      child: _GuideButton(
+                        label: channel.name,
+                        icon: _iconForChannel(channel.name),
+                        onTap: () => onOpenChannel(channel.name),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: Spacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => onOpenChannel('general'),
+                icon: const Icon(Icons.forum_outlined, size: IconSizes.sm),
+                label: const Text('Open General Discussion'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.tertiary,
+                  side: const BorderSide(color: AppColors.glassBorder),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<WorldChannel> get _guideChannels {
+    const names = {'info', 'rules', 'roles'};
+    final result =
+        channels
+            .where((channel) => names.contains(channel.name.toLowerCase()))
+            .toList()
+          ..sort((a, b) => a.position.compareTo(b.position));
+    if (result.isNotEmpty) return result;
+    return const [
+      WorldChannel(id: 'info', worldId: '', name: 'info'),
+      WorldChannel(id: 'rules', worldId: '', name: 'rules'),
+      WorldChannel(id: 'roles', worldId: '', name: 'roles'),
+    ];
+  }
+
+  String get _accessLabel {
+    if (world.requiredProfession != null) {
+      return 'Verified ${world.requiredProfession} world';
+    }
+    return 'Tier ${world.requiredTier} ${tierNames[world.requiredTier] ?? 'access'}';
+  }
+
+  IconData _iconForChannel(String name) => switch (name.toLowerCase()) {
+    'info' => Icons.info_outline,
+    'rules' => Icons.gavel_outlined,
+    'roles' => Icons.badge_outlined,
+    _ => Icons.tag,
+  };
+}
+
+class _FoundationChip extends StatelessWidget {
+  final String label;
+
+  const _FoundationChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainer.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: AppColors.glassBorder),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.inkSecondary,
+          fontSize: FontSizes.labelSm,
+          fontWeight: FontWeights.semiBold,
+        ),
+      ),
+    );
+  }
+}
+
+class _OrientationStepTile extends StatelessWidget {
+  final int index;
+  final String title;
+  final String description;
+  final String channel;
+  final VoidCallback onTap;
+
+  const _OrientationStepTile({
+    required this.index,
+    required this.title,
+    required this.description,
+    required this.channel,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        child: Container(
+          padding: const EdgeInsets.all(Spacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainer.withValues(alpha: 0.54),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(color: AppColors.glassBorder),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.tertiary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                ),
+                child: Text(
+                  '$index',
+                  style: const TextStyle(
+                    color: AppColors.tertiary,
+                    fontWeight: FontWeights.bold,
+                    fontSize: FontSizes.labelSm,
+                  ),
+                ),
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.ink,
+                        fontWeight: FontWeights.semiBold,
+                      ),
+                    ),
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.inkMuted,
+                        fontSize: FontSizes.labelSm,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Spacing.sm),
+              Text(
+                '#$channel',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: FontSizes.labelSm,
+                  fontWeight: FontWeights.semiBold,
+                ),
+              ),
+              const SizedBox(width: Spacing.xs),
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.inkMuted,
+                size: IconSizes.sm,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _GuideButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.xs,
+          vertical: Spacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: AppColors.primary, size: IconSizes.md),
+            const SizedBox(height: Spacing.xs),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.ink,
+                fontSize: FontSizes.labelSm,
+                fontWeight: FontWeights.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );

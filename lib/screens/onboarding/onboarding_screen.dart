@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
 import '../../models/resident.dart';
 import '../../widgets/core/tactile_button.dart';
 import '../../widgets/core/glass_panel.dart';
@@ -90,6 +91,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
 
+    final starterWorld = ref
+        .read(worldProvider)
+        .worlds
+        .values
+        .where((world) => world.slug == 'neon-district')
+        .firstOrNull;
+
     ref
         .read(residentProvider.notifier)
         .setResident(
@@ -102,7 +110,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ? null
                 : _selectedProfession,
             tier: ResidentTier.hustlers,
-            joinedWorldIds: const ['neon-district'],
+            joinedWorldIds: starterWorld == null ? const [] : [starterWorld.id],
             onboardingCompleted: true,
           ),
         );

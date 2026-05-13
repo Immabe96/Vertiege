@@ -294,7 +294,8 @@ class ChatNotifier extends Notifier<ChatState> {
     );
 
     try {
-      await ChatService.sendChannelMessage(
+      final inserted = await ChatService.sendChannelMessage(
+        messageId: msg.id,
         channelId: channelId,
         senderId: senderId,
         senderName: senderName,
@@ -302,6 +303,16 @@ class ChatNotifier extends Notifier<ChatState> {
         worldId: worldId,
         content: content,
         imageUrl: durableImageUrl,
+      );
+      final confirmed = _toChannelMessages([inserted]).first;
+      final current = state.channelMessages[channelId] ?? const [];
+      state = state.copyWith(
+        channelMessages: {
+          ...state.channelMessages,
+          channelId: current
+              .map((m) => m.id == msg.id ? confirmed : m)
+              .toList(),
+        },
       );
     } catch (_) {
       // Remove the optimistic message if the send failed

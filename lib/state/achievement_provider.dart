@@ -5,6 +5,7 @@ import '../models/resident.dart';
 import '../config/achievements.dart' as config;
 import '../config/titles.dart';
 import '../services/ai_verification_service.dart';
+import '../services/supabase.dart';
 import '../services/storage_service.dart';
 import '../utils/haptics.dart';
 import 'resident_provider.dart';
@@ -31,19 +32,20 @@ class AchievementState {
     List<String>? recentlyUnlockedIds,
     ResidentTier? celebrationTier,
     bool clearCelebration = false,
-  }) =>
-      AchievementState(
-        userAchievements: userAchievements ?? this.userAchievements,
-        isLoading: isLoading ?? this.isLoading,
-        totalXp: totalXp ?? this.totalXp,
-        recentlyUnlockedIds:
-            recentlyUnlockedIds ?? this.recentlyUnlockedIds,
-        celebrationTier: clearCelebration ? null : (celebrationTier ?? this.celebrationTier),
-      );
+  }) => AchievementState(
+    userAchievements: userAchievements ?? this.userAchievements,
+    isLoading: isLoading ?? this.isLoading,
+    totalXp: totalXp ?? this.totalXp,
+    recentlyUnlockedIds: recentlyUnlockedIds ?? this.recentlyUnlockedIds,
+    celebrationTier: clearCelebration
+        ? null
+        : (celebrationTier ?? this.celebrationTier),
+  );
 }
 
 class AchievementNotifier extends Notifier<AchievementState> {
-  void Function(List<String> verifiedIds, ResidentTier? newTier)? onAchievementsVerified;
+  void Function(List<String> verifiedIds, ResidentTier? newTier)?
+  onAchievementsVerified;
 
   @override
   AchievementState build() => const AchievementState();
@@ -58,15 +60,24 @@ class AchievementNotifier extends Notifier<AchievementState> {
       return;
     }
 
-    final achDef =
-        config.achievements.where((a) => a.id == achievementId).firstOrNull;
+    final achDef = config.achievements
+        .where((a) => a.id == achievementId)
+        .firstOrNull;
     final aiResult = await AiVerificationService.analyzeProof(
       proofUrl: proofUri,
       achievementId: achievementId,
       category: achDef?.category.name ?? '',
     );
 
-    final shouldAutoVerify = aiResult.autoApproved && aiResult.confidence >= 0.75;
+    final shouldAutoVerify =
+        aiResult.autoApproved && aiResult.confidence >= 0.75;
+    await _persistCloudSubmission(
+      achievementId: achievementId,
+      proofUri: proofUri,
+      status: shouldAutoVerify
+          ? AchievementStatus.verified
+          : AchievementStatus.submitted,
+    );
 
     state = state.copyWith(
       userAchievements: [
@@ -92,14 +103,16 @@ class AchievementNotifier extends Notifier<AchievementState> {
       final oldTier = config.getTierForXp(state.totalXp);
       final newTotalXp = _calculateTotalXp(
         state.userAchievements
-            .map((a) => a.achievementId == achievementId
-                ? a.copyWith(
-                    status: AchievementStatus.verified,
-                    verifiedAt: DateTime.now().millisecondsSinceEpoch,
-                    aiConfidence: aiResult.confidence,
-                    aiNotes: aiResult.notes,
-                  )
-                : a)
+            .map(
+              (a) => a.achievementId == achievementId
+                  ? a.copyWith(
+                      status: AchievementStatus.verified,
+                      verifiedAt: DateTime.now().millisecondsSinceEpoch,
+                      aiConfidence: aiResult.confidence,
+                      aiNotes: aiResult.notes,
+                    )
+                  : a,
+            )
             .toList(),
       );
       final newTier = config.getTierForXp(newTotalXp);
@@ -107,8 +120,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
 
       final newIds = [
         ...state.recentlyUnlockedIds,
-        if (!state.recentlyUnlockedIds.contains(achievementId))
-          achievementId,
+        if (!state.recentlyUnlockedIds.contains(achievementId)) achievementId,
       ];
 
       state = state.copyWith(
@@ -122,10 +134,31 @@ class AchievementNotifier extends Notifier<AchievementState> {
         ref.read(residentProvider.notifier).updateTier(newTier);
       }
 
-      onAchievementsVerified
-          ?.call([achievementId], tierChanged ? newTier : null);
+      onAchievementsVerified?.call([
+        achievementId,
+      ], tierChanged ? newTier : null);
       Haptics.success();
     }
+  }
+
+  Future<void> _persistCloudSubmission({
+    required String achievementId,
+    required String proofUri,
+    required AchievementStatus status,
+  }) async {
+    final userId =
+        ref.read(residentProvider).resident?.id ??
+        maybeSupabase()?.auth.currentUser?.id;
+    if (userId == null || userId.isEmpty || !isSupabaseConfigured()) return;
+    await getSupabase().from('user_achievements').upsert({
+      'user_id': userId,
+      'achievement_id': achievementId,
+      'status': status == AchievementStatus.verified ? 'verified' : 'submitted',
+      'proof_uri': proofUri,
+      'submitted_at': DateTime.now().toIso8601String(),
+      if (status == AchievementStatus.verified)
+        'verified_at': DateTime.now().toIso8601String(),
+    }, onConflict: 'user_id,achievement_id');
   }
 
   Future<void> verifyAchievement(String achievementId) async {
@@ -230,10 +263,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
   }
 
   void clearCelebration() {
-    state = state.copyWith(
-      recentlyUnlockedIds: [],
-      clearCelebration: true,
-    );
+    state = state.copyWith(recentlyUnlockedIds: [], clearCelebration: true);
   }
 
   void addDirectXp(int xp) {
@@ -270,8 +300,9 @@ class AchievementNotifier extends Notifier<AchievementState> {
         .map((a) => a.achievementId)
         .toSet();
 
-    final earned =
-        catAchievements.where((a) => verifiedIds.contains(a.id)).length;
+    final earned = catAchievements
+        .where((a) => verifiedIds.contains(a.id))
+        .length;
     final xp = catAchievements
         .where((a) => verifiedIds.contains(a.id))
         .fold<int>(0, (sum, a) => sum + a.xpValue);
@@ -284,13 +315,15 @@ class AchievementNotifier extends Notifier<AchievementState> {
   Future<void> loadAchievements() async {
     state = state.copyWith(isLoading: true);
     try {
-      final json =
-          await StorageService.getString(StorageService.achievementsKey);
+      final json = await StorageService.getString(
+        StorageService.achievementsKey,
+      );
       if (json != null) {
         final data = jsonDecode(json) as Map<String, dynamic>;
         final list = data['userAchievements'] as List? ?? [];
-        final achievements =
-            list.map((e) => _fromJson(e as Map<String, dynamic>)).toList();
+        final achievements = list
+            .map((e) => _fromJson(e as Map<String, dynamic>))
+            .toList();
         final totalXp = _calculateTotalXp(achievements);
         state = state.copyWith(
           userAchievements: achievements,
@@ -336,16 +369,17 @@ class AchievementNotifier extends Notifier<AchievementState> {
       );
 
   static Map<String, dynamic> _toJson(UserAchievement a) => {
-        'achievementId': a.achievementId,
-        'status': a.status.name,
-        'proofUri': a.proofUri,
-        'submittedAt': a.submittedAt,
-        'verifiedAt': a.verifiedAt,
-        'aiConfidence': a.aiConfidence,
-        'aiNotes': a.aiNotes,
-      };
+    'achievementId': a.achievementId,
+    'status': a.status.name,
+    'proofUri': a.proofUri,
+    'submittedAt': a.submittedAt,
+    'verifiedAt': a.verifiedAt,
+    'aiConfidence': a.aiConfidence,
+    'aiNotes': a.aiNotes,
+  };
 }
 
-final achievementProvider = NotifierProvider<AchievementNotifier, AchievementState>(
-  AchievementNotifier.new,
-);
+final achievementProvider =
+    NotifierProvider<AchievementNotifier, AchievementState>(
+      AchievementNotifier.new,
+    );

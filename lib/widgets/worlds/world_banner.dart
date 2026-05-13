@@ -15,6 +15,7 @@ import '../../utils/world_assets.dart';
 ///   prestige <  300  =>  orange (hustler)
 class WorldBanner extends StatelessWidget {
   final String worldId;
+  final String? assetKey;
   final double width;
   final double height;
   final WorldType worldType;
@@ -23,6 +24,7 @@ class WorldBanner extends StatelessWidget {
   const WorldBanner({
     super.key,
     required this.worldId,
+    this.assetKey,
     this.width = 400,
     this.height = 200,
     this.worldType = WorldType.wealth,
@@ -33,7 +35,15 @@ class WorldBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imagePath = WorldAssets.imageForWorld(worldId);
+    final visualKey = assetKey ?? worldId;
+    final imagePath = WorldAssets.imageForWorld(visualKey);
+    final logicalCacheWidth = width.isFinite
+        ? width
+        : MediaQuery.sizeOf(context).width;
+    final cacheWidth =
+        (logicalCacheWidth * MediaQuery.devicePixelRatioOf(context))
+            .round()
+            .clamp(480, 1600);
     if (imagePath != null) {
       return SizedBox(
         width: width,
@@ -44,9 +54,7 @@ class WorldBanner extends StatelessWidget {
             Image.asset(
               imagePath,
               fit: BoxFit.cover,
-              cacheWidth: (width * MediaQuery.devicePixelRatioOf(context))
-                  .round()
-                  .clamp(480, 1600),
+              cacheWidth: cacheWidth,
               errorBuilder: (_, _, _) => CustomPaint(
                 painter: _WorldBannerPainter(
                   worldId: worldId,

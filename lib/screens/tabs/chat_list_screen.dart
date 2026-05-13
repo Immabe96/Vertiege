@@ -208,7 +208,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 154,
+          height: 116,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: joinedWorlds.length,
@@ -473,9 +473,10 @@ class _JoinedWorldCard extends StatelessWidget {
           children: [
             WorldBanner(
               worldId: world.id,
+              assetKey: world.assetKey,
               worldType: world.type,
               prestige: world.prestige,
-              height: 154,
+              height: 116,
             ),
             DecoratedBox(
               decoration: BoxDecoration(

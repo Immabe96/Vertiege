@@ -256,6 +256,7 @@ class _BannerThumbnail extends StatelessWidget {
               tag: 'world-icon-${world.id}',
               child: WorldBanner(
                 worldId: world.id,
+                assetKey: world.assetKey,
                 width: double.infinity,
                 height: compact ? double.infinity : 80,
                 worldType: world.type,

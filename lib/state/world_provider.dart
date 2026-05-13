@@ -4,7 +4,6 @@ import '../config/tiers.dart';
 import '../models/world.dart';
 import '../models/post.dart';
 import '../models/alliance.dart';
-import '../services/supabase.dart';
 import '../services/world_service.dart';
 import '../services/storage_service.dart';
 import '../services/council_service.dart';
@@ -18,54 +17,69 @@ class WorldState {
   final bool isLoading;
   final List<Alliance> alliances;
 
-  const WorldState({this.worlds = const {}, this.isLoading = true, this.alliances = const []});
+  const WorldState({
+    this.worlds = const {},
+    this.isLoading = true,
+    this.alliances = const [],
+  });
 
-  WorldState copyWith({Map<String, World>? worlds, bool? isLoading, List<Alliance>? alliances}) =>
-      WorldState(
-        worlds: worlds ?? this.worlds,
-        isLoading: isLoading ?? this.isLoading,
-        alliances: alliances ?? this.alliances,
-      );
+  WorldState copyWith({
+    Map<String, World>? worlds,
+    bool? isLoading,
+    List<Alliance>? alliances,
+  }) => WorldState(
+    worlds: worlds ?? this.worlds,
+    isLoading: isLoading ?? this.isLoading,
+    alliances: alliances ?? this.alliances,
+  );
 }
 
 class WorldNotifier extends Notifier<WorldState> {
   @override
   WorldState build() {
     // Load local config worlds immediately — no network needed
-    return WorldState(worlds: Map<String, World>.from(worldsConfig), isLoading: false);
+    return const WorldState(isLoading: true);
   }
 
   Future<void> loadWorlds() async {
-    // Start with local worlds already showing
-    final merged = <String, World>{...state.worlds};
-
-    // Load user-created worlds from local storage (no network needed)
+    state = state.copyWith(isLoading: true);
     try {
-      final userWorlds = await _loadUserWorlds().timeout(const Duration(seconds: 3));
-      merged.addAll(userWorlds);
-    } catch (_) {}
-
-    // Try loading remote worlds — fail silently, local worlds still show
-    if (isSupabaseConfigured()) {
-      try {
-        final remote = await WorldService.loadWorlds().timeout(const Duration(seconds: 5));
-        for (final data in remote) {
-          final id = data['id'] as String?;
-          if (id != null && !merged.containsKey(id)) {
-            merged[id] = World.fromSupabase(data);
-          }
-        }
-      } catch (_) {}
+      final remote = await WorldService.loadWorlds().timeout(
+        const Duration(seconds: 8),
+      );
+      final worlds = <String, World>{};
+      for (final data in remote) {
+        final world = World.fromSupabase(data);
+        if (world.id.isNotEmpty) worlds[world.id] = world;
+      }
+      state = state.copyWith(worlds: worlds, isLoading: false);
+    } catch (_) {
+      state = state.copyWith(worlds: const {}, isLoading: false);
     }
 
-    state = state.copyWith(worlds: merged);
-    try { await _loadAlliances().timeout(const Duration(seconds: 3)); } catch (_) {}
+    try {
+      await _loadAlliances().timeout(const Duration(seconds: 3));
+    } catch (_) {}
     state = state.copyWith(alliances: state.alliances);
   }
 
   World? getWorld(String worldId) => state.worlds[worldId];
 
-  List<World> get worldsList => state.worlds.values.toList();
+  World? getWorldBySlug(String slug) {
+    for (final world in state.worlds.values) {
+      if (world.slug == slug) return world;
+    }
+    return null;
+  }
+
+  List<World> get worldsList {
+    final worlds = state.worlds.values.toList()
+      ..sort((a, b) {
+        final bySort = a.sortOrder.compareTo(b.sortOrder);
+        return bySort != 0 ? bySort : a.name.compareTo(b.name);
+      });
+    return worlds;
+  }
 
   Future<String> createWorld({
     required String name,
@@ -93,6 +107,7 @@ class WorldNotifier extends Notifier<WorldState> {
 
     final newWorld = World(
       id: worldId,
+      slug: worldData?['slug'] as String? ?? '',
       name: name,
       type: WorldType.dominion,
       description: description,
@@ -101,11 +116,7 @@ class WorldNotifier extends Notifier<WorldState> {
       icon: icon,
     );
 
-    state = state.copyWith(
-      worlds: {...state.worlds, worldId: newWorld},
-    );
-
-    await _persistUserWorld(newWorld);
+    state = state.copyWith(worlds: {...state.worlds, worldId: newWorld});
 
     return worldId;
   }
@@ -125,11 +136,7 @@ class WorldNotifier extends Notifier<WorldState> {
       icon: icon ?? world.icon,
     );
 
-    state = state.copyWith(
-      worlds: {...state.worlds, worldId: updated},
-    );
-
-    _persistUserWorld(updated);
+    state = state.copyWith(worlds: {...state.worlds, worldId: updated});
   }
 
   Future<int> updateWorldPrestige({
@@ -142,7 +149,9 @@ class WorldNotifier extends Notifier<WorldState> {
     if (world == null) return 0;
 
     final sovereignTier = PrestigeService.resolveSovereignTier(
-      world.sovereignId, memberTiers, world,
+      world.sovereignId,
+      memberTiers,
+      world,
     );
     final avgTier = PrestigeService.computeAvgTier(memberTiers);
 
@@ -157,10 +166,7 @@ class WorldNotifier extends Notifier<WorldState> {
 
     if (newPrestige != world.prestige) {
       final updated = world.copyWith(prestige: newPrestige);
-      state = state.copyWith(
-        worlds: {...state.worlds, worldId: updated},
-      );
-      _persistUserWorld(updated);
+      state = state.copyWith(worlds: {...state.worlds, worldId: updated});
     }
 
     return newPrestige;
@@ -178,10 +184,7 @@ class WorldNotifier extends Notifier<WorldState> {
     if (world == null || world.type != WorldType.dominion) return;
 
     final updated = world.copyWith(activityScore: world.activityScore + points);
-    state = state.copyWith(
-      worlds: {...state.worlds, worldId: updated},
-    );
-    _persistUserWorld(updated);
+    state = state.copyWith(worlds: {...state.worlds, worldId: updated});
   }
 
   int worldLevelFor(String worldId) {
@@ -203,7 +206,6 @@ class WorldNotifier extends Notifier<WorldState> {
     if (world == null) return;
     final updated = world.copyWith(memberCount: world.memberCount + 1);
     state = state.copyWith(worlds: {...state.worlds, worldId: updated});
-    _persistUserWorld(updated);
   }
 
   Future<List<CouncilAction>> runCouncilCheck(String worldId) async {
@@ -217,10 +219,7 @@ class WorldNotifier extends Notifier<WorldState> {
             sovereignId: action.residentId,
             sovereignName: action.residentName ?? world.sovereignName,
           );
-          state = state.copyWith(
-            worlds: {...state.worlds, worldId: updated},
-          );
-          _persistUserWorld(updated);
+          state = state.copyWith(worlds: {...state.worlds, worldId: updated});
         }
       }
     }
@@ -240,7 +239,9 @@ class WorldNotifier extends Notifier<WorldState> {
 
     final now = DateTime.now();
     final thisMonth = now.year * 12 + now.month;
-    final newCount = world.lastBoostMonth == thisMonth ? world.boostCount + 1 : 1;
+    final newCount = world.lastBoostMonth == thisMonth
+        ? world.boostCount + 1
+        : 1;
 
     final updated = world.copyWith(
       activityScore: world.activityScore + World.boostActivityPoints,
@@ -248,7 +249,6 @@ class WorldNotifier extends Notifier<WorldState> {
       lastBoostMonth: thisMonth,
     );
     state = state.copyWith(worlds: {...state.worlds, worldId: updated});
-    _persistUserWorld(updated);
 
     return StorePurchaseState.purchased;
   }
@@ -257,9 +257,11 @@ class WorldNotifier extends Notifier<WorldState> {
     final w1 = state.worlds[worldId1];
     final w2 = state.worlds[worldId2];
     if (w1 == null || w2 == null) return;
-    final exists = state.alliances.any((a) =>
-        (a.worldId1 == worldId1 && a.worldId2 == worldId2) ||
-        (a.worldId1 == worldId2 && a.worldId2 == worldId1));
+    final exists = state.alliances.any(
+      (a) =>
+          (a.worldId1 == worldId1 && a.worldId2 == worldId2) ||
+          (a.worldId1 == worldId2 && a.worldId2 == worldId1),
+    );
     if (exists) return;
 
     final alliance = Alliance(
@@ -285,8 +287,9 @@ class WorldNotifier extends Notifier<WorldState> {
     if (raw == null || raw.isEmpty) return;
     try {
       final list = jsonDecode(raw) as List;
-      final alliances =
-          list.map((e) => Alliance.fromJson(e as Map<String, dynamic>)).toList();
+      final alliances = list
+          .map((e) => Alliance.fromJson(e as Map<String, dynamic>))
+          .toList();
       state = state.copyWith(alliances: alliances);
     } catch (_) {}
   }
@@ -294,32 +297,6 @@ class WorldNotifier extends Notifier<WorldState> {
   void _persistAlliances() {
     final list = state.alliances.map((a) => a.toJson()).toList();
     StorageService.setStringDebounced('@alliances_data', jsonEncode(list));
-  }
-
-  Future<Map<String, World>> _loadUserWorlds() async {
-    final raw = await StorageService.getString(StorageService.userWorldsKey);
-    if (raw == null || raw.isEmpty) return {};
-    try {
-      final list = jsonDecode(raw) as List;
-      final result = <String, World>{};
-      for (final e in list) {
-        final w = World.fromJson(e);
-        result[w.id] = w;
-      }
-      return result;
-    } catch (_) {
-      return {};
-    }
-  }
-
-  Future<void> _persistUserWorld(World world) async {
-    final worlds = await _loadUserWorlds();
-    worlds[world.id] = world;
-    final list = worlds.values.map((w) => w.toJson()).toList();
-    StorageService.setStringDebounced(
-      StorageService.userWorldsKey,
-      jsonEncode(list),
-    );
   }
 }
 

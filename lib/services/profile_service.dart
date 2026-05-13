@@ -68,7 +68,7 @@ class ProfileService {
     'streak_shields': r.streakShields,
     'following': _uuidList(r.following),
     'joined_world_ids': _uuidList(r.joinedWorldIds),
-    'local_world_ids': _localWorldIds(r.joinedWorldIds),
+    'local_world_ids': const <String>[],
     if (r.referredBy != null) 'referred_by': r.referredBy,
     'referral_code': r.referralCode,
     'sovereign_coins': r.sovereignCoins,
@@ -123,12 +123,21 @@ class ProfileService {
     String userId,
     Map<String, dynamic> profile,
   ) async {
-    final ids = <String>{
-      ...List<String>.from(profile['joined_world_ids'] ?? []),
-      ...List<String>.from(profile['local_world_ids'] ?? []),
-    };
+    final ids = <String>{...List<String>.from(profile['joined_world_ids'] ?? [])};
     try {
       final client = getSupabase();
+      final localSlugs = List<String>.from(profile['local_world_ids'] ?? []);
+      if (localSlugs.isNotEmpty) {
+        final worlds = await client
+            .from('worlds')
+            .select('id, slug')
+            .inFilter('slug', localSlugs);
+        ids.addAll(
+          (worlds as List)
+              .map((e) => (e as Map<String, dynamic>)['id']?.toString())
+              .whereType<String>(),
+        );
+      }
       final data = await client
           .from('world_members')
           .select('world_id')
@@ -139,17 +148,14 @@ class ProfileService {
             .whereType<String>(),
       );
     } catch (_) {
-      // Profile arrays still preserve local catalog membership when the
-      // membership table is unreachable.
+      // Profile arrays still preserve cloud membership when membership reads
+      // are unreachable.
     }
     return ids.toList();
   }
 
   static List<String> _uuidList(Iterable<String> values) =>
       values.where(_isUuid).toList();
-
-  static List<String> _localWorldIds(Iterable<String> values) =>
-      values.where((id) => !_isUuid(id)).toSet().toList();
 
   static bool _isUuid(String value) => RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',

@@ -137,7 +137,12 @@ class WorldAssets {
     return _accentPalette[idx];
   }
 
-  static String? imageForWorld(String worldId) => _worldImagePaths[worldId];
+  static String? imageForWorld(String worldId) {
+    final normalized = worldId.startsWith('world-')
+        ? worldId.substring('world-'.length)
+        : worldId;
+    return _worldImagePaths[normalized] ?? _worldImagePaths[worldId];
+  }
 
   static String avatarForSeed(String seed) {
     final normalized = seed.trim().isEmpty ? 'resident' : seed.trim();

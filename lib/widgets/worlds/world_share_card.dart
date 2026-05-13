@@ -66,6 +66,7 @@ class WorldShareCard extends StatelessWidget {
             height: 260,
             child: WorldBanner(
               worldId: world.id,
+              assetKey: world.assetKey,
               width: 360,
               height: 260,
               worldType: world.type,

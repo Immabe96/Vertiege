@@ -5,10 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/resident.dart';
+import '../../models/world.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
+import '../../state/world_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
+import '../../utils/world_assets.dart';
+import '../../utils/world_foundations.dart';
 import '../../widgets/core/glass_panel.dart';
 
 /// Key used to track whether the resident has completed The Gate.
@@ -33,116 +38,126 @@ Future<void> markGateCompleted() async {
 
 // ── Interest type ──────────────────────────────────────────────────
 
-enum _GateInterest { build, wealth, learn, connect, lead }
+enum _GateInterest { execute, foundation, craft, capital, governance }
 
 extension _GateInterestX on _GateInterest {
   String get label {
     switch (this) {
-      case _GateInterest.build:
-        return 'Build & Create';
-      case _GateInterest.wealth:
-        return 'Grow Wealth';
-      case _GateInterest.learn:
-        return 'Learn & Master';
-      case _GateInterest.connect:
-        return 'Connect & Network';
-      case _GateInterest.lead:
-        return 'Lead & Govern';
+      case _GateInterest.execute:
+        return 'Move fast';
+      case _GateInterest.foundation:
+        return 'Build habits';
+      case _GateInterest.craft:
+        return 'Master craft';
+      case _GateInterest.capital:
+        return 'Study capital';
+      case _GateInterest.governance:
+        return 'Lead worlds';
     }
   }
 
   IconData get icon {
     switch (this) {
-      case _GateInterest.build:
-        return Icons.terminal;
-      case _GateInterest.wealth:
+      case _GateInterest.execute:
+        return Icons.bolt;
+      case _GateInterest.foundation:
+        return Icons.spa;
+      case _GateInterest.craft:
+        return Icons.workspace_premium;
+      case _GateInterest.capital:
         return Icons.diamond;
-      case _GateInterest.learn:
-        return Icons.menu_book;
-      case _GateInterest.connect:
-        return Icons.hub;
-      case _GateInterest.lead:
+      case _GateInterest.governance:
         return Icons.shield;
     }
   }
 
   Color get glowColor {
     switch (this) {
-      case _GateInterest.build:
+      case _GateInterest.execute:
         return AppColors.primary;
-      case _GateInterest.wealth:
+      case _GateInterest.capital:
         return AppColors.tertiary;
-      case _GateInterest.learn:
+      case _GateInterest.craft:
         return const Color(0xFF7C6FFD);
-      case _GateInterest.connect:
+      case _GateInterest.foundation:
         return AppColors.success;
-      case _GateInterest.lead:
+      case _GateInterest.governance:
         return AppColors.hustler;
     }
   }
 
-  /// Recommended world based on interest
-  ({String id, String name, String description, int memberCount}) get world {
+  String get description {
     switch (this) {
-      case _GateInterest.build:
-        return (id: 'digital-architects', name: 'Digital Architects', description: 'Build the future with code, design, and engineering.', memberCount: 847);
-      case _GateInterest.wealth:
-        return (id: 'gilded-vault', name: 'The Gilded Vault', description: 'Master wealth, investing, and financial independence.', memberCount: 1203);
-      case _GateInterest.learn:
-        return (id: 'scholars-athenaeum', name: "Scholar's Athenaeum", description: 'Pursue knowledge across every discipline.', memberCount: 652);
-      case _GateInterest.connect:
-        return (id: 'nexus-hub', name: 'Nexus Hub', description: 'Connect with creators, founders, and visionaries.', memberCount: 1430);
-      case _GateInterest.lead:
-        return (id: 'sovereigns-court', name: "Sovereign's Court", description: 'Lead councils, govern worlds, and shape the realm.', memberCount: 389);
+      case _GateInterest.execute:
+        return 'Hustle, tools, first wins';
+      case _GateInterest.foundation:
+        return 'Clarity, money habits, clean starts';
+      case _GateInterest.craft:
+        return 'Professional rooms and proof';
+      case _GateInterest.capital:
+        return 'Markets, leverage, reputation';
+      case _GateInterest.governance:
+        return 'Rules, roles, stewardship';
     }
   }
 }
 
 // ── Goal type ──────────────────────────────────────────────────────
 
-enum _GateGoal { firstPost, completeProfile, inviteFriend }
+enum _GateGoal { readCharter, learnStandard, firstSignal }
 
 extension _GateGoalX on _GateGoal {
   String get label {
     switch (this) {
-      case _GateGoal.firstPost:
-        return 'Post your first message';
-      case _GateGoal.completeProfile:
-        return 'Complete your profile';
-      case _GateGoal.inviteFriend:
-        return 'Invite a friend';
+      case _GateGoal.readCharter:
+        return 'Read the world charter';
+      case _GateGoal.learnStandard:
+        return 'Learn roles and rules';
+      case _GateGoal.firstSignal:
+        return 'Post your first signal';
+    }
+  }
+
+  String get description {
+    switch (this) {
+      case _GateGoal.readCharter:
+        return 'Start in #info before joining the room.';
+      case _GateGoal.learnStandard:
+        return 'Understand #rules and #roles before status matters.';
+      case _GateGoal.firstSignal:
+        return 'Enter #general with context, proof, or a useful ask.';
     }
   }
 
   int get xp {
     switch (this) {
-      case _GateGoal.firstPost:
+      case _GateGoal.readCharter:
         return 10;
-      case _GateGoal.completeProfile:
+      case _GateGoal.learnStandard:
         return 20;
-      case _GateGoal.inviteFriend:
+      case _GateGoal.firstSignal:
         return 30;
     }
   }
 
   IconData get icon {
     switch (this) {
-      case _GateGoal.firstPost:
-        return Icons.edit_note;
-      case _GateGoal.completeProfile:
-        return Icons.person;
-      case _GateGoal.inviteFriend:
-        return Icons.group_add;
+      case _GateGoal.readCharter:
+        return Icons.article_outlined;
+      case _GateGoal.learnStandard:
+        return Icons.verified_user_outlined;
+      case _GateGoal.firstSignal:
+        return Icons.forum_outlined;
     }
   }
 
   String get achievementId {
     switch (this) {
-      case _GateGoal.firstPost:
+      case _GateGoal.readCharter:
         return 'pioneer-poster';
-      case _GateGoal.completeProfile:
+      case _GateGoal.learnStandard:
         return 'explorer';
-      case _GateGoal.inviteFriend:
+      case _GateGoal.firstSignal:
         return 'wayfarer';
     }
   }
@@ -227,7 +242,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       if (!updatedDecorations.contains('gatekeeper')) {
         updatedDecorations.add('gatekeeper');
       }
-      ref.read(residentProvider.notifier).setResident(
+      ref
+          .read(residentProvider.notifier)
+          .setResident(
             resident.copyWith(
               decorations: updatedDecorations,
               gateCompleted: true,
@@ -241,10 +258,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       if (_selectedGoal != null) {
         final goalAchievementId = _selectedGoal!.achievementId;
         if (goalAchievementId.isNotEmpty) {
-          ref.read(achievementProvider.notifier).submitAchievement(
-                goalAchievementId,
-                'submitted',
-              );
+          ref
+              .read(achievementProvider.notifier)
+              .submitAchievement(goalAchievementId, 'submitted');
         }
       }
     }
@@ -447,18 +463,23 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // Stage 2: Choose Your Path (Interest quiz)
+  // Stage 2: Choose Your Signal
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage2() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.section, Spacing.lg, Spacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.lg,
+        Spacing.section,
+        Spacing.lg,
+        Spacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Header ────────────────────────────────────────
           Text(
-            'What brings you\nto the Realm?',
+            'Choose your\nfirst signal',
             style: GoogleFonts.spaceGrotesk(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
@@ -468,7 +489,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.sm),
           Text(
-            'Select 1–2 interests to guide your path.',
+            'Pick 1-2 signals so Vertiege can route your first world with intent.',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
               color: AppColors.inkMuted,
@@ -551,18 +572,28 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     // Pick the first selected interest, or default to build
     final interest = _selectedInterests.isNotEmpty
         ? _selectedInterests.first
-        : _GateInterest.build;
-
-    final world = interest.world;
+        : _GateInterest.execute;
+    final world = _recommendedWorldFor(
+      interest,
+      ref.read(residentProvider).resident,
+    );
+    final foundation = foundationForWorld(world);
+    final imagePath = WorldAssets.imageForWorld(world.assetKey);
+    final accent = WorldAssets.accentForWorld(world.assetKey);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.section, Spacing.lg, Spacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.lg,
+        Spacing.section,
+        Spacing.lg,
+        Spacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Header ────────────────────────────────────────
           Text(
-            'Your First World',
+            'Your first\nworld foundation',
             style: GoogleFonts.spaceGrotesk(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
@@ -571,7 +602,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.sm),
           Text(
-            'Based on your interests, we recommend:',
+            'This is not a random recommendation. It is your first room, with a charter, roles, rules, and a live general channel.',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
               color: AppColors.inkMuted,
@@ -581,55 +612,102 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           // ── World card preview ────────────────────────────
           GlassPanel(
-            padding: const EdgeInsets.all(Spacing.xl),
+            padding: EdgeInsets.zero,
             borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Icon
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: interest.glowColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(RadiusTokens.card),
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(RadiusTokens.cardFeatured),
                   ),
-                  child: Icon(interest.icon, size: 28, color: interest.glowColor),
-                ),
-                const SizedBox(height: Spacing.lg),
-                // Name
-                Text(
-                  world.name,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.bold,
-                    color: AppColors.ink,
+                  child: SizedBox(
+                    height: 150,
+                    width: double.infinity,
+                    child: imagePath == null
+                        ? ColoredBox(color: accent.withValues(alpha: 0.18))
+                        : Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => ColoredBox(
+                              color: accent.withValues(alpha: 0.18),
+                            ),
+                          ),
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
-                // Description
-                Text(
-                  world.description,
-                  style: TextStyle(
-                    fontSize: FontSizes.bodyMd,
-                    color: AppColors.inkSecondary,
-                    height: LineHeight.body,
-                  ),
-                ),
-                const SizedBox(height: Spacing.md),
-                // Member count
-                Row(
-                  children: [
-                    Icon(Icons.people, size: 16, color: AppColors.inkMuted),
-                    const SizedBox(width: Spacing.xs),
-                    Text(
-                      '${world.memberCount} members',
-                      style: TextStyle(
-                        fontSize: FontSizes.labelSm,
-                        color: AppColors.inkMuted,
+                Padding(
+                  padding: const EdgeInsets.all(Spacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: accent.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.card,
+                              ),
+                            ),
+                            child: Icon(
+                              WorldAssets.iconForWorld(world.assetKey),
+                              size: 24,
+                              color: accent,
+                            ),
+                          ),
+                          const SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  world.name,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: FontSizes.headlineMd,
+                                    fontWeight: FontWeights.bold,
+                                    color: AppColors.ink,
+                                  ),
+                                ),
+                                Text(
+                                  _accessLabel(world),
+                                  style: TextStyle(
+                                    fontSize: FontSizes.labelSm,
+                                    color: accent,
+                                    fontWeight: FontWeights.semiBold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: Spacing.md),
+                      Text(
+                        foundation.premise,
+                        style: TextStyle(
+                          fontSize: FontSizes.bodyMd,
+                          color: AppColors.inkSecondary,
+                          height: LineHeight.body,
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.md),
+                      Wrap(
+                        spacing: Spacing.xs,
+                        runSpacing: Spacing.xs,
+                        children:
+                            const ['#info', '#rules', '#roles', '#general']
+                                .map(
+                                  (channel) => _GatePill(
+                                    label: channel,
+                                    color: AppColors.tertiary,
+                                  ),
+                                )
+                                .toList(),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -642,15 +720,16 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: 48,
             child: FilledButton.icon(
               onPressed: () {
-                // Join the recommended world
                 final resident = ref.read(residentProvider).resident;
-                if (resident != null && !resident.joinedWorldIds.contains(world.id)) {
+                if (resident != null &&
+                    world.id.isNotEmpty &&
+                    !resident.joinedWorldIds.contains(world.id)) {
                   ref.read(residentProvider.notifier).joinWorld(world.id);
                 }
                 _nextStage();
               },
-              icon: const Icon(Icons.rocket_launch),
-              label: const Text('JOIN WORLD'),
+              icon: const Icon(Icons.login),
+              label: const Text('ENTER THIS WORLD'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.tertiary,
                 foregroundColor: AppColors.onTertiary,
@@ -670,8 +749,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: 48,
             child: OutlinedButton.icon(
               onPressed: _nextStage,
-              icon: const Icon(Icons.skip_next),
-              label: const Text('CHOOSE ANOTHER'),
+              icon: const Icon(Icons.travel_explore),
+              label: const Text('EXPLORE FIRST'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.inkSecondary,
                 side: const BorderSide(color: AppColors.glassBorder),
@@ -688,18 +767,23 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // Stage 4: Set Your Goal
+  // Stage 4: Set Your First Rite
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage4() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.section, Spacing.lg, Spacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.lg,
+        Spacing.section,
+        Spacing.lg,
+        Spacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Header ────────────────────────────────────────
           Text(
-            'What will you\nachieve first?',
+            'Choose your\nfirst rite',
             style: GoogleFonts.spaceGrotesk(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
@@ -709,7 +793,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.sm),
           Text(
-            'Set your first quest and earn bonus XP.',
+            'Pick the first orientation action you want waiting after The Gate.',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
               color: AppColors.inkMuted,
@@ -756,7 +840,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                       ),
                     )
                   : const Icon(Icons.flag),
-              label: Text(_completing ? 'Entering Realm...' : 'BEGIN YOUR JOURNEY'),
+              label: Text(_completing ? 'Entering Realm...' : 'OPEN THE REALM'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.tertiary,
                 foregroundColor: AppColors.onTertiary,
@@ -774,8 +858,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           Center(
             child: Text(
               _selectedGoal != null
-                  ? 'Quest: ${_selectedGoal!.label} (+${_selectedGoal!.xp} XP)'
-                  : 'Select a quest above',
+                  ? 'Rite: ${_selectedGoal!.label} (+${_selectedGoal!.xp} XP)'
+                  : 'Select a rite above',
               style: TextStyle(
                 fontSize: FontSizes.labelSm,
                 color: _selectedGoal != null
@@ -793,6 +877,62 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
   // Particle decorations
   // ═══════════════════════════════════════════════════════════════
+
+  String _accessLabel(World world) {
+    if (world.requiredProfession != null) {
+      return '${world.requiredProfession} gate';
+    }
+    return 'Tier ${world.requiredTier ?? 1} open world';
+  }
+
+  World _recommendedWorldFor(_GateInterest interest, Resident? resident) {
+    final professionWorlds = <String, String>{
+      'Aviation': 'aviation-heights',
+      'Medical': 'medical-nexus',
+      'Finance': 'financial-district',
+      'Legal': 'legal-plaza',
+      'Technology': 'tech-sprawl',
+      'Engineering': 'quantum-core',
+      'Arts': 'arts-pavilion',
+    };
+
+    String slug;
+    switch (interest) {
+      case _GateInterest.execute:
+        slug = 'neon-district';
+      case _GateInterest.foundation:
+        slug = 'crystal-shore';
+      case _GateInterest.craft:
+        slug = professionWorlds[resident?.profession] ?? 'neon-district';
+      case _GateInterest.capital:
+        slug = resident != null && resident.tier.value >= 2
+            ? 'azure-coast'
+            : 'crystal-shore';
+      case _GateInterest.governance:
+        slug = resident != null && resident.tier.value >= 3
+            ? 'sovereign-city'
+            : 'neon-district';
+    }
+
+    final worlds = ref.read(worldProvider).worlds.values;
+    return worlds.firstWhere(
+      (world) => world.slug == slug,
+      orElse: () => worlds.firstWhere(
+        (world) => world.slug == 'neon-district',
+        orElse: () => const World(
+          id: '',
+          slug: 'neon-district',
+          name: 'Neon District',
+          type: WorldType.wealth,
+          description: 'The entry point to the digital realm.',
+          sovereignId: '',
+          sovereignName: 'Vertiege',
+          icon: 'neon',
+          requiredTier: 1,
+        ),
+      ),
+    );
+  }
 
   List<Widget> _buildParticles() {
     final random = math.Random(42); // Fixed seed for consistent layout
@@ -827,6 +967,36 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 // ═════════════════════════════════════════════════════════════════════
 // Interest Card (Stage 2)
 // ═════════════════════════════════════════════════════════════════════
+
+class _GatePill extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _GatePill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        border: Border.all(color: color.withValues(alpha: 0.26)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: FontSizes.caption,
+          fontWeight: FontWeights.semiBold,
+        ),
+      ),
+    );
+  }
+}
 
 class _InterestCard extends StatelessWidget {
   final _GateInterest interest;
@@ -899,8 +1069,21 @@ class _InterestCard extends StatelessWidget {
                 interest.label,
                 style: TextStyle(
                   fontSize: FontSizes.bodyMd,
-                  fontWeight: isSelected ? FontWeights.bold : FontWeights.semiBold,
+                  fontWeight: isSelected
+                      ? FontWeights.bold
+                      : FontWeights.semiBold,
                   color: isSelected ? glow : AppColors.inkSecondary,
+                ),
+              ),
+              const SizedBox(height: Spacing.xs),
+              Text(
+                interest.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: FontSizes.caption,
+                  color: AppColors.inkMuted,
+                  height: 1.2,
                 ),
               ),
               if (isSelected) ...[
@@ -960,11 +1143,7 @@ class _GoalCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(RadiusTokens.card),
               ),
-              child: Icon(
-                goal.icon,
-                size: 22,
-                color: AppColors.tertiary,
-              ),
+              child: Icon(goal.icon, size: 22, color: AppColors.tertiary),
             ),
             const SizedBox(width: Spacing.md),
             Expanded(
@@ -975,7 +1154,9 @@ class _GoalCard extends StatelessWidget {
                     goal.label,
                     style: TextStyle(
                       fontSize: FontSizes.bodyMd,
-                      fontWeight: isSelected ? FontWeights.bold : FontWeights.semiBold,
+                      fontWeight: isSelected
+                          ? FontWeights.bold
+                          : FontWeights.semiBold,
                       color: AppColors.ink,
                     ),
                   ),
@@ -985,6 +1166,15 @@ class _GoalCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
                       color: AppColors.tertiary.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.xs),
+                  Text(
+                    goal.description,
+                    style: TextStyle(
+                      fontSize: FontSizes.caption,
+                      color: AppColors.inkMuted,
+                      height: 1.2,
                     ),
                   ),
                 ],

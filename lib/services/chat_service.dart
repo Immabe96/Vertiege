@@ -130,7 +130,8 @@ class ChatService {
 
   // --- Channel messages (world channels) ---
 
-  static Future<void> sendChannelMessage({
+  static Future<Map<String, dynamic>> sendChannelMessage({
+    required String messageId,
     required String channelId,
     required String senderId,
     required String senderName,
@@ -140,14 +141,39 @@ class ChatService {
     String? imageUrl,
   }) async {
     if (!isSupabaseConfigured()) throw Exception('Supabase not configured');
+    if (!WorldService.isRemoteWorldId(worldId) ||
+        !WorldService.isRemoteWorldId(channelId) ||
+        !WorldService.isRemoteWorldId(senderId)) {
+      throw ArgumentError('Channel messages require cloud UUID ids.');
+    }
     final client = getSupabase();
+
+    final channel = await client
+        .from('channels')
+        .select('id, world_id')
+        .eq('id', channelId)
+        .eq('world_id', worldId)
+        .maybeSingle();
+    if (channel == null) {
+      throw StateError('Channel is not available for this world.');
+    }
+
+    final membership = await client
+        .from('world_members')
+        .select('world_id')
+        .eq('world_id', worldId)
+        .eq('resident_id', senderId)
+        .maybeSingle();
+    if (membership == null) {
+      throw StateError('Join this world before sending messages.');
+    }
 
     // Run The Sentinel moderation filter before sending
     final moderationResult = ModerationFilter.checkContent(content);
     final isFlagged = moderationResult != null;
 
     final payload = <String, dynamic>{
-      'id': generateId(),
+      'id': messageId,
       'channel_id': channelId,
       'sender_id': senderId,
       'sender_name': senderName,
@@ -159,7 +185,19 @@ class ChatService {
       'created_at': DateTime.now().toIso8601String(),
     };
     try {
-      await client.from('channel_messages').insert(payload);
+      final inserted = await client
+          .from('channel_messages')
+          .insert(payload)
+          .select()
+          .single();
+      if (TextParser.containsAllResidents(content)) {
+        await _broadcastMentionNotifications(
+          worldId: worldId,
+          senderId: senderId,
+          senderName: senderName,
+        );
+      }
+      return Map<String, dynamic>.from(inserted);
     } on PostgrestException catch (e) {
       final missingOptionalColumns =
           e.message.contains('sender_avatar') ||
@@ -170,16 +208,19 @@ class ChatService {
         ..remove('sender_avatar')
         ..remove('image_url')
         ..remove('flagged');
-      await client.from('channel_messages').insert(fallbackPayload);
-    }
-
-    // Broadcast @AllResidents notifications
-    if (TextParser.containsAllResidents(content)) {
-      _broadcastMentionNotifications(
-        worldId: worldId,
-        senderId: senderId,
-        senderName: senderName,
-      );
+      final inserted = await client
+          .from('channel_messages')
+          .insert(fallbackPayload)
+          .select()
+          .single();
+      if (TextParser.containsAllResidents(content)) {
+        await _broadcastMentionNotifications(
+          worldId: worldId,
+          senderId: senderId,
+          senderName: senderName,
+        );
+      }
+      return Map<String, dynamic>.from(inserted);
     }
   }
 
@@ -426,8 +467,6 @@ class ChatService {
           .from('channel_messages')
           .insert(Map<String, dynamic>.from(payload)..remove('sender_avatar'));
     }
-    // Increment thread count on parent
-    await client.rpc('increment_thread_count', params: {'msg_id': threadId});
   }
 
   static Future<void> deleteDistrict(String districtId) async {

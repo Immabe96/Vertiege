@@ -6,26 +6,29 @@ import 'design_system.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get theme {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.dark,
-      surface: AppColors.canvas,
-    ).copyWith(
-      surface: AppColors.canvas,
-      surfaceContainer: AppColors.surface,
-      surfaceContainerHighest: AppColors.surfaceElevated,
-      primary: AppColors.primary,
-      onPrimary: AppColors.onPrimary,
-      onSurface: AppColors.ink,
-      onSurfaceVariant: AppColors.inkSecondary,
-      outline: AppColors.borderDefault,
-      outlineVariant: AppColors.borderSubtle,
-      error: AppColors.error,
-      tertiary: AppColors.tertiary,
-      onTertiary: AppColors.onTertiary,
-      shadow: Colors.transparent,
-    );
+  static ThemeData get theme => dark;
+
+  static ThemeData get dark {
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
+          surface: AppColors.canvas,
+        ).copyWith(
+          surface: AppColors.canvas,
+          surfaceContainer: AppColors.surface,
+          surfaceContainerHighest: AppColors.surfaceElevated,
+          primary: AppColors.primary,
+          onPrimary: AppColors.onPrimary,
+          onSurface: AppColors.ink,
+          onSurfaceVariant: AppColors.inkSecondary,
+          outline: AppColors.borderDefault,
+          outlineVariant: AppColors.borderSubtle,
+          error: AppColors.error,
+          tertiary: AppColors.tertiary,
+          onTertiary: AppColors.onTertiary,
+          shadow: Colors.transparent,
+        );
 
     final interTextTheme = GoogleFonts.interTextTheme(
       ThemeData.dark().textTheme.apply(
@@ -183,7 +186,9 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceElevated,
-        selectedColor: AppColors.primary.withValues(alpha: AppColors.alphaSelected),
+        selectedColor: AppColors.primary.withValues(
+          alpha: AppColors.alphaSelected,
+        ),
         labelStyle: GoogleFonts.inter(
           fontSize: FontSizes.labelSm,
           fontWeight: FontWeights.regular,
@@ -240,6 +245,125 @@ class AppTheme {
           fontSize: FontSizes.labelSm,
           fontWeight: FontWeights.regular,
         ),
+      ),
+    );
+  }
+
+  static ThemeData get light {
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6D5BD0),
+          brightness: Brightness.light,
+          surface: const Color(0xFFFAFAF8),
+        ).copyWith(
+          primary: const Color(0xFF6D5BD0),
+          onPrimary: Colors.white,
+          secondary: const Color(0xFF52606D),
+          tertiary: const Color(0xFFB7791F),
+          onTertiary: Colors.white,
+          surface: const Color(0xFFFAFAF8),
+          surfaceContainer: const Color(0xFFFFFFFF),
+          surfaceContainerHighest: const Color(0xFFE8E6EF),
+          onSurface: const Color(0xFF1F1F23),
+          onSurfaceVariant: const Color(0xFF60616A),
+          outline: const Color(0xFFD8D5E0),
+          outlineVariant: const Color(0xFFE8E6EF),
+          error: const Color(0xFFB3261E),
+          shadow: Colors.transparent,
+        );
+
+    final interTextTheme = GoogleFonts.interTextTheme(
+      ThemeData.light().textTheme.apply(
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
+        decorationColor: colorScheme.onSurfaceVariant,
+      ),
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: colorScheme.surface,
+      textTheme: interTextTheme,
+      appBarTheme: AppBarTheme(
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: FontSizes.headlineMd,
+          fontWeight: FontWeights.semiBold,
+          color: colorScheme.onSurface,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: colorScheme.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colorScheme.surfaceContainer,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          borderSide: BorderSide(color: colorScheme.primary),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.lg,
+            vertical: Spacing.sm + 2,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colorScheme.primary,
+          side: BorderSide(color: colorScheme.outline),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+          ),
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        backgroundColor: colorScheme.surface,
+        selectedItemColor: colorScheme.primary,
+        unselectedItemColor: colorScheme.onSurfaceVariant,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: colorScheme.surfaceContainer,
+        selectedColor: colorScheme.primary.withValues(alpha: 0.12),
+        side: BorderSide(color: colorScheme.outlineVariant),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        space: 1,
+        thickness: 0.5,
+        color: colorScheme.outlineVariant,
       ),
     );
   }

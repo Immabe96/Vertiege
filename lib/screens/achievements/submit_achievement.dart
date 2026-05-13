@@ -26,6 +26,7 @@ class _SubmitAchievementScreenState
   String? _proofImagePath;
   bool _isUploading = false;
   AchievementCategory? _categoryFilter;
+  String? _errorText;
 
   Future<void> _pickProofImage() async {
     final picker = ImagePicker();
@@ -40,40 +41,68 @@ class _SubmitAchievementScreenState
   }
 
   Future<void> _submit() async {
-    if (_selectedId == null) return;
-
-    setState(() => _isUploading = true);
-
-    String? proofUrl;
-    if (_proofImagePath != null) {
-      proofUrl = await _uploadToSupabase(_proofImagePath!);
-      if (!mounted) return;
+    if (_selectedId == null) {
+      setState(() => _errorText = 'Choose an achievement first.');
+      return;
     }
 
-    ref.read(achievementProvider.notifier).submitAchievement(
-          _selectedId!,
-          proofUrl ?? 'manual',
-        );
+    setState(() {
+      _isUploading = true;
+      _errorText = null;
+    });
 
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Achievement submitted for verification')),
-      );
+    try {
+      String proofUrl = 'manual';
+      if (_proofImagePath != null) {
+        final uploaded = await _uploadToSupabase(_proofImagePath!);
+        if (!mounted) return;
+        if (uploaded == null) {
+          setState(() {
+            _isUploading = false;
+            _errorText =
+                'Proof upload failed. Please try again or remove the image.';
+          });
+          return;
+        }
+        proofUrl = uploaded;
+      }
+
+      await ref
+          .read(achievementProvider.notifier)
+          .submitAchievement(_selectedId!, proofUrl);
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Achievement submitted for verification'),
+          ),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isUploading = false;
+        _errorText =
+            'Submission failed. Please check your connection and retry.';
+      });
     }
   }
 
   Future<String?> _uploadToSupabase(String filePath) async {
     if (!isSupabaseConfigured()) return null;
+    final userId = maybeSupabase()?.auth.currentUser?.id;
+    final achievementId = _selectedId;
+    if (userId == null || achievementId == null) return null;
     final client = getSupabase();
-    final ext = filePath.split('.').last;
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final ext = filePath.split('.').last.toLowerCase();
+    final fileName =
+        '$userId/$achievementId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     try {
-      await client.storage.from('achievement-proofs').upload(
-            fileName,
-            File(filePath),
-          );
+      await client.storage
+          .from('achievement-proofs')
+          .upload(fileName, File(filePath));
       return client.storage.from('achievement-proofs').getPublicUrl(fileName);
     } catch (_) {
       return null;
@@ -85,8 +114,7 @@ class _SubmitAchievementScreenState
     final theme = Theme.of(context);
     final achievementNotifier = ref.read(achievementProvider.notifier);
     final visibleAchievements = achievements.where((achievement) {
-      return _categoryFilter == null ||
-          achievement.category == _categoryFilter;
+      return _categoryFilter == null || achievement.category == _categoryFilter;
     }).toList();
     final selectedAchievement = achievements
         .where((achievement) => achievement.id == _selectedId)
@@ -104,12 +132,12 @@ class _SubmitAchievementScreenState
         ),
         children: [
           GlassPanel(
-            padding: const EdgeInsets.all(Spacing.lg),
+            padding: const EdgeInsets.all(Spacing.md),
             child: Row(
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
                     color: AppColors.tertiary.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(RadiusTokens.full),
@@ -137,7 +165,7 @@ class _SubmitAchievementScreenState
                       ),
                       const SizedBox(height: Spacing.xs),
                       Text(
-                        'Pick an unearned achievement, attach proof if needed, and send it for review.',
+                        'Choose an achievement and attach proof when it helps the review.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.inkMuted,
                           height: LineHeight.body,
@@ -260,11 +288,22 @@ class _SubmitAchievementScreenState
             ),
           ),
           const SizedBox(height: Spacing.lg),
+          if (_errorText != null) ...[
+            Text(
+              _errorText!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.error,
+                fontWeight: FontWeights.semiBold,
+              ),
+            ),
+            const SizedBox(height: Spacing.sm),
+          ],
           SizedBox(
             height: TouchTargets.minimum + 6,
             child: FilledButton.icon(
-              onPressed:
-                  (_selectedId != null && !_isUploading) ? _submit : null,
+              onPressed: (_selectedId != null && !_isUploading)
+                  ? _submit
+                  : null,
               icon: _isUploading
                   ? const SizedBox(
                       width: 18,

@@ -23,6 +23,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 import '../utils/date_format.dart';
+import '../utils/world_foundations.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 
@@ -196,7 +197,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             child: isLoading
                 ? const GlassLoadingList(itemCount: 8)
                 : messages.isEmpty
-                ? _buildEmpty()
+                ? _buildEmpty(channel)
                 : Stack(
                     children: [
                       ListView.builder(
@@ -288,7 +289,24 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(WorldChannel? channel) {
+    final world = ref.watch(worldProvider).worlds[widget.worldId];
+    final foundation = world == null
+        ? ''
+        : foundationMarkdownForChannel(
+            world: world,
+            channelName: channel?.name ?? widget.channelName,
+          );
+    if (foundation.isNotEmpty) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(Spacing.md),
+        child: _FoundationPanel(
+          channelName: channel?.name ?? widget.channelName,
+          markdown: foundation,
+        ),
+      );
+    }
+
     return AppEmptyState(
       title: 'No messages yet',
       description: 'Be the first to say something in #${widget.channelName}',
@@ -356,6 +374,96 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
 // ────────────────────────────────────────────────────────────
 // Channel message bubble (screen-specific styling)
 // ────────────────────────────────────────────────────────────
+
+class _FoundationPanel extends StatelessWidget {
+  final String channelName;
+  final String markdown;
+
+  const _FoundationPanel({required this.channelName, required this.markdown});
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.tertiary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                ),
+                child: Icon(
+                  _iconFor(channelName),
+                  color: AppColors.tertiary,
+                  size: IconSizes.md,
+                ),
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '# $channelName',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.ink,
+                        fontWeight: FontWeights.bold,
+                      ),
+                    ),
+                    const Text(
+                      'Foundation channel',
+                      style: TextStyle(
+                        color: AppColors.inkMuted,
+                        fontSize: FontSizes.labelSm,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.lg),
+          MarkdownBody(
+            data: markdown,
+            selectable: true,
+            styleSheet: MarkdownStyleSheet(
+              h2: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeights.bold,
+              ),
+              h3: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: AppColors.tertiary,
+                fontWeight: FontWeights.semiBold,
+              ),
+              p: const TextStyle(
+                color: AppColors.inkSecondary,
+                fontSize: FontSizes.bodyMd,
+                height: 1.35,
+              ),
+              listBullet: const TextStyle(color: AppColors.tertiary),
+              strong: const TextStyle(
+                color: AppColors.ink,
+                fontWeight: FontWeights.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _iconFor(String name) => switch (name.toLowerCase()) {
+    'info' => Icons.info_outline,
+    'rules' => Icons.gavel_outlined,
+    'roles' => Icons.badge_outlined,
+    _ => Icons.description_outlined,
+  };
+}
 
 class _MessageBubble extends StatefulWidget {
   final ChannelMessage message;
