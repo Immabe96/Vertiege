@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/shimmer.dart';
 
@@ -8,13 +8,12 @@ class ShimmerWorldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
         borderRadius: BorderRadius.circular(RadiusTokens.card),
-        border: Border.all(
-          color: AppColors.glassBorder,
-        ),
+        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
@@ -22,10 +21,7 @@ class ShimmerWorldCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(
-              width: 120,
-              child: Pulse(borderRadius: 0),
-            ),
+            const SizedBox(width: 120, child: Pulse(borderRadius: 0)),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(Spacing.sm + 6),

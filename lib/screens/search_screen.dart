@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,10 +10,9 @@ import '../models/resident.dart';
 import '../state/world_provider.dart';
 import '../state/post_provider.dart';
 import '../services/world_service.dart';
-import '../theme/design_system.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
+import '../theme/v_tokens.dart';
 import '../widgets/core/fade_in.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/shimmer.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/worlds/world_icon.dart';
@@ -42,7 +41,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _loadRecentSearches();
     _loadAllResidents();
     _focusNode.addListener(() {
-      if (mounted) setState(() {}); // Rebuild to show/hide recent searches
+      if (mounted) setState(() {});
     });
   }
 
@@ -83,7 +82,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     await prefs.setString(_recentSearchesKey, jsonEncode(updated));
   }
 
-  /// Loads all known residents by fetching members from all worlds and deduplicating.
   Future<void> _loadAllResidents() async {
     try {
       final worldState = ref.read(worldProvider);
@@ -111,9 +109,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               );
             }
           }
-        } catch (_) {
-          // Skip worlds where member fetch fails
-        }
+        } catch (_) {}
       }
 
       if (mounted) {
@@ -135,7 +131,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final residents = <_ResidentEntry>[];
     final posts = <Post>[];
 
-    // Worlds
     final allWorlds = ref.read(worldProvider).worlds.values;
     for (final w in allWorlds) {
       if (w.name.toLowerCase().contains(lower) ||
@@ -145,7 +140,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
     worlds.sort((a, b) => a.name.compareTo(b.name));
 
-    // Residents (by name and profession)
     for (final entry in _allResidents) {
       final r = entry.resident;
       if (r.name.toLowerCase().contains(lower) ||
@@ -156,7 +150,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
     residents.sort((a, b) => a.resident.name.compareTo(b.resident.name));
 
-    // Posts
     final allPosts = ref.read(postProvider).posts;
     for (final p in allPosts) {
       if (p.content.toLowerCase().contains(lower) ||
@@ -182,40 +175,59 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isFocused = _focusNode.hasFocus;
     final showRecent =
         isFocused && _controller.text.isEmpty && _recentSearches.isNotEmpty;
     final results = _query.length >= 2 ? _search(_query) : null;
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: TextField(
           controller: _controller,
           focusNode: _focusNode,
           autofocus: true,
-          style: const TextStyle(color: AppColors.ink),
+          style: TextStyle(
+            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+          ),
           onChanged: (v) {
             setState(() => _query = v);
             if (v.isEmpty) {
-              setState(() {}); // Re-show recent searches
+              setState(() {});
             }
           },
           onSubmitted: _onSubmitted,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Search worlds, people, posts...',
-            hintStyle: TextStyle(color: AppColors.inkMuted),
+            hintStyle: TextStyle(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                  : VColors.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
             border: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.glassBorder),
+              borderSide: BorderSide(
+                color: isDark
+                    ? VColors.outlineVariantDark
+                    : VColors.outlineVariant,
+              ),
             ),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.glassBorder),
+              borderSide: BorderSide(
+                color: isDark
+                    ? VColors.outlineVariantDark
+                    : VColors.outlineVariant,
+              ),
             ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primary),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: VColors.primary, width: 2),
             ),
             filled: true,
-            fillColor: AppColors.glassBackground,
-            suffixIcon: null, // handled dynamically
+            fillColor: isDark
+                ? VColors.surfaceContainerDark
+                : VColors.surfaceContainerLow,
           ),
         ),
         actions: [
@@ -229,35 +241,48 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
         ],
       ),
-      body: _buildBody(theme, results, showRecent),
+      body: _buildBody(theme, results, showRecent, isDark),
     );
   }
 
-  Widget _buildBody(ThemeData theme, _SearchResults? results, bool showRecent) {
-    // Recent searches (when field is focused and empty)
+  Widget _buildBody(
+    ThemeData theme,
+    _SearchResults? results,
+    bool showRecent,
+    bool isDark,
+  ) {
     if (showRecent) {
-      return _buildRecentSearches(theme);
+      return _buildRecentSearches(theme, isDark);
     }
 
-    // Empty query prompt
     if (_query.length < 2) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search, size: IconSizes.hero, color: AppColors.inkMuted),
-            const SizedBox(height: Spacing.md),
+            Icon(
+              Icons.search,
+              size: 64,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+            const SizedBox(height: VSpacing.md),
             Text(
               'Search worlds, people, and posts',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: AppColors.inkSecondary,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: VSpacing.xs),
             Text(
               'Type at least 2 characters',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkMuted,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                    : VColors.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -265,7 +290,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
-    // Results
     if (results == null || results.isEmpty) {
       return Center(
         child: Column(
@@ -273,11 +297,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             Icon(
               Icons.search_off,
-              size: IconSizes.xl,
-              color: AppColors.inkMuted,
+              size: VIconSize.xl,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
-            const SizedBox(height: Spacing.sm + 4),
-            Text('No results for "$_query"', style: theme.textTheme.bodyLarge),
+            const SizedBox(height: VSpacing.sm),
+            Text(
+              'No results for "$_query"',
+              style: theme.textTheme.bodyLarge,
+            ),
           ],
         ),
       );
@@ -287,50 +316,56 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       onRefresh: () async {
         await ref.read(worldProvider.notifier).loadWorlds();
         await ref.read(postProvider.notifier).loadPosts();
-        setState(() {}); // re-run search after data reloads
+        setState(() {});
       },
       child: ListView(
-        padding: const EdgeInsets.only(bottom: Spacing.lg),
+        padding: const EdgeInsets.only(bottom: VSpacing.lg),
         children: [
-          // ── Worlds Section ─────────────────
           _SectionHeader(
             icon: Icons.public,
             title: 'Worlds',
             count: results.worlds.length,
+            isDark: isDark,
           ),
           if (results.worlds.isEmpty)
-            _EmptySection(text: 'No worlds found')
+            _EmptySection(text: 'No worlds found', isDark: isDark)
           else
             ...results.worlds.map((w) => _WorldTile(world: w)),
 
-          const Divider(height: 1, color: AppColors.glassBorder),
+          Divider(
+            height: 1,
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          ),
 
-          // ── People Section ─────────────────
           _SectionHeader(
             icon: Icons.people,
             title: 'People',
             count: results.residents.length,
+            isDark: isDark,
           ),
           if (_loadingResidents)
             Padding(
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               child: const Pulse(width: double.infinity, height: 48),
             )
           else if (results.residents.isEmpty)
-            _EmptySection(text: 'No people found')
+            _EmptySection(text: 'No people found', isDark: isDark)
           else
             ...results.residents.take(20).map((r) => _PersonTile(entry: r)),
 
-          const Divider(height: 1, color: AppColors.glassBorder),
+          Divider(
+            height: 1,
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          ),
 
-          // ── Posts Section ─────────────────
           _SectionHeader(
             icon: Icons.forum,
             title: 'Posts',
             count: results.posts.length,
+            isDark: isDark,
           ),
           if (results.posts.isEmpty)
-            _EmptySection(text: 'No posts found')
+            _EmptySection(text: 'No posts found', isDark: isDark)
           else
             ...results.posts.take(20).map((p) => _PostTile(post: p)),
         ],
@@ -338,40 +373,44 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildRecentSearches(ThemeData theme) {
+  Widget _buildRecentSearches(ThemeData theme, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            Spacing.md,
-            Spacing.md,
-            Spacing.md,
-            Spacing.sm,
+            VSpacing.md,
+            VSpacing.md,
+            VSpacing.md,
+            VSpacing.sm,
           ),
           child: Row(
             children: [
               Icon(
                 Icons.history,
-                size: IconSizes.md,
-                color: AppColors.inkMuted,
+                size: VIconSize.md,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Text(
                 'Recent searches',
                 style: theme.textTheme.labelLarge?.copyWith(
-                  color: AppColors.inkSecondary,
-                  fontWeight: FontWeights.bold,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                  fontWeight: VFontWeight.bold,
                 ),
               ),
             ],
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
           child: Wrap(
-            spacing: Spacing.sm,
-            runSpacing: Spacing.xs,
+            spacing: VSpacing.sm,
+            runSpacing: VSpacing.xs,
             children: _recentSearches
                 .map(
                   (q) => InputChip(
@@ -382,11 +421,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       _focusNode.unfocus();
                     },
                     onDeleted: () => _removeRecentSearch(q),
-                    deleteIcon: const Icon(Icons.close, size: IconSizes.xs + 2),
+                    deleteIcon: const Icon(Icons.close, size: 14),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
-                    backgroundColor: AppColors.glassBackground,
-                    side: const BorderSide(color: AppColors.glassBorder),
                   ),
                 )
                 .toList(),
@@ -397,19 +434,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 }
 
-// ──────────────────────────────────────────────────────────
-// Section Header — gold bar style like explore_screen
-// ──────────────────────────────────────────────────────────
-
 class _SectionHeader extends StatelessWidget {
   final IconData icon;
   final String title;
   final int count;
+  final bool isDark;
 
   const _SectionHeader({
     required this.icon,
     required this.title,
     required this.count,
+    required this.isDark,
   });
 
   @override
@@ -417,46 +452,45 @@ class _SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.md,
-        Spacing.md,
-        Spacing.xs,
+        VSpacing.md,
+        VSpacing.md,
+        VSpacing.md,
+        VSpacing.xs,
       ),
       child: Row(
         children: [
-          // Gold bar
           Container(
             width: 3,
             height: 20,
             decoration: BoxDecoration(
-              color: AppColors.tertiary,
-              borderRadius: BorderRadius.circular(2),
+              color: VColors.tertiary,
+              borderRadius: BorderRadius.circular(VRadius.sm),
             ),
           ),
-          const SizedBox(width: Spacing.sm),
-          Icon(icon, size: IconSizes.md, color: AppColors.primary),
-          const SizedBox(width: Spacing.sm),
+          const SizedBox(width: VSpacing.sm),
+          Icon(icon, size: VIconSize.md, color: VColors.primary),
+          const SizedBox(width: VSpacing.sm),
           Text(
             title,
             style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeights.bold,
+              fontWeight: VFontWeight.bold,
             ),
           ),
-          const SizedBox(width: Spacing.sm),
+          const SizedBox(width: VSpacing.sm),
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.sm,
+              horizontal: VSpacing.sm,
               vertical: 2,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(RadiusTokens.pill),
+              color: VColors.primary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(VRadius.pill),
             ),
             child: Text(
               '$count',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeights.bold,
+                color: VColors.primary,
+                fontWeight: VFontWeight.bold,
               ),
             ),
           ),
@@ -466,35 +500,30 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ──────────────────────────────────────────────────────────
-// Empty Section
-// ──────────────────────────────────────────────────────────
-
 class _EmptySection extends StatelessWidget {
   final String text;
+  final bool isDark;
 
-  const _EmptySection({required this.text});
+  const _EmptySection({required this.text, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.sm,
       ),
       child: Text(
         text,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: isDark
+              ? VColors.onSurfaceVariantDark
+              : VColors.onSurfaceVariant,
+        ),
       ),
     );
   }
 }
-
-// ──────────────────────────────────────────────────────────
-// World Tile — glass container
-// ──────────────────────────────────────────────────────────
 
 class _WorldTile extends StatelessWidget {
   final World world;
@@ -504,40 +533,44 @@ class _WorldTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return FadeIn(
       delayMs: 30,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.xs,
+          horizontal: VSpacing.md,
+          vertical: VSpacing.xs,
         ),
-        child: GlassPanel(
-          padding: EdgeInsets.zero,
-          child: ListTile(
-            leading: WorldIcon(worldId: world.id, size: 36),
-            title: Text(
-              world.name,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeights.bold,
-              ),
-            ),
-            subtitle: Text(
-              world.description,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: const Icon(Icons.chevron_right),
+        child: Material(
+          color: isDark
+              ? VColors.surfaceContainerDark
+              : VColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          child: InkWell(
             onTap: () => context.push('/explore/${world.id}'),
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            child: ListTile(
+              leading: WorldIcon(worldId: world.id, size: 36),
+              title: Text(
+                world.name,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                world.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-// ──────────────────────────────────────────────────────────
-// Person Tile — glass container
-// ──────────────────────────────────────────────────────────
 
 class _PersonTile extends StatelessWidget {
   final _ResidentEntry entry;
@@ -556,65 +589,77 @@ class _PersonTile extends StatelessWidget {
 
   Color _tierColor(ResidentTier tier) {
     return switch (tier) {
-      ResidentTier.apex => AppColors.gemPink,
-      ResidentTier.oldMoney => AppColors.gold,
-      ResidentTier.elite => AppColors.silver,
-      ResidentTier.highRollers => AppColors.bronze,
-      ResidentTier.hustlers => AppColors.offline,
+      ResidentTier.apex => VColors.tertiary,
+      ResidentTier.oldMoney => VColors.secondary,
+      ResidentTier.elite => VColors.primary,
+      ResidentTier.highRollers => VColors.warning,
+      ResidentTier.hustlers => VColors.outline,
     };
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final resident = entry.resident;
 
     return FadeIn(
       delayMs: 30,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.xs,
+          horizontal: VSpacing.md,
+          vertical: VSpacing.xs,
         ),
-        child: GlassPanel(
-          padding: EdgeInsets.zero,
-          child: ListTile(
-            leading: CosmeticAvatar(
-              imageUrl: resident.avatarUrl,
-              seed: resident.id,
-              size: 40,
-            ),
-            title: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    resident.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeights.bold,
+        child: Material(
+          color: isDark
+              ? VColors.surfaceContainerDark
+              : VColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          child: InkWell(
+            onTap: () => context.push('/residents/${resident.id}'),
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            child: ListTile(
+              leading: CosmeticAvatar(
+                imageUrl: resident.avatarUrl,
+                seed: resident.id,
+                size: 40,
+              ),
+              title: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      resident.name,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(width: VSpacing.xs),
+                  Icon(
+                    _tierIcon(resident.tier),
+                    size: 16,
+                    color: _tierColor(resident.tier),
+                  ),
+                ],
+              ),
+              subtitle: resident.profession != null
+                  ? Text(
+                      resident.profession!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                    )
+                  : null,
+              trailing: Text(
+                'View',
+                style: TextStyle(
+                  color: VColors.primary,
+                  fontWeight: VFontWeight.medium,
                 ),
-                const SizedBox(width: Spacing.xs),
-                Icon(
-                  _tierIcon(resident.tier),
-                  size: IconSizes.xs + 4,
-                  color: _tierColor(resident.tier),
-                ),
-              ],
-            ),
-            subtitle: resident.profession != null
-                ? Text(
-                    resident.profession!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkMuted,
-                    ),
-                  )
-                : null,
-            trailing: TextButton(
-              onPressed: () => context.push('/residents/${resident.id}'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-              child: const Text('View Profile'),
+              ),
             ),
           ),
         ),
@@ -622,10 +667,6 @@ class _PersonTile extends StatelessWidget {
     );
   }
 }
-
-// ──────────────────────────────────────────────────────────
-// Post Tile — glass container
-// ──────────────────────────────────────────────────────────
 
 class _PostTile extends StatelessWidget {
   final Post post;
@@ -635,47 +676,51 @@ class _PostTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return FadeIn(
       delayMs: 30,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.xs,
+          horizontal: VSpacing.md,
+          vertical: VSpacing.xs,
         ),
-        child: GlassPanel(
-          padding: EdgeInsets.zero,
-          child: ListTile(
-            leading: CosmeticAvatar(
-              imageUrl: post.residentAvatar,
-              seed: post.residentId,
-              size: 36,
-            ),
-            title: Text(
-              post.residentName,
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeights.bold,
+        child: Material(
+          color: isDark
+              ? VColors.surfaceContainerDark
+              : VColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          child: InkWell(
+            onTap: () => context.push('/explore/${post.worldId}'),
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            child: ListTile(
+              leading: CosmeticAvatar(
+                imageUrl: post.residentAvatar,
+                seed: post.residentId,
+                size: 36,
+              ),
+              title: Text(
+                post.residentName,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                post.content,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Text(
+                '#${post.worldId}',
+                style: theme.textTheme.labelSmall,
               ),
             ),
-            subtitle: Text(
-              post.content,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: Text(
-              '#${post.worldId}',
-              style: theme.textTheme.labelSmall,
-            ),
-            onTap: () => context.push('/explore/${post.worldId}'),
           ),
         ),
       ),
     );
   }
 }
-
-// ──────────────────────────────────────────────────────────
-// Data types
-// ──────────────────────────────────────────────────────────
 
 class _SearchResults {
   final List<World> worlds;

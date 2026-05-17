@@ -69,7 +69,8 @@ class CouncilService {
     if ((councilData as List).isEmpty) return [];
 
     final members = (councilData as List).cast<Map<String, dynamic>>();
-    final cutoff = DateTime.now().millisecondsSinceEpoch - (inactivityDays * 86400000);
+    final cutoff =
+        DateTime.now().millisecondsSinceEpoch - (inactivityDays * 86400000);
 
     // Get profiles for all council members
     final memberIds = members.map((m) => m['resident_id'] as String).toList();
@@ -102,20 +103,24 @@ class CouncilService {
         // Inactive — eject
         await _ejectMember(worldId, rid);
         ejectedIds.add(rid);
-        actions.add(CouncilAction(
-          type: 'eject',
-          residentId: rid,
-          residentName: m['resident_name'] as String? ?? 'Unknown',
-          details: 'Inactive for $inactivityDays+ days',
-        ));
+        actions.add(
+          CouncilAction(
+            type: 'eject',
+            residentId: rid,
+            residentName: m['resident_name'] as String? ?? 'Unknown',
+            details: 'Inactive for $inactivityDays+ days',
+          ),
+        );
       } else if (!ejectedIds.contains(rid)) {
-        activeCouncil.add(CouncilMember(
-          residentId: rid,
-          residentName: m['resident_name'] as String? ?? 'Unknown',
-          rep: m['rep'] as int? ?? 0,
-          tier: tier,
-          lastSeenAt: lastSeen,
-        ));
+        activeCouncil.add(
+          CouncilMember(
+            residentId: rid,
+            residentName: m['resident_name'] as String? ?? 'Unknown',
+            rep: m['rep'] as int? ?? 0,
+            tier: tier,
+            lastSeenAt: lastSeen,
+          ),
+        );
       }
     }
 
@@ -124,13 +129,19 @@ class CouncilService {
       if (activeCouncil.isNotEmpty) {
         final newSovereign = _electSovereign(activeCouncil);
         if (newSovereign.residentId != sovereignId) {
-          await _updateSovereign(worldId, newSovereign.residentId, newSovereign.residentName);
-          actions.add(CouncilAction(
-            type: 'elect',
-            residentId: newSovereign.residentId,
-            residentName: newSovereign.residentName,
-            details: 'Elected as new Sovereign',
-          ));
+          await _updateSovereign(
+            worldId,
+            newSovereign.residentId,
+            newSovereign.residentName,
+          );
+          actions.add(
+            CouncilAction(
+              type: 'elect',
+              residentId: newSovereign.residentId,
+              residentName: newSovereign.residentName,
+              details: 'Elected as new Sovereign',
+            ),
+          );
         }
       }
     }
@@ -166,7 +177,10 @@ class CouncilService {
 
   static CouncilMember _electSovereign(List<CouncilMember> council) {
     final id = _electSovereignId(council);
-    return council.firstWhere((m) => m.residentId == id);
+    return council.firstWhere(
+      (m) => m.residentId == id,
+      orElse: () => council.first,
+    );
   }
 
   static Future<void> _ejectMember(String worldId, String residentId) async {
@@ -181,21 +195,24 @@ class CouncilService {
   }
 
   static Future<void> _updateSovereign(
-      String worldId, String sovereignId, String sovereignName) async {
+    String worldId,
+    String sovereignId,
+    String sovereignName,
+  ) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
     await client
         .from('worlds')
-        .update({
-          'sovereign_id': sovereignId,
-          'sovereign_name': sovereignName,
-        })
+        .update({'sovereign_id': sovereignId, 'sovereign_name': sovereignName})
         .eq('id', worldId);
   }
 
   /// Promote the next highest-rep members to council to fill vacancies.
   /// Called after ejections to ensure council stays at 11 members.
-  static Future<List<String>> fillCouncilSeats(String worldId, int currentCouncilCount) async {
+  static Future<List<String>> fillCouncilSeats(
+    String worldId,
+    int currentCouncilCount,
+  ) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
 

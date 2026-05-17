@@ -1,0 +1,433 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/treasury.dart';
+import '../../services/treasury_service.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
+import '../../widgets/core/shimmer.dart';
+import '../../widgets/core/empty_state.dart';
+
+class WorldTreasuryScreen extends ConsumerStatefulWidget {
+  final String worldId;
+  final bool isSovereignOrCouncil;
+
+  const WorldTreasuryScreen({
+    super.key,
+    required this.worldId,
+    this.isSovereignOrCouncil = false,
+  });
+
+  @override
+  ConsumerState<WorldTreasuryScreen> createState() =>
+      _WorldTreasuryScreenState();
+}
+
+class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
+  WorldTreasury? _treasury;
+  List<TreasuryTransaction> _transactions = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _loading = true);
+    try {
+      final treasury = await TreasuryService.getTreasury(widget.worldId);
+      final transactions = await TreasuryService.getTransactions(widget.worldId);
+      if (mounted) setState(() {
+        _treasury = treasury;
+        _transactions = transactions;
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _showDonateDialog() {
+    final amountController = TextEditingController();
+    final descController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Donate to Treasury'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: amountController,
+              decoration: const InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                labelText: 'Description (optional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final amount = int.tryParse(amountController.text);
+              if (amount == null || amount <= 0) return;
+
+              await TreasuryService.donate(
+                widget.worldId,
+                amount,
+                descController.text.trim(),
+              );
+              if (context.mounted) {
+                Navigator.of(ctx).pop();
+                _loadData();
+              }
+            },
+            child: const Text('Donate'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWithdrawDialog() {
+    final amountController = TextEditingController();
+    final descController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Withdraw from Treasury'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: amountController,
+              decoration: const InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                labelText: 'Reason',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final amount = int.tryParse(amountController.text);
+              if (amount == null || amount <= 0) return;
+
+              await TreasuryService.withdraw(
+                widget.worldId,
+                amount,
+                descController.text.trim(),
+              );
+              if (context.mounted) {
+                Navigator.of(ctx).pop();
+                _loadData();
+              }
+            },
+            child: const Text('Withdraw'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.all(VSpacing.md),
+        child: Column(
+          children: [
+            Pulse(height: 100, width: double.infinity),
+            SizedBox(height: VSpacing.md),
+            Expanded(child: Pulse()),
+          ],
+        ),
+      );
+    }
+
+    if (_treasury == null) {
+      return AppEmptyState(
+        title: 'No Treasury',
+        description: 'This world has not set up a treasury yet.',
+        icon: Icons.account_balance_outlined,
+      );
+    }
+
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.all(VSpacing.md),
+          padding: const EdgeInsets.all(VSpacing.lg),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                VColors.primary.withValues(alpha: 0.2),
+                VColors.tertiary.withValues(alpha: 0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(VRadius.xl),
+          ),
+          child: Column(
+            children: [
+              Text(
+                'Treasury Balance',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                ),
+              ),
+              const SizedBox(height: VSpacing.xs),
+              Text(
+                '${_treasury!.balance}',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                  color: VColors.tertiary,
+                ),
+              ),
+              const SizedBox(height: VSpacing.md),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatCard(
+                    label: 'Total Donated',
+                    value: _treasury!.totalDonated.toString(),
+                    icon: Icons.arrow_downward,
+                    color: VColors.success,
+                  ),
+                  _StatCard(
+                    label: 'Total Spent',
+                    value: _treasury!.totalSpent.toString(),
+                    icon: Icons.arrow_upward,
+                    color: VColors.error,
+                  ),
+                ],
+              ),
+              const SizedBox(height: VSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _showDonateDialog,
+                      icon: const Icon(Icons.volunteer_activism),
+                      label: const Text('Donate'),
+                    ),
+                  ),
+                  if (widget.isSovereignOrCouncil) ...[
+                    const SizedBox(width: VSpacing.sm),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _showWithdrawDialog,
+                        icon: const Icon(Icons.money_off),
+                        label: const Text('Withdraw'),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+          child: Row(
+            children: [
+              Text(
+                'Transactions',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: VSpacing.sm),
+        Expanded(
+          child: _transactions.isEmpty
+              ? const AppEmptyState(
+                  title: 'No transactions',
+                  description: 'Transactions will appear here.',
+                  icon: Icons.receipt_long_outlined,
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                  itemCount: _transactions.length,
+                  itemBuilder: (context, index) {
+                    final tx = _transactions[index];
+                    return _TransactionTile(transaction: tx);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      children: [
+        Icon(icon, size: VIconSize.md, color: color),
+        const SizedBox(height: VSpacing.xs),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: VFontWeight.bold,
+            fontSize: VFontSize.bodyLg,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: VFontSize.labelSm,
+            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TransactionTile extends StatelessWidget {
+  final TreasuryTransaction transaction;
+
+  const _TransactionTile({required this.transaction});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: VSpacing.xs),
+      padding: const EdgeInsets.all(VSpacing.sm),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceDark : VColors.surfaceContainer,
+        borderRadius: BorderRadius.circular(VRadius.md),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: _txColor(transaction.transactionType).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(VRadius.sm),
+            ),
+            child: Icon(
+              _txIcon(transaction.transactionType),
+              size: VIconSize.sm,
+              color: _txColor(transaction.transactionType),
+            ),
+          ),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.transactionType.name[0].toUpperCase() +
+                      transaction.transactionType.name.substring(1),
+                  style: const TextStyle(fontWeight: VFontWeight.semiBold),
+                ),
+                if (transaction.description.isNotEmpty)
+                  Text(
+                    transaction.description,
+                    style: TextStyle(
+                      fontSize: VFontSize.labelSm,
+                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            '${transaction.transactionType == TreasuryTransactionType.withdrawal ? '-' : '+'}${transaction.amount}',
+            style: TextStyle(
+              fontWeight: VFontWeight.bold,
+              color: _txColor(transaction.transactionType),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _txColor(TreasuryTransactionType type) {
+    switch (type) {
+      case TreasuryTransactionType.donation:
+        return VColors.success;
+      case TreasuryTransactionType.withdrawal:
+        return VColors.error;
+      case TreasuryTransactionType.tax:
+        return VColors.warning;
+      case TreasuryTransactionType.reward:
+        return VColors.primary;
+      case TreasuryTransactionType.refund:
+        return VColors.tertiary;
+    }
+  }
+
+  IconData _txIcon(TreasuryTransactionType type) {
+    switch (type) {
+      case TreasuryTransactionType.donation:
+        return Icons.volunteer_activism;
+      case TreasuryTransactionType.withdrawal:
+        return Icons.money_off;
+      case TreasuryTransactionType.tax:
+        return Icons.percent;
+      case TreasuryTransactionType.reward:
+        return Icons.emoji_events;
+      case TreasuryTransactionType.refund:
+        return Icons.restore;
+    }
+  }
+}

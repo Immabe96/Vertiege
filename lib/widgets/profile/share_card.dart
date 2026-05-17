@@ -1,11 +1,11 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../models/resident.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'cosmetic_avatar.dart';
 import 'name_banner.dart';
@@ -30,7 +30,8 @@ class _ShareCardState extends State<ShareCard> {
   final _key = GlobalKey();
 
   Future<void> _share() async {
-    final boundary = _key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    final boundary =
+        _key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary == null) return;
 
     final image = await boundary.toImage(pixelRatio: 3);
@@ -46,7 +47,9 @@ class _ShareCardState extends State<ShareCard> {
 
   Future<String?> _writeTempFile(Uint8List bytes) async {
     final dir = Directory.systemTemp;
-    final file = File('${dir.path}/vertiege_share_${DateTime.now().millisecondsSinceEpoch}.png');
+    final file = File(
+      '${dir.path}/vertiege_share_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
     await file.writeAsBytes(bytes);
     return file.path;
   }
@@ -63,25 +66,34 @@ class _ShareCardState extends State<ShareCard> {
           padding: const EdgeInsets.all(20),
           margin: const EdgeInsets.all(Spacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: AppColors.glassBorder),
+            color: VColors.glassBackground,
+            borderRadius: BorderRadius.circular(VRadius.xxxl),
+            border: Border.all(color: VColors.glassBorder),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               CosmeticAvatar(totalXp: widget.totalXp, size: 60),
               const SizedBox(height: Spacing.md),
-              NameBanner(profession: widget.resident.profession, name: widget.resident.name),
+              NameBanner(
+                profession: widget.resident.profession,
+                name: widget.resident.name,
+              ),
               const SizedBox(height: Spacing.xs),
-              Text(widget.resident.tier.label, style: theme.textTheme.bodyMedium),
+              Text(
+                widget.resident.tier.label,
+                style: theme.textTheme.bodyMedium,
+              ),
               const SizedBox(height: Spacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _Stat(label: 'XP', value: '${widget.totalXp}'),
                   const SizedBox(width: Spacing.xl),
-                  _Stat(label: 'Achievements', value: '${widget.achievementCount}'),
+                  _Stat(
+                    label: 'Achievements',
+                    value: '${widget.achievementCount}',
+                  ),
                 ],
               ),
               const SizedBox(height: Spacing.sm),

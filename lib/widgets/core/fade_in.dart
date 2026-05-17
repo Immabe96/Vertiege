@@ -33,12 +33,14 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
       duration: Duration(milliseconds: widget.durationMs),
       vsync: this,
     );
-    _opacity = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: widget.curve),
-    );
-    _slide = Tween(begin: const Offset(0, 0.06), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: widget.curve),
-    );
+    _opacity = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
+    _slide = Tween(
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
     _scale = Tween(begin: 0.92, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,

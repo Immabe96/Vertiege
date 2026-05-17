@@ -34,31 +34,30 @@ class Alliance {
     String? worldName1,
     String? worldName2,
     DateTime? formedAt,
-  }) =>
-      Alliance(
-        id: id ?? this.id,
-        worldId1: worldId1 ?? this.worldId1,
-        worldId2: worldId2 ?? this.worldId2,
-        worldName1: worldName1 ?? this.worldName1,
-        worldName2: worldName2 ?? this.worldName2,
-        formedAt: formedAt ?? this.formedAt,
-      );
+  }) => Alliance(
+    id: id ?? this.id,
+    worldId1: worldId1 ?? this.worldId1,
+    worldId2: worldId2 ?? this.worldId2,
+    worldName1: worldName1 ?? this.worldName1,
+    worldName2: worldName2 ?? this.worldName2,
+    formedAt: formedAt ?? this.formedAt,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'worldId1': worldId1,
-        'worldId2': worldId2,
-        'worldName1': worldName1,
-        'worldName2': worldName2,
-        'formedAt': formedAt.toIso8601String(),
-      };
+    'id': id,
+    'worldId1': worldId1,
+    'worldId2': worldId2,
+    'worldName1': worldName1,
+    'worldName2': worldName2,
+    'formedAt': formedAt.toIso8601String(),
+  };
 
   factory Alliance.fromJson(Map<String, dynamic> json) => Alliance(
-        id: json['id'] ?? '',
-        worldId1: json['worldId1'] ?? '',
-        worldId2: json['worldId2'] ?? '',
-        worldName1: json['worldName1'] ?? '',
-        worldName2: json['worldName2'] ?? '',
-        formedAt: DateTime.tryParse(json['formedAt'] ?? '') ?? DateTime.now(),
-      );
+    id: json['id'] ?? '',
+    worldId1: json['worldId1'] ?? '',
+    worldId2: json['worldId2'] ?? '',
+    worldName1: json['worldName1'] ?? '',
+    worldName2: json['worldName2'] ?? '',
+    formedAt: DateTime.tryParse(json['formedAt'] ?? '') ?? DateTime.now(),
+  );
 }

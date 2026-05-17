@@ -1,0 +1,296 @@
+import 'package:confetti/confetti.dart';
+import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/design_system.dart';
+
+class TierUpDialog extends StatefulWidget {
+  final int oldTier;
+  final int newTier;
+  final List<String> perks;
+
+  const TierUpDialog({
+    super.key,
+    required this.oldTier,
+    required this.newTier,
+    required this.perks,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    required int oldTier,
+    required int newTier,
+    required List<String> perks,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => TierUpDialog(
+        oldTier: oldTier,
+        newTier: newTier,
+        perks: perks,
+      ),
+    );
+  }
+
+  @override
+  State<TierUpDialog> createState() => _TierUpDialogState();
+}
+
+class _TierUpDialogState extends State<TierUpDialog> {
+  late final ConfettiController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
+    _confettiController.play();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  String _tierName(int tier) {
+    switch (tier) {
+      case 5:
+        return 'Apex';
+      case 4:
+        return 'Old Money';
+      case 3:
+        return 'Elite';
+      case 2:
+        return 'High Roller';
+      default:
+        return 'Hustler';
+    }
+  }
+
+  Color _tierColor(int tier) {
+    switch (tier) {
+      case 5:
+        return VColors.tierApex;
+      case 4:
+        return VColors.tierOldMoney;
+      case 3:
+        return VColors.tierElite;
+      case 2:
+        return VColors.tierHighRoller;
+      default:
+        return VColors.tierHustler;
+    }
+  }
+
+  IconData _tierIcon(int tier) {
+    switch (tier) {
+      case 5:
+        return Icons.diamond;
+      case 4:
+        return Icons.rocket_launch;
+      case 3:
+        return Icons.star;
+      case 2:
+        return Icons.star_border;
+      default:
+        return Icons.circle;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Stack(
+      children: [
+        Dialog(
+          backgroundColor: isDark
+              ? VColors.surfaceContainerDark
+              : VColors.surfaceContainer,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(Spacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'TIER UP!',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeights.bold,
+                    color: VColors.tertiary,
+                  ),
+                ),
+                const SizedBox(height: Spacing.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _TierBadgeDisplay(
+                      tier: widget.oldTier,
+                      label: _tierName(widget.oldTier),
+                      color: _tierColor(widget.oldTier),
+                      icon: _tierIcon(widget.oldTier),
+                      opacity: 0.5,
+                    ),
+                    const SizedBox(width: Spacing.md),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 32,
+                      color: VColors.success,
+                    ),
+                    const SizedBox(width: Spacing.md),
+                    _TierBadgeDisplay(
+                      tier: widget.newTier,
+                      label: _tierName(widget.newTier),
+                      color: _tierColor(widget.newTier),
+                      icon: _tierIcon(widget.newTier),
+                      glow: true,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Spacing.lg),
+                Container(
+                  padding: const EdgeInsets.all(Spacing.md),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? VColors.surfaceDark
+                        : VColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    border: Border.all(
+                      color: _tierColor(widget.newTier).withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'You unlocked:',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeights.bold,
+                          color: VColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.xs),
+                      ...widget.perks.map(
+                        (perk) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: VColors.success,
+                              ),
+                              const SizedBox(width: Spacing.xs),
+                              Expanded(
+                                child: Text(
+                                  perk,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Spacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _tierColor(widget.newTier),
+                      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+                    ),
+                    child: const Text('Continue'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            colors: const [
+              VColors.primary,
+              VColors.tertiary,
+              VColors.secondary,
+              VColors.tierOldMoney,
+              VColors.tierApex,
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TierBadgeDisplay extends StatelessWidget {
+  final int tier;
+  final String label;
+  final Color color;
+  final IconData icon;
+  final bool glow;
+  final double opacity;
+
+  const _TierBadgeDisplay({
+    required this.tier,
+    required this.label,
+    required this.color,
+    required this.icon,
+    this.glow = false,
+    this.opacity = 1.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Opacity(
+      opacity: opacity,
+      child: Container(
+        padding: const EdgeInsets.all(Spacing.md),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+          boxShadow: glow
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.4),
+                    blurRadius: 16,
+                    spreadRadius: 2,
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 40, color: color),
+            const SizedBox(height: Spacing.xs),
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeights.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

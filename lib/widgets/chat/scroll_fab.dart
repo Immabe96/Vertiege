@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class ChatScrollFab extends StatelessWidget {
@@ -10,18 +10,19 @@ class ChatScrollFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       elevation: 4,
       shape: const CircleBorder(),
-      color: backgroundColor ?? AppColors.glassBackground,
+      color: backgroundColor ?? (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.all(Spacing.sm),
+        child: Padding(
+          padding: const EdgeInsets.all(Spacing.sm),
           child: Icon(
             Icons.keyboard_arrow_down,
-            color: AppColors.ink,
+            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
             size: IconSizes.lg,
           ),
         ),

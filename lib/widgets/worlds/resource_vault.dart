@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/channel.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
 
@@ -35,7 +35,7 @@ class ResourceVault extends StatelessWidget {
                   vaultUnlocked
                       ? Icons.folder_special_outlined
                       : Icons.menu_book_outlined,
-                  color: vaultUnlocked ? AppColors.tertiary : AppColors.primary,
+                  color: vaultUnlocked ? VColors.tertiary : VColors.primary,
                   size: IconSizes.md,
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -45,7 +45,7 @@ class ResourceVault extends StatelessWidget {
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
                       fontWeight: FontWeights.semiBold,
-                      color: AppColors.ink,
+                      color: VColors.onSurface,
                       letterSpacing: LetterSpacing.label,
                     ),
                   ),
@@ -63,7 +63,7 @@ class ResourceVault extends StatelessWidget {
                   : 'A quick path through the world before residents jump into general chat.',
               style: const TextStyle(
                 fontSize: FontSizes.bodyMd,
-                color: AppColors.inkMuted,
+                color: VColors.outline,
               ),
             ),
             const SizedBox(height: Spacing.md),
@@ -118,9 +118,9 @@ class _GuideItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(Spacing.md),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainer.withValues(alpha: 0.64),
+            color: VColors.surfaceContainer.withValues(alpha: 0.64),
             borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(color: AppColors.glassBorder),
+            border: Border.all(color: VColors.glassBorder),
           ),
           child: Row(
             children: [
@@ -128,12 +128,12 @@ class _GuideItem extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: VColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Icon(
                   _icon,
-                  color: AppColors.primary,
+                  color: VColors.primary,
                   size: IconSizes.md,
                 ),
               ),
@@ -147,7 +147,7 @@ class _GuideItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: AppColors.ink,
+                        color: VColors.onSurface,
                         fontWeight: FontWeights.semiBold,
                       ),
                     ),
@@ -157,7 +157,7 @@ class _GuideItem extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: AppColors.inkMuted,
+                          color: VColors.outline,
                           fontSize: FontSizes.labelSm,
                         ),
                       ),
@@ -166,7 +166,7 @@ class _GuideItem extends StatelessWidget {
               ),
               const Icon(
                 Icons.chevron_right,
-                color: AppColors.inkMuted,
+                color: VColors.outline,
                 size: IconSizes.md,
               ),
             ],
@@ -187,14 +187,14 @@ class _VaultPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.tertiary.withValues(alpha: 0.12),
+        color: VColors.tertiary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(RadiusTokens.pill),
-        border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.24)),
+        border: Border.all(color: VColors.tertiary.withValues(alpha: 0.24)),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          color: AppColors.tertiary,
+          color: VColors.tertiary,
           fontSize: FontSizes.labelSm,
           fontWeight: FontWeights.bold,
         ),
@@ -212,13 +212,13 @@ class _VaultEmpty extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer.withValues(alpha: 0.5),
+        color: VColors.surfaceContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: VColors.glassBorder),
       ),
       child: const Text(
         'Starter channels are being prepared for this world.',
-        style: TextStyle(color: AppColors.inkMuted),
+        style: TextStyle(color: VColors.outline),
       ),
     );
   }

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../models/world.dart';
 
 class WorldInfoSheet extends StatefulWidget {
@@ -46,13 +46,14 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
     final world = widget.world;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+      margin: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.sm,
+      ),
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
+        color: VColors.glassBackground,
         borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-        border: Border.all(
-          color: AppColors.glassBorder,
-        ),
+        border: Border.all(color: VColors.glassBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -62,7 +63,11 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
           // Description
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                Spacing.md, Spacing.md, Spacing.md, Spacing.sm),
+              Spacing.md,
+              Spacing.md,
+              Spacing.md,
+              Spacing.sm,
+            ),
             child: Text(
               world.description,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -77,8 +82,7 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
             padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
             child: Row(
               children: [
-                Icon(Icons.auto_awesome,
-                    size: IconSizes.sm, color: cs.primary),
+                Icon(Icons.auto_awesome, size: IconSizes.sm, color: cs.primary),
                 const SizedBox(width: Spacing.xs),
                 Expanded(
                   child: Text(
@@ -88,7 +92,7 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
                     ),
                   ),
                 ),
-                Icon(Icons.star, size: IconSizes.sm, color: AppColors.tertiary),
+                Icon(Icons.star, size: IconSizes.sm, color: VColors.tertiary),
                 const SizedBox(width: Spacing.xs),
                 Text(
                   'Prestige ${world.prestige}',
@@ -108,25 +112,30 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
           // Stats row
           Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md, vertical: Spacing.sm + 4),
+              horizontal: Spacing.md,
+              vertical: Spacing.sm + 4,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 StatItem(
-                    icon: Icons.people,
-                    label: 'Members',
-                    value: widget.members,
-                    color: cs.primary),
+                  icon: Icons.people,
+                  label: 'Members',
+                  value: widget.members,
+                  color: cs.primary,
+                ),
                 StatItem(
-                    icon: Icons.forum,
-                    label: 'Posts',
-                    value: widget.posts,
-                    color: AppColors.primary),
+                  icon: Icons.forum,
+                  label: 'Posts',
+                  value: widget.posts,
+                  color: VColors.primary,
+                ),
                 StatItem(
-                    icon: Icons.event,
-                    label: 'Events',
-                    value: widget.events,
-                    color: AppColors.warning),
+                  icon: Icons.event,
+                  label: 'Events',
+                  value: widget.events,
+                  color: VColors.warning,
+                ),
               ],
             ),
           ),

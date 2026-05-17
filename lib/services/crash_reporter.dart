@@ -14,7 +14,9 @@ import 'package:flutter/foundation.dart';
 ///   }
 ///   ```
 abstract class CrashReporter {
-  static CrashReporter instance = ConsoleCrashReporter();
+  static CrashReporter? _instance;
+
+  static CrashReporter get instance => _instance ??= ConsoleCrashReporter();
 
   /// Record a caught exception. Call this in every silent catch block.
   void recordError(Object error, StackTrace stack, {String? hint});

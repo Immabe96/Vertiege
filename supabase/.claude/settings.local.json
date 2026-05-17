@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "PowerShell(adb install *)",
+      "PowerShell($env:LOCALAPPDATA + \"\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\")",
+      "PowerShell(& \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" install -r C:\\\\Users\\\\Immabe\\\\Vertiege\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-release.apk)"
+    ]
+  }
+}

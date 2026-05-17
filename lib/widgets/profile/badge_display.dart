@@ -14,7 +14,9 @@ class BadgeDisplay extends StatelessWidget {
     return Wrap(
       spacing: Spacing.sm,
       runSpacing: Spacing.xs,
-      children: earnedBadgeIds.map((id) => badge_widget.Badge(decorationId: id)).toList(),
+      children: earnedBadgeIds
+          .map((id) => badge_widget.Badge(decorationId: id))
+          .toList(),
     );
   }
 }

@@ -41,8 +41,10 @@ class UserAchievement {
   final String? proofUri;
   final int? submittedAt;
   final int? verifiedAt;
+
   /// AI confidence score from The Archivist (0.0–1.0).
   final double? aiConfidence;
+
   /// AI verifier notes.
   final String? aiNotes;
 
@@ -64,14 +66,13 @@ class UserAchievement {
     int? verifiedAt,
     double? aiConfidence,
     String? aiNotes,
-  }) =>
-      UserAchievement(
-        achievementId: achievementId ?? this.achievementId,
-        status: status ?? this.status,
-        proofUri: proofUri ?? this.proofUri,
-        submittedAt: submittedAt ?? this.submittedAt,
-        verifiedAt: verifiedAt ?? this.verifiedAt,
-        aiConfidence: aiConfidence ?? this.aiConfidence,
-        aiNotes: aiNotes ?? this.aiNotes,
-      );
+  }) => UserAchievement(
+    achievementId: achievementId ?? this.achievementId,
+    status: status ?? this.status,
+    proofUri: proofUri ?? this.proofUri,
+    submittedAt: submittedAt ?? this.submittedAt,
+    verifiedAt: verifiedAt ?? this.verifiedAt,
+    aiConfidence: aiConfidence ?? this.aiConfidence,
+    aiNotes: aiNotes ?? this.aiNotes,
+  );
 }

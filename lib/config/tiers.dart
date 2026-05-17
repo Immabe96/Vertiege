@@ -37,7 +37,9 @@ StandingLevel getStanding(int rep) {
 ({int current, int max}) getRepProgress(int rep) {
   final standing = getStanding(rep);
   final idx = standingLevels.indexOf(standing);
-  final next = idx < standingLevels.length - 1 ? standingLevels[idx + 1] : standing;
+  final next = idx < standingLevels.length - 1
+      ? standingLevels[idx + 1]
+      : standing;
   return (current: rep - standing.minRep, max: next.minRep - standing.minRep);
 }
 
@@ -115,7 +117,9 @@ WorldFeatures getUnlockedFeatures(int prestige) {
 }
 
 WorldFeatures getWorldFeatures(int prestige, WorldType type) {
-  final clamped = type == WorldType.dominion ? prestige.clamp(1, 50) : prestige.clamp(1, 50);
+  final clamped = type == WorldType.dominion
+      ? prestige.clamp(1, 50)
+      : prestige.clamp(1, 50);
   return getUnlockedFeatures(clamped);
 }
 
@@ -126,7 +130,8 @@ int calculatePrestige({
   required int weeklyReactions,
   required int memberCount,
 }) {
-  final score = sovereignTier * 8 +
+  final score =
+      sovereignTier * 8 +
       avgMemberTier * 5 +
       (weeklyPosts.clamp(0, 20)) * 0.5 +
       (weeklyReactions.clamp(0, 100)) * 0.1 +
@@ -139,7 +144,8 @@ final Map<String, World> worldsConfig = {
     id: 'neon-district',
     name: 'Neon District',
     type: WorldType.wealth,
-    description: 'The entry point to the digital realm. Neon lights and endless opportunity.',
+    description:
+        'The entry point to the digital realm. Neon lights and endless opportunity.',
     sovereignId: 'sovereign-neon',
     sovereignName: 'The Architect',
     prestige: 5,
@@ -150,7 +156,8 @@ final Map<String, World> worldsConfig = {
     id: 'azure-coast',
     name: 'Azure Coast',
     type: WorldType.wealth,
-    description: 'Pristine shores where the High Rollers gather to shape the economy.',
+    description:
+        'Pristine shores where the High Rollers gather to shape the economy.',
     sovereignId: 'sovereign-azure',
     sovereignName: 'Countess Voss',
     prestige: 12,
@@ -161,7 +168,8 @@ final Map<String, World> worldsConfig = {
     id: 'sovereign-city',
     name: 'Sovereign City',
     type: WorldType.wealth,
-    description: 'The capital of power. Only the Elite tread these gilded streets.',
+    description:
+        'The capital of power. Only the Elite tread these gilded streets.',
     sovereignId: 'sovereign-city-lord',
     sovereignName: 'Chancellor Vale',
     prestige: 22,
@@ -194,7 +202,8 @@ final Map<String, World> worldsConfig = {
     id: 'aviation-heights',
     name: 'Aviation Heights',
     type: WorldType.profession,
-    description: 'Where pilots and aerospace innovators push the boundaries of flight.',
+    description:
+        'Where pilots and aerospace innovators push the boundaries of flight.',
     sovereignId: 'sovereign-aviation',
     sovereignName: 'Captain Storm',
     prestige: 18,
@@ -205,7 +214,8 @@ final Map<String, World> worldsConfig = {
     id: 'medical-nexus',
     name: 'Medical Nexus',
     type: WorldType.profession,
-    description: 'The cutting edge of medicine where healers advance their craft.',
+    description:
+        'The cutting edge of medicine where healers advance their craft.',
     sovereignId: 'sovereign-medical',
     sovereignName: 'Dean Hippocrates',
     prestige: 28,
@@ -249,7 +259,8 @@ final Map<String, World> worldsConfig = {
     id: 'arts-pavilion',
     name: 'Arts Pavilion',
     type: WorldType.profession,
-    description: 'A sanctuary of creativity where artists bring beauty to life.',
+    description:
+        'A sanctuary of creativity where artists bring beauty to life.',
     sovereignId: 'sovereign-arts',
     sovereignName: 'Curator Noire',
     prestige: 15,
@@ -282,7 +293,8 @@ final Map<String, World> worldsConfig = {
     id: 'silver-page',
     name: 'Silver Page',
     type: WorldType.profession,
-    description: 'A quiet library realm where wordsmiths and storytellers dwell.',
+    description:
+        'A quiet library realm where wordsmiths and storytellers dwell.',
     sovereignId: 'sovereign-silver',
     sovereignName: 'Scribe Aurelius',
     prestige: 10,
@@ -293,7 +305,8 @@ final Map<String, World> worldsConfig = {
     id: 'crimson-court',
     name: 'Crimson Court',
     type: WorldType.wealth,
-    description: 'A velvet-draped court of intrigue for discerning High Rollers.',
+    description:
+        'A velvet-draped court of intrigue for discerning High Rollers.',
     sovereignId: 'sovereign-crimson',
     sovereignName: 'Duchess Scarlett',
     prestige: 16,
@@ -304,7 +317,8 @@ final Map<String, World> worldsConfig = {
     id: 'nova-station',
     name: 'Nova Station',
     type: WorldType.wealth,
-    description: 'A deep-space outpost orbiting the frontier of the known universe.',
+    description:
+        'A deep-space outpost orbiting the frontier of the known universe.',
     sovereignId: 'sovereign-nova',
     sovereignName: 'Commander Vega',
     prestige: 42,

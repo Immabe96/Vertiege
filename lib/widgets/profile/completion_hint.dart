@@ -31,7 +31,10 @@ class _CompletionHintState extends State<CompletionHint> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs + 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.xs + 2,
+      ),
       child: Dismissible(
         key: ValueKey('hint-${widget.title}'),
         direction: DismissDirection.endToStart,
@@ -62,7 +65,11 @@ class _CompletionHintState extends State<CompletionHint> {
                       color: widget.color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(RadiusTokens.input),
                     ),
-                    child: Icon(widget.icon, size: IconSizes.md, color: widget.color),
+                    child: Icon(
+                      widget.icon,
+                      size: IconSizes.md,
+                      color: widget.color,
+                    ),
                   ),
                   const SizedBox(width: Spacing.md - 4),
                   Expanded(
@@ -71,7 +78,9 @@ class _CompletionHintState extends State<CompletionHint> {
                       children: [
                         Text(
                           widget.title,
-                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeights.bold),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeights.bold,
+                          ),
                         ),
                         Text(
                           widget.subtitle,
@@ -82,7 +91,11 @@ class _CompletionHintState extends State<CompletionHint> {
                       ],
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios, size: IconSizes.xs + 2, color: theme.colorScheme.outline),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: IconSizes.xs + 2,
+                    color: theme.colorScheme.outline,
+                  ),
                 ],
               ),
             ),

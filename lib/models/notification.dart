@@ -1,4 +1,16 @@
-enum NotificationType { like, comment, worldUnlocked, tierUpgrade, welcome, modAction, ranking, streakReminder, reactionMilestone, mention, allegianceRequest }
+enum NotificationType {
+  like,
+  comment,
+  worldUnlocked,
+  tierUpgrade,
+  welcome,
+  modAction,
+  ranking,
+  streakReminder,
+  reactionMilestone,
+  mention,
+  allegianceRequest,
+}
 
 class AppNotification {
   final String id;
@@ -6,6 +18,7 @@ class AppNotification {
   final String message;
   final String? worldId;
   final String? postId;
+  final String? allyRequestId;
   final bool read;
   final int createdAt;
 
@@ -15,6 +28,7 @@ class AppNotification {
     required this.message,
     this.worldId,
     this.postId,
+    this.allyRequestId,
     this.read = false,
     required this.createdAt,
   });
@@ -25,18 +39,19 @@ class AppNotification {
     String? message,
     String? worldId,
     String? postId,
+    String? allyRequestId,
     bool? read,
     int? createdAt,
-  }) =>
-      AppNotification(
-        id: id ?? this.id,
-        type: type ?? this.type,
-        message: message ?? this.message,
-        worldId: worldId ?? this.worldId,
-        postId: postId ?? this.postId,
-        read: read ?? this.read,
-        createdAt: createdAt ?? this.createdAt,
-      );
+  }) => AppNotification(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    message: message ?? this.message,
+    worldId: worldId ?? this.worldId,
+    postId: postId ?? this.postId,
+    allyRequestId: allyRequestId ?? this.allyRequestId,
+    read: read ?? this.read,
+    createdAt: createdAt ?? this.createdAt,
+  );
 
   static NotificationType typeFromString(String value) {
     return switch (value) {
@@ -55,26 +70,31 @@ class AppNotification {
     };
   }
 
-  static AppNotification fromSupabase(Map<String, dynamic> data) => AppNotification(
+  static AppNotification fromSupabase(Map<String, dynamic> data) =>
+      AppNotification(
         id: data['id'] ?? '',
         type: typeFromString(data['type'] ?? ''),
         message: data['message'] ?? '',
         worldId: data['world_id'],
         postId: data['post_id'],
+        allyRequestId: data['ally_request_id'],
         read: data['read'] ?? false,
-        createdAt: data['created_at'] != null 
-            ? DateTime.tryParse(data['created_at'])?.millisecondsSinceEpoch ?? 0 
+        createdAt: data['created_at'] != null
+            ? DateTime.tryParse(data['created_at'])?.millisecondsSinceEpoch ?? 0
             : 0,
       );
 
   Map<String, dynamic> toSupabase(String recipientId) => {
-        'id': id,
-        'recipient_id': recipientId,
-        'type': type.name,
-        'message': message,
-        'world_id': worldId,
-        'post_id': postId,
-        'read': read,
-        'created_at': DateTime.fromMillisecondsSinceEpoch(createdAt).toIso8601String(),
-      };
+    'id': id,
+    'recipient_id': recipientId,
+    'type': type.name,
+    'message': message,
+    'world_id': worldId,
+    'post_id': postId,
+    'ally_request_id': allyRequestId,
+    'read': read,
+    'created_at': DateTime.fromMillisecondsSinceEpoch(
+      createdAt,
+    ).toIso8601String(),
+  };
 }

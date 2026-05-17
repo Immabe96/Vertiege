@@ -27,15 +27,14 @@ class VoiceState {
     bool? isDeafened,
     String? activeCampfireId,
     String? activeCampfireName,
-  }) =>
-      VoiceState(
-        participants: participants ?? this.participants,
-        isConnected: isConnected ?? this.isConnected,
-        isMuted: isMuted ?? this.isMuted,
-        isDeafened: isDeafened ?? this.isDeafened,
-        activeCampfireId: activeCampfireId ?? this.activeCampfireId,
-        activeCampfireName: activeCampfireName ?? this.activeCampfireName,
-      );
+  }) => VoiceState(
+    participants: participants ?? this.participants,
+    isConnected: isConnected ?? this.isConnected,
+    isMuted: isMuted ?? this.isMuted,
+    isDeafened: isDeafened ?? this.isDeafened,
+    activeCampfireId: activeCampfireId ?? this.activeCampfireId,
+    activeCampfireName: activeCampfireName ?? this.activeCampfireName,
+  );
 }
 
 class VoiceNotifier extends Notifier<VoiceState> {

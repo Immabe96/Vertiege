@@ -30,10 +30,7 @@ class SafeAsyncBuilder<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     if (hasError) {
       return errorWidget ??
-          AppErrorState(
-            message: errorMessage,
-            onRetry: onRetry,
-          );
+          AppErrorState(message: errorMessage, onRetry: onRetry);
     }
 
     if (isLoading && (!showDataWhileLoading || data == null)) {
@@ -44,9 +41,6 @@ class SafeAsyncBuilder<T> extends StatelessWidget {
       return builder(data as T);
     }
 
-    return AppErrorState(
-      message: 'No data available',
-      onRetry: onRetry,
-    );
+    return AppErrorState(message: 'No data available', onRetry: onRetry);
   }
 }

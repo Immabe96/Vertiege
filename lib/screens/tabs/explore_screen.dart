@@ -1,21 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../services/access_control.dart';
-import '../../services/season_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
-import '../../utils/world_assets.dart';
-import '../../widgets/core/empty_state.dart';
-import '../../widgets/core/fade_in.dart';
-import '../../widgets/core/notification_bell.dart';
-import '../../widgets/worlds/world_banner.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
+import '../../ui/ui.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -27,7 +20,7 @@ class ExploreScreen extends ConsumerStatefulWidget {
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  WorldType? _selectedType;
+  final Map<String, bool> _expandedIds = {};
 
   @override
   void dispose() {
@@ -35,79 +28,96 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     super.dispose();
   }
 
-  List<World> _filter(Iterable<World> worlds) {
-    final query = _searchQuery.trim().toLowerCase();
-    return worlds.where((world) {
-      if (_selectedType != null && world.type != _selectedType) return false;
-      if (query.isEmpty) return true;
-      return world.name.toLowerCase().contains(query) ||
-          world.description.toLowerCase().contains(query) ||
-          world.sovereignName.toLowerCase().contains(query);
-    }).toList();
-  }
-
-  List<World> _ranked(List<World> worlds) {
-    final ranked = List<World>.from(worlds);
-    ranked.sort((a, b) => _discoverScore(b).compareTo(_discoverScore(a)));
-    return ranked;
-  }
-
-  double _discoverScore(World world) {
-    final boost = world.isBoosted ? 120 : 0;
-    return world.prestige * 4 +
-        world.memberCount * 1.4 +
-        world.activityScore * 0.5 +
-        boost;
-  }
-
-  List<World> _trending(List<World> worlds) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final trending = List<World>.from(worlds);
-    trending.sort((a, b) {
-      double velocity(World world) {
-        final ageDays = ((now - world.createdAt) / 86400000).clamp(0.5, 9999);
-        return (world.memberCount * 10 + world.prestige + world.activityScore) /
-            ageDays;
-      }
-
-      return velocity(b).compareTo(velocity(a));
-    });
-    return trending;
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(worldProvider);
     final resident = ref.watch(residentProvider).resident;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final worlds = state.worlds.values.toList();
-    final rankedWorlds = _ranked(worlds);
-    final filtered = _ranked(_filter(worlds));
-    final isFiltering = _selectedType != null || _searchQuery.trim().isNotEmpty;
-    final spotlight = rankedWorlds.take(5).toList();
-    final boosted = rankedWorlds
-        .where((world) => world.isBoosted)
-        .take(6)
-        .toList();
-    final trending = _trending(worlds).take(6).toList();
+    final isLoading = worlds.isEmpty && state.isLoading;
+
+    final available = worlds.where((w) {
+      if (resident == null) return true;
+      return canAccessWorld(resident, w);
+    }).toList();
+
+    final locked = worlds.where((w) {
+      if (resident == null) return false;
+      return !canAccessWorld(resident, w);
+    }).toList();
+
+    final trending = available
+        .where((w) => w.activityScore > 0)
+        .toList()
+      ..sort((a, b) => b.activityScore.compareTo(a.activityScore));
+    final topTrending = trending.take(5).toList();
+
+    final recommended = resident != null
+        ? available
+            .where((w) =>
+                !resident.joinedWorldIds.contains(w.id) &&
+                (w.requiredTier == null ||
+                    resident.tier.value >= w.requiredTier!) &&
+                (w.requiredProfession == null ||
+                    resident.profession == w.requiredProfession))
+            .toList()
+        : <World>[];
+
+    List<World> filter(List<World> list) {
+      if (_searchQuery.isEmpty) return list;
+      final q = _searchQuery.toLowerCase();
+      return list
+          .where(
+            (w) =>
+                w.name.toLowerCase().contains(q) ||
+                w.description.toLowerCase().contains(q) ||
+                w.sovereignName.toLowerCase().contains(q),
+          )
+          .toList();
+    }
+
+    final filteredAvailable = filter(available);
+    final filteredLocked = filter(locked);
+
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.canvas,
+        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
+            .withValues(alpha: 0.86),
         elevation: 0,
         title: Text(
-          'Discover',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: FontSizes.headlineMd,
-            fontWeight: FontWeights.bold,
-            color: AppColors.ink,
+          'Worlds',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: VFontWeight.semiBold,
           ),
         ),
         actions: [
-          NotificationBell(onPress: () => context.push('/notifications')),
+          IconButton(
+            icon: Icon(
+              Icons.explore_outlined,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+            tooltip: 'Discover Worlds',
+            onPressed: () => context.push('/explore/discover'),
+          ),
           if ((resident?.tier.value ?? 0) >= 2)
             IconButton(
-              icon: const Icon(Icons.add, color: AppColors.inkSecondary),
+              icon: Icon(
+                Icons.add,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
               tooltip: 'Create World',
               onPressed: () => context.push('/create-world'),
             ),
@@ -118,374 +128,293 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: _DiscoverHeader(
-                controller: _searchController,
-                query: _searchQuery,
-                worlds: worlds,
-                onQueryChanged: (value) => setState(() => _searchQuery = value),
-                onClear: () {
-                  _searchController.clear();
-                  setState(() => _searchQuery = '');
-                },
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _WorldTypeStrip(
-                selectedType: _selectedType,
-                worlds: worlds,
-                onSelected: (type) => setState(() => _selectedType = type),
-              ),
-            ),
-            if (!isFiltering && spotlight.isNotEmpty) ...[
-              const SliverToBoxAdapter(child: _SectionTitle('Spotlight')),
-              SliverToBoxAdapter(
-                child: _SpotlightRail(worlds: spotlight, resident: resident),
-              ),
-            ],
-            if (!isFiltering && boosted.isNotEmpty) ...[
-              const SliverToBoxAdapter(child: _SectionTitle('Boosted Realms')),
-              SliverToBoxAdapter(
-                child: _MiniWorldRail(
-                  worlds: boosted,
-                  resident: resident,
-                  badgeLabel: 'Boosted',
-                  badgeIcon: Icons.rocket_launch,
-                  badgeColor: AppColors.tertiary,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  VSpacing.md,
+                  VSpacing.sm,
+                  VSpacing.md,
+                  VSpacing.md,
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Search worlds...',
+                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.close, size: VIconSize.md),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: isDark
+                        ? VColors.glassBackgroundDark
+                        : VColors.glassBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? VColors.glassBorderDark
+                            : VColors.glassBorder,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? VColors.glassBorderDark
+                            : VColors.glassBorder,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                      borderSide: const BorderSide(color: VColors.primary),
+                    ),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => setState(() => _searchQuery = v),
                 ),
               ),
-            ],
-            if (!isFiltering && trending.isNotEmpty) ...[
-              const SliverToBoxAdapter(child: _SectionTitle('Trending Now')),
-              SliverToBoxAdapter(
-                child: _MiniWorldRail(
-                  worlds: trending,
-                  resident: resident,
-                  badgeLabel: 'Active',
-                  badgeIcon: Icons.trending_up,
-                  badgeColor: AppColors.success,
-                ),
-              ),
-            ],
-            SliverToBoxAdapter(
-              child: _SectionTitle(
-                isFiltering ? 'Matching Worlds' : 'Browse All Worlds',
-              ),
             ),
-            if (filtered.isEmpty)
+
+            if (filteredAvailable.isNotEmpty) ...[
+              if (topTrending.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      VSpacing.md,
+                      VSpacing.sm,
+                      VSpacing.md,
+                      VSpacing.sm,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.local_fire_department,
+                          size: VIconSize.sm,
+                          color: VColors.tertiary,
+                        ),
+                        const SizedBox(width: VSpacing.xs),
+                        Text(
+                          'Trending',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: VFontWeight.semiBold,
+                            color: VColors.tertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 140,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                      itemCount: topTrending.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(width: VSpacing.sm),
+                      itemBuilder: (context, index) {
+                        final world = topTrending[index];
+                        return _TrendingWorldCard(world: world);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+
+              if (recommended.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      VSpacing.md,
+                      VSpacing.lg,
+                      VSpacing.md,
+                      VSpacing.sm,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.recommend,
+                          size: VIconSize.sm,
+                          color: VColors.primary,
+                        ),
+                        const SizedBox(width: VSpacing.xs),
+                        Text(
+                          'Recommended for You',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: VFontWeight.semiBold,
+                            color: VColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                  sliver: SliverList.separated(
+                    itemCount: recommended.length > 3 ? 3 : recommended.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: VSpacing.sm),
+                    itemBuilder: (context, index) => _WorldListCard(
+                      world: recommended[index],
+                      resident: resident,
+                      isExpanded:
+                          _expandedIds[recommended[index].id] ?? false,
+                      onToggle: () {
+                        setState(() {
+                          _expandedIds[recommended[index].id] =
+                              !(_expandedIds[recommended[index].id] ?? false);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(Spacing.xl),
-                  child: AppEmptyState(
+                  padding: const EdgeInsets.fromLTRB(
+                    VSpacing.md,
+                    VSpacing.sm,
+                    VSpacing.md,
+                    VSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: VIconSize.sm,
+                        color: VColors.success,
+                      ),
+                      const SizedBox(width: VSpacing.xs),
+                      Text(
+                        'Available (${filteredAvailable.length})',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: VFontWeight.semiBold,
+                          color: VColors.success,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                sliver: SliverList.separated(
+                  itemCount: filteredAvailable.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: VSpacing.sm),
+                  itemBuilder: (context, index) => _WorldListCard(
+                    world: filteredAvailable[index],
+                    resident: resident,
+                    isExpanded:
+                        _expandedIds[filteredAvailable[index].id] ?? false,
+                    onToggle: () {
+                      setState(() {
+                        _expandedIds[filteredAvailable[index].id] =
+                            !(_expandedIds[filteredAvailable[index].id] ??
+                                false);
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+
+            if (filteredLocked.isNotEmpty) ...[
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    VSpacing.md,
+                    VSpacing.lg,
+                    VSpacing.md,
+                    VSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lock_outline,
+                        size: VIconSize.sm,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: VSpacing.xs),
+                      Text(
+                        'Locked (${filteredLocked.length})',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: VFontWeight.semiBold,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                sliver: SliverList.separated(
+                  itemCount: filteredLocked.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: VSpacing.sm),
+                  itemBuilder: (context, index) => _WorldListCard(
+                    world: filteredLocked[index],
+                    resident: resident,
+                    isLocked: true,
+                    isExpanded:
+                        _expandedIds[filteredLocked[index].id] ?? false,
+                    onToggle: () {
+                      setState(() {
+                        _expandedIds[filteredLocked[index].id] =
+                            !(_expandedIds[filteredLocked[index].id] ?? false);
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+
+            if (filteredAvailable.isEmpty && filteredLocked.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(VSpacing.xxl),
+                  child: VEmptyState(
                     title: _searchQuery.isNotEmpty
                         ? 'No worlds found'
                         : 'No worlds available',
                     description: _searchQuery.isNotEmpty
-                        ? 'No worlds match "$_searchQuery". Try a different search.'
+                        ? 'No worlds match "$_searchQuery"'
                         : 'No worlds have been created yet.',
                     icon: _searchQuery.isNotEmpty
                         ? Icons.search_off
                         : Icons.public_off,
-                    imageAsset: 'assets/generated/empty-worlds.jpg',
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  Spacing.md,
-                  0,
-                  Spacing.md,
-                  Spacing.xxl + Spacing.xl,
-                ),
-                sliver: SliverList.separated(
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: Spacing.md),
-                  itemBuilder: (context, index) => FadeIn(
-                    delayMs: (index * 45).clamp(0, 360),
-                    child: _DiscoveryWorldCard(
-                      world: filtered[index],
-                      resident: resident,
-                      compact: index > 2 && !isFiltering,
-                    ),
                   ),
                 ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class _DiscoverHeader extends StatelessWidget {
-  final TextEditingController controller;
-  final String query;
-  final List<World> worlds;
-  final ValueChanged<String> onQueryChanged;
-  final VoidCallback onClear;
-
-  const _DiscoverHeader({
-    required this.controller,
-    required this.query,
-    required this.worlds,
-    required this.onQueryChanged,
-    required this.onClear,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final featured = List<World>.from(worlds)
-      ..sort((a, b) => b.prestige.compareTo(a.prestige));
-    final heroWorld = featured.isEmpty ? null : featured.first;
-    final memberTotal = worlds.fold<int>(
-      0,
-      (sum, world) => sum + world.memberCount,
-    );
-    final season = SeasonService.getCurrentSeason(worlds: worlds);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.full),
-        child: SizedBox(
-          height: 250,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (heroWorld != null)
-                WorldBanner(
-                  worldId: heroWorld.id,
-                  assetKey: heroWorld.assetKey,
-                  worldType: heroWorld.type,
-                  prestige: heroWorld.prestige,
-                  height: 250,
-                )
-              else
-                Container(color: AppColors.surface),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.canvas.withValues(alpha: 0.1),
-                      AppColors.canvas.withValues(alpha: 0.72),
-                      AppColors.canvas.withValues(alpha: 0.94),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(Spacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Spacer(),
-                    Text(
-                      'Find your next realm',
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 34,
-                        height: 1.05,
-                        fontWeight: FontWeights.bold,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.sm),
-                    Text(
-                      '${worlds.length} worlds, $memberTotal residents, ${season.name}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.lg),
-                    _SearchField(
-                      controller: controller,
-                      query: query,
-                      onQueryChanged: onQueryChanged,
-                      onClear: onClear,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  final TextEditingController controller;
-  final String query;
-  final ValueChanged<String> onQueryChanged;
-  final VoidCallback onClear;
-
-  const _SearchField({
-    required this.controller,
-    required this.query,
-    required this.onQueryChanged,
-    required this.onClear,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      onChanged: onQueryChanged,
-      style: const TextStyle(color: AppColors.ink),
-      decoration: InputDecoration(
-        hintText: 'Search by name, topic, or sovereign',
-        hintStyle: const TextStyle(color: AppColors.inkMuted),
-        prefixIcon: const Icon(Icons.search, color: AppColors.inkMuted),
-        suffixIcon: query.isEmpty
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.close, size: IconSizes.md),
-                onPressed: onClear,
-              ),
-        filled: true,
-        fillColor: AppColors.canvas.withValues(alpha: 0.72),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          borderSide: const BorderSide(color: AppColors.glassBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          borderSide: const BorderSide(color: AppColors.glassBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          borderSide: const BorderSide(color: AppColors.tertiary),
-        ),
-        isDense: true,
-      ),
-    );
-  }
-}
-
-class _WorldTypeStrip extends StatelessWidget {
-  final WorldType? selectedType;
-  final List<World> worlds;
-  final ValueChanged<WorldType?> onSelected;
-
-  const _WorldTypeStrip({
-    required this.selectedType,
-    required this.worlds,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final counts = <WorldType, int>{
-      for (final type in WorldType.values)
-        type: worlds.where((world) => world.type == type).length,
-    };
-
-    return SizedBox(
-      height: 82,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(
-          Spacing.md,
-          Spacing.md,
-          Spacing.md,
-          Spacing.sm,
-        ),
-        children: [
-          _TypeChip(
-            label: 'All',
-            count: worlds.length,
-            icon: Icons.public,
-            selected: selectedType == null,
-            color: AppColors.primary,
-            onTap: () => onSelected(null),
-          ),
-          for (final type in WorldType.values) ...[
-            const SizedBox(width: Spacing.sm),
-            _TypeChip(
-              label: _typeLabel(type),
-              count: counts[type] ?? 0,
-              icon: _typeIcon(type),
-              selected: selectedType == type,
-              color: _typeColor(type),
-              onTap: () => onSelected(type),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  final String label;
-  final int count;
-  final IconData icon;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _TypeChip({
-    required this.label,
-    required this.count,
-    required this.icon,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: AnimDurations.fast,
-        width: 126,
-        padding: const EdgeInsets.all(Spacing.md),
-        decoration: BoxDecoration(
-          color: selected
-              ? color.withValues(alpha: 0.16)
-              : AppColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
-          border: Border.all(
-            color: selected
-                ? color.withValues(alpha: 0.55)
-                : AppColors.glassBorder,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: IconSizes.md,
-              color: selected ? color : AppColors.inkMuted,
-            ),
-            const SizedBox(width: Spacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected ? AppColors.ink : AppColors.inkSecondary,
-                      fontWeight: FontWeights.semiBold,
-                    ),
-                  ),
-                  Text(
-                    '$count worlds',
-                    style: const TextStyle(
-                      color: AppColors.inkMuted,
-                      fontSize: FontSizes.labelSm,
-                    ),
-                  ),
-                ],
-              ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: VSpacing.xxl + VSpacing.xl),
             ),
           ],
         ),
@@ -494,373 +423,369 @@ class _TypeChip extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-
-  const _SectionTitle(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.lg,
-        Spacing.md,
-        Spacing.sm,
-      ),
-      child: Text(
-        title,
-        style: GoogleFonts.spaceGrotesk(
-          fontSize: FontSizes.bodyLg,
-          fontWeight: FontWeights.bold,
-          color: AppColors.ink,
-        ),
-      ),
-    );
-  }
-}
-
-class _SpotlightRail extends StatelessWidget {
-  final List<World> worlds;
-  final Resident? resident;
-
-  const _SpotlightRail({required this.worlds, required this.resident});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 310,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-        itemCount: worlds.length,
-        separatorBuilder: (_, _) => const SizedBox(width: Spacing.md),
-        itemBuilder: (context, index) => SizedBox(
-          width: 292,
-          child: _DiscoveryWorldCard(
-            world: worlds[index],
-            resident: resident,
-            spotlight: true,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniWorldRail extends StatelessWidget {
-  final List<World> worlds;
-  final Resident? resident;
-  final String badgeLabel;
-  final IconData badgeIcon;
-  final Color badgeColor;
-
-  const _MiniWorldRail({
-    required this.worlds,
-    required this.resident,
-    required this.badgeLabel,
-    required this.badgeIcon,
-    required this.badgeColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 172,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-        itemCount: worlds.length,
-        separatorBuilder: (_, _) => const SizedBox(width: Spacing.md),
-        itemBuilder: (context, index) => SizedBox(
-          width: 236,
-          child: _MiniWorldCard(
-            world: worlds[index],
-            resident: resident,
-            badgeLabel: badgeLabel,
-            badgeIcon: badgeIcon,
-            badgeColor: badgeColor,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DiscoveryWorldCard extends StatelessWidget {
+class _WorldListCard extends StatelessWidget {
   final World world;
   final Resident? resident;
-  final bool spotlight;
-  final bool compact;
+  final bool isLocked;
+  final bool isExpanded;
+  final VoidCallback onToggle;
 
-  const _DiscoveryWorldCard({
+  const _WorldListCard({
     required this.world,
     required this.resident,
-    this.spotlight = false,
-    this.compact = false,
+    this.isLocked = false,
+    required this.isExpanded,
+    required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
-    final locked = resident != null && !canAccessWorld(resident!, world);
-    final bannerHeight = spotlight ? 184.0 : (compact ? 116.0 : 158.0);
-    final accent = WorldAssets.colorForPrestige(world.prestige);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final typeColor = _typeColor(world.type);
+    final typeIcon = _typeIcon(world.type);
+    final typeLabel = _typeLabel(world.type);
+    final lockReason = _lockReason(world, resident);
 
-    return GestureDetector(
-      onTap: () => context.push('/explore/${world.id}'),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.full),
-        child: DecoratedBox(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isLocked ? null : () => context.push('/explore/${world.id}'),
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        child: Container(
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
-            border: Border.all(color: accent.withValues(alpha: 0.2)),
+            color: isDark
+                ? VColors.glassBackgroundDark
+                : VColors.glassBackground,
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            border: Border.all(
+              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                height: bannerHeight,
-                child: Stack(
-                  fit: StackFit.expand,
+              Padding(
+                padding: const EdgeInsets.all(VSpacing.md),
+                child: Row(
                   children: [
-                    Hero(
-                      tag: 'world-icon-${world.id}',
-                      child: WorldBanner(
-                        worldId: world.id,
-                        assetKey: world.assetKey,
-                        worldType: world.type,
-                        prestige: world.prestige,
-                        height: bannerHeight,
-                      ),
-                    ),
-                    DecoratedBox(
+                    Container(
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            AppColors.canvas.withValues(alpha: 0.78),
-                          ],
-                        ),
+                        color: typeColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(VRadius.md),
+                      ),
+                      child: Icon(
+                        typeIcon,
+                        color: typeColor,
+                        size: VIconSize.md,
                       ),
                     ),
-                    Positioned(
-                      left: Spacing.md,
-                      right: Spacing.md,
-                      bottom: Spacing.md,
-                      child: Row(
+                    const SizedBox(width: VSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              world.name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: spotlight
-                                    ? FontSizes.headlineMd
-                                    : FontSizes.bodyLg,
-                                height: 1.08,
-                                fontWeight: FontWeights.bold,
-                                color: AppColors.ink,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  world.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: VFontWeight.semiBold,
+                                    color: isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface,
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (isLocked)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: VSpacing.xs,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: VColors.error.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(
+                                      VRadius.pill,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.lock,
+                                        size: VIconSize.xs,
+                                        color: VColors.error,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        'Locked',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: VColors.error,
+                                          fontWeight: VFontWeight.semiBold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
-                          if (locked)
-                            const _GlassBadge(
-                              label: 'Locked',
-                              icon: Icons.lock,
-                              color: AppColors.error,
-                            ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: VSpacing.xs,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: typeColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(
+                                    VRadius.pill,
+                                  ),
+                                ),
+                                child: Text(
+                                  typeLabel,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: typeColor,
+                                    fontWeight: VFontWeight.semiBold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: VSpacing.xs),
+                              Text(
+                                '${world.memberCount} members',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: VSpacing.xs),
+                              Text(
+                                'P${world.prestige}',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: VSpacing.sm),
+                    GestureDetector(
+                      onTap: onToggle,
+                      child: AnimatedRotation(
+                        turns: isExpanded ? 0.5 : 0,
+                        duration: VAnimation.fast,
+                        child: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(Spacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      world.description,
-                      maxLines: compact ? 2 : 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    Wrap(
-                      spacing: Spacing.xs,
-                      runSpacing: Spacing.xs,
-                      children: [
-                        _GlassBadge(
-                          label: _typeLabel(world.type),
-                          icon: _typeIcon(world.type),
-                          color: _typeColor(world.type),
-                        ),
-                        _GlassBadge(
-                          label: '${world.memberCount} residents',
-                          icon: Icons.people,
-                          color: AppColors.inkSecondary,
-                        ),
-                        _GlassBadge(
-                          label: 'P${world.prestige}',
-                          icon: Icons.auto_awesome,
-                          color: accent,
-                        ),
-                        if (world.isBoosted)
-                          const _GlassBadge(
-                            label: 'Boosted',
-                            icon: Icons.rocket_launch,
-                            color: AppColors.tertiary,
-                          ),
-                      ],
-                    ),
-                    if (!compact || spotlight) ...[
-                      const SizedBox(height: Spacing.sm),
+              if (isExpanded) ...[
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(VSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        'Sovereign: ${world.sovereignName}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.inkMuted,
-                          fontSize: FontSizes.labelSm,
+                        world.description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                          height: 1.4,
                         ),
                       ),
+                      const SizedBox(height: VSpacing.md),
+                      Wrap(
+                        spacing: VSpacing.xs,
+                        runSpacing: VSpacing.xs,
+                        children: [
+                          _InfoChip(
+                            icon: Icons.person,
+                            label: 'Sovereign: ${world.sovereignName}',
+                          ),
+                          if (world.requiredTier != null)
+                            _InfoChip(
+                              icon: Icons.star,
+                              label: 'Requires Tier ${world.requiredTier}',
+                            ),
+                          if (world.requiredProfession != null)
+                            _InfoChip(
+                              icon: Icons.work,
+                              label: 'Requires: ${world.requiredProfession}',
+                            ),
+                          if (world.constitution.admission != 'open')
+                            _InfoChip(
+                              icon: Icons.description,
+                              label:
+                                  'Admission: ${world.constitution.admission}',
+                            ),
+                        ],
+                      ),
+                      if (isLocked && lockReason != null) ...[
+                        const SizedBox(height: VSpacing.md),
+                        Container(
+                          padding: const EdgeInsets.all(VSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: VColors.error.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            border: Border.all(
+                              color: VColors.error.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: VIconSize.sm,
+                                color: VColors.error,
+                              ),
+                              const SizedBox(width: VSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  lockReason,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: VColors.error,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (!isLocked) ...[
+                        const SizedBox(height: VSpacing.md),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: () =>
+                                context.push('/explore/${world.id}'),
+                            icon: const Icon(Icons.open_in_new),
+                            label: const Text('Enter World'),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class _MiniWorldCard extends StatelessWidget {
-  final World world;
-  final Resident? resident;
-  final String badgeLabel;
-  final IconData badgeIcon;
-  final Color badgeColor;
+  String? _lockReason(World world, Resident? resident) {
+    if (resident == null) return null;
+    switch (world.type) {
+      case WorldType.wealth:
+        final req = world.requiredTier ?? 1;
+        if (resident.tier.value < req &&
+            !resident.wealthWorldsUnlocked.contains(world.id)) {
+          return 'Reach Tier $req or unlock this world to enter.';
+        }
+        break;
+      case WorldType.profession:
+        final req = world.requiredProfession;
+        if (req != null && !resident.verifiedRoles.contains(req)) {
+          return 'Verify your $req profession to access this world.';
+        }
+        break;
+      case WorldType.dominion:
+        break;
+    }
+    return null;
+  }
 
-  const _MiniWorldCard({
-    required this.world,
-    required this.resident,
-    required this.badgeLabel,
-    required this.badgeIcon,
-    required this.badgeColor,
-  });
+  Color _typeColor(WorldType type) {
+    return switch (type) {
+      WorldType.wealth => VColors.tertiary,
+      WorldType.profession => VColors.primary,
+      WorldType.dominion => VColors.success,
+    };
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final locked = resident != null && !canAccessWorld(resident!, world);
-    return GestureDetector(
-      onTap: () => context.push('/explore/${world.id}'),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            WorldBanner(
-              worldId: world.id,
-              assetKey: world.assetKey,
-              worldType: world.type,
-              prestige: world.prestige,
-              height: 172,
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.canvas.withValues(alpha: 0.04),
-                    AppColors.canvas.withValues(alpha: 0.88),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(Spacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _GlassBadge(
-                    label: locked ? 'Locked' : badgeLabel,
-                    icon: locked ? Icons.lock : badgeIcon,
-                    color: locked ? AppColors.error : badgeColor,
-                  ),
-                  const Spacer(),
-                  Text(
-                    world.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeights.bold,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.xs),
-                  Text(
-                    '${world.memberCount} residents  P${world.prestige}',
-                    style: const TextStyle(
-                      color: AppColors.inkSecondary,
-                      fontSize: FontSizes.labelSm,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  IconData _typeIcon(WorldType type) {
+    return switch (type) {
+      WorldType.wealth => Icons.diamond,
+      WorldType.profession => Icons.work,
+      WorldType.dominion => Icons.shield,
+    };
+  }
+
+  String _typeLabel(WorldType type) {
+    return switch (type) {
+      WorldType.wealth => 'Wealth',
+      WorldType.profession => 'Profession',
+      WorldType.dominion => 'Dominion',
+    };
   }
 }
 
-class _GlassBadge extends StatelessWidget {
-  final String label;
+class _InfoChip extends StatelessWidget {
   final IconData icon;
-  final Color color;
+  final String label;
 
-  const _GlassBadge({
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.xs,
+        horizontal: VSpacing.sm,
+        vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.canvas.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border.all(color: color.withValues(alpha: 0.32)),
+        color: isDark
+            ? VColors.surfaceDark
+            : VColors.surface,
+        borderRadius: BorderRadius.circular(VRadius.pill),
+        border: Border.all(
+          color: isDark
+              ? VColors.outlineVariantDark
+              : VColors.outlineVariant,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: IconSizes.xs, color: color),
-          const SizedBox(width: 4),
+          Icon(
+            icon,
+            size: VIconSize.xs,
+            color: isDark
+                ? VColors.onSurfaceVariantDark
+                : VColors.onSurfaceVariant,
+          ),
+          const SizedBox(width: VSpacing.xxs),
           Text(
             label,
-            style: TextStyle(
-              color: color,
-              fontSize: FontSizes.labelSm,
-              fontWeight: FontWeights.semiBold,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
         ],
@@ -869,26 +794,74 @@ class _GlassBadge extends StatelessWidget {
   }
 }
 
-String _typeLabel(WorldType type) {
-  return switch (type) {
-    WorldType.wealth => 'Wealth',
-    WorldType.profession => 'Profession',
-    WorldType.dominion => 'Dominion',
-  };
-}
+class _TrendingWorldCard extends StatelessWidget {
+  final World world;
 
-IconData _typeIcon(WorldType type) {
-  return switch (type) {
-    WorldType.wealth => Icons.diamond,
-    WorldType.profession => Icons.work,
-    WorldType.dominion => Icons.shield,
-  };
-}
+  const _TrendingWorldCard({required this.world});
 
-Color _typeColor(WorldType type) {
-  return switch (type) {
-    WorldType.wealth => AppColors.tertiary,
-    WorldType.profession => AppColors.primary,
-    WorldType.dominion => AppColors.success,
-  };
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () => context.push('/explore/${world.id}'),
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: isDark
+              ? VColors.glassBackgroundDark
+              : VColors.glassBackground,
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          border: Border.all(
+            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(VSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.local_fire_department,
+                    size: VIconSize.sm,
+                    color: VColors.tertiary,
+                  ),
+                  const SizedBox(width: VSpacing.xxs),
+                  Text(
+                    '${world.activityScore}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: VColors.tertiary,
+                      fontWeight: VFontWeight.semiBold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: VSpacing.xs),
+              Text(
+                world.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${world.memberCount} members',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

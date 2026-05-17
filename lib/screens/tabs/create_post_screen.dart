@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/post.dart';
 import '../../models/world.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/ghost_input.dart';
@@ -25,6 +25,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _bodyController = TextEditingController();
   bool _isSovereignAnnouncement = false;
   bool _isSovereignDecree = false;
+  bool _isPinned = false;
   String? _selectedWorldId;
 
   // Poll state
@@ -133,7 +134,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    final worlds = ref.read(worldProvider).worlds.values.toList();
+    final worlds = ref
+        .read(worldProvider)
+        .worlds
+        .values
+        .where((world) => resident.joinedWorldIds.contains(world.id))
+        .toList();
     final worldId =
         _selectedWorldId ?? (worlds.isNotEmpty ? worlds.first.id : null);
     if (worldId == null) return;
@@ -156,12 +162,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           poll: poll,
         );
 
-    context.go('/');
+    context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    final worlds = ref.watch(worldProvider).worlds.values.toList();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final resident = ref.watch(residentProvider).resident;
+    final worlds = ref
+        .watch(worldProvider)
+        .worlds
+        .values
+        .where((world) => resident?.joinedWorldIds.contains(world.id) ?? false)
+        .toList();
     final selectedWorld = worlds.firstWhere(
       (world) => world.id == _selectedWorldId,
       orElse: () => worlds.isNotEmpty
@@ -177,11 +190,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.8),
+        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
+            .withValues(alpha: 0.8),
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.inkSecondary),
+          icon: Icon(
+            Icons.close,
+            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+          ),
           onPressed: () => context.go('/'),
         ),
         title: Text(
@@ -190,17 +207,17 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             fontFamily: AppFont.headline,
             fontSize: FontSizes.headlineLg,
             fontWeight: FontWeights.bold,
-            color: AppColors.tertiary,
+            color: VColors.tertiary,
           ),
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: Spacing.md),
             child: FilledButton(
-              onPressed: _publish,
+              onPressed: worlds.isEmpty ? null : _publish,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
+                backgroundColor: VColors.tertiary,
+                foregroundColor: VColors.onTertiary,
               ),
               child: const Text('PUBLISH'),
             ),
@@ -226,12 +243,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: AppColors.secondaryContainer,
+                        color: isDark
+                            ? VColors.secondaryContainerDark
+                            : VColors.secondaryContainer,
                         borderRadius: BorderRadius.circular(RadiusTokens.md),
                       ),
                       child: const Icon(
                         Icons.language,
-                        color: AppColors.tertiary,
+                        color: VColors.tertiary,
                         size: IconSizes.sm,
                       ),
                     ),
@@ -240,13 +259,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: selectedWorld.id,
-                          dropdownColor: AppColors.surfaceHigh,
-                          iconEnabledColor: AppColors.inkSecondary,
+                          dropdownColor: isDark
+                              ? VColors.surfaceContainerHighDark
+                              : VColors.surfaceContainerHigh,
+                          iconEnabledColor: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
                           isExpanded: true,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: FontSizes.headlineMd,
                             fontWeight: FontWeights.semiBold,
-                            color: AppColors.ink,
+                            color: isDark
+                                ? VColors.onSurfaceDark
+                                : VColors.onSurface,
                           ),
                           items: worlds
                               .map(
@@ -270,9 +295,37 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         ),
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.expand_more,
-                      color: AppColors.inkSecondary,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              )
+            else
+              GlassPanel(
+                padding: EdgeInsets.all(Spacing.lg),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                    SizedBox(width: Spacing.md),
+                    Expanded(
+                      child: Text(
+                        'Join a world before publishing.',
+                        style: TextStyle(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                          fontSize: FontSizes.bodyMd,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -297,16 +350,97 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   padding: const EdgeInsets.all(Spacing.lg),
                   child: Row(
                     children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: VColors.tertiary.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(RadiusTokens.md),
+                          ),
+                          child: const Icon(
+                            Icons.stars,
+                            color: VColors.tertiary,
+                            size: IconSizes.lg,
+                          ),
+                        ),
+                        const SizedBox(width: Spacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Announcement',
+                                style: TextStyle(
+                                  fontSize: FontSizes.headlineMd,
+                                  fontWeight: FontWeights.semiBold,
+                                  color: VColors.tertiary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Pin to the priority feed of all members.',
+                                style: TextStyle(
+                                  fontSize: FontSizes.bodyMd,
+                                  color: isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: _isSovereignAnnouncement,
+                          onChanged: (v) =>
+                              setState(() => _isSovereignAnnouncement = v),
+                          thumbColor: WidgetStateProperty.resolveWith((states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return VColors.onPrimary;
+                            }
+                            return isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant;
+                          }),
+                          trackColor: WidgetStateProperty.resolveWith((states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return VColors.tertiary.withValues(alpha: 0.4);
+                            }
+                            return (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant).withValues(
+                                alpha: 0.2,
+                              );
+                          }),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: Spacing.lg),
+
+            // Pin Post toggle (tier-gated)
+            Consumer(
+              builder: (context, ref, _) {
+                final resident = ref.watch(residentProvider).resident;
+                final pinLimit = resident?.postPinLimit ?? 0;
+                if (pinLimit <= 0) return const SizedBox.shrink();
+
+                return GlassPanel(
+                  padding: const EdgeInsets.all(Spacing.lg),
+                  child: Row(
+                    children: [
                       Container(
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: AppColors.tertiary.withValues(alpha: 0.10),
+                          color: VColors.primary.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(RadiusTokens.md),
                         ),
                         child: const Icon(
-                          Icons.stars,
-                          color: AppColors.tertiary,
+                          Icons.push_pin,
+                          color: VColors.primary,
                           size: IconSizes.lg,
                         ),
                       ),
@@ -316,32 +450,47 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Announcement',
+                              'Pin Post',
                               style: TextStyle(
                                 fontSize: FontSizes.headlineMd,
                                 fontWeight: FontWeights.semiBold,
-                                color: AppColors.tertiary,
+                                color: VColors.primary,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Pin to the priority feed of all members.',
+                              'Pin to top of the feed.',
                               style: TextStyle(
                                 fontSize: FontSizes.bodyMd,
-                                color: AppColors.inkSecondary,
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
                               ),
                             ),
                           ],
                         ),
                       ),
                       Switch(
-                        value: _isSovereignAnnouncement,
-                        onChanged: (v) =>
-                            setState(() => _isSovereignAnnouncement = v),
-                        activeThumbColor: AppColors.tertiary,
-                        activeTrackColor: AppColors.tertiary.withValues(
-                          alpha: 0.4,
-                        ),
+                        value: _isPinned,
+                        onChanged: (v) => setState(() => _isPinned = v),
+                        thumbColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return VColors.onPrimary;
+                          }
+                          return isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant;
+                        }),
+                        trackColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return VColors.primary.withValues(alpha: 0.4);
+                          }
+                          return (isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant).withValues(
+                              alpha: 0.2,
+                            );
+                        }),
                       ),
                     ],
                   ),
@@ -350,121 +499,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
 
             const SizedBox(height: Spacing.lg),
-
-            // Sovereign Decree toggle (only visible to sovereign)
-            Consumer(
-              builder: (context, ref, _) {
-                final resident = ref.watch(residentProvider).resident;
-                final isSovereign =
-                    resident != null &&
-                    resident.id == selectedWorld.sovereignId;
-
-                if (!isSovereign) return const SizedBox.shrink();
-
-                return Column(
-                  children: [
-                    GlassPanel(
-                      padding: const EdgeInsets.all(Spacing.lg),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppColors.tertiary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(
-                                RadiusTokens.md,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.tertiary.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                  blurRadius: 8,
-                                  spreadRadius: 0,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.auto_awesome,
-                              color: AppColors.tertiary,
-                              size: IconSizes.lg,
-                            ),
-                          ),
-                          const SizedBox(width: Spacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Sovereign Decree',
-                                      style: TextStyle(
-                                        fontSize: FontSizes.headlineMd,
-                                        fontWeight: FontWeights.semiBold,
-                                        color: AppColors.tertiary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: Spacing.sm),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: Spacing.sm,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            AppColors.tertiary,
-                                            AppColors.tertiaryFixedDim,
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          RadiusTokens.pill,
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'SOVEREIGN ONLY',
-                                        style: TextStyle(
-                                          fontSize: 9,
-                                          fontWeight: FontWeights.bold,
-                                          color: AppColors.onTertiary,
-                                          letterSpacing: LetterSpacing.label,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Golden-bordered, glowing decree pinned for 24 hours.',
-                                  style: TextStyle(
-                                    fontSize: FontSizes.bodyMd,
-                                    color: AppColors.inkSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Switch(
-                            value: _isSovereignDecree,
-                            onChanged: (v) =>
-                                setState(() => _isSovereignDecree = v),
-                            activeThumbColor: AppColors.tertiary,
-                            activeTrackColor: AppColors.tertiary.withValues(
-                              alpha: 0.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.lg),
-                  ],
-                );
-              },
-            ),
 
             // Editor
             GlassPanel(
@@ -559,6 +593,8 @@ class _AttachChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -568,13 +604,13 @@ class _AttachChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.tertiary.withValues(alpha: 0.15)
-              : AppColors.glassBackground,
+              ? VColors.tertiary.withValues(alpha: 0.15)
+              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
           borderRadius: BorderRadius.circular(RadiusTokens.full),
           border: Border.all(
             color: selected
-                ? AppColors.tertiary.withValues(alpha: 0.4)
-                : AppColors.glassBorder,
+                ? VColors.tertiary.withValues(alpha: 0.4)
+                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
           ),
         ),
         child: Row(
@@ -583,7 +619,11 @@ class _AttachChip extends StatelessWidget {
             Icon(
               icon,
               size: IconSizes.sm,
-              color: selected ? AppColors.tertiary : AppColors.inkSecondary,
+              color: selected
+                  ? VColors.tertiary
+                  : (isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant),
             ),
             const SizedBox(width: Spacing.sm),
             Text(
@@ -591,7 +631,11 @@ class _AttachChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: FontSizes.labelSm,
                 fontWeight: FontWeights.semiBold,
-                color: selected ? AppColors.tertiary : AppColors.inkSecondary,
+                color: selected
+                    ? VColors.tertiary
+                    : (isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant),
                 letterSpacing: LetterSpacing.label,
               ),
             ),
@@ -623,6 +667,8 @@ class _PollBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GlassPanel(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
@@ -631,27 +677,29 @@ class _PollBuilder extends StatelessWidget {
           // Header
           Row(
             children: [
-              const Icon(
-                Icons.poll,
-                size: IconSizes.md,
-                color: AppColors.tertiary,
-              ),
-              const SizedBox(width: Spacing.sm),
-              const Expanded(
-                child: Text(
-                  'Poll',
-                  style: TextStyle(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.semiBold,
-                    color: AppColors.ink,
-                  ),
+            const Icon(
+              Icons.poll,
+              size: IconSizes.md,
+              color: VColors.tertiary,
+            ),
+            const SizedBox(width: Spacing.sm),
+            const Expanded(
+              child: Text(
+                'Poll',
+                style: TextStyle(
+                  fontSize: FontSizes.headlineMd,
+                  fontWeight: FontWeights.semiBold,
+                  color: VColors.onSurface,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.close, size: IconSizes.md),
-                onPressed: onRemove,
-                color: AppColors.inkMuted,
-              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, size: IconSizes.md),
+              onPressed: onRemove,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
             ],
           ),
           const SizedBox(height: Spacing.md),
@@ -677,14 +725,14 @@ class _PollBuilder extends StatelessWidget {
                     ),
                   ),
                   if (optionControllers.length > 2)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.remove_circle_outline,
-                        size: IconSizes.md,
+                      IconButton(
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          size: IconSizes.md,
+                        ),
+                        onPressed: () => onRemoveOption(index),
+                        color: VColors.error,
                       ),
-                      onPressed: () => onRemoveOption(index),
-                      color: AppColors.error,
-                    ),
                 ],
               ),
             );
@@ -704,7 +752,7 @@ class _PollBuilder extends StatelessWidget {
                   fontWeight: FontWeights.semiBold,
                 ),
               ),
-              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+              style: TextButton.styleFrom(foregroundColor: VColors.primary),
             ),
 
           const SizedBox(height: Spacing.sm),
@@ -712,10 +760,12 @@ class _PollBuilder extends StatelessWidget {
           // Multi-choice toggle
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.checklist,
                 size: IconSizes.sm,
-                color: AppColors.inkSecondary,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
               const SizedBox(width: Spacing.sm),
               const Expanded(
@@ -723,15 +773,29 @@ class _PollBuilder extends StatelessWidget {
                   'Allow multiple choices',
                   style: TextStyle(
                     fontSize: FontSizes.bodyMd,
-                    color: AppColors.ink,
+                    color: VColors.onSurface,
                   ),
                 ),
               ),
               Switch(
                 value: isMultiChoice,
                 onChanged: (_) => onToggleMultiChoice(),
-                activeThumbColor: AppColors.tertiary,
-                activeTrackColor: AppColors.tertiary.withValues(alpha: 0.4),
+                thumbColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return VColors.onPrimary;
+                  }
+                  return isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant;
+                }),
+                trackColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return VColors.tertiary.withValues(alpha: 0.4);
+                  }
+                  return (isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant).withValues(alpha: 0.2);
+                }),
               ),
             ],
           ),
@@ -754,15 +818,19 @@ class _FormatButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: AppColors.glassBackground,
+          color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: AppColors.glassBorder),
+          border: Border.all(
+            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          ),
         ),
         child: Center(
           child: Text(
@@ -771,7 +839,9 @@ class _FormatButton extends StatelessWidget {
               fontSize: FontSizes.bodyMd,
               fontWeight: label == 'B' ? FontWeights.bold : FontWeights.regular,
               fontStyle: label == 'I' ? FontStyle.italic : FontStyle.normal,
-              color: AppColors.inkSecondary,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
         ),

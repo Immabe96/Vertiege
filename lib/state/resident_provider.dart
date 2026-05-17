@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
+import '../models/notification.dart';
 import '../config/tiers.dart';
 import '../services/media_service.dart';
 import '../services/profile_service.dart';
@@ -15,6 +17,7 @@ import 'achievement_provider.dart';
 import 'world_provider.dart';
 import 'post_provider.dart';
 import 'notification_provider.dart';
+import 'league_provider.dart';
 
 class ResidentState {
   final Resident? resident;
@@ -27,20 +30,43 @@ class ResidentState {
     this.verificationStatus = VerificationStatus.idle,
   });
 
+  static const Object _unset = Object();
+
   ResidentState copyWith({
-    Resident? resident,
+    Object? resident = _unset,
     bool? isLoading,
     VerificationStatus? verificationStatus,
   }) => ResidentState(
-    resident: resident ?? this.resident,
+    resident: identical(resident, _unset) ? this.resident : resident as Resident?,
     isLoading: isLoading ?? this.isLoading,
     verificationStatus: verificationStatus ?? this.verificationStatus,
   );
 }
 
 class ResidentNotifier extends Notifier<ResidentState> {
+  int _lastStreakCount = 0;
+  int _lastJoinedWorldsCount = 0;
+  double _cachedWorldPrestigeBonus = 0.0;
+
   @override
-  ResidentState build() => const ResidentState();
+  ResidentState build() {
+    ref.listen<ResidentState>(residentProvider, (prev, next) {
+      final r = next.resident;
+      if (r == null) return;
+
+      if (r.streakCount > _lastStreakCount) {
+        _lastStreakCount = r.streakCount;
+        _checkStreakMilestones(r.streakCount);
+      }
+
+      if (r.joinedWorldIds.length > _lastJoinedWorldsCount) {
+        _lastJoinedWorldsCount = r.joinedWorldIds.length;
+        _checkWorldJoinMilestones();
+      }
+    });
+
+    return const ResidentState();
+  }
 
   Future<void> loadResident() async {
     state = state.copyWith(isLoading: true);
@@ -111,7 +137,12 @@ class ResidentNotifier extends Notifier<ResidentState> {
   }) async {
     final r = state.resident;
     if (r == null) return;
-    if (name != null && (name.isEmpty || name.length > 100)) return;
+    if (name != null) {
+      final trimmed = name.trim();
+      if (trimmed.isEmpty || trimmed.length > 100) return;
+      if (!RegExp(r'^[a-zA-Z0-9 _-]+$').hasMatch(trimmed)) return;
+      name = trimmed;
+    }
     if (bio != null && bio.length > 500) return;
 
     String? cloudUrl = r.avatarUrl;
@@ -131,7 +162,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
     // Save to Supabase
     if (state.resident != null) {
-      _saveResidentProfile(state.resident!);
+      _saveResidentProfile(state.resident!).catchError(
+        (e) => debugPrint('Failed to save profile: $e'),
+      );
     }
   }
 
@@ -187,7 +220,6 @@ class ResidentNotifier extends Notifier<ResidentState> {
       ),
     );
     _persist();
-    _checkStreakMilestones(newStreak);
     return (streak: newStreak, bonusXp: bonusXp, shieldUsed: shieldUsed);
   }
 
@@ -229,14 +261,305 @@ class ResidentNotifier extends Notifier<ResidentState> {
     return state.resident?.following.contains(residentId) ?? false;
   }
 
+  bool get hasLoungeAccess =>
+      state.resident?.tier != null && state.resident!.tier.value >= 3;
+
+  bool get hasGovernanceVote =>
+      state.resident?.tier != null && state.resident!.tier.value >= 4;
+
+  int get customReactionSlots => switch (state.resident?.tier.value) {
+        null => 0,
+        1 => 0,
+        2 => 3,
+        3 => 5,
+        4 => 10,
+        5 => 999,
+        _ => 0,
+      };
+
+  int get postPinLimit => switch (state.resident?.tier.value) {
+        null => 0,
+        1 => 0,
+        2 => 1,
+        3 => 3,
+        4 => 5,
+        5 => 10,
+        _ => 0,
+      };
+
+  int get worldCreationLimit => switch (state.resident?.tier.value) {
+        null => 1,
+        1 => 1,
+        2 => 2,
+        3 => 1,
+        4 => 3,
+        5 => 999,
+        _ => 1,
+      };
+
+  double get xpMultiplier => switch (state.resident?.tier.value) {
+        null => 1.0,
+        1 => 1.0,
+        2 => 1.1,
+        3 => 1.25,
+        4 => 1.5,
+        5 => 2.0,
+        _ => 1.0,
+      };
+
+  Future<double> _calculateWorldPrestigeBonus() async {
+    final r = state.resident;
+    if (r == null) return 0.0;
+    try {
+      final highPrestigeWorlds = await WorldService.getHighPrestigeWorlds(r.id);
+      final count = highPrestigeWorlds.length;
+      final cappedCount = count.clamp(0, 5);
+      _cachedWorldPrestigeBonus = (cappedCount * 0.05).clamp(0.0, 0.25);
+    } catch (_) {
+      _cachedWorldPrestigeBonus = 0.0;
+    }
+    return _cachedWorldPrestigeBonus;
+  }
+
+  double get worldPrestigeBonus => _cachedWorldPrestigeBonus;
+
+  int get dailyCoinBonus => switch (state.resident?.tier.value) {
+        null => 0,
+        1 => 0,
+        2 => 5,
+        3 => 15,
+        4 => 30,
+        5 => 50,
+        _ => 0,
+      };
+
+  Future<int> awardActivityXp(String actionType, int baseXp) async {
+    final r = state.resident;
+    if (r == null) return 0;
+
+    final client = maybeSupabase();
+    if (client == null) return baseXp;
+
+    try {
+      final worldBonus = await _calculateWorldPrestigeBonus();
+      final totalMultiplier = xpMultiplier * (1.0 + worldBonus) * r.referralXpMultiplier;
+      final adjustedXp = (baseXp * totalMultiplier).round();
+
+      final response = await client.rpc(
+        'award_activity_xp',
+        params: {
+          'p_user_id': r.id,
+          'p_action_type': actionType,
+          'p_base_xp': adjustedXp,
+        },
+      );
+      final actualXp = (response is int) ? response : adjustedXp;
+
+      final newTotalXp = r.totalXp + actualXp;
+      final newTier = ResidentTier.fromXp(newTotalXp);
+
+      state = state.copyWith(
+        resident: r.copyWith(
+          totalXp: newTotalXp,
+          lastActivityAt: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+      _persist();
+
+      ref.read(leagueProvider.notifier).trackXP(actualXp);
+
+      if (newTier.value > r.tier.value) {
+        await _performTierUpgrade(r, newTier);
+      }
+
+      return actualXp;
+    } catch (_) {
+      final newTotalXp = r.totalXp + baseXp;
+      state = state.copyWith(
+        resident: r.copyWith(
+          totalXp: newTotalXp,
+          lastActivityAt: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+      _persist();
+      return baseXp;
+    }
+  }
+
+  Future<int> awardActivityXpForUser(
+    String userId,
+    String actionType,
+    int baseXp,
+  ) async {
+    final client = maybeSupabase();
+    if (client == null) return 0;
+
+    try {
+      final response = await client.rpc(
+        'award_activity_xp',
+        params: {
+          'p_user_id': userId,
+          'p_action_type': actionType,
+          'p_base_xp': baseXp,
+        },
+      );
+      final actualXp = (response is int) ? response : baseXp;
+
+      final r = state.resident;
+      if (r != null && r.id == userId) {
+        final newTotalXp = r.totalXp + actualXp;
+        final newTier = ResidentTier.fromXp(newTotalXp);
+
+        state = state.copyWith(
+          resident: r.copyWith(
+            totalXp: newTotalXp,
+            lastActivityAt: DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+        _persist();
+
+        if (newTier.value > r.tier.value) {
+          await _performTierUpgrade(r, newTier);
+        }
+      }
+
+      return actualXp;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<void> _performTierUpgrade(Resident oldResident, ResidentTier newTier) async {
+    state = state.copyWith(
+      resident: oldResident.copyWith(tier: newTier),
+    );
+    _persist();
+
+    ref
+        .read(notificationProvider.notifier)
+        .addNotification(
+          type: NotificationType.tierUpgrade,
+          message:
+              'Congratulations! You\'ve ascended to ${newTier.label} tier!',
+        );
+
+    Haptics.heavy();
+
+    ref.read(postProvider.notifier).addPost(
+      worldId: 'neon-district',
+      residentId: oldResident.id,
+      residentName: oldResident.name,
+      residentAvatar: oldResident.avatarUrl,
+      content: 'Just ascended to ${newTier.label} tier! ${oldResident.tier.label} -> ${newTier.label}',
+      tierValue: newTier.value,
+      isAnnouncement: true,
+    );
+  }
+
+  Future<void> checkTierUpgrade() async {
+    final r = state.resident;
+    if (r == null) return;
+
+    final expectedTier = ResidentTier.fromXp(r.totalXp);
+    if (expectedTier.value > r.tier.value) {
+      await _performTierUpgrade(r, expectedTier);
+    }
+  }
+
   void addRep(String worldId, int amount) {
     final r = state.resident;
     if (r == null) return;
     final standings = Map<String, WorldStanding>.from(r.worldStandings);
     final current = standings[worldId]?.rep ?? 0;
-    standings[worldId] = WorldStanding(rep: current + amount);
+    final newRep = current + amount;
+    standings[worldId] = WorldStanding(rep: newRep);
     state = state.copyWith(resident: r.copyWith(worldStandings: standings));
     _persist();
+
+    if (newRep >= 5000 && current < 5000) {
+      _awardRepMilestoneXp(worldId, newRep);
+    }
+  }
+
+  Future<void> _awardRepMilestoneXp(String worldId, int newRep) async {
+    final r = state.resident;
+    if (r == null) return;
+
+    final client = maybeSupabase();
+    if (client == null) return;
+
+    try {
+      await client.rpc(
+        'award_rep_milestone_xp',
+        params: {
+          'p_user_id': r.id,
+          'p_world_id': worldId,
+          'p_new_rep': newRep,
+        },
+      );
+
+      const councilBonusXp = 500;
+      final newTotalXp = r.totalXp + councilBonusXp;
+      final newTier = ResidentTier.fromXp(newTotalXp);
+
+      state = state.copyWith(
+        resident: r.copyWith(totalXp: newTotalXp),
+      );
+      _persist();
+
+      if (newTier.value > r.tier.value) {
+        await _performTierUpgrade(r, newTier);
+      }
+
+      ref
+          .read(notificationProvider.notifier)
+          .addNotification(
+            type: NotificationType.welcome,
+            message: 'Council milestone reached! +$councilBonusXp XP awarded.',
+          );
+    } catch (_) {}
+  }
+
+  Future<void> awardReferralXp(String referrerUserId) async {
+    final client = maybeSupabase();
+    if (client == null) return;
+
+    final r = state.resident;
+    if (r == null || r.id != referrerUserId) return;
+
+    const referralBonusXp = 200;
+    final newSuccessfulReferrals = r.successfulReferrals + 1;
+    final newReferralMultiplier = (1.0 + (newSuccessfulReferrals * 0.05)).clamp(1.0, 1.5);
+    final newTotalXp = r.totalXp + referralBonusXp;
+    final newTier = ResidentTier.fromXp(newTotalXp);
+
+    state = state.copyWith(
+      resident: r.copyWith(
+        totalXp: newTotalXp,
+        successfulReferrals: newSuccessfulReferrals,
+        referralXpMultiplier: newReferralMultiplier,
+      ),
+    );
+    _persist();
+
+    try {
+      await client.from('profiles').update({
+        'total_xp': newTotalXp,
+        'successful_referrals': newSuccessfulReferrals,
+        'referral_xp_multiplier': newReferralMultiplier,
+      }).eq('id', referrerUserId);
+    } catch (_) {}
+
+    if (newTier.value > r.tier.value) {
+      await _performTierUpgrade(r, newTier);
+    }
+
+    ref
+        .read(notificationProvider.notifier)
+        .addNotification(
+          type: NotificationType.welcome,
+          message: 'Referral bonus! +$referralBonusXp XP awarded.',
+        );
   }
 
   ({int level, String title, int rep}) getStandingInWorld(String worldId) {
@@ -390,7 +713,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
   }
 
-  void joinWorld(String worldId) {
+  Future<void> joinWorld(String worldId) async {
     final r = state.resident;
     if (r == null || r.joinedWorldIds.contains(worldId)) return;
     if (r.bannedWorldIds.contains('$worldId:${r.id}')) return;
@@ -402,12 +725,25 @@ class ResidentNotifier extends Notifier<ResidentState> {
       if (world.memberCount >= capacity) return;
     }
 
-    state = state.copyWith(
-      resident: r.copyWith(joinedWorldIds: [...r.joinedWorldIds, worldId]),
+    final updatedResident = r.copyWith(
+      joinedWorldIds: [...r.joinedWorldIds, worldId],
     );
+    state = state.copyWith(resident: updatedResident);
     _persist();
-    _checkWorldJoinMilestones();
-    WorldService.joinWorld(worldId, r.id, residentName: r.name);
+
+    try {
+      if (WorldService.isRemoteWorldId(worldId)) {
+        await WorldService.joinWorld(worldId, r.id, residentName: r.name);
+      }
+      await ProfileService.upsertProfile(updatedResident);
+    } catch (_) {
+      if (WorldService.isRemoteWorldId(worldId)) {
+        state = state.copyWith(resident: r);
+        _persist();
+        return;
+      }
+    }
+
     worldNotifier.incrementMemberCount(worldId);
     final updatedWorld = ref.read(worldProvider).worlds[worldId];
     worldNotifier.updateWorldPrestige(
@@ -429,6 +765,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
     );
     _persist();
     WorldService.leaveWorld(worldId, r.id);
+    ref.read(worldProvider.notifier).decrementMemberCount(worldId);
     ref
         .read(worldProvider.notifier)
         .updateWorldPrestige(
@@ -579,6 +916,48 @@ class ResidentNotifier extends Notifier<ResidentState> {
     if (count >= 5) notifier.autoAwardAchievement('realm-wanderer');
   }
 
+  bool get canAscend =>
+      state.resident != null && state.resident!.tier.value >= 5 && state.resident!.prestigeStars == 0;
+
+  Future<bool> ascendToPrestige() async {
+    final r = state.resident;
+    if (r == null || r.totalXp < 50000 || r.tier.value < 5) return false;
+
+    final newStars = r.prestigeStars + 1;
+    final prestigeFrameId = 'prestige_$newStars';
+
+    state = state.copyWith(
+      resident: r.copyWith(
+        totalXp: 0,
+        prestigeStars: newStars,
+        avatarFrameId: prestigeFrameId,
+        tier: ResidentTier.hustlers,
+      ),
+    );
+    _persist();
+
+    ref
+        .read(notificationProvider.notifier)
+        .addNotification(
+          type: NotificationType.tierUpgrade,
+          message: 'Ascended to Prestige $newStars! Your journey begins anew.',
+        );
+
+    Haptics.heavy();
+
+    ref.read(postProvider.notifier).addPost(
+      worldId: 'neon-district',
+      residentId: r.id,
+      residentName: r.name,
+      residentAvatar: r.avatarUrl,
+      content: 'Just ascended to Prestige $newStars! ${prestigeFrameId.toUpperCase()} frame unlocked.',
+      tierValue: 5,
+      isAnnouncement: true,
+    );
+
+    return true;
+  }
+
   void setTitle(String? title) {
     final r = state.resident;
     if (r == null) return;
@@ -653,6 +1032,18 @@ class ResidentNotifier extends Notifier<ResidentState> {
       sovereignCoins: (json['sovereignCoins'] as int?) ?? 100,
       onboardingCompleted: (json['onboardingCompleted'] as bool?) ?? false,
       gateCompleted: (json['gateCompleted'] as bool?) ?? false,
+      avatarFrameId: json['avatarFrameId'] as String?,
+      totalXp: (json['totalXp'] as int?) ?? 0,
+      prestigeLevel: (json['prestigeLevel'] as int?) ?? 0,
+      prestigeStars: (json['prestigeStars'] as int?) ?? 0,
+      referralXpMultiplier: (json['referralXpMultiplier'] as num?)?.toDouble() ?? 1.0,
+      successfulReferrals: (json['successfulReferrals'] as int?) ?? 0,
+      xpMultiplier: (json['xpMultiplier'] as num?)?.toDouble() ?? 1.0,
+      dailyCoinBonus: (json['dailyCoinBonus'] as int?) ?? 0,
+      customReactionSlots: (json['customReactionSlots'] as int?) ?? 0,
+      postPinLimit: (json['postPinLimit'] as int?) ?? 0,
+      worldCreationLimit: (json['worldCreationLimit'] as int?) ?? 1,
+      lastActivityAt: (json['lastActivityAt'] as int?) ?? 0,
     );
   }
 
@@ -692,6 +1083,18 @@ class ResidentNotifier extends Notifier<ResidentState> {
     'sovereignCoins': r.sovereignCoins,
     'onboardingCompleted': r.onboardingCompleted,
     'gateCompleted': r.gateCompleted,
+    if (r.avatarFrameId != null) 'avatarFrameId': r.avatarFrameId,
+    'totalXp': r.totalXp,
+    'prestigeLevel': r.prestigeLevel,
+    'prestigeStars': r.prestigeStars,
+    'referralXpMultiplier': r.referralXpMultiplier,
+    'successfulReferrals': r.successfulReferrals,
+    'xpMultiplier': r.xpMultiplier,
+    'dailyCoinBonus': r.dailyCoinBonus,
+    'customReactionSlots': r.customReactionSlots,
+    'postPinLimit': r.postPinLimit,
+    'worldCreationLimit': r.worldCreationLimit,
+    'lastActivityAt': r.lastActivityAt,
   };
 
   static List<String>? _toStringList(dynamic value) {

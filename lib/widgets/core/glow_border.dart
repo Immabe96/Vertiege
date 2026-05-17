@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 enum GlowTier { apex, elite, hustler }
@@ -21,39 +21,36 @@ class GlowBorder extends StatelessWidget {
   Color get _borderColor {
     switch (tier) {
       case GlowTier.apex:
-        return AppColors.tertiary.withValues(alpha: 0.20);
+        return VColors.tertiary.withValues(alpha: 0.20);
       case GlowTier.elite:
-        return AppColors.primary.withValues(alpha: 0.20);
+        return VColors.primary.withValues(alpha: 0.20);
       case GlowTier.hustler:
-        return AppColors.hustler.withValues(alpha: 0.20);
+        return VColors.tierHustler.withValues(alpha: 0.20);
     }
   }
 
   Color get _glowColor {
     switch (tier) {
       case GlowTier.apex:
-        return AppColors.tertiary.withValues(alpha: AppColors.glowGoldAlpha);
+        return VColors.tertiary.withValues(alpha: 0.3);
       case GlowTier.elite:
-        return AppColors.primary.withValues(alpha: AppColors.glowVioletAlpha);
+        return VColors.primary.withValues(alpha: 0.3);
       case GlowTier.hustler:
-        return AppColors.hustler.withValues(alpha: AppColors.glowOrangeAlpha);
+        return VColors.tierHustler.withValues(alpha: 0.3);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
         borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
         border: Border.all(color: _borderColor),
         boxShadow: [
-          BoxShadow(
-            color: _glowColor,
-            blurRadius: 15,
-            spreadRadius: 0,
-          ),
+          BoxShadow(color: _glowColor, blurRadius: 15, spreadRadius: 0),
         ],
       ),
       child: child,

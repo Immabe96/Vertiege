@@ -41,6 +41,8 @@ class WorldNotifier extends Notifier<WorldState> {
     return const WorldState(isLoading: true);
   }
 
+  static const String _worldsCacheKey = '@worlds_cache';
+
   Future<void> loadWorlds() async {
     state = state.copyWith(isLoading: true);
     try {
@@ -53,8 +55,10 @@ class WorldNotifier extends Notifier<WorldState> {
         if (world.id.isNotEmpty) worlds[world.id] = world;
       }
       state = state.copyWith(worlds: worlds, isLoading: false);
+      await _cacheWorlds(worlds);
     } catch (_) {
-      state = state.copyWith(worlds: const {}, isLoading: false);
+      final cached = await _loadCachedWorlds();
+      state = state.copyWith(worlds: cached ?? const {}, isLoading: false);
     }
 
     try {
@@ -87,6 +91,9 @@ class WorldNotifier extends Notifier<WorldState> {
     required String sovereignId,
     required String sovereignName,
     String icon = 'earth',
+    String? dominionType,
+    String? worldCurrencyName,
+    List<String>? tags,
   }) async {
     final worldData = await WorldService.createWorld(
       name: name,
@@ -95,6 +102,9 @@ class WorldNotifier extends Notifier<WorldState> {
       sovereignId: sovereignId,
       sovereignName: sovereignName,
       icon: icon,
+      dominionType: dominionType,
+      worldCurrencyName: worldCurrencyName,
+      tags: tags,
     );
 
     final worldId = worldData?['id'] as String? ?? generateId();
@@ -114,6 +124,14 @@ class WorldNotifier extends Notifier<WorldState> {
       sovereignId: sovereignId,
       sovereignName: sovereignName,
       icon: icon,
+      dominionType: dominionType != null
+          ? DominionType.values.firstWhere(
+              (t) => t.name == dominionType,
+              orElse: () => DominionType.sanctuary,
+            )
+          : null,
+      worldCurrencyName: worldCurrencyName ?? 'Coins',
+      tags: tags ?? [],
     );
 
     state = state.copyWith(worlds: {...state.worlds, worldId: newWorld});
@@ -121,12 +139,12 @@ class WorldNotifier extends Notifier<WorldState> {
     return worldId;
   }
 
-  void updateWorldSettings({
+  Future<void> updateWorldSettings({
     required String worldId,
     String? name,
     String? description,
     String? icon,
-  }) {
+  }) async {
     final world = state.worlds[worldId];
     if (world == null) return;
 
@@ -137,6 +155,13 @@ class WorldNotifier extends Notifier<WorldState> {
     );
 
     state = state.copyWith(worlds: {...state.worlds, worldId: updated});
+
+    await WorldService.updateWorld(
+      worldId: worldId,
+      name: name,
+      description: description,
+      icon: icon,
+    );
   }
 
   Future<int> updateWorldPrestige({
@@ -205,6 +230,15 @@ class WorldNotifier extends Notifier<WorldState> {
     final world = state.worlds[worldId];
     if (world == null) return;
     final updated = world.copyWith(memberCount: world.memberCount + 1);
+    state = state.copyWith(worlds: {...state.worlds, worldId: updated});
+  }
+
+  void decrementMemberCount(String worldId) {
+    final world = state.worlds[worldId];
+    if (world == null) return;
+    final updated = world.copyWith(
+      memberCount: (world.memberCount - 1).clamp(0, 99999),
+    );
     state = state.copyWith(worlds: {...state.worlds, worldId: updated});
   }
 
@@ -297,6 +331,78 @@ class WorldNotifier extends Notifier<WorldState> {
   void _persistAlliances() {
     final list = state.alliances.map((a) => a.toJson()).toList();
     StorageService.setStringDebounced('@alliances_data', jsonEncode(list));
+  }
+
+  Future<void> _cacheWorlds(Map<String, World> worlds) async {
+    try {
+      final json = jsonEncode(
+        worlds.values.map((w) {
+          final data = <String, dynamic>{
+            'id': w.id,
+            'slug': w.slug,
+            'name': w.name,
+            'type': w.type.name,
+            'description': w.description,
+            'sovereignId': w.sovereignId,
+            'sovereignName': w.sovereignName,
+            'prestige': w.prestige,
+            'icon': w.icon,
+            'memberCount': w.memberCount,
+            'activityScore': w.activityScore,
+            'sortOrder': w.sortOrder,
+            'createdAt': w.createdAt,
+          };
+          if (w.constitution.admission != 'open') {
+            data['admission'] = w.constitution.admission;
+          }
+          if (w.constitution.requiredProfession != null) {
+            data['requiredProfession'] = w.constitution.requiredProfession;
+          }
+          if (w.constitution.minTier != null) {
+            data['minTier'] = w.constitution.minTier;
+          }
+          if (w.constitution.entryFee > 0) {
+            data['entryFee'] = w.constitution.entryFee;
+          }
+          return data;
+        }).toList(),
+      );
+      await StorageService.setString(_worldsCacheKey, json);
+    } catch (_) {}
+  }
+
+  Future<Map<String, World>?> _loadCachedWorlds() async {
+    try {
+      final raw = await StorageService.getString(_worldsCacheKey);
+      if (raw == null || raw.isEmpty) return null;
+      final list = jsonDecode(raw) as List;
+      final worlds = <String, World>{};
+      for (final item in list) {
+        final data = item as Map<String, dynamic>;
+        final world = World(
+          id: data['id'] as String,
+          slug: data['slug'] as String? ?? '',
+          name: data['name'] as String? ?? '',
+          type: WorldType.values.firstWhere(
+            (e) => e.name == data['type'],
+            orElse: () => WorldType.dominion,
+          ),
+          description: data['description'] as String? ?? '',
+          sovereignId: data['sovereignId'] as String? ?? '',
+          sovereignName: data['sovereignName'] as String? ?? '',
+          prestige: data['prestige'] as int? ?? 1,
+          icon: data['icon'] as String? ?? 'earth',
+          memberCount: data['memberCount'] as int? ?? 0,
+          activityScore: data['activityScore'] as int? ?? 0,
+          sortOrder: data['sortOrder'] as int? ?? 0,
+          createdAt: data['createdAt'] as int? ?? 0,
+        );
+        if (world.id.isNotEmpty) worlds[world.id] = world;
+      }
+      return worlds;
+    } catch (_) {
+      return null;
+    }
   }
 }
 

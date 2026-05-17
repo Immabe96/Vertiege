@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../models/world.dart';
 import 'world_banner.dart';
 
@@ -79,8 +79,8 @@ class WorldHeroBanner extends StatelessWidget {
                   icon: const Icon(Icons.add, size: IconSizes.sm),
                   label: const Text('Join'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: VColors.primary,
+                    foregroundColor: VColors.onPrimary,
                   ),
                 ),
               );
@@ -106,7 +106,7 @@ class WorldHeroBanner extends StatelessWidget {
               ),
             ),
           ),
-          // Gradient overlay for readability
+          // Minimal text-safety fade that preserves banner colors.
           Positioned(
             bottom: 0,
             left: 0,
@@ -120,8 +120,8 @@ class WorldHeroBanner extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      theme.colorScheme.surface.withValues(alpha: 0.75),
-                      theme.colorScheme.surface,
+                      VColors.scrim.withValues(alpha: 0.24),
+                      VColors.scrim.withValues(alpha: 0.44),
                     ],
                   ),
                 ),
@@ -138,12 +138,12 @@ class WorldHeroBanner extends StatelessWidget {
               child: Text(
                 worldName,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeights.bold,
-                  color: Colors.white,
+                  fontWeight: VFontWeight.bold,
+                  color: VColors.onPrimary,
                   letterSpacing: LetterSpacing.section,
                   shadows: const [
                     Shadow(
-                      color: Colors.black54,
+                      color: VColors.scrim,
                       blurRadius: 10,
                       offset: Offset(0, 2),
                     ),

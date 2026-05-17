@@ -8,8 +8,8 @@ import '../../state/world_provider.dart';
 import '../../services/access_control.dart';
 import '../../services/store_service.dart';
 import '../../services/legacy_service.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
 import '../core/sovereign_card.dart';
@@ -118,39 +118,39 @@ class _CardBody extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.all(Spacing.sm + 6),
+      padding: const EdgeInsets.all(VSpacing.sm + 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             world.name,
-            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeights.bold),
+            style: theme.textTheme.titleSmall?.copyWith(fontWeight: VFontWeight.bold),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Row(
             children: [
-              Icon(Icons.people, size: 12, color: AppColors.inkSecondary),
+              Icon(Icons.people, size: 12, color: VColors.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 '${world.memberCount} members',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: AppColors.inkSecondary,
+                  color: VColors.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Text(
                 '★ P${world.prestige}',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.primary,
-                  fontWeight: FontWeights.bold,
+                  fontWeight: VFontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           Text(
             world.description,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -160,7 +160,7 @@ class _CardBody extends ConsumerWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           Wrap(
             spacing: 6,
             runSpacing: 4,
@@ -173,7 +173,7 @@ class _CardBody extends ConsumerWidget {
               if (isLocked)
                 _Badge(label: 'Locked', icon: Icons.lock, color: theme.colorScheme.error),
               if (world.isBoosted)
-                _Badge(label: 'Boosted', icon: Icons.rocket_launch, color: AppColors.tertiary),
+                _Badge(label: 'Boosted', icon: Icons.rocket_launch, color: VColors.tertiary),
               if (legacyTier != LegacyTier.none)
                 _Badge(
                   label: 'LEGACY: ${legacyTier.label}',
@@ -184,24 +184,24 @@ class _CardBody extends ConsumerWidget {
                 _Badge(
                   label: 'ALLIED WITH ${alliance.allyName(world.id).toUpperCase()}',
                   icon: Icons.handshake,
-                  color: AppColors.tertiary,
+                  color: VColors.tertiary,
                 ),
             ],
           ),
           if (canBoost) ...[
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             SizedBox(
               width: double.infinity,
-              height: TouchTargets.iconButton,
+              height: VTouchTarget.iconButton,
               child: OutlinedButton.icon(
                 onPressed: () => _handleBoost(context, ref),
-                icon: const Icon(Icons.rocket_launch, size: IconSizes.sm),
+                icon: const Icon(Icons.rocket_launch, size: VIconSize.sm),
                 label: const Text('Boost'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.tertiary,
-                  side: const BorderSide(color: AppColors.tertiary),
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                  textStyle: const TextStyle(fontSize: FontSizes.labelSm),
+                  foregroundColor: VColors.tertiary,
+                  side: const BorderSide(color: VColors.tertiary),
+                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
+                  textStyle: const TextStyle(fontSize: VFontSize.labelSm),
                 ),
               ),
             ),
@@ -295,7 +295,7 @@ class _BannerThumbnail extends StatelessWidget {
                 child: Center(
                   child: WorldIcon(
                     worldId: world.id,
-                    size: IconSizes.md + 16,
+                    size: VIconSize.md + 16,
                     tintColor: WorldAssets.colorForPrestige(world.prestige),
                   ),
                 ),
@@ -319,22 +319,22 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm, vertical: VSpacing.xs),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(RadiusTokens.chip),
+        borderRadius: BorderRadius.circular(VRadius.sm),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: IconSizes.xs, color: color),
+          Icon(icon, size: VIconSize.xs, color: color),
           const SizedBox(width: 3),
           Text(label,
             style: TextStyle(
               color: color,
-              fontSize: FontSizes.caption,
-              fontWeight: FontWeights.bold,
+              fontSize: VFontSize.labelSm,
+              fontWeight: VFontWeight.bold,
             ),
           ),
         ],

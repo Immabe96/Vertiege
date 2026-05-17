@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
@@ -36,18 +36,18 @@ class AchievementCard extends StatelessWidget {
     final isLocked = status == AchievementStatus.locked;
 
     final gradientColors = isVerified
-        ? AppColors.gradientPrimary
+        ? const [VColors.primary, VColors.tertiary]
         : isSubmitted
-        ? AppColors.gradientWarm
-        : AppColors.gradientDark;
+        ? const [VColors.secondary, VColors.tertiary]
+        : const [Color(0xFF1A1A2E), Color(0xFF0B0B1A)];
 
     final borderDecoration = isVerified
         ? BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.semanticSuccess, width: 2),
+            border: Border.all(color: VColors.success, width: 2),
             boxShadow: [
               BoxShadow(
-                color: AppColors.semanticSuccess.withValues(alpha: 0.45),
+                color: VColors.success.withValues(alpha: 0.45),
                 blurRadius: 12,
                 spreadRadius: 2,
               ),
@@ -57,7 +57,7 @@ class AchievementCard extends StatelessWidget {
         ? BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppColors.accentStreak,
+              color: VColors.secondary,
               width: 2.5,
               strokeAlign: BorderSide.strokeAlignOutside,
             ),
@@ -75,20 +75,20 @@ class AchievementCard extends StatelessWidget {
       child: Opacity(
         opacity: isLocked ? 0.5 : 1.0,
         child: Card(
-          color: AppColors.glassBackground,
+          color: VColors.glassBackground,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
             side: isVerified
                 ? BorderSide(
-                    color: AppColors.semanticSuccess.withValues(alpha: 0.4),
+                    color: VColors.success.withValues(alpha: 0.4),
                     width: 1.5,
                   )
                 : isSubmitted
                 ? BorderSide(
-                    color: AppColors.accentStreak.withValues(alpha: 0.3),
+                    color: VColors.secondary.withValues(alpha: 0.3),
                   )
-                : const BorderSide(color: AppColors.glassBorder, width: 0.5),
+                : const BorderSide(color: VColors.glassBorder, width: 0.5),
           ),
           child: InkWell(
             onTap: status != AchievementStatus.verified ? onPress : null,
@@ -149,14 +149,14 @@ class AchievementCard extends StatelessWidget {
                       if (isSubmitted)
                         const _StatusChip(
                           label: 'Pending Review',
-                          color: AppColors.accentStreak,
+                          color: VColors.secondary,
                           icon: Icons.schedule,
                         ),
                       if (isVerified)
                         const Icon(
                           Icons.check_circle,
                           size: IconSizes.sm,
-                          color: AppColors.semanticSuccess,
+                          color: VColors.success,
                         ),
                     ],
                   ),
@@ -288,9 +288,9 @@ class _AchievementIcon extends StatelessWidget {
                 strokeWidth: ringStrokeWidth,
                 strokeCap: StrokeCap.round,
                 color: progress == 0.0
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : AppColors.accentStreak,
-                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    ? VColors.onPrimary.withValues(alpha: 0.2)
+                    : VColors.secondary,
+                backgroundColor: VColors.onPrimary.withValues(alpha: 0.1),
               ),
             ),
           // Gradient icon circle
@@ -318,9 +318,9 @@ class _AchievementIcon extends StatelessWidget {
                       fit: BoxFit.contain,
                       cacheWidth: cacheWidth,
                       errorBuilder: (_, _, _) =>
-                          Icon(_resolveIcon(), size: 24, color: Colors.white),
+                          Icon(_resolveIcon(), size: 24, color: VColors.onPrimary),
                     )
-                  : Icon(_resolveIcon(), size: 24, color: Colors.white),
+                  : Icon(_resolveIcon(), size: 24, color: VColors.onPrimary),
             ),
           ),
           // Status overlay badges
@@ -333,9 +333,9 @@ class _AchievementIcon extends StatelessWidget {
                 height: 22,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.semanticSuccess,
+                  color: VColors.success,
                 ),
-                child: const Icon(Icons.check, size: 14, color: Colors.white),
+                child: const Icon(Icons.check, size: 14, color: VColors.onPrimary),
               ),
             ),
           if (status == AchievementStatus.submitted)
@@ -347,12 +347,12 @@ class _AchievementIcon extends StatelessWidget {
                 height: 22,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.accentStreak,
+                  color: VColors.secondary,
                 ),
                 child: const Icon(
                   Icons.access_time,
                   size: 14,
-                  color: Colors.white,
+                  color: VColors.onPrimary,
                 ),
               ),
             ),
@@ -365,9 +365,9 @@ class _AchievementIcon extends StatelessWidget {
                 height: 22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.grey.shade700,
+                  color: VColors.outline,
                 ),
-                child: const Icon(Icons.lock, size: 13, color: Colors.white),
+                child: const Icon(Icons.lock, size: 13, color: VColors.onPrimary),
               ),
             ),
         ],
@@ -437,8 +437,8 @@ class _StatusChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: color,
-              fontSize: 10,
-              fontWeight: FontWeights.bold,
+              fontSize: VFontSize.labelSm,
+              fontWeight: VFontWeight.bold,
             ),
           ),
         ],
@@ -450,26 +450,47 @@ class _StatusChip extends StatelessWidget {
 // ─── AI Confidence Chip (The Archivist) ─────────────────────────────
 
 class _AiConfidenceChip extends StatelessWidget {
-  final double confidence;
+  final double? confidence;
   final String? aiNotes;
 
   const _AiConfidenceChip({required this.confidence, this.aiNotes});
 
   @override
   Widget build(BuildContext context) {
-    final isHigh = confidence >= 0.75;
-    final isMedium = confidence >= 0.4 && confidence < 0.75;
+    if (confidence == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(VRadius.md),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.help_outline, size: 14, color: Colors.orange),
+            SizedBox(width: 4),
+            Text(
+              'Pending Review',
+              style: TextStyle(fontSize: VFontSize.labelSm, color: Colors.orange),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final isHigh = confidence! >= 0.75;
+    final isMedium = confidence! >= 0.4 && confidence! < 0.75;
 
     final Color color;
     final IconData icon;
     final String label;
 
     if (isHigh) {
-      color = AppColors.semanticSuccess;
+      color = VColors.success;
       icon = Icons.check_circle;
       label = 'AI-Verified';
     } else if (isMedium) {
-      color = AppColors.accentStreak;
+      color = VColors.secondary;
       icon = Icons.access_time;
       label = 'Under Review';
     } else {
@@ -502,16 +523,16 @@ class _AiConfidenceChip extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: color,
-                    fontSize: 10,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${(confidence * 100).toInt()}%',
+                  '${(confidence! * 100).toInt()}%',
                   style: TextStyle(
                     color: color.withValues(alpha: 0.8),
-                    fontSize: 10,
+                    fontSize: VFontSize.labelSm,
                   ),
                 ),
               ],
@@ -526,7 +547,7 @@ class _AiConfidenceChip extends StatelessWidget {
                   color: Theme.of(
                     context,
                   ).colorScheme.onSurface.withValues(alpha: 0.45),
-                  fontSize: 9,
+                  fontSize: VFontSize.labelSm,
                 ),
                 textAlign: TextAlign.center,
               ),

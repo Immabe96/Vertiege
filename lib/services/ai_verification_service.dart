@@ -18,31 +18,24 @@ class AiVerificationService {
     // Simulate AI analysis delay (network + inference time)
     await Future.delayed(const Duration(milliseconds: 800));
 
-    // Heuristic: if proof URL is a real upload (not 'manual'),
-    // give high confidence for auto-approval
-    if (proofUrl.startsWith('http') && proofUrl != 'manual') {
-      // Image was actually uploaded — high confidence
-      return AiVerificationResult(
-        confidence: 0.85,
-        autoApproved: true,
-        extractedText: 'Verified submission for $achievementId',
-        notes: 'Auto-verified by The Archivist',
-      );
-    }
-
+    // TODO: Replace with real AI moderation (Claude / GPT-4V vision API).
+    // Real implementation should analyze the proof image for authenticity,
+    // extract relevant text/features, and return a meaningful confidence score.
+    // Until then, all submissions require manual review.
     return AiVerificationResult(
-      confidence: 0.3,
+      confidence: null,
       autoApproved: false,
-      extractedText: 'Insufficient proof data',
-      notes: 'Requires manual review',
+      extractedText: '',
+      notes: 'AI verification not yet implemented — manual review required',
     );
   }
 }
 
 /// Result returned by [AiVerificationService.analyzeProof].
 class AiVerificationResult {
-  /// Confidence score 0.0 (no confidence) – 1.0 (certain).
-  final double confidence;
+  /// Confidence score 0.0 (no confidence) – 1.0 (certain), or null when
+  /// AI verification is unavailable and manual review is required.
+  final double? confidence;
 
   /// Whether this submission qualifies for automatic verification.
   final bool autoApproved;

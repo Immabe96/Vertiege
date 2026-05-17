@@ -1,6 +1,6 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 
 /// A single reward that can be granted to the resident.
 class DailyReward {
@@ -28,11 +28,37 @@ class DailyRewardService {
   DailyRewardService._();
 
   static final _rewards = const [
-    DailyReward(label: '5 XP', xpValue: 5, icon: Icons.bolt, color: AppColors.primary),
-    DailyReward(label: '10 XP', xpValue: 10, icon: Icons.auto_awesome, color: AppColors.tertiary),
-    DailyReward(label: '15 XP', xpValue: 15, icon: Icons.stars, color: AppColors.tertiary),
-    DailyReward(label: 'Streak Shield', xpValue: 0, icon: Icons.shield, color: AppColors.hustler, isShield: true),
-    DailyReward(label: '20 XP', xpValue: 20, icon: Icons.rocket_launch, color: AppColors.primary),
+    DailyReward(
+      label: '5 XP',
+      xpValue: 5,
+      icon: Icons.bolt,
+      color: VColors.primary,
+    ),
+    DailyReward(
+      label: '10 XP',
+      xpValue: 10,
+      icon: Icons.auto_awesome,
+      color: VColors.tertiary,
+    ),
+    DailyReward(
+      label: '15 XP',
+      xpValue: 15,
+      icon: Icons.stars,
+      color: VColors.tertiary,
+    ),
+    DailyReward(
+      label: 'Streak Shield',
+      xpValue: 0,
+      icon: Icons.shield,
+      color: VColors.tierHustler,
+      isShield: true,
+    ),
+    DailyReward(
+      label: '20 XP',
+      xpValue: 20,
+      icon: Icons.rocket_launch,
+      color: VColors.primary,
+    ),
   ];
 
   // Weighted: smaller XP rewards are more common, shields are rare (~10%)

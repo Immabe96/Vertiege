@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'glow_border.dart';
 import 'glass_panel.dart';
 import '../../theme/design_system.dart';
@@ -37,13 +37,10 @@ class SovereignCard extends StatelessWidget {
     final content = glass
         ? GlassPanel(
             useBlur: useBlur,
-            padding: const EdgeInsets.all(Spacing.lg),
+            padding: const EdgeInsets.all(Spacing.md),
             child: child,
           )
-        : Padding(
-            padding: const EdgeInsets.all(Spacing.lg),
-            child: child,
-          );
+        : Padding(padding: const EdgeInsets.all(Spacing.md), child: child);
 
     final wrapped = GlowBorder(
       tier: _toGlowTier(),
@@ -52,9 +49,13 @@ class SovereignCard extends StatelessWidget {
     );
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: wrapped,
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          child: wrapped,
+        ),
       );
     }
     return wrapped;

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
 import 'shimmer.dart';
@@ -10,31 +10,27 @@ class ScreenLoading extends StatelessWidget {
   final ScreenLoadingType type;
   final int itemCount;
 
-  const ScreenLoading({
-    super.key,
-    required this.type,
-    this.itemCount = 5,
-  });
+  const ScreenLoading({super.key, required this.type, this.itemCount = 5});
 
   const ScreenLoading.feed({super.key})
-      : type = ScreenLoadingType.feed,
-        itemCount = 4;
+    : type = ScreenLoadingType.feed,
+      itemCount = 4;
 
   const ScreenLoading.list({super.key})
-      : type = ScreenLoadingType.list,
-        itemCount = 6;
+    : type = ScreenLoadingType.list,
+      itemCount = 6;
 
   const ScreenLoading.grid({super.key})
-      : type = ScreenLoadingType.grid,
-        itemCount = 6;
+    : type = ScreenLoadingType.grid,
+      itemCount = 6;
 
   const ScreenLoading.profile({super.key})
-      : type = ScreenLoadingType.profile,
-        itemCount = 1;
+    : type = ScreenLoadingType.profile,
+      itemCount = 1;
 
   const ScreenLoading.detail({super.key})
-      : type = ScreenLoadingType.detail,
-        itemCount = 1;
+    : type = ScreenLoadingType.detail,
+      itemCount = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -103,11 +99,7 @@ class _GlassPostCardShimmer extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Pulse(
-              width: 48,
-              height: 48,
-              borderRadius: RadiusTokens.full,
-            ),
+            const Pulse(width: 48, height: 48, borderRadius: RadiusTokens.full),
             const SizedBox(width: Spacing.md),
             Expanded(
               child: Column(
@@ -151,11 +143,7 @@ class _GlassChatTileShimmer extends StatelessWidget {
         padding: const EdgeInsets.all(Spacing.md),
         child: Row(
           children: [
-            const Pulse(
-              width: 56,
-              height: 56,
-              borderRadius: RadiusTokens.full,
-            ),
+            const Pulse(width: 56, height: 56, borderRadius: RadiusTokens.full),
             const SizedBox(width: Spacing.md),
             Expanded(
               child: Column(
@@ -183,6 +171,8 @@ class _GlassChatTileShimmer extends StatelessWidget {
 }
 
 class _ProfileShimmer extends StatelessWidget {
+  const _ProfileShimmer();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -216,10 +206,7 @@ class _ProfileShimmer extends StatelessWidget {
             const SizedBox(height: Spacing.xl),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                3,
-                (_) => const _StatShimmer(),
-              ),
+              children: List.generate(3, (_) => const _StatShimmer()),
             ),
             const SizedBox(height: Spacing.xl),
             const Pulse(height: 14, borderRadius: RadiusTokens.chip),
@@ -248,13 +235,15 @@ class _StatShimmer extends StatelessWidget {
 }
 
 class _DetailShimmer extends StatelessWidget {
+  const _DetailShimmer();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
           height: 200,
-          color: AppColors.surfaceContainerHighest.withValues(alpha: 0.3),
+          color: VColors.surfaceContainerHighest.withValues(alpha: 0.3),
         ),
         Padding(
           padding: const EdgeInsets.all(Spacing.md),

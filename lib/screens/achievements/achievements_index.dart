@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,78 +6,77 @@ import '../../config/achievements.dart' as config;
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../state/achievement_provider.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
-import '../../widgets/core/glass_panel.dart';
-import '../../widgets/core/status_dot.dart';
 
 class AchievementsIndexScreen extends ConsumerWidget {
   const AchievementsIndexScreen({super.key});
 
   static const _categoryMeta =
       <AchievementCategory, ({String label, IconData icon, Color color})>{
-        AchievementCategory.education: (
-          label: 'Education',
-          icon: Icons.school,
-          color: AppColors.achievementEducation,
-        ),
-        AchievementCategory.career: (
-          label: 'Career',
-          icon: Icons.work,
-          color: AppColors.achievementCareer,
-        ),
-        AchievementCategory.relationships: (
-          label: 'Relationships',
-          icon: Icons.favorite,
-          color: AppColors.achievementRelationships,
-        ),
-        AchievementCategory.health: (
-          label: 'Health',
-          icon: Icons.fitness_center,
-          color: AppColors.achievementHealth,
-        ),
-        AchievementCategory.skills: (
-          label: 'Skills',
-          icon: Icons.build,
-          color: AppColors.achievementSkills,
-        ),
-        AchievementCategory.travel: (
-          label: 'Travel',
-          icon: Icons.flight,
-          color: AppColors.achievementTravel,
-        ),
-        AchievementCategory.finance: (
-          label: 'Finance',
-          icon: Icons.savings,
-          color: AppColors.achievementFinance,
-        ),
-        AchievementCategory.community: (
-          label: 'Community',
-          icon: Icons.volunteer_activism,
-          color: AppColors.achievementCommunity,
-        ),
-        AchievementCategory.funny: (
-          label: 'Funny',
-          icon: Icons.emoji_emotions,
-          color: AppColors.achievementFunny,
-        ),
-        AchievementCategory.creative: (
-          label: 'Creative',
-          icon: Icons.palette,
-          color: AppColors.achievementCreative,
-        ),
-        AchievementCategory.profession: (
-          label: 'Profession',
-          icon: Icons.verified_user,
-          color: AppColors.achievementProfession,
-        ),
-      };
+    AchievementCategory.education: (
+      label: 'Education',
+      icon: Icons.school,
+      color: VColors.achievementEducation,
+    ),
+    AchievementCategory.career: (
+      label: 'Career',
+      icon: Icons.work,
+      color: VColors.achievementCareer,
+    ),
+    AchievementCategory.relationships: (
+      label: 'Relationships',
+      icon: Icons.favorite,
+      color: VColors.achievementSocial,
+    ),
+    AchievementCategory.health: (
+      label: 'Health',
+      icon: Icons.fitness_center,
+      color: VColors.achievementHealth,
+    ),
+    AchievementCategory.skills: (
+      label: 'Skills',
+      icon: Icons.build,
+      color: VColors.achievementCreative,
+    ),
+    AchievementCategory.travel: (
+      label: 'Travel',
+      icon: Icons.flight,
+      color: VColors.achievementAdventure,
+    ),
+    AchievementCategory.finance: (
+      label: 'Finance',
+      icon: Icons.savings,
+      color: VColors.achievementFinance,
+    ),
+    AchievementCategory.community: (
+      label: 'Community',
+      icon: Icons.volunteer_activism,
+      color: VColors.achievementLeadership,
+    ),
+    AchievementCategory.funny: (
+      label: 'Funny',
+      icon: Icons.emoji_emotions,
+      color: VColors.tertiary,
+    ),
+    AchievementCategory.creative: (
+      label: 'Creative',
+      icon: Icons.palette,
+      color: VColors.achievementCreative,
+    ),
+    AchievementCategory.profession: (
+      label: 'Profession',
+      icon: Icons.verified_user,
+      color: VColors.primary,
+    ),
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(achievementProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final verifiedCount = state.userAchievements
         .where((a) => a.status == AchievementStatus.verified)
@@ -88,18 +87,38 @@ class AchievementsIndexScreen extends ConsumerWidget {
     final nextTierInfo = _computeNextTier(state.totalXp, currentTier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Achievements')),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Achievements',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: VFontWeight.semiBold,
+          ),
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: () async =>
             ref.read(achievementProvider.notifier).loadAchievements(),
         child: ListView(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           children: [
-            // ── Stats Row — glass panel ─────────────────────────
-            GlassPanel(
+            Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.lg,
-                vertical: Spacing.md,
+                horizontal: VSpacing.lg,
+                vertical: VSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(VRadius.xl),
+                border: Border.all(
+                  color: isDark
+                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                      : VColors.outlineVariant.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -107,7 +126,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
                   _StatColumn(
                     value: _AnimatedCount(target: state.totalXp),
                     label: 'Total XP',
-                    color: AppColors.warning,
+                    color: VColors.warning,
                   ),
                   _StatColumn(
                     value: Text(
@@ -115,7 +134,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
                       style: theme.textTheme.headlineLarge,
                     ),
                     label: 'Earned',
-                    color: AppColors.success,
+                    color: VColors.success,
                   ),
                   _StatColumn(
                     value: Text(
@@ -123,55 +142,61 @@ class AchievementsIndexScreen extends ConsumerWidget {
                       style: theme.textTheme.headlineLarge,
                     ),
                     label: 'Total',
-                    color: AppColors.primary,
+                    color: VColors.primary,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
 
-            // ── Progress to Next Tier — glass card ───────────────
             if (nextTierInfo != null) ...[
-              _NextTierProgress(info: nextTierInfo, currentTier: currentTier),
-              const SizedBox(height: Spacing.lg),
+              _NextTierProgress(
+                info: nextTierInfo,
+                currentTier: currentTier,
+              ),
+              const SizedBox(height: VSpacing.lg),
             ],
 
-            // ── Section Header ──────────────────────────────────
             Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
               child: Row(
                 children: [
-                  // Gold bar
                   Container(
                     width: 3,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: AppColors.tertiary,
-                      borderRadius: BorderRadius.circular(2),
+                      color: VColors.tertiary,
+                      borderRadius: BorderRadius.circular(VRadius.sm),
                     ),
                   ),
-                  const SizedBox(width: Spacing.sm),
-                  Text('Categories', style: theme.textTheme.titleMedium),
+                  const SizedBox(width: VSpacing.sm),
+                  Text(
+                    'Categories',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
+                    ),
+                  ),
                   const Spacer(),
                   Text(
                     '$verifiedCount of $totalAchievements earned',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
 
-            // ── Category Grid — bento glass tiles ───────────────
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisSpacing: Spacing.sm,
-                crossAxisSpacing: Spacing.sm,
+                mainAxisSpacing: VSpacing.sm,
+                crossAxisSpacing: VSpacing.sm,
               ),
               itemCount: _categoryMeta.length,
               itemBuilder: (context, index) {
@@ -194,29 +219,32 @@ class AchievementsIndexScreen extends ConsumerWidget {
               },
             ),
 
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
 
-            // ── Section Header: All Achievements ──────────────────
             Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
               child: Row(
                 children: [
                   Container(
                     width: 3,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: AppColors.tertiary,
-                      borderRadius: BorderRadius.circular(2),
+                      color: VColors.tertiary,
+                      borderRadius: BorderRadius.circular(VRadius.sm),
                     ),
                   ),
-                  const SizedBox(width: Spacing.sm),
-                  Text('All Achievements', style: theme.textTheme.titleMedium),
+                  const SizedBox(width: VSpacing.sm),
+                  Text(
+                    'All Achievements',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
 
-            // ── Individual Badges Grid ──────────────────────────────
             _AchievementBadgeGrid(
               achievements: config.achievements.take(15).toList(),
               userAchievements: state.userAchievements,
@@ -238,7 +266,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
     ];
 
     final currentIdx = currentTier.value - 1;
-    if (currentIdx >= tiers.length - 1) return null; // Already at max
+    if (currentIdx >= tiers.length - 1) return null;
 
     final next = tiers[currentIdx + 1];
     return _NextTierInfo(
@@ -268,8 +296,6 @@ class _NextTierInfo {
   });
 }
 
-// ─── Animated Count Widget ──────────────────────────────────────────
-
 class _AnimatedCount extends StatelessWidget {
   final int target;
 
@@ -281,15 +307,13 @@ class _AnimatedCount extends StatelessWidget {
     return TweenAnimationBuilder<int>(
       tween: IntTween(begin: 0, end: target),
       duration: const Duration(milliseconds: 1200),
-      curve: Curves.easeOutCubic,
+      curve: VAnimation.emphasized,
       builder: (context, value, _) {
         return Text('$value', style: theme.textTheme.headlineLarge);
       },
     );
   }
 }
-
-// ─── Stat Column ────────────────────────────────────────────────────
 
 class _StatColumn extends StatelessWidget {
   final Widget value;
@@ -308,22 +332,22 @@ class _StatColumn extends StatelessWidget {
     return Column(
       children: [
         value,
-        const SizedBox(height: Spacing.xs),
+        const SizedBox(height: VSpacing.xs),
         Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.sm,
+            horizontal: VSpacing.sm,
             vertical: 2,
           ),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(RadiusTokens.pill),
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(VRadius.pill),
           ),
           child: Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: color,
-              fontWeight: FontWeights.bold,
-              letterSpacing: LetterSpacing.micro,
+              fontWeight: VFontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
         ),
@@ -331,8 +355,6 @@ class _StatColumn extends StatelessWidget {
     );
   }
 }
-
-// ─── Next Tier Progress Card — glass panel ──────────────────────────
 
 class _NextTierProgress extends StatelessWidget {
   final _NextTierInfo info;
@@ -343,9 +365,21 @@ class _NextTierProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.md),
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.xl),
+        border: Border.all(
+          color: isDark
+              ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+              : VColors.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -353,41 +387,49 @@ class _NextTierProgress extends StatelessWidget {
             children: [
               const Icon(
                 Icons.trending_up,
-                size: IconSizes.md,
-                color: AppColors.warning,
+                size: VIconSize.md,
+                color: VColors.warning,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Expanded(
                 child: Text(
                   '${info.xpRemaining} XP until ${info.nextTierName}',
                   style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
-          AnimatedProgressBar(
-            value: info.progress,
-            color: AppColors.warning,
-            height: 10,
+          const SizedBox(height: VSpacing.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(VRadius.sm),
+            child: LinearProgressIndicator(
+              value: info.progress,
+              minHeight: 10,
+              valueColor: const AlwaysStoppedAnimation<Color>(VColors.warning),
+              backgroundColor: isDark
+                  ? VColors.surfaceContainerHighDark
+                  : VColors.surfaceContainerHigh,
+            ),
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 currentTier.label,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                 ),
               ),
               Text(
                 info.nextTierName,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: AppColors.warning,
-                  fontWeight: FontWeights.bold,
+                  color: VColors.warning,
+                  fontWeight: VFontWeight.bold,
                 ),
               ),
             ],
@@ -397,8 +439,6 @@ class _NextTierProgress extends StatelessWidget {
     );
   }
 }
-
-// ─── Category Card — bento glass tile ───────────────────────────────
 
 class _CategoryCard extends StatelessWidget {
   final String categoryName;
@@ -422,24 +462,29 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final fraction = total > 0 ? (earned / total).clamp(0.0, 1.0) : 0.0;
     final isComplete = earned >= total;
     final imagePath = WorldAssets.achievementCategoryImage(categoryName);
 
     return Material(
-      color: AppColors.glassBackground,
-      borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+      color: isDark
+          ? VColors.surfaceContainerDark
+          : VColors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(VRadius.xl),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+            borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(
               color: isComplete
-                  ? AppColors.success.withValues(alpha: 0.4)
-                  : AppColors.glassBorder,
-              width: isComplete ? 1.5 : 0.5,
+                  ? VColors.success.withValues(alpha: 0.4)
+                  : (isDark
+                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                      : VColors.outlineVariant.withValues(alpha: 0.3)),
+              width: isComplete ? 1.5 : 1,
             ),
           ),
           child: Column(
@@ -464,15 +509,14 @@ class _CategoryCard extends StatelessWidget {
                         ),
                       ),
               ),
-              const SizedBox(height: Spacing.xs + 2),
-              // Category name
+              const SizedBox(height: 6),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
                 child: Text(
                   label,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeights.bold,
-                    height: LineHeight.button,
+                    fontWeight: VFontWeight.bold,
+                    height: 1.0,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -480,26 +524,28 @@ class _CategoryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              // Progress fraction
               Text(
                 '$earned/$total',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: FontSizes.caption - 1,
-                  color: isComplete ? AppColors.success : AppColors.inkMuted,
-                  fontWeight: isComplete ? FontWeights.bold : FontWeight.w400,
+                  fontSize: VFontSize.labelSm,
+                  color: isComplete ? VColors.success : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+                  fontWeight: isComplete ? VFontWeight.bold : VFontWeight.regular,
                 ),
               ),
               const SizedBox(height: 4),
-              // Small progress bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.xs + 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                   child: LinearProgressIndicator(
                     value: fraction,
                     minHeight: 3,
-                    color: isComplete ? AppColors.success : color,
-                    backgroundColor: AppColors.surfaceOverlay,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isComplete ? VColors.success : color,
+                    ),
+                    backgroundColor: isDark
+                        ? VColors.surfaceContainerHighDark
+                        : VColors.surfaceContainerHigh,
                   ),
                 ),
               ),
@@ -510,9 +556,6 @@ class _CategoryCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Achievement Badge Grid ────────────────────────────────────────
-// Displays individual achievement badges in a 2-column bento grid
 
 class _AchievementBadgeGrid extends StatelessWidget {
   final List<Achievement> achievements;
@@ -525,7 +568,6 @@ class _AchievementBadgeGrid extends StatelessWidget {
     required this.currentTier,
   });
 
-  /// Minimum tier required for an achievement to be visible/unlocked.
   static int _minTierForAchievement(Achievement a) {
     if (a.xpValue >= 500) return 4;
     if (a.xpValue >= 200) return 3;
@@ -536,13 +578,13 @@ class _AchievementBadgeGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final tileWidth = (screenWidth - (Spacing.md * 2) - Spacing.sm) / 2;
+    final tileWidth = (screenWidth - (VSpacing.md * 2) - VSpacing.sm) / 2;
 
     final userMap = {for (final ua in userAchievements) ua.achievementId: ua};
 
     return Wrap(
-      spacing: Spacing.sm,
-      runSpacing: Spacing.sm,
+      spacing: VSpacing.sm,
+      runSpacing: VSpacing.sm,
       children: achievements.map((achievement) {
         final userAchievement = userMap[achievement.id];
         final requiredTier = _minTierForAchievement(achievement);
@@ -567,8 +609,6 @@ class _AchievementBadgeGrid extends StatelessWidget {
     );
   }
 }
-
-// ─── Individual Achievement Badge Card ─────────────────────────────
 
 class _AchievementBadgeCard extends StatelessWidget {
   final Achievement achievement;
@@ -659,6 +699,8 @@ class _AchievementBadgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final status = userAchievement?.status;
     final isVerified = status == AchievementStatus.verified;
     final isSubmitted = status == AchievementStatus.submitted;
@@ -668,18 +710,29 @@ class _AchievementBadgeCard extends StatelessWidget {
     final String statusLabel;
 
     if (isVerified) {
-      accentColor = AppColors.success;
+      accentColor = VColors.success;
       statusLabel = 'Verified';
     } else if (isSubmitted) {
-      accentColor = AppColors.warning;
+      accentColor = VColors.warning;
       statusLabel = 'Pending';
     } else {
-      accentColor = AppColors.tertiary;
+      accentColor = VColors.tertiary;
       statusLabel = 'Available';
     }
 
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.md),
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.xl),
+        border: Border.all(
+          color: isDark
+              ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+              : VColors.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -691,12 +744,11 @@ class _AchievementBadgeCard extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: accentColor.withValues(alpha: 0.12),
+                  color: accentColor.withValues(alpha: 0.15),
                 ),
                 child: Icon(iconData, size: 18, color: accentColor),
               ),
               const Spacer(),
-              // Status dot
               Container(
                 width: 8,
                 height: 8,
@@ -717,21 +769,20 @@ class _AchievementBadgeCard extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 statusLabel,
-                style: TextStyle(
-                  fontSize: FontSizes.labelSm - 1,
-                  fontWeight: FontWeights.semiBold,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.semiBold,
                   color: accentColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           Text(
             achievement.title,
-            style: const TextStyle(
-              fontSize: FontSizes.bodyMd,
-              fontWeight: FontWeights.semiBold,
-              color: AppColors.ink,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: VFontWeight.semiBold,
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -739,9 +790,10 @@ class _AchievementBadgeCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             achievement.description,
-            style: const TextStyle(
-              fontSize: FontSizes.labelSm,
-              color: AppColors.inkSecondary,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -749,10 +801,9 @@ class _AchievementBadgeCard extends StatelessWidget {
           const Spacer(),
           Text(
             '+${achievement.xpValue} XP',
-            style: const TextStyle(
-              fontSize: FontSizes.labelSm,
-              fontWeight: FontWeights.semiBold,
-              color: AppColors.warning,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: VFontWeight.semiBold,
+              color: VColors.warning,
             ),
           ),
         ],
@@ -760,8 +811,6 @@ class _AchievementBadgeCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Locked Achievement Card — blur overlay ─────────────────────────
 
 class _LockedAchievementCard extends StatelessWidget {
   final Achievement achievement;
@@ -787,17 +836,29 @@ class _LockedAchievementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return SizedBox(
       width: tileWidth,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         child: Stack(
           children: [
-            // Behind: ghosted tile
             Opacity(
               opacity: 0.5,
-              child: GlassPanel(
-                padding: const EdgeInsets.all(Spacing.md),
+              child: Container(
+                padding: const EdgeInsets.all(VSpacing.md),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? VColors.surfaceContainerDark
+                      : VColors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(VRadius.xl),
+                  border: Border.all(
+                    color: isDark
+                        ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                        : VColors.outlineVariant.withValues(alpha: 0.3),
+                  ),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -807,39 +868,50 @@ class _LockedAchievementCard extends StatelessWidget {
                       height: 32,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.inkMuted.withValues(alpha: 0.12),
+                        color: (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant)
+                            .withValues(alpha: 0.12),
                       ),
                       child: const Icon(
                         Icons.star,
                         size: 18,
-                        color: AppColors.inkMuted,
+                        color: VColors.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: Spacing.sm),
-                    // Ghost text placeholder
+                    const SizedBox(height: VSpacing.sm),
                     Container(
                       height: 14,
                       decoration: BoxDecoration(
-                        color: AppColors.inkMuted.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(4),
+                        color: (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant)
+                            .withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                     ),
-                    const SizedBox(height: Spacing.xs),
+                    const SizedBox(height: VSpacing.xs),
                     Container(
                       height: 10,
                       width: 80,
                       decoration: BoxDecoration(
-                        color: AppColors.inkMuted.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        color: (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant)
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: VSpacing.md),
                     Container(
                       height: 12,
                       width: 50,
                       decoration: BoxDecoration(
-                        color: AppColors.inkMuted.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        color: (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant)
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -847,32 +919,37 @@ class _LockedAchievementCard extends StatelessWidget {
                 ),
               ),
             ),
-            // Blur overlay
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                 child: Container(
-                  color: AppColors.canvas.withValues(alpha: 0.3),
+                  color: (isDark
+                          ? VColors.surfaceDark
+                          : VColors.surface)
+                      .withValues(alpha: 0.3),
                 ),
               ),
             ),
-            // Lock icon + label centered
             Positioned.fill(
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.lock,
-                      size: IconSizes.lg,
-                      color: AppColors.inkMuted,
+                      size: VIconSize.lg,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
-                    const SizedBox(height: Spacing.xs),
+                    const SizedBox(height: VSpacing.xs),
                     Text(
                       'Reach ${_tierLabel(requiredTier)} to unlock',
-                      style: const TextStyle(
-                        fontSize: FontSizes.labelSm - 1,
-                        color: AppColors.inkMuted,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: VFontSize.labelSm,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
                     ),

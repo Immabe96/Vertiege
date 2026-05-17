@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../services/verification_service.dart';
 import '../state/post_provider.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/glass_panel.dart';
@@ -83,10 +83,12 @@ class _VerificationReviewScreenState
       ),
     );
     if (confirmed == true) {
-      await VerificationService.reject(s.id,
-          notes: notesController.text.trim().isEmpty
-              ? null
-              : notesController.text.trim());
+      await VerificationService.reject(
+        s.id,
+        notes: notesController.text.trim().isEmpty
+            ? null
+            : notesController.text.trim(),
+      );
       _load();
     }
   }
@@ -104,8 +106,10 @@ class _VerificationReviewScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
         title: const Text('Verification Review'),
         bottom: TabBar(
@@ -118,20 +122,19 @@ class _VerificationReviewScreenState
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildVerificationsTab(theme),
-          _buildFlaggedPostsTab(theme),
-        ],
+        children: [_buildVerificationsTab(theme), _buildFlaggedPostsTab(theme)],
       ),
     );
   }
 
   Widget _buildVerificationsTab(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     if (_loading) return const GlassLoadingList();
     if (_submissions.isEmpty) {
       return const AppEmptyState(
         title: 'No pending verifications',
-        description: 'Profession reviews will appear here when residents submit proof.',
+        description:
+            'Profession reviews will appear here when residents submit proof.',
         icon: Icons.verified_user_outlined,
       );
     }
@@ -159,12 +162,17 @@ class _VerificationReviewScreenState
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(RadiusTokens.full),
+                            color: (isDark
+                                    ? VColors.primaryContainerDark
+                                    : VColors.primaryContainer)
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.full,
+                            ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.badge_outlined,
-                            color: AppColors.primary,
+                            color: VColors.primary,
                             size: IconSizes.md,
                           ),
                         ),
@@ -176,25 +184,34 @@ class _VerificationReviewScreenState
                               Text(
                                 s.residentName,
                                 style: theme.textTheme.titleSmall?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceDark
+                                      : VColors.onSurface,
                                   fontWeight: FontWeights.bold,
                                 ),
                               ),
                               Text(
                                 s.profession,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.primary,
+                                  color: VColors.primary,
                                 ),
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: AppColors.error),
+                          icon: Icon(
+                            Icons.close,
+                            color: VColors.error,
+                          ),
                           tooltip: 'Reject',
                           onPressed: () => _reject(s),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.check, color: AppColors.success),
+                          icon: Icon(
+                            Icons.check,
+                            color: VColors.success,
+                          ),
                           tooltip: 'Approve',
                           onPressed: () => _approve(s),
                         ),
@@ -213,12 +230,19 @@ class _VerificationReviewScreenState
                             height: 96,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceElevated.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(RadiusTokens.full),
+                              color: (isDark
+                                      ? VColors.surfaceContainerDark
+                                      : VColors.surfaceContainerLow)
+                                  .withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.full,
+                              ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.broken_image_outlined,
-                              color: AppColors.inkMuted,
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -235,6 +259,7 @@ class _VerificationReviewScreenState
   }
 
   Widget _buildFlaggedPostsTab(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final postState = ref.watch(postProvider);
     final flaggedPosts = postState.posts
         .where((p) => p.status == 'pending_review' || p.status == 'flagged')
@@ -279,38 +304,50 @@ class _VerificationReviewScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(post.residentName,
-                              style: theme.textTheme.titleSmall),
                           Text(
-                          post.status == 'pending_review'
-                              ? 'Pending Review'
-                              : 'Flagged',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: post.status == 'pending_review'
-                                  ? AppColors.warning
-                                  : AppColors.error,
+                            post.residentName,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceDark
+                                  : VColors.onSurface,
+                            ),
+                          ),
+                          Text(
+                            post.status == 'pending_review'
+                                ? 'Pending Review'
+                                : 'Flagged',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: post.status == 'pending_review'
+                                  ? (isDark
+                                      ? VColors.warningContainerDark
+                                      : VColors.warning)
+                                  : VColors.error,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline,
-                              color: AppColors.error),
-                          tooltip: 'Remove post',
-                          onPressed: () => _removePost(post),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.check_circle_outline,
-                              color: AppColors.success),
-                          tooltip: 'Approve post',
-                          onPressed: () => _approvePost(post),
-                        ),
-                      ],
-                    ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.delete_outline,
+                              color: VColors.error,
+                            ),
+                            tooltip: 'Remove post',
+                            onPressed: () => _removePost(post),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.check_circle_outline,
+                              color: VColors.success,
+                            ),
+                            tooltip: 'Approve post',
+                            onPressed: () => _approvePost(post),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 const SizedBox(height: Spacing.sm),
@@ -319,13 +356,18 @@ class _VerificationReviewScreenState
                   width: double.infinity,
                   padding: const EdgeInsets.all(Spacing.sm),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.3),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Text(
                     post.content,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceDark
+                          : VColors.onSurface,
+                    ),
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                   ),

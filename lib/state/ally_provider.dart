@@ -17,12 +17,11 @@ class AllyState {
     List<Ally>? allies,
     List<Ally>? pendingRequests,
     bool? isLoading,
-  }) =>
-      AllyState(
-        allies: allies ?? this.allies,
-        pendingRequests: pendingRequests ?? this.pendingRequests,
-        isLoading: isLoading ?? this.isLoading,
-      );
+  }) => AllyState(
+    allies: allies ?? this.allies,
+    pendingRequests: pendingRequests ?? this.pendingRequests,
+    isLoading: isLoading ?? this.isLoading,
+  );
 }
 
 class AllyNotifier extends Notifier<AllyState> {
@@ -87,8 +86,9 @@ class AllyNotifier extends Notifier<AllyState> {
     return rel?.status;
   }
 
-  bool isAlly(String otherId) =>
-      state.allies.any((a) => a.requesterId == otherId || a.receiverId == otherId);
+  bool isAlly(String otherId) => state.allies.any(
+    (a) => a.requesterId == otherId || a.receiverId == otherId,
+  );
 }
 
 final allyProvider = NotifierProvider<AllyNotifier, AllyState>(

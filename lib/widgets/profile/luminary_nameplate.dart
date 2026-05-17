@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 /// A tier-aware nameplate that renders resident names with progressive
@@ -33,19 +33,20 @@ class LuminaryNameplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (name.isEmpty) {
       return Text(
         'Traveler',
-        style: _buildStyle(tier),
+        style: _buildStyle(tier, isDark: isDark),
         textAlign: textAlign,
         maxLines: maxLines,
         overflow: overflow,
       );
     }
 
-    // Tier 5 (Apex) gets animated gradient
     if (tier >= 5) {
       return _buildTitledNameplate(
+        context,
         _ApexNameplate(
           name: name,
           fontSize: fontSize,
@@ -57,9 +58,10 @@ class LuminaryNameplate extends StatelessWidget {
     }
 
     return _buildTitledNameplate(
+      context,
       Text(
         name,
-        style: _buildStyle(tier),
+        style: _buildStyle(tier, isDark: isDark),
         textAlign: textAlign,
         maxLines: maxLines,
         overflow: overflow,
@@ -67,8 +69,9 @@ class LuminaryNameplate extends StatelessWidget {
     );
   }
 
-  Widget _buildTitledNameplate(Widget nameWidget) {
+  Widget _buildTitledNameplate(BuildContext context, Widget nameWidget) {
     if (title == null) return nameWidget;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: textAlign == TextAlign.center
@@ -81,7 +84,7 @@ class LuminaryNameplate extends StatelessWidget {
           style: TextStyle(
             fontSize: fontSize * 0.75,
             fontStyle: FontStyle.italic,
-            color: AppColors.inkSecondary,
+            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
           ),
           textAlign: textAlign,
           maxLines: 1,
@@ -91,47 +94,43 @@ class LuminaryNameplate extends StatelessWidget {
     );
   }
 
-  TextStyle _buildStyle(int tier) {
-    final baseStyle = GoogleFonts.spaceGrotesk(fontSize: fontSize);
+  TextStyle _buildStyle(int tier, {bool isDark = false}) {
+    final baseStyle = GoogleFonts.manrope(fontSize: fontSize);
 
     switch (tier) {
       case 5:
       case 4:
-        // Old Money / Apex: Gold text with glow
         return baseStyle.copyWith(
           fontWeight: FontWeights.bold,
-          color: AppColors.tertiary,
+          color: VColors.tertiary,
           shadows: [
             Shadow(
-              color: AppColors.tertiary.withValues(alpha: 0.3),
+              color: VColors.tertiary.withValues(alpha: 0.3),
               blurRadius: 12,
             ),
           ],
         );
       case 3:
-        // Elite: Bold with subtle violet glow
         return baseStyle.copyWith(
           fontWeight: FontWeights.bold,
-          color: AppColors.primary,
+          color: VColors.primary,
           shadows: [
             Shadow(
-              color: AppColors.primary.withValues(alpha: 0.2),
+              color: VColors.primary.withValues(alpha: 0.2),
               blurRadius: 8,
             ),
           ],
         );
       case 2:
-        // High Roller: SemiBold, primary color
         return baseStyle.copyWith(
           fontWeight: FontWeights.semiBold,
-          color: AppColors.primary,
+          color: VColors.primary,
         );
       case 1:
       default:
-        // Hustler: Plain text, ink color
         return baseStyle.copyWith(
           fontWeight: FontWeights.regular,
-          color: AppColors.ink,
+          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
         );
     }
   }
@@ -169,9 +168,10 @@ class _ApexNameplateState extends State<_ApexNameplate>
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat(reverse: true);
-    _animation = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -182,10 +182,10 @@ class _ApexNameplateState extends State<_ApexNameplate>
 
   @override
   Widget build(BuildContext context) {
-    final baseStyle = GoogleFonts.spaceGrotesk(
+    final baseStyle = GoogleFonts.manrope(
       fontSize: widget.fontSize,
-      fontWeight: FontWeights.bold,
-      color: Colors.white,
+      fontWeight: VFontWeight.bold,
+      color: VColors.onPrimary,
     );
 
     return AnimatedBuilder(
@@ -196,17 +196,12 @@ class _ApexNameplateState extends State<_ApexNameplate>
             final shift = _animation.value;
             return LinearGradient(
               colors: const [
-                AppColors.tertiary,
-                AppColors.primary,
-                AppColors.tertiary,
-                AppColors.primary,
+                VColors.tertiary,
+                VColors.primary,
+                VColors.tertiary,
+                VColors.primary,
               ],
-              stops: [
-                0.0,
-                0.25 + shift * 0.1,
-                0.5 + shift * 0.1,
-                1.0,
-              ],
+              stops: [0.0, 0.25 + shift * 0.1, 0.5 + shift * 0.1, 1.0],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ).createShader(bounds);

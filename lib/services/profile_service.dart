@@ -1,5 +1,6 @@
 import '../models/resident.dart';
 import 'supabase.dart';
+import 'crash_reporter.dart';
 
 class ProfileService {
   static Future<void> upsertProfile(Resident resident) async {
@@ -66,14 +67,13 @@ class ProfileService {
     'last_check_in': r.lastCheckIn,
     'streak_count': r.streakCount,
     'streak_shields': r.streakShields,
-    'following': _uuidList(r.following),
-    'joined_world_ids': _uuidList(r.joinedWorldIds),
-    'local_world_ids': const <String>[],
+    'following': r.following,
+    'joined_world_ids': r.joinedWorldIds,
     if (r.referredBy != null) 'referred_by': r.referredBy,
-    'referral_code': r.referralCode,
     'sovereign_coins': r.sovereignCoins,
     'onboarding_completed': r.onboardingCompleted,
     'gate_completed': r.gateCompleted,
+    if (r.avatarFrameId != null) 'avatar_frame_id': r.avatarFrameId,
   };
 
   static Resident _toResident(
@@ -99,6 +99,7 @@ class ProfileService {
     sovereignCoins: (data['sovereign_coins'] as int?) ?? 100,
     onboardingCompleted: data['onboarding_completed'] ?? false,
     gateCompleted: data['gate_completed'] ?? false,
+    avatarFrameId: data['avatar_frame_id'] as String?,
   );
 
   static Future<List<String>> _getVerifiedRoles(String userId) async {
@@ -108,13 +109,19 @@ class ProfileService {
           .from('verification_submissions')
           .select('profession')
           .eq('resident_id', userId)
-          .eq('status', 'approved');
+          .eq('status', 'verified');
       return (data as List)
           .map((e) => (e as Map<String, dynamic>)['profession']?.toString())
           .whereType<String>()
           .toSet()
           .toList();
-    } catch (_) {
+    } catch (e, st) {
+      // Graceful degradation — profile loads without verified roles.
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'profile_service getVerifiedRoles',
+      );
       return const [];
     }
   }
@@ -123,41 +130,6 @@ class ProfileService {
     String userId,
     Map<String, dynamic> profile,
   ) async {
-    final ids = <String>{...List<String>.from(profile['joined_world_ids'] ?? [])};
-    try {
-      final client = getSupabase();
-      final localSlugs = List<String>.from(profile['local_world_ids'] ?? []);
-      if (localSlugs.isNotEmpty) {
-        final worlds = await client
-            .from('worlds')
-            .select('id, slug')
-            .inFilter('slug', localSlugs);
-        ids.addAll(
-          (worlds as List)
-              .map((e) => (e as Map<String, dynamic>)['id']?.toString())
-              .whereType<String>(),
-        );
-      }
-      final data = await client
-          .from('world_members')
-          .select('world_id')
-          .eq('resident_id', userId);
-      ids.addAll(
-        (data as List)
-            .map((e) => (e as Map<String, dynamic>)['world_id']?.toString())
-            .whereType<String>(),
-      );
-    } catch (_) {
-      // Profile arrays still preserve cloud membership when membership reads
-      // are unreachable.
-    }
-    return ids.toList();
+    return List<String>.from(profile['joined_world_ids'] ?? []);
   }
-
-  static List<String> _uuidList(Iterable<String> values) =>
-      values.where(_isUuid).toList();
-
-  static bool _isUuid(String value) => RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-  ).hasMatch(value);
 }

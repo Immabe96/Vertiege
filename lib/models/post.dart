@@ -8,6 +8,7 @@ class Comment {
   final String content;
   final int timestamp;
   final bool isEdited;
+  final int tierAtPosting;
 
   const Comment({
     required this.id,
@@ -17,13 +18,20 @@ class Comment {
     required this.content,
     required this.timestamp,
     this.isEdited = false,
+    this.tierAtPosting = 1,
   });
 
   bool get isReply => parentId != null;
 
   Comment copyWith({
-    String? id, String? residentId, String? residentName,
-    String? parentId, String? content, int? timestamp, bool? isEdited,
+    String? id,
+    String? residentId,
+    String? residentName,
+    String? parentId,
+    String? content,
+    int? timestamp,
+    bool? isEdited,
+    int? tierAtPosting,
   }) => Comment(
     id: id ?? this.id,
     residentId: residentId ?? this.residentId,
@@ -32,6 +40,7 @@ class Comment {
     content: content ?? this.content,
     timestamp: timestamp ?? this.timestamp,
     isEdited: isEdited ?? this.isEdited,
+    tierAtPosting: tierAtPosting ?? this.tierAtPosting,
   );
 }
 
@@ -40,29 +49,25 @@ class PollOption {
   final String text;
   final int voteCount;
 
-  const PollOption({
-    required this.id,
-    required this.text,
-    this.voteCount = 0,
-  });
+  const PollOption({required this.id, required this.text, this.voteCount = 0});
 
   PollOption copyWith({String? id, String? text, int? voteCount}) => PollOption(
-        id: id ?? this.id,
-        text: text ?? this.text,
-        voteCount: voteCount ?? this.voteCount,
-      );
+    id: id ?? this.id,
+    text: text ?? this.text,
+    voteCount: voteCount ?? this.voteCount,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'text': text,
-        'voteCount': voteCount,
-      };
+    'id': id,
+    'text': text,
+    'voteCount': voteCount,
+  };
 
   factory PollOption.fromJson(Map<String, dynamic> json) => PollOption(
-        id: json['id'] ?? '',
-        text: json['text'] ?? '',
-        voteCount: json['voteCount'] ?? 0,
-      );
+    id: json['id'] ?? '',
+    text: json['text'] ?? '',
+    voteCount: json['voteCount'] ?? 0,
+  );
 }
 
 class Poll {
@@ -85,33 +90,34 @@ class Poll {
     List<PollOption>? options,
     bool? isMultiChoice,
     List<String>? votedResidentIds,
-  }) =>
-      Poll(
-        question: question ?? this.question,
-        options: options ?? this.options,
-        isMultiChoice: isMultiChoice ?? this.isMultiChoice,
-        votedResidentIds: votedResidentIds ?? this.votedResidentIds,
-      );
+  }) => Poll(
+    question: question ?? this.question,
+    options: options ?? this.options,
+    isMultiChoice: isMultiChoice ?? this.isMultiChoice,
+    votedResidentIds: votedResidentIds ?? this.votedResidentIds,
+  );
 
   Map<String, dynamic> toJson() => {
-        'question': question,
-        'options': options.map((o) => o.toJson()).toList(),
-        'isMultiChoice': isMultiChoice,
-        'votedResidentIds': votedResidentIds,
-      };
+    'question': question,
+    'options': options.map((o) => o.toJson()).toList(),
+    'isMultiChoice': isMultiChoice,
+    'votedResidentIds': votedResidentIds,
+  };
 
   factory Poll.fromJson(Map<String, dynamic> json) => Poll(
-        question: json['question'] ?? '',
-        options: (json['options'] as List<dynamic>?)
-                ?.map((o) => PollOption.fromJson(o as Map<String, dynamic>))
-                .toList() ??
-            [],
-        isMultiChoice: json['isMultiChoice'] ?? false,
-        votedResidentIds: (json['votedResidentIds'] as List<dynamic>?)
-                ?.map((e) => e.toString())
-                .toList() ??
-            [],
-      );
+    question: json['question'] ?? '',
+    options:
+        (json['options'] as List<dynamic>?)
+            ?.map((o) => PollOption.fromJson(o as Map<String, dynamic>))
+            .toList() ??
+        [],
+    isMultiChoice: json['isMultiChoice'] ?? false,
+    votedResidentIds:
+        (json['votedResidentIds'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [],
+  );
 }
 
 class Post {
@@ -134,14 +140,26 @@ class Post {
   final List<String> mentions;
   final List<String> hashtags;
   final Poll? poll;
+
   /// Whether this post is a Sovereign Decree (styled announcement from sovereign).
   final bool isDecree;
+
   /// If non-null, this post is an event announcement.
   final String? eventTitle;
   final int? eventStartsAt;
   final List<String> eventRsvpIds;
+
   /// Post moderation status: 'published', 'pending_review', 'flagged', 'removed'.
   final String status;
+
+  /// If non-null, the time at which this post should be published.
+  final DateTime? scheduledFor;
+
+  /// Awards given to this post by residents.
+  final List<String> awards;
+
+  /// Number of failed publish attempts for scheduled posts.
+  final int failedPublishes;
 
   const Post({
     required this.id,
@@ -168,6 +186,9 @@ class Post {
     this.eventTitle,
     this.eventStartsAt,
     this.eventRsvpIds = const [],
+    this.scheduledFor,
+    this.awards = const [],
+    this.failedPublishes = 0,
   });
 
   /// Resolves the effective list of image URIs, supporting both the legacy
@@ -207,31 +228,36 @@ class Post {
     String? eventTitle,
     int? eventStartsAt,
     List<String>? eventRsvpIds,
-  }) =>
-      Post(
-        id: id ?? this.id,
-        worldId: worldId ?? this.worldId,
-        residentId: residentId ?? this.residentId,
-        residentName: residentName ?? this.residentName,
-        residentAvatar: residentAvatar ?? this.residentAvatar,
-        content: content ?? this.content,
-        imageUri: imageUri ?? this.imageUri,
-        imageUris: imageUris ?? this.imageUris,
-        timestamp: timestamp ?? this.timestamp,
-        tierAtPosting: tierAtPosting ?? this.tierAtPosting,
-        reactions: reactions ?? this.reactions,
-        comments: comments ?? this.comments,
-        isAnnouncement: isAnnouncement ?? this.isAnnouncement,
-        isPinned: isPinned ?? this.isPinned,
-        isEdited: isEdited ?? this.isEdited,
-        repostOf: repostOf ?? this.repostOf,
-        mentions: mentions ?? this.mentions,
-        hashtags: hashtags ?? this.hashtags,
-        poll: clearPoll ? null : (poll ?? this.poll),
-        isDecree: isDecree ?? this.isDecree,
-        status: status ?? this.status,
-        eventTitle: eventTitle ?? this.eventTitle,
-        eventStartsAt: eventStartsAt ?? this.eventStartsAt,
-        eventRsvpIds: eventRsvpIds ?? this.eventRsvpIds,
-      );
+    DateTime? scheduledFor,
+    List<String>? awards,
+    int? failedPublishes,
+  }) => Post(
+    id: id ?? this.id,
+    worldId: worldId ?? this.worldId,
+    residentId: residentId ?? this.residentId,
+    residentName: residentName ?? this.residentName,
+    residentAvatar: residentAvatar ?? this.residentAvatar,
+    content: content ?? this.content,
+    imageUri: imageUri ?? this.imageUri,
+    imageUris: imageUris ?? this.imageUris,
+    timestamp: timestamp ?? this.timestamp,
+    tierAtPosting: tierAtPosting ?? this.tierAtPosting,
+    reactions: reactions ?? this.reactions,
+    comments: comments ?? this.comments,
+    isAnnouncement: isAnnouncement ?? this.isAnnouncement,
+    isPinned: isPinned ?? this.isPinned,
+    isEdited: isEdited ?? this.isEdited,
+    repostOf: repostOf ?? this.repostOf,
+    mentions: mentions ?? this.mentions,
+    hashtags: hashtags ?? this.hashtags,
+    poll: clearPoll ? null : (poll ?? this.poll),
+    isDecree: isDecree ?? this.isDecree,
+    status: status ?? this.status,
+    eventTitle: eventTitle ?? this.eventTitle,
+    eventStartsAt: eventStartsAt ?? this.eventStartsAt,
+    eventRsvpIds: eventRsvpIds ?? this.eventRsvpIds,
+    scheduledFor: scheduledFor ?? this.scheduledFor,
+    awards: awards ?? this.awards,
+    failedPublishes: failedPublishes ?? this.failedPublishes,
+  );
 }

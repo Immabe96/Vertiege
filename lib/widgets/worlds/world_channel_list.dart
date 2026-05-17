@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/channel.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/empty_state.dart';
 
@@ -19,7 +20,43 @@ class WorldChannelList extends ConsumerStatefulWidget {
 }
 
 class _WorldChannelListState extends ConsumerState<WorldChannelList> {
-  final Map<String, bool> _wardExpanded = {};
+  Map<String, bool> _wardExpanded = {};
+
+  static const String _prefsKey = 'ward_collapsed_state';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCollapsedState();
+  }
+
+  Future<void> _loadCollapsedState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final collapsedList = prefs.getStringList(_prefsKey) ?? [];
+    final collapsed = Set<String>.from(collapsedList);
+    setState(() {
+      _wardExpanded = {};
+      _collapsedState = collapsed;
+    });
+  }
+
+  Set<String> _collapsedState = {};
+
+  Future<void> _toggleWard(String wardId) async {
+    final newState = !_isExpanded(wardId);
+    setState(() {
+      _wardExpanded[wardId] = newState;
+      if (newState) {
+        _collapsedState.remove(wardId);
+      } else {
+        _collapsedState.add(wardId);
+      }
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_prefsKey, _collapsedState.toList());
+  }
+
+  bool _isExpanded(String wardId) => _wardExpanded[wardId] ?? !_collapsedState.contains(wardId);
 
   @override
   Widget build(BuildContext context) {
@@ -99,11 +136,12 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     String wardName,
     List<WorldChannel> wardChannels,
   ) {
-    final expanded = _wardExpanded[wardId] ?? true;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final expanded = _isExpanded(wardId);
     return Column(
       children: [
         GestureDetector(
-          onTap: () => setState(() => _wardExpanded[wardId] = !expanded),
+          onTap: () => _toggleWard(wardId),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               Spacing.lg,
@@ -114,17 +152,17 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
             child: Row(
               children: [
                 Icon(
-                  expanded ? Icons.expand_less : Icons.expand_more,
+                  expanded ? Icons.arrow_drop_down : Icons.chevron_right,
                   size: IconSizes.sm,
-                  color: AppColors.inkMuted,
+                  color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                 ),
                 const SizedBox(width: Spacing.xs),
                 Text(
                   wardName.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.semiBold,
-                    color: AppColors.inkSecondary,
+                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -167,6 +205,7 @@ class _ChannelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return ListTile(
       dense: true,
@@ -174,7 +213,7 @@ class _ChannelTile extends StatelessWidget {
         _icon,
         size: 20,
         color: unreadCount > 0
-            ? AppColors.ink
+            ? isDark ? VColors.onSurfaceDark : VColors.onSurface
             : theme.colorScheme.onSurfaceVariant,
       ),
       title: Row(
@@ -193,15 +232,15 @@ class _ChannelTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
-                color: AppColors.error,
+                color: VColors.error,
                 borderRadius: BorderRadius.circular(9),
               ),
               child: Text(
                 unreadCount > 99 ? '99+' : '$unreadCount',
                 style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeights.bold,
-                  color: Colors.white,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.bold,
+                  color: VColors.onPrimary,
                 ),
               ),
             ),

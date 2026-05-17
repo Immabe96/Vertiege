@@ -1,21 +1,19 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../models/message.dart';
 import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
-import '../theme/colors.dart';
-import '../theme/design_system.dart';
+import '../theme/v_colors.dart';
+import '../theme/v_tokens.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 import '../utils/date_format.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
@@ -76,8 +74,8 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: AnimDurations.normal,
-          curve: Curves.easeOutCubic,
+          duration: VAnimation.normal,
+          curve: VAnimation.standard,
         );
       }
     });
@@ -121,25 +119,29 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
         .channelMessages
         .containsKey(widget.parentMessage.id);
     final displayItems = buildChatDisplayItems(messages);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Thread',
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: FontSizes.headlineMd,
-                fontWeight: FontWeights.bold,
-                color: AppColors.ink,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: VFontWeight.bold,
               ),
             ),
             Text(
               '# ${widget.channelName}',
-              style: const TextStyle(
-                fontSize: FontSizes.labelSm,
-                color: AppColors.inkMuted,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
           ],
@@ -147,7 +149,6 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
       ),
       body: Column(
         children: [
-          // Parent message pinned at top
           _ParentMessageCard(
             message: widget.parentMessage,
             residentId: resident?.id ?? '',
@@ -156,33 +157,33 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             child: isLoading
                 ? const GlassLoadingList(itemCount: 5)
                 : messages.isEmpty
-                ? const AppEmptyState(
-                    title: 'No replies yet',
-                    description: 'Be the first to reply in this thread',
-                    icon: Icons.chat_bubble_outline,
-                  )
-                : Stack(
-                    children: [
-                      ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Spacing.sm,
-                          vertical: Spacing.sm,
-                        ),
-                        itemCount: displayItems.length,
-                        itemBuilder: (context, index) {
-                          final item = displayItems[index];
-                          return _buildItem(item, resident?.id ?? '');
-                        },
+                    ? AppEmptyState(
+                        title: 'No replies yet',
+                        description: 'Be the first to reply in this thread',
+                        icon: Icons.chat_bubble_outline,
+                      )
+                    : Stack(
+                        children: [
+                          ListView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: VSpacing.sm,
+                              vertical: VSpacing.sm,
+                            ),
+                            itemCount: displayItems.length,
+                            itemBuilder: (context, index) {
+                              final item = displayItems[index];
+                              return _buildItem(item, resident?.id ?? '');
+                            },
+                          ),
+                          if (_showScrollFab)
+                            Positioned(
+                              right: VSpacing.md,
+                              bottom: VSpacing.sm,
+                              child: ChatScrollFab(onTap: _scrollToBottom),
+                            ),
+                        ],
                       ),
-                      if (_showScrollFab)
-                        Positioned(
-                          right: Spacing.md,
-                          bottom: Spacing.sm,
-                          child: ChatScrollFab(onTap: _scrollToBottom),
-                        ),
-                    ],
-                  ),
           ),
           ChatInputBar(
             controller: _controller,
@@ -205,9 +206,11 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
   }
 
   Widget _buildThreadReply(ChannelMessage message, String residentId) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isMe = message.senderId == residentId;
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
@@ -227,11 +230,11 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                     seed: message.senderId,
                     size: 20,
                   ),
-                  const SizedBox(width: Spacing.xs),
+                  const SizedBox(width: VSpacing.xs),
                   LuminaryNameplate(
                     name: message.senderName,
                     tier: 1,
-                    fontSize: FontSizes.labelSm,
+                    fontSize: VFontSize.labelSm,
                   ),
                 ],
               ),
@@ -242,37 +245,51 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isMe ? AppColors.primary : AppColors.glassBackground,
+                  color: isMe
+                      ? VColors.primary
+                      : (isDark
+                          ? VColors.surfaceContainerDark
+                          : VColors.surfaceContainerLow),
                   borderRadius: isMe
                       ? const BorderRadius.only(
-                          topLeft: Radius.circular(RadiusTokens.xl),
-                          topRight: Radius.circular(RadiusTokens.xl),
-                          bottomLeft: Radius.circular(RadiusTokens.xl),
-                          bottomRight: Radius.circular(RadiusTokens.sm),
+                          topLeft: Radius.circular(VRadius.xl),
+                          topRight: Radius.circular(VRadius.xl),
+                          bottomLeft: Radius.circular(VRadius.xl),
+                          bottomRight: Radius.circular(VRadius.sm),
                         )
                       : const BorderRadius.only(
-                          topLeft: Radius.circular(RadiusTokens.xl),
-                          topRight: Radius.circular(RadiusTokens.xl),
-                          bottomRight: Radius.circular(RadiusTokens.xl),
-                          bottomLeft: Radius.circular(RadiusTokens.sm),
+                          topLeft: Radius.circular(VRadius.xl),
+                          topRight: Radius.circular(VRadius.xl),
+                          bottomRight: Radius.circular(VRadius.xl),
+                          bottomLeft: Radius.circular(VRadius.sm),
                         ),
                   border: isMe
                       ? null
-                      : Border.all(color: AppColors.glassBorder),
+                      : Border.all(
+                          color: isDark
+                              ? VColors.outlineVariantDark
+                              : VColors.outlineVariant,
+                        ),
                 ),
                 child: MarkdownBody(
                   data: message.content,
                   styleSheet: _markdownStyle(
-                    textColor: isMe ? AppColors.onPrimary : AppColors.ink,
+                    textColor: isMe
+                        ? VColors.onPrimary
+                        : (isDark
+                            ? VColors.onSurfaceDark
+                            : VColors.onSurface),
+                    isDark: isDark,
                   ),
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 formatTimestamp(message.createdAt),
-                style: const TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  color: AppColors.inkMuted,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                 ),
               ),
             ],
@@ -282,27 +299,38 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     );
   }
 
-  static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
+  static MarkdownStyleSheet _markdownStyle({
+    required Color textColor,
+    required bool isDark,
+  }) {
     return MarkdownStyleSheet(
       p: TextStyle(
-        fontSize: FontSizes.bodyMd,
+        fontSize: VFontSize.bodyMd,
         color: textColor,
-        height: LineHeight.body,
+        height: VLineHeight.body,
       ),
       code: TextStyle(
-        fontSize: FontSizes.bodyMd - 2,
-        color: AppColors.ink,
-        backgroundColor: AppColors.surface,
-        fontFamily: AppFont.mono,
+        fontSize: VFontSize.bodyMd - 2,
+        color: textColor,
+        backgroundColor: isDark
+            ? VColors.surfaceContainerHighDark
+            : VColors.surfaceContainerHigh,
+        fontFamily: 'monospace',
       ),
       codeblockDecoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: AppColors.glassBorder),
+        color: isDark
+            ? VColors.surfaceContainerHighDark
+            : VColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(VRadius.md),
+        border: Border.all(
+          color: isDark
+              ? VColors.outlineVariantDark
+              : VColors.outlineVariant,
+        ),
       ),
-      a: const TextStyle(
-        fontSize: FontSizes.bodyMd,
-        color: AppColors.primary,
+      a: TextStyle(
+        fontSize: VFontSize.bodyMd,
+        color: VColors.primary,
         decoration: TextDecoration.underline,
       ),
     );
@@ -317,9 +345,22 @@ class _ParentMessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.md),
-      borderRadius: BorderRadius.zero,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? VColors.outlineVariantDark
+                : VColors.outlineVariant,
+          ),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -330,38 +371,43 @@ class _ParentMessageCard extends StatelessWidget {
                 seed: message.senderId,
                 size: 28,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               LuminaryNameplate(
                 name: message.senderName,
                 tier: 1,
-                fontSize: FontSizes.bodyMd,
+                fontSize: VFontSize.bodyMd,
               ),
               const Spacer(),
               Text(
                 formatTimestamp(message.createdAt),
-                style: const TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  color: AppColors.inkMuted,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           MarkdownBody(
             data: message.content,
-            styleSheet: _markdownStyle(textColor: AppColors.ink),
+            styleSheet: _markdownStyle(
+              textColor: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              isDark: isDark,
+            ),
           ),
           if (message.imageUrl != null && message.imageUrl!.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: Spacing.sm),
+              padding: const EdgeInsets.only(top: VSpacing.sm),
               child: ChatImage(url: message.imageUrl!),
             ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           Text(
             '${message.threadCount} ${message.threadCount == 1 ? 'reply' : 'replies'}',
-            style: const TextStyle(
-              fontSize: FontSizes.labelSm,
-              color: AppColors.inkMuted,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
         ],
@@ -369,22 +415,27 @@ class _ParentMessageCard extends StatelessWidget {
     );
   }
 
-  static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
+  static MarkdownStyleSheet _markdownStyle({
+    required Color textColor,
+    required bool isDark,
+  }) {
     return MarkdownStyleSheet(
       p: TextStyle(
-        fontSize: FontSizes.bodyMd,
+        fontSize: VFontSize.bodyMd,
         color: textColor,
-        height: LineHeight.body,
+        height: VLineHeight.body,
       ),
       code: TextStyle(
-        fontSize: FontSizes.bodyMd - 2,
-        color: AppColors.ink,
-        backgroundColor: AppColors.surface,
-        fontFamily: AppFont.mono,
+        fontSize: VFontSize.bodyMd - 2,
+        color: textColor,
+        backgroundColor: isDark
+            ? VColors.surfaceContainerHighDark
+            : VColors.surfaceContainerHigh,
+        fontFamily: 'monospace',
       ),
-      a: const TextStyle(
-        fontSize: FontSizes.bodyMd,
-        color: AppColors.primary,
+      a: TextStyle(
+        fontSize: VFontSize.bodyMd,
+        color: VColors.primary,
         decoration: TextDecoration.underline,
       ),
     );

@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/achievement.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../state/world_provider.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/loading_state.dart';
+import '../widgets/core/prestige_up_dialog.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 
@@ -45,7 +46,14 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final resident = ref.watch(residentProvider).resident;
+    final canAscend = ref.watch(residentProvider.select(
+      (s) => s.resident != null && s.resident!.tier.value >= 5 && s.resident!.prestigeStars == 0,
+    ));
+
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
         title: const Text('Hall of Ascension'),
         actions: [
@@ -61,10 +69,18 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen>
       ),
       body: Column(
         children: [
+          if (resident != null) ...[
+            _PrestigeHeader(
+              resident: resident,
+              canAscend: canAscend,
+            ),
+          ],
           TabBar(
             controller: _tabController,
-            labelColor: AppColors.tertiary,
-            unselectedLabelColor: AppColors.inkMuted,
+            labelColor: VColors.tertiary,
+            unselectedLabelColor: isDark
+                ? VColors.onSurfaceVariantDark
+                : VColors.onSurfaceVariant,
             labelStyle: const TextStyle(
               fontSize: FontSizes.labelSm,
               fontWeight: FontWeights.semiBold,
@@ -95,6 +111,106 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen>
   }
 }
 
+// ── Prestige Header ──────────────────────────────────────
+
+class _PrestigeHeader extends ConsumerWidget {
+  final dynamic resident;
+  final bool canAscend;
+
+  const _PrestigeHeader({required this.resident, required this.canAscend});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final prestigeStars = resident.prestigeStars as int;
+    final prestigeTitle = prestigeStars == 0
+        ? 'Apex'
+        : (prestigeStars == 1 ? 'Apex I' : 'Apex $prestigeStars');
+
+    return Padding(
+      padding: const EdgeInsets.all(Spacing.md),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(Spacing.lg),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              ...List.generate(
+                prestigeStars,
+                (i) => Padding(
+                  padding: EdgeInsets.only(right: i < prestigeStars - 1 ? 4 : 0),
+                  child: const Icon(Icons.star, color: VColors.tertiary, size: 24),
+                ),
+              ),
+              if (prestigeStars == 0)
+                const Icon(
+                  Icons.star_border,
+                  color: VColors.tertiary,
+                  size: 24,
+                ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      prestigeTitle,
+                      style: TextStyle(
+                        fontSize: FontSizes.headlineLg,
+                        fontWeight: FontWeights.bold,
+                        color: VColors.tertiary,
+                      ),
+                    ),
+                    Text(
+                      prestigeStars == 0
+                          ? 'Reach 50,000 XP to ascend'
+                          : 'Prestige Level $prestigeStars',
+                      style: TextStyle(
+                        fontSize: FontSizes.bodySm,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (canAscend) ...[
+            const SizedBox(height: Spacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () async {
+                  final success = await ref
+                      .read(residentProvider.notifier)
+                      .ascendToPrestige();
+                  if (success && context.mounted) {
+                    PrestigeUpDialog.show(
+                      context,
+                      prestigeLevel: 1,
+                      newPrestigeStars: prestigeStars + 1,
+                    );
+                  }
+                },
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('ASCEND TO PRESTIGE'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: VColors.tertiary,
+                  foregroundColor: VColors.onTertiary,
+                  padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      ),
+    );
+  }
+}
+
 // ── Leaderboard Entry ────────────────────────────────────
 
 class _LeaderEntry {
@@ -115,27 +231,27 @@ class _LeaderEntry {
   });
 }
 
-Color _rankColor(int rank) {
+Color _rankColor(int rank, {required bool isDark}) {
   switch (rank) {
     case 1:
-      return AppColors.tertiary;
+      return VColors.tertiary;
     case 2:
-      return AppColors.silver;
+      return VColors.primary;
     case 3:
-      return AppColors.bronze;
+      return VColors.secondary;
     default:
-      return AppColors.glassBorder;
+      return isDark ? VColors.glassBorderDark : VColors.glassBorder;
   }
 }
 
 Color _rankGlowColor(int rank) {
   switch (rank) {
     case 1:
-      return AppColors.tertiary;
+      return VColors.tertiary;
     case 2:
-      return AppColors.primary;
+      return VColors.primary;
     case 3:
-      return AppColors.hustler;
+      return VColors.secondary;
     default:
       return Colors.transparent;
   }
@@ -251,6 +367,7 @@ Widget _buildLeaderboardList(
   WidgetRef ref,
   List<_LeaderEntry> entries,
 ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   if (entries.isEmpty) {
     return const AppEmptyState(
       title: 'No rankings yet',
@@ -275,7 +392,9 @@ Widget _buildLeaderboardList(
           child: GlassPanel(
             padding: const EdgeInsets.all(Spacing.md),
             border: isTop3
-                ? Border.all(color: glowColor.withValues(alpha: 0.4))
+                ? Border.all(
+                    color: glowColor.withValues(alpha: 0.4),
+                  )
                 : null,
             child: Container(
               decoration: isTop3
@@ -296,10 +415,14 @@ Widget _buildLeaderboardList(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: _rankColor(rank).withValues(alpha: 0.15),
+                      color: _rankColor(rank, isDark: isDark)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       border: isTop3
-                          ? Border.all(color: _rankColor(rank), width: 1.5)
+                          ? Border.all(
+                              color: _rankColor(rank, isDark: isDark),
+                              width: 1.5,
+                            )
                           : null,
                     ),
                     child: Center(
@@ -308,7 +431,7 @@ Widget _buildLeaderboardList(
                         style: TextStyle(
                           fontSize: FontSizes.headlineMd,
                           fontWeight: FontWeights.bold,
-                          color: _rankColor(rank),
+                          color: _rankColor(rank, isDark: isDark),
                         ),
                       ),
                     ),
@@ -330,10 +453,10 @@ Widget _buildLeaderboardList(
                   // Score
                   Text(
                     '${entry.score}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: FontSizes.headlineMd,
                       fontWeight: FontWeights.bold,
-                      color: AppColors.tertiary,
+                      color: VColors.tertiary,
                     ),
                   ),
                 ],

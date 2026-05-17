@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/invite.dart';
 import '../utils/id_generator.dart';
 import 'supabase.dart';
@@ -17,9 +18,7 @@ class InviteService {
       'created_by': createdBy,
       'max_uses': maxUses,
       'uses': 0,
-      'expires_at': expiresAt != null
-          ? DateTime.fromMillisecondsSinceEpoch(expiresAt).toIso8601String()
-          : null,
+      'expires_at': expiresAt,
       'created_at': DateTime.now().toIso8601String(),
     };
 
@@ -44,7 +43,12 @@ class InviteService {
     return _toInvite(data);
   }
 
-  static Future<bool> acceptInvite(String inviteId, String worldId, String residentId, {String residentName = 'Member'}) async {
+  static Future<bool> acceptInvite(
+    String inviteId,
+    String worldId,
+    String residentId, {
+    String residentName = 'Member',
+  }) async {
     if (!isSupabaseConfigured()) return false;
     final client = getSupabase();
 
@@ -58,13 +62,16 @@ class InviteService {
     await client.from('invites').update({'uses': newUses}).eq('id', inviteId);
 
     // Add resident to world members
-    await client.from('world_members').upsert({
-      'world_id': worldId,
-      'resident_id': residentId,
-      'resident_name': residentName,
-      'rep': 0,
-      'joined_at': DateTime.now().toIso8601String(),
-    }, onConflict: 'world_id, resident_id');
+    try {
+      await client.from('world_members').insert({
+        'world_id': worldId,
+        'resident_id': residentId,
+        'resident_name': residentName,
+        'rep': 0,
+      });
+    } on PostgrestException catch (e) {
+      if (e.code != '23505') rethrow;
+    }
 
     return true;
   }
@@ -83,20 +90,27 @@ class InviteService {
   static String _generateCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final rng = Random.secure();
-    final code = List.generate(6, (_) => chars[rng.nextInt(chars.length)]).join();
+    final code = List.generate(
+      6,
+      (_) => chars[rng.nextInt(chars.length)],
+    ).join();
     return code;
   }
 
   static WorldInvite _toInvite(Map<String, dynamic> data) => WorldInvite(
-        id: data['id'] ?? '',
-        worldId: data['world_id'] ?? '',
-        code: data['code'] ?? '',
-        createdBy: data['created_by'] ?? '',
-        maxUses: data['max_uses'] ?? 0,
-        uses: data['uses'] ?? 0,
-        expiresAt: data['expires_at'] != null
-            ? DateTime.tryParse(data['expires_at'].toString())?.millisecondsSinceEpoch
-            : null,
-        createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
-      );
+    id: data['id'] ?? '',
+    worldId: data['world_id'] ?? '',
+    code: data['code'] ?? '',
+    createdBy: data['created_by'] ?? '',
+    maxUses: data['max_uses'] ?? 0,
+    uses: data['uses'] ?? 0,
+    expiresAt: data['expires_at'] != null
+        ? DateTime.tryParse(
+            data['expires_at'].toString(),
+          )?.millisecondsSinceEpoch
+        : null,
+    createdAt:
+        DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ??
+        0,
+  );
 }

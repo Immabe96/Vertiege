@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/world.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
 import 'world_banner.dart';
@@ -33,8 +33,17 @@ class WorldShareCard extends StatelessWidget {
     if (world.requiredProfession != null) {
       return world.requiredProfession!.toUpperCase();
     }
-    if (world.requiredTier != null && world.requiredTier! >= 1 && world.requiredTier! <= 5) {
-      const names = ['', 'HUSTLER', 'HIGH ROLLER', 'ELITE', 'OLD MONEY', 'APEX'];
+    if (world.requiredTier != null &&
+        world.requiredTier! >= 1 &&
+        world.requiredTier! <= 5) {
+      const names = [
+        '',
+        'HUSTLER',
+        'HIGH ROLLER',
+        'ELITE',
+        'OLD MONEY',
+        'APEX',
+      ];
       return 'TIER ${names[world.requiredTier!]}';
     }
     return 'OPEN';
@@ -46,9 +55,9 @@ class WorldShareCard extends StatelessWidget {
       width: 360,
       height: 640,
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.glassBorder),
+        color: VColors.surface,
+        borderRadius: BorderRadius.circular(VRadius.xxxl),
+        border: Border.all(color: VColors.glassBorder),
         boxShadow: [
           BoxShadow(
             color: _tierColor.withValues(alpha: 0.18),
@@ -81,10 +90,7 @@ class WorldShareCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.surfaceElevated,
-                    AppColors.canvas,
-                  ],
+                  colors: [VColors.surfaceBright, VColors.surface],
                 ),
               ),
               padding: const EdgeInsets.symmetric(
@@ -145,10 +151,10 @@ class WorldShareCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.manrope(
                       fontSize: FontSizes.headlineLg,
                       fontWeight: FontWeights.bold,
-                      color: AppColors.ink,
+                      color: VColors.onSurface,
                       height: 1.2,
                     ),
                   ),
@@ -163,7 +169,7 @@ class WorldShareCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: FontSizes.bodyMd,
-                      color: AppColors.inkSecondary,
+                      color: VColors.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -183,7 +189,7 @@ class WorldShareCard extends StatelessWidget {
                       Container(
                         width: 1,
                         height: 32,
-                        color: AppColors.borderSubtle,
+                        color: VColors.outlineVariant,
                       ),
                       _ShareStat(
                         icon: Icons.auto_awesome,
@@ -194,7 +200,7 @@ class WorldShareCard extends StatelessWidget {
                       Container(
                         width: 1,
                         height: 32,
-                        color: AppColors.borderSubtle,
+                        color: VColors.outlineVariant,
                       ),
                       _ShareStat(
                         icon: Icons.local_fire_department,
@@ -220,7 +226,9 @@ class WorldShareCard extends StatelessWidget {
                           _tierColor.withValues(alpha: 0.04),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+                      borderRadius: BorderRadius.circular(
+                        RadiusTokens.cardFeatured,
+                      ),
                       border: Border.all(
                         color: _tierColor.withValues(alpha: 0.15),
                       ),
@@ -254,7 +262,7 @@ class WorldShareCard extends StatelessWidget {
                     'Sovereign: ${world.sovereignName}',
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
-                      color: AppColors.inkMuted,
+                      color: VColors.outline,
                       letterSpacing: LetterSpacing.label,
                     ),
                   ),
@@ -304,17 +312,17 @@ class _ShareStat extends StatelessWidget {
         const SizedBox(height: Spacing.xs),
         Text(
           value,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.manrope(
             fontSize: FontSizes.headlineMd,
             fontWeight: FontWeights.bold,
-            color: AppColors.ink,
+            color: VColors.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: FontSizes.labelSm,
-            color: AppColors.inkMuted,
+            color: VColors.outline,
             letterSpacing: LetterSpacing.label,
           ),
         ),

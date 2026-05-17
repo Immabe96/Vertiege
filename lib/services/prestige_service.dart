@@ -20,7 +20,10 @@ class PrestigeService {
     final weeklyPosts = worldPosts.where((p) => p.timestamp > weekAgo).length;
     final weeklyReactions = worldPosts
         .where((p) => p.timestamp > weekAgo)
-        .fold<int>(0, (sum, p) => sum + p.reactions.values.fold(0, (a, b) => a + b));
+        .fold<int>(
+          0,
+          (sum, p) => sum + p.reactions.values.fold(0, (a, b) => a + b),
+        );
 
     final newPrestige = calculatePrestige(
       sovereignTier: sovereignTier,
@@ -47,17 +50,34 @@ class PrestigeService {
 
   /// Get the sovereign tier for prestige calculation.
   /// Returns a reasonable default for NPC sovereigns (hardcoded worlds).
-  static int resolveSovereignTier(String sovereignId, Map<String, int> memberTiers, World world) {
+  static int resolveSovereignTier(
+    String sovereignId,
+    Map<String, int> memberTiers,
+    World world,
+  ) {
     // Real resident sovereign
     if (memberTiers.containsKey(sovereignId)) {
       return memberTiers[sovereignId]!;
     }
     // NPC sovereign — estimate from world's required tier or prestige bracket
     if (world.type == WorldType.wealth) {
-      return world.requiredTier ?? (world.prestige > 35 ? 5 : world.prestige > 20 ? 4 : world.prestige > 10 ? 3 : 2);
+      return world.requiredTier ??
+          (world.prestige > 35
+              ? 5
+              : world.prestige > 20
+              ? 4
+              : world.prestige > 10
+              ? 3
+              : 2);
     }
     if (world.type == WorldType.profession) {
-      return (world.prestige > 30 ? 5 : world.prestige > 20 ? 4 : world.prestige > 10 ? 3 : 2);
+      return (world.prestige > 30
+          ? 5
+          : world.prestige > 20
+          ? 4
+          : world.prestige > 10
+          ? 3
+          : 2);
     }
     return 3; // dominion worlds — sovereign is the creator
   }

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/post.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
@@ -34,10 +34,14 @@ class EventCard extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.12),
+                  color: VColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
-                child: const Icon(Icons.event, size: IconSizes.md, color: AppColors.warning),
+                child: const Icon(
+                  Icons.event,
+                  size: IconSizes.md,
+                  color: VColors.warning,
+                ),
               ),
               const SizedBox(width: Spacing.md),
               Expanded(
@@ -49,7 +53,7 @@ class EventCard extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: FontSizes.headlineMd,
                         fontWeight: FontWeights.semiBold,
-                        color: AppColors.ink,
+                        color: VColors.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -57,7 +61,7 @@ class EventCard extends ConsumerWidget {
                       dateStr,
                       style: const TextStyle(
                         fontSize: FontSizes.labelSm,
-                        color: AppColors.inkSecondary,
+                        color: VColors.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -71,7 +75,7 @@ class EventCard extends ConsumerWidget {
               post.content,
               style: const TextStyle(
                 fontSize: FontSizes.bodyMd,
-                color: AppColors.inkSecondary,
+                color: VColors.onSurfaceVariant,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -85,7 +89,7 @@ class EventCard extends ConsumerWidget {
                   '$rsvpCount attending',
                   style: const TextStyle(
                     fontSize: FontSizes.labelSm,
-                    color: AppColors.inkMuted,
+                    color: VColors.outline,
                   ),
                 ),
               ),
@@ -103,10 +107,12 @@ class EventCard extends ConsumerWidget {
                 ),
                 label: Text(hasRsvp ? 'GOING' : 'ATTEND'),
                 style: FilledButton.styleFrom(
-                  backgroundColor:
-                      hasRsvp ? AppColors.primary : AppColors.tertiary,
-                  foregroundColor:
-                      hasRsvp ? AppColors.onPrimary : AppColors.onTertiary,
+                  backgroundColor: hasRsvp
+                      ? VColors.primary
+                      : VColors.tertiary,
+                  foregroundColor: hasRsvp
+                      ? VColors.onPrimary
+                      : VColors.onTertiary,
                 ),
               ),
             ],

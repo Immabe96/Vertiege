@@ -1,15 +1,11 @@
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final Map<String, Timer> _timers = {};
-
-void debounceWrite(String key, void Function() fn, {int delay = 300}) {
-  _timers[key]?.cancel();
-  _timers[key] = Timer(Duration(milliseconds: delay), fn);
-}
-
 class StorageService {
   StorageService._();
+
+  static final Map<String, Timer> _timers = {};
+  static final Map<String, String> _pendingWrites = {};
 
   static const String residentKey = '@resident_data';
   static const String postsKey = '@posts_data';
@@ -20,7 +16,25 @@ class StorageService {
   static const String membershipsKey = '@memberships_data';
   static const String userWorldsKey = '@user_worlds_data';
 
-  static Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
+  static Future<SharedPreferences> get _prefs =>
+      SharedPreferences.getInstance();
+
+  static void debounceWrite(String key, void Function() fn, {int delay = 300}) {
+    _timers[key]?.cancel();
+    _timers[key] = Timer(Duration(milliseconds: delay), fn);
+  }
+
+  static void _flushPending() {
+    for (final entry in _timers.entries) {
+      entry.value.cancel();
+      final value = _pendingWrites[entry.key];
+      if (value != null) {
+        setString(entry.key, value);
+      }
+    }
+    _timers.clear();
+    _pendingWrites.clear();
+  }
 
   static Future<String?> getString(String key) async {
     final prefs = await _prefs;
@@ -35,7 +49,15 @@ class StorageService {
   /// Writes a string to SharedPreferences with a debounce delay.
   /// This prevents excessive disk writes when saving rapidly changing state.
   static Future<void> setStringDebounced(String key, String value) async {
-    debounceWrite(key, () => setString(key, value));
+    _pendingWrites[key] = value;
+    debounceWrite(key, () {
+      _pendingWrites.remove(key);
+      setString(key, value);
+    });
+  }
+
+  static void flush() {
+    _flushPending();
   }
 
   static Future<void> remove(String key) async {
@@ -55,7 +77,10 @@ class StorageService {
 
   /// Records a referral code usage. Returns true if this is the first use
   /// of the given code, false if it was already tracked.
-  static Future<bool> trackReferral(String referralCode, String newResidentId) async {
+  static Future<bool> trackReferral(
+    String referralCode,
+    String newResidentId,
+  ) async {
     final prefs = await _prefs;
     final key = 'referral_$referralCode';
     final existing = prefs.getString(key);
@@ -75,7 +100,16 @@ class StorageService {
 
   static Future<void> clearAll() async {
     final prefs = await _prefs;
-    for (final key in [residentKey, postsKey, notificationsKey, achievementsKey, themeKey, channelsKey, membershipsKey, userWorldsKey]) {
+    for (final key in [
+      residentKey,
+      postsKey,
+      notificationsKey,
+      achievementsKey,
+      themeKey,
+      channelsKey,
+      membershipsKey,
+      userWorldsKey,
+    ]) {
       await prefs.remove(key);
     }
   }

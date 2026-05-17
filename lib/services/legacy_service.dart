@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../theme/v_colors.dart';
 
 enum LegacyTier { none, bronze, silver, gold, diamond }
 
@@ -22,13 +22,13 @@ extension LegacyTierExtension on LegacyTier {
   Color get color {
     switch (this) {
       case LegacyTier.diamond:
-        return AppColors.primary;
+        return VColors.primary;
       case LegacyTier.gold:
-        return AppColors.tertiary;
+        return VColors.tertiary;
       case LegacyTier.silver:
-        return AppColors.silver;
+        return VColors.outline;
       case LegacyTier.bronze:
-        return AppColors.bronze;
+        return VColors.outlineVariant;
       case LegacyTier.none:
         return Colors.transparent;
     }
@@ -50,8 +50,18 @@ class LegacyService {
   /// Format the founded date for display, e.g. "Est. June 2025"
   static String formatFoundedDate(DateTime createdAt) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return 'Est. ${months[createdAt.month - 1]} ${createdAt.year}';
   }

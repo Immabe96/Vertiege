@@ -18,17 +18,21 @@ class SeasonWorldScore {
   });
 
   /// Trend direction for UI display: >0 trending up, <0 trending down, 0 neutral.
-  int get trend => compositeScore > 100 ? 1 : compositeScore > 0 ? 0 : -1;
+  int get trend => compositeScore > 100
+      ? 1
+      : compositeScore > 0
+      ? 0
+      : -1;
 
   SeasonWorldScore copyWith({int? rank}) => SeasonWorldScore(
-        worldId: worldId,
-        worldName: worldName,
-        activityScore: activityScore,
-        memberGrowth: memberGrowth,
-        achievementCount: achievementCount,
-        compositeScore: compositeScore,
-        rank: rank ?? this.rank,
-      );
+    worldId: worldId,
+    worldName: worldName,
+    activityScore: activityScore,
+    memberGrowth: memberGrowth,
+    achievementCount: achievementCount,
+    compositeScore: compositeScore,
+    rank: rank ?? this.rank,
+  );
 }
 
 class Season {
@@ -58,13 +62,11 @@ class Season {
   /// Which week of the season we are in (1-indexed, max 4).
   int get currentWeek => (daysElapsed ~/ 7).clamp(0, 3) + 1;
 
-  double get progress =>
-      (daysElapsed / totalDays).clamp(0.0, 1.0);
+  double get progress => (daysElapsed / totalDays).clamp(0.0, 1.0);
 
   /// Whether this season has ended.
   bool get hasEnded => DateTime.now().isAfter(endDate);
 
   /// Top score, or null if no scores.
-  SeasonWorldScore? get topScore =>
-      scores.isNotEmpty ? scores.first : null;
+  SeasonWorldScore? get topScore => scores.isNotEmpty ? scores.first : null;
 }

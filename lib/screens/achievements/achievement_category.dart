@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/achievement.dart';
 import '../../config/achievements.dart';
 import '../../state/achievement_provider.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../widgets/achievements/achievement_card.dart';
 import '../../widgets/core/empty_state.dart';
 
@@ -38,7 +38,7 @@ class AchievementCategoryScreen extends ConsumerWidget {
         title: Text(category[0].toUpperCase() + category.substring(1)),
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         itemCount: catAchievements.length,
         itemBuilder: (context, index) {
           final achievement = catAchievements[index];
@@ -50,7 +50,7 @@ class AchievementCategoryScreen extends ConsumerWidget {
               .firstOrNull;
           return Padding(
             padding: EdgeInsets.only(
-              bottom: index < catAchievements.length - 1 ? Spacing.sm : 0,
+              bottom: index < catAchievements.length - 1 ? VSpacing.sm : 0,
             ),
             child: AchievementCard(
               achievement: achievement,

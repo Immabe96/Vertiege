@@ -51,10 +51,7 @@ class AllyService {
 
   static Future<void> declineAllegianceRequest(String requestId) async {
     if (!isSupabaseConfigured()) return;
-    await getSupabase()
-        .from('allies')
-        .delete()
-        .eq('id', requestId);
+    await getSupabase().from('allies').delete().eq('id', requestId);
   }
 
   static Future<void> blockResident(String requestId) async {

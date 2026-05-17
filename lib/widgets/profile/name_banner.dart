@@ -16,13 +16,23 @@ class NameBanner extends StatelessWidget {
       final cosmetic = professionCosmetics[profession];
       if (cosmetic != null) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.lg,
+            vertical: Spacing.sm,
+          ),
           decoration: BoxDecoration(
             color: cosmetic.color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
             border: Border.all(color: cosmetic.color.withValues(alpha: 0.3)),
           ),
-          child: Text(name, style: TextStyle(color: cosmetic.color, fontWeight: FontWeights.bold, fontSize: FontSizes.headingCard)),
+          child: Text(
+            name,
+            style: TextStyle(
+              color: cosmetic.color,
+              fontWeight: FontWeights.bold,
+              fontSize: FontSizes.headingCard,
+            ),
+          ),
         );
       }
     }

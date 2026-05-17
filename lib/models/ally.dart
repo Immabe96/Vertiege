@@ -32,15 +32,19 @@ class Ally {
         (s) => s.name == statusStr,
         orElse: () => AllegianceStatus.pending,
       ),
-      createdAt: DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ?? 0,
+      createdAt:
+          DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ??
+          0,
     );
   }
 
   Map<String, dynamic> toSupabase() => {
-        'id': id,
-        'requester_id': requesterId,
-        'receiver_id': receiverId,
-        'status': status.name,
-        'created_at': DateTime.fromMillisecondsSinceEpoch(createdAt).toIso8601String(),
-      };
+    'id': id,
+    'requester_id': requesterId,
+    'receiver_id': receiverId,
+    'status': status.name,
+    'created_at': DateTime.fromMillisecondsSinceEpoch(
+      createdAt,
+    ).toIso8601String(),
+  };
 }

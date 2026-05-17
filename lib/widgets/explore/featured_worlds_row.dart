@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/world.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../worlds/world_card.dart';
 
 class FeaturedWorldsRow extends StatelessWidget {
@@ -14,9 +14,9 @@ class FeaturedWorldsRow extends StatelessWidget {
       height: 260,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
         itemCount: worlds.length,
-        separatorBuilder: (_, _) => const SizedBox(width: Spacing.md),
+        separatorBuilder: (_, _) => const SizedBox(width: VSpacing.md),
         itemBuilder: (context, index) {
           return SizedBox(
             width: 180,

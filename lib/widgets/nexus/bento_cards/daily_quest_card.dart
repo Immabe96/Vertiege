@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../state/quest_provider.dart';
-import '../../../theme/colors.dart';
+import '../../../theme/v_colors.dart';
 import '../../../theme/design_system.dart';
 
 /// Small card showing active quest progress.
@@ -19,14 +19,18 @@ class DailyQuestCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.explore, size: IconSizes.md, color: AppColors.tertiary),
+              const Icon(
+                Icons.explore,
+                size: IconSizes.md,
+                color: VColors.tertiary,
+              ),
               const SizedBox(width: Spacing.xs),
               const Text(
                 'DAILY QUESTS',
                 style: TextStyle(
                   fontSize: FontSizes.labelSm,
                   fontWeight: FontWeights.semiBold,
-                  color: AppColors.inkSecondary,
+                  color: VColors.onSurfaceVariant,
                   letterSpacing: LetterSpacing.label,
                 ),
               ),
@@ -35,7 +39,10 @@ class DailyQuestCard extends ConsumerWidget {
           const SizedBox(height: Spacing.md),
           const Text(
             'No active quests',
-            style: TextStyle(fontSize: FontSizes.bodyMd, color: AppColors.inkMuted),
+            style: TextStyle(
+              fontSize: FontSizes.bodyMd,
+              color: VColors.outline,
+            ),
           ),
         ],
       );
@@ -51,7 +58,11 @@ class DailyQuestCard extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.explore, size: IconSizes.md, color: AppColors.tertiary),
+            const Icon(
+              Icons.explore,
+              size: IconSizes.md,
+              color: VColors.tertiary,
+            ),
             const SizedBox(width: Spacing.xs),
             const Expanded(
               child: Text(
@@ -59,7 +70,7 @@ class DailyQuestCard extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: FontSizes.labelSm,
                   fontWeight: FontWeights.semiBold,
-                  color: AppColors.inkSecondary,
+                  color: VColors.onSurfaceVariant,
                   letterSpacing: LetterSpacing.label,
                 ),
               ),
@@ -69,25 +80,28 @@ class DailyQuestCard extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: FontSizes.headlineMd,
                 fontWeight: FontWeights.bold,
-                color: AppColors.tertiary,
+                color: VColors.tertiary,
               ),
             ),
           ],
         ),
         const SizedBox(height: Spacing.sm),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 4,
-            backgroundColor: AppColors.glassBorder,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.tertiary),
+            backgroundColor: VColors.glassBorder,
+            valueColor: const AlwaysStoppedAnimation<Color>(VColors.tertiary),
           ),
         ),
         const SizedBox(height: Spacing.sm),
         Text(
           '${quests.where((q) => q.isComplete && !q.claimed).length} ready to claim',
-          style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+          style: const TextStyle(
+            fontSize: FontSizes.labelSm,
+            color: VColors.outline,
+          ),
         ),
       ],
     );

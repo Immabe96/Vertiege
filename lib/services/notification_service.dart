@@ -6,9 +6,11 @@ class NotificationService {
   NotificationService._();
 
   /// Fetches the latest 50 notifications for a given user.
-  static Future<List<AppNotification>> getNotifications(String recipientId) async {
+  static Future<List<AppNotification>> getNotifications(
+    String recipientId,
+  ) async {
     if (!isSupabaseConfigured()) return [];
-    
+
     try {
       final client = getSupabase();
       final data = await client
@@ -17,9 +19,12 @@ class NotificationService {
           .eq('recipient_id', recipientId)
           .order('created_at', ascending: false)
           .limit(50);
-      
+
       return (data as List)
-          .map((json) => AppNotification.fromSupabase(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                AppNotification.fromSupabase(json as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
       // Log error or handle gracefully
@@ -30,7 +35,7 @@ class NotificationService {
   /// Marks a specific notification as read in the database.
   static Future<void> markRead(String notificationId) async {
     if (!isSupabaseConfigured()) return;
-    
+
     try {
       final client = getSupabase();
       await client
@@ -45,7 +50,7 @@ class NotificationService {
   /// Marks all unread notifications as read for a given user.
   static Future<void> markAllRead(String recipientId) async {
     if (!isSupabaseConfigured()) return;
-    
+
     try {
       final client = getSupabase();
       await client
@@ -65,7 +70,7 @@ class NotificationService {
     required AppNotification notification,
   }) async {
     if (!isSupabaseConfigured()) return;
-    
+
     try {
       final client = getSupabase();
       await client

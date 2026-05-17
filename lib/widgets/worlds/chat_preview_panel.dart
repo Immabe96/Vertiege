@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/channel.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
 
@@ -60,7 +60,9 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    ref.read(chatProvider.notifier).sendChannelMessage(
+    ref
+        .read(chatProvider.notifier)
+        .sendChannelMessage(
           worldId: widget.worldId,
           channelId: _generalChannelId!,
           senderId: resident.id,
@@ -73,7 +75,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
 
   @override
   Widget build(BuildContext context) {
-    // Re-check if channels just loaded
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (!_loaded) {
       _findAndLoadGeneral();
     }
@@ -110,8 +112,8 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   width: 3,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: AppColors.tertiary,
-                    borderRadius: BorderRadius.circular(2),
+                    color: VColors.tertiary,
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -120,7 +122,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   style: TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.semiBold,
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -129,7 +131,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   '#general',
                   style: TextStyle(
                     fontSize: FontSizes.labelSm,
-                    color: AppColors.inkMuted,
+                    color: VColors.outline,
                   ),
                 ),
               ],
@@ -143,7 +145,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   'No messages yet. Start the conversation!',
                   style: TextStyle(
                     fontSize: FontSizes.bodyMd,
-                    color: AppColors.inkMuted,
+                    color: VColors.outline,
                   ),
                 ),
               )
@@ -161,14 +163,14 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                           style: const TextStyle(
                             fontSize: FontSizes.labelSm,
                             fontWeight: FontWeights.semiBold,
-                            color: AppColors.primary,
+                            color: VColors.primary,
                           ),
                         ),
                         TextSpan(
                           text: '  ${msg.content}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: FontSizes.bodyMd,
-                            color: AppColors.ink,
+                            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                           ),
                         ),
                       ],
@@ -181,19 +183,24 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
             GlassPanel(
               blur: 8,
               padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md, vertical: Spacing.xs),
+                horizontal: Spacing.md,
+                vertical: Spacing.xs,
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      style: const TextStyle(
-                          fontSize: FontSizes.bodyMd, color: AppColors.ink),
+                      style: TextStyle(
+                        fontSize: FontSizes.bodyMd,
+                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      ),
                       decoration: const InputDecoration(
                         hintText: 'Type a message...',
                         hintStyle: TextStyle(
-                            fontSize: FontSizes.bodyMd,
-                            color: AppColors.inkMuted),
+                          fontSize: FontSizes.bodyMd,
+                          color: VColors.outline,
+                        ),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 10),
                       ),
@@ -204,10 +211,12 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   IconButton(
                     onPressed: _sendMessage,
                     icon: const Icon(Icons.send, size: IconSizes.sm),
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 36, minHeight: 36),
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
                   ),
                 ],
               ),
@@ -225,8 +234,8 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   }
                 },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.tertiary,
-                  side: const BorderSide(color: AppColors.glassBorder),
+                  foregroundColor: VColors.tertiary,
+                  side: const BorderSide(color: VColors.glassBorder),
                 ),
                 child: const Text('VIEW CHANNEL'),
               ),

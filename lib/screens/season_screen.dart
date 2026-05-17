@@ -1,16 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../models/season.dart';
 import '../services/season_service.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
-import '../theme/colors.dart';
-import '../theme/design_system.dart';
+import '../theme/v_colors.dart';
+import '../theme/v_tokens.dart';
 import '../utils/world_assets.dart';
 import '../widgets/core/fade_in.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/shimmer.dart';
 
 class SeasonScreen extends ConsumerStatefulWidget {
@@ -28,6 +26,8 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
     final season = SeasonService.getCurrentSeason(worlds: allWorlds);
     final rankings = season.scores;
     final isLoaded = !worldState.isLoading;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final resident = ref.read(residentProvider).resident;
     final myWorlds = resident != null
@@ -44,42 +44,32 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
         .toList();
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           'Sovereign Seasons',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: FontSizes.bodyLg,
-            fontWeight: FontWeights.semiBold,
-            color: AppColors.tertiary,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: VFontWeight.semiBold,
+            color: VColors.tertiary,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
       ),
       body: isLoaded
           ? CustomScrollView(
               slivers: [
-                // ── Hero section ──────────────────────────────
                 SliverToBoxAdapter(child: _SeasonHero(season: season)),
-
-                // ── Progress bar ──────────────────────────────
                 SliverToBoxAdapter(child: _SeasonProgress(season: season)),
-
-                // ── Countdown ─────────────────────────────────
                 SliverToBoxAdapter(child: _CountdownBanner(season: season)),
-
-                // ── Podium (top 3) ────────────────────────────
                 if (rankings.isNotEmpty)
                   SliverToBoxAdapter(child: _PodiumSection(rankings: rankings)),
-
-                // ── Full rankings header ──────────────────────
                 if (rankings.length > 3)
                   SliverToBoxAdapter(
                     child: _SectionHeader(title: 'Full Rankings'),
                   ),
-
-                // ── Rankings list (rest of top 10) ────────────
                 if (rankings.length > 3)
                   SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
@@ -87,8 +77,6 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                       return _RankingRow(score: score, index: index + 3);
                     }, childCount: rankings.length - 3),
                   ),
-
-                // ── My Worlds section ─────────────────────────
                 if (myRankedWorlds.isNotEmpty) ...[
                   SliverToBoxAdapter(
                     child: _SectionHeader(title: 'Your Worlds'),
@@ -100,34 +88,38 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                     }, childCount: myRankedWorlds.length),
                   ),
                 ],
-
-                // ── Bottom padding ────────────────────────────
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: Spacing.section),
+                  child: SizedBox(height: VSpacing.xxl),
                 ),
               ],
             )
-          : _buildLoading(),
+          : _buildLoading(isDark),
     );
   }
 
-  Widget _buildLoading() {
+  Widget _buildLoading(bool isDark) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.sm,
-        Spacing.md,
-        Spacing.sm,
+        VSpacing.md,
+        VSpacing.sm,
+        VSpacing.md,
+        VSpacing.sm,
       ),
       itemCount: 6,
       itemBuilder: (_, index) => Padding(
-        padding: const EdgeInsets.only(bottom: Spacing.sm + 4),
+        padding: const EdgeInsets.only(bottom: 12),
         child: Container(
           height: 80,
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
-            border: Border.all(color: AppColors.glassBorder),
+            color: isDark
+                ? VColors.surfaceContainerDark
+                : VColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(VRadius.xl),
+            border: Border.all(
+              color: isDark
+                  ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                  : VColors.outlineVariant.withValues(alpha: 0.3),
+            ),
           ),
           child: const Pulse(borderRadius: 0),
         ),
@@ -136,10 +128,6 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Hero Section — season name, gold glow background
-// ────────────────────────────────────────────────────────────────
-
 class _SeasonHero extends StatelessWidget {
   final Season season;
 
@@ -147,66 +135,62 @@ class _SeasonHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
-        Spacing.xl,
-        Spacing.section + Spacing.xxl,
-        Spacing.xl,
-        Spacing.xl,
+        VSpacing.xl,
+        100,
+        VSpacing.xl,
+        VSpacing.xl,
       ),
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.topCenter,
           radius: 1.5,
           colors: [
-            AppColors.tertiary.withValues(alpha: 0.08),
-            AppColors.tertiary.withValues(alpha: 0.03),
+            VColors.tertiary.withValues(alpha: 0.08),
+            VColors.tertiary.withValues(alpha: 0.03),
             Colors.transparent,
           ],
         ),
       ),
       child: Column(
         children: [
-          // Sovereign Seasons label
           FadeIn(
             delayMs: 60,
             child: Text(
               'SOVEREIGN SEASONS',
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.bold,
-                letterSpacing: LetterSpacing.label,
-                color: AppColors.tertiary.withValues(alpha: 0.8),
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: VFontWeight.bold,
+                letterSpacing: 1.5,
+                color: VColors.tertiary.withValues(alpha: 0.8),
               ),
             ),
           ),
-          const SizedBox(height: Spacing.sm),
-          // Season name
+          const SizedBox(height: VSpacing.sm),
           FadeIn(
             delayMs: 120,
             child: Text(
               season.name.toUpperCase(),
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: FontSizes.displayXl,
-                fontWeight: FontWeights.bold,
-                height: LineHeight.display,
-                letterSpacing: LetterSpacing.display,
-                color: AppColors.tertiary,
+              style: theme.textTheme.displayLarge?.copyWith(
+                fontWeight: VFontWeight.bold,
+                color: VColors.tertiary,
               ),
             ),
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           FadeIn(
             delayMs: 180,
             child: Text(
               'World activity is ranked from live activity signals',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: FontSizes.bodyMd,
-                color: AppColors.inkSecondary,
-                height: LineHeight.body,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
           ),
@@ -216,10 +200,6 @@ class _SeasonHero extends StatelessWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Season Progress Bar
-// ────────────────────────────────────────────────────────────────
-
 class _SeasonProgress extends StatelessWidget {
   final Season season;
 
@@ -227,10 +207,12 @@ class _SeasonProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.xl,
-        vertical: Spacing.md,
+        horizontal: VSpacing.xl,
+        vertical: VSpacing.md,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,31 +222,31 @@ class _SeasonProgress extends StatelessWidget {
             children: [
               Text(
                 'Week ${season.currentWeek} of 4',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: FontSizes.bodyMd,
-                  fontWeight: FontWeights.semiBold,
-                  color: AppColors.ink,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                 ),
               ),
               Text(
                 '${(season.progress * 100).round()}%',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.bold,
-                  color: AppColors.tertiary,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                  color: VColors.tertiary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
+            borderRadius: BorderRadius.circular(VRadius.sm),
             child: LinearProgressIndicator(
               value: season.progress,
               minHeight: 6,
-              backgroundColor: AppColors.glassBorder,
+              backgroundColor: isDark
+                  ? VColors.surfaceContainerHighDark
+                  : VColors.surfaceContainerHigh,
               valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.tertiary,
+                VColors.tertiary,
               ),
             ),
           ),
@@ -274,10 +256,6 @@ class _SeasonProgress extends StatelessWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Countdown Banner
-// ────────────────────────────────────────────────────────────────
-
 class _CountdownBanner extends StatelessWidget {
   final Season season;
 
@@ -285,33 +263,35 @@ class _CountdownBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.xl),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.lg,
-          vertical: Spacing.md,
+          horizontal: VSpacing.lg,
+          vertical: VSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.tertiary.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
-          border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.15)),
+          color: VColors.tertiary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(VRadius.xl),
+          border: Border.all(
+            color: VColors.tertiary.withValues(alpha: 0.2),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
               Icons.hourglass_bottom,
-              size: IconSizes.md,
-              color: AppColors.tertiary,
+              size: VIconSize.md,
+              color: VColors.tertiary,
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Text(
               '${season.daysRemaining} days remaining in this season',
-              style: TextStyle(
-                fontSize: FontSizes.bodyMd,
-                fontWeight: FontWeights.semiBold,
-                color: AppColors.tertiary,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: VFontWeight.semiBold,
+                color: VColors.tertiary,
               ),
             ),
           ],
@@ -320,10 +300,6 @@ class _CountdownBanner extends StatelessWidget {
     );
   }
 }
-
-// ────────────────────────────────────────────────────────────────
-// Podium Section — gold / silver / bronze
-// ────────────────────────────────────────────────────────────────
 
 class _PodiumSection extends StatelessWidget {
   final List<SeasonWorldScore> rankings;
@@ -335,23 +311,22 @@ class _PodiumSection extends StatelessWidget {
     final top3 = rankings.take(3).toList();
     if (top3.isEmpty) return const SizedBox.shrink();
 
-    // Arrange: 2nd (silver) / 1st (gold) / 3rd (bronze)
     final podiumOrder = <SeasonWorldScore>[];
-    if (top3.length > 1) podiumOrder.add(top3[1]); // silver (2nd)
-    podiumOrder.add(top3[0]); // gold (1st) — center, tallest
-    if (top3.length > 2) podiumOrder.add(top3[2]); // bronze (3rd)
+    if (top3.length > 1) podiumOrder.add(top3[1]);
+    podiumOrder.add(top3[0]);
+    if (top3.length > 2) podiumOrder.add(top3[2]);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.xl,
-        Spacing.md,
-        Spacing.md,
+        VSpacing.md,
+        VSpacing.xl,
+        VSpacing.md,
+        VSpacing.md,
       ),
       child: Column(
         children: [
           _SectionHeader(title: 'Leaderboard'),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -368,10 +343,10 @@ class _PodiumSection extends StatelessWidget {
                       ? 180.0
                       : 150.0,
                   medalColor: isGold
-                      ? AppColors.tertiary
+                      ? VColors.tertiary
                       : isSilver
-                      ? AppColors.silver
-                      : AppColors.bronze,
+                      ? VColors.secondary
+                      : VColors.warning,
                   medalIcon: isGold
                       ? Icons.emoji_events
                       : isSilver
@@ -386,10 +361,6 @@ class _PodiumSection extends StatelessWidget {
     );
   }
 }
-
-// ────────────────────────────────────────────────────────────────
-// Podium Card — medal-colored GlassPanel
-// ────────────────────────────────────────────────────────────────
 
 class _PodiumCard extends StatelessWidget {
   final SeasonWorldScore score;
@@ -406,15 +377,19 @@ class _PodiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
       child: GestureDetector(
         onTap: () => context.push('/explore/${score.worldId}'),
         child: Container(
           height: height,
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+            color: isDark
+                ? VColors.surfaceContainerDark
+                : VColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(color: medalColor.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
@@ -427,42 +402,37 @@ class _PodiumCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Medal rank number
               Text(
                 '#${score.rank}',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: FontSizes.headlineLg,
-                  fontWeight: FontWeights.bold,
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontWeight: VFontWeight.bold,
                   color: medalColor,
                 ),
               ),
-              const SizedBox(height: Spacing.xs),
-              // Medal icon
-              Icon(medalIcon, size: IconSizes.xl, color: medalColor),
-              const SizedBox(height: Spacing.sm),
-              // World name
+              const SizedBox(height: VSpacing.xs),
+              Icon(medalIcon, size: VIconSize.xl, color: medalColor),
+              const SizedBox(height: VSpacing.sm),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
                 child: Text(
                   score.worldName,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: FontSizes.bodyMd,
-                    fontWeight: FontWeights.bold,
-                    color: AppColors.ink,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: VFontWeight.bold,
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                   ),
                 ),
               ),
-              const SizedBox(height: Spacing.xs),
-              // Composite score
+              const SizedBox(height: VSpacing.xs),
               Text(
                 '${score.compositeScore} pts',
-                style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.semiBold,
-                  color: AppColors.inkSecondary,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                 ),
               ),
             ],
@@ -473,10 +443,6 @@ class _PodiumCard extends StatelessWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Section Header
-// ────────────────────────────────────────────────────────────────
-
 class _SectionHeader extends StatelessWidget {
   final String title;
 
@@ -484,12 +450,13 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.sm + 4,
-        Spacing.md,
-        Spacing.xs,
+        VSpacing.md,
+        12,
+        VSpacing.md,
+        VSpacing.xs,
       ),
       child: Row(
         children: [
@@ -497,18 +464,17 @@ class _SectionHeader extends StatelessWidget {
             width: 3,
             height: 20,
             decoration: BoxDecoration(
-              color: AppColors.tertiary,
-              borderRadius: BorderRadius.circular(2),
+              color: VColors.tertiary,
+              borderRadius: BorderRadius.circular(VRadius.sm),
             ),
           ),
-          const SizedBox(width: Spacing.sm),
+          const SizedBox(width: VSpacing.sm),
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: FontSizes.headlineLg,
-                fontWeight: FontWeights.semiBold,
-                color: AppColors.primary,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: VFontWeight.semiBold,
+                color: VColors.primary,
               ),
             ),
           ),
@@ -517,10 +483,6 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
-
-// ────────────────────────────────────────────────────────────────
-// Ranking Row — GlassPanel, numbered, tappable
-// ────────────────────────────────────────────────────────────────
 
 class _RankingRow extends StatelessWidget {
   final SeasonWorldScore score;
@@ -535,60 +497,70 @@ class _RankingRow extends StatelessWidget {
   }
 
   Color _trendColor() {
-    if (score.trend > 0) return AppColors.success;
-    if (score.trend < 0) return AppColors.error;
-    return AppColors.inkMuted;
+    if (score.trend > 0) return VColors.success;
+    if (score.trend < 0) return VColors.error;
+    return VColors.onSurfaceVariant;
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final worldIcon = WorldAssets.iconForWorld(score.worldId);
     final worldAccent = WorldAssets.accentForWorld(score.worldId);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.xs,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.xs,
       ),
       child: GestureDetector(
         onTap: () => context.push('/explore/${score.worldId}'),
-        child: GlassPanel(
+        child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.lg,
-            vertical: Spacing.md,
+            horizontal: VSpacing.lg,
+            vertical: VSpacing.md,
           ),
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          decoration: BoxDecoration(
+            color: isDark
+                ? VColors.surfaceContainerDark
+                : VColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(VRadius.xl),
+            border: Border.all(
+              color: isDark
+                  ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                  : VColors.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
           child: Row(
             children: [
-              // Rank number
               SizedBox(
                 width: 36,
                 child: Text(
                   '#${score.rank}',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.bold,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: VFontWeight.bold,
                     color: score.rank <= 3
-                        ? AppColors.tertiary
-                        : AppColors.inkMuted,
+                        ? VColors.tertiary
+                        : (isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant),
                   ),
                 ),
               ),
-              const SizedBox(width: Spacing.md),
-              // World icon
+              const SizedBox(width: VSpacing.md),
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
                   color: worldAccent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
                   border: Border.all(color: worldAccent.withValues(alpha: 0.2)),
                 ),
-                child: Icon(worldIcon, size: IconSizes.md, color: worldAccent),
+                child: Icon(worldIcon, size: VIconSize.md, color: worldAccent),
               ),
-              const SizedBox(width: Spacing.md),
-              // World name + sub-label
+              const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -597,10 +569,9 @@ class _RankingRow extends StatelessWidget {
                       score.worldName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: FontSizes.bodyMd,
-                        fontWeight: FontWeights.bold,
-                        color: AppColors.ink,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -608,24 +579,23 @@ class _RankingRow extends StatelessWidget {
                       'Activity: ${score.activityScore}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: FontSizes.labelSm,
-                        color: AppColors.inkMuted,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Composite score + trend
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     '${score.compositeScore}',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: FontSizes.bodyLg,
-                      fontWeight: FontWeights.bold,
-                      color: AppColors.tertiary,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: VFontWeight.bold,
+                      color: VColors.tertiary,
                     ),
                   ),
                   Row(
@@ -633,15 +603,16 @@ class _RankingRow extends StatelessWidget {
                     children: [
                       Icon(
                         _trendIcon(),
-                        size: IconSizes.xs,
+                        size: VIconSize.xs,
                         color: _trendColor(),
                       ),
                       const SizedBox(width: 2),
                       Text(
                         'pts',
-                        style: TextStyle(
-                          fontSize: FontSizes.labelSm,
-                          color: AppColors.inkMuted,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
                         ),
                       ),
                     ],

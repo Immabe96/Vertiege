@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../models/resident.dart';
 import '../../services/permission_service.dart';
@@ -29,6 +29,7 @@ class WorldFeedTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final eventPosts = posts
         .where((p) => (p as dynamic).isEvent == true)
         .toList();
@@ -38,7 +39,6 @@ class WorldFeedTab extends ConsumerWidget {
 
     return Column(
       children: [
-        // Post input or locked notice
         if (resident != null &&
             world != null &&
             WorldPermissions.canPost(resident!, worldId, world.sovereignId))
@@ -50,17 +50,17 @@ class WorldFeedTab extends ConsumerWidget {
               padding: const EdgeInsets.all(Spacing.md),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.lock,
                     size: IconSizes.md,
-                    color: AppColors.inkMuted,
+                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                   ),
                   const SizedBox(width: Spacing.sm + 4),
                   Expanded(
                     child: Text(
                       'Member+ required to post',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.inkMuted,
+                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -94,7 +94,6 @@ class WorldFeedTab extends ConsumerWidget {
                   title: 'No posts yet',
                   description: 'Be the first to post in this world',
                   icon: Icons.auto_awesome,
-                  imageAsset: 'assets/generated/empty-feed.jpg',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.only(

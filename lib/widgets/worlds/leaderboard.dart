@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/world_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/fade_in.dart';
 import '../core/loading_state.dart';
@@ -86,9 +86,9 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.glassBackground,
+          color: VColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-          border: Border.all(color: AppColors.glassBorder),
+          border: Border.all(color: VColors.glassBorder),
         ),
         child: Padding(
           padding: const EdgeInsets.all(Spacing.lg),
@@ -123,9 +123,9 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
+        color: VColors.glassBackground,
         borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: VColors.glassBorder),
       ),
       child: Padding(
         padding: const EdgeInsets.all(Spacing.md),
@@ -137,7 +137,7 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
                 Icon(
                   Icons.leaderboard,
                   size: IconSizes.md,
-                  color: AppColors.beeYellow,
+                  color: VColors.achievementFinance,
                 ),
                 const SizedBox(width: Spacing.sm),
                 Text(
@@ -215,13 +215,13 @@ class _RankBadge extends StatelessWidget {
     final IconData icon;
     switch (rank) {
       case 1:
-        bg = AppColors.tertiary;
+        bg = VColors.tertiary;
         icon = Icons.emoji_events;
       case 2:
-        bg = AppColors.silver;
+        bg = VColors.outline;
         icon = Icons.military_tech;
       case 3:
-        bg = AppColors.bronze;
+        bg = VColors.outlineVariant;
         icon = Icons.workspace_premium;
       default:
         return Container(

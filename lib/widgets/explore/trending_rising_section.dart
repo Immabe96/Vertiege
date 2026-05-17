@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class TrendingRisingSection extends StatelessWidget {
@@ -22,12 +22,18 @@ class TrendingRisingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.xs),
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.md,
+            0,
+            Spacing.md,
+            Spacing.xs,
+          ),
           child: Row(
             children: [
               Container(
@@ -35,13 +41,13 @@ class TrendingRisingSection extends StatelessWidget {
                 height: 20,
                 decoration: BoxDecoration(
                   color: badgeColor,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
               ),
               const SizedBox(width: Spacing.sm),
               Text(
                 title,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.manrope(
                   fontSize: FontSizes.headlineLg,
                   fontWeight: FontWeights.semiBold,
                   color: badgeColor,
@@ -65,9 +71,11 @@ class TrendingRisingSection extends StatelessWidget {
                   width: 220,
                   padding: const EdgeInsets.all(Spacing.md),
                   decoration: BoxDecoration(
-                    color: AppColors.glassBackground,
-                    borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-                    border: Border.all(color: AppColors.glassBorder),
+                    color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+                    borderRadius: BorderRadius.circular(
+                      RadiusTokens.cardFeatured,
+                    ),
+                    border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
                   ),
                   child: Row(
                     children: [
@@ -79,7 +87,9 @@ class TrendingRisingSection extends StatelessWidget {
                           borderRadius: BorderRadius.circular(RadiusTokens.md),
                         ),
                         child: Icon(
-                          title == 'Trending' ? Icons.trending_up : Icons.trending_flat,
+                          title == 'Trending'
+                              ? Icons.trending_up
+                              : Icons.trending_flat,
                           color: badgeColor,
                           size: IconSizes.md,
                         ),
@@ -94,7 +104,7 @@ class TrendingRisingSection extends StatelessWidget {
                               world.name,
                               style: theme.textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeights.bold,
-                                color: AppColors.ink,
+                                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -102,12 +112,16 @@ class TrendingRisingSection extends StatelessWidget {
                             const SizedBox(height: 2),
                             Row(
                               children: [
-                                const Icon(Icons.people, size: 12, color: AppColors.inkMuted),
+                                Icon(
+                                  Icons.people,
+                                  size: 12,
+                                  color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
+                                ),
                                 const SizedBox(width: 2),
                                 Text(
                                   '${world.memberCount}',
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: AppColors.inkMuted,
+                                    color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                                   ),
                                 ),
                                 const SizedBox(width: Spacing.sm),
@@ -118,7 +132,9 @@ class TrendingRisingSection extends StatelessWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: badgeColor.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                                    borderRadius: BorderRadius.circular(
+                                      RadiusTokens.chip,
+                                    ),
                                   ),
                                   child: Text(
                                     badgeLabel,

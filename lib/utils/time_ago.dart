@@ -90,8 +90,8 @@ String formatChatTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
       ? dateTime.hour - 12
       : dateTime.hour == 0
-          ? 12
-          : dateTime.hour;
+      ? 12
+      : dateTime.hour;
   final minute = dateTime.minute.toString().padLeft(2, '0');
   final period = dateTime.hour >= 12 ? 'PM' : 'AM';
   final timeStr = '$hour:$minute $period';
@@ -105,14 +105,34 @@ String formatChatTime(DateTime dateTime) {
     return '${weekdays[dateTime.weekday - 1]}, $timeStr';
   } else if (dateTime.year == now.year) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[dateTime.month - 1]} ${dateTime.day}, $timeStr';
   } else {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}, $timeStr';
   }

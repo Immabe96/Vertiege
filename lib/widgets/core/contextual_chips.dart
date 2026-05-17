@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
 import '../../state/quest_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 /// Dynamically renders contextual chips based on the resident's current state:
@@ -33,7 +33,7 @@ class ContextualChips extends ConsumerWidget {
           _ContextChip(
             icon: Icons.auto_awesome,
             label: 'Getting Started',
-            color: AppColors.semanticSuccess,
+            color: VColors.success,
             onTap: () => context.push('/onboarding'),
           ),
         );
@@ -45,7 +45,7 @@ class ContextualChips extends ConsumerWidget {
           _ContextChip(
             icon: Icons.shield,
             label: 'Governance',
-            color: AppColors.primary,
+            color: VColors.primary,
             onTap: () => context.push('/hall-of-ascension'),
           ),
         );
@@ -61,7 +61,7 @@ class ContextualChips extends ConsumerWidget {
           _ContextChip(
             icon: Icons.mail,
             label: 'Invites ($invitesCount)',
-            color: AppColors.warning,
+            color: VColors.warning,
             onTap: () => context.go('/explore'),
           ),
         );
@@ -77,7 +77,7 @@ class ContextualChips extends ConsumerWidget {
         _ContextChip(
           icon: Icons.bolt,
           label: 'Daily Quest',
-          color: AppColors.tertiary,
+          color: VColors.tertiary,
           onTap: () => context.push('/ascension-path'),
         ),
       );

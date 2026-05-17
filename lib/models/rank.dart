@@ -50,13 +50,13 @@ class Rank {
   }
 
   Map<String, dynamic> toSupabase() => {
-        'id': id,
-        'world_id': worldId,
-        'name': name,
-        'color': colorHex,
-        'is_hoisted': isHoisted,
-        'is_mentionable': isMentionable,
-        'position': position,
-        'edicts': edicts,
-      };
+    'id': id,
+    'world_id': worldId,
+    'name': name,
+    'color': colorHex,
+    'is_hoisted': isHoisted,
+    'is_mentionable': isMentionable,
+    'position': position,
+    'edicts': edicts,
+  };
 }

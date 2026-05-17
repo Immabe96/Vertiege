@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class ExploreViewToggle extends StatelessWidget {
@@ -29,7 +29,7 @@ class ExploreViewToggle extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.12)
+                ? VColors.primary.withValues(alpha: 0.12)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
@@ -40,16 +40,17 @@ class ExploreViewToggle extends StatelessWidget {
               Icon(
                 icon,
                 size: IconSizes.sm,
-                color: selected ? AppColors.primary : AppColors.inkMuted,
+                color: selected ? VColors.primary : VColors.outline,
               ),
               const SizedBox(width: Spacing.xs),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: FontSizes.labelSm,
-                  fontWeight:
-                      selected ? FontWeights.semiBold : FontWeights.regular,
-                  color: selected ? AppColors.primary : AppColors.inkMuted,
+                  fontWeight: selected
+                      ? FontWeights.semiBold
+                      : FontWeights.regular,
+                  color: selected ? VColors.primary : VColors.outline,
                 ),
               ),
             ],

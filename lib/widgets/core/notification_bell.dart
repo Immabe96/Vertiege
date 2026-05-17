@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/notification_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class NotificationBell extends ConsumerStatefulWidget {
@@ -59,8 +59,9 @@ class _NotificationBellState extends ConsumerState<NotificationBell>
       _pulseController.reset();
     }
 
-    final iconData =
-        unread > 0 ? Icons.notifications : Icons.notifications_outlined;
+    final iconData = unread > 0
+        ? Icons.notifications
+        : Icons.notifications_outlined;
 
     return Semantics(
       label: 'Notifications, $unread unread',
@@ -77,11 +78,7 @@ class _NotificationBellState extends ConsumerState<NotificationBell>
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              Icon(
-                iconData,
-                size: widget.size,
-                color: AppColors.tertiary,
-              ),
+              Icon(iconData, size: widget.size, color: VColors.tertiary),
               if (unread > 0)
                 Positioned(
                   top: -widget.size * 0.2,
@@ -117,7 +114,7 @@ class _Badge extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.error, AppColors.crimson],
+          colors: [VColors.error, VColors.tierHustler],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -127,8 +124,8 @@ class _Badge extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
+          color: VColors.onPrimary,
+          fontSize: VFontSize.labelSm,
           fontWeight: FontWeight.bold,
         ),
         textAlign: TextAlign.center,

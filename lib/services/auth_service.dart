@@ -1,5 +1,6 @@
 import 'supabase.dart';
 import 'secure_storage_service.dart';
+import 'crash_reporter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
@@ -55,7 +56,8 @@ class AuthService {
         redirectTo: 'vertiege://auth/callback',
       );
       return true;
-    } catch (_) {
+    } catch (e, st) {
+      CrashReporter.instance.recordError(e, st, hint: 'Google OAuth signIn');
       return false;
     }
   }
@@ -68,7 +70,8 @@ class AuthService {
         redirectTo: 'vertiege://auth/callback',
       );
       return true;
-    } catch (_) {
+    } catch (e, st) {
+      CrashReporter.instance.recordError(e, st, hint: 'Apple OAuth signIn');
       return false;
     }
   }

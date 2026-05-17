@@ -132,7 +132,7 @@ class VerificationService {
     final client = getSupabase();
     await client
         .from('verification_submissions')
-        .update({'status': 'approved'})
+        .update({'status': 'verified'})
         .eq('id', submissionId);
   }
 

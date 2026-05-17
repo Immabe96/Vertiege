@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../shared/share_button.dart';
 
@@ -25,29 +25,29 @@ class AchievementShareCard extends StatelessWidget {
   Color get _categoryColor {
     switch (achievement.category) {
       case AchievementCategory.education:
-        return AppColors.achievementEducation;
+        return VColors.achievementEducation;
       case AchievementCategory.career:
-        return AppColors.achievementCareer;
+        return VColors.achievementCareer;
       case AchievementCategory.relationships:
-        return AppColors.achievementRelationships;
+        return VColors.achievementSocial;
       case AchievementCategory.health:
-        return AppColors.achievementHealth;
+        return VColors.achievementHealth;
       case AchievementCategory.skills:
-        return AppColors.achievementSkills;
+        return VColors.achievementKnowledge;
       case AchievementCategory.travel:
-        return AppColors.achievementTravel;
+        return VColors.achievementAdventure;
       case AchievementCategory.finance:
-        return AppColors.achievementFinance;
+        return VColors.achievementFinance;
       case AchievementCategory.community:
-        return AppColors.achievementCommunity;
+        return VColors.achievementSocial;
       case AchievementCategory.funny:
-        return AppColors.achievementFunny;
+        return VColors.achievementCreative;
       case AchievementCategory.creative:
-        return AppColors.achievementCreative;
+        return VColors.achievementCreative;
       case AchievementCategory.profession:
-        return AppColors.achievementProfession;
+        return VColors.achievementCareer;
       case AchievementCategory.inApp:
-        return AppColors.primary;
+        return VColors.primary;
     }
   }
 
@@ -142,7 +142,7 @@ class AchievementShareCard extends StatelessWidget {
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text(
                 'Close',
-                style: TextStyle(color: AppColors.inkMuted),
+                style: TextStyle(color: VColors.outline),
               ),
             ),
           ],
@@ -157,9 +157,9 @@ class AchievementShareCard extends StatelessWidget {
       width: 360,
       height: 360,
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.glassBorder),
+        color: VColors.surface,
+        borderRadius: BorderRadius.circular(VRadius.xxxl),
+        border: Border.all(color: VColors.glassBorder),
         boxShadow: [
           BoxShadow(
             color: _categoryColor.withValues(alpha: 0.18),
@@ -234,10 +234,10 @@ class AchievementShareCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.manrope(
                     fontSize: FontSizes.headlineMd,
                     fontWeight: FontWeights.bold,
-                    color: AppColors.ink,
+                    color: VColors.onSurface,
                     height: 1.2,
                   ),
                 ),
@@ -250,7 +250,7 @@ class AchievementShareCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: FontSizes.bodyMd,
-                    color: AppColors.inkSecondary,
+                    color: VColors.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),
@@ -265,10 +265,7 @@ class AchievementShareCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.surfaceElevated,
-                    AppColors.canvas,
-                  ],
+                  colors: [VColors.surfaceBright, VColors.surface],
                 ),
               ),
               padding: const EdgeInsets.symmetric(
@@ -285,10 +282,10 @@ class AchievementShareCard extends StatelessWidget {
                       vertical: Spacing.xs + 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.tertiary.withValues(alpha: 0.12),
+                      color: VColors.tertiary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(RadiusTokens.pill),
                       border: Border.all(
-                        color: AppColors.tertiary.withValues(alpha: 0.25),
+                        color: VColors.tertiary.withValues(alpha: 0.25),
                       ),
                     ),
                     child: Row(
@@ -297,7 +294,7 @@ class AchievementShareCard extends StatelessWidget {
                         Icon(
                           Icons.auto_awesome,
                           size: IconSizes.sm,
-                          color: AppColors.tertiary,
+                          color: VColors.tertiary,
                         ),
                         const SizedBox(width: Spacing.sm),
                         Text(
@@ -305,7 +302,7 @@ class AchievementShareCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: FontSizes.labelSm,
                             fontWeight: FontWeights.bold,
-                            color: AppColors.tertiary,
+                            color: VColors.tertiary,
                           ),
                         ),
                       ],
@@ -317,7 +314,7 @@ class AchievementShareCard extends StatelessWidget {
                     'Earned by ${resident.name}',
                     style: TextStyle(
                       fontSize: FontSizes.bodyMd,
-                      color: AppColors.inkSecondary,
+                      color: VColors.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -326,7 +323,7 @@ class AchievementShareCard extends StatelessWidget {
                     '${resident.tier.label}  •  $totalXp XP',
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
-                      color: AppColors.inkMuted,
+                      color: VColors.outline,
                       letterSpacing: LetterSpacing.label,
                     ),
                   ),
@@ -344,8 +341,9 @@ class AchievementShareCard extends StatelessWidget {
                           _categoryColor.withValues(alpha: 0.04),
                         ],
                       ),
-                      borderRadius:
-                          BorderRadius.circular(RadiusTokens.cardFeatured),
+                      borderRadius: BorderRadius.circular(
+                        RadiusTokens.cardFeatured,
+                      ),
                       border: Border.all(
                         color: _categoryColor.withValues(alpha: 0.15),
                       ),

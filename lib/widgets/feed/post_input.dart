@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +7,7 @@ import '../../services/storage_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
@@ -41,6 +41,7 @@ class _ImagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (uri.startsWith('http')) {
       return Image.network(
         uri,
@@ -57,9 +58,9 @@ class _ImagePreview extends StatelessWidget {
       errorBuilder: (_, _, _) => Container(
         height: height,
         width: width,
-        color: AppColors.surfaceHigh,
+        color: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
         alignment: Alignment.center,
-        child: const Icon(Icons.broken_image, color: AppColors.inkMuted),
+        child: Icon(Icons.broken_image, color: isDark ? VColors.onSurfaceVariantDark : VColors.outline),
       ),
     );
   }
@@ -210,6 +211,8 @@ class _PostInputState extends ConsumerState<PostInput>
   void _showSuggestionsOverlay() {
     _hideSuggestionsOverlay();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     _suggestionOverlay = OverlayEntry(
       builder: (context) => Positioned(
         width: 200,
@@ -220,7 +223,7 @@ class _PostInputState extends ConsumerState<PostInput>
           child: Material(
             elevation: 8,
             borderRadius: BorderRadius.circular(RadiusTokens.md),
-            color: AppColors.surfaceHigh,
+            color: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 180),
               child: ListView.builder(
@@ -238,9 +241,9 @@ class _PostInputState extends ConsumerState<PostInput>
                       ),
                       child: Text(
                         '$_suggestionType$suggestion',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: FontSizes.bodyMd,
-                          color: AppColors.ink,
+                          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                         ),
                       ),
                     ),

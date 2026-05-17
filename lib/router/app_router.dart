@@ -37,14 +37,20 @@ import '../screens/verification_review_screen.dart';
 import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
+import '../screens/challenges_screen.dart';
+import '../screens/league_screen.dart';
+import '../screens/world_discovery_screen.dart';
 import '../models/message.dart';
 import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final residentState = ref.watch(residentProvider);
-  final resident = residentState.resident;
+  final residentState = ref.watch(
+    residentProvider.select((s) => (s.resident, s.isLoading)),
+  );
+  final resident = residentState.$1;
+  final isLoading = residentState.$2;
   final supabaseClient = maybeSupabase();
 
   return GoRouter(
@@ -68,7 +74,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Authenticated with a session
-      if (residentState.isLoading) return null;
+      if (isLoading) {
+        if (location != '/splash') return '/splash';
+        return null;
+      }
 
       if (resident == null) {
         // No resident profile yet — redirect to onboarding
@@ -77,11 +86,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Authenticated with resident but hasn't completed The Gate
-      // The Gate comes AFTER basic onboarding
+      // Onboarding + Gate are now merged into a single flow
       final gateDone = resident.gateCompleted;
       if (!gateDone) {
-        if (location != '/the-gate' && location != '/onboarding') {
-          return '/the-gate';
+        if (location != '/onboarding') {
+          return '/onboarding';
         }
         return null;
       }
@@ -92,7 +101,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (location == '/create-world' && tier < 2) return '/';
       if (location == '/subscription' && tier < 2) return '/';
 
-      // Authenticated with resident — redirect away from auth/onboarding/gate pages
+      // Authenticated with resident — redirect away from auth/onboarding pages
       if (isAuthPage || location == '/onboarding' || location == '/the-gate') {
         return '/';
       }
@@ -143,6 +152,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: '/explore',
                 builder: (context, state) => const ExploreScreen(),
                 routes: [
+                  GoRoute(
+                    path: 'discover',
+                    builder: (context, state) => const WorldDiscoveryScreen(),
+                  ),
                   GoRoute(
                     path: ':worldId',
                     builder: (context, state) => WorldDetailScreen(
@@ -197,6 +210,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/shop',
+                builder: (context, state) => const CosmeticsShopScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/identity',
                 builder: (context, state) => const IdentityScreen(),
               ),
@@ -242,8 +263,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SeasonScreen(),
       ),
       GoRoute(
-        path: '/shop',
-        builder: (context, state) => const CosmeticsShopScreen(),
+        path: '/challenges',
+        builder: (context, state) => const ChallengesScreen(),
+      ),
+      GoRoute(
+        path: '/leagues',
+        builder: (context, state) => const LeagueScreen(),
       ),
       GoRoute(
         path: '/hall-of-ascension',
@@ -349,7 +374,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     }
 
     await InviteService.acceptInvite(invite.id, invite.worldId, resident.id);
-    ref.read(residentProvider.notifier).joinWorld(invite.worldId);
+    await ref.read(residentProvider.notifier).joinWorld(invite.worldId);
 
     if (mounted) context.go('/explore/${invite.worldId}');
   }

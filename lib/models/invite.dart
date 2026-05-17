@@ -37,37 +37,36 @@ class WorldInvite {
     int? uses,
     int? expiresAt,
     int? createdAt,
-  }) =>
-      WorldInvite(
-        id: id ?? this.id,
-        worldId: worldId ?? this.worldId,
-        code: code ?? this.code,
-        createdBy: createdBy ?? this.createdBy,
-        maxUses: maxUses ?? this.maxUses,
-        uses: uses ?? this.uses,
-        expiresAt: expiresAt ?? this.expiresAt,
-        createdAt: createdAt ?? this.createdAt,
-      );
+  }) => WorldInvite(
+    id: id ?? this.id,
+    worldId: worldId ?? this.worldId,
+    code: code ?? this.code,
+    createdBy: createdBy ?? this.createdBy,
+    maxUses: maxUses ?? this.maxUses,
+    uses: uses ?? this.uses,
+    expiresAt: expiresAt ?? this.expiresAt,
+    createdAt: createdAt ?? this.createdAt,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'worldId': worldId,
-        'code': code,
-        'createdBy': createdBy,
-        'maxUses': maxUses,
-        'uses': uses,
-        'expiresAt': expiresAt,
-        'createdAt': createdAt,
-      };
+    'id': id,
+    'worldId': worldId,
+    'code': code,
+    'createdBy': createdBy,
+    'maxUses': maxUses,
+    'uses': uses,
+    'expiresAt': expiresAt,
+    'createdAt': createdAt,
+  };
 
   static WorldInvite fromJson(Map<String, dynamic> json) => WorldInvite(
-        id: json['id'] ?? '',
-        worldId: json['worldId'] ?? '',
-        code: json['code'] ?? '',
-        createdBy: json['createdBy'] ?? '',
-        maxUses: json['maxUses'] ?? 0,
-        uses: json['uses'] ?? 0,
-        expiresAt: json['expiresAt'],
-        createdAt: json['createdAt'] ?? 0,
-      );
+    id: json['id'] ?? '',
+    worldId: json['worldId'] ?? '',
+    code: json['code'] ?? '',
+    createdBy: json['createdBy'] ?? '',
+    maxUses: json['maxUses'] ?? 0,
+    uses: json['uses'] ?? 0,
+    expiresAt: json['expiresAt'],
+    createdAt: json['createdAt'] ?? 0,
+  );
 }

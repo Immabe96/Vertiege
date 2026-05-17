@@ -62,10 +62,9 @@ class _ShareButtonState extends State<ShareButton> {
       final pngBytes = byteData.buffer.asUint8List();
       final tempFile = await _writeTempFile(pngBytes);
       if (tempFile != null) {
-        await Share.shareXFiles(
-          [XFile(tempFile)],
-          text: widget.shareText ?? 'Join me on Vertiege!',
-        );
+        await Share.shareXFiles([
+          XFile(tempFile),
+        ], text: widget.shareText ?? 'Join me on Vertiege!');
         widget.onShared?.call();
       }
     } finally {
@@ -102,13 +101,12 @@ class _ShareButtonState extends State<ShareButton> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color(0x99000000),
-                    borderRadius:
-                        BorderRadius.circular(28), // matches card radius
+                    borderRadius: BorderRadius.circular(
+                      28,
+                    ), // matches card radius
                   ),
                   child: const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
                   ),
                 ),
               ),

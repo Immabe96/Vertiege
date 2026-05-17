@@ -1,8 +1,8 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class XpToast {
@@ -13,10 +13,8 @@ class XpToast {
     late OverlayEntry entry;
 
     entry = OverlayEntry(
-      builder: (context) => _XpToastWidget(
-        amount: amount,
-        onDismiss: () => entry.remove(),
-      ),
+      builder: (context) =>
+          _XpToastWidget(amount: amount, onDismiss: () => entry.remove()),
     );
 
     overlay.insert(entry);
@@ -48,15 +46,17 @@ class _XpToastWidgetState extends State<_XpToastWidget>
       vsync: this,
     );
 
-    _slide = Tween<double>(begin: -60, end: 0).animate(
-      CurvedAnimation(parent: _controller, curve: AnimCurves.easeOut),
-    );
+    _slide = Tween<double>(
+      begin: -60,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _controller, curve: AnimCurves.easeOut));
     _fade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: AnimCurves.easeInOut),
     );
-    _scale = Tween<double>(begin: 0.8, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: AnimCurves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 0.8,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: AnimCurves.easeOut));
 
     _controller.forward();
 
@@ -75,6 +75,7 @@ class _XpToastWidgetState extends State<_XpToastWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Positioned(
       top: MediaQuery.of(context).padding.top + Spacing.md,
       right: Spacing.md,
@@ -85,10 +86,7 @@ class _XpToastWidgetState extends State<_XpToastWidget>
             opacity: _fade.value,
             child: Transform.translate(
               offset: Offset(0, _slide.value),
-              child: Transform.scale(
-                scale: _scale.value,
-                child: child,
-              ),
+              child: Transform.scale(scale: _scale.value, child: child),
             ),
           );
         },
@@ -102,22 +100,22 @@ class _XpToastWidgetState extends State<_XpToastWidget>
                 vertical: Spacing.sm + 2,
               ),
               decoration: BoxDecoration(
-                color: AppColors.glassBackground,
+                color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
                 borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                border: Border.all(color: AppColors.glassBorder),
+                border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
                 boxShadow: [
                   // Outer glow in gold
                   BoxShadow(
-                    color: AppColors.tertiary.withValues(
-                      alpha: AppColors.glowGoldAlpha * 1.5,
+                    color: VColors.tertiary.withValues(
+                      alpha: 0.45,
                     ),
                     blurRadius: 18,
                     offset: const Offset(0, 4),
                   ),
                   // Inner glow ring
                   BoxShadow(
-                    color: AppColors.primary.withValues(
-                      alpha: AppColors.glowVioletAlpha,
+                    color: VColors.primary.withValues(
+                      alpha: 0.3,
                     ),
                     blurRadius: 10,
                     offset: Offset.zero,
@@ -129,14 +127,14 @@ class _XpToastWidgetState extends State<_XpToastWidget>
                 children: [
                   const Icon(
                     Icons.bolt,
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     size: IconSizes.md,
                   ),
                   const SizedBox(width: Spacing.xs),
                   Text(
                     '+${widget.amount} XP',
                     style: const TextStyle(
-                      color: AppColors.tertiary,
+                      color: VColors.tertiary,
                       fontSize: FontSizes.body,
                       fontWeight: FontWeights.bold,
                     ),

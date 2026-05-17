@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class FeedTabChip extends StatelessWidget {
@@ -19,15 +19,23 @@ class FeedTabChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: AnimDurations.fast,
+        curve: AnimCurves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? theme.colorScheme.primaryContainer
-              : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
+              ? VColors.primary.withValues(alpha: 0.18)
+              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
+          borderRadius: BorderRadius.circular(RadiusTokens.full),
+          border: Border.all(
+            color: selected
+                ? VColors.primary.withValues(alpha: 0.35)
+                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -36,15 +44,17 @@ class FeedTabChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: selected ? theme.colorScheme.primary : AppColors.inkSecondary,
+                color: selected ? VColors.primary : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
               ),
               const SizedBox(width: 4),
             ],
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: selected ? theme.colorScheme.primary : AppColors.inkSecondary,
-                fontWeight: selected ? FontWeights.bold : FontWeight.normal,
+                color: selected
+                    ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                    : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+                fontWeight: selected ? FontWeights.semiBold : FontWeight.normal,
               ),
             ),
           ],

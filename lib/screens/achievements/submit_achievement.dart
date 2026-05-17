@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,9 +8,8 @@ import '../../config/achievements.dart';
 import '../../models/achievement.dart';
 import '../../services/supabase.dart';
 import '../../state/achievement_provider.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
-import '../../widgets/core/glass_panel.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 
 class SubmitAchievementScreen extends ConsumerStatefulWidget {
   const SubmitAchievementScreen({super.key});
@@ -76,6 +75,7 @@ class _SubmitAchievementScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Achievement submitted for verification'),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -103,7 +103,10 @@ class _SubmitAchievementScreenState
       await client.storage
           .from('achievement-proofs')
           .upload(fileName, File(filePath));
-      return client.storage.from('achievement-proofs').getPublicUrl(fileName);
+      final urlResult = await client.storage
+          .from('achievement-proofs')
+          .createSignedUrl(fileName, 365 * 24 * 60 * 60);
+      return urlResult;
     } catch (_) {
       return null;
     }
@@ -112,6 +115,7 @@ class _SubmitAchievementScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final achievementNotifier = ref.read(achievementProvider.notifier);
     final visibleAchievements = achievements.where((achievement) {
       return _categoryFilter == null || achievement.category == _categoryFilter;
@@ -121,37 +125,57 @@ class _SubmitAchievementScreenState
         .firstOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Submit Achievement')),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Submit Achievement',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: VFontWeight.semiBold,
+          ),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
-          Spacing.lg,
-          Spacing.md,
-          Spacing.lg,
-          Spacing.xxl,
+          VSpacing.lg,
+          VSpacing.md,
+          VSpacing.lg,
+          VSpacing.xxl,
         ),
         children: [
-          GlassPanel(
-            padding: const EdgeInsets.all(Spacing.md),
+          Container(
+            padding: const EdgeInsets.all(VSpacing.md),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(VRadius.xl),
+              border: Border.all(
+                color: isDark
+                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                    : VColors.outlineVariant.withValues(alpha: 0.3),
+              ),
+            ),
             child: Row(
               children: [
                 Container(
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: AppColors.tertiary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(RadiusTokens.full),
+                    color: VColors.tertiary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(VRadius.pill),
                     border: Border.all(
-                      color: AppColors.tertiary.withValues(alpha: 0.28),
+                      color: VColors.tertiary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: const Icon(
                     Icons.workspace_premium_outlined,
-                    color: AppColors.tertiary,
-                    size: IconSizes.lg,
+                    color: VColors.tertiary,
+                    size: VIconSize.lg,
                   ),
                 ),
-                const SizedBox(width: Spacing.md),
+                const SizedBox(width: VSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,16 +183,16 @@ class _SubmitAchievementScreenState
                       Text(
                         'Submit proof',
                         style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeights.bold,
-                          color: AppColors.ink,
+                          fontWeight: VFontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: Spacing.xs),
+                      const SizedBox(height: VSpacing.xs),
                       Text(
                         'Choose an achievement and attach proof when it helps the review.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.inkMuted,
-                          height: LineHeight.body,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -177,7 +201,7 @@ class _SubmitAchievementScreenState
               ],
             ),
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
           _CategoryRail(
             selected: _categoryFilter,
             onSelected: (category) {
@@ -191,7 +215,7 @@ class _SubmitAchievementScreenState
               });
             },
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           RadioGroup<String>(
             groupValue: _selectedId,
             onChanged: (value) => setState(() => _selectedId = value),
@@ -208,32 +232,44 @@ class _SubmitAchievementScreenState
               }).toList(),
             ),
           ),
-          const SizedBox(height: Spacing.lg),
-          GlassPanel(
-            padding: const EdgeInsets.all(Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
+          Container(
+            padding: const EdgeInsets.all(VSpacing.lg),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(VRadius.xl),
+              border: Border.all(
+                color: isDark
+                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                    : VColors.outlineVariant.withValues(alpha: 0.3),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Proof',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeights.bold,
-                    color: AppColors.ink,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: VSpacing.xs),
                 Text(
                   _proofImagePath != null
                       ? 'This image will be attached to your submission.'
                       : 'Optional, but stronger proof helps reviews move faster.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.inkMuted,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 if (_proofImagePath != null)
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(RadiusTokens.full),
+                    borderRadius: BorderRadius.circular(VRadius.xl),
                     child: Image.file(
                       File(_proofImagePath!),
                       height: 176,
@@ -246,22 +282,28 @@ class _SubmitAchievementScreenState
                     height: 132,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceElevated.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(RadiusTokens.full),
-                      border: Border.all(color: AppColors.glassBorder),
+                      color: isDark
+                          ? VColors.surfaceContainerHighDark
+                          : VColors.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(VRadius.xl),
+                      border: Border.all(
+                        color: isDark
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant,
+                      ),
                     ),
                     child: const Center(
                       child: Icon(
                         Icons.add_photo_alternate_outlined,
-                        color: AppColors.inkMuted,
-                        size: IconSizes.xl,
+                        color: VColors.onSurfaceVariant,
+                        size: VIconSize.xl,
                       ),
                     ),
                   ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 Wrap(
-                  spacing: Spacing.sm,
-                  runSpacing: Spacing.sm,
+                  spacing: VSpacing.sm,
+                  runSpacing: VSpacing.sm,
                   children: [
                     OutlinedButton.icon(
                       onPressed: _pickProofImage,
@@ -276,9 +318,9 @@ class _SubmitAchievementScreenState
                         icon: const Icon(Icons.close),
                         label: const Text('Remove'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.error,
+                          foregroundColor: VColors.error,
                           side: BorderSide(
-                            color: AppColors.error.withValues(alpha: 0.35),
+                            color: VColors.error.withValues(alpha: 0.35),
                           ),
                         ),
                       ),
@@ -287,19 +329,19 @@ class _SubmitAchievementScreenState
               ],
             ),
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
           if (_errorText != null) ...[
             Text(
               _errorText!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.error,
-                fontWeight: FontWeights.semiBold,
+                color: VColors.error,
+                fontWeight: VFontWeight.semiBold,
               ),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
           ],
           SizedBox(
-            height: TouchTargets.minimum + 6,
+            height: 54,
             child: FilledButton.icon(
               onPressed: (_selectedId != null && !_isUploading)
                   ? _submit
@@ -312,10 +354,6 @@ class _SubmitAchievementScreenState
                     )
                   : const Icon(Icons.upload),
               label: Text(_isUploading ? 'Uploading...' : 'Submit for Review'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
-              ),
             ),
           ),
         ],
@@ -337,7 +375,7 @@ class _CategoryRail extends StatelessWidget {
       child: Row(
         children: [
           Padding(
-            padding: const EdgeInsets.only(right: Spacing.sm),
+            padding: const EdgeInsets.only(right: VSpacing.sm),
             child: ChoiceChip(
               label: const Text('All'),
               selected: selected == null,
@@ -346,7 +384,7 @@ class _CategoryRail extends StatelessWidget {
           ),
           ...AchievementCategory.values.map(
             (category) => Padding(
-              padding: const EdgeInsets.only(right: Spacing.sm),
+              padding: const EdgeInsets.only(right: VSpacing.sm),
               child: ChoiceChip(
                 label: Text(_categoryLabel(category)),
                 selected: selected == category,
@@ -374,39 +412,53 @@ class _AchievementOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final categoryColor = _categoryColor(achievement.category);
-    final foreground = enabled ? AppColors.ink : AppColors.inkMuted;
+    final foreground = enabled
+        ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+        : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
-      child: GlassPanel(
-        padding: EdgeInsets.zero,
-        border: Border.all(
-          color: selected
-              ? categoryColor.withValues(alpha: 0.55)
-              : AppColors.glassBorder,
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark
+              ? VColors.surfaceContainerDark
+              : VColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(VRadius.xl),
+          border: Border.all(
+            color: selected
+                ? categoryColor.withValues(alpha: 0.55)
+                : (isDark
+                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                    : VColors.outlineVariant.withValues(alpha: 0.3)),
+          ),
         ),
         child: RadioListTile<String>(
           value: achievement.id,
           enabled: enabled,
           activeColor: categoryColor,
           contentPadding: const EdgeInsets.fromLTRB(
-            Spacing.sm,
-            Spacing.xs,
-            Spacing.md,
-            Spacing.xs,
+            VSpacing.sm,
+            VSpacing.xs,
+            VSpacing.md,
+            VSpacing.xs,
           ),
           secondary: Container(
             width: 42,
             height: 42,
             decoration: BoxDecoration(
               color: categoryColor.withValues(alpha: enabled ? 0.16 : 0.07),
-              borderRadius: BorderRadius.circular(RadiusTokens.full),
+              borderRadius: BorderRadius.circular(VRadius.pill),
             ),
             child: Icon(
               _iconFor(achievement.icon),
-              color: enabled ? categoryColor : AppColors.inkMuted,
-              size: IconSizes.md,
+              color: enabled
+                  ? categoryColor
+                  : (isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant),
+              size: VIconSize.md,
             ),
           ),
           title: Text(
@@ -415,7 +467,7 @@ class _AchievementOption extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleSmall?.copyWith(
               color: foreground,
-              fontWeight: FontWeights.semiBold,
+              fontWeight: VFontWeight.semiBold,
             ),
           ),
           subtitle: Text(
@@ -425,8 +477,12 @@ class _AchievementOption extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
               color: enabled
-                  ? AppColors.inkMuted
-                  : AppColors.inkMuted.withValues(alpha: 0.55),
+                  ? (isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant)
+                  : (isDark
+                      ? VColors.onSurfaceVariantDark.withValues(alpha: 0.55)
+                      : VColors.onSurfaceVariant.withValues(alpha: 0.55)),
             ),
           ),
         ),
@@ -444,18 +500,18 @@ String _categoryLabel(AchievementCategory category) {
 
 Color _categoryColor(AchievementCategory category) {
   return switch (category) {
-    AchievementCategory.education => AppColors.achievementEducation,
-    AchievementCategory.career => AppColors.achievementCareer,
-    AchievementCategory.relationships => AppColors.achievementRelationships,
-    AchievementCategory.health => AppColors.achievementHealth,
-    AchievementCategory.skills => AppColors.achievementSkills,
-    AchievementCategory.travel => AppColors.achievementTravel,
-    AchievementCategory.finance => AppColors.achievementFinance,
-    AchievementCategory.community => AppColors.achievementCommunity,
-    AchievementCategory.funny => AppColors.achievementFunny,
-    AchievementCategory.creative => AppColors.achievementCreative,
-    AchievementCategory.profession => AppColors.achievementProfession,
-    AchievementCategory.inApp => AppColors.primary,
+    AchievementCategory.education => VColors.achievementEducation,
+    AchievementCategory.career => VColors.achievementCareer,
+    AchievementCategory.relationships => VColors.achievementSocial,
+    AchievementCategory.health => VColors.achievementHealth,
+    AchievementCategory.skills => VColors.achievementCreative,
+    AchievementCategory.travel => VColors.achievementAdventure,
+    AchievementCategory.finance => VColors.achievementFinance,
+    AchievementCategory.community => VColors.achievementLeadership,
+    AchievementCategory.funny => VColors.tertiary,
+    AchievementCategory.creative => VColors.achievementCreative,
+    AchievementCategory.profession => VColors.primary,
+    AchievementCategory.inApp => VColors.primary,
   };
 }
 

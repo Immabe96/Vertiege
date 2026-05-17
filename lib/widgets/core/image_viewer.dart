@@ -3,17 +3,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
 import 'shimmer.dart';
 
 class ImageViewer extends StatefulWidget {
   final String imageUrl;
   final String? heroTag;
 
-  const ImageViewer({
-    super.key,
-    required this.imageUrl,
-    this.heroTag,
-  });
+  const ImageViewer({super.key, required this.imageUrl, this.heroTag});
 
   /// Opens the image viewer as a fullscreen overlay modal.
   ///
@@ -27,7 +24,7 @@ class ImageViewer extends StatefulWidget {
   }) {
     return showGeneralDialog<void>(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.94),
+      barrierColor: VColors.scrimDark,
       barrierDismissible: true,
       barrierLabel: 'Image viewer',
       transitionDuration: const Duration(milliseconds: 300),
@@ -105,14 +102,14 @@ class _ImageViewerState extends State<ImageViewer> {
           height: 44,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.14),
+            color: VColors.onPrimary.withValues(alpha: 0.14),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.28),
+              color: VColors.onPrimary.withValues(alpha: 0.28),
               width: 0.5,
             ),
           ),
           child: const Center(
-            child: Icon(Icons.close_rounded, color: Colors.white, size: 22),
+            child: Icon(Icons.close_rounded, color: VColors.onPrimary, size: 22),
           ),
         ),
       ),
@@ -133,16 +130,16 @@ class _ImageViewerState extends State<ImageViewer> {
       children: [
         Icon(
           Icons.broken_image_outlined,
-          size: IconSizes.xl,
-          color: Colors.white.withValues(alpha: 0.6),
+          size: VIconSize.xl,
+          color: VColors.onPrimary.withValues(alpha: 0.6),
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         Text(
           'Failed to load',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: FontSizes.body,
-            fontWeight: FontWeights.regular,
+            color: VColors.onPrimary.withValues(alpha: 0.7),
+            fontSize: VFontSize.bodyMd,
+            fontWeight: VFontWeight.regular,
           ),
         ),
       ],
@@ -186,8 +183,7 @@ class _ImageViewerState extends State<ImageViewer> {
                 ),
 
                 // Loading shimmer.
-                if (_isLoading && !_hasError)
-                  Center(child: _buildLoading()),
+                if (_isLoading && !_hasError) Center(child: _buildLoading()),
 
                 // Error state.
                 if (_hasError) Center(child: _buildError()),

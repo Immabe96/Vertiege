@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/world_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/fade_in.dart';
 import '../core/loading_state.dart';
@@ -81,11 +81,11 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
             final standing = getStanding(member.rep);
             final isSovereign = resident.id == widget.world.sovereignId;
             final medalColor = idx == 0
-                ? AppColors.tertiary
+                ? VColors.tertiary
                 : idx == 1
-                ? AppColors.silver
+                ? VColors.outline
                 : idx == 2
-                ? AppColors.bronze
+                ? VColors.outlineVariant
                 : null;
 
             return FadeIn(

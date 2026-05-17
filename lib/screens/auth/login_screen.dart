@@ -1,15 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
-import '../../widgets/core/tactile_button.dart';
 import '../../widgets/core/fade_in.dart';
-import '../../widgets/core/glass_panel.dart';
 import '../../widgets/auth/auth_error_card.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -59,8 +58,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
 
-      // Fetch the resident profile from Supabase before deciding where to go.
-      // If app data was cleared, the profile still exists on the server.
       await ref.read(residentProvider.notifier).loadResident();
       if (!mounted) return;
 
@@ -85,248 +82,484 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _showForgotPassword() async {
+    final emailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Enter your email address. We will send you a password reset link.',
+            ),
+            const SizedBox(height: VSpacing.md),
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                hintText: 'you@example.com',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(color: VColors.primary, width: 2),
+                ),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Send reset link'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && emailController.text.trim().isNotEmpty) {
+      try {
+        final client = maybeSupabase();
+        if (client != null) {
+          await client.auth.resetPasswordForEmail(emailController.text.trim());
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Password reset link sent. Check your email.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to send reset link. Please try again.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+    emailController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-          child: Column(
-            children: [
-              const SizedBox(height: Spacing.xxl + Spacing.xl),
-
-              // ── Brand — gold icon on obsidian ────────────
-              FadeIn(
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated.withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(Spacing.xs),
-                    child: Image.asset(
-                      'assets/images/splash-icon.png',
-                      fit: BoxFit.contain,
-                      cacheWidth: 128,
-                    ),
-                  ),
-                ),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/generated/bg-onboarding.jpg',
+            fit: BoxFit.cover,
+            cacheWidth:
+                (MediaQuery.sizeOf(context).width *
+                        MediaQuery.devicePixelRatioOf(context))
+                    .round()
+                    .clamp(480, 1440),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  (isDark ? VColors.surfaceDark : VColors.surface).withValues(alpha: 0.30),
+                  (isDark ? VColors.surfaceDark : VColors.surface).withValues(alpha: 0.76),
+                  isDark ? VColors.surfaceDark : VColors.surface,
+                ],
               ),
-              const SizedBox(height: Spacing.lg),
-              FadeIn(
-                delayMs: 100,
-                child: Text(
-                  'Vertiege',
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeights.bold,
-                    letterSpacing: LetterSpacing.display,
-                  ),
-                ),
-              ),
-              const SizedBox(height: Spacing.xs),
-              FadeIn(
-                delayMs: 150,
-                child: Text(
-                  'Welcome back',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.inkSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: Spacing.xxl),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: Column(
+                children: [
+                  const SizedBox(height: 80),
 
-              // ── Glass form card ──────────────────────────
-              GlassPanel(
-                padding: const EdgeInsets.all(Spacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── Error Message ──────────────────────
-                    if (_errorMessage != null) ...[
-                      AuthErrorCard(message: _errorMessage!),
-                      const SizedBox(height: Spacing.lg),
-                    ],
-
-                    // ── Email Field — ghost/underline ─────
-                    FadeIn(
-                      delayMs: 200,
-                      child: TextField(
-                        controller: _emailController,
-                        focusNode: _emailFocus,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autocorrect: false,
-                        enabled: !_isLoading,
-                        style: const TextStyle(color: AppColors.ink),
-                        onSubmitted: (_) => _passwordFocus.requestFocus(),
-                        onChanged: (_) => setState(() => _errorMessage = null),
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'you@example.com',
-                          hintStyle: TextStyle(color: AppColors.inkMuted),
-                          border: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                  FadeIn(
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? VColors.glassBackgroundDark
+                            : VColors.glassBackground,
+                        borderRadius: BorderRadius.circular(VRadius.xl),
+                        border: Border.all(
+                          color: isDark
+                              ? VColors.glassBorderDark
+                              : VColors.glassBorder,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: VColors.primary.withValues(alpha: 0.18),
+                            blurRadius: 28,
                           ),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary),
-                          ),
-                          prefixIcon: Icon(Icons.email_outlined),
-                          filled: true,
-                          fillColor: AppColors.glassBackground,
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(VSpacing.xs),
+                        child: Image.asset(
+                          'assets/images/splash-icon.png',
+                          fit: BoxFit.contain,
+                          cacheWidth: 128,
                         ),
                       ),
                     ),
-                    const SizedBox(height: Spacing.md),
-
-                    // ── Password Field — ghost/underline ──
-                    FadeIn(
-                      delayMs: 250,
-                      child: TextField(
-                        controller: _passwordController,
-                        focusNode: _passwordFocus,
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        enabled: !_isLoading,
-                        style: const TextStyle(color: AppColors.ink),
-                        onSubmitted: _isValid ? (_) => _handleLogin() : null,
-                        onChanged: (_) => setState(() => _errorMessage = null),
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          hintStyle: const TextStyle(color: AppColors.inkMuted),
-                          border: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
-                          ),
-                          enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
-                          ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary),
-                          ),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                            ),
-                            onPressed: () =>
-                                setState(() => _obscurePassword = !_obscurePassword),
-                          ),
-                          filled: true,
-                          fillColor: AppColors.glassBackground,
-                        ),
+                  ),
+                  const SizedBox(height: VSpacing.lg),
+                  FadeIn(
+                    delayMs: 100,
+                    child: Text(
+                      'Vertiege',
+                      style: theme.textTheme.headlineLarge?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                        letterSpacing: 1.5,
                       ),
                     ),
-                    const SizedBox(height: Spacing.xl),
-
-                    // ── Sign In Button — gold CTA ──────────
-                    FadeIn(
-                      delayMs: 300,
-                      child: TactileButton(
-                        label: _isLoading ? 'Signing in...' : 'Sign In',
-                        icon: _isLoading ? null : Icons.arrow_forward,
-                        fullWidth: true,
-                        color: AppColors.tertiary,
-                        textColor: AppColors.onTertiary,
-                        onPressed: _isLoading || !_isValid ? null : _handleLogin,
+                  ),
+                  const SizedBox(height: VSpacing.xs),
+                  FadeIn(
+                    delayMs: 150,
+                    child: Text(
+                      'Welcome back to your worlds',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                  const SizedBox(height: VSpacing.xxl),
 
-              const SizedBox(height: Spacing.lg),
-
-              // ── OAuth ─────────────────────────────────────
-              FadeIn(
-                delayMs: 350,
-                child: Column(
-                  children: [
-                    Row(
+                  Container(
+                    padding: const EdgeInsets.all(VSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? VColors.surfaceContainerDark
+                          : VColors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(VRadius.xl),
+                      border: Border.all(
+                        color: isDark
+                            ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                            : VColors.outlineVariant.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Expanded(child: Divider(color: AppColors.glassBorder)),
-                        const SizedBox(width: Spacing.md),
-                        Text(
-                          'or',
-                          style: theme.textTheme.labelSmall?.copyWith(color: AppColors.inkMuted),
+                        if (_errorMessage != null) ...[
+                          AuthErrorCard(message: _errorMessage!),
+                          const SizedBox(height: VSpacing.lg),
+                        ],
+
+                        FadeIn(
+                          delayMs: 200,
+                          child: TextField(
+                            controller: _emailController,
+                            focusNode: _emailFocus,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autocorrect: false,
+                            enabled: !_isLoading,
+                            style: TextStyle(
+                              color: isDark
+                                  ? VColors.onSurfaceDark
+                                  : VColors.onSurface,
+                            ),
+                            onSubmitted: (_) => _passwordFocus.requestFocus(),
+                            onChanged: (_) =>
+                                setState(() => _errorMessage = null),
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              hintText: 'you@example.com',
+                              hintStyle: TextStyle(
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                                    : VColors.onSurfaceVariant.withValues(alpha: 0.6),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(VRadius.md),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? VColors.outlineDark
+                                      : VColors.outline,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(VRadius.md),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? VColors.outlineVariantDark
+                                      : VColors.outlineVariant,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(VRadius.md),
+                                borderSide: const BorderSide(
+                                  color: VColors.primary,
+                                  width: 2,
+                                ),
+                              ),
+                              prefixIcon: const Icon(Icons.email_outlined),
+                              filled: true,
+                              fillColor: isDark
+                                  ? VColors.surfaceContainerHighDark
+                                  : VColors.surfaceContainerHigh,
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: Spacing.md),
-                        const Expanded(child: Divider(color: AppColors.glassBorder)),
+                        const SizedBox(height: VSpacing.md),
+
+                        FadeIn(
+                          delayMs: 250,
+                          child: TextField(
+                            controller: _passwordController,
+                            focusNode: _passwordFocus,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.done,
+                            enabled: !_isLoading,
+                            style: TextStyle(
+                              color: isDark
+                                  ? VColors.onSurfaceDark
+                                  : VColors.onSurface,
+                            ),
+                            onSubmitted: _isValid
+                                ? (_) => _handleLogin()
+                                : null,
+                            onChanged: (_) =>
+                                setState(() => _errorMessage = null),
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              hintStyle: TextStyle(
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                                    : VColors.onSurfaceVariant.withValues(alpha: 0.6),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(VRadius.md),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? VColors.outlineDark
+                                      : VColors.outline,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(VRadius.md),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? VColors.outlineVariantDark
+                                      : VColors.outlineVariant,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(VRadius.md),
+                                borderSide: const BorderSide(
+                                  color: VColors.primary,
+                                  width: 2,
+                                ),
+                              ),
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                ),
+                                onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: isDark
+                                  ? VColors.surfaceContainerHighDark
+                                  : VColors.surfaceContainerHigh,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: VSpacing.xl),
+
+                        FadeIn(
+                          delayMs: 300,
+                          child: FilledButton.icon(
+                            onPressed: _isLoading || !_isValid
+                                ? null
+                                : _handleLogin,
+                            icon: _isLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.arrow_forward),
+                            label: Text(_isLoading ? 'Signing in...' : 'Sign In'),
+                          ),
+                        ),
+                        const SizedBox(height: VSpacing.sm),
+                        FadeIn(
+                          delayMs: 320,
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _isLoading ? null : _showForgotPassword,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'Forgot password?',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: VColors.tertiary,
+                                  fontWeight: VFontWeight.semiBold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: Spacing.md),
-                    OutlinedButton.icon(
-                      onPressed: AuthService.signInWithGoogle,
-                      icon: const Icon(Icons.g_mobiledata, size: IconSizes.lg),
-                      label: const Text('Continue with Google'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.ink,
-                        side: const BorderSide(color: AppColors.glassBorder),
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.sm),
-                    OutlinedButton.icon(
-                      onPressed: AuthService.signInWithApple,
-                      icon: const Icon(Icons.apple, size: IconSizes.lg),
-                      label: const Text('Continue with Apple'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.ink,
-                        side: const BorderSide(color: AppColors.glassBorder),
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
 
-              const SizedBox(height: Spacing.lg),
+                  const SizedBox(height: VSpacing.lg),
 
-              // ── Sign Up Link ─────────────────────────────
-              FadeIn(
-                delayMs: 400,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account? ",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.inkSecondary,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _isLoading
-                          ? null
-                          : () => context.go('/signup'),
-                      child: Text(
-                        'Sign Up',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.tertiary,
-                          fontWeight: FontWeights.bold,
+                  FadeIn(
+                    delayMs: 350,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: isDark
+                                    ? VColors.outlineVariantDark
+                                    : VColors.outlineVariant,
+                              ),
+                            ),
+                            const SizedBox(width: VSpacing.md),
+                            Text(
+                              'or',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(width: VSpacing.md),
+                            Expanded(
+                              child: Divider(
+                                color: isDark
+                                    ? VColors.outlineVariantDark
+                                    : VColors.outlineVariant,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: VSpacing.md),
+                        OutlinedButton.icon(
+                          onPressed: AuthService.signInWithGoogle,
+                          icon: const Icon(Icons.g_mobiledata, size: VIconSize.lg),
+                          label: const Text('Continue with Google'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(VRadius.md),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: VSpacing.sm),
+                        OutlinedButton.icon(
+                          onPressed: AuthService.signInWithApple,
+                          icon: const Icon(Icons.apple, size: VIconSize.lg),
+                          label: const Text('Continue with Apple'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(VRadius.md),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+
+                  const SizedBox(height: VSpacing.lg),
+
+                  FadeIn(
+                    delayMs: 400,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () => context.go('/signup'),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Sign Up',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: VColors.tertiary,
+                              fontWeight: VFontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.xxl),
+                ],
               ),
-              const SizedBox(height: Spacing.xxl),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

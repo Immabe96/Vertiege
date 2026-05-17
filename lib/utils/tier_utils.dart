@@ -1,24 +1,24 @@
-import 'package:flutter/material.dart';
-import '../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../theme/v_colors.dart';
 
 /// Maps standing level to a tier-appropriate color for the standing badge.
 Color tierStandingColor(int level) {
   switch (level) {
     case 1:
-      return AppColors.tierHustler;
+      return VColors.tierHustler;
     case 2:
-      return AppColors.tierHighRoller;
+      return VColors.tierHighRoller;
     case 3:
-      return AppColors.tierElite;
+      return VColors.tierElite;
     case 4:
-      return AppColors.tierOldMoney;
+      return VColors.tierOldMoney;
     case 5:
-      return AppColors.tierApex;
+      return VColors.tierApex;
     case 6:
-      return AppColors.tertiary;
+      return VColors.tertiary;
     case 7:
-      return AppColors.primary;
+      return VColors.primary;
     default:
-      return AppColors.inkMuted;
+      return VColors.outline;
   }
 }

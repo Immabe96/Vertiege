@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/daily_reward_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 /// A celebratory glass-modal dialog shown once per day when the resident
@@ -19,7 +19,8 @@ class DailyRewardDialog extends StatefulWidget {
   });
 
   /// Show the dialog over the given context.
-  static Future<void> show(BuildContext context, {
+  static Future<void> show(
+    BuildContext context, {
     required DailyReward reward,
     required VoidCallback onCollect,
   }) {
@@ -27,24 +28,15 @@ class DailyRewardDialog extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Daily Reward',
-      barrierColor: AppColors.canvas.withValues(alpha: 0.85),
+      barrierColor: VColors.surface.withValues(alpha: 0.85),
       transitionDuration: AnimDurations.normal,
       pageBuilder: (context, animation, secondaryAnimation) {
-        return DailyRewardDialog(
-          reward: reward,
-          onCollect: onCollect,
-        );
+        return DailyRewardDialog(reward: reward, onCollect: onCollect);
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return ScaleTransition(
-          scale: CurvedAnimation(
-            parent: animation,
-            curve: AnimCurves.bouncy,
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          scale: CurvedAnimation(parent: animation, curve: AnimCurves.bouncy),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
     );
@@ -67,13 +59,13 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _iconScale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.5), weight: 60),
-      TweenSequenceItem(tween: Tween(begin: 1.5, end: 1.0), weight: 40),
-    ]).animate(CurvedAnimation(
-      parent: _iconController,
-      curve: Curves.elasticOut,
-    ));
+    _iconScale =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.5), weight: 60),
+          TweenSequenceItem(tween: Tween(begin: 1.5, end: 1.0), weight: 40),
+        ]).animate(
+          CurvedAnimation(parent: _iconController, curve: Curves.elasticOut),
+        );
 
     // Start the icon animation after a brief delay
     Future.delayed(const Duration(milliseconds: 150), () {
@@ -102,12 +94,12 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
         margin: const EdgeInsets.symmetric(horizontal: Spacing.xl),
         padding: const EdgeInsets.all(Spacing.xl),
         decoration: BoxDecoration(
-          color: AppColors.glassModalBackground,
+          color: VColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-          border: Border.all(color: AppColors.glassBorder),
+          border: Border.all(color: VColors.glassBorder),
           boxShadow: [
             BoxShadow(
-              color: AppColors.tertiary.withValues(alpha: 0.15),
+              color: VColors.tertiary.withValues(alpha: 0.15),
               blurRadius: 40,
               spreadRadius: 8,
             ),
@@ -119,10 +111,10 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             // Title
             Text(
               'DAILY RESONANCE',
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.manrope(
                 fontSize: FontSizes.headlineMd,
                 fontWeight: FontWeights.bold,
-                color: AppColors.tertiary,
+                color: VColors.tertiary,
                 letterSpacing: 2,
               ),
             ),
@@ -157,10 +149,12 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             // Reward text
             Text(
               widget.reward.label,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.manrope(
                 fontSize: FontSizes.displayXl,
                 fontWeight: FontWeights.bold,
-                color: widget.reward.isShield ? AppColors.hustler : AppColors.ink,
+                color: widget.reward.isShield
+                    ? VColors.tierHustler
+                    : VColors.onSurface,
               ),
             ),
             const SizedBox(height: Spacing.sm),
@@ -170,7 +164,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                   ? 'Protects your streak for one missed day!'
                   : 'Resonance energy granted',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkSecondary,
+                color: VColors.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -182,8 +176,8 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
               child: FilledButton(
                 onPressed: _collected ? null : _onCollect,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.tertiary,
-                  foregroundColor: AppColors.onTertiary,
+                  backgroundColor: VColors.tertiary,
+                  foregroundColor: VColors.onTertiary,
                   padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(RadiusTokens.card),
@@ -191,7 +185,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                 ),
                 child: Text(
                   _collected ? 'COLLECTED!' : 'COLLECT',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.manrope(
                     fontSize: FontSizes.bodyLg,
                     fontWeight: FontWeights.bold,
                     letterSpacing: 2,

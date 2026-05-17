@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/auth_service.dart';
 import '../../state/resident_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class AuthCallbackScreen extends ConsumerStatefulWidget {
@@ -58,6 +58,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(
@@ -81,11 +82,18 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated.withValues(alpha: 0.72),
+                    color: (isDark
+                            ? VColors.glassBackgroundDark
+                            : VColors.glassBackground)
+                        .withValues(alpha: 0.72),
                     borderRadius: BorderRadius.circular(
                       RadiusTokens.cardFeatured,
                     ),
-                    border: Border.all(color: AppColors.glassBorder),
+                    border: Border.all(
+                      color: isDark
+                          ? VColors.glassBorderDark
+                          : VColors.glassBorder,
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(Spacing.xs),
@@ -100,6 +108,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                 Text(
                   'Vertiege',
                   style: theme.textTheme.headlineLarge?.copyWith(
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     fontWeight: FontWeights.bold,
                     letterSpacing: LetterSpacing.display,
                   ),

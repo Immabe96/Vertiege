@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../models/world.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
 
@@ -29,8 +29,8 @@ class WorldInviteSection extends StatelessWidget {
                 width: 3,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: AppColors.tertiary,
-                  borderRadius: BorderRadius.circular(2),
+                        color: VColors.tertiary,
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
               ),
               const SizedBox(width: Spacing.sm),
@@ -39,14 +39,14 @@ class WorldInviteSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: FontSizes.headlineMd,
                   fontWeight: FontWeights.semiBold,
-                  color: AppColors.ink,
+                              color: VColors.onSurface,
                 ),
               ),
             ],
           ),
           const SizedBox(height: Spacing.sm),
           ...invites.map((world) {
-            final iconData = worldIconMap[world.icon] ?? Icons.public;
+            final iconData = _iconForWorldType(world.type);
             final memberLabel = '${world.memberCount} members';
             return Padding(
               padding: const EdgeInsets.only(bottom: Spacing.sm),
@@ -59,10 +59,14 @@ class WorldInviteSection extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.tertiary.withValues(alpha: 0.12),
+                        color: VColors.tertiary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
-                      child: Icon(iconData, size: IconSizes.md, color: AppColors.tertiary),
+                      child: Icon(
+                        iconData,
+                        size: IconSizes.md,
+                  color: VColors.tertiary,
+                      ),
                     ),
                     const SizedBox(width: Spacing.md),
                     Expanded(
@@ -74,7 +78,7 @@ class WorldInviteSection extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: FontSizes.headlineMd,
                               fontWeight: FontWeights.semiBold,
-                              color: AppColors.ink,
+                  color: VColors.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -84,7 +88,7 @@ class WorldInviteSection extends StatelessWidget {
                             memberLabel,
                             style: const TextStyle(
                               fontSize: FontSizes.labelSm,
-                              color: AppColors.inkSecondary,
+                              color: VColors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -96,8 +100,8 @@ class WorldInviteSection extends StatelessWidget {
                         FilledButton(
                           onPressed: () => onAccept(world.id),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.tertiary,
-                            foregroundColor: AppColors.onTertiary,
+                            backgroundColor: VColors.tertiary,
+                            foregroundColor: VColors.onTertiary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: Spacing.md,
                               vertical: Spacing.sm,
@@ -117,8 +121,10 @@ class WorldInviteSection extends StatelessWidget {
                         OutlinedButton(
                           onPressed: () => onDecline(world.id),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.inkSecondary,
-                            side: const BorderSide(color: AppColors.glassBorder),
+                            foregroundColor: VColors.onSurfaceVariant,
+                            side: const BorderSide(
+                              color: VColors.glassBorder,
+                            ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: Spacing.md,
                               vertical: Spacing.sm,
@@ -144,5 +150,13 @@ class WorldInviteSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _iconForWorldType(WorldType type) {
+    return switch (type) {
+      WorldType.wealth => Icons.diamond,
+      WorldType.profession => Icons.work,
+      WorldType.dominion => Icons.shield,
+    };
   }
 }

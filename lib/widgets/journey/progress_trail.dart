@@ -1,18 +1,25 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 
 class ProgressTrail extends StatefulWidget {
   final int currentTier;
   const ProgressTrail({super.key, required this.currentTier});
 
-  static const _tierNames = ['Hustler', 'High Roller', 'Elite', 'Old Money', 'Apex'];
+  static const _tierNames = [
+    'Hustler',
+    'High Roller',
+    'Elite',
+    'Old Money',
+    'Apex',
+  ];
 
   static const _tierColors = [
-    AppColors.tierHustler,
-    AppColors.tierHighRoller,
-    AppColors.tierElite,
-    AppColors.tierOldMoney,
-    AppColors.tierApex,
+    VColors.tierHustler,
+    VColors.tierHighRoller,
+    VColors.tierElite,
+    VColors.tierOldMoney,
+    VColors.tierApex,
   ];
 
   @override
@@ -89,7 +96,7 @@ class _TrailPathPainter extends CustomPainter {
           ],
         ).createShader(Rect.fromPoints(from, to));
       } else {
-        paint.color = AppColors.glassBorder;
+        paint.color = VColors.glassBorder;
       }
 
       canvas.drawLine(from, to, paint);
@@ -115,7 +122,7 @@ class _TrailPathPainter extends CustomPainter {
       // Pulsing glow for current node
       if (isCurrent) {
         final glowPaint = Paint()
-          ..color = AppColors.primary.withValues(alpha: 0.2)
+          ..color = VColors.primary.withValues(alpha: 0.2)
           ..style = PaintingStyle.fill
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
         canvas.drawCircle(pos, nodeRadius + 8, glowPaint);
@@ -123,7 +130,7 @@ class _TrailPathPainter extends CustomPainter {
 
       // Node circle background
       final bgColor = isFuture
-          ? AppColors.surfaceHigh
+          ? VColors.surfaceContainerHighest
           : ProgressTrail._tierColors[i].withValues(alpha: 0.12);
       final bgPaint = Paint()..color = bgColor;
       canvas.drawCircle(pos, nodeRadius, bgPaint);
@@ -135,9 +142,9 @@ class _TrailPathPainter extends CustomPainter {
       if (isCompleted) {
         borderPaint.color = ProgressTrail._tierColors[i];
       } else if (isCurrent) {
-        borderPaint.color = AppColors.primary;
+        borderPaint.color = VColors.primary;
       } else {
-        borderPaint.color = AppColors.glassBorder;
+        borderPaint.color = VColors.glassBorder;
       }
       canvas.drawCircle(pos, nodeRadius, borderPaint);
 
@@ -147,8 +154,8 @@ class _TrailPathPainter extends CustomPainter {
         text: TextSpan(
           text: iconText,
           style: TextStyle(
-            fontSize: 20,
-            color: isFuture ? AppColors.inkMuted : ProgressTrail._tierColors[i],
+            fontSize: VFontSize.headlineSm,
+            color: isFuture ? VColors.outline : ProgressTrail._tierColors[i],
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -161,10 +168,10 @@ class _TrailPathPainter extends CustomPainter {
 
       // Draw tier label below node
       final labelColor = isFuture
-          ? AppColors.inkMuted
+          ? VColors.outline
           : isCurrent
-              ? AppColors.primary
-              : AppColors.inkSecondary;
+          ? VColors.primary
+          : VColors.onSurfaceVariant;
       final labelPainter = TextPainter(
         text: TextSpan(
           text: ProgressTrail._tierNames[i],
@@ -188,9 +195,9 @@ class _TrailPathPainter extends CustomPainter {
           text: const TextSpan(
             text: 'CURRENT',
             style: TextStyle(
-              fontSize: 9,
+              fontSize: VFontSize.labelSm,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: VColors.primary,
               letterSpacing: 0.05,
             ),
           ),
@@ -199,10 +206,7 @@ class _TrailPathPainter extends CustomPainter {
         currentPainter.layout();
         currentPainter.paint(
           canvas,
-          Offset(
-            pos.dx - currentPainter.width / 2,
-            pos.dy + nodeRadius + 22,
-          ),
+          Offset(pos.dx - currentPainter.width / 2, pos.dy + nodeRadius + 22),
         );
       }
     }

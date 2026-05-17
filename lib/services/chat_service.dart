@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/channel.dart';
 import '../models/notification.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
 import 'moderation_filter.dart';
-import 'notification_service.dart';
 import 'supabase.dart';
 import 'world_service.dart';
 
@@ -52,10 +52,16 @@ class ChatService {
     required String content,
     String? senderAvatar,
     String? imageUrl,
+    String? replyToMessageId,
+    String? replyToSenderId,
+    String? replyToSenderName,
+    String? replyToContent,
+    int? autoDeleteAfterSeconds,
   }) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
     final payload = <String, dynamic>{
+      'id': generateId(),
       'room_id': roomId,
       'sender_id': senderId,
       'sender_name': senderName,
@@ -64,20 +70,34 @@ class ChatService {
       'image_url': imageUrl,
       'created_at': DateTime.now().toIso8601String(),
     };
+    if (replyToMessageId != null) {
+      payload['reply_to_message_id'] = replyToMessageId;
+      payload['reply_to_sender_id'] = replyToSenderId;
+      payload['reply_to_sender_name'] = replyToSenderName;
+      payload['reply_to_content'] = replyToContent;
+    }
+    if (autoDeleteAfterSeconds != null) {
+      payload['auto_delete_after_seconds'] = autoDeleteAfterSeconds;
+    }
     try {
       await client.from('chat_messages').insert(payload);
     } on PostgrestException catch (e) {
       final missingDisplayColumns =
           e.message.contains('sender_name') ||
           e.message.contains('sender_avatar') ||
-          e.message.contains('image_url');
+          e.message.contains('image_url') ||
+          e.message.contains('reply_to');
       if (!missingDisplayColumns) rethrow;
-      await client.from('chat_messages').insert({
+      final fallback = <String, dynamic>{
         'room_id': roomId,
         'sender_id': senderId,
         'content': content,
         'created_at': payload['created_at'],
-      });
+      };
+      if (autoDeleteAfterSeconds != null) {
+        fallback['auto_delete_after_seconds'] = autoDeleteAfterSeconds;
+      }
+      await client.from('chat_messages').insert(fallback);
     }
     await client
         .from('dm_rooms')
@@ -91,6 +111,7 @@ class ChatService {
   static Future<List<Map<String, dynamic>>> getMessages(
     String roomId, {
     int limit = 100,
+    int? autoDeleteSeconds,
   }) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
@@ -100,7 +121,15 @@ class ChatService {
         .eq('room_id', roomId)
         .order('created_at', ascending: true)
         .limit(limit);
-    return (data as List).cast<Map<String, dynamic>>();
+    final raw = (data as List).cast<Map<String, dynamic>>();
+    final now = DateTime.now();
+    return raw.where((msg) {
+      final autoDelete = msg['auto_delete_after_seconds'] as int?;
+      if (autoDelete == null) return true;
+      final createdAt = DateTime.tryParse(msg['created_at'] ?? '');
+      if (createdAt == null) return true;
+      return createdAt.add(Duration(seconds: autoDelete)).isAfter(now);
+    }).toList();
   }
 
   static RealtimeChannel? subscribeToMessages(
@@ -191,11 +220,11 @@ class ChatService {
           .select()
           .single();
       if (TextParser.containsAllResidents(content)) {
-        await _broadcastMentionNotifications(
+        unawaited(_broadcastMentionNotifications(
           worldId: worldId,
           senderId: senderId,
           senderName: senderName,
-        );
+        ));
       }
       return Map<String, dynamic>.from(inserted);
     } on PostgrestException catch (e) {
@@ -214,11 +243,11 @@ class ChatService {
           .select()
           .single();
       if (TextParser.containsAllResidents(content)) {
-        await _broadcastMentionNotifications(
+        unawaited(_broadcastMentionNotifications(
           worldId: worldId,
           senderId: senderId,
           senderName: senderName,
-        );
+        ));
       }
       return Map<String, dynamic>.from(inserted);
     }
@@ -230,6 +259,7 @@ class ChatService {
     required String senderName,
   }) async {
     final members = await WorldService.getMembers(worldId);
+    final notifications = <Map<String, dynamic>>[];
     for (final member in members) {
       final residentId = member['resident_id'] ?? member['id'] ?? '';
       if (residentId.isEmpty || residentId == senderId) continue;
@@ -240,10 +270,11 @@ class ChatService {
         worldId: worldId,
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
-      await NotificationService.createNotification(
-        recipientId: residentId,
-        notification: notification,
-      );
+      notifications.add(notification.toSupabase(residentId));
+    }
+    if (notifications.isNotEmpty) {
+      final client = getSupabase();
+      await client.from('notifications').insert(notifications);
     }
   }
 
@@ -496,5 +527,58 @@ class ChatService {
           },
         )
         .subscribe();
+  }
+
+  // F-02: Reactions
+  static Future<void> toggleReaction({
+    required String messageId,
+    required String userId,
+    required String emoji,
+    required bool add,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    if (add) {
+      await client.rpc('add_reaction', params: {
+        'msg_id': messageId,
+        'emoji': emoji,
+        'resident_id': userId,
+      });
+    } else {
+      await client.rpc('remove_reaction', params: {
+        'msg_id': messageId,
+        'emoji': emoji,
+        'resident_id': userId,
+      });
+    }
+  }
+
+  // F-03: Edit message
+  static Future<void> editMessage({
+    required String messageId,
+    required String newContent,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('chat_messages').update({
+      'content': newContent,
+      'is_edited': true,
+      'edited_at': DateTime.now().toIso8601String(),
+    }).eq('id', messageId);
+  }
+
+  // F-03: Delete message
+  static Future<void> deleteMessage({
+    required String messageId,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('chat_messages').update({
+      'content': 'This message was deleted',
+      'is_deleted': true,
+      'image_url': null,
+      'reply_to_content': null,
+      'reply_to_image_url': null,
+    }).eq('id', messageId);
   }
 }

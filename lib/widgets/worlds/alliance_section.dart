@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
 
@@ -10,10 +10,15 @@ class AllianceSection extends ConsumerWidget {
   final String worldId;
   final dynamic world;
 
-  const AllianceSection({super.key, required this.worldId, required this.world});
+  const AllianceSection({
+    super.key,
+    required this.worldId,
+    required this.world,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final alliances = ref
         .watch(worldProvider)
         .alliances
@@ -35,8 +40,8 @@ class AllianceSection extends ConsumerWidget {
                   width: 3,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: AppColors.tertiary,
-                    borderRadius: BorderRadius.circular(2),
+                    color: VColors.tertiary,
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -45,7 +50,7 @@ class AllianceSection extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.semiBold,
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -82,10 +87,14 @@ class AllianceSection extends ConsumerWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.tertiary.withValues(alpha: 0.12),
+                          color: VColors.tertiary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
-                        child: Icon(iconData, size: IconSizes.md, color: AppColors.tertiary),
+                        child: Icon(
+                          iconData,
+                          size: IconSizes.md,
+                          color: VColors.tertiary,
+                        ),
                       ),
                       const SizedBox(width: Spacing.md),
                       Expanded(
@@ -94,17 +103,17 @@ class AllianceSection extends ConsumerWidget {
                           children: [
                             Text(
                               allyName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: FontSizes.headlineMd,
                                 fontWeight: FontWeights.semiBold,
-                                color: AppColors.ink,
+                                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                               ),
                             ),
                             Text(
                               '$memberCount members',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: FontSizes.labelSm,
-                                color: AppColors.inkSecondary,
+                                color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -113,8 +122,8 @@ class AllianceSection extends ConsumerWidget {
                       FilledButton(
                         onPressed: () => context.push('/explore/$allyId'),
                         style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.tertiary,
-                          foregroundColor: AppColors.onTertiary,
+                          backgroundColor: VColors.tertiary,
+                          foregroundColor: VColors.onTertiary,
                           padding: const EdgeInsets.symmetric(
                             horizontal: Spacing.md,
                             vertical: Spacing.sm,

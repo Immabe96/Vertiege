@@ -23,10 +23,14 @@ class BentoCard {
   final Widget child;
   final BentoSize size;
   final VoidCallback? onTap;
-  const BentoCard({required this.child, this.size = BentoSize.small, this.onTap});
+  const BentoCard({
+    required this.child,
+    this.size = BentoSize.small,
+    this.onTap,
+  });
 }
 
-enum BentoSize { small, medium, large }
+enum BentoSize { small, medium, large, full }
 
 class _BentoCardTile extends StatelessWidget {
   final BentoCard card;
@@ -41,9 +45,8 @@ class _BentoCardTile extends StatelessWidget {
         width = (screenWidth - (2 * Spacing.md) - Spacing.sm) / 2;
         break;
       case BentoSize.medium:
-        width = screenWidth - (2 * Spacing.md);
-        break;
       case BentoSize.large:
+      case BentoSize.full:
         width = screenWidth - (2 * Spacing.md);
         break;
     }
@@ -58,10 +61,7 @@ class _BentoCardTile extends StatelessWidget {
     );
 
     if (card.onTap != null) {
-      return GestureDetector(
-        onTap: card.onTap,
-        child: child,
-      );
+      return GestureDetector(onTap: card.onTap, child: child);
     }
     return child;
   }

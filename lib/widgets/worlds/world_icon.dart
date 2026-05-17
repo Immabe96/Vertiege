@@ -1,8 +1,8 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
 
@@ -26,6 +26,7 @@ class WorldIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final icon = WorldAssets.iconForWorld(worldId);
     final iconColor = tintColor ?? WorldAssets.accentForWorld(worldId);
 
@@ -33,12 +34,12 @@ class WorldIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
         boxShadow: [
           BoxShadow(
-            color: iconColor.withValues(alpha: AppColors.glowAlphaStrong),
+            color: iconColor.withValues(alpha: 0.5),
             blurRadius: 8,
             spreadRadius: 0,
           ),
@@ -49,11 +50,7 @@ class WorldIcon extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Center(
-            child: Icon(
-              icon,
-              size: size * 0.5,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: size * 0.5, color: iconColor),
           ),
         ),
       ),

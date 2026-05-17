@@ -1,6 +1,4 @@
-import 'dart:ui';
-
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,17 +8,11 @@ import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/time_ago.dart';
-import '../../utils/world_assets.dart';
-import '../../widgets/core/empty_state.dart';
-import '../../widgets/core/fade_in.dart';
-import '../../widgets/core/glass_panel.dart';
-import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
-import '../../widgets/worlds/world_banner.dart';
 
 enum _ChatMode { worlds, dms }
 
@@ -40,6 +32,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final residentId = resident?.id;
     final chatState = ref.watch(chatProvider);
@@ -70,29 +63,31 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     _ensureSelectedWorld(joinedWorlds);
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: AppBar(
-              toolbarHeight: 56,
-              elevation: 0,
-              backgroundColor: AppColors.surface.withAlpha(204),
-              title: const Text('Chats'),
-              actions: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.edit_square,
-                    color: AppColors.inkSecondary,
-                  ),
-                  tooltip: 'New DM',
-                  onPressed: () => context.push('/search'),
-                ),
-              ],
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(
+        backgroundColor:
+            (isDark ? VColors.surfaceDark : VColors.surface).withValues(
+              alpha: 0.86,
             ),
+        elevation: 0,
+        title: Text(
+          'Messages',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: VFontWeight.semiBold,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.person_add_outlined,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+            tooltip: 'New DM',
+            onPressed: () => context.push('/search'),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -117,7 +112,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             }
           }
         },
-        child: _buildBody(context, theme, residentId, joinedWorlds, chatState),
+        child: _buildBody(context, theme, isDark, residentId, joinedWorlds, chatState),
       ),
     );
   }
@@ -148,52 +143,82 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Widget _buildBody(
     BuildContext context,
     ThemeData theme,
+    bool isDark,
     String? residentId,
     List<World> joinedWorlds,
     ChatState chatState,
   ) {
     if (residentId == null) {
       return Center(
-        child: Text('Sign in to view chats', style: theme.textTheme.bodyLarge),
+        child: Text(
+          'Sign in to view chats',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+          ),
+        ),
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.sm,
-        Spacing.md,
-        120,
-      ),
+    return Column(
       children: [
-        _ModeSwitch(
-          mode: _mode,
-          dmCount: chatState.dmRooms.length,
-          worldCount: joinedWorlds.length,
-          onChanged: (mode) => setState(() => _mode = mode),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            VSpacing.md,
+            VSpacing.sm,
+            VSpacing.md,
+            VSpacing.sm,
+          ),
+          child: _ModeSwitch(
+            mode: _mode,
+            dmCount: chatState.dmRooms.length,
+            worldCount: joinedWorlds.length,
+            onChanged: (mode) => setState(() => _mode = mode),
+          ),
         ),
-        const SizedBox(height: Spacing.md),
-        if (_mode == _ChatMode.worlds)
-          _buildWorldChats(joinedWorlds)
-        else if (chatState.isLoadingRooms)
-          const ScreenLoading.list()
-        else if (chatState.dmRooms.isEmpty)
-          _buildEmptyDmState()
-        else
-          _buildRoomList(theme, chatState.dmRooms, residentId),
+        Expanded(
+          child: _mode == _ChatMode.worlds
+              ? _buildWorldChats(joinedWorlds)
+              : chatState.isLoadingRooms
+                  ? const Center(child: CircularProgressIndicator())
+                  : chatState.dmRooms.isEmpty
+                      ? _buildEmptyDmState()
+                      : _buildRoomList(theme, isDark, chatState.dmRooms, residentId),
+        ),
       ],
     );
   }
 
   Widget _buildWorldChats(List<World> joinedWorlds) {
     if (joinedWorlds.isEmpty) {
-      return AppEmptyState(
-        title: 'No world chats yet',
-        description: 'Join a world to see its public channels here.',
-        icon: Icons.public,
-        imageAsset: 'assets/generated/empty-chat.jpg',
-        actionLabel: 'Explore Worlds',
-        onAction: () => context.go('/explore'),
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.public_outlined,
+              size: 48,
+              color: VColors.onSurfaceVariant,
+            ),
+            const SizedBox(height: VSpacing.md),
+            const Text(
+              'No world chats yet',
+              style: TextStyle(fontWeight: VFontWeight.semiBold),
+            ),
+            const SizedBox(height: VSpacing.xs),
+            Text(
+              'Join a world to see its channels here.',
+              style: TextStyle(
+                color: VColors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: VSpacing.lg),
+            FilledButton.icon(
+              onPressed: () => context.push('/explore'),
+              icon: const Icon(Icons.public),
+              label: const Text('Explore Worlds'),
+            ),
+          ],
+        ),
       );
     }
 
@@ -208,100 +233,162 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 116,
+          height: 44,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             itemCount: joinedWorlds.length,
-            separatorBuilder: (_, _) => const SizedBox(width: Spacing.sm),
+            separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
             itemBuilder: (context, index) {
               final world = joinedWorlds[index];
-              return FadeIn(
-                delayMs: index * 35,
-                child: _JoinedWorldCard(
-                  world: world,
-                  selected: world.id == selectedWorld.id,
-                  onTap: () {
-                    setState(() => _selectedWorldId = world.id);
-                    ref.read(channelProvider.notifier).loadChannels(world.id);
-                  },
+              final isSelected = world.id == selectedWorld.id;
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _selectedWorldId = world.id);
+                  ref.read(channelProvider.notifier).loadChannels(world.id);
+                },
+                child: AnimatedContainer(
+                  duration: VAnimation.fast,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.md,
+                    vertical: VSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? VColors.primary.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(VRadius.pill),
+                    border: Border.all(
+                      color: isSelected
+                          ? VColors.primary.withValues(alpha: 0.4)
+                          : Colors.transparent,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.public,
+                        size: VIconSize.sm,
+                        color: isSelected
+                            ? VColors.primary
+                            : VColors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: VSpacing.xs),
+                      Text(
+                        world.name,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? VFontWeight.semiBold
+                              : VFontWeight.regular,
+                          color: isSelected
+                              ? VColors.primary
+                              : VColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
           ),
         ),
-        const SizedBox(height: Spacing.lg),
-        _SelectedWorldHeader(world: selectedWorld),
-        const SizedBox(height: Spacing.sm),
-        if (channels.isEmpty)
-          FutureBuilder<void>(
-            future: ref
-                .read(channelProvider.notifier)
-                .loadChannels(selectedWorld.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const ScreenLoading(
-                  type: ScreenLoadingType.list,
-                  itemCount: 3,
-                );
-              }
-              final loaded =
-                  ref
-                      .watch(channelProvider)
-                      .channelsByWorld[selectedWorld.id] ??
-                  [];
-              if (loaded.isEmpty) {
-                return const AppEmptyState(
-                  title: 'No channels yet',
-                  description:
-                      'This world does not have a public channel available.',
-                  icon: Icons.forum_outlined,
-                );
-              }
-              return _ChannelList(world: selectedWorld, channels: loaded);
-            },
-          )
-        else
-          _ChannelList(world: selectedWorld, channels: channels),
+        const Divider(height: 1),
+        Expanded(
+          child: channels.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.tag,
+                        size: 48,
+                        color: VColors.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: VSpacing.md),
+                      const Text(
+                        'No channels yet',
+                        style: TextStyle(fontWeight: VFontWeight.semiBold),
+                      ),
+                      const SizedBox(height: VSpacing.xs),
+                      Text(
+                        'This world does not have a public channel.',
+                        style: TextStyle(color: VColors.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+                  itemCount: channels.length,
+                  itemBuilder: (context, index) {
+                    final channel = channels[index];
+                    final unreadCount = ref
+                        .read(chatProvider.notifier)
+                        .unreadCount(channel.id);
+                    return _ChannelTile(
+                      channel: channel,
+                      world: selectedWorld,
+                      unreadCount: unreadCount,
+                    );
+                  },
+                ),
+        ),
       ],
     );
   }
 
   Widget _buildEmptyDmState() {
-    return AppEmptyState(
-      title: 'No direct messages yet',
-      description: 'Find residents and start a private conversation.',
-      icon: Icons.chat_bubble_outline,
-      imageAsset: 'assets/generated/empty-chat.jpg',
-      actionLabel: 'Find Residents',
-      onAction: () => context.go('/search'),
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.chat_bubble_outline,
+            size: 48,
+            color: VColors.onSurfaceVariant,
+          ),
+          const SizedBox(height: VSpacing.md),
+          const Text(
+            'No direct messages yet',
+            style: TextStyle(fontWeight: VFontWeight.semiBold),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            'Find residents and start a conversation.',
+            style: TextStyle(color: VColors.onSurfaceVariant),
+          ),
+          const SizedBox(height: VSpacing.lg),
+          FilledButton.icon(
+            onPressed: () => context.push('/search'),
+            icon: const Icon(Icons.search),
+            label: const Text('Find Residents'),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildRoomList(
     ThemeData theme,
+    bool isDark,
     List<Map<String, dynamic>> rooms,
     String currentUserId,
   ) {
-    return Column(
-      children: [
-        for (final entry in rooms.asMap().entries)
-          FadeIn(
-            delayMs: entry.key * 40,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
-              child: _DmRoomTile(
-                room: entry.value,
-                currentUserId: currentUserId,
-                otherName: _otherName(entry.value, currentUserId),
-                otherAvatar: _otherAvatar(entry.value),
-                presence: _presence(entry.value),
-                timeLabel: _timeLabel(
-                  entry.value['last_message_at'] as String?,
-                ),
-              ),
-            ),
-          ),
-      ],
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+      itemCount: rooms.length,
+      itemBuilder: (context, index) {
+        final room = rooms[index];
+        return _DmRoomTile(
+          room: room,
+          currentUserId: currentUserId,
+          otherName: _otherName(room, currentUserId),
+          otherAvatar: _otherAvatar(room),
+          presence: _presence(room),
+          timeLabel: _timeLabel(room['last_message_at'] as String?),
+        );
+      },
     );
   }
 
@@ -328,13 +415,22 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   Presence _presence(Map<String, dynamic> room) {
-    final lastAt = room['last_message_at'] as String?;
-    if (lastAt == null) return Presence.offline;
-    final last = DateTime.tryParse(lastAt);
-    if (last == null) return Presence.offline;
-    return DateTime.now().difference(last).inMinutes < 5
-        ? Presence.online
-        : Presence.offline;
+    final otherLastSeen = room['other_last_seen_at'] as int?;
+    if (otherLastSeen == null || otherLastSeen == 0) {
+      final lastAt = room['last_message_at'] as String?;
+      if (lastAt == null) return Presence.offline;
+      final last = DateTime.tryParse(lastAt);
+      if (last == null) return Presence.offline;
+      final diff = DateTime.now().difference(last).inMinutes;
+      if (diff < 2) return Presence.online;
+      if (diff < 10) return Presence.idle;
+      return Presence.offline;
+    }
+    final lastSeen = DateTime.fromMillisecondsSinceEpoch(otherLastSeen);
+    final diff = DateTime.now().difference(lastSeen).inMinutes;
+    if (diff < 2) return Presence.online;
+    if (diff < 10) return Presence.idle;
+    return Presence.offline;
   }
 
   String _timeLabel(String? iso) {
@@ -360,24 +456,39 @@ class _ModeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.xs),
-      borderRadius: BorderRadius.circular(RadiusTokens.full),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.xs),
+      decoration: BoxDecoration(
+        color: isDark
+            ? VColors.glassBackgroundDark
+            : VColors.glassBackground,
+        borderRadius: BorderRadius.circular(VRadius.pill),
+        border: Border.all(
+          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+        ),
+      ),
       child: Row(
         children: [
-          _ModeButton(
-            label: 'Worlds',
-            count: worldCount,
-            icon: Icons.public,
-            selected: mode == _ChatMode.worlds,
-            onTap: () => onChanged(_ChatMode.worlds),
+          Expanded(
+            child: _ModeButton(
+              label: 'Worlds',
+              count: worldCount,
+              icon: Icons.public,
+              selected: mode == _ChatMode.worlds,
+              onTap: () => onChanged(_ChatMode.worlds),
+            ),
           ),
-          _ModeButton(
-            label: 'DMs',
-            count: dmCount,
-            icon: Icons.forum,
-            selected: mode == _ChatMode.dms,
-            onTap: () => onChanged(_ChatMode.dms),
+          Expanded(
+            child: _ModeButton(
+              label: 'DMs',
+              count: dmCount,
+              icon: Icons.forum,
+              selected: mode == _ChatMode.dms,
+              onTap: () => onChanged(_ChatMode.dms),
+            ),
           ),
         ],
       ),
@@ -402,126 +513,47 @@ class _ModeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: AnimDurations.fast,
-          padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.md,
-            vertical: Spacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.tertiary.withValues(alpha: 0.14)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(RadiusTokens.full),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: IconSizes.sm,
-                color: selected ? AppColors.tertiary : AppColors.inkMuted,
-              ),
-              const SizedBox(width: Spacing.xs),
-              Text(
-                '$label $count',
-                style: TextStyle(
-                  color: selected ? AppColors.tertiary : AppColors.inkMuted,
-                  fontWeight: selected ? FontWeights.bold : FontWeights.regular,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-class _JoinedWorldCard extends StatelessWidget {
-  final World world;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _JoinedWorldCard({
-    required this.world,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = WorldAssets.colorForPrestige(world.prestige);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: AnimDurations.fast,
-        width: selected ? 220 : 178,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
-          border: Border.all(
-            color: selected ? accent : AppColors.glassBorder,
-            width: selected ? 1.4 : 1,
-          ),
+        duration: VAnimation.fast,
+        padding: const EdgeInsets.symmetric(
+          horizontal: VSpacing.md,
+          vertical: VSpacing.sm,
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
+        decoration: BoxDecoration(
+          color: selected
+              ? VColors.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(VRadius.pill),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            WorldBanner(
-              worldId: world.id,
-              assetKey: world.assetKey,
-              worldType: world.type,
-              prestige: world.prestige,
-              height: 116,
+            Icon(
+              icon,
+              size: VIconSize.sm,
+              color: selected
+                  ? VColors.primary
+                  : (isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant),
             ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.canvas.withValues(alpha: 0.06),
-                    AppColors.canvas.withValues(alpha: 0.88),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(Spacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Icon(
-                      selected ? Icons.check_circle : Icons.public,
-                      color: selected ? accent : AppColors.inkMuted,
-                      size: IconSizes.md,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    world.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.ink,
-                      fontWeight: FontWeights.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${world.memberCount} residents',
-                    style: const TextStyle(
-                      color: AppColors.inkSecondary,
-                      fontSize: FontSizes.labelSm,
-                    ),
-                  ),
-                ],
+            const SizedBox(width: VSpacing.xs),
+            Text(
+              '$label $count',
+              style: TextStyle(
+                color: selected
+                    ? VColors.primary
+                    : (isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant),
+                fontWeight: selected
+                    ? VFontWeight.semiBold
+                    : VFontWeight.regular,
               ),
             ),
           ],
@@ -531,169 +563,107 @@ class _JoinedWorldCard extends StatelessWidget {
   }
 }
 
-class _SelectedWorldHeader extends StatelessWidget {
-  final World world;
-
-  const _SelectedWorldHeader({required this.world});
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = WorldAssets.colorForPrestige(world.prestige);
-    return Row(
-      children: [
-        Container(
-          width: 3,
-          height: 28,
-          decoration: BoxDecoration(
-            color: accent,
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          ),
-        ),
-        const SizedBox(width: Spacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                world.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.ink,
-                  fontWeight: FontWeights.bold,
-                ),
-              ),
-              Text(
-                'World channels',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: AppColors.inkMuted),
-              ),
-            ],
-          ),
-        ),
-        IconButton(
-          tooltip: 'View World',
-          icon: const Icon(Icons.open_in_new, size: IconSizes.md),
-          color: AppColors.inkSecondary,
-          onPressed: () => context.push('/explore/${world.id}'),
-        ),
-      ],
-    );
-  }
-}
-
-class _ChannelList extends ConsumerWidget {
-  final World world;
-  final List<WorldChannel> channels;
-
-  const _ChannelList({required this.world, required this.channels});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final features = ref
-        .read(worldProvider.notifier)
-        .featuresForWorld(world.id);
-    final visible = channels.where((channel) {
-      if (channel.name == 'lounge' && !features.lounge) return false;
-      return true;
-    }).toList()..sort((a, b) => a.position.compareTo(b.position));
-
-    if (visible.isEmpty) {
-      return const AppEmptyState(
-        title: 'No channels yet',
-        description: 'This world does not have a public channel available.',
-        icon: Icons.forum_outlined,
-      );
-    }
-    Future.microtask(
-      () => ref
-          .read(chatProvider.notifier)
-          .loadChannelActivity(visible.map((channel) => channel.id).toList()),
-    );
-
-    return Column(
-      children: [
-        for (final entry in visible.asMap().entries)
-          Padding(
-            padding: const EdgeInsets.only(bottom: Spacing.sm),
-            child: _WorldChannelTile(
-              world: world,
-              channel: entry.value,
-              unreadCount: ref
-                  .read(chatProvider.notifier)
-                  .unreadCount(entry.value.id),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _WorldChannelTile extends StatelessWidget {
+class _ChannelTile extends StatelessWidget {
   final World world;
   final WorldChannel channel;
   final int unreadCount;
 
-  const _WorldChannelTile({
-    required this.world,
+  const _ChannelTile({
     required this.channel,
+    required this.world,
     required this.unreadCount,
   });
 
   IconData get _icon => switch (channel.channelType) {
-    ChannelType.announcement => Icons.campaign,
-    ChannelType.feed => Icons.dynamic_feed,
-    ChannelType.text => Icons.tag,
-    ChannelType.voice => Icons.volume_up,
-  };
+        ChannelType.announcement => Icons.campaign,
+        ChannelType.feed => Icons.dynamic_feed,
+        ChannelType.text => Icons.tag,
+        ChannelType.voice => Icons.volume_up,
+      };
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final channelName = Uri.encodeComponent(channel.name);
     final channelId = Uri.encodeComponent(channel.id);
 
-    return GlassPanel(
-      padding: EdgeInsets.zero,
-      borderRadius: BorderRadius.circular(RadiusTokens.xl),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.xs,
-        ),
-        leading: Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          ),
-          child: Icon(_icon, color: AppColors.primary, size: IconSizes.md),
-        ),
-        title: Text(
-          '# ${channel.name}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: AppColors.ink,
-            fontWeight: FontWeights.bold,
-          ),
-        ),
-        subtitle: Text(
-          channel.description ?? 'Open discussion in ${world.name}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: AppColors.inkMuted),
-        ),
-        trailing: unreadCount > 0
-            ? _UnreadBadge(count: unreadCount)
-            : const Icon(
-                Icons.chevron_right,
-                color: AppColors.inkMuted,
-                size: IconSizes.md,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         onTap: () =>
             context.push('/explore/${world.id}/$channelName?id=$channelId'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _icon,
+                size: VIconSize.md,
+                color: unreadCount > 0
+                    ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                    : (isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant),
+              ),
+              const SizedBox(width: VSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      channel.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: unreadCount > 0
+                            ? VFontWeight.semiBold
+                            : VFontWeight.regular,
+                        color: unreadCount > 0
+                            ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                            : (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant),
+                      ),
+                    ),
+                    if (channel.description != null && channel.description!.isNotEmpty)
+                      Text(
+                        channel.description!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (unreadCount > 0)
+                Container(
+                  constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: VColors.primary,
+                    borderRadius: BorderRadius.circular(VRadius.pill),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    unreadCount > 99 ? '99+' : '$unreadCount',
+                    style: const TextStyle(
+                      color: VColors.onPrimary,
+                      fontSize: VFontSize.labelSm,
+                      fontWeight: VFontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -719,101 +689,118 @@ class _DmRoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final lastMessage = room['last_message'] as String? ?? '';
     final unreadCount = room['unread_count'] as int? ?? 0;
 
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.md),
-      borderRadius: BorderRadius.circular(RadiusTokens.xl),
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push('/chat/${room['id']}'),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        child: Row(
-          children: [
-            CosmeticAvatar(imageUrl: otherAvatar, size: 48),
-            const SizedBox(width: Spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Stack(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          otherName.isNotEmpty ? otherName : 'Unknown',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeights.bold,
-                            color: AppColors.ink,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (timeLabel.isNotEmpty)
-                        Text(
-                          timeLabel,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppColors.inkMuted,
-                          ),
-                        ),
-                    ],
+                  CosmeticAvatar(
+                    imageUrl: otherAvatar,
+                    size: 48,
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          lastMessage.isNotEmpty
-                              ? lastMessage
-                              : 'No messages yet',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: unreadCount > 0
-                                ? AppColors.ink
-                                : AppColors.inkMuted,
-                            fontWeight: unreadCount > 0
-                                ? FontWeights.semiBold
-                                : FontWeights.regular,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? VColors.surfaceDark : VColors.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? VColors.surfaceDark : VColors.surface,
+                          width: 2,
                         ),
                       ),
-                      if (unreadCount > 0) _UnreadBadge(count: unreadCount),
-                    ],
+                      child: StatusDot(
+                        presence: presence,
+                        size: 10,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: Spacing.sm),
-            StatusDot(presence: presence, size: 8),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _UnreadBadge extends StatelessWidget {
-  final int count;
-
-  const _UnreadBadge({required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.tertiary,
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        count > 99 ? '99+' : '$count',
-        style: const TextStyle(
-          color: AppColors.onTertiary,
-          fontSize: 11,
-          fontWeight: FontWeights.bold,
+              const SizedBox(width: VSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            otherName.isNotEmpty ? otherName : 'Unknown',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: unreadCount > 0
+                                  ? VFontWeight.semiBold
+                                  : VFontWeight.regular,
+                              color: unreadCount > 0
+                                  ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                                  : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (timeLabel.isNotEmpty)
+                          Text(
+                            timeLabel,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            lastMessage.isNotEmpty
+                                ? lastMessage
+                                : 'No messages yet',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: unreadCount > 0
+                                  ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                                  : (isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant),
+                              fontWeight: unreadCount > 0
+                                  ? VFontWeight.semiBold
+                                  : VFontWeight.regular,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (unreadCount > 0)
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: VColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

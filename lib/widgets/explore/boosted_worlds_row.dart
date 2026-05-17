@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class BoostedWorldsRow extends StatelessWidget {
   final List<World> worlds;
@@ -17,28 +17,28 @@ class BoostedWorldsRow extends StatelessWidget {
       height: 120,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
         itemCount: worlds.length,
-        separatorBuilder: (_, _) => const SizedBox(width: Spacing.md),
+        separatorBuilder: (_, _) => const SizedBox(width: VSpacing.md),
         itemBuilder: (context, index) {
           final world = worlds[index];
           return GestureDetector(
             onTap: () => context.push('/explore/${world.id}'),
             child: Container(
               width: 200,
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.tertiary.withValues(alpha: 0.1),
-                    AppColors.tertiary.withValues(alpha: 0.03),
+                    VColors.tertiary.withValues(alpha: 0.1),
+                    VColors.tertiary.withValues(alpha: 0.03),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+                borderRadius: BorderRadius.circular(VRadius.lg),
                 border: Border.all(
-                  color: AppColors.tertiary.withValues(alpha: 0.25),
+                  color: VColors.tertiary.withValues(alpha: 0.25),
                 ),
               ),
               child: Row(
@@ -47,12 +47,12 @@ class BoostedWorldsRow extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.tertiary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      color: VColors.tertiary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(VRadius.md),
                     ),
-                    child: const Icon(Icons.rocket_launch, color: AppColors.tertiary, size: IconSizes.md),
+                    child: const Icon(Icons.rocket_launch, color: VColors.tertiary, size: VIconSize.md),
                   ),
-                  const SizedBox(width: Spacing.sm),
+                  const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,8 +61,8 @@ class BoostedWorldsRow extends StatelessWidget {
                         Text(
                           world.name,
                           style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeights.bold,
-                            color: AppColors.ink,
+                            fontWeight: VFontWeight.bold,
+                            color: VColors.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -70,20 +70,20 @@ class BoostedWorldsRow extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.bolt, size: 12, color: AppColors.tertiary),
+                            const Icon(Icons.bolt, size: 12, color: VColors.tertiary),
                             const SizedBox(width: 2),
                             Text(
                               'Boosted',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppColors.tertiary,
-                                fontWeight: FontWeights.semiBold,
+                                color: VColors.tertiary,
+                                fontWeight: VFontWeight.semiBold,
                               ),
                             ),
-                            const SizedBox(width: Spacing.sm),
+                            const SizedBox(width: VSpacing.sm),
                             Text(
                               '★ P${world.prestige}',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppColors.inkMuted,
+                                color: VColors.onSurfaceVariant,
                               ),
                             ),
                           ],

@@ -5,22 +5,27 @@ import '../models/notification.dart';
 import '../services/storage_service.dart';
 import '../services/notification_service.dart';
 import '../services/push_service.dart';
+import '../services/quiet_hours_service.dart';
 import '../utils/id_generator.dart';
 import 'resident_provider.dart';
 
 class NotificationState {
   final List<AppNotification> notifications;
+  final List<AppNotification> quietNotifications;
   final bool isLoading;
   const NotificationState({
     this.notifications = const [],
+    this.quietNotifications = const [],
     this.isLoading = true,
   });
 
   NotificationState copyWith({
     List<AppNotification>? notifications,
+    List<AppNotification>? quietNotifications,
     bool? isLoading,
   }) => NotificationState(
     notifications: notifications ?? this.notifications,
+    quietNotifications: quietNotifications ?? this.quietNotifications,
     isLoading: isLoading ?? this.isLoading,
   );
 }
@@ -28,6 +33,7 @@ class NotificationState {
 class NotificationNotifier extends Notifier<NotificationState> {
   StreamSubscription<AppNotification>? _realtimeSubscription;
   String? _realtimeResidentId;
+  int _unreadCount = 0;
 
   @override
   NotificationState build() {
@@ -43,7 +49,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     required String message,
     String? postId,
     String? worldId,
-  }) {
+  }) async {
     final n = AppNotification(
       id: generateId(),
       type: type,
@@ -52,7 +58,24 @@ class NotificationNotifier extends Notifier<NotificationState> {
       worldId: worldId,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
+
+    final isPriority = type == NotificationType.modAction ||
+        type == NotificationType.tierUpgrade ||
+        type == NotificationType.welcome;
+
+    if (worldId != null && !isPriority) {
+      final quiet = await QuietHoursService.isQuietTime(worldId);
+      if (quiet) {
+        state = state.copyWith(
+          quietNotifications: [...state.quietNotifications, n],
+        );
+        _persist();
+        return;
+      }
+    }
+
     state = state.copyWith(notifications: [n, ...state.notifications]);
+    _unreadCount++;
     _persist();
 
     final resident = ref.read(residentProvider).resident;
@@ -64,23 +87,42 @@ class NotificationNotifier extends Notifier<NotificationState> {
     }
   }
 
+  void deliverQuietNotifications() {
+    if (state.quietNotifications.isEmpty) return;
+    final toDeliver = List<AppNotification>.from(state.quietNotifications);
+    state = state.copyWith(
+      notifications: [...toDeliver, ...state.notifications],
+      quietNotifications: [],
+    );
+    _unreadCount += toDeliver.length;
+    _persist();
+  }
+
   void markRead(String id) {
+    final wasUnread = state.notifications
+        .where((n) => n.id == id && !n.read)
+        .isNotEmpty;
     state = state.copyWith(
       notifications: state.notifications
           .map((n) => n.id == id ? n.copyWith(read: true) : n)
           .toList(),
     );
+    if (wasUnread) {
+      _unreadCount = (_unreadCount - 1).clamp(0, 999999);
+    }
     _persist();
 
     NotificationService.markRead(id);
   }
 
   void markAllRead() {
+    final wasUnread = state.notifications.where((n) => !n.read).length;
     state = state.copyWith(
       notifications: state.notifications
           .map((n) => n.copyWith(read: true))
           .toList(),
     );
+    _unreadCount = (_unreadCount - wasUnread).clamp(0, 999999);
     _persist();
 
     final resident = ref.read(residentProvider).resident;
@@ -99,6 +141,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         resident.id,
       );
       if (remoteNotifications.isNotEmpty) {
+        _unreadCount = remoteNotifications.where((n) => !n.read).length;
         state = NotificationState(
           notifications: remoteNotifications,
           isLoading: false,
@@ -118,6 +161,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
             .map((e) => _fromJson(e as Map<String, dynamic>))
             .whereType<AppNotification>()
             .toList();
+        _unreadCount = notifications.where((n) => !n.read).length;
         state = NotificationState(
           notifications: notifications,
           isLoading: false,
@@ -126,9 +170,10 @@ class NotificationNotifier extends Notifier<NotificationState> {
       }
     } catch (_) {}
     state = const NotificationState(isLoading: false);
+    _unreadCount = 0;
   }
 
-  int get unreadCount => state.notifications.where((n) => !n.read).length;
+  int get unreadCount => _unreadCount;
 
   Future<void> _subscribeRealtime(String residentId) async {
     if (_realtimeResidentId == residentId) return;
@@ -143,6 +188,9 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
   void _addRemoteNotification(AppNotification notification) {
     if (state.notifications.any((n) => n.id == notification.id)) return;
+    if (!notification.read) {
+      _unreadCount++;
+    }
     state = state.copyWith(
       notifications: [notification, ...state.notifications],
       isLoading: false,

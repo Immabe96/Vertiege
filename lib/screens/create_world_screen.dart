@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/world.dart';
 import '../services/subscription_service.dart';
 import '../theme/design_system.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../widgets/core/glass_panel.dart';
+import '../widgets/worlds/dominion_type_picker.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -40,11 +42,11 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
   late final TextEditingController _descController;
 
   String _selectedIcon = 'public';
+  DominionType? _selectedDominionType;
   final Map<String, bool> _channelToggles = {
     for (final c in _defaultChannels) c.key: true,
   };
   bool _isCreating = false;
-  SubscriptionTier _subscriptionTier = SubscriptionTier.resident;
   bool _tierLoaded = false;
 
   @override
@@ -58,10 +60,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
   Future<void> _loadSubscriptionTier() async {
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
-      final tier = await SubscriptionService.getTier(resident.id);
+      await SubscriptionService.getTier(resident.id);
       if (mounted) {
         setState(() {
-          _subscriptionTier = tier;
           _tierLoaded = true;
         });
       }
@@ -85,7 +86,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No resident profile found. Please create one first.')),
+        const SnackBar(
+          content: Text('No resident profile found. Please create one first.'),
+        ),
       );
       return;
     }
@@ -93,21 +96,27 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     setState(() => _isCreating = true);
 
     try {
-      final worldId = await ref.read(worldProvider.notifier).createWorld(
+      final worldId = await ref
+          .read(worldProvider.notifier)
+          .createWorld(
             name: _nameController.text.trim(),
             description: _descController.text.trim(),
             sovereignId: resident.id,
             sovereignName: resident.name,
             icon: _selectedIcon,
+            dominionType: _selectedDominionType?.name,
+            worldCurrencyName: _selectedDominionType?.defaultCurrencyName,
+            tags: _selectedDominionType?.defaultTags,
           );
 
-      ref.read(residentProvider.notifier).joinWorld(worldId);
+      await ref.read(residentProvider.notifier).joinWorld(worldId);
 
       if (mounted) {
         _nameController.clear();
         _descController.clear();
         setState(() {
           _selectedIcon = 'public';
+          _selectedDominionType = null;
           for (final key in _channelToggles.keys) {
             _channelToggles[key] = true;
           }
@@ -118,9 +127,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isCreating = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create world: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to create world: $e')));
       }
     }
   }
@@ -134,24 +143,35 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     return resident.tier.value >= _requiredTierLevel;
   }
 
-  bool get _isAtSubscriptionLimit {
+  bool get _isAtWorldCreationLimit {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return false;
-    final benefits = SubscriptionService.getBenefits(_subscriptionTier);
-    final worldLimit = benefits['worldLimit'] as int;
-    return resident.joinedWorldIds.length >= worldLimit;
+    final worldState = ref.read(worldProvider);
+    final ownedWorlds = worldState.worlds.values
+        .where((w) => w.sovereignId == resident.id)
+        .length;
+    return ownedWorlds >= resident.worldCreationLimit;
   }
 
-  /// Builds the subscription upgrade prompt when world limit is reached.
-  Widget _buildSubscriptionLockedView(BuildContext context) {
+  /// Builds the world limit reached view when user has used all creation slots.
+  Widget _buildWorldLimitReachedView(BuildContext context) {
     final theme = Theme.of(context);
-    final benefits = SubscriptionService.getBenefits(_subscriptionTier);
-    final tierLabel = benefits['label'] as String;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final resident = ref.read(residentProvider).resident;
+    final limit = resident?.worldCreationLimit ?? 1;
+
+    final nextTierLimit = switch (resident?.tier.value) {
+      null => 2,
+      1 => 2,
+      2 => 3,
+      3 => 4,
+      4 => 5,
+      _ => null,
+    };
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Dominion World'),
-      ),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(title: const Text('Create Dominion World')),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
@@ -162,45 +182,51 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 Icon(
                   Icons.diamond_outlined,
                   size: 64,
-                  color: AppColors.tertiary,
+                  color: VColors.tertiary,
                 ),
                 const SizedBox(height: Spacing.md),
                 Text(
                   'World Limit Reached',
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: Spacing.sm),
                 Text(
-                  'Your $tierLabel subscription allows you to create up to ${benefits['worldLimit']} worlds. Upgrade to unlock more.',
+                  'You have created $limit world(s). Upgrade your tier to unlock more.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.inkMuted,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: Spacing.xl),
-                SizedBox(
-                  height: 48,
-                  child: FilledButton.icon(
-                    onPressed: () => context.push('/subscription'),
-                    icon: const Icon(Icons.star),
-                    label: const Text('UPGRADE SUBSCRIPTION'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.tertiary,
-                      foregroundColor: AppColors.onTertiary,
+                if (nextTierLimit != null) ...[
+                  SizedBox(
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: () => context.push('/achievements'),
+                      icon: const Icon(Icons.emoji_events),
+                      label: const Text('Go to Achievements'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: VColors.tertiary,
+                        foregroundColor: VColors.onTertiary,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: Spacing.sm),
-                Text(
-                  'Patrician: up to 10 worlds. Sovereign Elite: unlimited.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.inkMuted,
+                  const SizedBox(height: Spacing.sm),
+                  Text(
+                    'Reach the next tier to create up to $nextTierLimit worlds.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -211,14 +237,14 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
   Widget _buildLockedView(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final totalXp = ref.watch(achievementProvider).totalXp;
     final progress = (totalXp / _requiredXp).clamp(0.0, 1.0);
     final remaining = _requiredXp - totalXp;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Dominion World'),
-      ),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(title: const Text('Create Dominion World')),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
@@ -226,16 +252,12 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             padding: const EdgeInsets.all(Spacing.xl),
             child: Column(
               children: [
-                Icon(
-                  Icons.lock_outline,
-                  size: 64,
-                  color: AppColors.tertiary,
-                ),
+                Icon(Icons.lock_outline, size: 64, color: VColors.tertiary),
                 const SizedBox(height: Spacing.md),
                 Text(
                   'High Roller Required',
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -244,25 +266,29 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   'Only residents who have reached High Roller tier (500+ XP) can create custom dominion worlds.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.inkMuted,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: Spacing.lg),
                 // ── Progress bar ──────────────────────────────
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(VRadius.md),
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 16,
-                    backgroundColor: AppColors.glassBackground,
-                    valueColor: const AlwaysStoppedAnimation(AppColors.tertiary),
+                    backgroundColor: isDark
+                        ? VColors.glassBackgroundDark
+                        : VColors.glassBackground,
+                    valueColor: const AlwaysStoppedAnimation(VColors.tertiary),
                   ),
                 ),
                 const SizedBox(height: Spacing.sm),
                 Text(
                   '$totalXp / $_requiredXp XP',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -271,7 +297,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   Text(
                     '$remaining XP to go',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -283,8 +311,8 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     icon: const Icon(Icons.emoji_events),
                     label: const Text('Go to Achievements'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.tertiary,
-                      foregroundColor: AppColors.onTertiary,
+                      backgroundColor: VColors.tertiary,
+                      foregroundColor: VColors.onTertiary,
                     ),
                   ),
                 ),
@@ -293,7 +321,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   'Submit achievements and earn XP to unlock world creation.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.inkMuted,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -307,21 +337,21 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // ── Level gate: must be High Roller (tier >= 2) ─────────────
     if (!_canCreateWorld) {
       return _buildLockedView(context);
     }
 
-    // ── Subscription gate: world limit ──────────────────────────
-    if (_tierLoaded && _isAtSubscriptionLimit) {
-      return _buildSubscriptionLockedView(context);
+    // ── World creation limit gate ────────────────────────────────
+    if (_tierLoaded && _isAtWorldCreationLimit) {
+      return _buildWorldLimitReachedView(context);
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Dominion World'),
-      ),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(title: const Text('Create Dominion World')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -335,7 +365,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.public, color: AppColors.primary, size: 20),
+                      Icon(Icons.public, color: VColors.primary, size: 20),
                       const SizedBox(width: Spacing.sm),
                       Text('World Details', style: theme.textTheme.titleMedium),
                     ],
@@ -343,23 +373,31 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   const SizedBox(height: Spacing.md),
                   TextFormField(
                     controller: _nameController,
-                    style: const TextStyle(color: AppColors.ink),
-                    decoration: const InputDecoration(
+                    style: TextStyle(
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    ),
+                    decoration: InputDecoration(
                       labelText: 'World Name',
                       hintText: 'Enter a name for your world',
-                      hintStyle: TextStyle(color: AppColors.inkMuted),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.glassBorder),
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.glassBorder),
+                      border: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: VColors.glassBorder),
                       ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: VColors.glassBorder),
                       ),
-                      prefixIcon: Icon(Icons.edit_note),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: VColors.primary),
+                      ),
+                      prefixIcon: const Icon(Icons.edit_note),
                       filled: true,
-                      fillColor: AppColors.glassBackground,
+                      fillColor: isDark
+                          ? VColors.glassBackgroundDark
+                          : VColors.glassBackground,
                     ),
                     textCapitalization: TextCapitalization.words,
                     maxLength: 50,
@@ -376,23 +414,31 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   const SizedBox(height: Spacing.md),
                   TextFormField(
                     controller: _descController,
-                    style: const TextStyle(color: AppColors.ink),
-                    decoration: const InputDecoration(
+                    style: TextStyle(
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    ),
+                    decoration: InputDecoration(
                       labelText: 'Description',
                       hintText: 'What is your world about?',
-                      hintStyle: TextStyle(color: AppColors.inkMuted),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.glassBorder),
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.glassBorder),
+                      border: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: VColors.glassBorder),
                       ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: VColors.glassBorder),
                       ),
-                      prefixIcon: Icon(Icons.description),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: VColors.primary),
+                      ),
+                      prefixIcon: const Icon(Icons.description),
                       filled: true,
-                      fillColor: AppColors.glassBackground,
+                      fillColor: isDark
+                          ? VColors.glassBackgroundDark
+                          : VColors.glassBackground,
                     ),
                     textCapitalization: TextCapitalization.sentences,
                     maxLines: 3,
@@ -420,8 +466,10 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                           choice.icon,
                           size: 24,
                           color: isSelected
-                              ? AppColors.onPrimaryContainer
-                              : AppColors.inkMuted,
+                              ? VColors.onPrimaryContainer
+                              : (isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant),
                         ),
                         selected: isSelected,
                         onSelected: (selected) {
@@ -430,12 +478,24 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                           }
                         },
                         avatar: isSelected
-                            ? Icon(Icons.check_circle, size: 16, color: AppColors.onPrimaryContainer)
+                            ? Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: VColors.onPrimaryContainer,
+                              )
                             : null,
-                        selectedColor: AppColors.primaryContainer,
-                        backgroundColor: AppColors.glassBackground,
+                        selectedColor: isDark
+                            ? VColors.primaryContainerDark
+                            : VColors.primaryContainer,
+                        backgroundColor: isDark
+                            ? VColors.glassBackgroundDark
+                            : VColors.glassBackground,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.glassBorder,
+                          color: isSelected
+                              ? VColors.primary
+                              : (isDark
+                                  ? VColors.glassBorderDark
+                                  : VColors.glassBorder),
                         ),
                         visualDensity: VisualDensity.compact,
                         padding: const EdgeInsets.all(Spacing.sm),
@@ -443,6 +503,17 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     }).toList(),
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: Spacing.md),
+
+            // ── Dominion Type ────────────────────────────────────────
+            GlassPanel(
+              padding: const EdgeInsets.all(Spacing.md),
+              child: DominionTypePicker(
+                selected: _selectedDominionType,
+                onSelected: (type) => setState(() => _selectedDominionType = type),
               ),
             ),
 
@@ -456,16 +527,21 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.tag, color: AppColors.primary, size: 20),
+                      Icon(Icons.tag, color: VColors.primary, size: 20),
                       const SizedBox(width: Spacing.sm),
-                      Text('Default Channels', style: theme.textTheme.titleMedium),
+                      Text(
+                        'Default Channels',
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ],
                   ),
                   const SizedBox(height: Spacing.xs),
                   Text(
                     'These channels will be created for your world.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: Spacing.sm),
@@ -478,7 +554,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       },
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      activeTrackColor: AppColors.primaryContainer,
+                      activeTrackColor: isDark
+                          ? VColors.primaryContainerDark
+                          : VColors.primaryContainer,
                     ),
                   ),
                 ],
@@ -498,14 +576,14 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.ink,
+                          color: VColors.onSurface,
                         ),
                       )
                     : const Icon(Icons.add_circle_outline),
                 label: Text(_isCreating ? 'Creating...' : 'Create World'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.tertiary,
-                  foregroundColor: AppColors.onTertiary,
+                  backgroundColor: VColors.tertiary,
+                  foregroundColor: VColors.onTertiary,
                 ),
               ),
             ),

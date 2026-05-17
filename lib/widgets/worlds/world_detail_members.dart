@@ -43,10 +43,7 @@ class WorldDetailMembers extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: Spacing.sm),
-        if (ref
-            .read(worldProvider.notifier)
-            .featuresForWorld(worldId)
-            .events)
+        if (ref.read(worldProvider.notifier).featuresForWorld(worldId).events)
           WorldEventsCard(worldId: worldId, sovereignId: world.sovereignId),
         WorldLeaderboard(worldId: worldId),
         const SizedBox(height: Spacing.md),

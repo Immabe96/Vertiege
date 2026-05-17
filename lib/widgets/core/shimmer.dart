@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class Pulse extends StatefulWidget {
@@ -12,7 +12,7 @@ class Pulse extends StatefulWidget {
     super.key,
     this.width = double.infinity,
     this.height = 16,
-    this.borderRadius = 4,
+    this.borderRadius = RadiusTokens.sm,
     this.opacity,
   });
 
@@ -40,6 +40,7 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -47,9 +48,8 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHighest.withValues(
-              alpha: widget.opacity ??
-                  (0.3 + (_controller.value * 0.2)),
+            color: (isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest).withValues(
+              alpha: widget.opacity ?? (0.3 + (_controller.value * 0.2)),
             ),
             borderRadius: BorderRadius.circular(widget.borderRadius),
           ),
@@ -69,16 +69,12 @@ class Shimmer extends StatelessWidget {
     super.key,
     this.width = double.infinity,
     this.height = 16,
-    this.borderRadius = 4,
+    this.borderRadius = RadiusTokens.sm,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Pulse(
-      width: width,
-      height: height,
-      borderRadius: borderRadius,
-    );
+    return Pulse(width: width, height: height, borderRadius: borderRadius);
   }
 }
 
@@ -99,11 +95,7 @@ class ShimmerPostCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Pulse(
-            width: 48,
-            height: 48,
-            borderRadius: RadiusTokens.full,
-          ),
+          const Pulse(width: 48, height: 48, borderRadius: RadiusTokens.full),
           const SizedBox(width: Spacing.md),
           Expanded(
             child: Column(
@@ -112,7 +104,7 @@ class ShimmerPostCard extends StatelessWidget {
                 const SizedBox(height: Spacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.35,
-                  height: FontSizes.body,
+                  height: Spacing.md,
                   borderRadius: RadiusTokens.chip,
                 ),
                 const SizedBox(height: Spacing.sm),
@@ -120,7 +112,7 @@ class ShimmerPostCard extends StatelessWidget {
                 const SizedBox(height: Spacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.6,
-                  height: 14,
+                  height: FontSizes.bodyMd,
                   borderRadius: RadiusTokens.chip,
                 ),
               ],
@@ -144,15 +136,11 @@ class ShimmerChatTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: Spacing.md,
-        vertical: Spacing.sm + 2,
+        vertical: Spacing.sm,
       ),
       child: Row(
         children: [
-          const Pulse(
-            width: 56,
-            height: 56,
-            borderRadius: RadiusTokens.full,
-          ),
+          const Pulse(width: 56, height: 56, borderRadius: RadiusTokens.full),
           const SizedBox(width: Spacing.md),
           Expanded(
             child: Column(
@@ -160,13 +148,13 @@ class ShimmerChatTile extends StatelessWidget {
               children: [
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.3,
-                  height: FontSizes.body,
+                  height: Spacing.md,
                   borderRadius: RadiusTokens.chip,
                 ),
-                const SizedBox(height: Spacing.xs + 2),
+                const SizedBox(height: Spacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.55,
-                  height: FontSizes.body,
+                  height: Spacing.md,
                   borderRadius: RadiusTokens.chip,
                 ),
               ],

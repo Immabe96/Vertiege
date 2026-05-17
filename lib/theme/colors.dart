@@ -1,146 +1,193 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'v_colors.dart';
+export 'v_colors.dart';
 
-/// Vertiege color system — Sovereign Excellence
-/// Source: Stitch design system "App Interface Redesign"
+/// Backward-compatible aliases — all point to new VColors
+/// TODO: Migrate all usages to VColors directly, then remove this file
 class AppColors {
   AppColors._();
 
-  // ── Surface Hierarchy (OLED obsidian) ─────────────────────
-  static const Color canvas = Color(0xFF0A0A0A);
-  static const Color surface = Color(0xFF141218);
-  static const Color surfaceElevated = Color(0xFF1D1B20);
-  static const Color surfaceHigh = Color(0xFF211F24);
-  static const Color surfaceOverlay = Color(0xFF2B292F);
-  static const Color surfaceContainerLowest = Color(0xFF0F0D13);
-  static const Color surfaceContainerLow = Color(0xFF1D1B20);
-  static const Color surfaceContainer = Color(0xFF211F24);
-  static const Color surfaceContainerHigh = Color(0xFF2B292F);
-  static const Color surfaceContainerHighest = Color(0xFF36343A);
+  static const primary = VColors.primary;
+  static const primaryLight = VColors.primaryLight;
+  static const primaryDark = VColors.primaryDark;
+  static const primaryContainer = VColors.primaryContainer;
+  static const onPrimary = VColors.onPrimary;
+  static const onPrimaryContainer = VColors.onPrimaryContainer;
 
-  // ── Text ──────────────────────────────────────────────────
-  static const Color ink = Color(0xFFE6E0E9);
-  static const Color inkSecondary = Color(0xFFCBC4D2);
-  static const Color inkMuted = Color(0xFF948E9C);
-  static const Color inkOnAccent = Color(0xFF381E72);
+  static const secondary = VColors.secondary;
+  static const secondaryLight = VColors.secondaryLight;
+  static const secondaryDark = VColors.secondaryDark;
+  static const secondaryContainer = VColors.secondaryContainer;
+  static const onSecondary = VColors.onSecondary;
+  static const onSecondaryContainer = VColors.onSecondaryContainer;
 
-  // ── Sovereign Accents ─────────────────────────────────────
-  static const Color primary = Color(0xFFCFBCFF);
-  static const Color primaryContainer = Color(0xFF6750A4);
-  static const Color onPrimary = Color(0xFF381E72);
-  static const Color onPrimaryContainer = Color(0xFFE0D2FF);
-  static const Color primaryFixed = Color(0xFFE9DDFF);
-  static const Color primaryFixedDim = Color(0xFFCFBCFF);
+  static const tertiary = VColors.tertiary;
+  static const tertiaryLight = VColors.tertiaryLight;
+  static const tertiaryDark = VColors.tertiaryDark;
+  static const tertiaryContainer = VColors.tertiaryContainer;
+  static const tertiaryFixedDim = VColors.tertiaryContainer;
+  static const tertiaryFixed = VColors.tertiary;
+  static const onTertiary = VColors.onTertiary;
+  static const onTertiaryContainer = VColors.onTertiaryContainer;
 
-  // ── Gold / Tertiary ───────────────────────────────────────
-  static const Color tertiary = Color(0xFFE7C365);
-  static const Color tertiaryContainer = Color(0xFFC9A74D);
-  static const Color onTertiary = Color(0xFF3E2E00);
-  static const Color onTertiaryContainer = Color(0xFF503D00);
-  static const Color tertiaryFixed = Color(0xFFFFDF93);
-  static const Color tertiaryFixedDim = Color(0xFFE7C365);
+  static const error = VColors.error;
+  static const errorContainer = VColors.errorContainer;
+  static const onError = VColors.onError;
+  static const onErrorContainer = VColors.onErrorContainer;
 
-  // ── Secondary ─────────────────────────────────────────────
-  static const Color secondary = Color(0xFFCDC0E9);
-  static const Color secondaryContainer = Color(0xFF4D4465);
-  static const Color onSecondary = Color(0xFF342B4B);
-  static const Color onSecondaryContainer = Color(0xFFBFB2DA);
+  static const success = VColors.success;
+  static const semanticSuccess = VColors.success;
+  static const semanticError = VColors.error;
+  static const successContainer = VColors.successContainer;
 
-  // ── Hustler (Tier III) ────────────────────────────────────
-  static const Color hustler = Color(0xFFFF6D00);
+  static const warning = VColors.warning;
+  static const warningContainer = VColors.warningContainer;
 
-  // ── Semantic ──────────────────────────────────────────────
-  static const Color error = Color(0xFFFFB4AB);
-  static const Color errorContainer = Color(0xFF93000A);
-  static const Color onError = Color(0xFF690005);
-  static const Color onErrorContainer = Color(0xFFFFDAD6);
-  static const Color success = Color(0xFF22C55E);
-  static const Color warning = Color(0xFFF5AF19);
+  static const canvas = VColors.surface;
+  static const surface = VColors.surface;
+  static const surfaceElevated = VColors.surfaceBright;
+  static const surfaceOverlay = VColors.surfaceContainerHigh;
+  static const surfaceHigh = VColors.surfaceContainerHighest;
+  static const surfaceContainerLowest = VColors.surfaceContainerLowest;
+  static const surfaceContainerLow = VColors.surfaceContainerLow;
+  static const surfaceContainer = VColors.surfaceContainer;
+  static const surfaceContainerHigh = VColors.surfaceContainerHigh;
+  static const surfaceContainerHighest = VColors.surfaceContainerHighest;
 
-  // ── Borders ───────────────────────────────────────────────
-  static const Color borderDefault = Color(0xFF494551);
-  static const Color borderSubtle = Color(0xFF36343A);
-  static const Color outline = Color(0xFF948E9C);
-  static const Color outlineVariant = Color(0xFF494551);
+  static const glassBackground = VColors.glassBackground;
+  static const glassBorder = VColors.glassBorder;
+  static const glassModalBackground = VColors.glassBackground;
 
-  // ── Achievement Category Colors ───────────────────────────
-  static const Color achievementEducation = Color(0xFF4A90D9);
-  static const Color achievementCareer = Color(0xFF7B61FF);
-  static const Color achievementRelationships = Color(0xFFE8456B);
-  static const Color achievementHealth = Color(0xFF3ECF8E);
-  static const Color achievementSkills = Color(0xFFF0B232);
-  static const Color achievementTravel = Color(0xFF1CB0F6);
-  static const Color achievementFinance = Color(0xFF58CC02);
-  static const Color achievementCommunity = Color(0xFFFF9600);
-  static const Color achievementFunny = Color(0xFFCE82FF);
-  static const Color achievementCreative = Color(0xFFFF5764);
-  static const Color achievementProfession = Color(0xFFD4A843);
+  static const ink = VColors.onSurface;
+  static const inkSecondary = VColors.onSurfaceVariant;
+  static const inkMuted = VColors.outline;
+  static const inkOnAccent = VColors.onPrimary;
 
-  // ── Surface Variant ───────────────────────────────────────
-  static const Color surfaceVariant = Color(0xFF36343A);
-  static const Color surfaceBright = Color(0xFF3B383E);
-  static const Color surfaceDim = Color(0xFF141218);
+  static const borderDefault = VColors.outline;
+  static const borderSubtle = VColors.outlineVariant;
+  static const outline = VColors.outline;
+  static const outlineVariant = VColors.outlineVariant;
 
-  // ── Glow Opacities ────────────────────────────────────────
-  static const double glowGoldAlpha = 0.10;
-  static const double glowVioletAlpha = 0.10;
-  static const double glowOrangeAlpha = 0.10;
-  static const double glowAlphaStrong = 0.15;
+  static const dark = VColors.dark;
+  static const light = VColors.light;
 
-  // ── Glass ─────────────────────────────────────────────────
-  static const Color glassBackground = Color(0x99121212);
-  static const Color glassModalBackground = Color(0x66141818);
-  static const Color glassBorder = Color(0x1A948E9C);
+  static const hustler = VColors.tierHustler;
+  static const highRoller = VColors.tierHighRoller;
+  static const elite = VColors.tierElite;
+  static const oldMoney = VColors.tierOldMoney;
+  static const apex = VColors.tierApex;
 
-  // ── Alpha Presets ─────────────────────────────────────────
-  static const double alphaHover = 0.05;
-  static const double alphaPressed = 0.10;
-  static const double alphaSelected = 0.12;
-  static const double alphaBorder = 0.20;
-  static const double alphaOverlay = 0.60;
+  static const online = VColors.online;
+  static const idle = VColors.idle;
+  static const dnd = VColors.dnd;
+  static const offline = VColors.offline;
 
-  // ── Legacy aliases for gradual migration ──────────────────
-  static const Color seed = primary;
-  static const Color accentPrimary = primary;
-  static const Color accentPrestige = tertiary;
-  static const Color accentStreak = warning;
-  static const Color accentAchievement = Color(0xFFEC4899);
-  static const Color accentLevel = Color(0xFF3B82F6);
-  static const Color worldWealth = success;
-  static const Color worldProfession = primary;
-  static const Color worldDominion = hustler;
-  static const Color semanticError = error;
-  static const Color semanticSuccess = success;
-  static const Color semanticWarning = warning;
-  static const Color tierHustler = hustler;
-  static const Color tierHighRoller = Color(0xFF3B82F6);
-  static const Color tierElite = primary;
-  static const Color tierOldMoney = tertiary;
-  static const Color tierApex = error;
-  static const Color online = success;
-  static const Color idle = warning;
-  static const Color dnd = error;
-  static const Color offline = inkMuted;
-  static const Color owlGreen = Color(0xFF58CC02);
-  static const double glowAlpha = 0.15;
-  static const Color gemPink = Color(0xFFEC4899);
-  static const Color beeYellow = Color(0xFFFFC800);
-  static const Color eelBlue = Color(0xFF1CB0F6);
-  static const Color crimson = Color(0xFF8B2252);
-  static const Color dangerRed = error;
-  static const Color gold = tertiary;
-  static const Color silver = Color(0xFFC0C0C0);
-  static const Color bronze = Color(0xFFCD7F32);
-  static const Color mysticBlue = Color(0xFF5865F2);
-  static const List<Color> gradientPrimary = [primary, Color(0xFF7C6FFD)];
-  static const List<Color> gradientBrand = [primary, Color(0xFF3ECF8E)];
-  static const List<Color> gradientWarm = [warning, Color(0xFFFF5764)];
-  static const List<Color> gradientDark = [canvas, surfaceElevated];
-  static const Map<String, Color> tierColors = {
-    'hustlers': tierHustler,
-    'highRollers': tierHighRoller,
-    'elite': tierElite,
-    'oldMoney': tierOldMoney,
-    'apex': tierApex,
-  };
-  static const Map<String, Color> tier = tierColors;
+  static const owlGreen = VColors.achievementEducation;
+  static const gemPink = VColors.achievementSocial;
+  static const beeYellow = VColors.achievementFinance;
+  static const eelBlue = VColors.achievementAdventure;
+  static const crimson = VColors.tierHustler;
+  static const gold = VColors.tierOldMoney;
+  static const silver = VColors.outline;
+  static const bronze = VColors.outlineVariant;
+  static const mysticBlue = VColors.primary;
+
+  static const tier1 = VColors.tierHustler;
+  static const tier2 = VColors.tierHighRoller;
+  static const tier3 = VColors.tierElite;
+  static const tier4 = VColors.tierOldMoney;
+  static const tier5 = VColors.tierApex;
+  static const tierHustler = VColors.tierHustler;
+  static const tierHighRoller = VColors.tierHighRoller;
+  static const tierElite = VColors.tierElite;
+  static const tierOldMoney = VColors.tierOldMoney;
+  static const tierApex = VColors.tierApex;
+
+  static const achievementEducation = VColors.achievementEducation;
+  static const achievementCareer = VColors.achievementCareer;
+  static const achievementHealth = VColors.achievementHealth;
+  static const achievementFinance = VColors.achievementFinance;
+  static const achievementSocial = VColors.achievementSocial;
+  static const achievementCreative = VColors.achievementCreative;
+  static const achievementAdventure = VColors.achievementAdventure;
+  static const achievementLeadership = VColors.achievementLeadership;
+  static const achievementKnowledge = VColors.achievementKnowledge;
+  static const achievementWellness = VColors.achievementWellness;
+  static const achievementSpecial = VColors.achievementSpecial;
+  static const achievementRelationships = VColors.achievementSocial;
+  static const achievementSkills = VColors.achievementKnowledge;
+  static const achievementTravel = VColors.achievementAdventure;
+  static const achievementCommunity = VColors.achievementSocial;
+  static const achievementFunny = VColors.achievementCreative;
+  static const achievementProfession = VColors.achievementCareer;
+
+  static const accentLevel = VColors.primary;
+  static const accentStreak = VColors.secondary;
+  static const accentAchievement = VColors.tertiary;
+  static const accentPrestige = VColors.tierElite;
+
+  static const primaryFixedDim = VColors.primaryContainer;
+  static const primaryFixed = VColors.primary;
+
+  static const dangerRed = VColors.error;
+
+  static const glowGoldAlpha = 0.3;
+  static const glowVioletAlpha = 0.3;
+  static const glowOrangeAlpha = 0.3;
+  static const glowAlphaStrong = 0.5;
+
+  static const gradientPrimary = VColors.gradientPrimary;
+  static const gradientBrand = VColors.gradientBrand;
+  static const gradientWarm = VColors.gradientWarm;
+  static const gradientDark = LinearGradient(
+    colors: [Color(0xFF1A1A2E), Color(0xFF0B0B1A)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const gradientLight = LinearGradient(
+    colors: [Color(0xFFFFFFFF), Color(0xFFF0EEF8)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const gradientSunset = VColors.gradientSunset;
+  static const gradientOcean = VColors.gradientOcean;
+
+  static const alphaHover = 0.08;
+  static const alphaPressed = 0.12;
+  static const alphaSelected = 0.16;
+  static const alphaBorder = 0.2;
+  static const alphaOverlay = 0.5;
+
+  static Color resolveCanvas({bool dark = false}) =>
+      dark ? VColors.surfaceDark : surface;
+  static Color resolveSurface({bool dark = false}) =>
+      dark ? VColors.surfaceDark : surface;
+  static Color resolveSurfaceContainer({bool dark = false}) =>
+      dark ? VColors.surfaceContainerDark : surfaceContainer;
+  static Color resolveSurfaceContainerLow({bool dark = false}) =>
+      dark ? VColors.surfaceContainerLowDark : surfaceContainerLow;
+  static Color resolveSurfaceContainerHigh({bool dark = false}) =>
+      dark ? VColors.surfaceContainerHighDark : surfaceContainerHigh;
+  static Color resolveSurfaceContainerHighest({bool dark = false}) =>
+      dark ? VColors.surfaceContainerHighestDark : surfaceContainerHighest;
+  static Color resolveGlassBackground({bool dark = false}) =>
+      dark ? VColors.glassBackgroundDark : glassBackground;
+  static Color resolveGlassBorder({bool dark = false}) =>
+      dark ? VColors.glassBorderDark : glassBorder;
+  static Color resolveInk({bool dark = false}) =>
+      dark ? VColors.onSurfaceDark : ink;
+  static Color resolveInkSecondary({bool dark = false}) =>
+      dark ? VColors.onSurfaceVariantDark : inkSecondary;
+  static Color resolveInkMuted({bool dark = false}) =>
+      dark ? VColors.outlineDark : inkMuted;
+  static Color resolveBorderDefault({bool dark = false}) =>
+      dark ? VColors.outlineDark : borderDefault;
+  static Color resolveBorderSubtle({bool dark = false}) =>
+      dark ? VColors.outlineVariantDark : borderSubtle;
+  static Color resolvePrimary({bool dark = false}) =>
+      dark ? VColors.primaryLight : primary;
+  static Color resolveSecondary({bool dark = false}) =>
+      dark ? VColors.secondaryLight : secondary;
+  static Color resolveTertiary({bool dark = false}) =>
+      dark ? VColors.tertiaryLight : tertiary;
 }

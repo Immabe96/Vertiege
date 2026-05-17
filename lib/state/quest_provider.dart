@@ -41,13 +41,17 @@ class Quest {
   int get xpReward => target * 10;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'progress': progress,
-        'claimed': claimed,
-      };
+    'id': id,
+    'progress': progress,
+    'claimed': claimed,
+  };
 
   static ({Quest quest, String label, String icon, int target}) fromPersisted(
-      Map<String, dynamic> json, String label, String icon, int target) {
+    Map<String, dynamic> json,
+    String label,
+    String icon,
+    int target,
+  ) {
     return (
       quest: Quest(
         id: json['id'] as String,
@@ -71,7 +75,8 @@ class QuestState {
   const QuestState({this.quests = const [], this.dateKey = ''});
 
   int get completedCount => quests.where((q) => q.isComplete).length;
-  int get totalXpAvailable => quests.fold(0, (sum, q) => sum + (q.claimed ? 0 : q.xpReward));
+  int get totalXpAvailable =>
+      quests.fold(0, (sum, q) => sum + (q.claimed ? 0 : q.xpReward));
 }
 
 class QuestNotifier extends Notifier<QuestState> {
@@ -103,7 +108,10 @@ class QuestNotifier extends Notifier<QuestState> {
           if (rawQuests != null) {
             final quests = rawQuests.whereType<Map<String, dynamic>>().map((q) {
               final id = q['id'] as String? ?? '';
-              final template = _templates.firstWhere((t) => t.$1 == id, orElse: () => _templates[0]);
+              final template = _templates.firstWhere(
+                (t) => t.$1 == id,
+                orElse: () => _templates[0],
+              );
               return Quest(
                 id: id,
                 label: template.$2,
@@ -120,12 +128,9 @@ class QuestNotifier extends Notifier<QuestState> {
       } catch (_) {}
     }
     // Fresh day or first load — generate new quests
-    final quests = _templates.map((t) => Quest(
-      id: t.$1,
-      label: t.$2,
-      icon: t.$3,
-      target: t.$4,
-    )).toList();
+    final quests = _templates
+        .map((t) => Quest(id: t.$1, label: t.$2, icon: t.$3, target: t.$4))
+        .toList();
     state = QuestState(quests: quests, dateKey: dateKey);
     _persist();
   }

@@ -25,22 +25,26 @@ class CacheService {
     if (raw == null || raw.isEmpty) return null;
     try {
       final list = jsonDecode(raw) as List;
-      return list.map((e) => Post(
-        id: e['id'] ?? '',
-        worldId: e['worldId'] ?? '',
-        residentId: e['residentId'] ?? '',
-        residentName: e['residentName'] ?? '',
-        residentAvatar: e['residentAvatar'] ?? '',
-        content: e['content'] ?? '',
-        imageUri: e['imageUri'],
-        imageUris: (e['imageUris'] as List?)?.cast<String>(),
-        timestamp: e['timestamp'] ?? 0,
-        isAnnouncement: e['isAnnouncement'] ?? false,
-        isPinned: e['isPinned'] ?? false,
-        eventTitle: e['eventTitle'],
-        eventStartsAt: e['eventStartsAt'],
-        eventRsvpIds: (e['eventRsvpIds'] as List?)?.cast<String>() ?? [],
-      )).toList();
+      return list
+          .map(
+            (e) => Post(
+              id: e['id'] ?? '',
+              worldId: e['worldId'] ?? '',
+              residentId: e['residentId'] ?? '',
+              residentName: e['residentName'] ?? '',
+              residentAvatar: e['residentAvatar'] ?? '',
+              content: e['content'] ?? '',
+              imageUri: e['imageUri'],
+              imageUris: (e['imageUris'] as List?)?.cast<String>(),
+              timestamp: e['timestamp'] ?? 0,
+              isAnnouncement: e['isAnnouncement'] ?? false,
+              isPinned: e['isPinned'] ?? false,
+              eventTitle: e['eventTitle'],
+              eventStartsAt: e['eventStartsAt'],
+              eventRsvpIds: (e['eventRsvpIds'] as List?)?.cast<String>() ?? [],
+            ),
+          )
+          .toList();
     } catch (_) {
       return null;
     }
@@ -59,7 +63,9 @@ class CacheService {
     if (raw == null || raw.isEmpty) return null;
     try {
       final list = jsonDecode(raw) as List;
-      return list.map((e) => World.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => World.fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (_) {
       return null;
     }

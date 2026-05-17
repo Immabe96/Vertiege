@@ -1,7 +1,7 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/world.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
 
@@ -93,14 +93,14 @@ class _BannerGeneratorState extends State<BannerGenerator> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.canvas.withValues(alpha: 0.7),
+                        color: VColors.surface.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       child: Text(
                         'Variant ${index + 1}',
                         style: const TextStyle(
                           fontSize: FontSizes.micro,
-                          color: AppColors.inkSecondary,
+                          color: VColors.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -128,14 +128,18 @@ class _GeneratingState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _PulseWidget(
-            child: const Icon(Icons.auto_awesome, size: IconSizes.hero, color: AppColors.tertiary),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: IconSizes.hero,
+              color: VColors.tertiary,
+            ),
           ),
           const SizedBox(height: Spacing.lg),
           const Text(
             'The Herald is generating banner variants...',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
-              color: AppColors.inkSecondary,
+              color: VColors.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -144,7 +148,7 @@ class _GeneratingState extends StatelessWidget {
             'Analyzing world aesthetics and prestige patterns.',
             style: TextStyle(
               fontSize: FontSizes.labelSm,
-              color: AppColors.inkMuted,
+              color: VColors.outline,
             ),
             textAlign: TextAlign.center,
           ),
@@ -175,9 +179,10 @@ class _PulseWidgetState extends State<_PulseWidget>
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     )..repeat(reverse: true);
-    _animation = Tween(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -193,10 +198,7 @@ class _PulseWidgetState extends State<_PulseWidget>
       builder: (context, child) {
         return Transform.scale(
           scale: _animation.value,
-          child: Opacity(
-            opacity: _animation.value,
-            child: widget.child,
-          ),
+          child: Opacity(opacity: _animation.value, child: widget.child),
         );
       },
     );
@@ -226,9 +228,9 @@ class _VariantPainter extends CustomPainter {
   });
 
   Color get _tierColor {
-    if (prestige >= 600) return AppColors.tertiary;
-    if (prestige >= 300) return AppColors.primary;
-    return AppColors.hustler;
+    if (prestige >= 600) return VColors.tertiary;
+    if (prestige >= 300) return VColors.primary;
+    return VColors.tierHustler;
   }
 
   @override
@@ -241,8 +243,12 @@ class _VariantPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          AppColors.canvas,
-          Color.lerp(AppColors.surface, _tierColor, 0.05 + variantIndex * 0.02)!,
+          VColors.surface,
+          Color.lerp(
+            VColors.surface,
+            _tierColor,
+            0.05 + variantIndex * 0.02,
+          )!,
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
@@ -254,10 +260,20 @@ class _VariantPainter extends CustomPainter {
 
     switch (variantIndex) {
       case 0: // Diagonal lines
-        for (double d = 0; d < size.width + size.height; d += 12 + rng.nextDouble() * 8) {
+        for (
+          double d = 0;
+          d < size.width + size.height;
+          d += 12 + rng.nextDouble() * 8
+        ) {
           canvas.drawLine(
-            Offset(d > size.width ? size.width : d, d > size.width ? d - size.width : 0),
-            Offset(d > size.height ? d - size.height : 0, d > size.height ? size.height : d),
+            Offset(
+              d > size.width ? size.width : d,
+              d > size.width ? d - size.width : 0,
+            ),
+            Offset(
+              d > size.height ? d - size.height : 0,
+              d > size.height ? size.height : d,
+            ),
             patternPaint,
           );
         }
@@ -275,14 +291,20 @@ class _VariantPainter extends CustomPainter {
         final step = size.width / 5;
         for (double x = 0; x < size.width + step; x += step * 1.5) {
           for (double y = 0; y < size.height + step; y += step * 0.55) {
-            final offset = (y ~/ (step * 0.55).round() % 2 == 0) ? 0.0 : step * 0.75;
+            final offset = (y ~/ (step * 0.55).round() % 2 == 0)
+                ? 0.0
+                : step * 0.75;
             _drawHex(canvas, Offset(x + offset, y), step / 3, patternPaint);
           }
         }
         break;
       case 3: // Radiating lines from center
         final center = Offset(size.width / 2, size.height / 2);
-        for (double angle = 0; angle < 3.14159 * 2; angle += 0.2 + rng.nextDouble() * 0.3) {
+        for (
+          double angle = 0;
+          angle < 3.14159 * 2;
+          angle += 0.2 + rng.nextDouble() * 0.3
+        ) {
           canvas.drawLine(
             center,
             Offset(
@@ -314,7 +336,10 @@ class _VariantPainter extends CustomPainter {
           _tierColor.withValues(alpha: 0.3),
         ],
       ).createShader(Rect.fromLTWH(0, size.height - 4, size.width, 4));
-    canvas.drawRect(Rect.fromLTWH(0, size.height - 4, size.width, 4), glowPaint);
+    canvas.drawRect(
+      Rect.fromLTWH(0, size.height - 4, size.width, 4),
+      glowPaint,
+    );
   }
 
   void _drawHex(Canvas canvas, Offset center, double r, Paint paint) {

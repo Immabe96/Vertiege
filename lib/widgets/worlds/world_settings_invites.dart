@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../models/invite.dart';
 import '../../utils/date_format.dart';
@@ -37,15 +37,24 @@ class WorldSettingsInvites extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.person_add, color: AppColors.tertiary, size: IconSizes.sm),
+            const Icon(
+              Icons.person_add,
+              color: VColors.tertiary,
+              size: IconSizes.sm,
+            ),
             const SizedBox(width: Spacing.sm),
-            Text('Invites', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeights.bold)),
+            Text(
+              'Invites',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeights.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: Spacing.sm),
         Text(
           'Create and manage invitation codes for this world.',
-          style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
+          style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
         ),
         const SizedBox(height: Spacing.md),
         if (residentId == sovereignId)
@@ -56,7 +65,8 @@ class WorldSettingsInvites extends StatelessWidget {
               onPressed: isGenerating ? null : onGenerate,
               icon: isGenerating
                   ? const SizedBox(
-                      width: 20, height: 20,
+                      width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.link),
@@ -75,7 +85,7 @@ class WorldSettingsInvites extends StatelessWidget {
                     hintText: 'Invite Code',
                     prefixIcon: Icon(Icons.vpn_key),
                     border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.glassBorder),
+                      borderSide: BorderSide(color: VColors.glassBorder),
                     ),
                   ),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -102,7 +112,9 @@ class WorldSettingsInvites extends StatelessWidget {
           const SizedBox(height: Spacing.sm),
           Text('Existing Invites', style: theme.textTheme.labelLarge),
           const SizedBox(height: Spacing.sm),
-          ...invites.map((invite) => _InviteRow(invite: invite, onCopy: onCopy)),
+          ...invites.map(
+            (invite) => _InviteRow(invite: invite, onCopy: onCopy),
+          ),
         ],
       ],
     );
@@ -119,7 +131,9 @@ class _InviteRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final valid = invite.isValid;
-    final displayDate = invite.createdAt > 0 ? formatTimestamp(invite.createdAt) : 'Unknown date';
+    final displayDate = invite.createdAt > 0
+        ? formatTimestamp(invite.createdAt)
+        : 'Unknown date';
     final usesLabel = invite.maxUses > 0
         ? '${invite.uses}/${invite.maxUses} uses'
         : '${invite.uses} uses (unlimited)';
@@ -133,7 +147,7 @@ class _InviteRow extends StatelessWidget {
           children: [
             Icon(
               valid ? Icons.check_circle_outline : Icons.cancel_outlined,
-              color: valid ? AppColors.primary : AppColors.error,
+              color: valid ? VColors.primary : VColors.error,
               size: IconSizes.md,
             ),
             const SizedBox(width: Spacing.sm),
@@ -144,14 +158,18 @@ class _InviteRow extends StatelessWidget {
                   Text(
                     invite.code,
                     style: const TextStyle(
-                      fontFamily: AppFont.mono, letterSpacing: 1, color: AppColors.ink,
+                      fontFamily: AppFont.mono,
+                      letterSpacing: 1,
+                      color: VColors.onSurface,
                     ),
                   ),
                   Text(
                     '$usesLabel  ·  $displayDate'
                     '${invite.isExpired ? '  ·  Expired' : ''}'
                     '${invite.isExhausted ? '  ·  Exhausted' : ''}',
-                    style: theme.textTheme.labelSmall?.copyWith(color: AppColors.inkMuted),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: VColors.outline,
+                    ),
                   ),
                 ],
               ),

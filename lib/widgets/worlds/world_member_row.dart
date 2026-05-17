@@ -1,14 +1,20 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../models/resident.dart';
+import '../../services/streak_service.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../core/shimmer.dart';
 
 class WorldMemberEntry {
   final Resident resident;
   final int rep;
-  const WorldMemberEntry({required this.resident, required this.rep});
+  final int streak;
+  const WorldMemberEntry({
+    required this.resident,
+    required this.rep,
+    this.streak = 0,
+  });
 }
 
 class WorldMemberRow extends StatelessWidget {
@@ -28,6 +34,7 @@ class WorldMemberRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final cs = theme.colorScheme;
     final displayMembers = members.take(8).toList();
     final remaining = members.length - displayMembers.length;
@@ -65,34 +72,64 @@ class WorldMemberRow extends StatelessWidget {
                     children: displayMembers.asMap().entries.map((entry) {
                       final member = entry.value;
                       final isCouncil = member.rep >= 5000;
+                      final hasStreak = member.streak > 0;
+                      final flameColor = hasStreak
+                          ? StreakService.getStreakFlameColor(member.streak)
+                          : null;
                       return Positioned(
                         left: entry.key * 28.0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isCouncil
-                                  ? AppColors.tertiary
-                                  : cs.surface,
-                              width: isCouncil ? 2.5 : 2,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isCouncil
+                                      ? VColors.tertiary
+                                      : isDark ? VColors.surfaceDark : cs.surface,
+                                  width: isCouncil ? 2.5 : 2,
+                                ),
+                                boxShadow: isCouncil
+                                    ? [
+                                        BoxShadow(
+                                          color: VColors.tertiary.withValues(
+                                            alpha: 0.35,
+                                          ),
+                                          blurRadius: 4,
+                                          spreadRadius: 0,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: CosmeticAvatar(
+                                imageUrl: member.resident.avatarUrl,
+                                seed: member.resident.id,
+                                size: 32,
+                              ),
                             ),
-                            boxShadow: isCouncil
-                                ? [
-                                    BoxShadow(
-                                      color: AppColors.tertiary.withValues(
-                                        alpha: 0.35,
-                                      ),
-                                      blurRadius: 4,
-                                      spreadRadius: 0,
+                            if (hasStreak && flameColor != null)
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(1),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? VColors.surfaceDark
+                                        : cs.surface,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    StreakService.getStreakFlameIcon(
+                                      member.streak,
                                     ),
-                                  ]
-                                : null,
-                          ),
-                          child: CosmeticAvatar(
-                            imageUrl: member.resident.avatarUrl,
-                            seed: member.resident.id,
-                            size: 32,
-                          ),
+                                    size: 10,
+                                    color: flameColor,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       );
                     }).toList(),
@@ -123,14 +160,14 @@ class WorldMemberRow extends StatelessWidget {
                   height: 8,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.semanticSuccess,
+                    color: VColors.success,
                   ),
                 ),
                 const SizedBox(width: Spacing.xs),
                 Text(
                   '$onlineCount online',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppColors.semanticSuccess,
+                    color: VColors.success,
                     fontWeight: FontWeights.regular,
                   ),
                 ),

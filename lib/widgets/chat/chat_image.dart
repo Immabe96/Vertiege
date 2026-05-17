@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
 import '../core/broken_media.dart';
+import '../core/shimmer.dart';
 
 class ChatImage extends StatelessWidget {
   final String url;
@@ -16,6 +17,21 @@ class ChatImage extends StatelessWidget {
         child: Image.network(
           url,
           fit: BoxFit.cover,
+          // B-11 FIX: Added loadingBuilder with shimmer placeholder
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return SizedBox(
+              height: 160,
+              width: double.infinity,
+              child: Center(
+                child: Pulse(
+                  height: 160,
+                  borderRadius: RadiusTokens.card,
+                  opacity: 0.3,
+                ),
+              ),
+            );
+          },
           errorBuilder: (_, _, _) => const BrokenMediaTile(height: 160),
         ),
       );

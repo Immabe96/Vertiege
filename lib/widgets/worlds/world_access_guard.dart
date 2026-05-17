@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +9,7 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../services/access_control.dart';
 import '../../services/store_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/loading_state.dart';
 import 'access_icon.dart';
@@ -54,9 +54,9 @@ class WorldAccessGuard extends ConsumerWidget {
       padding: const EdgeInsets.all(32),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.glassBackground,
+          color: VColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-          border: Border.all(color: AppColors.glassBorder),
+          border: Border.all(color: VColors.glassBorder),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -282,7 +282,7 @@ class _VerificationSheetState extends State<_VerificationSheet> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(RadiusTokens.card),
-                border: Border.all(color: AppColors.glassBorder),
+                border: Border.all(color: VColors.glassBorder),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(RadiusTokens.card),

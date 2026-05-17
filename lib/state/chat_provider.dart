@@ -3,8 +3,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
 import '../services/media_service.dart';
+import '../services/storage_service.dart';
+import '../services/offline_queue.dart';
+import '../services/typing_service.dart';
 import '../utils/chat_unread.dart';
 import '../utils/id_generator.dart';
+import '../utils/rate_limiter.dart';
+import 'resident_provider.dart';
 
 class ChatState {
   final List<Map<String, dynamic>> dmRooms;
@@ -12,6 +17,7 @@ class ChatState {
   final Map<String, List<ChannelMessage>> channelMessages;
   final Map<String, DateTime> channelReads;
   final Map<String, DateTime> channelLatestMessageTimes;
+  final Map<String, Set<String>> typingUsers;
   final bool isLoadingRooms;
 
   const ChatState({
@@ -20,6 +26,7 @@ class ChatState {
     this.channelMessages = const {},
     this.channelReads = const {},
     this.channelLatestMessageTimes = const {},
+    this.typingUsers = const {},
     this.isLoadingRooms = false,
   });
 
@@ -29,6 +36,7 @@ class ChatState {
     Map<String, List<ChannelMessage>>? channelMessages,
     Map<String, DateTime>? channelReads,
     Map<String, DateTime>? channelLatestMessageTimes,
+    Map<String, Set<String>>? typingUsers,
     bool? isLoadingRooms,
   }) => ChatState(
     dmRooms: dmRooms ?? this.dmRooms,
@@ -37,6 +45,7 @@ class ChatState {
     channelReads: channelReads ?? this.channelReads,
     channelLatestMessageTimes:
         channelLatestMessageTimes ?? this.channelLatestMessageTimes,
+    typingUsers: typingUsers ?? this.typingUsers,
     isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
   );
 }
@@ -54,7 +63,46 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void _dispose() {
+    TypingService.dispose();
     unsubscribeAll();
+  }
+
+  // ── Typing indicators ──────────────────────────────────
+
+  void startTyping(String roomId, String userId) {
+    TypingService.startTyping(roomId, userId);
+  }
+
+  void stopTyping(String roomId, String userId) {
+    TypingService.stopTyping(roomId, userId);
+  }
+
+  List<String> getTypingUsers(String roomId, {String? excludeUserId}) {
+    return TypingService.getTypingUsers(roomId, excludeUserId: excludeUserId);
+  }
+
+  void subscribeToTyping(String roomId) {
+    void handler(String rId, String userId, bool isTyping) {
+      if (rId != roomId) return;
+      final current = Map<String, Set<String>>.from(state.typingUsers);
+      current.putIfAbsent(roomId, () => {});
+      if (isTyping) {
+        current[roomId]!.add(userId);
+      } else {
+        current[roomId]!.remove(userId);
+      }
+      if (current[roomId]!.isEmpty) {
+        current.remove(roomId);
+      }
+      state = state.copyWith(typingUsers: current);
+    }
+    TypingService.addListener(handler);
+  }
+
+  void unsubscribeFromTyping(String roomId) {
+    final current = Map<String, Set<String>>.from(state.typingUsers);
+    current.remove(roomId);
+    state = state.copyWith(typingUsers: current);
   }
 
   Future<void> loadDmRooms(String residentId) async {
@@ -72,7 +120,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   List<ChannelMessage> dmMessagesFor(String roomId) =>
-      state.dmMessages[roomId] ?? [];
+      _filterExpired(state.dmMessages[roomId] ?? []);
 
   Future<void> loadDmMessages(String roomId, {bool force = false}) async {
     if (!force && state.dmMessages.containsKey(roomId)) return;
@@ -82,6 +130,31 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
+  List<ChannelMessage> _filterExpired(List<ChannelMessage> messages) {
+    final now = DateTime.now();
+    return messages.where((m) {
+      if (m.autoDeleteAfterSeconds == null) return true;
+      final created = DateTime.fromMillisecondsSinceEpoch(m.createdAt);
+      return created.add(Duration(seconds: m.autoDeleteAfterSeconds!)).isAfter(now);
+    }).toList();
+  }
+
+  static const String _autoDeletePrefsPrefix = 'auto_delete_';
+
+  Future<int?> getAutoDeleteForRoom(String roomId) async {
+    final raw = await StorageService.getString('$_autoDeletePrefsPrefix$roomId');
+    if (raw == null) return null;
+    return int.tryParse(raw);
+  }
+
+  Future<void> setAutoDeleteForRoom(String roomId, int? seconds) async {
+    if (seconds == null) {
+      await StorageService.remove('$_autoDeletePrefsPrefix$roomId');
+    } else {
+      await StorageService.setString('$_autoDeletePrefsPrefix$roomId', seconds.toString());
+    }
+  }
+
   Future<void> sendDmMessage({
     required String roomId,
     required String senderId,
@@ -89,7 +162,10 @@ class ChatNotifier extends Notifier<ChatState> {
     String? senderAvatar,
     required String content,
     String? imageUrl,
+    int? autoDeleteAfterSeconds,
   }) async {
+    if (!RateLimiter.canProceed('message_$roomId', maxCalls: 3)) return;
+
     String? durableImageUrl = imageUrl;
     if (durableImageUrl != null && !durableImageUrl.startsWith('http')) {
       durableImageUrl = await MediaService.uploadPostImage(
@@ -107,6 +183,7 @@ class ChatNotifier extends Notifier<ChatState> {
       content: content,
       imageUrl: durableImageUrl ?? imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
+      autoDeleteAfterSeconds: autoDeleteAfterSeconds,
     );
 
     final existing = state.dmMessages[roomId] ?? [];
@@ -125,15 +202,29 @@ class ChatNotifier extends Notifier<ChatState> {
         senderAvatar: senderAvatar,
         content: content,
         imageUrl: durableImageUrl,
+        autoDeleteAfterSeconds: autoDeleteAfterSeconds,
       );
+      ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
-      final reverted =
-          state.dmMessages[roomId]?.where((m) => m.id != msg.id).toList() ??
-          const <ChannelMessage>[];
-      state = state.copyWith(
-        dmMessages: {...state.dmMessages, roomId: reverted},
+      await OfflineQueue.enqueue('message', {
+        'roomId': roomId,
+        'senderId': senderId,
+        'senderName': senderName,
+        'senderAvatar': senderAvatar,
+        'content': content,
+        'imageUrl': durableImageUrl,
+        'autoDeleteAfterSeconds': autoDeleteAfterSeconds,
+        'messageId': msg.id,
+      });
+      final failedMsg = msg.copyWith(
+        content: 'Failed to send - tap to retry',
       );
-      rethrow;
+      final updated = state.dmMessages[roomId]
+          ?.map((m) => m.id == msg.id ? failedMsg : m)
+          .toList();
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: updated ?? []},
+      );
     }
   }
 
@@ -158,6 +249,19 @@ class ChatNotifier extends Notifier<ChatState> {
       createdAt:
           DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ??
           0,
+      replyToMessageId: data['reply_to_message_id'],
+      replyToSenderId: data['reply_to_sender_id'],
+      replyToSenderName: data['reply_to_sender_name'],
+      replyToContent: data['reply_to_content'],
+      reactions: data['reactions'] != null
+          ? (data['reactions'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key, List<String>.from(value)),
+            )
+          : {},
+      isEdited: data['is_edited'] ?? false,
+      editedAt: data['edited_at'],
+      isDeleted: data['is_deleted'] ?? false,
+      autoDeleteAfterSeconds: data['auto_delete_after_seconds'],
     );
   }
 
@@ -263,6 +367,8 @@ class ChatNotifier extends Notifier<ChatState> {
     required String content,
     String? imageUrl,
   }) async {
+    if (!RateLimiter.canProceed('message_$channelId', maxCalls: 3)) return;
+
     String? durableImageUrl = imageUrl;
     if (durableImageUrl != null && !durableImageUrl.startsWith('http')) {
       durableImageUrl = await MediaService.uploadPostImage(
@@ -314,19 +420,33 @@ class ChatNotifier extends Notifier<ChatState> {
               .toList(),
         },
       );
+      ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
-      // Remove the optimistic message if the send failed
-      final reverted = allMessages.where((m) => m.id != msg.id).toList();
+      await OfflineQueue.enqueue('message', {
+        'worldId': worldId,
+        'channelId': channelId,
+        'senderId': senderId,
+        'senderName': senderName,
+        'senderAvatar': senderAvatar,
+        'content': content,
+        'imageUrl': durableImageUrl,
+        'messageId': msg.id,
+      });
+      final failedMsg = msg.copyWith(
+        content: 'Failed to send - tap to retry',
+      );
+      final updated = allMessages
+          .map((m) => m.id == msg.id ? failedMsg : m)
+          .toList();
       state = state.copyWith(
-        channelMessages: {...state.channelMessages, channelId: reverted},
+        channelMessages: {...state.channelMessages, channelId: updated},
         channelLatestMessageTimes: _mergeLatestMessageTime(
           state.channelLatestMessageTimes,
           channelId,
-          latestMessageTime(reverted) ?? _emptyChannelActivity,
+          latestMessageTime(updated) ?? _emptyChannelActivity,
           replace: true,
         ),
       );
-      rethrow;
     }
   }
 
@@ -480,6 +600,185 @@ class ChatNotifier extends Notifier<ChatState> {
     _subscriptions.clear();
   }
 
+  // F-01: Reply-to-message
+  Future<void> sendDmReply({
+    required String roomId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatar,
+    required String content,
+    required String replyToMessageId,
+    required String replyToSenderId,
+    required String replyToSenderName,
+    required String replyToContent,
+  }) async {
+    final msg = ChannelMessage(
+      id: generateId(),
+      channelId: roomId,
+      senderId: senderId,
+      senderName: senderName,
+      senderAvatar: senderAvatar,
+      content: content,
+      replyToMessageId: replyToMessageId,
+      replyToSenderId: replyToSenderId,
+      replyToSenderName: replyToSenderName,
+      replyToContent: replyToContent,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    final existing = state.dmMessages[roomId] ?? [];
+    state = state.copyWith(
+      dmMessages: {
+        ...state.dmMessages,
+        roomId: [...existing, msg],
+      },
+    );
+
+    try {
+      await ChatService.sendMessage(
+        roomId: roomId,
+        senderId: senderId,
+        senderName: senderName,
+        senderAvatar: senderAvatar,
+        content: content,
+        replyToMessageId: replyToMessageId,
+        replyToSenderId: replyToSenderId,
+        replyToSenderName: replyToSenderName,
+        replyToContent: replyToContent,
+      );
+    } catch (_) {
+      final reverted =
+          state.dmMessages[roomId]?.where((m) => m.id != msg.id).toList() ??
+          const <ChannelMessage>[];
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: reverted},
+      );
+      rethrow;
+    }
+  }
+
+  // F-02: Message reactions
+  Future<void> toggleReaction({
+    required String roomId,
+    required String messageId,
+    required String userId,
+    required String emoji,
+  }) async {
+    final messages = state.dmMessages[roomId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final currentReactions = Map<String, List<String>>.from(msg.reactions);
+    final users = List<String>.from(currentReactions[emoji] ?? []);
+
+    if (users.contains(userId)) {
+      users.remove(userId);
+      if (users.isEmpty) {
+        currentReactions.remove(emoji);
+      } else {
+        currentReactions[emoji] = users;
+      }
+    } else {
+      currentReactions[emoji] = [...users, userId];
+    }
+
+    final updatedMsg = msg.copyWith(reactions: currentReactions);
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      dmMessages: {...state.dmMessages, roomId: updatedMessages},
+    );
+
+    try {
+      await ChatService.toggleReaction(
+        messageId: messageId,
+        userId: userId,
+        emoji: emoji,
+        add: users.contains(userId),
+      );
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: revertedMessages},
+      );
+      rethrow;
+    }
+  }
+
+  // F-03: Message edit
+  Future<void> editMessage({
+    required String roomId,
+    required String messageId,
+    required String newContent,
+  }) async {
+    final messages = state.dmMessages[roomId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final updatedMsg = msg.copyWith(
+      content: newContent,
+      isEdited: true,
+      editedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      dmMessages: {...state.dmMessages, roomId: updatedMessages},
+    );
+
+    try {
+      await ChatService.editMessage(
+        messageId: messageId,
+        newContent: newContent,
+      );
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: revertedMessages},
+      );
+      rethrow;
+    }
+  }
+
+  // F-03: Message delete
+  Future<void> deleteMessage({
+    required String roomId,
+    required String messageId,
+  }) async {
+    final messages = state.dmMessages[roomId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final updatedMsg = msg.copyWith(
+      content: 'This message was deleted',
+      isDeleted: true,
+    );
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      dmMessages: {...state.dmMessages, roomId: updatedMessages},
+    );
+
+    try {
+      await ChatService.deleteMessage(messageId: messageId);
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: revertedMessages},
+      );
+      rethrow;
+    }
+  }
+
   List<ChannelMessage> _toChannelMessages(List<Map<String, dynamic>> raw) => raw
       .map(
         (e) => ChannelMessage(
@@ -499,6 +798,19 @@ class ChatNotifier extends Notifier<ChatState> {
                 e['created_at'] ?? '',
               )?.millisecondsSinceEpoch ??
               0,
+          replyToMessageId: e['reply_to_message_id'],
+          replyToSenderId: e['reply_to_sender_id'],
+          replyToSenderName: e['reply_to_sender_name'],
+          replyToContent: e['reply_to_content'],
+          reactions: e['reactions'] != null
+              ? (e['reactions'] as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(key, List<String>.from(value)),
+                )
+              : {},
+          isEdited: e['is_edited'] ?? false,
+          editedAt: e['edited_at'],
+          isDeleted: e['is_deleted'] ?? false,
+          autoDeleteAfterSeconds: e['auto_delete_after_seconds'],
         ),
       )
       .toList();

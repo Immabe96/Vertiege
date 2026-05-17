@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../models/channel.dart';
 import '../../widgets/core/glass_panel.dart';
@@ -34,24 +34,35 @@ class WorldSettingsChannels extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.tag, color: AppColors.tertiary, size: IconSizes.sm),
+            const Icon(
+              Icons.tag,
+              color: VColors.tertiary,
+              size: IconSizes.sm,
+            ),
             const SizedBox(width: Spacing.sm),
-            Text('Channels', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeights.bold)),
+            Text(
+              'Channels',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeights.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: Spacing.sm),
         Text(
           'Manage channels for this world.',
-          style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
+          style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
         ),
         const SizedBox(height: Spacing.md),
         if (channels.isNotEmpty)
-          ...channels.map((ch) => _ChannelRow(
-                channel: ch,
-                isSovereign: residentId == sovereignId,
-                onRename: () => onRename(ch.id, ch.name),
-                onDelete: () => onDelete(ch.id, ch.name),
-              )),
+          ...channels.map(
+            (ch) => _ChannelRow(
+              channel: ch,
+              isSovereign: residentId == sovereignId,
+              onRename: () => onRename(ch.id, ch.name),
+              onDelete: () => onDelete(ch.id, ch.name),
+            ),
+          ),
         const SizedBox(height: Spacing.sm),
         if (residentId == sovereignId)
           SizedBox(
@@ -98,10 +109,10 @@ class _ChannelRow extends StatelessWidget {
                 channel.channelType == ChannelType.announcement
                     ? Icons.campaign
                     : channel.channelType == ChannelType.feed
-                        ? Icons.dynamic_feed
-                        : Icons.tag,
+                    ? Icons.dynamic_feed
+                    : Icons.tag,
                 size: IconSizes.md,
-                color: AppColors.inkSecondary,
+                color: VColors.onSurfaceVariant,
               ),
               const SizedBox(width: Spacing.sm),
               Expanded(
@@ -112,16 +123,17 @@ class _ChannelRow extends StatelessWidget {
                       '# ${channel.name}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeights.semiBold,
-                        color: AppColors.ink,
+                        color: VColors.onSurface,
                       ),
                     ),
-                    if (channel.description != null && channel.description!.isNotEmpty)
+                    if (channel.description != null &&
+                        channel.description!.isNotEmpty)
                       Text(
                         channel.description!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.inkMuted,
+                          color: VColors.outline,
                         ),
                       ),
                   ],
@@ -131,12 +143,16 @@ class _ChannelRow extends StatelessWidget {
                 Text(
                   'Default',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppColors.outline,
+                    color: VColors.outline,
                   ),
                 )
               else if (isSovereign)
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: VColors.error,
+                  ),
                   onPressed: onDelete,
                 ),
             ],

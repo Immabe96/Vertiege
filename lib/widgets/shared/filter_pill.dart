@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 /// A glass-style filter pill used in horizontal chip rows.
@@ -31,13 +31,13 @@ class FilterPill extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary.withValues(alpha: 0.12)
-              : AppColors.glassBackground,
+              ? VColors.primary.withValues(alpha: 0.12)
+              : VColors.glassBackground,
           borderRadius: BorderRadius.circular(RadiusTokens.lg),
           border: Border.all(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.3)
-                : AppColors.glassBorder,
+                ? VColors.primary.withValues(alpha: 0.3)
+                : VColors.glassBorder,
           ),
         ),
         child: Row(
@@ -46,7 +46,7 @@ class FilterPill extends StatelessWidget {
             Icon(
               icon,
               size: IconSizes.sm,
-              color: selected ? AppColors.primary : AppColors.inkMuted,
+              color: selected ? VColors.primary : VColors.outline,
             ),
             const SizedBox(width: Spacing.sm),
             Text(
@@ -54,7 +54,7 @@ class FilterPill extends StatelessWidget {
               style: TextStyle(
                 fontSize: FontSizes.body,
                 fontWeight: selected ? FontWeights.bold : FontWeights.regular,
-                color: selected ? AppColors.primary : AppColors.inkMuted,
+                color: selected ? VColors.primary : VColors.outline,
               ),
             ),
           ],

@@ -1,5 +1,77 @@
 enum WorldType { wealth, profession, dominion }
 
+enum DominionType {
+  marketplace,
+  academy,
+  sanctuary,
+  archive;
+
+  String get displayName {
+    switch (this) {
+      case DominionType.marketplace:
+        return 'Marketplace';
+      case DominionType.academy:
+        return 'Academy';
+      case DominionType.sanctuary:
+        return 'Sanctuary';
+      case DominionType.archive:
+        return 'Archive';
+    }
+  }
+
+  String get icon {
+    switch (this) {
+      case DominionType.marketplace:
+        return 'storefront';
+      case DominionType.academy:
+        return 'school';
+      case DominionType.sanctuary:
+        return 'self_improvement';
+      case DominionType.archive:
+        return 'menu_book';
+    }
+  }
+
+  String get lore {
+    switch (this) {
+      case DominionType.marketplace:
+        return 'The Grand Bazaar — ancient trading crossroads where commerce flows like rivers.';
+      case DominionType.academy:
+        return 'The Athenaeum — where knowledge is forged and wisdom is shared.';
+      case DominionType.sanctuary:
+        return 'A community space for residents to connect and grow together.';
+      case DominionType.archive:
+        return 'The Vault of Ages — keeper of all knowledge and truth.';
+    }
+  }
+
+  String get defaultCurrencyName {
+    switch (this) {
+      case DominionType.marketplace:
+        return 'Credits';
+      case DominionType.academy:
+        return 'Scholar Coins';
+      case DominionType.sanctuary:
+        return 'Harmony Points';
+      case DominionType.archive:
+        return 'Quills';
+    }
+  }
+
+  List<String> get defaultTags {
+    switch (this) {
+      case DominionType.marketplace:
+        return ['trading', 'commerce', 'economy'];
+      case DominionType.academy:
+        return ['education', 'learning', 'courses'];
+      case DominionType.sanctuary:
+        return ['social', 'community', 'wellness'];
+      case DominionType.archive:
+        return ['knowledge', 'research', 'documents'];
+    }
+  }
+}
+
 class WorldConstitution {
   final String admission;
   final int? minTier;
@@ -8,6 +80,9 @@ class WorldConstitution {
   final String commenting;
   final List<String> contentTypes;
   final int entryFee;
+  final bool allowAnonymous;
+  final bool requireApproval;
+  final String language;
 
   const WorldConstitution({
     this.admission = 'open',
@@ -17,6 +92,9 @@ class WorldConstitution {
     this.commenting = 'all-members',
     this.contentTypes = const ['text', 'image'],
     this.entryFee = 0,
+    this.allowAnonymous = false,
+    this.requireApproval = false,
+    this.language = 'en',
   });
 
   Map<String, dynamic> toJson() => {
@@ -27,20 +105,38 @@ class WorldConstitution {
     'commenting': commenting,
     'contentTypes': contentTypes,
     'entryFee': entryFee,
+    'allowAnonymous': allowAnonymous,
+    'requireApproval': requireApproval,
+    'language': language,
   };
 
-  static WorldConstitution fromJson(Map<String, dynamic> json) =>
-      WorldConstitution(
-        admission: json['admission'] ?? 'open',
-        minTier: json['minTier'],
-        requiredProfession: json['requiredProfession'],
-        posting: json['posting'] ?? 'all-members',
-        commenting: json['commenting'] ?? 'all-members',
-        contentTypes: List<String>.from(
-          json['contentTypes'] ?? ['text', 'image'],
-        ),
-        entryFee: json['entryFee'] ?? 0,
-      );
+  static WorldConstitution fromJson(Map<String, dynamic> json) {
+    final rawContentTypes = json['contentTypes'];
+    List<String> contentTypes;
+    if (rawContentTypes is List) {
+      contentTypes = rawContentTypes.map((e) => e.toString()).toList();
+      if (contentTypes.isEmpty) contentTypes = ['text', 'image'];
+    } else {
+      contentTypes = ['text', 'image'];
+    }
+
+    return WorldConstitution(
+      admission: json['admission'] is String ? json['admission'] as String : 'open',
+      minTier: json['minTier'] is int ? json['minTier'] as int : null,
+      requiredProfession: json['requiredProfession'] is String
+          ? json['requiredProfession'] as String
+          : null,
+      posting: json['posting'] is String ? json['posting'] as String : 'all-members',
+      commenting: json['commenting'] is String
+          ? json['commenting'] as String
+          : 'all-members',
+      contentTypes: contentTypes,
+      entryFee: json['entryFee'] is num ? (json['entryFee'] as num).toInt() : 0,
+      allowAnonymous: json['allowAnonymous'] == true,
+      requireApproval: json['requireApproval'] == true,
+      language: json['language'] is String ? json['language'] as String : 'en',
+    );
+  }
 }
 
 class WorldBase {
@@ -82,6 +178,16 @@ class World extends WorldBase {
   final bool isDefault;
   final int sortOrder;
   final String? bannerKey;
+  final String motto;
+  final String accentColor;
+  final String lore;
+  final List<Map<String, dynamic>> lineage;
+  final List<String> tags;
+  final String worldCurrencyName;
+  final int taxRate;
+  final int landmarkLevel;
+  final DominionType? dominionType;
+  final String welcomeMessage;
 
   static const int maxBoostsPerMonth = 3;
   static const int boostActivityPoints = 50;
@@ -107,20 +213,33 @@ class World extends WorldBase {
     this.isDefault = false,
     this.sortOrder = 0,
     this.bannerKey,
+    this.motto = '',
+    this.accentColor = '',
+    this.lore = '',
+    this.lineage = const [],
+    this.tags = const [],
+    this.worldCurrencyName = 'Coins',
+    this.taxRate = 0,
+    this.landmarkLevel = 1,
+    this.dominionType,
+    this.welcomeMessage = '',
   });
 
   String get assetKey => bannerKey ?? (slug.isNotEmpty ? slug : id);
 
-  /// Whether this world has been boosted (any boost count > 0 this month).
-  bool get isBoosted => boostCount > 0 && boostsRemaining < maxBoostsPerMonth;
+  bool get isBoosted => boostCount > 0 && boostsRemaining > 0;
 
-  /// How many boosts remain this month.
   int get boostsRemaining {
     final now = DateTime.now();
     final thisMonth = now.year * 12 + now.month;
     if (lastBoostMonth != thisMonth) return maxBoostsPerMonth;
     return (maxBoostsPerMonth - boostCount).clamp(0, maxBoostsPerMonth);
   }
+
+  bool get isSanctuary => type == WorldType.dominion && dominionType == DominionType.sanctuary;
+  bool get isMarketplace => type == WorldType.dominion && dominionType == DominionType.marketplace;
+  bool get isAcademy => type == WorldType.dominion && dominionType == DominionType.academy;
+  bool get isArchive => type == WorldType.dominion && dominionType == DominionType.archive;
 
   World copyWith({
     String? id,
@@ -143,6 +262,16 @@ class World extends WorldBase {
     bool? isDefault,
     int? sortOrder,
     String? bannerKey,
+    String? motto,
+    String? accentColor,
+    String? lore,
+    List<Map<String, dynamic>>? lineage,
+    List<String>? tags,
+    String? worldCurrencyName,
+    int? taxRate,
+    int? landmarkLevel,
+    DominionType? dominionType,
+    String? welcomeMessage,
   }) => World(
     id: id ?? this.id,
     slug: slug ?? this.slug,
@@ -164,6 +293,16 @@ class World extends WorldBase {
     isDefault: isDefault ?? this.isDefault,
     sortOrder: sortOrder ?? this.sortOrder,
     bannerKey: bannerKey ?? this.bannerKey,
+    motto: motto ?? this.motto,
+    accentColor: accentColor ?? this.accentColor,
+    lore: lore ?? this.lore,
+    lineage: lineage ?? this.lineage,
+    tags: tags ?? this.tags,
+    worldCurrencyName: worldCurrencyName ?? this.worldCurrencyName,
+    taxRate: taxRate ?? this.taxRate,
+    landmarkLevel: landmarkLevel ?? this.landmarkLevel,
+    dominionType: dominionType ?? this.dominionType,
+    welcomeMessage: welcomeMessage ?? this.welcomeMessage,
   );
 
   Map<String, dynamic> toJson() => {
@@ -187,6 +326,16 @@ class World extends WorldBase {
     'constitution': constitution.toJson(),
     if (requiredTier != null) 'requiredTier': requiredTier,
     if (requiredProfession != null) 'requiredProfession': requiredProfession,
+    'motto': motto,
+    'accentColor': accentColor,
+    'lore': lore,
+    'lineage': lineage,
+    'tags': tags,
+    'worldCurrencyName': worldCurrencyName,
+    'taxRate': taxRate,
+    'landmarkLevel': landmarkLevel,
+    if (dominionType != null) 'dominionType': dominionType!.name,
+    'welcomeMessage': welcomeMessage,
   };
 
   static World fromJson(Map<String, dynamic> json) => World(
@@ -212,6 +361,20 @@ class World extends WorldBase {
         : const WorldConstitution(),
     requiredTier: json['requiredTier'],
     requiredProfession: json['requiredProfession'],
+    motto: json['motto'] ?? '',
+    accentColor: json['accentColor'] ?? '',
+    lore: json['lore'] ?? '',
+    lineage: json['lineage'] is List
+        ? (json['lineage'] as List).map((e) => e as Map<String, dynamic>).toList()
+        : [],
+    tags: json['tags'] is List
+        ? (json['tags'] as List).map((e) => e.toString()).toList()
+        : [],
+    worldCurrencyName: json['worldCurrencyName'] ?? 'Coins',
+    taxRate: json['taxRate'] ?? 0,
+    landmarkLevel: json['landmarkLevel'] ?? 1,
+    dominionType: _parseDominionType(json['dominionType']),
+    welcomeMessage: json['welcomeMessage'] ?? '',
   );
 
   static World fromSupabase(Map<String, dynamic> data) => World(
@@ -233,7 +396,9 @@ class World extends WorldBase {
               0,
     activityScore: data['activity_score'] ?? 0,
     boostCount: data['boost_count'] ?? 0,
-    lastBoostMonth: data['last_boost_month'] ?? 0,
+    lastBoostMonth: data['last_boost_month'] is String
+        ? int.tryParse(data['last_boost_month']) ?? 0
+        : data['last_boost_month'] ?? 0,
     isDefault: data['is_default'] ?? false,
     sortOrder: data['sort_order'] ?? 0,
     bannerKey: data['banner_key'] ?? data['banner'],
@@ -242,12 +407,34 @@ class World extends WorldBase {
         : const WorldConstitution(),
     requiredTier: data['required_tier'],
     requiredProfession: data['required_profession'],
+    motto: data['motto'] ?? '',
+    accentColor: data['accent_color'] ?? '',
+    lore: data['lore'] ?? '',
+    lineage: data['lineage'] is List
+        ? (data['lineage'] as List).map((e) => e as Map<String, dynamic>).toList()
+        : [],
+    tags: data['tags'] is List
+        ? (data['tags'] as List).map((e) => e.toString()).toList()
+        : [],
+    worldCurrencyName: data['world_currency_name'] ?? 'Coins',
+    taxRate: data['tax_rate'] ?? 0,
+    landmarkLevel: data['landmark_level'] ?? 1,
+    dominionType: _parseDominionType(data['dominion_type']),
+    welcomeMessage: data['welcome_message'] ?? '',
   );
 
   static WorldType _parseType(String? type) {
     return WorldType.values.firstWhere(
       (t) => t.name == type,
       orElse: () => WorldType.wealth,
+    );
+  }
+
+  static DominionType? _parseDominionType(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    return DominionType.values.firstWhere(
+      (t) => t.name == raw,
+      orElse: () => DominionType.sanctuary,
     );
   }
 }

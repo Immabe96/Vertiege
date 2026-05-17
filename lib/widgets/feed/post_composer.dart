@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,8 +7,9 @@ import '../../services/storage_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
 
@@ -31,6 +32,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
   bool _sent = false;
   String? _selectedWorldId;
   bool _hasDraft = false;
+  DateTime? _scheduledFor;
 
   late final AnimationController _sendAnim;
   late final Animation<double> _sendScale;
@@ -100,7 +102,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
           duration: const Duration(seconds: 1),
           behavior: SnackBarBehavior.floating,
           width: 140,
-          backgroundColor: AppColors.surfaceHigh,
+          backgroundColor: VColors.surfaceContainerHighest,
         ),
       );
     }
@@ -113,6 +115,67 @@ class _PostComposerState extends ConsumerState<PostComposer>
       _controller.clear();
       _imageUri = null;
     });
+  }
+
+  Future<void> _pickSchedule() async {
+    final now = DateTime.now();
+    final minDate = now.add(const Duration(minutes: 5));
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: minDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 30)),
+    );
+    if (pickedDate == null || !mounted) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(minDate),
+    );
+    if (pickedTime == null || !mounted) return;
+
+    final scheduled = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    if (scheduled.isBefore(now)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Schedule time must be in the future'),
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _scheduledFor = scheduled);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Scheduled for ${_formatScheduleDate(scheduled)}',
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: VColors.surfaceContainerHighest,
+        ),
+      );
+    }
+  }
+
+  String _formatScheduleDate(DateTime dt) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '${months[dt.month - 1]} ${dt.day} ${dt.year} at $hour:${dt.minute.toString().padLeft(2, '0')} $ampm';
   }
 
   Future<void> _submit() async {
@@ -134,18 +197,13 @@ class _PostComposerState extends ConsumerState<PostComposer>
     if (targetWorldId == null) return;
     final imageUri = _imageUri;
     final isAnnouncement = _isAnnouncement;
+    final scheduledFor = _scheduledFor;
 
-    _controller.clear();
-    setState(() {
-      _imageUri = null;
-      _isAnnouncement = false;
-      _sent = true;
-      _hasDraft = false;
-    });
-    _sendAnim.forward(from: 0);
-    HapticFeedback.heavyImpact();
-    XpToast.show(context, amount: 15);
-    StorageService.remove(_draftKey);
+    // B-13 FIX: Save content for rollback before clearing
+    final savedContent = content;
+    final savedImageUri = imageUri;
+    final savedAnnouncement = isAnnouncement;
+    final savedScheduledFor = scheduledFor;
 
     try {
       await ref
@@ -159,34 +217,56 @@ class _PostComposerState extends ConsumerState<PostComposer>
             imageUri: imageUri,
             tierValue: resident.tier.value,
             isAnnouncement: isAnnouncement,
+            scheduledFor: scheduledFor,
           );
-    } catch (_) {
-      // Post failed — the provider will have reverted the optimistic update
+
+      // Only clear UI and show success AFTER post succeeds
+      _controller.clear();
+      setState(() {
+        _imageUri = null;
+        _isAnnouncement = false;
+        _sent = true;
+        _hasDraft = false;
+        _scheduledFor = null;
+      });
+      _sendAnim.forward(from: 0);
+      HapticFeedback.heavyImpact();
+      XpToast.show(context, amount: 15);
+      StorageService.remove(_draftKey);
+
       if (mounted) {
         setState(() => _sent = false);
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // B-13 FIX: Restore content on failure
+      if (mounted) {
+        _controller.text = savedContent;
+        setState(() {
+          _imageUri = savedImageUri;
+          _isAnnouncement = savedAnnouncement;
+          _scheduledFor = savedScheduledFor;
+          _sent = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Failed to publish post. Please try again.'),
+            backgroundColor: VColors.error,
           ),
         );
       }
-      return;
-    }
-
-    if (mounted) {
-      setState(() => _sent = false);
-      Navigator.of(context).pop();
     }
   }
 
   Color _charColor(int length) {
-    if (length >= _maxChars) return AppColors.semanticError;
-    if (length >= _warnChars) return AppColors.accentStreak;
-    return AppColors.inkMuted;
+    if (length >= _maxChars) return VColors.error;
+    if (length >= _warnChars) return VColors.secondary;
+    return VColors.outline;
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final worlds = ref
         .watch(worldProvider)
@@ -219,7 +299,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.inkMuted.withValues(alpha: 0.4),
+                  color: (isDark ? VColors.onSurfaceVariantDark : VColors.outline).withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(RadiusTokens.full),
                 ),
               ),
@@ -232,10 +312,10 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 children: [
                   Text(
                     'Create Post',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: FontSizes.headingCard,
                       fontWeight: FontWeights.bold,
-                      color: AppColors.ink,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
                   ),
                   const Spacer(),
@@ -253,7 +333,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                           'Discard',
                           style: TextStyle(
                             fontSize: FontSizes.caption,
-                            color: AppColors.semanticError,
+                            color: VColors.error,
                           ),
                         ),
                       ),
@@ -262,7 +342,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close, size: IconSizes.md),
-                    color: AppColors.inkMuted,
+                    color: VColors.outline,
                     splashRadius: TouchTargets.iconButton / 2,
                   ),
                 ],
@@ -294,19 +374,19 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.primary.withValues(
-                                  alpha: AppColors.alphaSelected,
+                              ? VColors.primary.withValues(
+                                  alpha: 0.16,
                                 )
-                              : AppColors.surfaceElevated,
+                              : VColors.surfaceBright,
                           borderRadius: BorderRadius.circular(
                             RadiusTokens.pill,
                           ),
                           border: Border.all(
                             color: selected
-                                ? AppColors.primary.withValues(
-                                    alpha: AppColors.alphaBorder,
+                                ? VColors.primary.withValues(
+                                    alpha: 0.2,
                                   )
-                                : AppColors.glassBorder,
+                                : VColors.glassBorder,
                           ),
                         ),
                         child: Row(
@@ -316,8 +396,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                               Icons.public,
                               size: IconSizes.xs,
                               color: selected
-                                  ? AppColors.primary
-                                  : AppColors.inkSecondary,
+                                  ? VColors.primary
+                                  : VColors.onSurfaceVariant,
                             ),
                             const SizedBox(width: Spacing.xs),
                             Text(
@@ -328,8 +408,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                                     ? FontWeights.bold
                                     : FontWeights.regular,
                                 color: selected
-                                    ? AppColors.primary
-                                    : AppColors.inkSecondary,
+                                    ? VColors.primary
+                                    : VColors.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -363,7 +443,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 style: const TextStyle(
                   fontSize: FontSizes.body,
                   fontWeight: FontWeights.regular,
-                  color: AppColors.ink,
+                  color: VColors.onSurface,
                   height: LineHeight.body,
                 ),
                 decoration: InputDecoration(
@@ -371,7 +451,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   hintStyle: const TextStyle(
                     fontSize: FontSizes.body,
                     fontWeight: FontWeights.regular,
-                    color: AppColors.inkMuted,
+                    color: VColors.outline,
                   ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -407,16 +487,16 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         child: GestureDetector(
                           onTap: () => setState(() => _imageUri = null),
                           child: Container(
-                            width: 28,
-                            height: 28,
+                            width: TouchTargets.iconButton,
+                            height: TouchTargets.iconButton,
                             decoration: BoxDecoration(
-                              color: AppColors.canvas.withValues(alpha: 0.8),
+                              color: VColors.surface.withValues(alpha: 0.8),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.close,
-                              size: 16,
-                              color: AppColors.ink,
+                              size: IconSizes.md,
+                              color: VColors.onSurface,
                             ),
                           ),
                         ),
@@ -460,19 +540,31 @@ class _PostComposerState extends ConsumerState<PostComposer>
                           setState(() => _isAnnouncement = !_isAnnouncement),
                     ),
 
+                  // ── Schedule ──────────────────────────
+                  _CompactTool(
+                    icon: _scheduledFor != null
+                        ? Icons.schedule
+                        : Icons.schedule_outlined,
+                    tooltip: _scheduledFor != null
+                        ? 'Scheduled: ${_formatScheduleDate(_scheduledFor!)}'
+                        : 'Schedule post',
+                    active: _scheduledFor != null,
+                    onTap: _pickSchedule,
+                  ),
+
                   const Spacer(),
 
                   // ── Character counter ─────────────────
                   SizedBox(
-                    width: 36,
-                    height: 36,
+                    width: TouchTargets.minimum,
+                    height: TouchTargets.minimum,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         CircularProgressIndicator(
                           value: charProgress,
                           strokeWidth: 2.5,
-                          backgroundColor: AppColors.surfaceElevated,
+                          backgroundColor: VColors.surfaceBright,
                           valueColor: AlwaysStoppedAnimation(charColor),
                         ),
                         Text(
@@ -503,16 +595,16 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         height: 44,
                         decoration: BoxDecoration(
                           color: charLength > 0
-                              ? AppColors.primary
-                              : AppColors.surfaceElevated,
+                              ? VColors.primary
+                              : VColors.surfaceBright,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           _sent ? Icons.check : Icons.arrow_upward,
                           size: IconSizes.md,
                           color: charLength > 0
-                              ? AppColors.inkOnAccent
-                              : AppColors.inkMuted,
+                              ? VColors.onPrimary
+                              : VColors.outline,
                         ),
                       ),
                     ),
@@ -551,18 +643,18 @@ class _CompactTool extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 36,
-          height: 36,
+          width: TouchTargets.iconButton,
+          height: TouchTargets.iconButton,
           decoration: BoxDecoration(
             color: active
-                ? AppColors.primary.withValues(alpha: AppColors.alphaSelected)
+                ? VColors.primary.withValues(alpha: 0.16)
                 : null,
-            borderRadius: BorderRadius.circular(RadiusTokens.circle),
+            borderRadius: BorderRadius.circular(VRadius.pill),
           ),
           child: Icon(
             icon,
-            size: IconSizes.sm,
-            color: active ? AppColors.primary : AppColors.inkSecondary,
+            size: IconSizes.md,
+            color: active ? VColors.primary : VColors.onSurfaceVariant,
           ),
         ),
       ),
@@ -599,9 +691,9 @@ class _ImagePreview extends StatelessWidget {
       errorBuilder: (_, _, _) => Container(
         height: height,
         width: width,
-        color: AppColors.surfaceHigh,
+        color: VColors.surfaceContainerHighest,
         alignment: Alignment.center,
-        child: const Icon(Icons.broken_image, color: AppColors.inkMuted),
+        child: const Icon(Icons.broken_image, color: VColors.outline),
       ),
     );
   }

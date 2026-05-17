@@ -1,6 +1,6 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 /// A glass-morphism bottom sheet with backdrop blur overlay.
@@ -23,6 +23,7 @@ class GlassSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(RadiusTokens.cardFeatured),
@@ -31,11 +32,11 @@ class GlassSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
+            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(RadiusTokens.cardFeatured),
             ),
-            border: Border.all(color: AppColors.glassBorder),
+            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -43,12 +44,15 @@ class GlassSheet extends StatelessWidget {
               // ── Gold drag handle ──
               Center(
                 child: Container(
-                  margin: const EdgeInsets.only(top: Spacing.md, bottom: Spacing.sm),
+                  margin: const EdgeInsets.only(
+                    top: Spacing.md,
+                    bottom: Spacing.sm,
+                  ),
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.tertiary,
-                    borderRadius: BorderRadius.circular(2),
+                    color: VColors.tertiary,
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                 ),
               ),
@@ -77,7 +81,7 @@ void showGlassSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.black54,
+    barrierColor: VColors.scrim,
     builder: (_) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: initialSize,

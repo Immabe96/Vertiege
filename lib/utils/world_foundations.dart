@@ -437,3 +437,27 @@ const _foundations = <String, WorldFoundation>{
         'Share what you are writing, the reader effect you want, and the feedback you are ready for.',
   ),
 };
+
+/// Maps Gate interests to recommended world slugs
+String? matchWorldSlugForInterest(String interestName) {
+  return switch (interestName) {
+    'execute' => 'neon-district',
+    'foundation' => 'crystal-shore',
+    'craft' => 'tech-sprawl',
+    'capital' => 'azure-coast',
+    'governance' => 'sovereign-city',
+    _ => null,
+  };
+}
+
+/// Returns a world description for the matched interest
+String worldDescriptionForInterest(String interestName) {
+  return switch (interestName) {
+    'execute' => 'Neon District — fast experiments, first wins, useful hustle.',
+    'foundation' => 'Crystal Shore — fundamentals, habits, and clean starts.',
+    'craft' => 'Tech Sprawl — engineering craft, product thinking, and startup execution.',
+    'capital' => 'Azure Coast — deal flow, capital allocation, and network leverage.',
+    'governance' => 'Sovereign City — leadership, systems, ownership, and durable institutions.',
+    _ => 'Neon District — your starting point for exploration.',
+  };
+}

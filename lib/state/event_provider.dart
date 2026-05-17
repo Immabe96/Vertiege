@@ -10,11 +10,13 @@ class EventState {
 
   const EventState({this.eventsByWorld = const {}, this.isLoading = false});
 
-  EventState copyWith({Map<String, List<WorldEvent>>? eventsByWorld, bool? isLoading}) =>
-      EventState(
-        eventsByWorld: eventsByWorld ?? this.eventsByWorld,
-        isLoading: isLoading ?? this.isLoading,
-      );
+  EventState copyWith({
+    Map<String, List<WorldEvent>>? eventsByWorld,
+    bool? isLoading,
+  }) => EventState(
+    eventsByWorld: eventsByWorld ?? this.eventsByWorld,
+    isLoading: isLoading ?? this.isLoading,
+  );
 }
 
 class EventNotifier extends Notifier<EventState> {
@@ -48,8 +50,11 @@ class EventNotifier extends Notifier<EventState> {
       endsAt: endsAt ?? startsAt + 3600000,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
-    final events = List<WorldEvent>.from(state.eventsByWorld[worldId] ?? [])..add(event);
-    state = state.copyWith(eventsByWorld: {...state.eventsByWorld, worldId: events});
+    final events = List<WorldEvent>.from(state.eventsByWorld[worldId] ?? [])
+      ..add(event);
+    state = state.copyWith(
+      eventsByWorld: {...state.eventsByWorld, worldId: events},
+    );
     _persist();
   }
 
@@ -64,13 +69,19 @@ class EventNotifier extends Notifier<EventState> {
       }
       return e.copyWith(rsvpIds: rsvpIds);
     }).toList();
-    state = state.copyWith(eventsByWorld: {...state.eventsByWorld, worldId: events});
+    state = state.copyWith(
+      eventsByWorld: {...state.eventsByWorld, worldId: events},
+    );
     _persist();
   }
 
   void deleteEvent(String worldId, String eventId) {
-    final events = (state.eventsByWorld[worldId] ?? []).where((e) => e.id != eventId).toList();
-    state = state.copyWith(eventsByWorld: {...state.eventsByWorld, worldId: events});
+    final events = (state.eventsByWorld[worldId] ?? [])
+        .where((e) => e.id != eventId)
+        .toList();
+    state = state.copyWith(
+      eventsByWorld: {...state.eventsByWorld, worldId: events},
+    );
     _persist();
   }
 

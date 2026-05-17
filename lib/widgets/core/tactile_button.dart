@@ -1,14 +1,8 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
-/// Duolingo-inspired tactile button with bottom-shadow press animation.
-///
-/// Resting state: 4px solid bottom border in a darker shade of the fill.
-/// Pressed state: button drops 3px, bottom border shrinks to 1px.
-/// Duration: 180ms (matching Duolingo's press timing).
-///
-/// Default color is Sovereign gold ([AppColors.tertiary]).
+/// Smooth glass-era button with a soft press animation.
 class TactileButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -26,7 +20,7 @@ class TactileButton extends StatefulWidget {
     this.textColor,
     this.icon,
     this.fullWidth = false,
-    this.height = 52,
+    this.height = 48,
   });
 
   @override
@@ -36,18 +30,20 @@ class TactileButton extends StatefulWidget {
 class _TactileButtonState extends State<TactileButton> {
   bool _pressed = false;
 
-  Color get _fillColor => widget.color ?? AppColors.tertiary;
+  Color get _fillColor => widget.color ?? VColors.primary;
   Color get _shadowColor {
-    // Compute a darker shade: Duolingo uses ~25% darker for shadow
     final hsl = HSLColor.fromColor(_fillColor);
-    return hsl.withLightness((hsl.lightness - 0.08).clamp(0.0, 1.0)).toColor();
+    return hsl.withLightness((hsl.lightness - 0.10).clamp(0.0, 1.0)).toColor();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColor = widget.textColor ?? AppColors.onTertiary;
-    final shadowH = _pressed ? 1.0 : 4.0;
+    final enabled = widget.onPressed != null;
+    final textColor = (widget.textColor ?? VColors.onPrimary).withValues(
+      alpha: enabled ? 1 : 0.58,
+    );
+    final secondFill = Color.lerp(_fillColor, VColors.secondary, 0.18)!;
 
     return SizedBox(
       width: widget.fullWidth ? double.infinity : null,
@@ -64,13 +60,32 @@ class _TactileButtonState extends State<TactileButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          margin: EdgeInsets.only(top: 4 - shadowH),
-          height: widget.height - 4,
+          transform: Matrix4.translationValues(0, _pressed ? 2 : 0, 0),
+          height: widget.height,
           decoration: BoxDecoration(
-            color: _fillColor,
-            borderRadius: BorderRadius.circular(16),
-            border:
-                Border(bottom: BorderSide(color: _shadowColor, width: shadowH)),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _fillColor.withValues(alpha: enabled ? 1 : 0.32),
+                secondFill.withValues(alpha: enabled ? 1 : 0.24),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(RadiusTokens.lg),
+            border: Border.all(
+              color: VColors.onPrimary.withValues(alpha: enabled ? 0.14 : 0.08),
+            ),
+            boxShadow: !enabled
+                ? null
+                : [
+                    BoxShadow(
+                      color: _shadowColor.withValues(
+                        alpha: _pressed ? 0.15 : 0.32,
+                      ),
+                      blurRadius: _pressed ? 12 : 24,
+                      offset: Offset(0, _pressed ? 6 : 12),
+                    ),
+                  ],
           ),
           child: Center(
             child: AnimatedSlide(
@@ -81,15 +96,15 @@ class _TactileButtonState extends State<TactileButton> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (widget.icon != null) ...[
-                    Icon(widget.icon, size: 20, color: textColor),
-                    const SizedBox(width: 8),
+                    Icon(widget.icon, size: IconSizes.md, color: textColor),
+                    const SizedBox(width: Spacing.sm),
                   ],
                   Text(
                     widget.label,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: textColor,
-                      fontWeight: FontWeights.bold,
-                      letterSpacing: 0.02,
+                      fontWeight: FontWeights.semiBold,
+                      letterSpacing: LetterSpacing.normal,
                     ),
                   ),
                 ],

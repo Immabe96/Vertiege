@@ -14,16 +14,16 @@ class ChatDisplayItem {
   });
 
   const ChatDisplayItem.date(this.dateLabel)
-      : type = ChatItemType.dateSeparator,
-        message = null;
+    : type = ChatItemType.dateSeparator,
+      message = null;
 
   const ChatDisplayItem.first(this.message)
-      : type = ChatItemType.firstInGroup,
-        dateLabel = '';
+    : type = ChatItemType.firstInGroup,
+      dateLabel = '';
 
   const ChatDisplayItem.subsequent(this.message)
-      : type = ChatItemType.subsequent,
-        dateLabel = '';
+    : type = ChatItemType.subsequent,
+      dateLabel = '';
 }
 
 const chatGroupWindow = 5 * 60 * 1000;
@@ -49,7 +49,8 @@ List<ChatDisplayItem> buildChatDisplayItems(List<ChannelMessage> messages) {
     }
 
     final sameSender = msg.senderId == lastSenderId;
-    final withinWindow = lastSenderTimestamp != null &&
+    final withinWindow =
+        lastSenderTimestamp != null &&
         (msg.createdAt - lastSenderTimestamp).abs() < chatGroupWindow;
 
     if (sameSender && withinWindow) {
@@ -81,12 +82,27 @@ String _simpleDateLabel(DateTime date) {
   if (diff == 1) return 'Yesterday';
 
   const weekdays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-    'Friday', 'Saturday', 'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   if (diff < 7) return weekdays[date.weekday - 1];

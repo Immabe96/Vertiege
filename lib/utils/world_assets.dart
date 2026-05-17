@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../models/world.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 
 /// Deterministic world asset generator.
 /// Every world gets a unique visual identity derived from its ID hash.
@@ -83,20 +83,20 @@ class WorldAssets {
 
   /// Pool of pre-approved accent colors drawn from AppColors.
   static final _accentPalette = <Color>[
-    AppColors.gemPink,
-    AppColors.beeYellow,
-    AppColors.eelBlue,
-    AppColors.mysticBlue,
-    AppColors.achievementEducation,
-    AppColors.achievementCareer,
-    AppColors.achievementSkills,
-    AppColors.achievementTravel,
-    AppColors.achievementHealth,
-    AppColors.achievementCommunity,
-    AppColors.achievementFinance,
-    AppColors.achievementCreative,
-    AppColors.success,
-    AppColors.warning,
+    VColors.achievementSocial,
+    VColors.achievementFinance,
+    VColors.achievementAdventure,
+    VColors.primary,
+    VColors.achievementEducation,
+    VColors.achievementCareer,
+    VColors.achievementKnowledge,
+    VColors.achievementAdventure,
+    VColors.achievementHealth,
+    VColors.achievementSocial,
+    VColors.achievementFinance,
+    VColors.achievementCreative,
+    VColors.success,
+    VColors.warning,
     const Color(0xFFA78BFA), // violet accent
     const Color(0xFFF472B6), // rose accent
   ];
@@ -169,9 +169,9 @@ class WorldAssets {
   /// prestige >= 20  =>  violet (primary)
   /// prestige <  20  =>  orange (hustler)
   static Color glowForPrestige(int prestige) {
-    if (prestige >= 40) return AppColors.tertiary;
-    if (prestige >= 20) return AppColors.primary;
-    return AppColors.hustler;
+    if (prestige >= 40) return VColors.tertiary;
+    if (prestige >= 20) return VColors.primary;
+    return VColors.tierHustler;
   }
 
   /// Alias for [glowForPrestige] — clean name for UI-tier coloring.

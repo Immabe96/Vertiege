@@ -1,18 +1,28 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
 import '../models/notification.dart';
 import '../services/moderation_filter.dart';
 import '../services/permission_service.dart';
+import '../services/supabase.dart';
+import '../services/crash_reporter.dart';
 import 'world_provider.dart';
 import '../services/storage_service.dart';
 import '../services/media_service.dart';
 import '../services/post_service.dart';
+import '../services/world_service.dart';
+import '../services/offline_queue.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
 import '../utils/haptics.dart';
+import '../utils/rate_limiter.dart';
+import '../config/achievements.dart';
 import 'resident_provider.dart';
 import 'notification_provider.dart';
 import 'quest_provider.dart';
@@ -20,32 +30,167 @@ import 'achievement_provider.dart';
 
 class PostState {
   final List<Post> posts;
+  final List<Post> followingPosts;
   final Set<String> bookmarkedPostIds;
   final String? error;
+  final bool isPosting;
+  final List<Post> scheduledPosts;
+  final String? lastError;
+  final bool isLoadingMore;
+  final bool hasMorePosts;
 
   const PostState({
     this.posts = const [],
+    this.followingPosts = const [],
     this.bookmarkedPostIds = const {},
     this.error,
+    this.isPosting = false,
+    this.scheduledPosts = const [],
+    this.lastError,
+    this.isLoadingMore = false,
+    this.hasMorePosts = true,
   });
 
   bool get hasError => error != null;
 
   PostState copyWith({
     List<Post>? posts,
+    List<Post>? followingPosts,
     Set<String>? bookmarkedPostIds,
     String? error,
     bool clearError = false,
+    bool? isPosting,
+    List<Post>? scheduledPosts,
+    String? lastError,
+    bool clearLastError = false,
+    bool? isLoadingMore,
+    bool? hasMorePosts,
   }) => PostState(
     posts: posts ?? this.posts,
+    followingPosts: followingPosts ?? this.followingPosts,
     bookmarkedPostIds: bookmarkedPostIds ?? this.bookmarkedPostIds,
     error: clearError ? null : error ?? this.error,
+    isPosting: isPosting ?? this.isPosting,
+    scheduledPosts: scheduledPosts ?? this.scheduledPosts,
+    lastError: clearLastError ? null : lastError ?? this.lastError,
+    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    hasMorePosts: hasMorePosts ?? this.hasMorePosts,
   );
 }
 
 class PostNotifier extends Notifier<PostState> {
+  RealtimeChannel? _realtimeChannel;
+  Timer? _schedulerTimer;
+  final Map<String, Set<String>> _userReactions = {};
+  int _lastPersistedCount = 0;
+  int _currentLimit = 20;
+  String? _lastCursor;
+  bool _hasMore = true;
+
   @override
-  PostState build() => const PostState();
+  PostState build() {
+    ref.onDispose(() {
+      unawaited(_realtimeChannel?.unsubscribe());
+      _schedulerTimer?.cancel();
+    });
+
+    ref.listen<PostState>(postProvider, (prev, next) {
+      if (prev == null) return;
+      if (next.posts.length > prev.posts.length) {
+        final newPost = next.posts.first;
+        ref.read(residentProvider.notifier).addRep(newPost.worldId, 5);
+        _checkPostMilestones(newPost.residentId);
+        _triggerPrestigeUpdate(newPost.worldId);
+      }
+    });
+
+    _loadScheduledPosts();
+    _startScheduler();
+    return const PostState();
+  }
+
+  static const String _scheduledKey = '@scheduled_posts';
+
+  Future<void> _loadScheduledPosts() async {
+    try {
+      final raw = await StorageService.getString(_scheduledKey);
+      if (raw == null || raw.isEmpty) return;
+      final list = jsonDecode(raw) as List<dynamic>;
+      final posts = list.map((e) => _postFromJson(e)).toList();
+      state = state.copyWith(scheduledPosts: posts);
+    } catch (_) {}
+  }
+
+  void _startScheduler() {
+    _schedulerTimer?.cancel();
+    _schedulerTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _publishReadyPosts();
+    });
+  }
+
+  Future<void> _publishReadyPosts() async {
+    final now = DateTime.now();
+    final ready = state.scheduledPosts
+        .where((p) => p.scheduledFor != null && p.scheduledFor!.isBefore(now))
+        .toList();
+    if (ready.isEmpty) return;
+
+    for (final post in ready) {
+      if (now.difference(post.scheduledFor!) > const Duration(minutes: 5)) {
+        state = state.copyWith(
+          scheduledPosts: state.scheduledPosts
+              .where((p) => p.id != post.id)
+              .toList(),
+        );
+        _persistScheduled();
+        continue;
+      }
+      try {
+        await PostService.createPost(
+          residentId: post.residentId,
+          residentName: post.residentName,
+          worldId: post.worldId,
+          content: post.content,
+          imageUrl: post.imageUri,
+          residentAvatar: post.residentAvatar,
+          tierAtPosting: post.tierAtPosting.value,
+          isAnnouncement: post.isAnnouncement,
+        );
+        state = state.copyWith(
+          posts: [post.copyWith(scheduledFor: null), ...state.posts],
+          scheduledPosts: state.scheduledPosts
+              .where((p) => p.id != post.id)
+              .toList(),
+        );
+        _persist();
+        _persistScheduled();
+      } catch (e, st) {
+        debugPrint('Failed to publish scheduled post: $e');
+        CrashReporter.instance.recordError(
+          e,
+          st,
+          hint: 'scheduled_post_publish',
+        );
+        state = state.copyWith(
+          scheduledPosts: state.scheduledPosts
+              .map((p) => p.id == post.id
+                  ? p.copyWith(failedPublishes: p.failedPublishes + 1)
+                  : p)
+              .toList(),
+        );
+        _persistScheduled();
+      }
+    }
+  }
+
+  Future<void> _persistScheduled() async {
+    if (state.scheduledPosts.length == _lastPersistedCount) return;
+    final json = jsonEncode(
+      state.scheduledPosts.map(_postToJson).toList(),
+    );
+    await StorageService.setString(_scheduledKey, json);
+    _lastPersistedCount = state.scheduledPosts.length;
+  }
 
   Future<void> addPost({
     required String worldId,
@@ -60,9 +205,19 @@ class PostNotifier extends Notifier<PostState> {
     String? repostOf,
     Poll? poll,
     bool isDecree = false,
+    DateTime? scheduledFor,
   }) async {
+    state = state.copyWith(isPosting: true);
     final resident = ref.read(residentProvider).resident;
-    if (resident == null) return;
+    if (resident == null) {
+      state = state.copyWith(isPosting: false);
+      return;
+    }
+    if (!resident.joinedWorldIds.contains(worldId)) {
+      state = state.copyWith(isPosting: false);
+      return;
+    }
+
     final world = ref.read(worldProvider).worlds[worldId];
     final constitution = world?.constitution ?? const WorldConstitution();
     if (!WorldPermissions.canPost(
@@ -71,9 +226,13 @@ class PostNotifier extends Notifier<PostState> {
       world?.sovereignId,
       constitution: constitution,
     )) {
+      state = state.copyWith(isPosting: false);
       return;
     }
-    if (WorldPermissions.isMuted(resident, worldId)) return;
+    if (WorldPermissions.isMuted(resident, worldId)) {
+      state = state.copyWith(isPosting: false);
+      return;
+    }
 
     final mentions = TextParser.extractMentions(content);
     final hashtags = TextParser.extractHashtags(content);
@@ -101,7 +260,18 @@ class PostNotifier extends Notifier<PostState> {
       poll: poll,
       isDecree: isDecree,
       status: postStatus,
+      scheduledFor: scheduledFor,
     );
+
+    if (scheduledFor != null && scheduledFor.isAfter(DateTime.now())) {
+      state = state.copyWith(
+        scheduledPosts: [...state.scheduledPosts, post],
+        isPosting: false,
+      );
+      _persistScheduled();
+      Haptics.medium();
+      return;
+    }
 
     // Upload image to Supabase Storage if local file
     String? cloudImageUrl = imageUri;
@@ -123,20 +293,29 @@ class PostNotifier extends Notifier<PostState> {
         tierAtPosting: tierValue,
         isAnnouncement: isAnnouncement,
       );
-    } catch (_) {
+      state = state.copyWith(isPosting: false, clearLastError: true);
+    } catch (e) {
+      await OfflineQueue.enqueue('post', {
+        'residentId': residentId,
+        'residentName': residentName,
+        'worldId': worldId,
+        'content': content,
+        'imageUrl': cloudImageUrl,
+        'residentAvatar': residentAvatar,
+        'tierValue': tierValue,
+        'isAnnouncement': isAnnouncement,
+        'postId': post.id,
+      });
       state = state.copyWith(
-        posts: state.posts.where((p) => p.id != post.id).toList(),
-        error: 'Failed to publish post',
+        error: 'Failed to post - tap to retry',
+        lastError: 'Failed to create post: $e',
+        isPosting: false,
       );
-      _persist();
-      rethrow;
     }
 
-    ref.read(residentProvider.notifier).addRep(worldId, 5);
+    ref.read(residentProvider.notifier).awardActivityXp('post', 5);
     ref.read(questProvider.notifier).onPostCreated();
     Haptics.medium();
-    _checkPostMilestones(residentId);
-    _triggerPrestigeUpdate(worldId);
   }
 
   void _checkPostMilestones(String residentId) {
@@ -144,10 +323,10 @@ class PostNotifier extends Notifier<PostState> {
         .where((p) => p.residentId == residentId)
         .length;
     final notifier = ref.read(achievementProvider.notifier);
-    if (postCount >= 1) notifier.autoAwardAchievement('pioneer-poster');
-    if (postCount >= 10) notifier.autoAwardAchievement('voice-of-realm');
-    if (postCount >= 50) notifier.autoAwardAchievement('chronicler');
-    if (postCount >= 100) notifier.autoAwardAchievement('nexus-scribe');
+    if (postCount >= 1) notifier.autoAwardAchievement(achievementPioneerPoster);
+    if (postCount >= 10) notifier.autoAwardAchievement(achievementVoiceOfRealm);
+    if (postCount >= 50) notifier.autoAwardAchievement(achievementChronicler);
+    if (postCount >= 100) notifier.autoAwardAchievement(achievementNexusScribe);
   }
 
   void _triggerPrestigeUpdate(String worldId) {
@@ -172,6 +351,9 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   void addReaction(String postId, String emoji, String residentId) {
+    if (!RateLimiter.canProceed('reaction_$postId')) return;
+    if (_userReactions[postId]?.contains(emoji) == true) return;
+
     final posts = state.posts.map((p) {
       if (p.id != postId) return p;
       final reactions = Map<String, int>.from(p.reactions);
@@ -182,10 +364,20 @@ class PostNotifier extends Notifier<PostState> {
     state = state.copyWith(posts: posts);
     _persist();
 
+    _userReactions.putIfAbsent(postId, () => {}).add(emoji);
+
     // Persist to Supabase
     PostService.addReaction(postId, emoji, residentId);
 
+    ref.read(residentProvider.notifier).awardActivityXp('reaction', 1);
+
     final reactedPost = state.posts.where((p) => p.id == postId).firstOrNull;
+    if (reactedPost != null && reactedPost.residentId != residentId) {
+      ref
+          .read(residentProvider.notifier)
+          .awardActivityXpForUser(reactedPost.residentId, 'received_reaction', 2);
+    }
+
     ref.read(questProvider.notifier).onReacted();
     ref
         .read(notificationProvider.notifier)
@@ -251,6 +443,10 @@ class PostNotifier extends Notifier<PostState> {
     _persistBookmarks();
   }
 
+  void clearError() {
+    state = state.copyWith(clearError: true, clearLastError: true);
+  }
+
   void addComment(String postId, Comment comment) {
     final post = state.posts.where((p) => p.id == postId).firstOrNull;
     if (post == null) return;
@@ -267,7 +463,6 @@ class PostNotifier extends Notifier<PostState> {
     PostService.addComment(postId, comment.residentId, comment.content);
 
     ref.read(questProvider.notifier).onCommentAdded();
-    ref.read(residentProvider.notifier).addRep(post.worldId, 3);
     ref
         .read(notificationProvider.notifier)
         .addNotification(
@@ -351,16 +546,41 @@ class PostNotifier extends Notifier<PostState> {
     }
   }
 
+  void awardPost(String postId, String awardType, String residentId) {
+    final posts = state.posts.map((p) {
+      if (p.id != postId) return p;
+      final awardKey = '$awardType:$residentId';
+      if (p.awards.any((a) => a.startsWith('$awardType:'))) return p;
+      return p.copyWith(awards: [...p.awards, awardKey]);
+    }).toList();
+    state = state.copyWith(posts: posts);
+    _persist();
+
+    final awardedPost = state.posts.where((p) => p.id == postId).firstOrNull;
+    if (awardedPost != null) {
+      ref
+          .read(notificationProvider.notifier)
+          .addNotification(
+            type: NotificationType.like,
+            message: 'Someone gave your post an award!',
+            postId: postId,
+            worldId: awardedPost.worldId,
+          );
+    }
+  }
+
   void _bookmark(String postId) {
     final updated = {...state.bookmarkedPostIds, postId};
     state = state.copyWith(bookmarkedPostIds: updated);
     _persistBookmarks();
+    _syncBookmarkToSupabase(postId, add: true);
   }
 
   void _unbookmark(String postId) {
     final updated = state.bookmarkedPostIds.where((id) => id != postId).toSet();
     state = state.copyWith(bookmarkedPostIds: updated);
     _persistBookmarks();
+    _syncBookmarkToSupabase(postId, add: false);
   }
 
   bool isBookmarked(String postId) => state.bookmarkedPostIds.contains(postId);
@@ -370,15 +590,66 @@ class PostNotifier extends Notifier<PostState> {
     await StorageService.setString(_bookmarksKey, json);
   }
 
+  Future<void> _syncBookmarkToSupabase(String postId, {required bool add}) async {
+    final client = maybeSupabase();
+    if (client == null) return;
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    try {
+      if (add) {
+        await client.from('bookmarks').upsert({
+          'user_id': resident.id,
+          'post_id': postId,
+        });
+      } else {
+        await client
+            .from('bookmarks')
+            .delete()
+            .eq('user_id', resident.id)
+            .eq('post_id', postId);
+      }
+    } catch (_) {}
+  }
+
   Future<void> loadBookmarks() async {
+    final localIds = await _loadLocalBookmarks();
+
+    final remoteIds = await _loadRemoteBookmarks();
+
+    final merged = {...localIds, ...remoteIds};
+    if (merged.isNotEmpty) {
+      state = state.copyWith(bookmarkedPostIds: merged);
+    }
+  }
+
+  Future<Set<String>> _loadLocalBookmarks() async {
     final raw = await StorageService.getString(_bookmarksKey);
-    if (raw == null || raw.isEmpty) return;
+    if (raw == null || raw.isEmpty) return {};
     try {
       final list = jsonDecode(raw) as List<dynamic>;
-      state = state.copyWith(
-        bookmarkedPostIds: list.map((e) => e.toString()).toSet(),
-      );
-    } catch (_) {}
+      return list.map((e) => e.toString()).toSet();
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<Set<String>> _loadRemoteBookmarks() async {
+    final client = maybeSupabase();
+    if (client == null) return {};
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return {};
+
+    try {
+      final response = await client
+          .from('bookmarks')
+          .select('post_id')
+          .eq('user_id', resident.id);
+      final list = response as List<dynamic>;
+      return list.map((e) => e['post_id'] as String).toSet();
+    } catch (_) {
+      return {};
+    }
   }
 
   void repost(String originalPostId) {
@@ -407,7 +678,6 @@ class PostNotifier extends Notifier<PostState> {
     state = state.copyWith(posts: [repost, ...state.posts]);
     _persist();
 
-    ref.read(residentProvider.notifier).addRep(original.worldId, 5);
     ref.read(questProvider.notifier).onPostCreated();
 
     ref
@@ -428,23 +698,60 @@ class PostNotifier extends Notifier<PostState> {
     return _sortPosts(state.posts);
   }
 
-  List<Post> _sortPosts(Iterable<Post> source) {
+  List<Post> _sortPosts(Iterable<Post> source, {String sort = 'hot'}) {
     final now = DateTime.now().millisecondsSinceEpoch;
     final decreeExpiry = const Duration(hours: 24).inMilliseconds;
 
-    final sorted = List.of(source)
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    final activeDecrees = sorted
-        .where((p) => p.isDecree && (now - p.timestamp) < decreeExpiry)
-        .toList();
-    final pinned = sorted.where((p) => p.isPinned && !p.isDecree).toList();
-    final announcements = sorted
-        .where((p) => !p.isPinned && p.isAnnouncement && !p.isDecree)
-        .toList();
-    final regular = sorted
-        .where((p) => !p.isPinned && !p.isAnnouncement && !p.isDecree)
-        .toList();
-    return [...activeDecrees, ...pinned, ...announcements, ...regular];
+    // List.of(source) creates a new mutable copy; sort() mutates this copy,
+    // not the original source iterable, so the caller's data is unaffected.
+    final posts = List.of(source);
+
+    int _priority(Post p) {
+      if (p.isDecree && (now - p.timestamp) < decreeExpiry) return 0;
+      if (p.isPinned && !p.isDecree) return 1;
+      if (p.isAnnouncement && !p.isPinned && !p.isDecree) return 2;
+      return 3;
+    }
+
+    int compareByReactions(Post a, Post b) {
+      final aTotal = a.reactions.values.fold<int>(0, (s, c) => s + c);
+      final bTotal = b.reactions.values.fold<int>(0, (s, c) => s + c);
+      return bTotal.compareTo(aTotal);
+    }
+
+    int compareByHot(Post a, Post b) {
+      final aScore = _hotScore(a);
+      final bScore = _hotScore(b);
+      return bScore.compareTo(aScore);
+    }
+
+    posts.sort((a, b) {
+      final pa = _priority(a);
+      final pb = _priority(b);
+      if (pa != pb) return pa.compareTo(pb);
+      if (pa == 3) {
+        switch (sort) {
+          case 'new':
+            return b.timestamp.compareTo(a.timestamp);
+          case 'top':
+            return compareByReactions(a, b);
+          case 'hot':
+          default:
+            return compareByHot(a, b);
+        }
+      }
+      return b.timestamp.compareTo(a.timestamp);
+    });
+
+    return posts;
+  }
+
+  double _hotScore(Post post) {
+    final totalReactions = post.reactions.values.fold<int>(0, (s, c) => s + c) +
+        post.comments.length;
+    final ageMs = DateTime.now().millisecondsSinceEpoch - post.timestamp;
+    final ageHours = ageMs / (1000 * 60 * 60);
+    return totalReactions / math.pow(ageHours + 2, 1.5);
   }
 
   void setPosts(List<Post> posts) {
@@ -454,13 +761,30 @@ class PostNotifier extends Notifier<PostState> {
 
   Future<void> loadPosts() async {
     try {
-      // Fetch from Supabase first
-      final remote = await PostService.getPosts();
-      final posts = remote.map((e) => _postFromJson(e)).toList();
-      state = state.copyWith(posts: posts, clearError: true);
+      _currentLimit = 20;
+      _lastCursor = null;
+      _hasMore = true;
+
+      final remote = await PostService.getPosts(limit: _currentLimit);
+      final posts = remote.items.map((e) => _postFromJson(e)).toList();
+      _hasMore = remote.hasMore;
+      _lastCursor = remote.nextCursor;
+      state = state.copyWith(
+        posts: posts,
+        clearError: true,
+        hasMorePosts: _hasMore,
+      );
       _persist();
+      unawaited(_subscribeRealtime());
     } catch (e) {
-      // Fallback to local cache only when the remote request itself failed.
+      final joinedWorldPosts = await _loadPostsFromJoinedWorlds();
+      if (joinedWorldPosts != null) {
+        state = state.copyWith(posts: joinedWorldPosts, clearError: true);
+        _persist();
+        unawaited(_subscribeRealtime());
+        return;
+      }
+
       final raw = await StorageService.getString(StorageService.postsKey);
       if (raw != null && raw.isNotEmpty) {
         final list = jsonDecode(raw) as List<dynamic>;
@@ -470,6 +794,132 @@ class PostNotifier extends Notifier<PostState> {
       }
       state = state.copyWith(error: 'Failed to load posts: $e');
     }
+  }
+
+  Future<void> loadMorePosts(String worldId) async {
+    if (!_hasMore || state.isLoadingMore) return;
+
+    state = state.copyWith(isLoadingMore: true);
+    try {
+      final remote = await PostService.getPosts(
+        worldId: worldId,
+        cursor: _lastCursor,
+        limit: _currentLimit,
+      );
+      final newPosts = remote.items.map((e) => _postFromJson(e)).toList();
+      _hasMore = remote.hasMore;
+      _lastCursor = remote.nextCursor;
+      state = state.copyWith(
+        posts: [...state.posts, ...newPosts],
+        isLoadingMore: false,
+        hasMorePosts: _hasMore,
+      );
+      _persist();
+    } catch (e) {
+      state = state.copyWith(isLoadingMore: false);
+    }
+  }
+
+  Future<void> loadFollowingPosts() async {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    final followingIds = resident.following.toList();
+    if (followingIds.isEmpty) {
+      state = state.copyWith(followingPosts: [], clearError: true);
+      return;
+    }
+
+    try {
+      final remote = await PostService.getFollowingPosts(
+        resident.id,
+        followingIds,
+      );
+      final posts = remote.map((e) => _postFromJson(e)).toList();
+      state = state.copyWith(followingPosts: posts, clearError: true);
+    } catch (e) {
+      state = state.copyWith(
+        followingPosts: [],
+        error: 'Failed to load following feed: $e',
+      );
+    }
+  }
+
+  Future<void> _subscribeRealtime() async {
+    final client = maybeSupabase();
+    if (client == null) return;
+
+    await _realtimeChannel?.unsubscribe();
+
+    _realtimeChannel = client
+        .channel('posts_realtime')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final newPost = _postFromJson(payload.newRecord);
+            if (state.posts.any((p) => p.id == newPost.id)) return;
+            if (state.scheduledPosts.any((p) => p.id == newPost.id)) return;
+            state = state.copyWith(posts: [newPost, ...state.posts]);
+            _persist();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final updated = _postFromJson(payload.newRecord);
+            final posts = state.posts.map((p) {
+              if (p.id == updated.id) return updated;
+              return p;
+            }).toList();
+            state = state.copyWith(posts: posts);
+            _persist();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.delete,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final deletedId = payload.oldRecord['id'] as String?;
+            if (deletedId == null) return;
+            state = state.copyWith(
+              posts: state.posts.where((p) => p.id != deletedId).toList(),
+            );
+            _persist();
+          },
+        )
+        .subscribe();
+  }
+
+  Future<List<Post>?> _loadPostsFromJoinedWorlds() async {
+    final joinedWorldIds = ref
+        .read(residentProvider)
+        .resident
+        ?.joinedWorldIds
+        .where(WorldService.isRemoteWorldId)
+        .toSet()
+        .toList();
+    if (joinedWorldIds == null || joinedWorldIds.isEmpty) return null;
+
+    final results = await Future.wait(
+      joinedWorldIds.map((worldId) => PostService.getPosts(worldId: worldId)),
+    );
+
+    final posts = <Post>[];
+    var hadSuccessfulRequest = false;
+    for (final result in results) {
+      if (result.items.isNotEmpty) {
+        hadSuccessfulRequest = true;
+        posts.addAll(result.items.map((e) => _postFromJson(e)));
+      }
+    }
+
+    if (!hadSuccessfulRequest) return null;
+    return _sortPosts(posts).take(50).toList();
   }
 
   static Post _postFromJson(Map<String, dynamic> json) {
@@ -521,6 +971,8 @@ class PostNotifier extends Notifier<PostState> {
                   residentName: c['residentName'] ?? '',
                   content: c['content'] ?? '',
                   timestamp: c['timestamp'] ?? 0,
+                  parentId: c['parentId'],
+                  tierAtPosting: c['tierAtPosting'] ?? 1,
                 ),
               )
               .toList() ??
@@ -545,6 +997,15 @@ class PostNotifier extends Notifier<PostState> {
           : null,
       status: json['status'] ?? 'published',
       isDecree: json['isDecree'] ?? json['is_decree'] ?? false,
+      scheduledFor: json['scheduledFor'] != null
+          ? DateTime.tryParse(json['scheduledFor'] as String)
+          : null,
+      awards:
+          (json['awards'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      failedPublishes: json['failedPublishes'] ?? 0,
     );
   }
 
@@ -574,6 +1035,9 @@ class PostNotifier extends Notifier<PostState> {
     'poll': p.poll?.toJson(),
     'isDecree': p.isDecree,
     'status': p.status,
+    'scheduledFor': p.scheduledFor?.toIso8601String(),
+    'awards': p.awards,
+    'failedPublishes': p.failedPublishes,
     'comments': p.comments
         .map(
           (c) => {
@@ -582,6 +1046,8 @@ class PostNotifier extends Notifier<PostState> {
             'residentName': c.residentName,
             'content': c.content,
             'timestamp': c.timestamp,
+            'parentId': c.parentId,
+            'tierAtPosting': c.tierAtPosting,
           },
         )
         .toList(),

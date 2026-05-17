@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../utils/navigation.dart';
 import '../widgets/core/glass_panel.dart';
@@ -89,9 +89,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
         title: const Text('The Vault'),
         leading: IconButton(
@@ -112,7 +113,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: AppColors.tertiary.withValues(alpha: 0.15),
+                          color: VColors.tertiary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(
                             RadiusTokens.cardFeatured,
                           ),
@@ -120,23 +121,25 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         child: const Icon(
                           Icons.diamond_outlined,
                           size: 36,
-                          color: AppColors.tertiary,
+                          color: VColors.tertiary,
                         ),
                       ),
                       const SizedBox(height: Spacing.md),
                       Text(
                         'The Vault',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.manrope(
                           fontSize: FontSizes.headlineLg,
                           fontWeight: FontWeights.bold,
-                          color: AppColors.ink,
+                          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                         ),
                       ),
                       const SizedBox(height: Spacing.xs),
                       Text(
                         'Unlock sovereign privileges',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppColors.inkMuted,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -150,17 +153,17 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     padding: const EdgeInsets.all(Spacing.md),
                     margin: const EdgeInsets.only(bottom: Spacing.lg),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
+                      color: VColors.success.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(RadiusTokens.card),
                       border: Border.all(
-                        color: AppColors.success.withValues(alpha: 0.3),
+                        color: VColors.success.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
                       children: [
                         const Icon(
                           Icons.check_circle,
-                          color: AppColors.success,
+                          color: VColors.success,
                           size: 20,
                         ),
                         const SizedBox(width: Spacing.sm),
@@ -168,7 +171,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                           child: Text(
                             _purchaseMessage!,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.success,
+                              color: VColors.success,
                             ),
                           ),
                         ),
@@ -196,7 +199,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       tierName: benefits['label'] as String,
                       tierColor:
                           (benefits['color'] as Color?) ??
-                          AppColors.inkSecondary,
+                          (isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant),
                       price: price,
                       pricePeriod: pricePeriod,
                       isActive: isActive,
@@ -217,7 +222,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     'All subscriptions support the Vertiege realm.\nCancel anytime.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                       height: LineHeight.body,
                     ),
                   ),
@@ -242,7 +249,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     },
                     child: const Text(
                       'Restore Purchases',
-                      style: TextStyle(color: AppColors.primary),
+                      style: TextStyle(color: VColors.primary),
                     ),
                   ),
                 ),
@@ -339,6 +346,7 @@ class _TierCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GlassPanel(
       padding: const EdgeInsets.all(Spacing.xl),
@@ -352,7 +360,7 @@ class _TierCard extends StatelessWidget {
             children: [
               Text(
                 tierName,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.manrope(
                   fontSize: FontSizes.headlineMd,
                   fontWeight: FontWeights.bold,
                   color: tierColor,
@@ -388,10 +396,10 @@ class _TierCard extends StatelessWidget {
             children: [
               Text(
                 price,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.manrope(
                   fontSize: FontSizes.displayXl,
                   fontWeight: FontWeights.bold,
-                  color: AppColors.ink,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                 ),
               ),
               if (pricePeriod.isNotEmpty) ...[
@@ -401,7 +409,10 @@ class _TierCard extends StatelessWidget {
                   child: Text(
                     pricePeriod,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                              .withValues(alpha: 0.5)
+                          : VColors.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -411,7 +422,10 @@ class _TierCard extends StatelessWidget {
           const SizedBox(height: Spacing.lg),
 
           // ── Divider ─────────────────────────────────────────
-          Container(height: 1, color: AppColors.glassBorder),
+          Container(
+            height: 1,
+            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          ),
           const SizedBox(height: Spacing.lg),
 
           // ── Features ────────────────────────────────────────
@@ -427,8 +441,10 @@ class _TierCard extends StatelessWidget {
                         : Icons.remove_circle_outline,
                     size: 18,
                     color: feature.included
-                        ? AppColors.success
-                        : AppColors.inkMuted.withValues(alpha: 0.4),
+                        ? VColors.success
+                        : (isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant).withValues(alpha: 0.4),
                   ),
                   const SizedBox(width: Spacing.sm),
                   Expanded(
@@ -436,8 +452,14 @@ class _TierCard extends StatelessWidget {
                       feature.label,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: feature.included
-                            ? AppColors.inkSecondary
-                            : AppColors.inkMuted.withValues(alpha: 0.5),
+                            ? (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant)
+                            : (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant).withValues(
+                                alpha: 0.5,
+                              ),
                       ),
                     ),
                   ),
@@ -460,14 +482,14 @@ class _TierCard extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.ink,
+                          color: VColors.onSurface,
                         ),
                       )
                     : const Icon(Icons.star),
                 label: Text(isLoading ? 'Activating...' : 'UPGRADE'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.tertiary,
-                  foregroundColor: AppColors.onTertiary,
+                  backgroundColor: VColors.tertiary,
+                  foregroundColor: VColors.onTertiary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(RadiusTokens.card),
                   ),

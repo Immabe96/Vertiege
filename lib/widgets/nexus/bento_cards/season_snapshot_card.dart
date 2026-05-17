@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../state/resident_provider.dart';
 import '../../../state/world_provider.dart';
-import '../../../theme/colors.dart';
+import '../../../theme/v_colors.dart';
 import '../../../theme/design_system.dart';
 
 /// Small card with season name + user's worlds count.
@@ -36,14 +36,18 @@ class SeasonSnapshotCard extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.auto_awesome, size: IconSizes.md, color: AppColors.primary),
+            const Icon(
+              Icons.auto_awesome,
+              size: IconSizes.md,
+              color: VColors.primary,
+            ),
             const SizedBox(width: Spacing.xs),
             const Text(
               'SEASON',
               style: TextStyle(
                 fontSize: FontSizes.labelSm,
                 fontWeight: FontWeights.semiBold,
-                color: AppColors.inkSecondary,
+                color: VColors.onSurfaceVariant,
                 letterSpacing: LetterSpacing.label,
               ),
             ),
@@ -55,25 +59,35 @@ class SeasonSnapshotCard extends ConsumerWidget {
           style: const TextStyle(
             fontSize: FontSizes.bodyMd,
             fontWeight: FontWeights.bold,
-            color: AppColors.ink,
+            color: VColors.onSurface,
           ),
         ),
         const SizedBox(height: Spacing.xs),
         Text(
           '$joinedCount of $totalWorlds worlds joined',
-          style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+          style: const TextStyle(
+            fontSize: FontSizes.labelSm,
+            color: VColors.outline,
+          ),
         ),
-        const Spacer(),
+        const SizedBox(height: Spacing.md),
         GestureDetector(
           onTap: () => context.push('/season'),
           child: const Row(
             children: [
               Text(
                 'View Season',
-                style: TextStyle(fontSize: FontSizes.labelSm, color: AppColors.primary),
+                style: TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  color: VColors.primary,
+                ),
               ),
               SizedBox(width: Spacing.xs),
-              Icon(Icons.chevron_right, size: IconSizes.sm, color: AppColors.primary),
+              Icon(
+                Icons.chevron_right,
+                size: IconSizes.sm,
+                color: VColors.primary,
+              ),
             ],
           ),
         ),

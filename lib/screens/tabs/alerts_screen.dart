@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +13,7 @@ import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../theme/design_system.dart';
 import '../../utils/navigation.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 
 enum _DateGroup { today, thisWeek, earlier }
 
@@ -209,12 +209,13 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SliverPersistentHeader(
       pinned: true,
       delegate: _SectionHeaderDelegate(
         title: title,
-        backgroundColor: AppColors.canvas,
-        textColor: AppColors.tertiary,
+        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+        textColor: VColors.tertiary,
       ),
     );
   }
@@ -301,7 +302,9 @@ class _NotificationSliverList extends StatelessWidget {
           switch (n.type) {
             case NotificationType.like:
             case NotificationType.comment:
-              if (n.worldId != null) {
+              if (n.postId != null && n.worldId != null) {
+                context.push('/explore/${n.worldId}?post=${n.postId}');
+              } else if (n.worldId != null) {
                 context.push('/explore/${n.worldId}');
               }
               break;
@@ -312,14 +315,29 @@ class _NotificationSliverList extends StatelessWidget {
               }
               break;
             case NotificationType.tierUpgrade:
+              context.push('/identity');
+              break;
             case NotificationType.allegianceRequest:
-              context.go('/identity');
+              context.push('/identity?tab=allies');
               break;
             case NotificationType.welcome:
+              context.push('/explore');
+              break;
             case NotificationType.modAction:
+              context.push('/settings');
+              break;
             case NotificationType.ranking:
+              context.push('/season');
+              break;
             case NotificationType.streakReminder:
+              context.push('/identity');
+              break;
             case NotificationType.reactionMilestone:
+              if (n.postId != null && n.worldId != null) {
+                context.push('/explore/${n.worldId}?post=${n.postId}');
+              } else {
+                context.push('/identity');
+              }
               break;
           }
         }
@@ -348,7 +366,7 @@ class _NotificationSliverList extends StatelessWidget {
                 }
               },
               background: _SwipeBackground(
-                color: AppColors.online,
+                color: VColors.success,
                 icon: Icons.check,
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: Spacing.lg),
@@ -376,17 +394,17 @@ class _NotificationSliverList extends StatelessWidget {
 
   static Color _colorForTypeStatic(NotificationType type) {
     return switch (type) {
-      NotificationType.like => AppColors.accentAchievement,
-      NotificationType.comment => AppColors.accentLevel,
-      NotificationType.worldUnlocked => AppColors.semanticSuccess,
-      NotificationType.tierUpgrade => AppColors.accentStreak,
-      NotificationType.welcome => AppColors.primary,
-      NotificationType.modAction => AppColors.semanticError,
-      NotificationType.ranking => AppColors.tertiary,
-      NotificationType.streakReminder => AppColors.warning,
-      NotificationType.reactionMilestone => AppColors.accentAchievement,
-      NotificationType.mention => AppColors.primary,
-      NotificationType.allegianceRequest => AppColors.accentAchievement,
+      NotificationType.like => VColors.tertiary,
+      NotificationType.comment => VColors.primary,
+      NotificationType.worldUnlocked => VColors.success,
+      NotificationType.tierUpgrade => VColors.secondary,
+      NotificationType.welcome => VColors.primary,
+      NotificationType.modAction => VColors.error,
+      NotificationType.ranking => VColors.tertiary,
+      NotificationType.streakReminder => VColors.warning,
+      NotificationType.reactionMilestone => VColors.tertiary,
+      NotificationType.mention => VColors.primary,
+      NotificationType.allegianceRequest => VColors.tertiary,
     };
   }
 }
@@ -410,6 +428,7 @@ class _SwipeBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: color,
@@ -417,7 +436,7 @@ class _SwipeBackground extends StatelessWidget {
       ),
       alignment: alignment,
       padding: padding,
-      child: Icon(icon, color: AppColors.ink, size: IconSizes.lg),
+      child: Icon(icon, color: isDark ? VColors.onSurfaceDark : VColors.onSurface, size: IconSizes.lg),
     );
   }
 }
@@ -442,6 +461,7 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final n = notification;
     final unread = !n.read;
 
@@ -464,7 +484,7 @@ class _NotificationCard extends StatelessWidget {
                       Container(
                         width: 3,
                         decoration: const BoxDecoration(
-                          color: AppColors.primary,
+                          color: VColors.primary,
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(RadiusTokens.xl),
                             bottomLeft: Radius.circular(RadiusTokens.xl),
@@ -482,9 +502,7 @@ class _NotificationCard extends StatelessWidget {
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: typeColor.withValues(
-                                  alpha: AppColors.alphaSelected,
-                                ),
+                                color: typeColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(
                                   RadiusTokens.input,
                                 ),
@@ -507,8 +525,12 @@ class _NotificationCard extends StatelessWidget {
                                       ? FontWeights.bold
                                       : FontWeights.regular,
                                   color: unread
-                                      ? AppColors.ink
-                                      : AppColors.inkSecondary,
+                                      ? (isDark
+                                          ? VColors.onSurfaceDark
+                                          : VColors.onSurface)
+                                      : (isDark
+                                          ? VColors.onSurfaceVariantDark
+                                          : VColors.onSurfaceVariant),
                                   height: LineHeight.body,
                                 ),
                               ),
@@ -518,7 +540,9 @@ class _NotificationCard extends StatelessWidget {
                             TimeAgo(
                               DateTime.fromMillisecondsSinceEpoch(n.createdAt),
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppColors.inkMuted,
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -568,30 +592,44 @@ class _AllegianceRequestActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final allyNotifier = ref.read(allyProvider.notifier);
-    // The notification message contains the request info; we use notification.id
-    // as a proxy since the actual ally request ID is embedded in the notification.
-    // For now, accept/decline by iterating pending requests.
+    final allyState = ref.watch(allyProvider);
+
+    String? findRequestId() {
+      if (notification.allyRequestId != null) {
+        return notification.allyRequestId;
+      }
+      final match = allyState.pendingRequests.where((r) {
+        return notification.message.contains(r.requesterId) ||
+            notification.message.contains(r.receiverId);
+      }).firstOrNull;
+      return match?.id;
+    }
+
+    final requestId = findRequestId();
+
     return Row(
       children: [
         Expanded(
           child: SizedBox(
             height: 36,
             child: OutlinedButton(
-              onPressed: () async {
-                // Decline — mark notification as read and remove from list
-                ref
-                    .read(notificationProvider.notifier)
-                    .markRead(notification.id);
-                // Attempt to decline based on pending list
-                final pending = ref.read(allyProvider).pendingRequests;
-                if (pending.isNotEmpty) {
-                  await allyNotifier.declineRequest(pending.first.id);
-                }
-              },
+              onPressed: requestId != null
+                  ? () async {
+                      ref
+                          .read(notificationProvider.notifier)
+                          .markRead(notification.id);
+                      await allyNotifier.declineRequest(requestId);
+                    }
+                  : null,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.inkMuted,
-                side: const BorderSide(color: AppColors.glassBorder),
+                foregroundColor: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+                side: BorderSide(
+                  color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
@@ -609,18 +647,17 @@ class _AllegianceRequestActions extends ConsumerWidget {
           child: SizedBox(
             height: 36,
             child: FilledButton(
-              onPressed: () async {
-                ref
-                    .read(notificationProvider.notifier)
-                    .markRead(notification.id);
-                final pending = ref.read(allyProvider).pendingRequests;
-                if (pending.isNotEmpty) {
-                  await allyNotifier.acceptRequest(pending.first.id);
-                }
-              },
+              onPressed: requestId != null
+                  ? () async {
+                      ref
+                          .read(notificationProvider.notifier)
+                          .markRead(notification.id);
+                      await allyNotifier.acceptRequest(requestId);
+                    }
+                  : null,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
+                backgroundColor: VColors.tertiary,
+                foregroundColor: VColors.onTertiary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),

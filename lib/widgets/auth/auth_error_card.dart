@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class AuthErrorCard extends StatelessWidget {
@@ -11,20 +11,24 @@ class AuthErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: AppColors.errorContainer.withValues(alpha: 0.15),
+        color: VColors.errorContainer.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+        border: Border.all(color: VColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error, size: IconSizes.md),
+          const Icon(
+            Icons.error_outline,
+            color: VColors.error,
+            size: IconSizes.md,
+          ),
           const SizedBox(width: Spacing.sm),
           Expanded(
             child: Text(
               message,
               style: const TextStyle(
                 fontSize: FontSizes.labelSm,
-                color: AppColors.error,
+                color: VColors.error,
                 fontWeight: FontWeights.regular,
               ),
             ),

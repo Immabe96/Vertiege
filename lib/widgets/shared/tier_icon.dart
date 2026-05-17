@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../utils/world_assets.dart';
 
 class TierIcon extends StatelessWidget {
@@ -36,11 +36,11 @@ class TierIcon extends StatelessWidget {
       _ => Icons.trending_up,
     };
     final color = switch (tier) {
-      5 => AppColors.tierApex,
-      4 => AppColors.tierOldMoney,
-      3 => AppColors.tierElite,
-      2 => AppColors.tierHighRoller,
-      _ => AppColors.tierHustler,
+      5 => VColors.tierApex,
+      4 => VColors.tierOldMoney,
+      3 => VColors.tierElite,
+      2 => VColors.tierHighRoller,
+      _ => VColors.tierHustler,
     };
 
     return Icon(icon, size: size, color: color);

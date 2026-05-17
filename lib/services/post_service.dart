@@ -1,3 +1,6 @@
+import '../models/paginated_result.dart';
+import '../utils/id_generator.dart';
+import '../utils/validators.dart' as validators;
 import 'moderation_filter.dart';
 import 'supabase.dart';
 
@@ -21,7 +24,10 @@ class PostService {
 
     final client = getSupabase();
     await client.from('posts').insert({
+      'id': generateId(),
       'world_id': worldId,
+      'resident_id': residentId,
+      'resident_name': residentName,
       'author_id': residentId,
       'author_name': residentName,
       'author_avatar': residentAvatar,
@@ -32,31 +38,60 @@ class PostService {
       'is_pinned': false,
       'reactions': <String, dynamic>{},
       'comment_count': 0,
-      'created_at': DateTime.now().millisecondsSinceEpoch,
     });
     return null;
   }
 
-  static Future<List<Map<String, dynamic>>> getPosts({
+  static Future<PaginatedResult<Map<String, dynamic>>> getPosts({
     String? worldId,
-    int limit = 50,
+    String? cursor,
+    int limit = 20,
   }) async {
-    if (!isSupabaseConfigured()) return [];
-    if (worldId != null && !_isUuid(worldId)) return [];
+    if (!isSupabaseConfigured()) {
+      return PaginatedResult(items: [], hasMore: false);
+    }
+    if (worldId != null && !_isUuid(worldId)) {
+      return PaginatedResult(items: [], hasMore: false);
+    }
 
     final client = getSupabase();
-    final data = worldId != null
-        ? await client
-              .from('posts')
-              .select()
-              .eq('world_id', worldId)
-              .order('created_at', ascending: false)
-              .limit(limit)
-        : await client
-              .from('posts')
-              .select()
-              .order('created_at', ascending: false)
-              .limit(limit);
+    var query = worldId != null
+        ? client.from('posts').select().eq('world_id', worldId)
+        : client.from('posts').select();
+
+    if (cursor != null) {
+      query = query.lt('created_at', cursor);
+    }
+
+    final data = await query
+        .order('created_at', ascending: false)
+        .limit(limit + 1);
+
+    final list = (data as List).cast<Map<String, dynamic>>();
+    final hasMore = list.length > limit;
+    final items = hasMore ? list.sublist(0, limit) : list;
+
+    return PaginatedResult(
+      items: items,
+      hasMore: hasMore,
+      nextCursor: items.isNotEmpty ? items.last['created_at'] as String? : null,
+    );
+  }
+
+  static Future<List<Map<String, dynamic>>> getFollowingPosts(
+    String residentId,
+    List<String> followingIds,
+  ) async {
+    if (!isSupabaseConfigured()) return [];
+    if (followingIds.isEmpty) return [];
+
+    final client = getSupabase();
+    final data = await client
+        .from('posts')
+        .select()
+        .inFilter('resident_id', followingIds)
+        .order('created_at', ascending: false)
+        .limit(50);
     return (data as List).cast<Map<String, dynamic>>();
   }
 
@@ -69,17 +104,11 @@ class PostService {
     if (!_isUuid(postId)) return;
 
     final client = getSupabase();
-    final row = await client
-        .from('posts')
-        .select('reactions')
-        .eq('id', postId)
-        .maybeSingle();
-    final reactions = Map<String, dynamic>.from(row?['reactions'] ?? {});
-    reactions[emoji] = ((reactions[emoji] as int?) ?? 0) + 1;
-    await client
-        .from('posts')
-        .update({'reactions': reactions})
-        .eq('id', postId);
+    await client.rpc('toggle_reaction', params: {
+      'post_id': postId,
+      'emoji': emoji,
+      'resident_id': residentId,
+    });
   }
 
   static Future<void> addComment(
@@ -91,19 +120,13 @@ class PostService {
     if (!_isUuid(postId)) return;
 
     final client = getSupabase();
-    final row = await client
-        .from('posts')
-        .select('comment_count')
-        .eq('id', postId)
-        .maybeSingle();
-    final count = (row?['comment_count'] as int?) ?? 0;
-    await client
-        .from('posts')
-        .update({'comment_count': count + 1})
-        .eq('id', postId);
+    await client.rpc('add_comment', params: {
+      'post_id': postId,
+      'resident_id': residentId,
+      'content': content,
+    });
+    await client.rpc('increment_comment_count', params: {'post_id': postId});
   }
 
-  static bool _isUuid(String value) => RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-  ).hasMatch(value);
+  static bool _isUuid(String value) => validators.isUuid(value);
 }

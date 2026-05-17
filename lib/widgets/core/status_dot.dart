@@ -1,7 +1,7 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 /// Discord-style presence indicator.
@@ -31,11 +31,11 @@ class _StatusDotState extends State<StatusDot>
   late final AnimationController _pulseController;
 
   Color get _color => switch (widget.presence) {
-        Presence.online => AppColors.success,
-        Presence.idle => AppColors.warning,
-        Presence.dnd => AppColors.error,
-        Presence.offline => AppColors.inkMuted,
-      };
+    Presence.online => VColors.success,
+    Presence.idle => VColors.warning,
+    Presence.dnd => VColors.error,
+    Presence.offline => VColors.outline,
+  };
 
   @override
   void initState() {
@@ -77,10 +77,7 @@ class _StatusDotState extends State<StatusDot>
         animation: _pulseController,
         builder: (context, child) {
           final scale = 1.0 + (_pulseController.value * 0.3);
-          return Transform.scale(
-            scale: scale,
-            child: child,
-          );
+          return Transform.scale(scale: scale, child: child);
         },
         child: _buildDot(context, 0.25 + (_pulseController.value * 0.15)),
       );
@@ -100,9 +97,9 @@ class _StatusDotState extends State<StatusDot>
             width: glassSize,
             height: glassSize,
             decoration: BoxDecoration(
-              color: AppColors.glassBackground,
+              color: VColors.glassBackground,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.glassBorder),
+              border: Border.all(color: VColors.glassBorder),
             ),
             child: Center(
               child: Container(
@@ -139,7 +136,7 @@ class AnimatedProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fillColor = color ?? AppColors.success;
+    final fillColor = color ?? VColors.success;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +151,7 @@ class AnimatedProgressBar extends StatelessWidget {
               height: height,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHighest,
+                color: VColors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(height / 2),
               ),
               child: FractionallySizedBox(
@@ -174,8 +171,9 @@ class AnimatedProgressBar extends StatelessWidget {
           const SizedBox(height: Spacing.xs),
           Text(
             '${(value * 100).round()}%',
-            style: theme.textTheme.labelSmall
-                ?.copyWith(color: theme.colorScheme.outline),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
           ),
         ],
       ],

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class GhostInput extends StatelessWidget {
@@ -36,7 +36,7 @@ class GhostInput extends StatelessWidget {
             style: const TextStyle(
               fontSize: FontSizes.labelSm,
               fontWeight: FontWeights.semiBold,
-              color: AppColors.tertiary,
+              color: VColors.tertiary,
               letterSpacing: LetterSpacing.label,
             ),
           ),
@@ -52,24 +52,24 @@ class GhostInput extends StatelessWidget {
           style: const TextStyle(
             fontSize: FontSizes.bodyMd,
             fontWeight: FontWeights.regular,
-            color: AppColors.ink,
+            color: VColors.onSurface,
             height: LineHeight.body,
           ),
           decoration: InputDecoration(
             hintText: hint,
             border: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.glassBorder),
+              borderSide: BorderSide(color: VColors.glassBorder),
             ),
             enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.glassBorder),
+              borderSide: BorderSide(color: VColors.glassBorder),
             ),
             focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.tertiary),
+              borderSide: BorderSide(color: VColors.tertiary),
             ),
             contentPadding: const EdgeInsets.symmetric(
-              vertical: Spacing.sm + 4,
+              vertical: Spacing.sm,
             ),
-            isDense: false,
+            isDense: true,
           ),
         ),
       ],

@@ -1,8 +1,9 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../models/resident.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../shared/tier_icon.dart';
 
 class TierCelebration extends StatefulWidget {
@@ -76,16 +77,17 @@ class _TierCelebrationState extends State<TierCelebration>
       ),
     );
 
-    _cardScale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.5, end: 1.08), weight: 3),
-      TweenSequenceItem(tween: Tween(begin: 1.08, end: 0.96), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.96, end: 1.0), weight: 1),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.15, 0.55, curve: Curves.easeOut),
-      ),
-    );
+    _cardScale =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 0.5, end: 1.08), weight: 3),
+          TweenSequenceItem(tween: Tween(begin: 1.08, end: 0.96), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: 0.96, end: 1.0), weight: 1),
+        ]).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.15, 0.55, curve: Curves.easeOut),
+          ),
+        );
 
     _cardOpacity = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -100,8 +102,11 @@ class _TierCelebrationState extends State<TierCelebration>
       _perkAnimations[i] = Tween(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
           parent: _controller,
-          curve: Interval(start.clamp(0.0, 0.95), (start + 0.12).clamp(0.07, 1.0),
-              curve: Curves.easeOutCubic),
+          curve: Interval(
+            start.clamp(0.0, 0.95),
+            (start + 0.12).clamp(0.07, 1.0),
+            curve: Curves.easeOutCubic,
+          ),
         ),
       );
     }
@@ -144,7 +149,9 @@ class _TierCelebrationState extends State<TierCelebration>
                   // Semi-transparent overlay
                   Opacity(
                     opacity: _overlayOpacity.value,
-                    child: Container(color: Colors.black.withValues(alpha: 0.65)),
+                    child: Container(
+                      color: VColors.scrim,
+                    ),
                   ),
                   // Confetti canvas
                   _ConfettiCanvas(controller: _controller),
@@ -196,8 +203,8 @@ class _CelebrationCard extends StatelessWidget {
         width: 300,
         constraints: const BoxConstraints(maxWidth: 340),
         decoration: BoxDecoration(
-          color: AppColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.celebration),
+          color: VColors.glassBackground,
+          borderRadius: BorderRadius.circular(VRadius.xl),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -242,9 +249,13 @@ class _CelebrationCard extends StatelessWidget {
                 child: FilledButton(
                   onPressed: onDismiss,
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: Spacing.sm + 4),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: Spacing.sm + 4,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+                      borderRadius: BorderRadius.circular(
+                        RadiusTokens.cardFeatured,
+                      ),
                     ),
                   ),
                   child: const Text('Awesome!'),
@@ -303,23 +314,18 @@ class _PulsingTierIconState extends State<_PulsingTierIcon>
           height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: AppColors.gradientBrand,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: VColors.gradientBrand,
             boxShadow: [
               BoxShadow(
-                color: AppColors.accentLevel.withValues(alpha: 0.4 * _pulse.value),
+                color: VColors.primary.withValues(
+                  alpha: 0.4 * _pulse.value,
+                ),
                 blurRadius: 24 * _pulse.value,
                 spreadRadius: 4 * _pulse.value,
               ),
             ],
           ),
-          child: TierIcon(
-            tier: widget.tier.value,
-            size: 44,
-          ),
+          child: TierIcon(tier: widget.tier.value, size: 44),
         );
       },
     );
@@ -364,7 +370,7 @@ class _PerkItem extends StatelessWidget {
                     height: 6,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.primary.withValues(alpha: anim.value),
+                      color: VColors.primary.withValues(alpha: anim.value),
                     ),
                   ),
                   const SizedBox(width: Spacing.sm),
@@ -372,8 +378,9 @@ class _PerkItem extends StatelessWidget {
                     child: Text(
                       perk,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface
-                            .withValues(alpha: anim.value.clamp(0.0, 1.0)),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: anim.value.clamp(0.0, 1.0),
+                        ),
                       ),
                     ),
                   ),
@@ -403,14 +410,14 @@ class _ConfettiCanvasState extends State<_ConfettiCanvas> {
   final _random = Random(42);
 
   static const _colors = [
-    AppColors.owlGreen,
-    AppColors.accentStreak,
-    AppColors.beeYellow,
-    AppColors.accentAchievement,
-    AppColors.eelBlue,
-    AppColors.tertiary,
-    AppColors.primary,
-    AppColors.mysticBlue,
+    VColors.achievementEducation,
+    VColors.secondary,
+    VColors.achievementFinance,
+    VColors.tertiary,
+    VColors.achievementAdventure,
+    VColors.tertiary,
+    VColors.primary,
+    VColors.primary,
   ];
 
   @override
@@ -496,8 +503,15 @@ class _ConfettiPainter extends CustomPainter {
 
       final eased = Curves.easeOutCubic.transform(localT);
       final distance = eased * p.speed * 2;
-      final dx = center.dx + cos(p.startAngle) * distance + sin(eased * 8 + p.wobble) * 40;
-      final dy = center.dy + sin(p.startAngle) * distance + eased * eased * 120 - eased * 80;
+      final dx =
+          center.dx +
+          cos(p.startAngle) * distance +
+          sin(eased * 8 + p.wobble) * 40;
+      final dy =
+          center.dy +
+          sin(p.startAngle) * distance +
+          eased * eased * 120 -
+          eased * 80;
 
       final rotation = eased * p.wobble * pi * 2;
       final opacity = (1.0 - eased).clamp(0.0, 1.0);
@@ -513,7 +527,11 @@ class _ConfettiPainter extends CustomPainter {
       canvas.rotate(rotation);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.6),
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: p.size,
+            height: p.size * 0.6,
+          ),
           const Radius.circular(1),
         ),
         paint,

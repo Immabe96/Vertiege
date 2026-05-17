@@ -1,15 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../state/resident_provider.dart';
-import '../../widgets/core/tactile_button.dart';
 import '../../widgets/core/fade_in.dart';
-import '../../widgets/core/glass_panel.dart';
 import '../../widgets/auth/auth_error_card.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -84,7 +82,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
       if (!mounted) return;
 
-      // Check if a profile already exists on the server (app data may have been cleared)
       await ref.read(residentProvider.notifier).loadResident();
       if (!mounted) return;
 
@@ -111,27 +108,34 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+          padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
           child: Column(
             children: [
-              const SizedBox(height: Spacing.xxl + Spacing.xl),
+              const SizedBox(height: 80),
 
-              // ── Brand — gold icon on obsidian ────────────
               FadeIn(
                 child: Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated.withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-                    border: Border.all(color: AppColors.glassBorder),
+                    color: isDark
+                        ? VColors.glassBackgroundDark
+                        : VColors.glassBackground,
+                    borderRadius: BorderRadius.circular(VRadius.xl),
+                    border: Border.all(
+                      color: isDark
+                          ? VColors.glassBorderDark
+                          : VColors.glassBorder,
+                    ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(Spacing.xs),
+                    padding: const EdgeInsets.all(VSpacing.xs),
                     child: Image.asset(
                       'assets/images/splash-icon.png',
                       fit: BoxFit.contain,
@@ -140,42 +144,52 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: Spacing.lg),
+              const SizedBox(height: VSpacing.lg),
               FadeIn(
                 delayMs: 100,
                 child: Text(
                   'Vertiege',
                   style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeights.bold,
-                    letterSpacing: LetterSpacing.display,
+                    fontWeight: VFontWeight.bold,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ),
-              const SizedBox(height: Spacing.xs),
+              const SizedBox(height: VSpacing.xs),
               FadeIn(
                 delayMs: 150,
                 child: Text(
                   'Create your account',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.inkSecondary,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
                 ),
               ),
-              const SizedBox(height: Spacing.xxl),
+              const SizedBox(height: VSpacing.xxl),
 
-              // ── Glass form card ──────────────────────────
-              GlassPanel(
-                padding: const EdgeInsets.all(Spacing.lg),
+              Container(
+                padding: const EdgeInsets.all(VSpacing.lg),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? VColors.surfaceContainerDark
+                      : VColors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(VRadius.xl),
+                  border: Border.all(
+                    color: isDark
+                        ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                        : VColors.outlineVariant.withValues(alpha: 0.3),
+                  ),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── Error Message ──────────────────────
                     if (_errorMessage != null) ...[
                       AuthErrorCard(message: _errorMessage!),
-                      const SizedBox(height: Spacing.lg),
+                      const SizedBox(height: VSpacing.lg),
                     ],
 
-                    // ── Email Field — ghost/underline ─────
                     FadeIn(
                       delayMs: 200,
                       child: TextField(
@@ -185,31 +199,54 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         textInputAction: TextInputAction.next,
                         autocorrect: false,
                         enabled: !_isLoading,
-                        style: const TextStyle(color: AppColors.ink),
+                        style: TextStyle(
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
+                        ),
                         onSubmitted: (_) => _passwordFocus.requestFocus(),
                         onChanged: (_) => setState(() => _errorMessage = null),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'you@example.com',
-                          hintStyle: TextStyle(color: AppColors.inkMuted),
-                          border: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                          hintStyle: TextStyle(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
                           ),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? VColors.outlineDark
+                                  : VColors.outline,
+                            ),
                           ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? VColors.outlineVariantDark
+                                  : VColors.outlineVariant,
+                            ),
                           ),
-                          prefixIcon: Icon(Icons.email_outlined),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: const BorderSide(
+                              color: VColors.primary,
+                              width: 2,
+                            ),
+                          ),
+                          prefixIcon: const Icon(Icons.email_outlined),
                           filled: true,
-                          fillColor: AppColors.glassBackground,
+                          fillColor: isDark
+                              ? VColors.surfaceContainerHighDark
+                              : VColors.surfaceContainerHigh,
                         ),
                       ),
                     ),
-                    const SizedBox(height: Spacing.md),
+                    const SizedBox(height: VSpacing.md),
 
-                    // ── Password Field — ghost/underline ──
                     FadeIn(
                       delayMs: 250,
                       child: TextField(
@@ -218,21 +255,44 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.next,
                         enabled: !_isLoading,
-                        style: const TextStyle(color: AppColors.ink),
-                        onSubmitted: (_) => _confirmPasswordFocus.requestFocus(),
+                        style: TextStyle(
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
+                        ),
+                        onSubmitted: (_) =>
+                            _confirmPasswordFocus.requestFocus(),
                         onChanged: (_) => setState(() => _errorMessage = null),
                         decoration: InputDecoration(
                           labelText: 'Password',
                           hintText: 'At least 6 characters',
-                          hintStyle: const TextStyle(color: AppColors.inkMuted),
-                          border: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                          hintStyle: TextStyle(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
                           ),
-                          enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? VColors.outlineDark
+                                  : VColors.outline,
+                            ),
                           ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? VColors.outlineVariantDark
+                                  : VColors.outlineVariant,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: const BorderSide(
+                              color: VColors.primary,
+                              width: 2,
+                            ),
                           ),
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
@@ -241,18 +301,20 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
                             ),
-                            onPressed: () =>
-                                setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                           filled: true,
-                          fillColor: AppColors.glassBackground,
+                          fillColor: isDark
+                              ? VColors.surfaceContainerHighDark
+                              : VColors.surfaceContainerHigh,
                           errorText: _passwordError(),
                         ),
                       ),
                     ),
-                    const SizedBox(height: Spacing.md),
+                    const SizedBox(height: VSpacing.md),
 
-                    // ── Confirm Password — ghost/underline ─
                     FadeIn(
                       delayMs: 300,
                       child: TextField(
@@ -261,20 +323,42 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         obscureText: _obscureConfirmPassword,
                         textInputAction: TextInputAction.done,
                         enabled: !_isLoading,
-                        style: const TextStyle(color: AppColors.ink),
+                        style: TextStyle(
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
+                        ),
                         onSubmitted: _isValid ? (_) => _handleSignUp() : null,
                         onChanged: (_) => setState(() => _errorMessage = null),
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
-                          hintStyle: const TextStyle(color: AppColors.inkMuted),
-                          border: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                          hintStyle: TextStyle(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
                           ),
-                          enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.glassBorder),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? VColors.outlineDark
+                                  : VColors.outline,
+                            ),
                           ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? VColors.outlineVariantDark
+                                  : VColors.outlineVariant,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            borderSide: const BorderSide(
+                              color: VColors.primary,
+                              width: 2,
+                            ),
                           ),
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
@@ -284,35 +368,46 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   : Icons.visibility_outlined,
                             ),
                             onPressed: () => setState(
-                                () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                              () => _obscureConfirmPassword =
+                                  !_obscureConfirmPassword,
+                            ),
                           ),
                           filled: true,
-                          fillColor: AppColors.glassBackground,
+                          fillColor: isDark
+                              ? VColors.surfaceContainerHighDark
+                              : VColors.surfaceContainerHigh,
                           errorText: _confirmPasswordError(),
                         ),
                       ),
                     ),
-                    const SizedBox(height: Spacing.xl),
+                    const SizedBox(height: VSpacing.xl),
 
-                    // ── Create Account Button — gold CTA ───
                     FadeIn(
                       delayMs: 350,
-                      child: TactileButton(
-                        label: _isLoading ? 'Creating account...' : 'Create Account',
-                        icon: _isLoading ? null : Icons.arrow_forward,
-                        fullWidth: true,
-                        color: AppColors.tertiary,
-                        textColor: AppColors.onTertiary,
-                        onPressed: _isLoading || !_isValid ? null : _handleSignUp,
+                      child: FilledButton.icon(
+                        onPressed: _isLoading || !_isValid
+                            ? null
+                            : _handleSignUp,
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.arrow_forward),
+                        label: Text(
+                          _isLoading ? 'Creating account...' : 'Create Account',
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: Spacing.lg),
+              const SizedBox(height: VSpacing.lg),
 
-              // ── Sign In Link ─────────────────────────────
               FadeIn(
                 delayMs: 400,
                 child: Row(
@@ -321,25 +416,30 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     Text(
                       'Already have an account? ',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.inkSecondary,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _isLoading
-                          ? null
-                          : () => context.go('/login'),
+                    TextButton(
+                      onPressed: _isLoading ? null : () => context.go('/login'),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       child: Text(
                         'Sign In',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.tertiary,
-                          fontWeight: FontWeights.bold,
+                          color: VColors.tertiary,
+                          fontWeight: VFontWeight.bold,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: Spacing.xxl),
+              const SizedBox(height: VSpacing.xxl),
             ],
           ),
         ),

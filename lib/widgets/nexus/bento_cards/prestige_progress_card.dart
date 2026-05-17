@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../config/achievements.dart';
 import '../../../state/resident_provider.dart';
 import '../../../state/achievement_provider.dart';
-import '../../../theme/colors.dart';
+import '../../../theme/v_colors.dart';
 import '../../../theme/design_system.dart';
 
 /// Medium card with tier name + XP progress bar.
@@ -24,7 +24,9 @@ class PrestigeProgressCard extends ConsumerWidget {
 
     // Calculate progress toward next tier
     final currentThreshold = xpThresholds[tierNum] ?? 0;
-    final nextThreshold = tierNum < 5 ? (xpThresholds[tierNum + 1] ?? totalXp + 1) : totalXp + 1;
+    final nextThreshold = tierNum < 5
+        ? (xpThresholds[tierNum + 1] ?? totalXp + 1)
+        : totalXp + 1;
     final tierProgress = totalXp - currentThreshold;
     final tierRequired = nextThreshold - currentThreshold;
     final progressFraction = tierRequired > 0
@@ -32,11 +34,11 @@ class PrestigeProgressCard extends ConsumerWidget {
         : 0.0;
 
     final tierColor = switch (tierNum) {
-      5 => AppColors.tierApex,
-      4 => AppColors.tierOldMoney,
-      3 => AppColors.tierElite,
-      2 => AppColors.tierHighRoller,
-      _ => AppColors.tierHustler,
+      5 => VColors.tierApex,
+      4 => VColors.tierOldMoney,
+      3 => VColors.tierElite,
+      2 => VColors.tierHighRoller,
+      _ => VColors.tierHustler,
     };
 
     final nextTierLabel = tierNum < 5
@@ -71,7 +73,7 @@ class PrestigeProgressCard extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.semiBold,
-                    color: AppColors.inkSecondary,
+                    color: VColors.onSurfaceVariant,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -80,7 +82,7 @@ class PrestigeProgressCard extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: FontSizes.headlineMd,
                     fontWeight: FontWeights.bold,
-                    color: AppColors.ink,
+                    color: VColors.onSurface,
                   ),
                 ),
               ],
@@ -94,21 +96,28 @@ class PrestigeProgressCard extends ConsumerWidget {
             children: [
               Text(
                 'Next: $nextTierLabel',
-                style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkMuted),
+                style: const TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  color: VColors.outline,
+                ),
               ),
               Text(
                 '${tierRequired - tierProgress} XP',
-                style: TextStyle(fontSize: FontSizes.labelSm, fontWeight: FontWeights.semiBold, color: tierColor),
+                style: TextStyle(
+                  fontSize: FontSizes.labelSm,
+                  fontWeight: FontWeights.semiBold,
+                  color: tierColor,
+                ),
               ),
             ],
           ),
           const SizedBox(height: Spacing.xs),
           ClipRRect(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
             child: LinearProgressIndicator(
               value: progressFraction,
               minHeight: 4,
-              backgroundColor: AppColors.glassBorder,
+              backgroundColor: VColors.glassBorder,
               valueColor: AlwaysStoppedAnimation<Color>(tierColor),
             ),
           ),
@@ -116,16 +125,22 @@ class PrestigeProgressCard extends ConsumerWidget {
           const SizedBox(height: Spacing.xs),
           Text(
             'SOVEREIGN MAX',
-            style: TextStyle(fontSize: FontSizes.labelSm, fontWeight: FontWeights.bold, color: tierColor),
+            style: TextStyle(
+              fontSize: FontSizes.labelSm,
+              fontWeight: FontWeights.bold,
+              color: tierColor,
+            ),
           ),
           const SizedBox(height: Spacing.xs),
           ClipRRect(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
             child: LinearProgressIndicator(
               value: 1.0,
               minHeight: 4,
-              backgroundColor: AppColors.glassBorder,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.tierApex),
+              backgroundColor: VColors.glassBorder,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                VColors.tierApex,
+              ),
             ),
           ),
         ],

@@ -40,6 +40,10 @@ import '../models/world.dart' show World;
 import '../widgets/worlds/resource_vault.dart';
 import '../widgets/worlds/world_share_card.dart';
 import '../widgets/shared/share_button.dart';
+import '../screens/world_marketplace_screen.dart';
+import '../screens/world_polls_screen.dart';
+import '../screens/world_treasury_screen.dart';
+import '../screens/world_challenges_screen.dart';
 
 class WorldDetailScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -53,7 +57,7 @@ class WorldDetailScreen extends ConsumerStatefulWidget {
 class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     with TickerProviderStateMixin {
   late final AnimationController _joinAnimController;
-  late final TabController _tabController;
+  TabController? _tabController;
   final GlobalKey _joinButtonKey = GlobalKey();
 
   List<WorldMemberEntry> _members = [];
@@ -66,14 +70,61 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   int _displayedEvents = 0;
   bool _statsAnimated = false;
 
+  bool _shouldShowMarketTab(World? world) {
+    if (world == null) return false;
+    return world.type.name == 'dominion' || world.prestige >= 30;
+  }
+
+  bool _shouldShowPollsTab(World? world, Resident? resident) {
+    if (world == null || resident == null) return false;
+    return resident.joinedWorldIds.contains(widget.worldId);
+  }
+
+  bool _shouldShowTreasuryTab(World? world) {
+    if (world == null) return false;
+    return world.prestige >= 25;
+  }
+
+  bool _shouldShowChallengesTab(World? world, Resident? resident) {
+    if (world == null || resident == null) return false;
+    return resident.joinedWorldIds.contains(widget.worldId);
+  }
+
+  bool _isSovereignOrCouncil(Resident? resident, World world) {
+    if (resident == null) return false;
+    if (resident.id == world.sovereignId) return true;
+    final member = _members.where((m) => m.resident.id == resident.id).firstOrNull;
+    return member != null && member.rep >= 5000;
+  }
+
+  int _getTabCount(World? world, ResidentState residentState) {
+    int count = 3; // Feed, Channels, Members
+    if (_shouldShowMarketTab(world)) count++;
+    if (_shouldShowPollsTab(world, residentState.resident)) count++;
+    if (_shouldShowTreasuryTab(world)) count++;
+    if (_shouldShowChallengesTab(world, residentState.resident)) count++;
+    return count;
+  }
+
+  int _computeTabCount(WorldState ws, ResidentState rs) => _getTabCount(
+    ws.worlds[widget.worldId],
+    rs,
+  );
+
+  void _ensureTabController(int length) {
+    if (_tabController == null || _tabController!.length != length) {
+      _tabController?.dispose();
+      _tabController = TabController(length: length, vsync: this);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _joinAnimController = AnimationController(
-      duration: AnimDurations.fast,
+      duration: VAnimation.fast,
       vsync: this,
     );
-    _tabController = TabController(length: 3, vsync: this);
     _loadMembers();
     _maybeAutoJoin();
     _runGovernanceChecks();
@@ -159,7 +210,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final targetPosts = posts.length;
     final targetEvents = events;
 
-    const duration = AnimDurations.slow;
+    const duration = VAnimation.slow;
     const steps = 20;
     final stepDuration = duration ~/ steps;
 
@@ -178,7 +229,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   @override
   void dispose() {
     _joinAnimController.dispose();
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -232,9 +283,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   }
 
   Color _getPrestigeTierColor(int prestige) {
-    if (prestige >= 40) return AppColors.tertiary;
-    if (prestige >= 20) return AppColors.primary;
-    return AppColors.hustler;
+    if (prestige >= 40) return VColors.tierApex;
+    if (prestige >= 20) return VColors.primary;
+    return VColors.tierHustler;
   }
 
   GlowTier _getPrestigeGlowTier(int prestige) {
@@ -259,11 +310,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   }
 
   void _showWorldShareSheet(World world) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(Spacing.lg),
+        insetPadding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -272,12 +324,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               onShared: () => Navigator.of(ctx).pop(),
               child: WorldShareCard(world: world),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text(
+              child: Text(
                 'Cancel',
-                style: TextStyle(color: AppColors.inkMuted),
+                style: TextStyle(color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
               ),
             ),
           ],
@@ -288,6 +340,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final worldState = ref.watch(worldProvider);
     final world = worldState.worlds[widget.worldId];
     final resident = ref.watch(residentProvider).resident;
@@ -300,6 +353,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final cs = theme.colorScheme;
     final isJoined = resident?.joinedWorldIds.contains(widget.worldId) ?? false;
 
+    final tabCount = _computeTabCount(worldState, ref.watch(residentProvider));
+    _ensureTabController(tabCount);
+
     final scaleAnimation =
         TweenSequence<double>([
           TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 1),
@@ -308,7 +364,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         ]).animate(
           CurvedAnimation(
             parent: _joinAnimController,
-            curve: AnimCurves.easeOut,
+            curve: VAnimation.standard,
           ),
         );
 
@@ -325,13 +381,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
         body: ListView(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           children: [
             SovereignErrorBanner(
               message: _errorMessage ?? 'Failed to load world',
               onRetry: _retryLoad,
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             AppEmptyState(
               title: 'Could not load this world',
               description:
@@ -444,7 +500,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, AppColors.canvas],
+                              colors: [Colors.transparent, isDark ? VColors.surfaceDark : VColors.surface],
                               stops: const [0.7, 1.0],
                             ),
                           ),
@@ -452,13 +508,14 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                       ),
                       // Back button
                       Positioned(
-                        top: MediaQuery.of(context).padding.top + Spacing.sm,
-                        left: Spacing.sm,
+                        top: MediaQuery.of(context).padding.top + VSpacing.sm,
+                        left: VSpacing.sm,
                         child: IconButton(
                           icon: const Icon(
                             Icons.arrow_back,
-                            color: AppColors.ink,
-                            size: IconSizes.lg,
+                            color: Colors.white,
+                            size: VIconSize.lg,
+                            shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
                           ),
                           onPressed: () =>
                               safeBack(context, fallback: '/explore'),
@@ -466,13 +523,14 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                       ),
                       // Share button (top-right, left of settings)
                       Positioned(
-                        top: MediaQuery.of(context).padding.top + Spacing.sm,
-                        right: (onSettings != null ? 56.0 : Spacing.sm),
+                        top: MediaQuery.of(context).padding.top + VSpacing.sm,
+                        right: (onSettings != null ? 56.0 : VSpacing.sm),
                         child: IconButton(
                           icon: const Icon(
                             Icons.share_outlined,
-                            color: AppColors.ink,
-                            size: IconSizes.lg,
+                            color: Colors.white,
+                            size: VIconSize.lg,
+                            shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
                           ),
                           tooltip: 'Share world',
                           onPressed: () => _showWorldShareSheet(world),
@@ -481,13 +539,14 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                       // Settings gear (top-right)
                       if (onSettings != null)
                         Positioned(
-                          top: MediaQuery.of(context).padding.top + Spacing.sm,
-                          right: Spacing.sm,
+                          top: MediaQuery.of(context).padding.top + VSpacing.sm,
+                          right: VSpacing.sm,
                           child: IconButton(
                             icon: const Icon(
                               Icons.settings,
-                              color: AppColors.ink,
-                              size: IconSizes.lg,
+                              color: Colors.white,
+                              size: VIconSize.lg,
+                              shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
                             ),
                             tooltip: 'World settings',
                             onPressed: onSettings,
@@ -499,22 +558,22 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                         left: 0,
                         right: 0,
                         child: Padding(
-                          padding: const EdgeInsets.all(Spacing.xl),
+                          padding: const EdgeInsets.all(VSpacing.xl),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Tier badge — colored by prestige tier
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: Spacing.md,
-                                  vertical: Spacing.xs,
+                                  horizontal: VSpacing.md,
+                                  vertical: VSpacing.xs,
                                 ),
                                 decoration: BoxDecoration(
                                   color: prestigeTierColor.withValues(
                                     alpha: 0.12,
                                   ),
                                   borderRadius: BorderRadius.circular(
-                                    RadiusTokens.md,
+                                    VRadius.md,
                                   ),
                                   border: Border.all(
                                     color: prestigeTierColor.withValues(
@@ -527,13 +586,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                       ? tierLabel.toUpperCase()
                                       : 'TIER $tierLabel'.toUpperCase(),
                                   style: TextStyle(
-                                    fontSize: FontSizes.labelSm,
-                                    fontWeight: FontWeights.semiBold,
+                                    fontSize: VFontSize.labelMd,
+                                    fontWeight: VFontWeight.semiBold,
                                     color: prestigeTierColor,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: Spacing.sm),
+                              const SizedBox(height: VSpacing.sm),
                               // World name + sovereign crown
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -542,35 +601,35 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                     child: Text(
                                       world.name,
                                       style: GoogleFonts.spaceGrotesk(
-                                        fontSize: FontSizes.headlineLg,
-                                        fontWeight: FontWeights.bold,
-                                        color: AppColors.ink,
+                                        fontSize: VFontSize.headlineLg,
+                                        fontWeight: VFontWeight.bold,
+                                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const SizedBox(width: Spacing.sm),
+                                  const SizedBox(width: VSpacing.sm),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: Spacing.sm,
-                                      vertical: Spacing.xs,
+                                      horizontal: VSpacing.sm,
+                                      vertical: VSpacing.xs,
                                     ),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
                                         colors: [
-                                          AppColors.tertiary,
-                                          AppColors.tertiaryFixedDim,
+                                          VColors.tertiary,
+                                          VColors.tertiaryDark,
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
                                       borderRadius: BorderRadius.circular(
-                                        RadiusTokens.pill,
+                                        VRadius.pill,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.tertiary.withValues(
+                                          color: VColors.tertiary.withValues(
                                             alpha: 0.3,
                                           ),
                                           blurRadius: 8,
@@ -581,54 +640,60 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(
-                                          Icons.shield,
-                                          size: 12,
-                                          color: AppColors.onTertiary,
-                                        ),
-                                        SizedBox(width: 3),
-                                        Text(
-                                          'SOVEREIGN',
-                                          style: TextStyle(
-                                            fontSize: FontSizes.labelSm,
-                                            fontWeight: FontWeights.bold,
-                                            color: AppColors.onTertiary,
-                                            letterSpacing: LetterSpacing.label,
+                                          Icon(
+                                            Icons.shield,
+                                            size: 12,
+                                            color: VColors.onTertiary,
                                           ),
-                                        ),
+                                          SizedBox(width: 3),
+                                          Text(
+                                            'SOVEREIGN',
+                                            style: TextStyle(
+                                              fontSize: VFontSize.labelMd,
+                                              fontWeight: VFontWeight.bold,
+                                              color: VColors.onTertiary,
+                                            ),
+                                          ),
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: Spacing.xs),
+                              const SizedBox(height: VSpacing.xs),
                               // Description
                               Text(
                                 world.description,
                                 style: TextStyle(
-                                  fontSize: FontSizes.bodyLg,
-                                  color: AppColors.inkSecondary,
+                                  fontSize: VFontSize.bodyLg,
+                                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              // Prestige progress bar
+                              const SizedBox(height: VSpacing.sm),
+                              _PrestigeProgressBar(
+                                prestige: world.prestige,
+                                tierColor: prestigeTierColor,
+                                isDark: isDark,
+                              ),
                               // Founded date (legacy)
                               if (world.createdAt > 0) ...[
-                                const SizedBox(height: Spacing.sm),
+                                const SizedBox(height: VSpacing.sm),
                                 Text(
                                   LegacyService.formatFoundedDate(
                                     DateTime.fromMillisecondsSinceEpoch(
                                       world.createdAt,
                                     ),
                                   ),
-                                  style: const TextStyle(
-                                    fontSize: FontSizes.labelSm,
-                                    color: AppColors.inkMuted,
+                                  style: TextStyle(
+                                    fontSize: VFontSize.labelMd,
+                                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ],
-                              const SizedBox(height: Spacing.lg),
+                              const SizedBox(height: VSpacing.lg),
                               // Action buttons — colored by prestige tier
                               Row(
                                 children: [
@@ -639,13 +704,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                       builder: (context, _) {
                                         // Determine foreground for tier button
                                         final btnBg = isJoined
-                                            ? AppColors.error
+                                            ? VColors.error
                                             : prestigeTierColor;
                                         final btnFg = isJoined
-                                            ? AppColors.onError
-                                            : (prestigeGlowTier == GlowTier.apex
-                                                  ? AppColors.onTertiary
-                                                  : AppColors.onPrimary);
+                                            ? VColors.onError
+                                            : VColors.onPrimary;
                                         return FilledButton(
                                           key: _joinButtonKey,
                                           onPressed: _handleJoin,
@@ -738,15 +801,21 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _WorldTabBarDelegate(
-                  controller: _tabController,
+                  controller: _tabController!,
                   color: prestigeTierColor,
+                  showMarketTab: _shouldShowMarketTab(world),
+                  showPollsTab: _shouldShowPollsTab(world, resident),
+                  showTreasuryTab: _shouldShowTreasuryTab(world),
+                  showChallengesTab: _shouldShowChallengesTab(world, resident),
                 ),
               ),
 
               // ── Tab Content ──
               SliverFillRemaining(
+                hasScrollBody: false,
                 child: TabBarView(
                   controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
                     // Feed tab: PostInput + Posts
                     WorldFeedTab(
@@ -769,7 +838,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                 .ensureDefaultChannels(widget.worldId),
                           )
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.all(Spacing.md),
+                            padding: const EdgeInsets.all(VSpacing.md),
                             physics: const ClampingScrollPhysics(),
                             child: WorldChannelList(worldId: widget.worldId),
                           ),
@@ -783,7 +852,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             variant: EmptyStateVariant.default_,
                           )
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.all(Spacing.md),
+                            padding: const EdgeInsets.all(VSpacing.md),
                             physics: const ClampingScrollPhysics(),
                             child: WorldDetailMembers(
                               worldId: widget.worldId,
@@ -792,6 +861,26 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                               membersLoading: _membersLoading,
                             ),
                           ),
+                    if (_shouldShowMarketTab(world))
+                      WorldMarketplaceScreen(
+                        worldId: widget.worldId,
+                        isMember: isJoined,
+                      ),
+                    if (_shouldShowPollsTab(world, resident))
+                      WorldPollsScreen(
+                        worldId: widget.worldId,
+                        isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
+                      ),
+                    if (_shouldShowTreasuryTab(world))
+                      WorldTreasuryScreen(
+                        worldId: widget.worldId,
+                        isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
+                      ),
+                    if (_shouldShowChallengesTab(world, resident))
+                      WorldChallengesScreen(
+                        worldId: widget.worldId,
+                        isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
+                      ),
                   ],
                 ),
               ),
@@ -806,8 +895,19 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabController controller;
   final Color color;
+  final bool showMarketTab;
+  final bool showPollsTab;
+  final bool showTreasuryTab;
+  final bool showChallengesTab;
 
-  const _WorldTabBarDelegate({required this.controller, required this.color});
+  const _WorldTabBarDelegate({
+    required this.controller,
+    required this.color,
+    this.showMarketTab = false,
+    this.showPollsTab = false,
+    this.showTreasuryTab = false,
+    this.showChallengesTab = false,
+  });
 
   @override
   double get minExtent => 56;
@@ -821,36 +921,44 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final bgColor = isDark ? VColors.surfaceDark : VColors.surface;
+    final dividerColor = isDark ? VColors.outlineDark : VColors.outline;
+    final unselectedColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+
     return ColoredBox(
-      color: AppColors.canvas.withValues(alpha: 0.96),
+      color: bgColor.withValues(alpha: 0.96),
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: AppColors.glassBorder),
+            bottom: BorderSide(color: dividerColor),
             top: BorderSide(
-              color: AppColors.glassBorder.withValues(alpha: 0.6),
+              color: dividerColor.withValues(alpha: 0.6),
             ),
           ),
         ),
         child: TabBar(
           controller: controller,
           labelColor: color,
-          unselectedLabelColor: AppColors.inkMuted,
+          unselectedLabelColor: unselectedColor,
           indicatorColor: color,
-          labelStyle: const TextStyle(
-            fontSize: FontSizes.labelSm,
-            fontWeight: FontWeights.semiBold,
-            letterSpacing: LetterSpacing.label,
+          labelStyle: TextStyle(
+            fontSize: VFontSize.labelSm,
+            fontWeight: VFontWeight.semiBold,
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: FontSizes.labelSm,
-            fontWeight: FontWeights.regular,
-            letterSpacing: LetterSpacing.label,
+          unselectedLabelStyle: TextStyle(
+            fontSize: VFontSize.labelSm,
+            fontWeight: VFontWeight.regular,
           ),
-          tabs: const [
-            Tab(text: 'FEED'),
-            Tab(text: 'CHANNELS'),
-            Tab(text: 'MEMBERS'),
+          tabs: [
+            const Tab(text: 'FEED'),
+            const Tab(text: 'CHANNELS'),
+            const Tab(text: 'MEMBERS'),
+            if (showMarketTab) const Tab(text: 'MARKET'),
+            if (showPollsTab) const Tab(text: 'POLLS'),
+            if (showTreasuryTab) const Tab(text: 'TREASURY'),
+            if (showChallengesTab) const Tab(text: 'CHALLENGES'),
           ],
         ),
       ),
@@ -859,7 +967,12 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _WorldTabBarDelegate oldDelegate) {
-    return oldDelegate.controller != controller || oldDelegate.color != color;
+    return oldDelegate.controller != controller ||
+        oldDelegate.color != color ||
+        oldDelegate.showMarketTab != showMarketTab ||
+        oldDelegate.showPollsTab != showPollsTab ||
+        oldDelegate.showTreasuryTab != showTreasuryTab ||
+        oldDelegate.showChallengesTab != showChallengesTab;
   }
 }
 
@@ -876,15 +989,16 @@ class _WorldFoundationSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final foundation = foundationForWorld(world);
     final guideChannels = _guideChannels;
     final orientation = orientationStepsForWorld(world);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
+      padding: const EdgeInsets.fromLTRB(VSpacing.md, 0, VSpacing.md, VSpacing.sm),
       child: GlassPanel(
-        padding: const EdgeInsets.all(Spacing.lg),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        padding: const EdgeInsets.all(VSpacing.lg),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -894,35 +1008,35 @@ class _WorldFoundationSummary extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: AppColors.tertiary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                    color: VColors.tertiary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(VRadius.lg),
                   ),
                   child: const Icon(
                     Icons.account_tree_outlined,
-                    color: AppColors.tertiary,
-                    size: IconSizes.md,
+                    color: VColors.tertiary,
+                    size: VIconSize.md,
                   ),
                 ),
-                const SizedBox(width: Spacing.md),
+                const SizedBox(width: VSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'World Foundation',
                         style: TextStyle(
-                          color: AppColors.ink,
-                          fontWeight: FontWeights.bold,
-                          fontSize: FontSizes.bodyLg,
+                          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                          fontWeight: VFontWeight.bold,
+                          fontSize: VFontSize.bodyLg,
                         ),
                       ),
                       Text(
                         _accessLabel,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.inkMuted,
-                          fontSize: FontSizes.labelSm,
+                        style: TextStyle(
+                          color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                          fontSize: VFontSize.labelMd,
                         ),
                       ),
                     ],
@@ -930,34 +1044,34 @@ class _WorldFoundationSummary extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             Text(
               foundation.premise,
-              style: const TextStyle(
-                color: AppColors.inkSecondary,
-                fontSize: FontSizes.bodyMd,
+              style: TextStyle(
+                color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                fontSize: VFontSize.bodyMd,
                 height: 1.35,
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             Wrap(
-              spacing: Spacing.xs,
-              runSpacing: Spacing.xs,
+              spacing: VSpacing.xs,
+              runSpacing: VSpacing.xs,
               children: [
                 for (final item in foundation.focus.take(3))
                   _FoundationChip(label: item),
               ],
             ),
-            const SizedBox(height: Spacing.lg),
-            const Text(
+            const SizedBox(height: VSpacing.lg),
+            Text(
               'Orientation Path',
               style: TextStyle(
-                color: AppColors.ink,
-                fontWeight: FontWeights.bold,
-                fontSize: FontSizes.bodyMd,
+                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                fontWeight: VFontWeight.bold,
+                fontSize: VFontSize.bodyMd,
               ),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             for (var i = 0; i < orientation.length; i++)
               _OrientationStepTile(
                 index: i + 1,
@@ -966,14 +1080,14 @@ class _WorldFoundationSummary extends StatelessWidget {
                 channel: orientation[i].channel,
                 onTap: () => onOpenChannel(orientation[i].channel),
               ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             Row(
               children: [
                 for (final channel in guideChannels)
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(
-                        right: channel == guideChannels.last ? 0 : Spacing.sm,
+                        right: channel == guideChannels.last ? 0 : VSpacing.sm,
                       ),
                       child: _GuideButton(
                         label: channel.name,
@@ -984,16 +1098,16 @@ class _WorldFoundationSummary extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => onOpenChannel('general'),
-                icon: const Icon(Icons.forum_outlined, size: IconSizes.sm),
+                icon: const Icon(Icons.forum_outlined, size: VIconSize.sm),
                 label: const Text('Open General Discussion'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.tertiary,
-                  side: const BorderSide(color: AppColors.glassBorder),
+                  foregroundColor: VColors.tertiary,
+                  side: BorderSide(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
                 ),
               ),
             ),
@@ -1040,22 +1154,23 @@ class _FoundationChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.xs,
+        horizontal: VSpacing.sm,
+        vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: AppColors.glassBorder),
+        color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(VRadius.md),
+        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppColors.inkSecondary,
-          fontSize: FontSizes.labelSm,
-          fontWeight: FontWeights.semiBold,
+        style: TextStyle(
+          color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+          fontSize: VFontSize.labelMd,
+          fontWeight: VFontWeight.semiBold,
         ),
       ),
     );
@@ -1079,17 +1194,18 @@ class _OrientationStepTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        borderRadius: BorderRadius.circular(VRadius.md),
         child: Container(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainer.withValues(alpha: 0.54),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(color: AppColors.glassBorder),
+            color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.54),
+            borderRadius: BorderRadius.circular(VRadius.md),
+            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
           ),
           child: Row(
             children: [
@@ -1098,19 +1214,19 @@ class _OrientationStepTile extends StatelessWidget {
                 height: 28,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.tertiary.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  color: VColors.tertiary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
                 child: Text(
                   '$index',
-                  style: const TextStyle(
-                    color: AppColors.tertiary,
-                    fontWeight: FontWeights.bold,
-                    fontSize: FontSizes.labelSm,
+                  style: TextStyle(
+                    color: VColors.tertiary,
+                    fontWeight: VFontWeight.bold,
+                    fontSize: VFontSize.labelMd,
                   ),
                 ),
               ),
-              const SizedBox(width: Spacing.md),
+              const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1119,38 +1235,38 @@ class _OrientationStepTile extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.ink,
-                        fontWeight: FontWeights.semiBold,
+                      style: TextStyle(
+                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                        fontWeight: VFontWeight.semiBold,
                       ),
                     ),
                     Text(
                       description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.inkMuted,
-                        fontSize: FontSizes.labelSm,
-                      ),
-                    ),
-                  ],
-                ),
+                      style: TextStyle(
+                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                fontSize: VFontSize.labelMd,
               ),
-              const SizedBox(width: Spacing.sm),
-              Text(
-                '#$channel',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.semiBold,
-                ),
-              ),
-              const SizedBox(width: Spacing.xs),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.inkMuted,
-                size: IconSizes.sm,
-              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(width: VSpacing.sm),
+      Text(
+        '#$channel',
+        style: TextStyle(
+          color: VColors.primary,
+          fontSize: VFontSize.labelMd,
+          fontWeight: VFontWeight.semiBold,
+        ),
+      ),
+      const SizedBox(width: VSpacing.xs),
+      Icon(
+        Icons.chevron_right,
+        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+        size: VIconSize.sm,
+      ),
             ],
           ),
         ),
@@ -1172,37 +1288,95 @@ class _GuideButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      borderRadius: BorderRadius.circular(VRadius.md),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.xs,
-          vertical: Spacing.sm,
+          horizontal: VSpacing.xs,
+          vertical: VSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+          color: VColors.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(VRadius.md),
+          border: Border.all(color: VColors.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.primary, size: IconSizes.md),
-            const SizedBox(height: Spacing.xs),
+            Icon(icon, color: VColors.primary, size: VIconSize.md),
+            const SizedBox(height: VSpacing.xs),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.ink,
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.bold,
+              style: TextStyle(
+                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                fontSize: VFontSize.labelMd,
+                fontWeight: VFontWeight.bold,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PrestigeProgressBar extends StatelessWidget {
+  final int prestige;
+  final Color tierColor;
+  final bool isDark;
+
+  const _PrestigeProgressBar({required this.prestige, required this.tierColor, this.isDark = false});
+
+  @override
+  Widget build(BuildContext context) {
+    const thresholds = [5, 15, 25, 40, 55];
+    int currentLevel = 0;
+    int nextThreshold = thresholds.first;
+    for (int i = 0; i < thresholds.length; i++) {
+      if (prestige >= thresholds[i]) {
+        currentLevel = i + 1;
+        nextThreshold = i + 1 < thresholds.length ? thresholds[i + 1] : thresholds.last + 15;
+      } else {
+        nextThreshold = thresholds[i];
+        break;
+      }
+    }
+    final prevThreshold = currentLevel > 0 ? thresholds[currentLevel - 1] : 0;
+    final range = nextThreshold - prevThreshold;
+    final progress = range > 0 ? ((prestige - prevThreshold) / range).clamp(0.0, 1.0) : 1.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Prestige $prestige',
+              style: TextStyle(fontSize: VFontSize.labelMd, fontWeight: VFontWeight.semiBold, color: tierColor),
+            ),
+            if (currentLevel < thresholds.length)
+              Text(
+                'Next: $nextThreshold',
+                style: TextStyle(fontSize: VFontSize.labelMd, color: (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant).withValues(alpha: 0.7)),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(VRadius.sm),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 4,
+            backgroundColor: (isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest).withValues(alpha: 0.3),
+            valueColor: AlwaysStoppedAnimation<Color>(tierColor),
+          ),
+        ),
+      ],
     );
   }
 }

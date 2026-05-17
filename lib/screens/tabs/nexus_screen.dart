@@ -1,17 +1,13 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../state/resident_provider.dart';
 import '../../state/post_provider.dart';
+import '../../state/notification_provider.dart';
 import '../../models/post.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
-import '../../widgets/core/glass_panel.dart';
-import '../../widgets/core/notification_bell.dart';
-import '../../widgets/core/fade_in.dart';
-import '../../widgets/core/empty_state.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
+import '../../ui/ui.dart';
 import '../../widgets/feed/post_item.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/nexus/bento_grid.dart';
@@ -20,9 +16,13 @@ import '../../widgets/nexus/bento_cards/prestige_progress_card.dart';
 import '../../widgets/nexus/bento_cards/season_snapshot_card.dart';
 import '../../widgets/nexus/bento_cards/trending_card.dart';
 import '../../widgets/nexus/bento_cards/feed_preview_card.dart';
+import '../../widgets/nexus/bento_cards/spotlight_card.dart';
+import '../../widgets/nexus/bento_cards/challenges_card.dart';
+import '../../widgets/nexus/bento_cards/league_card.dart';
 import '../../widgets/nexus/feed_tab_chip.dart';
 import '../../widgets/nexus/feed_sort_dropdown.dart';
 import '../tabs/tab_layout.dart';
+import 'nexus_notifications_sheet.dart';
 
 enum _FeedTab { all, following, announcements }
 
@@ -38,6 +38,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   FeedSort _sort = FeedSort.latest;
   late final ScrollController _scrollController;
   bool _showScrollFab = false;
+  bool _searchExpanded = false;
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -50,6 +53,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -63,31 +67,76 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   void _scrollToTop() {
     _scrollController.animateTo(
       0,
-      duration: AnimDurations.normal,
-      curve: AnimCurves.easeOut,
+      duration: VAnimation.normal,
+      curve: VAnimation.standard,
+    );
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _searchExpanded = !_searchExpanded;
+      if (!_searchExpanded) {
+        _searchController.clear();
+        _searchQuery = '';
+      }
+    });
+    if (_searchExpanded) {
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  void _showNotifications() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const NexusNotificationsSheet(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Scroll to top when the active tab is tapped again
     ref.listen<int>(scrollToTopProvider, (_, next) => _scrollToTop());
     final resident = ref.watch(residentProvider).resident;
-    final postState = ref.watch(postProvider);
-    final allPosts = postState.posts;
-    final greeting = _getGreeting();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    var posts = switch (_tab) {
-      _FeedTab.all => allPosts,
-      _FeedTab.following =>
-        allPosts
-            .where((p) => resident?.following.contains(p.residentId) ?? false)
-            .toList(),
-      _FeedTab.announcements =>
-        allPosts.where((p) => p.isAnnouncement).toList(),
-    };
+    final posts = ref.watch(
+      postProvider.select((postState) {
+        var filtered = switch (_tab) {
+          _FeedTab.all => postState.posts,
+          _FeedTab.following =>
+            postState.posts
+                .where(
+                  (p) => resident?.following.contains(p.residentId) ?? false,
+                )
+                .toList(),
+          _FeedTab.announcements =>
+            postState.posts.where((p) => p.isAnnouncement).toList(),
+        };
 
-    posts = _sortPosts(posts, _sort);
+        if (_searchQuery.isNotEmpty) {
+          final q = _searchQuery.toLowerCase();
+          filtered = filtered
+              .where(
+                (p) =>
+                    p.content.toLowerCase().contains(q) ||
+                    p.residentName.toLowerCase().contains(q),
+              )
+              .toList();
+        }
+
+        return _sortPosts(filtered, _sort);
+      }),
+    );
+
+    final postError = ref.watch(
+      postProvider.select((s) => s.error),
+    );
+    final postHasError = ref.watch(
+      postProvider.select((s) => s.hasError),
+    );
 
     return Scaffold(
       appBar: PreferredSize(
@@ -98,58 +147,150 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
             child: AppBar(
               toolbarHeight: 56,
               elevation: 0,
-              backgroundColor: AppColors.surface.withAlpha(204),
-              title: Text(
-                'Vertiege',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: FontSizes.headlineMd,
-                  fontWeight: FontWeights.bold,
-                  color: AppColors.tertiary,
-                ),
-              ),
+              backgroundColor: isDark
+                  ? VColors.surfaceDark.withValues(alpha: 0.85)
+                  : VColors.surface.withValues(alpha: 0.72),
+              title: _searchExpanded
+                  ? TextField(
+                      controller: _searchController,
+                      autofocus: true,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceDark
+                            : VColors.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Search posts, residents...',
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                    )
+                  : Text(
+                      'Vertiege',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: VFontWeight.semiBold,
+                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      ),
+                    ),
               actions: [
+                if (!_searchExpanded)
+                  IconButton(
+                    icon: Icon(
+                      Icons.search,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                    tooltip: 'Search',
+                    onPressed: _toggleSearch,
+                  )
+                else
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                    tooltip: 'Close search',
+                    onPressed: _toggleSearch,
+                  ),
                 IconButton(
-                  icon: const Icon(Icons.search, color: AppColors.inkSecondary),
-                  tooltip: 'Search',
-                  onPressed: () => context.push('/search'),
+                  icon: Consumer(
+                    builder: (context, ref, _) {
+                      final unread = ref.watch(
+                        notificationProvider.select(
+                          (s) => s.notifications.where((n) => !n.read).length,
+                        ),
+                      );
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(
+                            Icons.notifications_outlined,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                          if (unread > 0)
+                            Positioned(
+                              right: -4,
+                              top: -4,
+                              child: Container(
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                decoration: const BoxDecoration(
+                                  color: VColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  unread > 9 ? '9+' : '$unread',
+                                  style: const TextStyle(
+                                    color: VColors.onError,
+                                    fontSize: VFontSize.labelSm,
+                                    fontWeight: VFontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  tooltip: 'Notifications',
+                  onPressed: _showNotifications,
                 ),
-                NotificationBell(onPress: () => context.push('/notifications')),
               ],
             ),
           ),
         ),
       ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await ref.read(postProvider.notifier).loadPosts();
-            await Future<void>.delayed(const Duration(milliseconds: 200));
-          },
-          child: Stack(
-            children: [
-              CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: FadeIn(
-                      delayMs: 0,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isDark ? VColors.surfaceDark : VColors.surface,
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(postProvider.notifier).loadPosts();
+              await Future<void>.delayed(const Duration(milliseconds: 200));
+            },
+            child: Stack(
+              children: [
+                CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(Spacing.md),
+                        padding: const EdgeInsets.all(VSpacing.md),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               'Nexus Activity',
-                              style: GoogleFonts.spaceGrotesk(
-                                fontSize: FontSizes.headlineLg,
-                                fontWeight: FontWeights.semiBold,
-                                color: AppColors.ink,
+                              style: theme.textTheme.headlineLarge?.copyWith(
+                                fontWeight: VFontWeight.semiBold,
+                                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                               ),
                             ),
-                            const SizedBox(height: Spacing.sm),
-                            GlassPanel(
-                              padding: const EdgeInsets.all(Spacing.lg),
+                            const SizedBox(height: VSpacing.sm),
+                            VCard(
+                              isGlass: true,
+                              padding: const EdgeInsets.all(VSpacing.lg),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -159,54 +300,64 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                       children: [
                                         Flexible(
                                           child: LuminaryNameplate(
-                                            name:
-                                                '$greeting, ${resident?.name ?? 'Traveler'}',
+                                            name: resident?.name ?? 'Traveler',
                                             tier: resident?.tier.value ?? 1,
-                                            fontSize: FontSizes.bodyLg,
+                                            fontSize: VFontSize.bodyLg,
                                             title: resident?.title,
                                           ),
                                         ),
                                         if (resident != null) ...[
-                                          const SizedBox(width: Spacing.sm),
+                                          const SizedBox(
+                                            width: VSpacing.sm,
+                                          ),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: Spacing.sm,
-                                              vertical: 2,
-                                            ),
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: VSpacing.sm,
+                                                  vertical: 2,
+                                                ),
                                             decoration: BoxDecoration(
-                                              color: AppColors.primaryContainer,
+                                              color: isDark
+                                                  ? VColors.primaryContainerDark
+                                                  : VColors.primaryContainer,
                                               borderRadius:
                                                   BorderRadius.circular(
-                                                    RadiusTokens.pill,
+                                                    VRadius.pill,
                                                   ),
                                             ),
                                             child: Text(
                                               resident.tier.label,
-                                              style: const TextStyle(
-                                                fontSize: FontSizes.labelSm,
-                                                fontWeight: FontWeights.bold,
-                                                color: AppColors
-                                                    .onPrimaryContainer,
+                                              style: theme.textTheme
+                                                  .labelSmall?.copyWith(
+                                                fontSize: VFontSize.labelSm,
+                                                fontWeight: VFontWeight.bold,
+                                                color: isDark
+                                                    ? VColors
+                                                        .onPrimaryContainerDark
+                                                    : VColors
+                                                        .onPrimaryContainer,
                                               ),
                                             ),
                                           ),
                                           if (resident.streakCount > 0) ...[
-                                            const SizedBox(width: Spacing.sm),
+                                            const SizedBox(
+                                              width: VSpacing.sm,
+                                            ),
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: Spacing.sm,
+                                                    horizontal: VSpacing.sm,
                                                     vertical: 2,
                                                   ),
                                               decoration: BoxDecoration(
-                                                color: AppColors.warning
+                                                color: VColors.warning
                                                     .withValues(alpha: 0.15),
                                                 borderRadius:
                                                     BorderRadius.circular(
-                                                      RadiusTokens.pill,
+                                                      VRadius.pill,
                                                     ),
                                                 border: Border.all(
-                                                  color: AppColors.warning
+                                                  color: VColors.warning
                                                       .withValues(alpha: 0.3),
                                                 ),
                                               ),
@@ -214,19 +365,21 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   const Icon(
-                                                    Icons.local_fire_department,
+                                                    Icons
+                                                        .local_fire_department,
                                                     size: 14,
-                                                    color: AppColors.warning,
+                                                    color: VColors.warning,
                                                   ),
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     '${resident.streakCount}',
-                                                    style: const TextStyle(
+                                                    style: theme.textTheme
+                                                        .labelSmall?.copyWith(
                                                       fontSize:
-                                                          FontSizes.labelSm,
+                                                          VFontSize.labelSm,
                                                       fontWeight:
-                                                          FontWeights.bold,
-                                                      color: AppColors.warning,
+                                                          VFontWeight.bold,
+                                                      color: VColors.warning,
                                                     ),
                                                   ),
                                                 ],
@@ -237,7 +390,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: Spacing.sm),
+                                  const SizedBox(width: VSpacing.sm),
                                 ],
                               ),
                             ),
@@ -245,11 +398,8 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                         ),
                       ),
                     ),
-                  ),
 
-                  SliverToBoxAdapter(
-                    child: FadeIn(
-                      delayMs: 10,
+                    SliverToBoxAdapter(
                       child: const BentoGrid(
                         cards: [
                           BentoCard(
@@ -265,6 +415,18 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                             size: BentoSize.small,
                           ),
                           BentoCard(
+                            child: SpotlightCard(),
+                            size: BentoSize.medium,
+                          ),
+                          BentoCard(
+                            child: ChallengesCard(),
+                            size: BentoSize.small,
+                          ),
+                          BentoCard(
+                            child: const LeagueCard(),
+                            size: BentoSize.small,
+                          ),
+                          BentoCard(
                             child: TrendingCard(),
                             size: BentoSize.large,
                           ),
@@ -275,11 +437,8 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                         ],
                       ),
                     ),
-                  ),
 
-                  SliverToBoxAdapter(
-                    child: FadeIn(
-                      delayMs: 30,
+                    SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -305,7 +464,8 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                         const SizedBox(width: 6),
                                         FeedTabChip(
                                           label: 'Following',
-                                          selected: _tab == _FeedTab.following,
+                                          selected:
+                                              _tab == _FeedTab.following,
                                           onTap: () => setState(
                                             () => _tab = _FeedTab.following,
                                           ),
@@ -317,14 +477,15 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                                               _tab == _FeedTab.announcements,
                                           icon: Icons.campaign,
                                           onTap: () => setState(
-                                            () => _tab = _FeedTab.announcements,
+                                            () =>
+                                                _tab = _FeedTab.announcements,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: Spacing.sm),
+                                const SizedBox(width: VSpacing.sm),
                                 FeedSortDropdown(
                                   currentSort: _sort,
                                   onChanged: (s) => setState(() => _sort = s),
@@ -335,55 +496,50 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                         ),
                       ),
                     ),
-                  ),
 
-                  if (postState.hasError)
-                    SliverToBoxAdapter(
-                      child: FadeIn(
-                        delayMs: 160,
-                        child: AppErrorState(
-                          message: postState.error,
+                    if (postHasError)
+                      SliverToBoxAdapter(
+                        child: VErrorState(
+                          message: postError ?? 'Something went wrong',
                           onRetry: () =>
                               ref.read(postProvider.notifier).loadPosts(),
                         ),
+                      )
+                    else if (posts.isEmpty)
+                      SliverToBoxAdapter(
+                        child: _buildEmptyState(),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) =>
+                              PostItem(post: posts[index], index: index),
+                          childCount: posts.length,
+                        ),
                       ),
-                    )
-                  else if (posts.isEmpty)
-                    SliverToBoxAdapter(
-                      child: FadeIn(delayMs: 160, child: _buildEmptyState()),
-                    )
-                  else
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) =>
-                            PostItem(post: posts[index], index: index),
-                        childCount: posts.length,
-                      ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
 
-              if (_showScrollFab)
-                Positioned(
-                  right: Spacing.md,
-                  bottom: Spacing.md,
-                  child: AnimatedScale(
-                    scale: _showScrollFab ? 1.0 : 0.0,
-                    duration: AnimDurations.fast,
-                    curve: AnimCurves.easeOut,
-                    child: FloatingActionButton.small(
-                      onPressed: _scrollToTop,
-                      tooltip: 'Scroll to top',
-                      backgroundColor: AppColors.glassBackground,
-                      foregroundColor: AppColors.primary,
-                      child: const Icon(
-                        Icons.keyboard_arrow_up,
-                        size: IconSizes.lg,
+                if (_showScrollFab)
+                  Positioned(
+                    right: VSpacing.md,
+                    bottom: VSpacing.md,
+                    child: AnimatedScale(
+                      scale: _showScrollFab ? 1.0 : 0.0,
+                      duration: VAnimation.fast,
+                      curve: VAnimation.standard,
+                      child: FloatingActionButton.small(
+                        onPressed: _scrollToTop,
+                        tooltip: 'Scroll to top',
+                        child: const Icon(
+                          Icons.keyboard_arrow_up,
+                          size: VIconSize.lg,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -391,36 +547,34 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   }
 
   Widget _buildEmptyState() {
+    if (_searchQuery.isNotEmpty) {
+      return VEmptyState(
+        title: 'No results for "$_searchQuery"',
+        description: 'Try a different search term',
+        icon: Icons.search_off,
+      );
+    }
     switch (_tab) {
       case _FeedTab.following:
-        return const AppEmptyState(
+        return const VEmptyState(
           title: 'No posts from followed residents',
           description: 'Follow residents to see their posts here',
           icon: Icons.people_outline,
-          imageAsset: 'assets/generated/empty-feed.jpg',
         );
       case _FeedTab.announcements:
-        return const AppEmptyState(
+        return const VEmptyState(
           title: 'No announcements yet',
-          description: 'Announcements from world moderators will appear here',
+          description:
+              'Announcements from world moderators will appear here',
           icon: Icons.campaign_outlined,
-          imageAsset: 'assets/generated/empty-feed.jpg',
         );
       case _FeedTab.all:
-        return const AppEmptyState(
+        return const VEmptyState(
           title: 'No posts yet',
           description: 'Be the first to share something with the community!',
           icon: Icons.auto_awesome,
-          imageAsset: 'assets/generated/empty-feed.jpg',
         );
     }
-  }
-
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
   }
 
   List<Post> _sortPosts(List<Post> posts, FeedSort sort) {
@@ -443,7 +597,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
         });
         break;
       case FeedSort.top:
-        sorted.sort((a, b) => b.comments.length.compareTo(a.comments.length));
+        sorted.sort(
+          (a, b) => b.comments.length.compareTo(a.comments.length),
+        );
         break;
     }
     return sorted;

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/moderation_service.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../utils/date_format.dart';
 import '../widgets/core/glass_panel.dart';
@@ -35,12 +35,23 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final entries = await ModerationService.getAuditLog(widget.worldId);
-      if (mounted) setState(() { _entries = entries; _loading = false; });
+      if (mounted)
+        setState(() {
+          _entries = entries;
+          _loading = false;
+        });
     } catch (_) {
-      if (mounted) setState(() { _loading = false; _error = 'Failed to load audit log'; });
+      if (mounted)
+        setState(() {
+          _loading = false;
+          _error = 'Failed to load audit log';
+        });
     }
   }
 
@@ -75,97 +86,121 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.worldName} — Realm Audit'),
-      ),
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      appBar: AppBar(title: Text('${widget.worldName} — Realm Audit')),
       body: _loading
           ? const GlassLoadingList(itemCount: 8)
           : _error != null
-              ? AppErrorState(message: _error!, onRetry: _load)
-              : _entries.isEmpty
-                  ? const AppEmptyState(
-                      title: 'No audit entries',
-                      description: 'Moderation actions will appear here.',
-                      icon: Icons.history,
-                    )
-                  : RefreshIndicator(
-                      onRefresh: () async {
-                        await _load();
-                        await Future<void>.delayed(const Duration(milliseconds: 200));
-                      },
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(Spacing.md),
-                        itemCount: _entries.length,
-                        itemBuilder: (context, index) {
-                          final entry = _entries[index];
-                          final action = entry['action'] as String? ?? '';
-                          final details = entry['details'] as Map<String, dynamic>?;
-                          final createdAt = DateTime.tryParse(entry['created_at'] ?? '');
-                          final count = details?['count'] as int?;
+          ? AppErrorState(message: _error!, onRetry: _load)
+          : _entries.isEmpty
+          ? const AppEmptyState(
+              title: 'No audit entries',
+              description: 'Moderation actions will appear here.',
+              icon: Icons.history,
+            )
+          : RefreshIndicator(
+              onRefresh: () async {
+                await _load();
+                await Future<void>.delayed(const Duration(milliseconds: 200));
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(Spacing.md),
+                itemCount: _entries.length,
+                itemBuilder: (context, index) {
+                  final entry = _entries[index];
+                  final action = entry['action'] as String? ?? '';
+                  final details = entry['details'] as Map<String, dynamic>?;
+                  final createdAt = DateTime.tryParse(
+                    entry['created_at'] ?? '',
+                  );
+                  final count = details?['count'] as int?;
 
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: index < _entries.length - 1 ? Spacing.sm : 0),
-                            child: GlassPanel(
-                              padding: const EdgeInsets.all(Spacing.md),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surfaceContainerHighest.withValues(alpha: 0.5),
-                                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                                    ),
-                                    child: Icon(_actionIcon(action), size: IconSizes.sm, color: AppColors.inkSecondary),
-                                  ),
-                                  const SizedBox(width: Spacing.md),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _formatAction(action),
-                                          style: const TextStyle(
-                                            fontSize: FontSizes.bodyMd,
-                                            fontWeight: FontWeights.semiBold,
-                                            color: AppColors.ink,
-                                          ),
-                                        ),
-                                        if (entry['actor_id'] is String && (entry['actor_id'] as String).isNotEmpty)
-                                          Text(
-                                            'by ${entry['actor_id']}',
-                                            style: const TextStyle(
-                                              fontSize: FontSizes.labelSm,
-                                              color: AppColors.inkMuted,
-                                            ),
-                                          ),
-                                        if (count != null)
-                                          Text(
-                                            '$count messages',
-                                            style: const TextStyle(
-                                              fontSize: FontSizes.labelSm,
-                                              color: AppColors.inkMuted,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (createdAt != null)
-                                    Text(
-                                      formatTimestamp(createdAt.millisecondsSinceEpoch),
-                                      style: const TextStyle(
-                                        fontSize: FontSizes.labelSm,
-                                        color: AppColors.inkMuted,
-                                      ),
-                                    ),
-                                ],
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index < _entries.length - 1 ? Spacing.sm : 0,
+                    ),
+                    child: GlassPanel(
+                      padding: const EdgeInsets.all(Spacing.md),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: (isDark
+                                      ? VColors.surfaceContainerHighestDark
+                                      : VColors.surfaceContainerHighest)
+                                  .withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.md,
                               ),
                             ),
-                          );
-                        },
+                            child: Icon(
+                              _actionIcon(action),
+                              size: IconSizes.sm,
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _formatAction(action),
+                                  style: TextStyle(
+                                    fontSize: FontSizes.bodyMd,
+                                    fontWeight: FontWeights.semiBold,
+                                    color: isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface,
+                                  ),
+                                ),
+                                if (entry['actor_id'] is String &&
+                                    (entry['actor_id'] as String).isNotEmpty)
+                                  Text(
+                                    'by ${entry['actor_id']}',
+                                    style: TextStyle(
+                                      fontSize: FontSizes.labelSm,
+                                      color: isDark
+                                          ? VColors.onSurfaceVariantDark
+                                          : VColors.onSurfaceVariant,
+                                    ),
+                                  ),
+                                if (count != null)
+                                  Text(
+                                    '$count messages',
+                                    style: TextStyle(
+                                      fontSize: FontSizes.labelSm,
+                                      color: isDark
+                                          ? VColors.onSurfaceVariantDark
+                                          : VColors.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (createdAt != null)
+                            Text(
+                              formatTimestamp(createdAt.millisecondsSinceEpoch),
+                              style: TextStyle(
+                                fontSize: FontSizes.labelSm,
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
+                  );
+                },
+              ),
+            ),
     );
   }
 }

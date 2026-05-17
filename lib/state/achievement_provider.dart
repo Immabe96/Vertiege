@@ -46,9 +46,20 @@ class AchievementState {
 class AchievementNotifier extends Notifier<AchievementState> {
   void Function(List<String> verifiedIds, ResidentTier? newTier)?
   onAchievementsVerified;
+  int _lastTotalXp = 0;
 
   @override
-  AchievementState build() => const AchievementState();
+  AchievementState build() {
+    ref.listen<AchievementState>(achievementProvider, (prev, next) {
+      if (next.totalXp > _lastTotalXp) {
+        _lastTotalXp = next.totalXp;
+        final newTier = config.getTierForXp(next.totalXp);
+        ref.read(residentProvider.notifier).updateTier(newTier);
+      }
+    });
+
+    return const AchievementState();
+  }
 
   Future<void> submitAchievement(String achievementId, String proofUri) async {
     final existing = state.userAchievements
@@ -70,7 +81,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
     );
 
     final shouldAutoVerify =
-        aiResult.autoApproved && aiResult.confidence >= 0.75;
+        aiResult.autoApproved && (aiResult.confidence ?? 0) >= 0.75;
     await _persistCloudSubmission(
       achievementId: achievementId,
       proofUri: proofUri,
@@ -131,12 +142,8 @@ class AchievementNotifier extends Notifier<AchievementState> {
       _persist();
 
       if (tierChanged) {
-        ref.read(residentProvider.notifier).updateTier(newTier);
+        onAchievementsVerified?.call([achievementId], tierChanged ? newTier : null);
       }
-
-      onAchievementsVerified?.call([
-        achievementId,
-      ], tierChanged ? newTier : null);
       Haptics.success();
     }
   }
@@ -248,10 +255,6 @@ class AchievementNotifier extends Notifier<AchievementState> {
     );
     _persist();
 
-    if (tierChanged) {
-      ref.read(residentProvider.notifier).updateTier(newTier);
-    }
-
     onAchievementsVerified?.call([achievementId], tierChanged ? newTier : null);
 
     final earnedTitle = titleForAchievement(achievementId);
@@ -278,10 +281,6 @@ class AchievementNotifier extends Notifier<AchievementState> {
       celebrationTier: tierChanged ? newTier : state.celebrationTier,
     );
     _persist();
-
-    if (tierChanged) {
-      ref.read(residentProvider.notifier).updateTier(newTier);
-    }
   }
 
   AchievementStatus getAchievementStatus(String achievementId) {

@@ -1,9 +1,9 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
 
@@ -114,11 +114,11 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
   Color _variantColor() {
     switch (widget.variant) {
       case EmptyStateVariant.error:
-        return AppColors.error;
+        return VColors.error;
       case EmptyStateVariant.success:
-        return AppColors.success;
+        return VColors.success;
       case EmptyStateVariant.default_:
-        return AppColors.primary;
+        return VColors.primary;
     }
   }
 
@@ -230,6 +230,9 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
 
         // Wrap default variant in GlassPanel with dashed border.
         if (widget.variant == EmptyStateVariant.default_) {
+          final isDark = theme.brightness == Brightness.dark;
+          final glassBg = isDark ? VColors.glassBackgroundDark : VColors.glassBackground;
+          final glassBorder = isDark ? VColors.glassBorderDark : VColors.glassBorder;
           return Padding(
             padding: const EdgeInsets.all(Spacing.lg),
             child: ClipRRect(
@@ -238,7 +241,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: CustomPaint(
                   painter: _DashedBorderPainter(
-                    color: AppColors.glassBorder,
+                    color: glassBorder,
                     strokeWidth: 1,
                     dashLength: 6,
                     gapLength: 4,
@@ -246,7 +249,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.glassBackground,
+                      color: glassBg,
                       borderRadius: BorderRadius.circular(RadiusTokens.full),
                     ),
                     child: inner,
@@ -268,6 +271,9 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
   }) {
     final glowOpacity = _glowOpacity.value;
     final iconScale = _iconScale.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final glassBg = isDark ? VColors.glassBackgroundDark : VColors.glassBackground;
+    final glassBorder = isDark ? VColors.glassBorderDark : VColors.glassBorder;
 
     return Transform.scale(
       scale: iconScale,
@@ -279,9 +285,9 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
             width: IconSizes.hero + Spacing.xl,
             height: IconSizes.hero + Spacing.xl,
             decoration: BoxDecoration(
-              color: AppColors.glassBackground,
+              color: glassBg,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.glassBorder),
+              border: Border.all(color: glassBorder),
               boxShadow: [
                 // Ambient shadow
                 BoxShadow(
@@ -308,7 +314,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
               child: Icon(
                 widget.icon,
                 size: IconSizes.hero,
-                color: Colors.white,
+                color: VColors.onPrimary,
               ),
             ),
           ),
@@ -318,6 +324,9 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
   }
 
   Widget _buildImageContainer({required Color variantColor}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final glassBg = isDark ? VColors.glassBackgroundDark : VColors.glassBackground;
+    final glassBorder = isDark ? VColors.glassBorderDark : VColors.glassBorder;
     final glowOpacity = _glowOpacity.value;
     return ClipRRect(
       borderRadius: BorderRadius.circular(RadiusTokens.xl),
@@ -325,8 +334,8 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
         width: 180,
         height: 132,
         decoration: BoxDecoration(
-          color: AppColors.glassBackground,
-          border: Border.all(color: AppColors.glassBorder),
+          color: glassBg,
+          border: Border.all(color: glassBorder),
           boxShadow: [
             BoxShadow(
               color: variantColor.withValues(alpha: 0.18 * glowOpacity),

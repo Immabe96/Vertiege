@@ -1,18 +1,18 @@
-import 'dart:io';
+﻿import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../models/resident.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
-import '../../models/resident.dart';
-import '../../widgets/core/tactile_button.dart';
-import '../../widgets/core/glass_panel.dart';
-import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
+import 'the_gate_screen.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -21,17 +21,17 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int _currentStep = 0;
+
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
-  final _scrollController = ScrollController();
-  final _nameFocus = FocusNode();
-  final _bioFocus = FocusNode();
   final _picker = ImagePicker();
 
   File? _avatarFile;
   String _selectedProfession = '';
-  bool _submitting = false;
 
   static const _professions = [
     '',
@@ -44,7 +44,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     'Arts',
   ];
 
-  bool get _isValid => _nameController.text.trim().length >= 2;
+  // Gate state
+  final Map<_GateInterest, int> _gateScores = {};
+  bool _gateSubmitting = false;
+
+  bool get _isProfileValid => _nameController.text.trim().length >= 2;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() => _currentStep = _tabController.index);
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _nameController.dispose();
+    _bioController.dispose();
+    super.dispose();
+  }
+
+  void _nextStep() {
+    if (_currentStep < 2) {
+      _tabController.animateTo(_currentStep + 1);
+    }
+  }
+
+  void _prevStep() {
+    if (_currentStep > 0) {
+      _tabController.animateTo(_currentStep - 1);
+    }
+  }
 
   Future<void> _pickAvatar(ImageSource source) async {
     final picked = await _picker.pickImage(
@@ -54,7 +87,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       imageQuality: 85,
     );
     if (picked == null) return;
-
     final file = File(picked.path);
     final saved = await _saveToLocal(file);
     setState(() => _avatarFile = saved);
@@ -68,39 +100,53 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return dest;
   }
 
-  void _complete() {
-    if (!_isValid) {
+  Future<void> _completeProfile() async {
+    if (!_isProfileValid) {
       HapticFeedback.heavyImpact();
-      _nameFocus.requestFocus();
+      return;
+    }
+    _nextStep();
+  }
+
+  Future<void> _submitGate() async {
+    if (_gateScores.isEmpty) {
+      HapticFeedback.heavyImpact();
       return;
     }
 
-    setState(() => _submitting = true);
+    setState(() => _gateSubmitting = true);
 
-    final userId = maybeSupabase()?.auth.currentUser?.id ?? '';
+    final topInterest = _gateScores.entries
+        .reduce((a, b) => a.value > b.value ? a : b)
+        .key;
+
+    // Get user ID from Supabase auth directly (resident may not exist yet for new users)
+    final userId = ref.read(residentProvider).resident?.id ??
+        maybeSupabase()?.auth.currentUser?.id ??
+        '';
     if (userId.isEmpty) {
-      setState(() => _submitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please sign in again to finish setting up your profile.',
+      setState(() => _gateSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Session expired. Please sign in again.'),
+            behavior: SnackBarBehavior.floating,
           ),
-        ),
-      );
-      context.go('/login');
+        );
+      }
       return;
     }
 
-    final starterWorld = ref
+    // New users only get starter worlds — verification/tier gates unlock the rest
+    final starterWorlds = ref
         .read(worldProvider)
         .worlds
         .values
-        .where((world) => world.slug == 'neon-district')
-        .firstOrNull;
+        .where((w) => w.slug == 'neon-district' || w.slug == 'crystal-shore')
+        .map((w) => w.id)
+        .toList();
 
-    ref
-        .read(residentProvider.notifier)
-        .setResident(
+    ref.read(residentProvider.notifier).setResident(
           Resident(
             id: userId,
             name: _nameController.text.trim(),
@@ -110,390 +156,698 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ? null
                 : _selectedProfession,
             tier: ResidentTier.hustlers,
-            joinedWorldIds: starterWorld == null ? const [] : [starterWorld.id],
+            joinedWorldIds: starterWorlds,
             onboardingCompleted: true,
+            gateCompleted: true,
+            gateInterest: topInterest.name,
           ),
         );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.go('/');
-    });
+
+    await markGateCompleted();
+
+    if (mounted) {
+      _nextStep();
+    }
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _bioController.dispose();
-    _scrollController.dispose();
-    _nameFocus.dispose();
-    _bioFocus.dispose();
-    super.dispose();
+  void _enterApp() {
+    if (mounted) context.go('/');
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
-      body: SingleChildScrollView(
-        controller: _scrollController,
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      body: SafeArea(
         child: Column(
           children: [
-            const _HeroHeader(),
+            // Progress header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              padding: const EdgeInsets.all(VSpacing.lg),
+              child: Row(
                 children: [
-                  const SizedBox(height: Spacing.lg),
-
-                  // ── Profile section — glass panel ────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Profile picture
-                        _buildSectionLabel('Profile picture', theme),
-                        const SizedBox(height: Spacing.sm + 4),
-                        _buildAvatarSection(theme),
-                        const SizedBox(height: Spacing.lg),
-
-                        // Name field
-                        _buildSectionLabel('Display name', theme),
-                        const SizedBox(height: Spacing.sm),
-                        TextField(
-                          controller: _nameController,
-                          focusNode: _nameFocus,
-                          textCapitalization: TextCapitalization.words,
-                          textInputAction: TextInputAction.next,
-                          style: const TextStyle(color: AppColors.ink),
-                          onSubmitted: (_) => _bioFocus.requestFocus(),
-                          decoration: const InputDecoration(
-                            hintText: 'How should we call you?',
-                            hintStyle: TextStyle(color: AppColors.inkMuted),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.glassBorder,
-                              ),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.glassBorder,
-                              ),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: AppColors.primary),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.person_outline,
-                              size: IconSizes.md,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.glassBackground,
-                          ),
-                        ),
-                        const SizedBox(height: Spacing.lg),
-
-                        // Bio field
-                        _buildSectionLabel('Bio', theme),
-                        const SizedBox(height: Spacing.sm),
-                        TextField(
-                          controller: _bioController,
-                          focusNode: _bioFocus,
-                          maxLines: 2,
-                          maxLength: 160,
-                          textCapitalization: TextCapitalization.sentences,
-                          style: const TextStyle(color: AppColors.ink),
-                          decoration: InputDecoration(
-                            hintText: 'A few words about yourself...',
-                            hintStyle: const TextStyle(
-                              color: AppColors.inkMuted,
-                            ),
-                            border: const UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.glassBorder,
-                              ),
-                            ),
-                            enabledBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.glassBorder,
-                              ),
-                            ),
-                            focusedBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: AppColors.primary),
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.edit_note,
-                              size: IconSizes.md,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.glassBackground,
-                            counterStyle: const TextStyle(
-                              color: AppColors.inkMuted,
-                              fontSize: FontSizes.caption,
-                            ),
-                          ),
-                        ),
-                      ],
+                  if (_currentStep > 0)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: _prevStep,
+                      color: isDark
+                          ? VColors.onSurfaceDark
+                          : VColors.onSurface,
                     ),
-                  ),
-
-                  const SizedBox(height: Spacing.lg),
-
-                  // ── Profession — glass panel ─────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  const SizedBox(width: VSpacing.sm),
+                  Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionLabel('Profession', theme),
-                        const SizedBox(height: Spacing.sm),
-                        _buildProfessionSelector(theme),
-                        const SizedBox(height: Spacing.xs),
                         Text(
-                          'Self-declared — verification coming in a future update.\nAll users start at the bottom and rank up through activity.',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppColors.inkMuted,
-                            height: LineHeight.body,
+                          _currentStep == 0
+                              ? 'Create your identity'
+                              : _currentStep == 1
+                                  ? 'Find your path'
+                                  : 'Welcome in',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: VFontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: VSpacing.sm),
+                        _ProgressDots(currentStep: _currentStep),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: Spacing.xl),
-
-                  // ── CTA — gold ───────────────────────────
-                  TactileButton(
-                    label: _submitting ? 'Entering...' : 'Enter the Worlds',
-                    icon: _submitting ? null : Icons.arrow_forward,
-                    fullWidth: true,
-                    color: AppColors.tertiary,
-                    textColor: AppColors.onTertiary,
-                    onPressed: _submitting ? null : _complete,
+                ],
+              ),
+            ),
+            // Tab bar
+            TabBar(
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
+              tabs: const [
+                Tab(text: 'Profile'),
+                Tab(text: 'The Gate'),
+                Tab(text: 'World'),
+              ],
+            ),
+            // Tab content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _ProfileTab(
+                    nameController: _nameController,
+                    bioController: _bioController,
+                    avatarFile: _avatarFile,
+                    selectedProfession: _selectedProfession,
+                    professions: _professions,
+                    onPickAvatar: _pickAvatar,
+                    onProfessionChanged: (p) =>
+                        setState(() => _selectedProfession = p),
+                    onNext: _completeProfile,
+                    isValid: _isProfileValid,
                   ),
-                  const SizedBox(height: Spacing.md),
-
-                  Text(
-                    'You will start in Neon District.\nMore worlds unlock as you level up.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.inkMuted,
-                      height: LineHeight.body,
-                    ),
+                  _GateTab(
+                    scores: _gateScores,
+                    onScoreChanged: (interest, score) {
+                      setState(() => _gateScores[interest] = score);
+                    },
+                    onSubmit: _submitGate,
+                    isSubmitting: _gateSubmitting,
                   ),
-                  const SizedBox(height: Spacing.xxl),
+                  _WorldTab(onEnter: _enterApp),
                 ],
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionLabel(String text, ThemeData theme) {
-    return Text(
-      text,
-      style: theme.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeights.bold,
-        color: AppColors.inkSecondary,
-      ),
-    );
-  }
-
-  Widget _buildAvatarSection(ThemeData theme) {
-    if (_avatarFile != null) {
-      return Center(
-        child: Stack(
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.tertiary, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.tertiary.withValues(alpha: 0.35),
-                    blurRadius: 16,
-                    spreadRadius: 1,
-                  ),
-                ],
-                image: DecorationImage(
-                  image: FileImage(_avatarFile!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: GestureDetector(
-                onTap: () => setState(() => _avatarFile = null),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceOverlay,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.glassBorder, width: 2),
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    size: 16,
-                    color: AppColors.inkSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          child: _buildPickButton(
-            icon: Icons.camera_alt_outlined,
-            label: 'Camera',
-            onTap: () => _pickAvatar(ImageSource.camera),
-          ),
-        ),
-        const SizedBox(width: Spacing.sm),
-        Expanded(
-          child: _buildPickButton(
-            icon: Icons.photo_library_outlined,
-            label: 'Gallery',
-            onTap: () => _pickAvatar(ImageSource.gallery),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPickButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: AppColors.glassBackground,
-      borderRadius: BorderRadius.circular(RadiusTokens.card),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.card),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: Spacing.md),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(RadiusTokens.card),
-            border: Border.all(color: AppColors.glassBorder),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: AppColors.tertiary, size: 28),
-              const SizedBox(height: Spacing.xs),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.inkSecondary,
-                  fontSize: FontSizes.body,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfessionSelector(ThemeData theme) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: _professions.map((p) {
-        final selected = _selectedProfession == p;
-        final label = p.isEmpty ? 'None' : p;
-        return ChoiceChip(
-          label: Text(label),
-          selected: selected,
-          onSelected: (_) => setState(() => _selectedProfession = p),
-          selectedColor: AppColors.primary,
-          labelStyle: TextStyle(
-            color: selected ? AppColors.onPrimary : AppColors.inkSecondary,
-            fontSize: FontSizes.body,
-          ),
-          backgroundColor: AppColors.glassBackground,
-          side: BorderSide(
-            color: selected ? AppColors.primary : AppColors.glassBorder,
-          ),
-        );
-      }).toList(),
     );
   }
 }
 
-class _HeroHeader extends StatelessWidget {
-  const _HeroHeader();
+class _ProgressDots extends StatelessWidget {
+  final int currentStep;
+
+  const _ProgressDots({required this.currentStep});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(
-        top: Spacing.xxl + Spacing.lg,
-        bottom: Spacing.xl + Spacing.lg,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      children: List.generate(3, (i) {
+        final isActive = i <= currentStep;
+        return Expanded(
+          child: Container(
+            height: 3,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? (isDark ? VColors.primaryLight : VColors.primary)
+                  : (isDark
+                      ? VColors.surfaceContainerHighDark
+                      : VColors.surfaceContainerHigh),
+              borderRadius: BorderRadius.circular(VRadius.xxs),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _ProfileTab extends StatelessWidget {
+  final TextEditingController nameController;
+  final TextEditingController bioController;
+  final File? avatarFile;
+  final String selectedProfession;
+  final List<String> professions;
+  final Future<void> Function(ImageSource) onPickAvatar;
+  final ValueChanged<String> onProfessionChanged;
+  final VoidCallback onNext;
+  final bool isValid;
+
+  const _ProfileTab({
+    required this.nameController,
+    required this.bioController,
+    required this.avatarFile,
+    required this.selectedProfession,
+    required this.professions,
+    required this.onPickAvatar,
+    required this.onProfessionChanged,
+    required this.onNext,
+    required this.isValid,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Avatar
+          Center(
+            child: GestureDetector(
+              onTap: () => _showAvatarOptions(context),
+              child: Stack(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: VColors.tertiary,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: VColors.tertiary.withValues(alpha: 0.25),
+                          blurRadius: 16,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                      image: avatarFile != null
+                          ? DecorationImage(
+                              image: FileImage(avatarFile!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      color: avatarFile == null
+                          ? (isDark
+                              ? VColors.surfaceContainerDark
+                              : VColors.surfaceContainer)
+                          : null,
+                    ),
+                    child: avatarFile == null
+                        ? Icon(
+                            Icons.person_outline,
+                            size: 40,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          )
+                        : null,
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? VColors.surfaceContainerHighDark
+                            : VColors.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark
+                              ? VColors.outlineVariantDark
+                              : VColors.outlineVariant,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        size: 16,
+                        color: VColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: VSpacing.xl),
+
+          // Name
+          TextField(
+            controller: nameController,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            style: TextStyle(
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            ),
+            decoration: InputDecoration(
+              labelText: 'Display name',
+              hintText: 'How should we call you?',
+              prefixIcon: const Icon(Icons.person_outline),
+              filled: true,
+              fillColor: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
+            ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          // Bio
+          TextField(
+            controller: bioController,
+            maxLines: 2,
+            maxLength: 160,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.done,
+            style: TextStyle(
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            ),
+            decoration: InputDecoration(
+              labelText: 'Bio',
+              hintText: 'A few words about yourself...',
+              prefixIcon: const Icon(Icons.edit_note),
+              filled: true,
+              fillColor: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xl),
+
+          // Profession
+          Text(
+            'Profession (optional)',
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: VFontWeight.semiBold,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Wrap(
+            spacing: VSpacing.sm,
+            runSpacing: VSpacing.sm,
+            children: professions.map((p) {
+              final selected = selectedProfession == p;
+              final label = p.isEmpty ? 'None' : p;
+              return ChoiceChip(
+                label: Text(label),
+                selected: selected,
+                onSelected: (_) => onProfessionChanged(p),
+                selectedColor: isDark
+                    ? VColors.primaryContainerDark
+                    : VColors.primaryContainer,
+                labelStyle: TextStyle(
+                  color: selected
+                      ? (isDark ? VColors.primaryLight : VColors.primary)
+                      : (isDark
+                          ? VColors.onSurfaceDark
+                          : VColors.onSurface),
+                  fontWeight: selected ? VFontWeight.semiBold : null,
+                ),
+                backgroundColor: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
+                side: BorderSide(
+                  color: selected
+                      ? (isDark
+                          ? VColors.primaryLight.withValues(alpha: 0.4)
+                          : VColors.primary.withValues(alpha: 0.4))
+                      : (isDark
+                          ? VColors.outlineVariantDark
+                          : VColors.outlineVariant),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: VSpacing.xxl),
+
+          // Next button
+          FilledButton(
+            onPressed: isValid ? onNext : null,
+            child: const Text('Continue to The Gate'),
+          ),
+          const SizedBox(height: VSpacing.lg),
+          Text(
+            'Self-declared — verification coming later.\nAll users start at the bottom and rank up.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.surface, AppColors.canvas],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
+    );
+  }
+
+  void _showAvatarOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.tertiary.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-              ),
-              child: const Icon(
-                Icons.public,
-                size: 40,
-                color: AppColors.tertiary,
-              ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                onPickAvatar(ImageSource.camera);
+              },
             ),
-            const SizedBox(height: Spacing.lg),
-            Text(
-              'Welcome to\nVertiege',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeights.bold,
-                letterSpacing: LetterSpacing.display,
-                height: LineHeight.display,
-                color: AppColors.ink,
-              ),
-            ),
-            const SizedBox(height: Spacing.sm + 4),
-            Text(
-              'Your tier-gated social universe.\nSet your identity and enter the worlds.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.ink.withValues(alpha: 0.7),
-                height: LineHeight.body,
-              ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                onPickAvatar(ImageSource.gallery);
+              },
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+enum _GateInterest { execute, foundation, craft, capital, governance }
+
+class _GateTab extends StatefulWidget {
+  final Map<_GateInterest, int> scores;
+  final void Function(_GateInterest, int) onScoreChanged;
+  final VoidCallback onSubmit;
+  final bool isSubmitting;
+
+  const _GateTab({
+    required this.scores,
+    required this.onScoreChanged,
+    required this.onSubmit,
+    required this.isSubmitting,
+  });
+
+  @override
+  State<_GateTab> createState() => _GateTabState();
+}
+
+class _GateTabState extends State<_GateTab> {
+  int _currentIndex = 0;
+
+  static const _questions = [
+    (
+      text: 'What excites you most?',
+      options: [
+        ('Move fast and ship', _GateInterest.execute),
+        ('Build lasting habits', _GateInterest.foundation),
+        ('Master your craft', _GateInterest.craft),
+      ],
+    ),
+    (
+      text: 'What would you study first?',
+      options: [
+        ('Markets & leverage', _GateInterest.capital),
+        ('Leadership & rules', _GateInterest.governance),
+        ('Tools & execution', _GateInterest.execute),
+      ],
+    ),
+    (
+      text: 'Pick your weekend project',
+      options: [
+        ('Build a side hustle', _GateInterest.execute),
+        ('Design a system', _GateInterest.foundation),
+        ('Create something beautiful', _GateInterest.craft),
+      ],
+    ),
+    (
+      text: 'What kind of world do you want?',
+      options: [
+        ('Fast-paced & competitive', _GateInterest.capital),
+        ('Structured & fair', _GateInterest.governance),
+        ('Creative & expressive', _GateInterest.craft),
+      ],
+    ),
+    (
+      text: 'Your superpower is...',
+      options: [
+        ('Getting things done', _GateInterest.execute),
+        ('Staying consistent', _GateInterest.foundation),
+        ('Deep expertise', _GateInterest.craft),
+        ('Understanding money', _GateInterest.capital),
+        ('Bringing people together', _GateInterest.governance),
+      ],
+    ),
+  ];
+
+  void _selectOption(_GateInterest interest) {
+    final scores = Map<_GateInterest, int>.from(widget.scores);
+    scores[interest] = (scores[interest] ?? 0) + 1;
+    widget.onScoreChanged(interest, scores[interest]!);
+
+    if (_currentIndex < _questions.length - 1) {
+      setState(() => _currentIndex++);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final question = _questions[_currentIndex];
+    final progress = (_currentIndex + 1) / _questions.length;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Progress bar
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: isDark
+                ? VColors.surfaceContainerHighDark
+                : VColors.surfaceContainerHigh,
+            valueColor: AlwaysStoppedAnimation(
+              isDark ? VColors.primaryLight : VColors.primary,
+            ),
+            minHeight: 4,
+          ),
+          const SizedBox(height: VSpacing.xl),
+
+          // Question number
+          Text(
+            'Question ${_currentIndex + 1} of ${_questions.length}',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+
+          // Question
+          Text(
+            question.text,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xl),
+
+          // Options
+          ...question.options.map((option) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: VSpacing.md),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _selectOption(option.$2),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
+                  child: Container(
+                    padding: const EdgeInsets.all(VSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? VColors.surfaceContainerDark
+                          : VColors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(VRadius.lg),
+                      border: Border.all(
+                        color: isDark
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: (isDark
+                                    ? VColors.primaryContainerDark
+                                    : VColors.primaryContainer)
+                                .withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                          ),
+                          child: Icon(
+                            _iconForInterest(option.$2),
+                            color: isDark
+                                ? VColors.primaryLight
+                                : VColors.primary,
+                            size: VIconSize.lg,
+                          ),
+                        ),
+                        const SizedBox(width: VSpacing.md),
+                        Expanded(
+                          child: Text(
+                            option.$1,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: VFontWeight.medium,
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+
+          const SizedBox(height: VSpacing.xl),
+
+          // Submit button (shown on last question)
+          if (_currentIndex == _questions.length - 1)
+            FilledButton(
+              onPressed: widget.isSubmitting ? null : widget.onSubmit,
+              child: widget.isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Reveal Your World'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  IconData _iconForInterest(_GateInterest interest) {
+    switch (interest) {
+      case _GateInterest.execute:
+        return Icons.bolt;
+      case _GateInterest.foundation:
+        return Icons.spa;
+      case _GateInterest.craft:
+        return Icons.workspace_premium;
+      case _GateInterest.capital:
+        return Icons.diamond;
+      case _GateInterest.governance:
+        return Icons.shield;
+    }
+  }
+}
+
+class _WorldTab extends ConsumerWidget {
+  final VoidCallback onEnter;
+
+  const _WorldTab({required this.onEnter});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final resident = ref.watch(residentProvider).resident;
+
+    final interestLabel = resident?.gateInterest != null
+        ? _interestLabel(resident!.gateInterest!)
+        : null;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      child: Column(
+        children: [
+          const SizedBox(height: VSpacing.xxl),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: (isDark
+                      ? VColors.primaryContainerDark
+                      : VColors.primaryContainer)
+                  .withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.public,
+              size: 40,
+              color: isDark ? VColors.primaryLight : VColors.primary,
+            ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+          Text(
+            interestLabel != null
+                ? 'Your path: $interestLabel'
+                : 'Welcome to Vertiege',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Text(
+            'You start in Neon District and Crystal Shore. '
+            'More worlds unlock as you verify your profession or level up your tier.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xl),
+          FilledButton.icon(
+            onPressed: onEnter,
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Enter the App'),
+          ),
+          const SizedBox(height: VSpacing.lg),
+          Text(
+            'Your Gate results shape your feed recommendations and achievement paths.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _interestLabel(String interest) {
+    return switch (interest) {
+      'execute' => 'Execution',
+      'foundation' => 'Foundation',
+      'craft' => 'Craft',
+      'capital' => 'Capital',
+      'governance' => 'Governance',
+      _ => 'Explorer',
+    };
   }
 }

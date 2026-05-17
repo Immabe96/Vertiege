@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +10,7 @@ import '../../models/world.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../state/world_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
 import '../../utils/world_foundations.dart';
@@ -74,15 +74,15 @@ extension _GateInterestX on _GateInterest {
   Color get glowColor {
     switch (this) {
       case _GateInterest.execute:
-        return AppColors.primary;
+        return VColors.primary;
       case _GateInterest.capital:
-        return AppColors.tertiary;
+        return VColors.tertiary;
       case _GateInterest.craft:
         return const Color(0xFF7C6FFD);
       case _GateInterest.foundation:
-        return AppColors.success;
+        return VColors.success;
       case _GateInterest.governance:
-        return AppColors.hustler;
+        return VColors.secondary;
     }
   }
 
@@ -185,6 +185,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   final Set<_GateInterest> _selectedInterests = {};
   _GateGoal? _selectedGoal;
   bool _completing = false;
+  String? _joinedStarterWorldId;
 
   final PageController _pageController = PageController();
 
@@ -274,20 +275,22 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
         SnackBar(
           content: Text('The Realm welcomes you, $name'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.tertiary,
+          backgroundColor: VColors.tertiary,
           duration: const Duration(seconds: 3),
         ),
       );
 
-      // Navigate to Nexus (home feed)
-      context.go('/');
+      context.go(
+        _joinedStarterWorldId == null ? '/' : '/explore/$_joinedStarterWorldId',
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       body: SafeArea(
         child: Stack(
           children: [
@@ -323,9 +326,11 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: i <= _stage - 1
-                              ? AppColors.tertiary
-                              : AppColors.glassBorder,
-                          borderRadius: BorderRadius.circular(2),
+                              ? VColors.tertiary
+                              : (isDark
+                                  ? VColors.glassBorderDark
+                                  : VColors.glassBorder),
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                       );
                     }),
@@ -340,7 +345,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 left: Spacing.sm,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_ios, size: 20),
-                  color: AppColors.inkMuted,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                   onPressed: _prevStage,
                 ),
               ),
@@ -355,6 +362,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage1() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(Spacing.xl),
       child: Column(
@@ -374,13 +382,13 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
-                      colors: [AppColors.tertiary, AppColors.tertiaryFixedDim],
+                      colors: [VColors.tertiary, VColors.secondary],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.tertiary.withValues(
+                        color: VColors.tertiary.withValues(
                           alpha: 0.45 * _pulseAnim.value,
                         ),
                         blurRadius: 40,
@@ -391,7 +399,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   child: const Icon(
                     Icons.public,
                     size: 56,
-                    color: AppColors.onTertiary,
+                    color: VColors.onTertiary,
                   ),
                 ),
               );
@@ -403,10 +411,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           Text(
             'Welcome to\nthe Realm',
             textAlign: TextAlign.center,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.manrope(
               fontSize: FontSizes.displayXl,
               fontWeight: FontWeights.bold,
-              color: AppColors.ink,
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
               height: LineHeight.display,
             ),
           ),
@@ -416,9 +424,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           Text(
             'Your sovereign journey begins',
             textAlign: TextAlign.center,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.manrope(
               fontSize: FontSizes.bodyLg,
-              color: AppColors.tertiary,
+              color: VColors.tertiary,
             ),
           ),
           const SizedBox(height: Spacing.xs),
@@ -427,7 +435,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
-              color: AppColors.inkMuted,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
               height: LineHeight.body,
             ),
           ),
@@ -442,9 +452,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               icon: const Icon(Icons.keyboard_double_arrow_right),
               label: const Text('ENTER THE GATE'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
-                textStyle: GoogleFonts.spaceGrotesk(
+                backgroundColor: VColors.tertiary,
+                foregroundColor: VColors.onTertiary,
+                textStyle: GoogleFonts.manrope(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                   letterSpacing: LetterSpacing.label,
@@ -467,6 +477,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage2() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         Spacing.lg,
@@ -480,10 +491,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── Header ────────────────────────────────────────
           Text(
             'Choose your\nfirst signal',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.manrope(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
-              color: AppColors.ink,
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
               height: LineHeight.headlineLg,
             ),
           ),
@@ -492,7 +503,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Pick 1-2 signals so Vertiege can route your first world with intent.',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
-              color: AppColors.inkMuted,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: Spacing.xl),
@@ -536,10 +549,12 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               icon: const Icon(Icons.arrow_forward),
               label: const Text('CONTINUE'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
-                disabledBackgroundColor: AppColors.surfaceOverlay,
-                textStyle: GoogleFonts.spaceGrotesk(
+                backgroundColor: VColors.tertiary,
+                foregroundColor: VColors.onTertiary,
+                disabledBackgroundColor: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
+                textStyle: GoogleFonts.manrope(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                 ),
@@ -555,7 +570,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               '${_selectedInterests.length}/2 selected',
               style: TextStyle(
                 fontSize: FontSizes.labelSm,
-                color: AppColors.inkMuted,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
           ),
@@ -569,6 +586,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage3() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     // Pick the first selected interest, or default to build
     final interest = _selectedInterests.isNotEmpty
         ? _selectedInterests.first
@@ -594,10 +612,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── Header ────────────────────────────────────────
           Text(
             'Your first\nworld foundation',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.manrope(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
-              color: AppColors.ink,
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
             ),
           ),
           const SizedBox(height: Spacing.sm),
@@ -605,7 +623,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'This is not a random recommendation. It is your first room, with a charter, roles, rules, and a live general channel.',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
-              color: AppColors.inkMuted,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: Spacing.xl),
@@ -664,10 +684,12 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                               children: [
                                 Text(
                                   world.name,
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.manrope(
                                     fontSize: FontSizes.headlineMd,
                                     fontWeight: FontWeights.bold,
-                                    color: AppColors.ink,
+                                    color: isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface,
                                   ),
                                 ),
                                 Text(
@@ -688,7 +710,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                         foundation.premise,
                         style: TextStyle(
                           fontSize: FontSizes.bodyMd,
-                          color: AppColors.inkSecondary,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
                           height: LineHeight.body,
                         ),
                       ),
@@ -701,7 +725,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                                 .map(
                                   (channel) => _GatePill(
                                     label: channel,
-                                    color: AppColors.tertiary,
+                                    color: VColors.tertiary,
                                   ),
                                 )
                                 .toList(),
@@ -719,21 +743,45 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           SizedBox(
             height: 48,
             child: FilledButton.icon(
-              onPressed: () {
-                final resident = ref.read(residentProvider).resident;
-                if (resident != null &&
-                    world.id.isNotEmpty &&
-                    !resident.joinedWorldIds.contains(world.id)) {
-                  ref.read(residentProvider.notifier).joinWorld(world.id);
-                }
-                _nextStage();
-              },
+              onPressed: world.id.isEmpty
+                  ? null
+                  : () async {
+                      final resident = ref.read(residentProvider).resident;
+                      if (resident != null &&
+                          world.id.isNotEmpty &&
+                          !resident.joinedWorldIds.contains(world.id)) {
+                        await ref
+                            .read(residentProvider.notifier)
+                            .joinWorld(world.id);
+                        if (!mounted) return;
+                        final joined = ref
+                            .read(residentProvider)
+                            .resident
+                            ?.joinedWorldIds
+                            .contains(world.id);
+                        if (joined != true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'World entry is still syncing. Try again.',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
+                      }
+                      _joinedStarterWorldId = world.id;
+                      _nextStage();
+                    },
               icon: const Icon(Icons.login),
-              label: const Text('ENTER THIS WORLD'),
+              label: Text(
+                world.id.isEmpty ? 'LOADING WORLD' : 'ENTER THIS WORLD',
+              ),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
-                textStyle: GoogleFonts.spaceGrotesk(
+                backgroundColor: VColors.tertiary,
+                foregroundColor: VColors.onTertiary,
+                textStyle: GoogleFonts.manrope(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                 ),
@@ -752,8 +800,12 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               icon: const Icon(Icons.travel_explore),
               label: const Text('EXPLORE FIRST'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.inkSecondary,
-                side: const BorderSide(color: AppColors.glassBorder),
+                foregroundColor: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+                side: BorderSide(
+                  color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
@@ -771,6 +823,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage4() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         Spacing.lg,
@@ -784,10 +837,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── Header ────────────────────────────────────────
           Text(
             'Choose your\nfirst rite',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.manrope(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
-              color: AppColors.ink,
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
               height: LineHeight.headlineLg,
             ),
           ),
@@ -796,7 +849,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Pick the first orientation action you want waiting after The Gate.',
             style: TextStyle(
               fontSize: FontSizes.bodyMd,
-              color: AppColors.inkMuted,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: Spacing.xl),
@@ -836,15 +891,15 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.onTertiary,
+                        color: VColors.onTertiary,
                       ),
                     )
                   : const Icon(Icons.flag),
               label: Text(_completing ? 'Entering Realm...' : 'OPEN THE REALM'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.tertiary,
-                foregroundColor: AppColors.onTertiary,
-                textStyle: GoogleFonts.spaceGrotesk(
+                backgroundColor: VColors.tertiary,
+                foregroundColor: VColors.onTertiary,
+                textStyle: GoogleFonts.manrope(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                 ),
@@ -863,8 +918,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               style: TextStyle(
                 fontSize: FontSizes.labelSm,
                 color: _selectedGoal != null
-                    ? AppColors.tertiary
-                    : AppColors.inkMuted,
+                    ? VColors.tertiary
+                    : (isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant),
               ),
             ),
           ),
@@ -953,7 +1010,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.tertiary.withValues(alpha: opacity),
+              color: VColors.tertiary.withValues(alpha: opacity),
             ),
           ),
         ),
@@ -1010,7 +1067,8 @@ class _InterestCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - Spacing.lg * 2 - Spacing.sm) / 2;
     final glow = interest.glowColor;
@@ -1024,12 +1082,12 @@ class _InterestCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? glow.withValues(alpha: 0.12)
-              : AppColors.glassBackground,
+              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
           borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
           border: Border.all(
             color: isSelected
                 ? glow.withValues(alpha: 0.5)
-                : AppColors.glassBorder,
+                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -1072,7 +1130,7 @@ class _InterestCard extends StatelessWidget {
                   fontWeight: isSelected
                       ? FontWeights.bold
                       : FontWeights.semiBold,
-                  color: isSelected ? glow : AppColors.inkSecondary,
+                  color: isSelected ? glow : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
                 ),
               ),
               const SizedBox(height: Spacing.xs),
@@ -1082,7 +1140,7 @@ class _InterestCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: FontSizes.caption,
-                  color: AppColors.inkMuted,
+                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                   height: 1.2,
                 ),
               ),
@@ -1114,7 +1172,8 @@ class _GoalCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -1122,13 +1181,13 @@ class _GoalCard extends StatelessWidget {
         padding: const EdgeInsets.all(Spacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.tertiary.withValues(alpha: 0.12)
-              : AppColors.glassBackground,
+              ? VColors.tertiary.withValues(alpha: 0.12)
+              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
           borderRadius: BorderRadius.circular(RadiusTokens.card),
           border: Border.all(
             color: isSelected
-                ? AppColors.tertiary.withValues(alpha: 0.5)
-                : AppColors.glassBorder,
+                ? VColors.tertiary.withValues(alpha: 0.5)
+                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1138,12 +1197,12 @@ class _GoalCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.tertiary.withValues(
+                color: VColors.tertiary.withValues(
                   alpha: isSelected ? 0.25 : 0.08,
                 ),
                 borderRadius: BorderRadius.circular(RadiusTokens.card),
               ),
-              child: Icon(goal.icon, size: 22, color: AppColors.tertiary),
+              child: Icon(goal.icon, size: 22, color: VColors.tertiary),
             ),
             const SizedBox(width: Spacing.md),
             Expanded(
@@ -1157,7 +1216,7 @@ class _GoalCard extends StatelessWidget {
                       fontWeight: isSelected
                           ? FontWeights.bold
                           : FontWeights.semiBold,
-                      color: AppColors.ink,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
                   ),
                   const SizedBox(height: Spacing.xs),
@@ -1165,7 +1224,7 @@ class _GoalCard extends StatelessWidget {
                     '+${goal.xp} XP bonus',
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
-                      color: AppColors.tertiary.withValues(alpha: 0.8),
+                      color: VColors.tertiary.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(height: Spacing.xs),
@@ -1173,7 +1232,9 @@ class _GoalCard extends StatelessWidget {
                     goal.description,
                     style: TextStyle(
                       fontSize: FontSizes.caption,
-                      color: AppColors.inkMuted,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                       height: 1.2,
                     ),
                   ),
@@ -1181,7 +1242,7 @@ class _GoalCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, size: 22, color: AppColors.tertiary),
+              Icon(Icons.check_circle, size: 22, color: VColors.tertiary),
           ],
         ),
       ),

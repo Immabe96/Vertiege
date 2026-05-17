@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 enum FeedSort { latest, hot, top }
@@ -8,17 +8,24 @@ class FeedSortDropdown extends StatelessWidget {
   final FeedSort currentSort;
   final ValueChanged<FeedSort> onChanged;
 
-  const FeedSortDropdown({super.key, required this.currentSort, required this.onChanged});
+  const FeedSortDropdown({
+    super.key,
+    required this.currentSort,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final label = switch (currentSort) {
       FeedSort.latest => 'Latest',
       FeedSort.hot => 'Hot',
       FeedSort.top => 'Top',
     };
+
+    final mutedColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
 
     return PopupMenuButton<FeedSort>(
       initialValue: currentSort,
@@ -31,21 +38,25 @@ class FeedSortDropdown extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(VRadius.xl),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.sort, size: 14, color: AppColors.inkSecondary),
+            Icon(Icons.sort, size: 14, color: mutedColor),
             const SizedBox(width: 4),
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: AppColors.inkSecondary,
+                color: mutedColor,
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.inkSecondary),
+            Icon(
+              Icons.arrow_drop_down,
+              size: 16,
+              color: mutedColor,
+            ),
           ],
         ),
       ),
@@ -74,7 +85,7 @@ class FeedSortDropdown extends StatelessWidget {
                 Icons.local_fire_department,
                 size: IconSizes.sm,
                 color: currentSort == FeedSort.hot
-                    ? AppColors.warning
+                    ? VColors.warning
                     : theme.colorScheme.outline,
               ),
               const SizedBox(width: Spacing.sm),

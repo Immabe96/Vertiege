@@ -42,12 +42,10 @@ class SecureStorageService {
   // ── Convenience methods ───────────────────────────────────
 
   /// Store the current user's ID after successful auth.
-  static Future<void> saveUserId(String userId) =>
-      write(userIdKey, userId);
+  static Future<void> saveUserId(String userId) => write(userIdKey, userId);
 
   /// Retrieve stored user ID (for offline session restore).
-  static Future<String?> getUserId() =>
-      read(userIdKey);
+  static Future<String?> getUserId() => read(userIdKey);
 
   /// Store session tokens after auth.
   static Future<void> saveTokens({

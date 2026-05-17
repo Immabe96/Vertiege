@@ -34,6 +34,7 @@ class StoreService {
   static bool _initialized = false;
   static bool _available = false;
   static StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
+  static final Map<String, Completer<StorePurchaseState>> _pendingPurchases = {};
 
   /// Whether the store is available on this device.
   static bool get isEnabled => _available;
@@ -59,21 +60,20 @@ class StoreService {
     if (!isEnabled) return _fallbackProducts();
 
     try {
-      final allIds = [
-        ...wealthTierProducts.values,
-        worldBoostId,
-      ];
+      final allIds = [...wealthTierProducts.values, worldBoostId];
       final response = await _store.queryProductDetails(allIds.toSet());
       if (response.notFoundIDs.isNotEmpty) {
         debugPrint('Store: not found: ${response.notFoundIDs}');
       }
       return response.productDetails
-          .map((p) => StoreProduct(
-                id: p.id,
-                title: p.title,
-                description: p.description,
-                price: p.price,
-              ))
+          .map(
+            (p) => StoreProduct(
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              price: p.price,
+            ),
+          )
           .toList();
     } catch (_) {
       return _fallbackProducts();
@@ -90,13 +90,24 @@ class StoreService {
       final response = await _store.queryProductDetails({productId}.toSet());
       if (response.productDetails.isEmpty) return StorePurchaseState.error;
 
-      final success = await _store.buyNonConsumable(
-        purchaseParam:
-            PurchaseParam(productDetails: response.productDetails.first),
+      final completer = Completer<StorePurchaseState>();
+      _pendingPurchases[productId] = completer;
+
+      await _store.buyNonConsumable(
+        purchaseParam: PurchaseParam(
+          productDetails: response.productDetails.first,
+        ),
       );
 
-      return success ? StorePurchaseState.purchased : StorePurchaseState.error;
+      return completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          _pendingPurchases.remove(productId);
+          return StorePurchaseState.error;
+        },
+      );
     } catch (_) {
+      _pendingPurchases.remove(productId);
       return StorePurchaseState.error;
     }
   }
@@ -106,17 +117,27 @@ class StoreService {
     if (!isEnabled) return StorePurchaseState.disabled;
 
     try {
-      final response =
-          await _store.queryProductDetails({worldBoostId}.toSet());
+      final response = await _store.queryProductDetails({worldBoostId}.toSet());
       if (response.productDetails.isEmpty) return StorePurchaseState.error;
 
-      final success = await _store.buyConsumable(
-        purchaseParam:
-            PurchaseParam(productDetails: response.productDetails.first),
+      final completer = Completer<StorePurchaseState>();
+      _pendingPurchases[worldBoostId] = completer;
+
+      await _store.buyConsumable(
+        purchaseParam: PurchaseParam(
+          productDetails: response.productDetails.first,
+        ),
       );
 
-      return success ? StorePurchaseState.purchased : StorePurchaseState.error;
+      return completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          _pendingPurchases.remove(worldBoostId);
+          return StorePurchaseState.error;
+        },
+      );
     } catch (_) {
+      _pendingPurchases.remove(worldBoostId);
       return StorePurchaseState.error;
     }
   }
@@ -129,39 +150,53 @@ class StoreService {
 
   static void _onPurchaseUpdate(List<PurchaseDetails> details) {
     for (final purchase in details) {
+      final completer = _pendingPurchases[purchase.productID];
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
         InAppPurchase.instance.completePurchase(purchase);
+        completer?.complete(StorePurchaseState.purchased);
+        _pendingPurchases.remove(purchase.productID);
+      } else if (purchase.status == PurchaseStatus.error) {
+        completer?.complete(StorePurchaseState.error);
+        _pendingPurchases.remove(purchase.productID);
+      } else if (purchase.status == PurchaseStatus.canceled) {
+        completer?.complete(StorePurchaseState.error);
+        _pendingPurchases.remove(purchase.productID);
       }
     }
   }
 
   /// Fallback product info shown during development.
   static List<StoreProduct> _fallbackProducts() => [
-        const StoreProduct(
-            id: '${wealthTierPrefix}2',
-            title: 'High Roller Access',
-            description: 'Unlock tier 2 wealth worlds',
-            price: '\$4.99'),
-        const StoreProduct(
-            id: '${wealthTierPrefix}3',
-            title: 'Elite Access',
-            description: 'Unlock tier 3 wealth worlds',
-            price: '\$9.99'),
-        const StoreProduct(
-            id: '${wealthTierPrefix}4',
-            title: 'Old Money Access',
-            description: 'Unlock tier 4 wealth worlds',
-            price: '\$19.99'),
-        const StoreProduct(
-            id: '${wealthTierPrefix}5',
-            title: 'Apex Access',
-            description: 'Unlock tier 5 wealth worlds',
-            price: '\$49.99'),
-        const StoreProduct(
-            id: worldBoostId,
-            title: 'World Boost',
-            description: '+1 level to your custom world (monthly limit)',
-            price: '\$4.99'),
-      ];
+    const StoreProduct(
+      id: '${wealthTierPrefix}2',
+      title: 'High Roller Access',
+      description: 'Unlock tier 2 wealth worlds',
+      price: '\$4.99',
+    ),
+    const StoreProduct(
+      id: '${wealthTierPrefix}3',
+      title: 'Elite Access',
+      description: 'Unlock tier 3 wealth worlds',
+      price: '\$9.99',
+    ),
+    const StoreProduct(
+      id: '${wealthTierPrefix}4',
+      title: 'Old Money Access',
+      description: 'Unlock tier 4 wealth worlds',
+      price: '\$19.99',
+    ),
+    const StoreProduct(
+      id: '${wealthTierPrefix}5',
+      title: 'Apex Access',
+      description: 'Unlock tier 5 wealth worlds',
+      price: '\$49.99',
+    ),
+    const StoreProduct(
+      id: worldBoostId,
+      title: 'World Boost',
+      description: '+1 level to your custom world (monthly limit)',
+      price: '\$4.99',
+    ),
+  ];
 }

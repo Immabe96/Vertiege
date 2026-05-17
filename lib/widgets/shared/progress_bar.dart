@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class AppProgressBar extends StatelessWidget {
@@ -8,11 +8,18 @@ class AppProgressBar extends StatelessWidget {
   final String? label;
   final double height;
 
-  const AppProgressBar({super.key, required this.current, required this.max, this.label, this.height = 8});
+  const AppProgressBar({
+    super.key,
+    required this.current,
+    required this.max,
+    this.label,
+    this.height = 8,
+  });
 
   @override
   Widget build(BuildContext context) {
     final fraction = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,8 +28,22 @@ class AppProgressBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label!, style: const TextStyle(fontSize: FontSizes.caption, fontWeight: FontWeights.bold, color: AppColors.ink)),
-              Text('$current/$max', style: const TextStyle(fontSize: FontSizes.micro, fontWeight: FontWeights.regular, color: AppColors.inkSecondary)),
+              Text(
+                label!,
+                style: TextStyle(
+                  fontSize: FontSizes.caption,
+                  fontWeight: FontWeights.bold,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+              ),
+              Text(
+                '$current/$max',
+                style: TextStyle(
+                  fontSize: FontSizes.micro,
+                  fontWeight: FontWeights.regular,
+                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: Spacing.xs),
@@ -32,8 +53,10 @@ class AppProgressBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: fraction,
             minHeight: height,
-            backgroundColor: AppColors.surfaceHigh,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accentLevel),
+            backgroundColor: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              VColors.primary,
+            ),
           ),
         ),
       ],
@@ -57,7 +80,8 @@ class SovereignProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final barColor = color ?? AppColors.primary;
+    final barColor = color ?? VColors.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -69,10 +93,10 @@ class SovereignProgressBar extends StatelessWidget {
               if (label != null)
                 Text(
                   label!.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.regular,
-                    color: AppColors.inkSecondary,
+                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -87,14 +111,17 @@ class SovereignProgressBar extends StatelessWidget {
                 ),
             ],
           ),
-        if (label != null || trailing != null) const SizedBox(height: Spacing.xs),
+        if (label != null || trailing != null)
+          const SizedBox(height: Spacing.xs),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
           child: SizedBox(
             height: 4,
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
-              backgroundColor: AppColors.surfaceContainerHighest.withValues(alpha: 0.3),
+              backgroundColor: (isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest).withValues(
+                alpha: 0.3,
+              ),
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
             ),
           ),

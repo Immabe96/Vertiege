@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../config/tiers.dart';
@@ -6,7 +6,7 @@ import '../models/rank.dart';
 import '../services/rank_service.dart';
 import '../services/world_service.dart';
 import '../state/resident_provider.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../utils/tier_utils.dart';
 import '../services/crash_reporter.dart';
@@ -90,11 +90,13 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = _filtered;
     final currentResidentId = ref.watch(residentProvider).resident?.id;
     final canManageRanks = currentResidentId == widget.sovereignId;
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
         title: Text('${widget.worldName} — Members'),
         actions: [
@@ -171,7 +173,9 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                                 ?.copyWith(
                                                   fontWeight:
                                                       FontWeights.semiBold,
-                                                  color: AppColors.ink,
+                                                  color: isDark
+                                                      ? VColors.onSurfaceDark
+                                                      : VColors.onSurface,
                                                 ),
                                           ),
                                         ),
@@ -183,7 +187,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: AppColors.tertiary,
+                                              color: VColors.tertiary,
                                               borderRadius:
                                                   BorderRadius.circular(
                                                     RadiusTokens.pill,
@@ -193,7 +197,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                               'SOVEREIGN',
                                               style: theme.textTheme.labelSmall
                                                   ?.copyWith(
-                                                    color: AppColors.onTertiary,
+                                                    color: VColors.onTertiary,
                                                   ),
                                             ),
                                           ),
@@ -229,7 +233,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                           'Rep $rep',
                                           style: theme.textTheme.labelSmall
                                               ?.copyWith(
-                                                color: AppColors.tertiary,
+                                                color: VColors.tertiary,
                                               ),
                                         ),
                                       ],
@@ -262,16 +266,18 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                     Icons.admin_panel_settings_outlined,
                                     size: IconSizes.md,
                                   ),
-                                  color: AppColors.tertiary,
+                                  color: VColors.tertiary,
                                   onPressed: () => _showRankManager(
                                     residentId: residentId,
                                     residentName: name,
                                   ),
                                 )
                               else
-                                const Icon(
+                                Icon(
                                   Icons.chevron_right,
-                                  color: AppColors.outline,
+                                  color: isDark
+                                      ? VColors.outlineVariantDark
+                                      : VColors.outlineVariant,
                                   size: IconSizes.lg,
                                 ),
                             ],
@@ -306,11 +312,14 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     final selected = (_rankIdsByResident[residentId] ?? const <String>[])
         .toSet();
     final original = Set<String>.from(selected);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      backgroundColor: AppColors.surfaceHigh,
+      backgroundColor: isDark
+          ? VColors.surfaceContainerHighDark
+          : VColors.surfaceContainerHigh,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
           child: Padding(
@@ -324,13 +333,13 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Ranks for $residentName',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.ink,
-                    fontWeight: FontWeights.bold,
-                  ),
+              Text(
+                'Ranks for $residentName',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  fontWeight: FontWeights.bold,
                 ),
+              ),
                 const SizedBox(height: Spacing.md),
                 Flexible(
                   child: ListView(
@@ -465,18 +474,25 @@ class _MoreRanksChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
+        color: isDark
+            ? VColors.glassBackgroundDark
+            : VColors.glassBackground,
         borderRadius: BorderRadius.circular(RadiusTokens.pill),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(
+          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+        ),
       ),
       child: Text(
         '+$count',
         style: Theme.of(
           context,
-        ).textTheme.labelSmall?.copyWith(color: AppColors.inkMuted),
+        ).textTheme.labelSmall?.copyWith(
+          color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -503,5 +519,5 @@ class _RankDot extends StatelessWidget {
 Color _parseRankColor(String hex) {
   final normalized = hex.startsWith('#') ? hex.substring(1) : hex;
   final value = int.tryParse('FF$normalized', radix: 16);
-  return value == null ? AppColors.tertiary : Color(value);
+  return value == null ? VColors.tertiary : Color(value);
 }

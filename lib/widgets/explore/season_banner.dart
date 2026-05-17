@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/world.dart';
 import '../../services/season_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class SeasonBanner extends StatelessWidget {
@@ -13,6 +13,7 @@ class SeasonBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final season = SeasonService.getCurrentSeason(worlds: worlds);
     final subtitle = SeasonService.bannerSubtitle(season.scores);
 
@@ -23,14 +24,16 @@ class SeasonBanner extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(Spacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
+            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
             borderRadius: BorderRadius.circular(RadiusTokens.card),
             border: Border.all(
-              color: AppColors.tertiary.withValues(alpha: AppColors.glowGoldAlpha * 2),
+              color: isDark ? VColors.glassBorderDark : VColors.tertiary.withValues(
+                alpha: 0.3 * 2,
+              ),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.tertiary.withValues(alpha: 0.06),
+                color: VColors.tertiary.withValues(alpha: 0.06),
                 blurRadius: 20,
                 spreadRadius: 2,
               ),
@@ -42,8 +45,8 @@ class SeasonBanner extends StatelessWidget {
                 width: 3,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.tertiary,
-                  borderRadius: BorderRadius.circular(2),
+                  color: VColors.tertiary,
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
               ),
               const SizedBox(width: Spacing.md),
@@ -54,10 +57,10 @@ class SeasonBanner extends StatelessWidget {
                   children: [
                     Text(
                       season.name.toUpperCase(),
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.manrope(
                         fontSize: FontSizes.bodyMd,
                         fontWeight: FontWeights.bold,
-                        color: AppColors.tertiary,
+                        color: VColors.tertiary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -65,7 +68,7 @@ class SeasonBanner extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: FontSizes.labelSm,
-                        color: AppColors.inkSecondary,
+                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -80,10 +83,10 @@ class SeasonBanner extends StatelessWidget {
                   vertical: Spacing.sm,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.tertiary.withValues(alpha: 0.12),
+                  color: VColors.tertiary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(RadiusTokens.lg),
                   border: Border.all(
-                    color: AppColors.tertiary.withValues(alpha: 0.25),
+                    color: VColors.tertiary.withValues(alpha: 0.25),
                   ),
                 ),
                 child: Text(
@@ -91,7 +94,7 @@ class SeasonBanner extends StatelessWidget {
                   style: TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.bold,
-                    color: AppColors.tertiary,
+                    color: VColors.tertiary,
                   ),
                 ),
               ),

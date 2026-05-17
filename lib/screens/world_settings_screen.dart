@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_system.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
+import '../models/quiet_hours.dart';
+import '../services/quiet_hours_service.dart';
 
 import '../services/invite_service.dart';
 import '../services/permission_service.dart';
@@ -63,6 +65,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   List<Map<String, dynamic>> _members = [];
   bool _isLoadingMembers = false;
 
+  QuietHours _quietHours = const QuietHours(worldId: '');
+  bool _isLoadingQuietHours = false;
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +79,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
     _loadInvites();
     _loadMembers();
+    _loadQuietHours();
   }
 
   @override
@@ -144,6 +150,40 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     } catch (_) {
       if (mounted) setState(() => _isLoadingMembers = false);
     }
+  }
+
+  Future<void> _loadQuietHours() async {
+    setState(() => _isLoadingQuietHours = true);
+    try {
+      final qh = await QuietHoursService.getQuietHours(widget.worldId);
+      if (mounted) {
+        setState(() {
+          _quietHours = qh;
+          _isLoadingQuietHours = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingQuietHours = false);
+    }
+  }
+
+  Future<void> _saveQuietHours({
+    int? startHour,
+    int? endHour,
+    bool? enabled,
+  }) async {
+    final updated = _quietHours.copyWith(
+      startHour: startHour,
+      endHour: endHour,
+      enabled: enabled,
+    );
+    await QuietHoursService.setQuietHours(
+      widget.worldId,
+      startHour: updated.startHour,
+      endHour: updated.endHour,
+      enabled: updated.enabled,
+    );
+    setState(() => _quietHours = updated);
   }
 
   Future<void> _muteMember(String residentId, String name, int hours) async {
@@ -373,6 +413,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   void _showBannerGenerator() {
     final world = ref.read(worldProvider).worlds[widget.worldId];
     if (world == null) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
@@ -382,9 +423,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         child: Container(
           constraints: const BoxConstraints(maxHeight: 600),
           decoration: BoxDecoration(
-            color: AppColors.canvas,
+            color: isDark ? VColors.surfaceDark : VColors.surface,
             borderRadius: BorderRadius.circular(RadiusTokens.xl),
-            border: Border.all(color: AppColors.glassBorder),
+            border: Border.all(
+              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -393,7 +436,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                 padding: const EdgeInsets.all(Spacing.lg),
                 child: Row(
                   children: [
-                    const Icon(Icons.auto_awesome, color: AppColors.tertiary),
+                    const Icon(Icons.auto_awesome, color: VColors.tertiary),
                     const SizedBox(width: Spacing.sm),
                     const Expanded(
                       child: Text(
@@ -401,12 +444,17 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         style: TextStyle(
                           fontSize: FontSizes.headlineMd,
                           fontWeight: FontWeights.semiBold,
-                          color: AppColors.ink,
+                          color: VColors.onSurface,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: AppColors.inkMuted),
+                      icon: Icon(
+                        Icons.close,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
                       onPressed: () => Navigator.pop(ctx),
                     ),
                   ],
@@ -433,7 +481,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           content: Text(
                             'Banner Variant ${variant + 1} selected!',
                           ),
-                          backgroundColor: AppColors.success,
+                          backgroundColor: VColors.success,
                         ),
                       );
                     },
@@ -450,16 +498,17 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   // ── Section header builder ──────────────────────────────────────
 
   Widget _sectionHeader(IconData icon, String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        Icon(icon, color: AppColors.tertiary, size: IconSizes.md),
+        Icon(icon, color: VColors.tertiary, size: IconSizes.md),
         const SizedBox(width: Spacing.sm),
         Text(
           title,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.manrope(
             fontSize: FontSizes.bodyMd,
             fontWeight: FontWeights.bold,
-            color: AppColors.ink,
+            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
           ),
         ),
       ],
@@ -473,7 +522,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
       text,
       style: Theme.of(
         context,
-      ).textTheme.labelSmall?.copyWith(color: AppColors.tertiary),
+      ).textTheme.labelSmall?.copyWith(color: VColors.tertiary),
     );
   }
 
@@ -483,18 +532,23 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     String? hintText,
     Widget? prefixIcon,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hintText,
       prefixIcon: prefixIcon,
       filled: false,
-      border: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.glassBorder),
+      border: UnderlineInputBorder(
+        borderSide: BorderSide(
+          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+        ),
       ),
-      enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.glassBorder),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(
+          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+        ),
       ),
       focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.tertiary),
+        borderSide: BorderSide(color: VColors.tertiary),
       ),
     );
   }
@@ -503,10 +557,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final world = ref.watch(worldProvider).worlds[widget.worldId];
     final resident = ref.watch(residentProvider).resident;
 
     return Scaffold(
+      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(title: const Text('World Settings')),
       body: world == null
           ? const GlassLoadingList()
@@ -613,7 +669,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         SizedBox(
                           width: double.infinity,
                           height: TouchTargets.minimum,
-                          child: FilledButton.icon(
+                            child: FilledButton.icon(
                             onPressed: _isSaving ? null : _saveSettings,
                             icon: _isSaving
                                 ? const SizedBox(
@@ -621,7 +677,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: AppColors.onTertiary,
+                                      color: VColors.onTertiary,
                                     ),
                                   )
                                 : const Icon(Icons.save),
@@ -647,7 +703,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         Text(
                           'Generate AI-assisted banner variants for your world.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.inkMuted,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: Spacing.md),
@@ -659,8 +717,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             icon: const Icon(Icons.auto_awesome),
                             label: const Text('Regenerate Banner'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.tertiary,
-                              side: const BorderSide(color: AppColors.tertiary),
+                              foregroundColor: VColors.tertiary,
+                              side: const BorderSide(color: VColors.tertiary),
                             ),
                           ),
                         ),
@@ -682,6 +740,80 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       onCreate: (ctx) => _showCreateChannel(ctx),
                     ),
                   ),
+
+                  const SizedBox(height: Spacing.md),
+
+                  // ── Lounge Settings (tier-gated) ─────────────
+                  if (ref.watch(residentProvider.select(
+                        (s) => s.resident != null && s.resident!.tier.value >= 3,
+                      )))
+                    GlassPanel(
+                      padding: const EdgeInsets.all(Spacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _sectionHeader(Icons.local_bar, 'Lounge'),
+                          const SizedBox(height: Spacing.sm),
+                          Text(
+                            'Configure lounge access and settings for this world.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: Spacing.md),
+                          Text(
+                            'Lounge settings coming soon.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (ref.watch(residentProvider.select(
+                        (s) => s.resident != null && s.resident!.tier.value >= 3,
+                      )))
+                    const SizedBox(height: Spacing.md),
+
+                  // ── Governance (tier-gated) ─────────────────
+                  if (ref.watch(residentProvider.select(
+                        (s) => s.resident != null && s.resident!.tier.value >= 4,
+                      )))
+                    GlassPanel(
+                      padding: const EdgeInsets.all(Spacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _sectionHeader(Icons.how_to_vote, 'Governance'),
+                          const SizedBox(height: Spacing.sm),
+                          Text(
+                            'Participate in world governance and voting.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: Spacing.md),
+                          Text(
+                            'Governance voting coming soon.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (ref.watch(residentProvider.select(
+                        (s) => s.resident != null && s.resident!.tier.value >= 4,
+                      )))
+                    const SizedBox(height: Spacing.md),
 
                   const SizedBox(height: Spacing.md),
 
@@ -713,7 +845,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         Text(
                           'Manage residents and their standing in this world.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.inkMuted,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: Spacing.md),
@@ -776,37 +910,39 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                       ?.copyWith(
                                                         fontWeight: FontWeights
                                                             .semiBold,
-                                                        color: AppColors.ink,
+                                                        color: isDark
+                                                            ? VColors.onSurfaceDark
+                                                            : VColors.onSurface,
                                                       ),
-                                                ),
-                                              ),
-                                              if (isSovereign) ...[
-                                                const SizedBox(
-                                                  width: Spacing.sm,
-                                                ),
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: Spacing.sm,
-                                                        vertical: 2,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.tertiary,
+                                                    ),
+                                                  ),
+                                                if (isSovereign) ...[
+                                                  const SizedBox(
+                                                    width: Spacing.sm,
+                                                  ),
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: Spacing.sm,
+                                                          vertical: 2,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color: VColors.tertiary,
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                           RadiusTokens.pill,
                                                         ),
                                                   ),
-                                                  child: Text(
-                                                    'SOVEREIGN',
-                                                    style: theme
-                                                        .textTheme
-                                                        .labelSmall
-                                                        ?.copyWith(
-                                                          color: AppColors
-                                                              .onTertiary,
-                                                        ),
-                                                  ),
+                                                    child: Text(
+                                                      'SOVEREIGN',
+                                                      style: theme
+                                                          .textTheme
+                                                          .labelSmall
+                                                          ?.copyWith(
+                                                            color: VColors
+                                                                .onTertiary,
+                                                          ),
+                                                    ),
                                                 ),
                                               ],
                                             ],
@@ -843,15 +979,15 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                 ),
                                               ),
                                               const SizedBox(width: Spacing.sm),
-                                              Text(
-                                                'Rep $rep',
-                                                style: theme
-                                                    .textTheme
-                                                    .labelSmall
-                                                    ?.copyWith(
-                                                      color: AppColors.tertiary,
-                                                    ),
-                                              ),
+                                            Text(
+                                              'Rep $rep',
+                                              style: theme
+                                                  .textTheme
+                                                  .labelSmall
+                                                  ?.copyWith(
+                                                    color: VColors.tertiary,
+                                                  ),
+                                            ),
                                             ],
                                           ),
                                         ],
@@ -859,11 +995,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                     ),
                                     if (!isCurrentUser && canMod)
                                       PopupMenuButton<String>(
-                                        icon: Icon(
-                                          Icons.more_vert,
-                                          size: 18,
-                                          color: AppColors.outline,
-                                        ),
+                                      icon: Icon(
+                                        Icons.more_vert,
+                                        size: 18,
+                                        color: isDark
+                                            ? VColors.outlineVariantDark
+                                            : VColors.outlineVariant,
+                                      ),
                                         onSelected: (action) {
                                           switch (action) {
                                             case 'mute1':
@@ -900,6 +1038,128 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
+                  // ── Quiet Hours ──────────────────────────────────
+                  GlassPanel(
+                    padding: const EdgeInsets.all(Spacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionHeader(Icons.do_not_disturb, 'Quiet Hours'),
+                        const SizedBox(height: Spacing.sm),
+                        Text(
+                          'Mute notifications during specific hours.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        if (_isLoadingQuietHours)
+                          const Center(child: GlassLoadingCard())
+                        else ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Enable Quiet Hours',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceDark
+                                      : VColors.onSurface,
+                                ),
+                              ),
+                              Switch(
+                                value: _quietHours.enabled,
+                                onChanged: (v) =>
+                                    _saveQuietHours(enabled: v),
+                                activeThumbColor: VColors.tertiary,
+                              ),
+                            ],
+                          ),
+                          if (_quietHours.enabled) ...[
+                            const SizedBox(height: Spacing.md),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Start',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: VColors.tertiary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: Spacing.xs),
+                                      DropdownButton<int>(
+                                        value: _quietHours.startHour,
+                                        isExpanded: true,
+                                        items: List.generate(
+                                          24,
+                                          (i) => DropdownMenuItem(
+                                            value: i,
+                                            child: Text(
+                                              '${i.toString().padLeft(2, '0')}:00',
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (v) {
+                                          if (v != null) {
+                                            _saveQuietHours(startHour: v);
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: Spacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'End',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: VColors.tertiary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: Spacing.xs),
+                                      DropdownButton<int>(
+                                        value: _quietHours.endHour,
+                                        isExpanded: true,
+                                        items: List.generate(
+                                          24,
+                                          (i) => DropdownMenuItem(
+                                            value: i,
+                                            child: Text(
+                                              '${i.toString().padLeft(2, '0')}:00',
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (v) {
+                                          if (v != null) {
+                                            _saveQuietHours(endHour: v);
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: Spacing.md),
+
                   // ── Boost World (dominion only) ─────────────────
                   if (world.type == WorldType.dominion) ...[
                     _BoostWorldCard(worldId: widget.worldId),
@@ -920,15 +1180,17 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ListTile(
                       leading: const Icon(
                         Icons.history,
-                        color: AppColors.tertiary,
+                        color: VColors.tertiary,
                       ),
                       title: const Text('Realm Audit'),
                       subtitle: const Text(
                         'View moderation history and action logs',
                       ),
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.chevron_right,
-                        color: AppColors.outline,
+                        color: isDark
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(RadiusTokens.xl),
@@ -944,10 +1206,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(Spacing.lg),
                     decoration: BoxDecoration(
-                      color: AppColors.errorContainer,
+                      color: isDark
+                          ? VColors.errorContainerDark
+                          : VColors.errorContainer,
                       borderRadius: BorderRadius.circular(RadiusTokens.xl),
                       border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.3),
+                        color: VColors.error.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Column(
@@ -957,14 +1221,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           children: [
                             Icon(
                               Icons.warning_amber_rounded,
-                              color: AppColors.error,
+                              color: VColors.error,
                               size: IconSizes.md,
                             ),
                             const SizedBox(width: Spacing.sm),
                             Text(
                               'Danger Zone',
                               style: theme.textTheme.titleMedium?.copyWith(
-                                color: AppColors.error,
+                                color: VColors.error,
                               ),
                             ),
                           ],
@@ -974,7 +1238,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           'Permanently delete this world and all '
                           'associated data. This action cannot be undone.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.inkSecondary,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: Spacing.md),
@@ -983,8 +1249,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           height: TouchTargets.minimum,
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.error,
-                              side: const BorderSide(color: AppColors.error),
+                              foregroundColor: VColors.error,
+                              side: const BorderSide(color: VColors.error),
                             ),
                             onPressed: resident?.id == world.sovereignId
                                 ? _deleteWorld
@@ -1020,6 +1286,7 @@ class _BoostWorldCard extends ConsumerWidget {
     if (world == null) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final cs = theme.colorScheme;
     final currentLevel = getWorldLevel(world.activityScore);
     final nextLevel = (currentLevel + 1).clamp(1, 10);
@@ -1044,7 +1311,7 @@ class _BoostWorldCard extends ConsumerWidget {
             children: [
               Icon(
                 Icons.rocket_launch,
-                color: AppColors.tertiary,
+                color: VColors.tertiary,
                 size: IconSizes.md,
               ),
               const SizedBox(width: Spacing.sm),
@@ -1055,7 +1322,9 @@ class _BoostWorldCard extends ConsumerWidget {
           Text(
             'Accelerate your world\'s progression with a one-time boost.',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkMuted,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: Spacing.md),
@@ -1085,7 +1354,7 @@ class _BoostWorldCard extends ConsumerWidget {
                 Text(
                   'Max level reached',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.gold,
+                    color: VColors.tertiary,
                   ),
                 )
               else
@@ -1093,7 +1362,9 @@ class _BoostWorldCard extends ConsumerWidget {
                   child: Text(
                     '$progress / $range to Level $nextLevel',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.outline,
+                      color: isDark
+                          ? VColors.outlineVariantDark
+                          : VColors.outlineVariant,
                     ),
                   ),
                 ),
@@ -1118,7 +1389,7 @@ class _BoostWorldCard extends ConsumerWidget {
           // Boost info row
           Row(
             children: [
-              Icon(Icons.bolt, size: 16, color: AppColors.gold),
+              Icon(Icons.bolt, size: 16, color: VColors.tertiary),
               const SizedBox(width: 4),
               Text(
                 '+${World.boostActivityPoints} activity pts per boost',
@@ -1132,7 +1403,11 @@ class _BoostWorldCard extends ConsumerWidget {
                     ? '${world.boostsRemaining} of ${World.maxBoostsPerMonth} remaining'
                     : 'Store disabled in this build',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: enabled ? AppColors.outline : AppColors.error,
+                  color: enabled
+                      ? (isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant)
+                      : VColors.error,
                   fontWeight: FontWeights.regular,
                 ),
               ),
@@ -1153,8 +1428,10 @@ class _BoostWorldCard extends ConsumerWidget {
                 enabled ? 'Boost World - \$4.99' : 'Boost unavailable',
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: canBoost ? AppColors.gold : null,
-                foregroundColor: canBoost ? Colors.black : null,
+                backgroundColor: canBoost ? VColors.tertiary : null,
+                foregroundColor: canBoost
+                    ? (isDark ? VColors.onSurfaceDark : Colors.black)
+                    : null,
               ),
             ),
           ),
@@ -1229,11 +1506,14 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
   }
 
   void _showCreateDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceHigh,
+        backgroundColor: isDark
+            ? VColors.surfaceContainerHighDark
+            : VColors.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.full),
         ),
@@ -1265,6 +1545,8 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GlassPanel(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
@@ -1274,7 +1556,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
             children: [
               const Icon(
                 Icons.military_tech,
-                color: AppColors.tertiary,
+                color: VColors.tertiary,
                 size: IconSizes.md,
               ),
               const SizedBox(width: Spacing.sm),
@@ -1298,9 +1580,13 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
           if (_loading)
             const Center(child: GlassLoadingCard())
           else if (_ranks.isEmpty)
-            const Text(
+            Text(
               'No ranks yet. Create one to assign privileges.',
-              style: TextStyle(color: AppColors.inkMuted),
+              style: TextStyle(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
             )
           else
             ..._ranks.map(

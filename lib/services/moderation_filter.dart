@@ -28,11 +28,32 @@ class ModerationFilter {
     return null;
   }
 
+  // ── Leetspeak normalization ────────────────────────────────
+
+  static String _normalizeLeetspeak(String text) {
+    return text
+        .replaceAll('4', 'a')
+        .replaceAll('3', 'e')
+        .replaceAll('1', 'i')
+        .replaceAll('0', 'o')
+        .replaceAll('5', 's')
+        .replaceAll('7', 't')
+        .replaceAll('@', 'a')
+        .replaceAll('\$', 's')
+        .replaceAll('!', 'i')
+        .replaceAll('+', 't');
+  }
+
   // ── Stage 2: Keyword / pattern filtering ──────────────────
 
   static final _blockedPatterns = [
     RegExp(r'\b(hate\s*speech|slur|violence|threat)\b', caseSensitive: false),
-    RegExp(r'\b(kill|murder|attack)\s*(yourself|others|them|everyone)\b', caseSensitive: false),
+    RegExp(
+      r'\b(kill|murder|attack)\s*(yourself|others|them|everyone)\b',
+      caseSensitive: false,
+    ),
+    RegExp(r'\b(d[o0]x|x[s\$]s)\b', caseSensitive: false),
+    RegExp(r'https?://\S*\.(onion|bit)\b', caseSensitive: false),
   ];
 
   static String? _checkPatterns(String lower) {
@@ -51,7 +72,8 @@ class ModerationFilter {
       final capsCount = text.runes.where((r) => r >= 65 && r <= 90).length;
       if (capsCount / text.length > 0.5) return 'Content appears to be spam';
     }
-    if (RegExp(r'(.)\1{5,}').hasMatch(text)) return 'Content appears to be spam';
+    if (RegExp(r'(.)\1{5,}').hasMatch(text))
+      return 'Content appears to be spam';
     // More than 3 repeated words
     final words = text.toLowerCase().split(RegExp(r'\s+'));
     for (final word in {...words}) {
@@ -72,12 +94,19 @@ class ModerationFilter {
     if (trimmed.isEmpty) return 'Content cannot be empty';
 
     final lower = trimmed.toLowerCase();
+    final leetNormalized = _normalizeLeetspeak(lower);
 
     final profanityResult = _checkProfanity(lower);
     if (profanityResult != null) return profanityResult;
 
+    final leetProfanityResult = _checkProfanity(leetNormalized);
+    if (leetProfanityResult != null) return leetProfanityResult;
+
     final patternResult = _checkPatterns(lower);
     if (patternResult != null) return patternResult;
+
+    final leetPatternResult = _checkPatterns(leetNormalized);
+    if (leetPatternResult != null) return leetPatternResult;
 
     final spamResult = _checkSpam(trimmed);
     if (spamResult != null) return spamResult;

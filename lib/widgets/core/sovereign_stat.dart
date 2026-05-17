@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
 
@@ -26,12 +26,19 @@ class SovereignStat extends StatelessWidget {
       onTap: onTap,
       child: GlassPanel(
         useBlur: false,
-        padding: const EdgeInsets.symmetric(vertical: Spacing.lg, horizontal: Spacing.sm),
+        padding: const EdgeInsets.symmetric(
+          vertical: Spacing.lg,
+          horizontal: Spacing.sm,
+        ),
         borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: IconSizes.lg, color: AppColors.tertiary.withValues(alpha: 0.7)),
+            Icon(
+              icon,
+              size: IconSizes.lg,
+              color: VColors.tertiary.withValues(alpha: 0.7),
+            ),
             const SizedBox(height: Spacing.sm),
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: 1),
@@ -44,7 +51,7 @@ class SovereignStat extends StatelessWidget {
                     opacity: progress,
                     child: Text(
                       '$value',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.manrope(
                         fontSize: FontSizes.displayXl,
                         fontWeight: FontWeights.bold,
                         color: theme.colorScheme.onSurface,

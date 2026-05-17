@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../state/post_provider.dart';
-import '../../../theme/colors.dart';
+import '../../../theme/v_colors.dart';
 import '../../../theme/design_system.dart';
 
 /// Large card with 2 recent posts + "View All" link.
@@ -23,14 +23,18 @@ class FeedPreviewCard extends ConsumerWidget {
           children: [
             const Row(
               children: [
-                Icon(Icons.auto_awesome, size: IconSizes.sm, color: AppColors.primary),
+                Icon(
+                  Icons.auto_awesome,
+                  size: IconSizes.sm,
+                  color: VColors.primary,
+                ),
                 SizedBox(width: Spacing.xs),
                 Text(
                   'LATEST POSTS',
                   style: TextStyle(
                     fontSize: FontSizes.labelSm,
                     fontWeight: FontWeights.semiBold,
-                    color: AppColors.inkSecondary,
+                    color: VColors.onSurfaceVariant,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -43,10 +47,17 @@ class FeedPreviewCard extends ConsumerWidget {
                 children: [
                   Text(
                     'View All',
-                    style: TextStyle(fontSize: FontSizes.labelSm, color: AppColors.primary),
+                    style: TextStyle(
+                      fontSize: FontSizes.labelSm,
+                      color: VColors.primary,
+                    ),
                   ),
                   SizedBox(width: Spacing.xs),
-                  Icon(Icons.chevron_right, size: IconSizes.sm, color: AppColors.primary),
+                  Icon(
+                    Icons.chevron_right,
+                    size: IconSizes.sm,
+                    color: VColors.primary,
+                  ),
                 ],
               ),
             ),
@@ -56,20 +67,27 @@ class FeedPreviewCard extends ConsumerWidget {
         if (posts.isEmpty)
           const Text(
             'No posts yet. Be the first!',
-            style: TextStyle(fontSize: FontSizes.bodyMd, color: AppColors.inkMuted),
+            style: TextStyle(
+              fontSize: FontSizes.bodyMd,
+              color: VColors.outline,
+            ),
           )
         else
           ...posts.asMap().entries.map((entry) {
             final index = entry.key;
             final post = entry.value;
-            final preview = post.content.length > 80 ? '${post.content.substring(0, 80)}...' : post.content;
+            final preview = post.content.length > 80
+                ? '${post.content.substring(0, 80)}...'
+                : post.content;
 
             return Padding(
-              padding: EdgeInsets.only(bottom: index < posts.length - 1 ? Spacing.sm : 0),
+              padding: EdgeInsets.only(
+                bottom: index < posts.length - 1 ? Spacing.sm : 0,
+              ),
               child: Container(
                 padding: const EdgeInsets.all(Spacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
+                  color: VColors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Row(
@@ -88,7 +106,7 @@ class FeedPreviewCard extends ConsumerWidget {
                                   style: const TextStyle(
                                     fontSize: FontSizes.labelSm,
                                     fontWeight: FontWeights.semiBold,
-                                    color: AppColors.ink,
+                                    color: VColors.onSurface,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -96,14 +114,21 @@ class FeedPreviewCard extends ConsumerWidget {
                               ),
                               if (post.isAnnouncement) ...[
                                 const SizedBox(width: Spacing.xs),
-                                const Icon(Icons.campaign, size: 12, color: AppColors.warning),
+                                const Icon(
+                                  Icons.campaign,
+                                  size: 12,
+                                  color: VColors.warning,
+                                ),
                               ],
                             ],
                           ),
                           const SizedBox(height: 2),
                           Text(
                             preview,
-                            style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary),
+                            style: const TextStyle(
+                              fontSize: FontSizes.labelSm,
+                              color: VColors.onSurfaceVariant,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),

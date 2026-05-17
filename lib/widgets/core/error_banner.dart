@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class SovereignErrorBanner extends StatelessWidget {
@@ -16,17 +16,22 @@ class SovereignErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: Spacing.marginMobile,
         vertical: Spacing.md,
       ),
-      color: AppColors.errorContainer.withValues(alpha: 0.8),
+      color: (isDark ? VColors.errorContainerDark : VColors.errorContainer).withValues(alpha: 0.8),
       child: SafeArea(
         child: Row(
           children: [
-            const Icon(Icons.warning_rounded, color: AppColors.onErrorContainer, size: IconSizes.md),
+            Icon(
+              Icons.warning_rounded,
+              color: isDark ? VColors.onErrorContainerDark : VColors.onErrorContainer,
+              size: IconSizes.md,
+            ),
             const SizedBox(width: Spacing.sm),
             Expanded(
               child: Column(
@@ -35,18 +40,18 @@ class SovereignErrorBanner extends StatelessWidget {
                 children: [
                   Text(
                     message,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: FontSizes.labelSm,
                       fontWeight: FontWeights.semiBold,
-                      color: AppColors.onErrorContainer,
+                      color: isDark ? VColors.onErrorContainerDark : VColors.onErrorContainer,
                     ),
                   ),
                   if (code != null)
                     Text(
                       code!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: FontSizes.labelSm,
-                        color: AppColors.onErrorContainer,
+              color: isDark ? VColors.onErrorContainerDark : VColors.onErrorContainer,
                       ),
                     ),
                 ],
@@ -58,14 +63,18 @@ class SovereignErrorBanner extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.sync, size: IconSizes.sm, color: AppColors.tertiary),
+                    Icon(
+                      Icons.sync,
+                      size: IconSizes.sm,
+                      color: VColors.tertiary,
+                    ),
                     SizedBox(width: Spacing.xs),
                     Text(
                       'RETRY',
                       style: TextStyle(
                         fontSize: FontSizes.labelSm,
                         fontWeight: FontWeights.semiBold,
-                        color: AppColors.tertiary,
+                      color: VColors.tertiary,
                         letterSpacing: LetterSpacing.label,
                       ),
                     ),

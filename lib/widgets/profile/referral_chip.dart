@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class ReferralChip extends StatelessWidget {
@@ -18,22 +18,31 @@ class ReferralChip extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg,
+              vertical: Spacing.sm,
+            ),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: VColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: VColors.primary.withValues(alpha: 0.2),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.people_alt, size: IconSizes.sm + 2, color: AppColors.primary),
+                Icon(
+                  Icons.people_alt,
+                  size: IconSizes.sm + 2,
+                  color: VColors.primary,
+                ),
                 const SizedBox(width: Spacing.sm),
                 Text(
                   'YOUR REFERRAL CODE: ',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppColors.inkMuted,
+                    color: VColors.outline,
                     letterSpacing: LetterSpacing.label,
                   ),
                 ),
@@ -41,7 +50,7 @@ class ReferralChip extends StatelessWidget {
                   referralCode,
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeights.bold,
-                    color: AppColors.primary,
+                    color: VColors.primary,
                     fontFamily: AppFont.mono,
                     letterSpacing: 2,
                   ),
@@ -57,10 +66,14 @@ class ReferralChip extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
+                      color: VColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),
-                    child: const Icon(Icons.copy, size: IconSizes.sm, color: AppColors.primary),
+                    child: const Icon(
+                      Icons.copy,
+                      size: IconSizes.sm,
+                      color: VColors.primary,
+                    ),
                   ),
                 ),
               ],
@@ -71,7 +84,7 @@ class ReferralChip extends StatelessWidget {
             Text(
               'Referred by: $referredBy',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: AppColors.inkMuted,
+                color: VColors.outline,
                 fontStyle: FontStyle.italic,
               ),
             ),

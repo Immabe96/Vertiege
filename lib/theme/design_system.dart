@@ -1,145 +1,126 @@
+// @deprecated
+// This file is a compatibility shim. Migrate imports to 'v_tokens.dart' directly.
+// Spacing, RadiusTokens, IconSizes, etc. are re-exported from v_tokens.dart.
+// This file will be removed in a future version.
 import 'package:flutter/material.dart';
+import 'v_tokens.dart';
+export 'v_tokens.dart';
 
-/// Vertiege design tokens — Sovereign Excellence
-/// Source: Stitch design system "App Interface Redesign"
-
-// ── Font ────────────────────────────────────────────────────
-class AppFont {
-  AppFont._();
-  static const String headline = 'Space Grotesk';
-  static const String body = 'Inter';
-  static const String mono = 'JetBrains Mono';
+/// Backward-compatible aliases for design tokens
+/// TODO: Migrate all usages to VSpacing, VRadius, etc., then remove this file
+class Spacing {
+  Spacing._();
+  static const double xs = VSpacing.xs;
+  static const double sm = VSpacing.sm;
+  static const double md = VSpacing.md;
+  static const double lg = VSpacing.lg;
+  static const double xl = VSpacing.xl;
+  static const double xxl = VSpacing.xxl;
+  static const double section = VSpacing.xxl;
+  static const double gutter = VSpacing.md;
+  static const double marginMobile = VSpacing.lg;
+  static const double marginDesktop = VSpacing.xxl;
 }
 
-// ── Typography Scale ────────────────────────────────────────
+class RadiusTokens {
+  RadiusTokens._();
+  static const double sm = VRadius.sm;
+  static const double md = VRadius.md;
+  static const double lg = VRadius.lg;
+  static const double xl = VRadius.xl;
+  static const double card = VRadius.lg;
+  static const double cardFeatured = VRadius.md;
+  static const double input = VRadius.md;
+  static const double chip = VRadius.sm;
+  static const double full = VRadius.pill;
+  static const double pill = VRadius.pill;
+}
+
+class IconSizes {
+  IconSizes._();
+  static const double xs = VIconSize.xs;
+  static const double sm = VIconSize.sm;
+  static const double md = VIconSize.md;
+  static const double lg = VIconSize.lg;
+  static const double xl = VIconSize.xl;
+  static const double hero = VIconSize.xl;
+}
+
+class AnimDurations {
+  AnimDurations._();
+  static const Duration fast = VAnimation.fast;
+  static const Duration normal = VAnimation.normal;
+  static const Duration slow = VAnimation.slow;
+  static const Duration entrance = VAnimation.entrance;
+}
+
+class AnimCurves {
+  AnimCurves._();
+  static const Curve standard = VAnimation.standard;
+  static const Curve emphasized = VAnimation.emphasized;
+  static const Curve spring = VAnimation.spring;
+  static const Curve easeOut = Curves.easeOutCubic;
+  static const Curve easeInOut = Curves.easeInOutCubic;
+  static const Curve bouncy = Curves.elasticOut;
+}
+
+class TouchTargets {
+  TouchTargets._();
+  static const double minimum = VTouchTarget.minimum;
+  static const double iconButton = VTouchTarget.iconButton;
+  static const double chip = VTouchTarget.chip;
+}
+
+class AppFont {
+  AppFont._();
+  static const String sans = VFont.sans;
+  static const String mono = VFont.mono;
+  static const String headline = VFont.headline;
+}
+
+class FontWeights {
+  FontWeights._();
+  static const FontWeight regular = VFontWeight.regular;
+  static const FontWeight semiBold = VFontWeight.semiBold;
+  static const FontWeight bold = VFontWeight.bold;
+}
+
 class FontSizes {
   FontSizes._();
-  static const double labelSm = 12;
-  static const double bodyMd = 16;
-  static const double bodyLg = 18;
-  static const double headlineMd = 24;
-  static const double headlineLg = 32;
-  static const double displayXl = 48;
-
-  // Legacy aliases
-  static const double micro = labelSm;
+  static const double labelXs = VFontSize.labelSm;
+  static const double labelSm = VFontSize.labelMd;
+  static const double labelMd = VFontSize.labelLg;
+  static const double bodySm = VFontSize.bodySm;
+  static const double bodyMd = VFontSize.bodyMd;
+  static const double bodyLg = VFontSize.bodyLg;
+  static const double headlineSm = VFontSize.headlineSm;
+  static const double headlineMd = VFontSize.headlineMd;
+  static const double headlineLg = VFontSize.headlineLg;
+  static const double displayXl = VFontSize.displayXl;
+  static const double micro = labelXs;
   static const double caption = labelSm;
   static const double body = bodyMd;
   static const double headingCard = headlineMd;
   static const double displayHero = displayXl;
 }
 
-class FontWeights {
-  FontWeights._();
-  static const FontWeight regular = FontWeight.w400;
-  static const FontWeight semiBold = FontWeight.w600;
-  static const FontWeight bold = FontWeight.w700;
-}
-
 class LetterSpacing {
   LetterSpacing._();
-  static const double display = -0.02;
-  static const double headline = -0.01;
+  static const double display = 0.0;
+  static const double headline = 0.0;
   static const double normal = 0.0;
-  static const double label = 0.05;
-
-  // Legacy aliases
+  static const double label = 0.0;
   static const double section = headline;
   static const double micro = label;
 }
 
 class LineHeight {
   LineHeight._();
-  static const double display = 1.1;
-  static const double headline = 1.3;
-  static const double headlineLg = 1.2;
-  static const double body = 1.5;
-  static const double bodyLg = 1.6;
-  static const double label = 1.0;
-
-  // Legacy aliases
+  static const double display = VLineHeight.display;
+  static const double headline = VLineHeight.headline;
+  static const double headlineLg = VLineHeight.headline;
+  static const double body = VLineHeight.body;
+  static const double bodyLg = VLineHeight.bodyLg;
+  static const double label = VLineHeight.label;
   static const double button = label;
 }
-
-// ── Spacing Scale (8px base) ────────────────────────────────
-class Spacing {
-  Spacing._();
-  static const double xs = 4;
-  static const double sm = 8;
-  static const double md = 12;
-  static const double lg = 16;
-  static const double xl = 24;
-  static const double xxl = 32;
-  static const double section = 48;
-  static const double gutter = 24;
-  static const double marginMobile = 16;
-  static const double marginDesktop = 40;
-}
-
-// ── Radius Scale (architectural — tight) ────────────────────
-class RadiusTokens {
-  RadiusTokens._();
-  static const double sm = 2;
-  static const double md = 4;
-  static const double lg = 6;
-  static const double xl = 8;
-  static const double full = 12;
-
-  // Legacy aliases
-  static const double chip = lg;
-  static const double input = md;
-  static const double card = xl;
-  static const double cardFeatured = full;
-  static const double celebration = full;
-  static const double pill = 9999;
-  static const double circle = 9999;
-}
-
-// ── Icon Sizes ──────────────────────────────────────────────
-class IconSizes {
-  IconSizes._();
-  static const double xs = 12;
-  static const double sm = 14;
-  static const double md = 20;
-  static const double lg = 24;
-  static const double xl = 32;
-  static const double hero = 48;
-}
-
-// ── Animation ───────────────────────────────────────────────
-class AnimDurations {
-  AnimDurations._();
-  static const Duration fast = Duration(milliseconds: 150);
-  static const Duration normal = Duration(milliseconds: 250);
-  static const Duration slow = Duration(milliseconds: 400);
-  static const Duration entrance = Duration(milliseconds: 500);
-}
-
-class AnimCurves {
-  AnimCurves._();
-  static const Curve easeOut = Curves.easeOutCubic;
-  static const Curve easeInOut = Curves.easeInOutCubic;
-  static const Curve spring = Curves.elasticOut;
-  static const Curve bouncy = Curves.easeOutBack;
-}
-
-// ── Touch Targets ───────────────────────────────────────────
-class TouchTargets {
-  TouchTargets._();
-  static const double minimum = 44;
-  static const double iconButton = 40;
-  static const double chip = 32;
-}
-
-// ── World Icon Map ──────────────────────────────────────────
-const Map<String, IconData> worldIconMap = {
-  'public': Icons.public,
-  'landscape': Icons.landscape,
-  'science': Icons.science,
-  'account_balance': Icons.account_balance,
-  'rocket': Icons.rocket,
-  'palette': Icons.palette,
-  'music_note': Icons.music_note,
-  'code': Icons.code,
-  'earth': Icons.public,
-};

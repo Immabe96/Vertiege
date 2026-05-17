@@ -1,9 +1,9 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../models/world.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../utils/world_assets.dart';
 
 /// Procedural world banner that generates a unique, tier-themed visual
@@ -61,33 +61,6 @@ class WorldBanner extends StatelessWidget {
                   worldType: worldType,
                   tierColor: tierColor,
                   prestige: prestige,
-                ),
-              ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.canvas.withValues(alpha: 0.04),
-                    AppColors.canvas.withValues(alpha: 0.58),
-                  ],
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      tierColor.withValues(alpha: 0),
-                      tierColor.withValues(alpha: 0.75),
-                      tierColor.withValues(alpha: 0),
-                    ],
-                  ),
                 ),
               ),
             ),
@@ -155,7 +128,7 @@ class _WorldBannerPainter extends CustomPainter {
       ..shader = const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [AppColors.canvas, AppColors.surface],
+        colors: [VColors.surface, VColors.surface],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
@@ -312,7 +285,7 @@ class _WorldBannerPainter extends CustomPainter {
       ..shader = RadialGradient(
         center: const Alignment(0, -0.1),
         radius: 0.9,
-        colors: [Colors.transparent, AppColors.canvas.withValues(alpha: 0.55)],
+        colors: [Colors.transparent, VColors.surface.withValues(alpha: 0.55)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }

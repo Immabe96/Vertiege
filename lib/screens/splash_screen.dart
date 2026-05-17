@@ -1,6 +1,6 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../theme/colors.dart';
+import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -73,6 +73,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: AnimatedBuilder(
         animation: _controller,
@@ -90,18 +91,17 @@ class _SplashScreenState extends State<SplashScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppColors.canvas.withValues(alpha: 0.65),
-                    AppColors.canvas.withValues(alpha: 0.8),
-                    AppColors.canvas,
+                    (isDark ? VColors.surfaceDark : VColors.surface)
+                        .withValues(alpha: 0.65),
+                    (isDark ? VColors.surfaceDark : VColors.surface)
+                        .withValues(alpha: 0.8),
+                    isDark ? VColors.surfaceDark : VColors.surface,
                   ],
                 ),
               ),
               child: Stack(
                 fit: StackFit.expand,
-                children: [
-                  _buildDecorativeShapes(),
-                  child!,
-                ],
+                children: [_buildDecorativeShapes(), child!],
               ),
             ),
           );
@@ -118,10 +118,13 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.surfaceElevated.withValues(alpha: 0.72),
+                    color: (isDark
+                            ? VColors.glassBackgroundDark
+                            : VColors.glassBackground)
+                        .withValues(alpha: 0.72),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.tertiary.withValues(
+                        color: VColors.tertiary.withValues(
                           alpha: 0.45 * _iconScale.value,
                         ),
                         blurRadius: 32,
@@ -143,12 +146,12 @@ class _SplashScreenState extends State<SplashScreen>
               // App name
               Opacity(
                 opacity: _textFade.value,
-                child: const Text(
+                child: Text(
                   'Vertiege',
                   style: TextStyle(
                     fontSize: FontSizes.displayHero,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     letterSpacing: LetterSpacing.display,
                   ),
                 ),
@@ -157,14 +160,14 @@ class _SplashScreenState extends State<SplashScreen>
               // Tagline — gold tint
               Opacity(
                 opacity: _taglineFade.value,
-                child: Text(
-                  'Your tier-gated social universe',
-                  style: TextStyle(
-                    fontSize: FontSizes.body,
-                    color: AppColors.tertiary.withValues(alpha: 0.6),
-                    letterSpacing: LetterSpacing.micro,
-                  ),
+              child: Text(
+                'Your tier-gated social universe',
+                style: TextStyle(
+                  fontSize: FontSizes.body,
+                  color: VColors.tertiary.withValues(alpha: 0.6),
+                  letterSpacing: LetterSpacing.micro,
                 ),
+              ),
               ),
               const SizedBox(height: Spacing.xxl + Spacing.lg),
               // Loading indicator — gold accent
@@ -173,12 +176,12 @@ class _SplashScreenState extends State<SplashScreen>
                 child: SizedBox(
                   width: 28,
                   height: 28,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation(
-                      AppColors.tertiary.withValues(alpha: 0.8),
-                    ),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation(
+                    VColors.tertiary.withValues(alpha: 0.8),
                   ),
+                ),
                 ),
               ),
             ],
@@ -197,25 +200,45 @@ class _SplashScreenState extends State<SplashScreen>
           Positioned(
             top: -120,
             right: -80,
-            child: _DecoShape(size: 400, rotation: 0.4, color: AppColors.tertiary, opacity: 0.08),
+          child: _DecoShape(
+            size: 400,
+            rotation: 0.4,
+            color: VColors.tertiary,
+            opacity: 0.08,
+          ),
           ),
           // Bottom-left medium shape — primary violet
           Positioned(
             bottom: -100,
             left: -60,
-            child: _DecoShape(size: 300, rotation: -0.6, color: AppColors.primary, opacity: 0.07),
+          child: _DecoShape(
+            size: 300,
+            rotation: -0.6,
+            color: VColors.primary,
+            opacity: 0.07,
+          ),
           ),
           // Top-left small shape — gold
           Positioned(
             top: 80,
             left: -40,
-            child: _DecoShape(size: 200, rotation: 0.8, color: AppColors.tertiaryFixedDim, opacity: 0.06),
+          child: _DecoShape(
+            size: 200,
+            rotation: 0.8,
+            color: VColors.secondary,
+            opacity: 0.06,
+          ),
           ),
           // Bottom-right small shape — violet
           Positioned(
             bottom: 180,
             right: -50,
-            child: _DecoShape(size: 180, rotation: -0.3, color: AppColors.primaryFixedDim, opacity: 0.06),
+          child: _DecoShape(
+            size: 180,
+            rotation: -0.3,
+            color: VColors.primary,
+            opacity: 0.06,
+          ),
           ),
         ],
       ),

@@ -1,14 +1,22 @@
 import 'dart:async';
 import 'package:livekit_client/livekit_client.dart';
 import 'supabase.dart';
+import 'crash_reporter.dart';
 
 class VoiceService {
   static Room? _currentRoom;
-  static final _participantsController = StreamController<List<Participant>>.broadcast();
+  static StreamController<List<Participant>>? _participantsController;
   static final List<Participant> _participants = [];
+  static bool _disposed = false;
+  static bool _isDeafened = false;
 
-  static Stream<List<Participant>> get participantsStream =>
-      _participantsController.stream;
+  static Stream<List<Participant>> get participantsStream {
+    if (_disposed || _participantsController == null || _participantsController!.isClosed) {
+      _participantsController = StreamController<List<Participant>>.broadcast();
+      _disposed = false;
+    }
+    return _participantsController!.stream;
+  }
 
   static List<Participant> get participants => List.unmodifiable(_participants);
 
@@ -25,13 +33,15 @@ class VoiceService {
     if (token == null) return;
 
     final room = Room();
-    await room.connect(
-      token['livekitUrl'] as String,
-      token['token'] as String,
-    );
+    await room.connect(token['livekitUrl'] as String, token['token'] as String);
 
     room.addListener(_onRoomUpdate);
     _currentRoom = room;
+
+    if (_participantsController == null || _participantsController!.isClosed) {
+      _participantsController = StreamController<List<Participant>>.broadcast();
+      _disposed = false;
+    }
   }
 
   static Future<Map<String, dynamic>?> _fetchToken(
@@ -52,7 +62,12 @@ class VoiceService {
         },
       );
       return res.data as Map<String, dynamic>?;
-    } catch (_) {
+    } catch (e, st) {
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'voice_service token fetch',
+      );
       return null;
     }
   }
@@ -66,7 +81,7 @@ class VoiceService {
       _participants.add(local);
     }
     _participants.addAll(room.remoteParticipants.values);
-    _participantsController.add(List.unmodifiable(_participants));
+    _participantsController?.add(List.unmodifiable(_participants));
   }
 
   static Future<void> leaveCampfire() async {
@@ -74,32 +89,41 @@ class VoiceService {
     _currentRoom?.removeListener(_onRoomUpdate);
     _currentRoom = null;
     _participants.clear();
-    _participantsController.add([]);
+    _participantsController?.add([]);
   }
 
   static Future<void> toggleMute() async {
-    await _currentRoom?.localParticipant?.setMicrophoneEnabled(
-      _currentRoom!.localParticipant!.isMicrophoneEnabled(),
-    );
+    final local = _currentRoom?.localParticipant;
+    if (local == null) return;
+    await local.setMicrophoneEnabled(!local.isMicrophoneEnabled());
   }
 
   static Future<void> toggleDeafen() async {
     if (_currentRoom == null) return;
     final local = _currentRoom!.localParticipant;
     if (local == null) return;
-    final currentlyEnabled = local.isMicrophoneEnabled();
-    await local.setMicrophoneEnabled(!currentlyEnabled);
+    _isDeafened = !_isDeafened;
+    await local.setMicrophoneEnabled(!_isDeafened);
   }
+
+  static bool get isDeafened => _isDeafened;
 
   static bool get isMuted =>
       _currentRoom?.localParticipant?.isMicrophoneEnabled() == false;
 
-  static bool get isSpeaking => false;
+  static bool get isSpeaking {
+    final level = _currentRoom?.localParticipant?.audioLevel;
+    return level != null && level > 0.01;
+  }
+
+  static double get audioLevel =>
+      _currentRoom?.localParticipant?.audioLevel ?? 0.0;
 
   static void dispose() {
+    _disposed = true;
     _currentRoom?.removeListener(_onRoomUpdate);
     _currentRoom = null;
     _participants.clear();
-    _participantsController.close();
+    _participantsController?.close();
   }
 }

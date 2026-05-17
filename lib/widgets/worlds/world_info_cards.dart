@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../models/world.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 
 class WorldInfoCards extends StatefulWidget {
-  final dynamic world;
+  final World world;
   final int members;
   final int posts;
   final int events;
@@ -44,7 +45,7 @@ class _WorldInfoCardsState extends State<WorldInfoCards> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 420;
@@ -54,7 +55,7 @@ class _WorldInfoCardsState extends State<WorldInfoCards> {
               value: '${widget.members}',
               label: 'Residents',
               detail: 'View roster',
-              color: AppColors.primary,
+              color: VColors.primary,
               onTap: widget.onMembersTap,
             ),
             _InfoStatCard(
@@ -62,28 +63,28 @@ class _WorldInfoCardsState extends State<WorldInfoCards> {
               value: '${widget.posts}',
               label: 'Posts',
               detail: 'World feed',
-              color: AppColors.primary,
+              color: VColors.primary,
             ),
             _InfoStatCard(
               icon: Icons.event_available_outlined,
               value: '${widget.events}',
               label: 'Events',
               detail: widget.events == 0 ? 'None scheduled' : 'Upcoming',
-              color: AppColors.tertiary,
+              color: VColors.tertiary,
             ),
             _InfoStatCard(
               icon: Icons.auto_awesome,
               value: '${widget.world.prestige}',
               label: 'Prestige',
               detail: 'World signal',
-              color: AppColors.tertiary,
+              color: VColors.tertiary,
             ),
           ];
 
           return GridView.count(
             crossAxisCount: compact ? 2 : 4,
-            crossAxisSpacing: Spacing.sm,
-            mainAxisSpacing: Spacing.sm,
+            crossAxisSpacing: VSpacing.sm,
+            mainAxisSpacing: VSpacing.sm,
             childAspectRatio: compact ? 1.42 : 1.2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -114,25 +115,26 @@ class _InfoStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GlassPanel(
       padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         child: Padding(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(icon, size: IconSizes.md, color: color),
+                  Icon(icon, size: VIconSize.md, color: color),
                   const Spacer(),
                   if (onTap != null)
-                    const Icon(
+                    Icon(
                       Icons.chevron_right,
-                      size: IconSizes.sm,
-                      color: AppColors.inkMuted,
+                      size: VIconSize.sm,
+                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                     ),
                 ],
               ),
@@ -143,9 +145,9 @@ class _InfoStatCard extends StatelessWidget {
                 child: Text(
                   value,
                   style: GoogleFonts.spaceGrotesk(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.bold,
-                    color: AppColors.ink,
+                    fontSize: VFontSize.headlineMd,
+                    fontWeight: VFontWeight.bold,
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                   ),
                 ),
               ),
@@ -153,19 +155,19 @@ class _InfoStatCard extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  color: AppColors.inkSecondary,
-                  fontWeight: FontWeights.semiBold,
+                style: TextStyle(
+                  fontSize: VFontSize.labelMd,
+                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                  fontWeight: VFontWeight.semiBold,
                 ),
               ),
               Text(
                 detail,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  color: AppColors.inkMuted,
+                style: TextStyle(
+                  fontSize: VFontSize.labelMd,
+                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                 ),
               ),
             ],

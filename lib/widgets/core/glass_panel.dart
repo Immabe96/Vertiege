@@ -1,7 +1,7 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
 class GlassPanel extends StatelessWidget {
@@ -11,6 +11,7 @@ class GlassPanel extends StatelessWidget {
   final Border? border;
   final double blur;
   final bool useBlur;
+  final List<BoxShadow>? shadows;
 
   const GlassPanel({
     super.key,
@@ -20,18 +21,29 @@ class GlassPanel extends StatelessWidget {
     this.border,
     this.blur = 12,
     this.useBlur = true,
+    this.shadows,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final container = Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
-        borderRadius:
-            borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
-        border: border ??
-            Border.all(color: AppColors.glassBorder),
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
+        border: border ?? Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder, width: 0.5),
+        boxShadow:
+            shadows ??
+            [
+              BoxShadow(
+                color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
       ),
       child: child,
     );
@@ -61,16 +73,26 @@ class GlassModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(RadiusTokens.full),
+      borderRadius: BorderRadius.circular(RadiusTokens.xl),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          padding: padding ?? const EdgeInsets.all(Spacing.xl),
+          padding: padding ?? const EdgeInsets.all(Spacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.glassModalBackground,
-            borderRadius: BorderRadius.circular(RadiusTokens.full),
-            border: Border.all(color: AppColors.glassBorder),
+            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder, width: 0.5),
+            boxShadow: [
+              BoxShadow(
+                color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
           child: child,
         ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/post.dart';
 import '../../models/report.dart';
+import '../../config/awards.dart';
 import '../../services/permission_service.dart';
 import '../../services/moderation_service.dart';
 import '../../state/post_provider.dart';
@@ -13,11 +14,13 @@ import '../../theme/design_system.dart';
 import '../../utils/date_format.dart';
 import '../core/fade_in.dart';
 import '../core/glass_sheet.dart';
+import '../core/tier_badge.dart';
 import '../shared/tier_icon.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
 import 'comment_sheet.dart';
 import 'reaction_bar.dart';
+import 'heart_animation.dart';
 
 class PostItem extends ConsumerWidget {
   final Post post;
@@ -51,6 +54,19 @@ class PostItem extends ConsumerWidget {
     return FadeIn(
       delayMs: index * 70,
       child: GestureDetector(
+        onDoubleTapDown: (details) {
+          if (resident != null) {
+            final box = context.findRenderObject() as RenderBox?;
+            if (box != null) {
+              final position = box.localToGlobal(details.localPosition);
+              HeartAnimationOverlay.show(context, position);
+            }
+            ref
+                .read(postProvider.notifier)
+                .addReaction(post.id, '❤️', resident.id);
+            HapticFeedback.mediumImpact();
+          }
+        },
         onDoubleTap: () {
           if (resident != null) {
             ref
@@ -108,10 +124,17 @@ class PostItem extends ConsumerWidget {
                             onTap: () => _showResidentPreview(context, ref),
                             onLongPress: () =>
                                 context.push('/residents/${post.residentId}'),
-                            child: LuminaryNameplate(
-                              name: post.residentName,
-                              tier: post.tierAtPosting.value,
-                              fontSize: FontSizes.bodyMd,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                LuminaryNameplate(
+                                  name: post.residentName,
+                                  tier: post.tierAtPosting.value,
+                                  fontSize: FontSizes.bodyMd,
+                                ),
+                                const SizedBox(width: 4),
+                                TierBadge(tier: post.tierAtPosting.value),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 1),
@@ -236,16 +259,48 @@ class PostItem extends ConsumerWidget {
                   const SizedBox(height: 8),
                   _PollDisplay(post: post),
                 ],
-                if (post.imageUri != null) ...[
+                if (post.allImageUris.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        post.imageUri!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
+                    child: post.allImageUris.length == 1
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(VRadius.md),
+                            child: Image.network(
+                              post.allImageUris.first,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          )
+                        : _ImageCarousel(imageUris: post.allImageUris),
+                  ),
+                ],
+                if (post.awards.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: post.awards.map((awardKey) {
+                        final awardTypeId = awardKey.split(':').first;
+                        final meta = AwardType.all[awardTypeId];
+                        if (meta == null) return const SizedBox.shrink();
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                            border: Border.all(color: AppColors.borderSubtle),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(meta.icon, style: const TextStyle(fontSize: VFontSize.labelMd)),
+                              const SizedBox(width: 3),
+                              Text(meta.label, style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary)),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
                 ],
@@ -256,6 +311,7 @@ class PostItem extends ConsumerWidget {
                         child: ReactionBar(
                           reactions: post.reactions,
                           currentResidentId: resident?.id ?? '',
+                          userTier: resident?.tier.value ?? 1,
                           onReact: (emoji) {
                             ref
                                 .read(postProvider.notifier)
@@ -376,11 +432,18 @@ class PostItem extends ConsumerWidget {
               size: 72,
             ),
             const SizedBox(height: Spacing.md),
-            LuminaryNameplate(
-              name: post.residentName,
-              tier: post.tierAtPosting.value,
-              fontSize: FontSizes.headlineMd,
-              textAlign: TextAlign.center,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LuminaryNameplate(
+                  name: post.residentName,
+                  tier: post.tierAtPosting.value,
+                  fontSize: FontSizes.headlineMd,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(width: Spacing.xs),
+                TierBadge(tier: post.tierAtPosting.value, size: 20),
+              ],
             ),
             const SizedBox(height: Spacing.xs),
             Text(
@@ -504,6 +567,7 @@ class PostItem extends ConsumerWidget {
             residentName: resident.name,
             content: content,
             timestamp: DateTime.now().millisecondsSinceEpoch,
+            tierAtPosting: resident.tier.value,
           );
           ref.read(postProvider.notifier).addComment(post.id, comment);
         },
@@ -943,6 +1007,73 @@ class _DecreeLabelState extends State<_DecreeLabel>
           ),
         );
       },
+    );
+  }
+}
+
+class _ImageCarousel extends StatefulWidget {
+  final List<String> imageUris;
+  const _ImageCarousel({required this.imageUris});
+
+  @override
+  State<_ImageCarousel> createState() => _ImageCarouselState();
+}
+
+class _ImageCarouselState extends State<_ImageCarousel> {
+  int _currentPage = 0;
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(VRadius.md),
+          child: SizedBox(
+            height: 250,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.imageUris.length,
+              onPageChanged: (index) => setState(() => _currentPage = index),
+              itemBuilder: (context, index) {
+                return Image.network(
+                  widget.imageUris[index],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: Spacing.xs),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '${_currentPage + 1}/${widget.imageUris.length}',
+              style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary),
+            ),
+            const SizedBox(width: Spacing.sm),
+            ...widget.imageUris.asMap().entries.map((entry) {
+              return Container(
+                width: entry.key == _currentPage ? 8 : 6,
+                height: entry.key == _currentPage ? 8 : 6,
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: entry.key == _currentPage ? AppColors.primary : AppColors.inkMuted.withValues(alpha: 0.3),
+                ),
+              );
+            }),
+          ],
+        ),
+      ],
     );
   }
 }
