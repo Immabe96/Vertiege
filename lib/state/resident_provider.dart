@@ -131,9 +131,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
     }
 
     await _worldRepository.saveProfileMembership(durableResident);
-    for (final worldId in durableResident.joinedWorldIds) {
-      await _worldRepository.joinWorld(
-        worldId: worldId,
+    if (durableResident.joinedWorldIds.isNotEmpty) {
+      await _worldRepository.joinWorlds(
+        worldIds: durableResident.joinedWorldIds,
         residentId: durableResident.id,
         residentName: durableResident.name,
       );
