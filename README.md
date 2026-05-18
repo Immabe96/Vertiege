@@ -1,4 +1,4 @@
-# Vertiege v1.0.0-beta
+# Vertiege v1.0.0-beta.4+1
 
 > A tier-gated social network where every world is a sovereign realm with entry conditions. Built with Flutter + Riverpod + Supabase + Sovereign Excellence dark theme.
 
@@ -39,11 +39,21 @@
 
 Vertiege is a semi-social, semi-gamified sovereign realm platform. Users create residents, join tier-gated worlds, earn prestige through activity, and ascend through five tiers — from Hustler to Apex.
 
-**191 Dart files** across **10 directories**.
+**290 Dart files** across **11 directories**.
 
 | Category | Count |
 |----------|-------|
-| Screens | 32 |
+| Screens | 46 |
+| Widgets | 110 |
+| State Providers | 14 |
+| Services | 49 |
+| Models | 31 |
+| Theme | 7 |
+| Router | 1 |
+| Config | 5 |
+| Utils | 13 |
+| Repositories | 4 |
+| UI | 8 |
 | Widgets | 93 |
 | State Providers | 10 |
 | Services | 26 |
@@ -79,92 +89,16 @@ lib/
 │   ├── resident.dart                  # Resident, ResidentTier (1-5), WorldStanding, VerificationStatus
 │   ├── season.dart                    # Season, SeasonWorldScore, composite scoring
 │   └── world.dart                     # World, WorldType (wealth/profession/dominion), WorldConstitution, WorldFeatures, DominionWorld
+├── repositories/                      # (4) Data access layers wrapping Supabase/APIs
 ├── router/
 │   └── app_router.dart                # GoRouter Provider: 25+ routes, auth/tier redirect guards
-├── screens/
-│   ├── auth/                          # LoginScreen, SignUpScreen, AuthCallbackScreen
-│   ├── onboarding/                    # OnboardingScreen, TheGateScreen
-│   ├── tabs/                          # TabLayout, NexusScreen, ExploreScreen, ChatListScreen, IdentityScreen, CreatePostScreen, AlertsScreen
-│   ├── achievements/                  # AchievementsIndexScreen, AchievementCategoryScreen, SubmitAchievementScreen
-│   ├── journey/                       # AscensionPathScreen
-│   ├── world_detail_screen.dart       # Full world view: banner, tabs, join/leave
-│   ├── world_channel_screen.dart      # Channel chat view
-│   ├── world_settings_screen.dart     # Sovereign world management
-│   ├── world_members_screen.dart      # Member roster with standings
-│   ├── chat_room_screen.dart          # 1:1 DM chat room
-│   ├── resident_profile_screen.dart   # Other resident's profile
-│   ├── create_world_screen.dart       # World creation flow
-│   ├── search_screen.dart             # Global search
-│   ├── settings_screen.dart           # App settings
-│   ├── splash_screen.dart             # Animated splash with procedural shapes
-│   ├── cosmetics_shop_screen.dart     # Cosmetics marketplace
-│   ├── season_screen.dart             # Season leaderboard
-│   ├── subscription_screen.dart       # IAP subscription tiers
-│   ├── hall_of_ascension_screen.dart  # Leaderboard gallery
-│   └── verification_review_screen.dart # Admin: approve/reject verifications
-├── services/
-│   ├── supabase.dart                  # Client accessor + isSupabaseConfigured() gate
-│   ├── auth_service.dart              # Email sign-in/sign-up/out with token persistence
-│   ├── profile_service.dart           # CRUD for profiles table
-│   ├── world_service.dart             # World CRUD + join/leave + default channels
-│   ├── post_service.dart              # Post CRUD with moderation filter
-│   ├── chat_service.dart              # DM room + channel message management
-│   ├── notification_service.dart      # Fetch/mark-read notifications
-│   ├── storage_service.dart           # SharedPreferences wrapper (debounced writes)
-│   ├── secure_storage_service.dart    # FlutterSecureStorage for auth tokens
-│   ├── prestige_service.dart          # Prestige scoring algorithm
-│   ├── season_service.dart            # Season data + rankings
-│   ├── daily_reward_service.dart      # Daily XP/shield reward generation
-│   ├── verification_service.dart      # Profession proof submission + review
-│   ├── ai_verification_service.dart   # Simulated AI achievement verification
-│   ├── access_control.dart            # canAccessWorld() tier/profession gating
-│   ├── permission_service.dart        # Standing-based action permissions
-│   ├── moderation_service.dart        # Server-side ban/mute/warn
-│   ├── moderation_filter.dart         # Pre-publish content filter (3-stage pipeline)
-│   ├── council_service.dart           # Council member tracking
-│   ├── invite_service.dart            # Invite create/lookup/accept
-│   ├── backup_service.dart            # JSON backup/restore
-│   ├── cache_service.dart             # Feed/world cache for instant resume
-│   ├── legacy_service.dart            # Legacy tier color mapping
-│   ├── store_service.dart             # IAP wrapper (in_app_purchase)
-│   ├── subscription_service.dart      # Subscription tiers + benefits
-│   └── crash_reporter.dart            # Crash reporting abstraction (ready for Firebase Crashlytics)
-├── state/
-│   ├── resident_provider.dart         # Resident state + profile persistence
-│   ├── world_provider.dart            # Worlds map + alliances + create/join/leave
-│   ├── post_provider.dart             # Feed posts + comments + reactions
-│   ├── chat_provider.dart             # DM rooms + channel messages + real-time
-│   ├── channel_provider.dart          # WorldChannel CRUD
-│   ├── event_provider.dart            # WorldEvent with RSVP
-│   ├── notification_provider.dart     # Notifications sync
-│   ├── achievement_provider.dart      # Achievements + XP + tier thresholds
-│   ├── quest_provider.dart            # Daily quests + streak tracking
-│   └── theme_provider.dart            # Theme mode persistence
-├── theme/
-│   ├── colors.dart                    # AppColors: OLED obsidian surface hierarchy, sovereign violet primary, gold tertiary, tier accents
-│   ├── design_system.dart             # Font, spacing, radius, animation tokens, world icon map
-│   └── app_theme.dart                 # Material 3 dark-only ThemeData from seed colors
-├── utils/
-│   ├── date_format.dart               # Relative timestamp formatting
-│   ├── time_ago.dart                  # Human-readable relative time + TimeAgo widget
-│   ├── tier_utils.dart                # Standing-to-color mapping
-│   ├── text_parser.dart               # @mentions + #hashtags extraction
-│   ├── haptics.dart                   # Curated haptic feedback presets
-│   ├── id_generator.dart              # UUID v4 generation
-│   ├── world_assets.dart              # Deterministic world icon/color/gradient generator
-│   └── string_utils.dart              # capitalize(), truncate() helpers
-└── widgets/
-    ├── core/ (22)                     # GlassPanel, GlowBorder, FadeIn, Shimmer, EmptyState, LoadingState, SafeAsyncBuilder, etc.
-    ├── worlds/ (21)                   # WorldCard, WorldBanner, WorldAccessGuard, Leaderboard, etc.
-    ├── profile/ (11)                  # CosmeticAvatar, LuminaryNameplate, BadgeDisplay, StreakDisplay, etc.
-    ├── feed/ (7)                      # PostItem, PostComposer, ReactionBar, CommentSheet, etc.
-    ├── achievements/ (3)              # AchievementCard, AchievementGrid, TierCelebration
-    ├── auth/ (1)                      # AuthErrorCard
-    ├── shared/ (5)                    # TierIcon, ProgressBar, ShareButton, FilterPill, ImagePicker
-    ├── nexus/ (9)                     # BentoGrid, BentoCards (DailyQuest, PrestigeProgress, SeasonSnapshot, Trending, FeedPreview), FeedTabChip, FeedSortDropdown, WorldInviteSection
-    ├── explore/ (8)                   # TierSection, SectionHeader, ViewModeToggle, FeaturedWorldsRow, BoostedWorldsRow, TrendingRisingSection, ShimmerWorldCard, SeasonBanner
-    ├── chat/ (5)                      # ChatMessageGrouper, ChatDateSeparator, ChatInputBar, ChatImage, ScrollFab
-    └── journey/ (1)                   # ProgressTrail (5-step tier visualization)
+├── screens/                           # (46) Full-page Flutter UI screens
+├── services/                          # (49) Business logic and third-party integrations
+├── state/                             # (14) Riverpod providers and state models
+├── theme/                             # (7) Design tokens, colors, and global theming
+├── ui/                                # (8) Reusable, generic UI components
+├── utils/                             # (13) Helper functions, formatters, generators
+└── widgets/                           # (110) Specific feature components divided by domain
 ```
 
 ---
@@ -583,6 +517,8 @@ On auth/onboarding/gate pages, fully authenticated → /
 - Featured worlds row (top 5 by prestige)
 - Trending/Rising sections with velocity scoring
 - World detail: procedural banner, tabs (Feed/Channels/Members), join/leave
+- Starter Worlds Auto-Join: New residents are automatically added to default starter worlds.
+- Wealth World Level-Up Access: Wealth Worlds can be unlocked for free when a resident's Tier matches or exceeds the required level, presented with a progress breakdown.
 
 ### Social Feed
 - Post creation with text + image + announcement toggle
@@ -611,18 +547,22 @@ On auth/onboarding/gate pages, fully authenticated → /
 - 90 achievements across 13 categories
 - Achievement verification with proof submission
 - Ascension path: visual 5-step tier trail
+- Real-World Achievements: Users can submit real-world proof for achievements to gain XP and levels.
 
 ### Monetization
 - Wealth world tiers purchasable via IAP
 - World boosts (consumable)
 - Subscription tiers: Resident (free), Patrician, Sovereign Elite
 - Each tier: world limits, streak shields, priority verification, gold name, custom background, analytics, badge
+- Shop Expansions: XP Boosters and Extra World Slots can be purchased with Sovereign Coins.
 
 ### Moderation
 - 3-stage content filter: profanity → patterns → spam
 - Server-side ban/mute/warn
 - Report system: 6 reasons (spam, harassment, hate speech, NSFW, misinformation, other)
 - Admin verification review panel
+- Admin Dashboard/Verification: Dedicated dashboard for admins to review and approve real-world proofs, which automatically assigns verified roles.
+- Sovereign Level-Gate: To ensure meaningful progression, creating a new Sovereign World requires reaching Tier 3 (Elite) and 2000 XP.
 
 ### Cosmetics & Identity
 - Cosmetic avatar frames
@@ -720,10 +660,11 @@ On auth/onboarding/gate pages, fully authenticated → /
 | Framework | Flutter 3.41 (Dart 3.11) |
 | State | Riverpod 2.6 (Notifier + NotifierProvider) |
 | Routing | GoRouter 14.8 (StatefulShellRoute) |
-| Backend | Supabase 2.8 (Auth, Database, Realtime, Storage) |
+| Backend | Supabase 2.8 (Auth, Database, Realtime, Storage) / supabase_flutter |
 | Local Storage | SharedPreferences + FlutterSecureStorage |
 | UI | Material 3 Dark-Only + Custom Glass Design System |
 | Fonts | Google Fonts (Space Grotesk, Inter) |
+| Live Audio/Video | livekit_client 2.5.3 |
 | IAP | in_app_purchase 3.2 |
 | Images | image_picker 1.1 |
 | Share | share_plus 10.1 |
