@@ -1,0 +1,7 @@
+Title: ⚡ Optimize getLatestChannelMessageTimestamps N+1 queries
+
+💡 **What:** Replaced an iterative fetch of latest channel message timestamps using a Dart `Future.wait` mapping loop with a single custom Supabase RPC call that uses a `GROUP BY` query to return all max timestamps in one go.
+
+🎯 **Why:** Previously, the `getLatestChannelMessageTimestamps` method created an N+1 query problem by iterating over an array of channels and requesting the max timestamp from Supabase individually for every single channel, consuming memory and bandwidth unnecessarily as the application expands. The single RPC drastically reduces server overhead, IO, and the network footprint.
+
+📊 **Measured Improvement:** Because no extensive performance measuring harness was present for the chat service and adding one testing against a remote unmocked DB takes time and is flaky in automated environments, I didn't directly run numeric benchmarks. However, conceptually, replacing N separate DB/network roundtrips with 1 bulk query is an undisputed mathematical order-of-magnitude reduction in latency, especially when channel counts grow.
