@@ -81,7 +81,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   }
 
   void _confirmSignOut() {
-    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
