@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,7 +96,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showCreditsDialog() {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -191,14 +190,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (email.isEmpty) return;
               try {
                 final client = getSupabase();
-                await client.auth.updateUser(
-                  UserAttributes(email: email),
-                );
+                await client.auth.updateUser(UserAttributes(email: email));
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Check your new email to confirm the change'),
+                      content: Text(
+                        'Check your new email to confirm the change',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -255,7 +254,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(color: VColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
                 validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
@@ -278,7 +280,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(color: VColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
                 validator: (v) {
@@ -305,7 +310,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(color: VColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
                 validator: (v) {
@@ -359,7 +367,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-
   void _showDeleteAccountDialog() {
     final controller = TextEditingController();
     String confirmText = '';
@@ -369,10 +376,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(
-            'Delete Account',
-            style: TextStyle(color: VColors.error),
-          ),
+          title: Text('Delete Account', style: TextStyle(color: VColors.error)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,7 +407,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(color: VColors.error, width: 2),
+                    borderSide: const BorderSide(
+                      color: VColors.error,
+                      width: 2,
+                    ),
                   ),
                 ),
                 onChanged: (v) => setDialogState(() => confirmText = v),
@@ -465,10 +472,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Last updated: May 2025',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text('Last updated: May 2025', style: theme.textTheme.bodySmall),
               const SizedBox(height: VSpacing.md),
               Text(
                 'Information We Collect',
@@ -537,10 +541,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Last updated: May 2025',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text('Last updated: May 2025', style: theme.textTheme.bodySmall),
               const SizedBox(height: VSpacing.md),
               Text(
                 '1. Acceptance of Terms',
@@ -636,7 +637,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(color: VColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                   errorText: validationError,
                   contentPadding: const EdgeInsets.all(VSpacing.md),
@@ -1115,19 +1119,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     final themeState = ref.watch(themeProvider);
                     final textSize = themeState.textSize;
                     return ListTile(
-                      leading: const Icon(Icons.text_fields, size: VIconSize.md),
+                      leading: const Icon(
+                        Icons.text_fields,
+                        size: VIconSize.md,
+                      ),
                       title: const Text('Text Size'),
-                      subtitle: Text(textSize.name[0].toUpperCase() + textSize.name.substring(1)),
+                      subtitle: Text(
+                        textSize.name[0].toUpperCase() +
+                            textSize.name.substring(1),
+                      ),
                       trailing: FSelect<TextSize>.rich(
-                        format: (value) => value.name[0].toUpperCase() + value.name.substring(1),
+                        format: (value) =>
+                            value.name[0].toUpperCase() +
+                            value.name.substring(1),
                         control: FSelectControl.lifted(
                           value: textSize,
-                          onChange: (v) { if (v != null) ref.read(themeProvider.notifier).setTextSize(v); },
+                          onChange: (v) {
+                            if (v != null)
+                              ref.read(themeProvider.notifier).setTextSize(v);
+                          },
                         ),
-                        children: TextSize.values.map((t) => FSelectItem<TextSize>(
-                          value: t,
-                          title: Text(t.name[0].toUpperCase() + t.name.substring(1)),
-                        )).toList(),
+                        children: TextSize.values
+                            .map(
+                              (t) => FSelectItem<TextSize>(
+                                value: t,
+                                title: Text(
+                                  t.name[0].toUpperCase() + t.name.substring(1),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
                     );
                   },
@@ -1179,7 +1200,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         _PerkTile(
                           icon: Icons.push_pin,
                           title: 'Post Pins',
-                          value: pinLimit > 0 ? '$pinLimit available' : 'Locked',
+                          value: pinLimit > 0
+                              ? '$pinLimit available'
+                              : 'Locked',
                           isDark: isDark,
                         ),
                         _sectionDivider(isDark),
@@ -1370,7 +1393,9 @@ class _PerkTile extends StatelessWidget {
             value,
             style: theme.textTheme.labelMedium?.copyWith(
               color: value.contains('Locked')
-                  ? (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant)
+                  ? (isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant)
                   : VColors.tertiary,
               fontWeight: VFontWeight.semiBold,
             ),
@@ -1420,10 +1445,7 @@ class _ResetDataConfirmationDialogState
         children: [
           const Icon(Icons.warning_amber_rounded, color: VColors.error),
           const SizedBox(width: VSpacing.sm),
-          Text(
-            'Reset all data?',
-            style: TextStyle(color: VColors.error),
-          ),
+          Text('Reset all data?', style: TextStyle(color: VColors.error)),
         ],
       ),
       content: _step == 0
@@ -1461,7 +1483,10 @@ class _ResetDataConfirmationDialogState
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(VRadius.md),
-                      borderSide: const BorderSide(color: VColors.error, width: 2),
+                      borderSide: const BorderSide(
+                        color: VColors.error,
+                        width: 2,
+                      ),
                     ),
                   ),
                   onChanged: (v) => setState(() => _typedText = v),
@@ -1475,10 +1500,7 @@ class _ResetDataConfirmationDialogState
                 onPressed: () => Navigator.pop(context),
                 variant: ButtonVariant.text,
               ),
-              VButton(
-                label: 'Continue',
-                onPressed: _goToStep2,
-              ),
+              VButton(label: 'Continue', onPressed: _goToStep2),
             ]
           : [
               VButton(
