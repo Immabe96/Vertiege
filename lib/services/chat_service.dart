@@ -378,15 +378,22 @@ class ChatService {
   ) async {
     final ids = channelIds.toSet().where((id) => id.isNotEmpty).toList();
     if (!isSupabaseConfigured() || ids.isEmpty) return {};
-    final entries = await Future.wait(
-      ids.map(
-        (id) async => MapEntry(id, await _getLatestChannelMessageTimestamp(id)),
-      ),
+    final response = await getSupabase().rpc(
+      'get_latest_channel_message_timestamps',
+      params: {'p_channel_ids': ids},
     );
     final latest = <String, DateTime>{};
-    for (final entry in entries) {
-      final createdAt = entry.value;
-      if (createdAt != null) latest[entry.key] = createdAt;
+    if (response is List) {
+      for (final row in response) {
+        final cid = row['channel_id'] as String?;
+        final tsStr = row['created_at']?.toString();
+        if (cid != null && tsStr != null) {
+          final ts = DateTime.tryParse(tsStr);
+          if (ts != null) {
+            latest[cid] = ts;
+          }
+        }
+      }
     }
     return latest;
   }
