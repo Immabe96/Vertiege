@@ -350,7 +350,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
           cacheWidth: (180 * MediaQuery.devicePixelRatioOf(context))
               .round()
               .clamp(360, 720),
-          errorBuilder: (_, _, _) => _buildIconContainer(
+          errorBuilder: (context, error, stackTrace) => _buildIconContainer(
             variantColor: variantColor,
             variantBg: _variantBackground(variantColor),
           ),

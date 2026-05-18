@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,9 +89,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       final worldIds = worldState.worlds.keys.toList();
       final allMembers = <String, _ResidentEntry>{};
 
-      for (final worldId in worldIds) {
+      if (worldIds.isNotEmpty) {
         try {
-          final members = await WorldService.getMembers(worldId);
+          final members = await WorldService.getMembersForWorlds(worldIds);
           for (final m in members) {
             final id = m['resident_id'] as String?;
             final name = m['resident_name'] as String?;
@@ -332,12 +332,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             _EmptySection(text: 'No worlds found', isDark: isDark)
           else
             ...results.worlds.map((w) => _WorldTile(world: w)),
-
           Divider(
             height: 1,
             color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
           ),
-
           _SectionHeader(
             icon: Icons.people,
             title: 'People',
@@ -353,12 +351,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             _EmptySection(text: 'No people found', isDark: isDark)
           else
             ...results.residents.take(20).map((r) => _PersonTile(entry: r)),
-
           Divider(
             height: 1,
             color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
           ),
-
           _SectionHeader(
             icon: Icons.forum,
             title: 'Posts',
@@ -517,10 +513,10 @@ class _EmptySection extends StatelessWidget {
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
-        ),
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
       ),
     );
   }

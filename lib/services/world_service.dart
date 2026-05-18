@@ -44,14 +44,18 @@ class WorldService {
       'sort_order': DateTime.now().millisecondsSinceEpoch,
       'created_at': DateTime.now().toIso8601String(),
       if (motto != null && motto.isNotEmpty) 'motto': motto,
-      if (accentColor != null && accentColor.isNotEmpty) 'accent_color': accentColor,
+      if (accentColor != null && accentColor.isNotEmpty)
+        'accent_color': accentColor,
       if (lore != null && lore.isNotEmpty) 'lore': lore,
-      if (dominionType != null && dominionType.isNotEmpty) 'dominion_type': dominionType,
-      if (worldCurrencyName != null && worldCurrencyName.isNotEmpty) 'world_currency_name': worldCurrencyName,
+      if (dominionType != null && dominionType.isNotEmpty)
+        'dominion_type': dominionType,
+      if (worldCurrencyName != null && worldCurrencyName.isNotEmpty)
+        'world_currency_name': worldCurrencyName,
       'tax_rate': taxRate,
       if (constitution != null) 'constitution': constitution,
       if (tags != null && tags.isNotEmpty) 'tags': tags,
-      if (welcomeMessage != null && welcomeMessage.isNotEmpty) 'welcome_message': welcomeMessage,
+      if (welcomeMessage != null && welcomeMessage.isNotEmpty)
+        'welcome_message': welcomeMessage,
     };
 
     if (!isSupabaseConfigured()) {
@@ -88,7 +92,8 @@ class WorldService {
     if (lore != null) updates['lore'] = lore;
     if (constitution != null) updates['constitution'] = constitution;
     if (tags != null) updates['tags'] = tags;
-    if (worldCurrencyName != null) updates['world_currency_name'] = worldCurrencyName;
+    if (worldCurrencyName != null)
+      updates['world_currency_name'] = worldCurrencyName;
     if (taxRate != null) updates['tax_rate'] = taxRate;
     if (welcomeMessage != null) updates['welcome_message'] = welcomeMessage;
 
@@ -107,11 +112,8 @@ class WorldService {
   static Future<World?> getWorld(String worldId) async {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
-    final data = await client
-        .from('worlds')
-        .select()
-        .eq('id', worldId)
-        .maybeSingle();
+    final data =
+        await client.from('worlds').select().eq('id', worldId).maybeSingle();
     if (data == null) return null;
     return World.fromSupabase(data);
   }
@@ -143,7 +145,8 @@ class WorldService {
     return (data as List).cast<Map<String, dynamic>>();
   }
 
-  static Future<List<Map<String, dynamic>>> getTrendingWorlds({int limit = 10}) async {
+  static Future<List<Map<String, dynamic>>> getTrendingWorlds(
+      {int limit = 10}) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
     final data = await client
@@ -154,7 +157,8 @@ class WorldService {
     return (data as List).cast<Map<String, dynamic>>();
   }
 
-  static Future<List<Map<String, dynamic>>> getFeaturedWorlds({int limit = 5}) async {
+  static Future<List<Map<String, dynamic>>> getFeaturedWorlds(
+      {int limit = 5}) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
     final data = await client
@@ -168,7 +172,8 @@ class WorldService {
 
   static Future<List<Map<String, dynamic>>> loadWorlds() async {
     if (!isSupabaseConfigured()) {
-      debugPrint('WorldService: Supabase not configured, returning empty worlds list (offline mode)');
+      debugPrint(
+          'WorldService: Supabase not configured, returning empty worlds list (offline mode)');
       return [];
     }
     final client = getSupabase();
@@ -183,11 +188,8 @@ class WorldService {
   static Future<Map<String, dynamic>?> getWorldBySlug(String slug) async {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
-    final data = await client
-        .from('worlds')
-        .select()
-        .eq('slug', slug)
-        .maybeSingle();
+    final data =
+        await client.from('worlds').select().eq('slug', slug).maybeSingle();
     return data == null ? null : Map<String, dynamic>.from(data);
   }
 
@@ -227,6 +229,18 @@ class WorldService {
     await client.rpc('decrement_world_members', params: {'w_id': worldId});
   }
 
+  static Future<List<Map<String, dynamic>>> getMembersForWorlds(
+      List<String> worldIds) async {
+    if (!isSupabaseConfigured() || worldIds.isEmpty) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('world_members')
+        .select()
+        .inFilter('world_id', worldIds)
+        .order('rep', ascending: false);
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
   static Future<List<Map<String, dynamic>>> getMembers(String worldId) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
@@ -263,8 +277,7 @@ class WorldService {
     if (!isSupabaseConfigured()) return;
     await getSupabase()
         .from('channels')
-        .update({'name': newName})
-        .eq('id', channelId);
+        .update({'name': newName}).eq('id', channelId);
   }
 
   static Future<void> deleteChannel(String channelId) async {
@@ -285,13 +298,11 @@ class WorldService {
     final created = <WorldChannel>[];
     final nextPosition = existing.isEmpty
         ? 0
-        : existing
-                  .map((c) => c.position)
-                  .fold<int>(
-                    0,
-                    (max, position) => position > max ? position : max,
-                  ) +
-              1;
+        : existing.map((c) => c.position).fold<int>(
+                  0,
+                  (max, position) => position > max ? position : max,
+                ) +
+            1;
 
     const defaults = [
       (
