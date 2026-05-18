@@ -64,7 +64,9 @@ class VerificationService {
 
     try {
       await client.storage.from(_bucket).upload(fileName, file);
-      return client.storage.from(_bucket).getPublicUrl(fileName);
+      return await client.storage
+          .from(_bucket)
+          .createSignedUrl(fileName, 365 * 24 * 60 * 60);
     } catch (_) {
       return null;
     }
@@ -100,7 +102,9 @@ class VerificationService {
         .eq('status', 'pending')
         .order('created_at', ascending: false);
     return (data as List)
-        .map((e) => VerificationSubmission.fromSupabase(e))
+        .map(
+          (e) => VerificationSubmission.fromSupabase(e as Map<String, dynamic>),
+        )
         .toList();
   }
 
