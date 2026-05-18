@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'v_colors.dart';
 export 'v_colors.dart';
 
-/// Backward-compatible aliases — all point to new VColors
+/// Backward-compatible aliases â€” all point to new VColors
 /// TODO: Migrate all usages to VColors directly, then remove this file
 class AppColors {
   AppColors._();

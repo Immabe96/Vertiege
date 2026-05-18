@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
+import 'package:vertiege/theme/colors.dart';
 import '../../models/world.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';

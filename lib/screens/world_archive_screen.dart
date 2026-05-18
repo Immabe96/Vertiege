@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/channel.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../state/channel_provider.dart';
 

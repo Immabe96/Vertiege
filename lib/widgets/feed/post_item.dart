@@ -9,7 +9,7 @@ import '../../services/permission_service.dart';
 import '../../services/moderation_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
-import '../../theme/colors.dart';
+import 'package:vertiege/theme/colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/date_format.dart';
 import '../core/fade_in.dart';

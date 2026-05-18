@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+import 'package:vertiege/theme/colors.dart';
 
 class HeartAnimation extends StatefulWidget {
   final Offset tapPosition;

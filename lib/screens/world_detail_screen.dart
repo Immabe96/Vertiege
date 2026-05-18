@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_system.dart';
-import '../theme/colors.dart';
+import 'package:vertiege/theme/colors.dart';
 import '../config/tiers.dart';
 import '../models/channel.dart';
 import '../state/world_provider.dart';
