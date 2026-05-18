@@ -11,6 +11,47 @@ class WorldRepository {
   static const joinWorldMutation = 'world.join';
   static const leaveWorldMutation = 'world.leave';
 
+  Future<RepositoryResult<void>> joinWorlds({
+    required List<String> worldIds,
+    required String residentId,
+    required String residentName,
+  }) async {
+    final remoteWorldIds = worldIds
+        .where((id) => WorldService.isRemoteWorldId(id))
+        .toList();
+    if (remoteWorldIds.isEmpty) {
+      return const RepositoryResult.success(null);
+    }
+    if (!isSupabaseConfigured()) {
+      for (final worldId in remoteWorldIds) {
+        await MutationOutboxService.enqueue(joinWorldMutation, {
+          'worldId': worldId,
+          'residentId': residentId,
+          'residentName': residentName,
+        });
+      }
+      return const RepositoryResult.queued();
+    }
+
+    try {
+      await WorldService.joinWorlds(
+        remoteWorldIds,
+        residentId,
+        residentName: residentName,
+      );
+      return const RepositoryResult.success(null);
+    } catch (error, stackTrace) {
+      for (final worldId in remoteWorldIds) {
+        await MutationOutboxService.enqueue(joinWorldMutation, {
+          'worldId': worldId,
+          'residentId': residentId,
+          'residentName': residentName,
+        });
+      }
+      return RepositoryResult.failure(error, stackTrace);
+    }
+  }
+
   Future<RepositoryResult<void>> joinWorld({
     required String worldId,
     required String residentId,
