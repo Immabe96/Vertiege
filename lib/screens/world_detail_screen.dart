@@ -288,11 +288,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     return VColors.tierHustler;
   }
 
-  GlowTier _getPrestigeGlowTier(int prestige) {
-    if (prestige >= 40) return GlowTier.apex;
-    if (prestige >= 20) return GlowTier.elite;
-    return GlowTier.hustler;
-  }
 
   void _openChannelByName(String channelName, List<WorldChannel> channels) {
     final normalized = channelName.toLowerCase();
@@ -423,7 +418,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
     // Prestige-based tier for hero glow, badge, and button colors
     final prestigeTierColor = _getPrestigeTierColor(world.prestige);
-    final prestigeGlowTier = _getPrestigeGlowTier(world.prestige);
     final heroHeight = (MediaQuery.of(context).size.height * 0.28)
         .clamp(210.0, 300.0)
         .toDouble();
