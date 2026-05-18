@@ -6,6 +6,23 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 serve(async (req: Request) => {
   try {
+    // Authenticate webhook payload
+    const webhookSecret = Deno.env.get('WEBHOOK_SECRET')
+    if (!webhookSecret) {
+      return new Response(JSON.stringify({ error: 'Server misconfiguration: WEBHOOK_SECRET not set' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const authHeader = req.headers.get('Authorization')
+    if (authHeader !== `Bearer ${webhookSecret}`) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
     const payload = await req.json()
     const record = payload.record
 
@@ -26,7 +43,7 @@ serve(async (req: Request) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
-  } catch (err) {
+  } catch (_err) {
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
