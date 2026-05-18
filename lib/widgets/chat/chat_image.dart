@@ -11,7 +11,7 @@ class ChatImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (url.startsWith('https://')) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(RadiusTokens.card),
         child: Image.network(
@@ -20,7 +20,7 @@ class ChatImage extends StatelessWidget {
           // B-11 FIX: Added loadingBuilder with shimmer placeholder
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            return SizedBox(
+            return const SizedBox(
               height: 160,
               width: double.infinity,
               child: Center(
