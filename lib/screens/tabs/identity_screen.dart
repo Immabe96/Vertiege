@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,7 +81,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   }
 
   void _confirmSignOut() {
-    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -116,12 +115,14 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       context,
       resident,
       onSave: ({name, bio, avatarPath, profession}) {
-        ref.read(residentProvider.notifier).updateProfile(
-          name: name,
-          bio: bio,
-          avatarPath: avatarPath,
-          profession: profession,
-        );
+        ref
+            .read(residentProvider.notifier)
+            .updateProfile(
+              name: name,
+              bio: bio,
+              avatarPath: avatarPath,
+              profession: profession,
+            );
       },
     );
   }
@@ -160,7 +161,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     if (perks.isEmpty) perks.add('Exclusive tier badge');
     return perks;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -237,10 +237,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        backgroundColor:
-            (isDark ? VColors.surfaceDark : VColors.surface).withValues(
-              alpha: 0.86,
-            ),
+        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
+            .withValues(alpha: 0.86),
         elevation: 0,
         title: Text(
           resident.name,
@@ -282,97 +280,383 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-            // ── Hero Section ──────────────────────────────
-            Container(
-              padding: const EdgeInsets.all(VSpacing.lg),
-              child: Column(
-                children: [
-                  // Avatar with tier-colored glow
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: VColors.primary.withValues(alpha: 0.2),
-                          blurRadius: 24,
-                          spreadRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Hero(
-                      tag: 'avatar-${resident.id}',
-                      child: CosmeticAvatar(
-                        totalXp: currentXp,
-                        size: _avatarRadius * 2,
-                        imageUrl: resident.avatarUrl,
-                        seed: resident.id,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: VSpacing.md),
-
-                  // Name with tier badge
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      LuminaryNameplate(
-                        name: resident.name,
-                        tier: resident.tier.value,
-                        fontSize: VFontSize.headlineMd,
-                        textAlign: TextAlign.center,
-                        title: resident.title,
-                      ),
-                      const SizedBox(width: VSpacing.sm),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: VSpacing.sm,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: VColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(VRadius.pill),
-                          border: Border.all(
-                            color: VColors.primary.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          resident.tier.label,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: VColors.primary,
-                            fontWeight: VFontWeight.bold,
-                          ),
-                        ),
+          // ── Hero Section ──────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(VSpacing.lg),
+            child: Column(
+              children: [
+                // Avatar with tier-colored glow
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: VColors.primary.withValues(alpha: 0.2),
+                        blurRadius: 24,
+                        spreadRadius: 4,
                       ),
                     ],
                   ),
+                  child: Hero(
+                    tag: 'avatar-${resident.id}',
+                    child: CosmeticAvatar(
+                      totalXp: currentXp,
+                      size: _avatarRadius * 2,
+                      imageUrl: resident.avatarUrl,
+                      seed: resident.id,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: VSpacing.md),
 
-                  // Top X% indicator
-                  if (tierValue >= 2)
-                    Padding(
-                      padding: const EdgeInsets.only(top: VSpacing.xs),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: VSpacing.sm,
-                          vertical: 2,
+                // Name with tier badge
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LuminaryNameplate(
+                      name: resident.name,
+                      tier: resident.tier.value,
+                      fontSize: VFontSize.headlineMd,
+                      textAlign: TextAlign.center,
+                      title: resident.title,
+                    ),
+                    const SizedBox(width: VSpacing.sm),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.sm,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: VColors.primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(VRadius.pill),
+                        border: Border.all(
+                          color: VColors.primary.withValues(alpha: 0.3),
                         ),
-                        decoration: BoxDecoration(
-                          color: VColors.tertiary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(VRadius.pill),
-                          border: Border.all(
-                            color: VColors.tertiary.withValues(alpha: 0.25),
+                      ),
+                      child: Text(
+                        resident.tier.label,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: VColors.primary,
+                          fontWeight: VFontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Top X% indicator
+                if (tierValue >= 2)
+                  Padding(
+                    padding: const EdgeInsets.only(top: VSpacing.xs),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.sm,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: VColors.tertiary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(VRadius.pill),
+                        border: Border.all(
+                          color: VColors.tertiary.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.emoji_events,
+                            size: VIconSize.xs,
+                            color: VColors.tertiary,
+                          ),
+                          const SizedBox(width: VSpacing.xxs),
+                          Text(
+                            _topPercentLabel(tierValue),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: VColors.tertiary,
+                              fontWeight: VFontWeight.semiBold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Subscription badge
+                if (_subscriptionTier != SubscriptionTier.resident)
+                  Padding(
+                    padding: const EdgeInsets.only(top: VSpacing.xs),
+                    child: SubscriptionBadge(tier: _subscriptionTier),
+                  ),
+
+                // REP badge
+                const SizedBox(height: VSpacing.sm),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.lg,
+                    vertical: VSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: VColors.tertiary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(VRadius.pill),
+                  ),
+                  child: Text(
+                    '$totalRep REP',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: VColors.tertiary,
+                      fontWeight: VFontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                // Bio
+                if (resident.bio.isNotEmpty) ...[
+                  const SizedBox(height: VSpacing.md),
+                  Text(
+                    resident.bio,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+
+                // Profession
+                if (resident.profession != null &&
+                    resident.profession!.isNotEmpty) ...[
+                  const SizedBox(height: VSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: VSpacing.sm,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? VColors.glassBackgroundDark
+                          : VColors.glassBackground,
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                      border: Border.all(
+                        color: isDark
+                            ? VColors.glassBorderDark
+                            : VColors.glassBorder,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.work,
+                          size: VIconSize.xs,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: VSpacing.xxs),
+                        Text(
+                          resident.profession!,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // ── Referral Code ──────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: ReferralChip(
+              referralCode: resident.referralCode,
+              referredBy: resident.referredBy,
+            ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          // ── Tier Progress ───────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: Column(
+              children: [
+                SovereignProgressBar(
+                  progress: tierProgress,
+                  color: VColors.primary,
+                  label: '${resident.tier.label} Tier',
+                  trailing: nextThreshold != null
+                      ? 'Next: $nextTierName'
+                      : 'Max Tier',
+                ),
+                const SizedBox(height: VSpacing.xs),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${currentXp - currentThreshold} / ${nextThreshold != null ? nextThreshold - currentThreshold : 0} XP',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                    Text(
+                      '$currentXp total XP',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                        fontWeight: VFontWeight.semiBold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          // ── Tier Perks ────────────────────────────────
+          _PerksCard(tier: tierValue, isDark: isDark),
+
+          const SizedBox(height: VSpacing.xl),
+
+          // ── Action Buttons ─────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => _showEditProfileSheet(resident),
+                    icon: const Icon(VIcons.edit, size: VIconSize.md),
+                    label: const Text('Edit Profile'),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      final referralCode = resident.referralCode.isNotEmpty
+                          ? resident.referralCode
+                          : resident.id
+                                .substring(
+                                  0,
+                                  resident.id.length < 8
+                                      ? resident.id.length
+                                      : 8,
+                                )
+                                .toUpperCase();
+                      SharePlus.instance.share(
+                        ShareParams(
+                          text:
+                              'Join me on Vertiege! 🌟\n\n${resident.name} is inviting you.\n\nDownload Vertiege and use referral code: $referralCode',
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.share_outlined, size: VIconSize.md),
+                    label: const Text('Share'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: VSpacing.xl),
+
+          // ── Stats Row ─────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _StatCard(
+                    icon: Icons.emoji_events,
+                    value: '$verifiedAchievementCount',
+                    label: 'Achievements',
+                    onTap: () => context.push('/achievements'),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: _StatCard(
+                    icon: Icons.people,
+                    value: '${resident.following.length}',
+                    label: 'Following',
+                    onTap: () => context.push('/search'),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: _StatCard(
+                    icon: Icons.public,
+                    value: '${resident.joinedWorldIds.length}',
+                    label: 'Worlds',
+                    onTap: () => context.push('/explore'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          // ── World Prestige Bonus ───────────────────────
+          if (_highPrestigeWorlds.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: Container(
+                padding: const EdgeInsets.all(VSpacing.md),
+                decoration: BoxDecoration(
+                  color: VColors.tertiary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
+                  border: Border.all(
+                    color: VColors.tertiary.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          size: VIconSize.md,
+                          color: VColors.tertiary,
+                        ),
+                        const SizedBox(width: VSpacing.xs),
+                        Text(
+                          'World Prestige Bonus',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: VFontWeight.semiBold,
+                            color: VColors.tertiary,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '+${(_highPrestigeWorlds.length * 5)}%',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: VFontWeight.bold,
+                            color: VColors.tertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: VSpacing.sm),
+                    ..._highPrestigeWorlds.map((world) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: VSpacing.xs),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              Icons.emoji_events,
-                              size: VIconSize.xs,
-                              color: VColors.tertiary,
-                            ),
-                            const SizedBox(width: VSpacing.xxs),
                             Text(
-                              _topPercentLabel(tierValue),
+                              world['name'] as String,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              'Prestige ${world['prestige']}',
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: VColors.tertiary,
                                 fontWeight: VFontWeight.semiBold,
@@ -380,453 +664,168 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                             ),
                           ],
                         ),
-                      ),
-                    ),
-
-                  // Subscription badge
-                  if (_subscriptionTier != SubscriptionTier.resident)
-                    Padding(
-                      padding: const EdgeInsets.only(top: VSpacing.xs),
-                      child: SubscriptionBadge(tier: _subscriptionTier),
-                    ),
-
-                  // REP badge
-                  const SizedBox(height: VSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.lg,
-                      vertical: VSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: VColors.tertiary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(VRadius.pill),
-                    ),
-                    child: Text(
-                      '$totalRep REP',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: VColors.tertiary,
-                        fontWeight: VFontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  // Bio
-                  if (resident.bio.isNotEmpty) ...[
-                    const SizedBox(height: VSpacing.md),
-                    Text(
-                      resident.bio,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-
-                  // Profession
-                  if (resident.profession != null &&
-                      resident.profession!.isNotEmpty) ...[
-                    const SizedBox(height: VSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: VSpacing.sm,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? VColors.glassBackgroundDark
-                            : VColors.glassBackground,
-                        borderRadius: BorderRadius.circular(VRadius.pill),
-                        border: Border.all(
-                          color: isDark
-                              ? VColors.glassBorderDark
-                              : VColors.glassBorder,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.work,
-                            size: VIconSize.xs,
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: VSpacing.xxs),
-                          Text(
-                            resident.profession!,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            // ── Referral Code ──────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: ReferralChip(
-                referralCode: resident.referralCode,
-                referredBy: resident.referredBy,
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-
-            // ── Tier Progress ───────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: Column(
-                children: [
-                  SovereignProgressBar(
-                    progress: tierProgress,
-                    color: VColors.primary,
-                    label: '${resident.tier.label} Tier',
-                    trailing: nextThreshold != null
-                        ? 'Next: $nextTierName'
-                        : 'Max Tier',
-                  ),
-                  const SizedBox(height: VSpacing.xs),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${currentXp - currentThreshold} / ${nextThreshold != null ? nextThreshold - currentThreshold : 0} XP',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                      Text(
-                        '$currentXp total XP',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.outline,
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-
-            // ── Tier Perks ────────────────────────────────
-            _PerksCard(tier: tierValue, isDark: isDark),
-
-            const SizedBox(height: VSpacing.xl),
-
-            // ── Action Buttons ─────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => _showEditProfileSheet(resident),
-                      icon: const Icon(VIcons.edit, size: VIconSize.md),
-                      label: const Text('Edit Profile'),
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        final referralCode = resident.referralCode.isNotEmpty
-                            ? resident.referralCode
-                            : resident.id.substring(0, resident.id.length < 8 ? resident.id.length : 8).toUpperCase();
-                        SharePlus.instance.share(
-                          ShareParams(
-                            text: 'Join me on Vertiege! 🌟\n\n${resident.name} is inviting you.\n\nDownload Vertiege and use referral code: $referralCode',
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.share_outlined,
-                        size: VIconSize.md,
-                      ),
-                      label: const Text('Share'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.xl),
-
-            // ── Stats Row ─────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.emoji_events,
-                      value: '$verifiedAchievementCount',
-                      label: 'Achievements',
-                      onTap: () => context.push('/achievements'),
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.people,
-                      value: '${resident.following.length}',
-                      label: 'Following',
-                      onTap: () => context.push('/search'),
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.public,
-                      value: '${resident.joinedWorldIds.length}',
-                      label: 'Worlds',
-                      onTap: () => context.push('/explore'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-
-            // ── World Prestige Bonus ───────────────────────
-            if (_highPrestigeWorlds.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-                child: Container(
-                  padding: const EdgeInsets.all(VSpacing.md),
-                  decoration: BoxDecoration(
-                    color: VColors.tertiary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(VRadius.lg),
-                    border: Border.all(
-                      color: VColors.tertiary.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.auto_awesome,
-                            size: VIconSize.md,
-                            color: VColors.tertiary,
-                          ),
-                          const SizedBox(width: VSpacing.xs),
-                          Text(
-                            'World Prestige Bonus',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: VFontWeight.semiBold,
-                              color: VColors.tertiary,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '+${(_highPrestigeWorlds.length * 5)}%',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: VFontWeight.bold,
-                              color: VColors.tertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: VSpacing.sm),
-                      ..._highPrestigeWorlds.map((world) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: VSpacing.xs),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                world['name'] as String,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                'Prestige ${world['prestige']}',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: VColors.tertiary,
-                                  fontWeight: VFontWeight.semiBold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ),
-            if (_highPrestigeWorlds.isNotEmpty)
-              const SizedBox(height: VSpacing.lg),
-
-            // ── Streak Display ──────────────────────────────
-            if (resident.streakCount > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-                child: StreakDisplay(
-                  streakCount: resident.streakCount,
-                  streakShields: resident.streakShields,
-                ),
-              ),
-            if (resident.streakCount > 0)
-              const SizedBox(height: VSpacing.lg),
-
-            // ── Trophy Case ─────────────────────────────────
-            TrophyCase(
-              resident: resident,
-              achievements: achievements.userAchievements,
-              totalXp: currentXp,
-            ),
-            const SizedBox(height: VSpacing.lg),
-
-            // ── Completion hints ────────────────────────────
-            if (resident.bio.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-                child: CompletionHint(
-                  icon: Icons.auto_awesome,
-                  title: 'Add a bio',
-                  subtitle: 'Tell people who you are and what you do.',
-                  color: VColors.warning,
-                  onTap: () => _showEditProfileSheet(resident),
-                ),
-              ),
-            if (resident.profession == null || resident.profession!.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-                child: CompletionHint(
-                  icon: Icons.work_outline,
-                  title: 'Pick a profession',
-                  subtitle: 'Unlock profession-specific worlds and badges.',
-                  color: VColors.primary,
-                  onTap: () => _showEditProfileSheet(resident),
-                ),
-              ),
-            if (resident.bio.isEmpty ||
-                resident.profession == null ||
-                resident.profession!.isEmpty)
-              const SizedBox(height: VSpacing.sm),
-
-            const Divider(height: 1),
-
-            // ── Badges section ─────────────────────────────
-            if (resident.decorations.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  VSpacing.lg,
-                  VSpacing.lg,
-                  VSpacing.lg,
-                  VSpacing.sm,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.emoji_events,
-                      size: VIconSize.sm,
-                      color: VColors.tertiary,
-                    ),
-                    const SizedBox(width: VSpacing.xs),
-                    Text(
-                      'Badges',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: VFontWeight.semiBold,
-                      ),
-                    ),
+                      );
+                    }),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-                child: BadgeDisplay(earnedBadgeIds: resident.decorations),
+            ),
+          if (_highPrestigeWorlds.isNotEmpty)
+            const SizedBox(height: VSpacing.lg),
+
+          // ── Streak Display ──────────────────────────────
+          if (resident.streakCount > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: StreakDisplay(
+                streakCount: resident.streakCount,
+                streakShields: resident.streakShields,
               ),
-              const SizedBox(height: VSpacing.lg),
-              const Divider(height: 1),
-            ],
+            ),
+          if (resident.streakCount > 0) const SizedBox(height: VSpacing.lg),
 
-            // ── Navigation Links ──────────────────────────
-            _NavTile(
-              icon: Icons.emoji_events,
-              iconColor: VColors.tertiary,
-              title: 'Achievements',
-              subtitle: '$verifiedAchievementCount verified · $currentXp XP',
-              onTap: () => context.push('/achievements'),
-            ),
-            Consumer(
-              builder: (context, ref, _) {
-                final allies = ref.watch(allyProvider).allies;
-                return _NavTile(
-                  icon: Icons.handshake,
-                  iconColor: allies.isNotEmpty
-                      ? VColors.tertiary
-                      : (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant),
-                  title: 'Allies',
-                  subtitle: allies.isNotEmpty
-                      ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
-                      : 'Find residents to connect',
-                  onTap: () => context.push('/search'),
-                );
-              },
-            ),
-            _NavTile(
-              icon: Icons.leaderboard,
-              iconColor: VColors.tertiary,
-              title: 'Hall of Ascension',
-              subtitle: 'View global rankings',
-              onTap: () => context.push('/hall-of-ascension'),
-            ),
-            _NavTile(
-              icon: Icons.monetization_on,
-              iconColor: VColors.tertiary,
-              title: 'Sovereign Regalia',
-              subtitle: '${resident.sovereignCoins} Sovereign Coins',
-              onTap: () => context.push('/shop'),
-            ),
-            _NavTile(
-              icon: Icons.settings_outlined,
-              iconColor: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-              title: 'Settings',
-              onTap: () => context.push('/settings'),
-            ),
+          // ── Trophy Case ─────────────────────────────────
+          TrophyCase(
+            resident: resident,
+            achievements: achievements.userAchievements,
+            totalXp: currentXp,
+          ),
+          const SizedBox(height: VSpacing.lg),
 
+          // ── Completion hints ────────────────────────────
+          if (resident.bio.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: CompletionHint(
+                icon: Icons.auto_awesome,
+                title: 'Add a bio',
+                subtitle: 'Tell people who you are and what you do.',
+                color: VColors.warning,
+                onTap: () => _showEditProfileSheet(resident),
+              ),
+            ),
+          if (resident.profession == null || resident.profession!.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: CompletionHint(
+                icon: Icons.work_outline,
+                title: 'Pick a profession',
+                subtitle: 'Unlock profession-specific worlds and badges.',
+                color: VColors.primary,
+                onTap: () => _showEditProfileSheet(resident),
+              ),
+            ),
+          if (resident.bio.isEmpty ||
+              resident.profession == null ||
+              resident.profession!.isEmpty)
             const SizedBox(height: VSpacing.sm),
 
-            // ── Sign out ───────────────────────────────────
+          const Divider(height: 1),
+
+          // ── Badges section ─────────────────────────────
+          if (resident.decorations.isNotEmpty) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: ListTile(
-                leading: const Icon(
-                  Icons.logout,
-                  color: VColors.error,
-                ),
-                title: const Text(
-                  'Sign Out',
-                  style: TextStyle(color: VColors.error),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-                onTap: _confirmSignOut,
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.lg,
+                VSpacing.lg,
+                VSpacing.lg,
+                VSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.emoji_events,
+                    size: VIconSize.sm,
+                    color: VColors.tertiary,
+                  ),
+                  const SizedBox(width: VSpacing.xs),
+                  Text(
+                    'Badges',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: VSpacing.xxl),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: BadgeDisplay(earnedBadgeIds: resident.decorations),
+            ),
+            const SizedBox(height: VSpacing.lg),
+            const Divider(height: 1),
           ],
-        ),
+
+          // ── Navigation Links ──────────────────────────
+          _NavTile(
+            icon: Icons.emoji_events,
+            iconColor: VColors.tertiary,
+            title: 'Achievements',
+            subtitle: '$verifiedAchievementCount verified · $currentXp XP',
+            onTap: () => context.push('/achievements'),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final allies = ref.watch(allyProvider).allies;
+              return _NavTile(
+                icon: Icons.handshake,
+                iconColor: allies.isNotEmpty
+                    ? VColors.tertiary
+                    : (isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant),
+                title: 'Allies',
+                subtitle: allies.isNotEmpty
+                    ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
+                    : 'Find residents to connect',
+                onTap: () => context.push('/search'),
+              );
+            },
+          ),
+          _NavTile(
+            icon: Icons.leaderboard,
+            iconColor: VColors.tertiary,
+            title: 'Hall of Ascension',
+            subtitle: 'View global rankings',
+            onTap: () => context.push('/hall-of-ascension'),
+          ),
+          _NavTile(
+            icon: Icons.monetization_on,
+            iconColor: VColors.tertiary,
+            title: 'Sovereign Regalia',
+            subtitle: '${resident.sovereignCoins} Sovereign Coins',
+            onTap: () => context.push('/shop'),
+          ),
+          _NavTile(
+            icon: Icons.settings_outlined,
+            iconColor: isDark
+                ? VColors.onSurfaceVariantDark
+                : VColors.onSurfaceVariant,
+            title: 'Settings',
+            onTap: () => context.push('/settings'),
+          ),
+
+          const SizedBox(height: VSpacing.sm),
+
+          // ── Sign out ───────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: ListTile(
+              leading: const Icon(Icons.logout, color: VColors.error),
+              title: const Text(
+                'Sign Out',
+                style: TextStyle(color: VColors.error),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(VRadius.lg),
+              ),
+              onTap: _confirmSignOut,
+            ),
+          ),
+
+          const SizedBox(height: VSpacing.xxl),
+        ],
+      ),
     );
   }
 }
@@ -871,7 +870,9 @@ class _PerksCard extends ConsumerWidget {
               value,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: value.contains('Locked')
-                    ? (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant)
+                    ? (isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant)
                     : VColors.tertiary,
                 fontWeight: VFontWeight.semiBold,
               ),
@@ -925,19 +926,39 @@ class _PerksCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _tile(Icons.trending_up, 'XP Multiplier', 'x${multiplier.toStringAsFixed(2)}'),
+                _tile(
+                  Icons.trending_up,
+                  'XP Multiplier',
+                  'x${multiplier.toStringAsFixed(2)}',
+                ),
                 _divider(),
                 _tile(Icons.monetization_on, 'Daily Coin Bonus', '+$coinBonus'),
                 _divider(),
-                _tile(Icons.emoji_emotions, 'Custom Reactions', '$reactionSlots slots'),
+                _tile(
+                  Icons.emoji_emotions,
+                  'Custom Reactions',
+                  '$reactionSlots slots',
+                ),
                 _divider(),
-                _tile(Icons.push_pin, 'Post Pins', pinLimit > 0 ? '$pinLimit available' : 'Locked'),
+                _tile(
+                  Icons.push_pin,
+                  'Post Pins',
+                  pinLimit > 0 ? '$pinLimit available' : 'Locked',
+                ),
                 _divider(),
                 _tile(Icons.language, 'World Creation', '$worldLimit worlds'),
                 _divider(),
-                _tile(Icons.local_bar, 'Lounge Access', hasLounge ? 'Unlocked' : 'Locked'),
+                _tile(
+                  Icons.local_bar,
+                  'Lounge Access',
+                  hasLounge ? 'Unlocked' : 'Locked',
+                ),
                 _divider(),
-                _tile(Icons.how_to_vote, 'Governance Vote', hasVote ? 'Unlocked' : 'Locked'),
+                _tile(
+                  Icons.how_to_vote,
+                  'Governance Vote',
+                  hasVote ? 'Unlocked' : 'Locked',
+                ),
               ],
             ),
           ),
@@ -983,11 +1004,7 @@ class _StatCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(
-                icon,
-                size: VIconSize.md,
-                color: VColors.primary,
-              ),
+              Icon(icon, size: VIconSize.md, color: VColors.primary),
               const SizedBox(height: VSpacing.xs),
               Text(
                 value,
@@ -1042,11 +1059,7 @@ class _NavTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: VIconSize.md,
-                color: iconColor,
-              ),
+              Icon(icon, size: VIconSize.md, color: iconColor),
               const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
