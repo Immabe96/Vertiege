@@ -77,6 +77,18 @@ class RankService {
     });
   }
 
+  static Future<void> assignRanks({
+    required String residentId,
+    required Iterable<String> rankIds,
+  }) async {
+    if (!isSupabaseConfigured() || rankIds.isEmpty) return;
+    final rows = rankIds.map((rankId) => {
+      'resident_id': residentId,
+      'rank_id': rankId,
+    }).toList();
+    await getSupabase().from('resident_ranks').upsert(rows);
+  }
+
   static Future<void> removeRank({
     required String residentId,
     required String rankId,
@@ -87,6 +99,18 @@ class RankService {
         .delete()
         .eq('resident_id', residentId)
         .eq('rank_id', rankId);
+  }
+
+  static Future<void> removeRanks({
+    required String residentId,
+    required Iterable<String> rankIds,
+  }) async {
+    if (!isSupabaseConfigured() || rankIds.isEmpty) return;
+    await getSupabase()
+        .from('resident_ranks')
+        .delete()
+        .eq('resident_id', residentId)
+        .inFilter('rank_id', rankIds.toList());
   }
 
   static Future<List<String>> fetchResidentRankIds(String residentId) async {

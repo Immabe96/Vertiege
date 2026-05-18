@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../config/tiers.dart';
@@ -381,16 +381,16 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                       onPressed: () async {
                         final toAdd = selected.difference(original);
                         final toRemove = original.difference(selected);
-                        for (final rankId in toAdd) {
-                          await RankService.assignRank(
+                        if (toAdd.isNotEmpty) {
+                          await RankService.assignRanks(
                             residentId: residentId,
-                            rankId: rankId,
+                            rankIds: toAdd,
                           );
                         }
-                        for (final rankId in toRemove) {
-                          await RankService.removeRank(
+                        if (toRemove.isNotEmpty) {
+                          await RankService.removeRanks(
                             residentId: residentId,
-                            rankId: rankId,
+                            rankIds: toRemove,
                           );
                         }
                         if (!ctx.mounted) return;
