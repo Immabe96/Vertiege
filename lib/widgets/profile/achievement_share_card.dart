@@ -5,6 +5,7 @@ import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../shared/share_button.dart';
+import '../../ui/buttons/v_button.dart';
 
 /// A glassmorphism-style share card for a newly earned achievement.
 ///
@@ -138,12 +139,10 @@ class AchievementShareCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: Spacing.md),
-            TextButton(
+            VButton(
+              label: 'Close',
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text(
-                'Close',
-                style: TextStyle(color: VColors.outline),
-              ),
+              variant: ButtonVariant.text,
             ),
           ],
         ),

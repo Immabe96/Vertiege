@@ -11,6 +11,7 @@ import '../../theme/design_system.dart';
 import '../../widgets/core/loading_state.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/journey/progress_trail.dart';
+import '../../ui/icons/v_icons.dart';
 
 class AscensionPathScreen extends ConsumerWidget {
   const AscensionPathScreen({super.key});
@@ -209,7 +210,7 @@ class AscensionPathScreen extends ConsumerWidget {
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: () => context.push('/hall-of-ascension'),
-                  icon: const Icon(Icons.leaderboard, size: IconSizes.md),
+                  icon: const Icon(VIcons.chart, size: IconSizes.md),
                   label: const Text(
                     'View Hall of Ascension',
                     style: TextStyle(

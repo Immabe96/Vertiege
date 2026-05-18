@@ -5,6 +5,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../theme/v_tokens.dart';
 import '../shared/tier_icon.dart';
+import '../../ui/buttons/v_button.dart';
 
 class TierCelebration extends StatefulWidget {
   final ResidentTier tier;
@@ -244,22 +245,10 @@ class _CelebrationCard extends StatelessWidget {
             // Dismiss button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: onDismiss,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: Spacing.sm + 4,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        RadiusTokens.cardFeatured,
-                      ),
-                    ),
-                  ),
-                  child: const Text('Awesome!'),
-                ),
+              child: VButton(
+                label: 'Awesome!',
+                onPressed: onDismiss,
+                isFullWidth: true,
               ),
             ),
             const SizedBox(height: Spacing.lg),

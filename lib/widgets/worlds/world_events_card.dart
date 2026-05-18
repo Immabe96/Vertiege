@@ -5,6 +5,8 @@ import '../../theme/design_system.dart';
 import '../../state/event_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../services/permission_service.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class WorldEventsCard extends ConsumerWidget {
   final String worldId;
@@ -59,7 +61,7 @@ class WorldEventsCard extends ConsumerWidget {
               if (canCreate)
                 TextButton.icon(
                   onPressed: () => _showCreateEvent(context, ref),
-                  icon: const Icon(Icons.add, size: IconSizes.xs),
+                  icon: const Icon(VIcons.plus, size: IconSizes.xs),
                   label: const Text('Create'),
                 ),
             ],
@@ -94,7 +96,10 @@ class WorldEventsCard extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelSmall,
               ),
-              trailing: TextButton(
+              trailing: VButton(
+                label: isRsvp
+                    ? 'Going (${event.rsvpIds.length})'
+                    : 'RSVP (${event.rsvpIds.length})',
                 onPressed: () {
                   if (resident != null) {
                     ref
@@ -102,15 +107,7 @@ class WorldEventsCard extends ConsumerWidget {
                         .toggleRsvp(worldId, event.id, resident.id);
                   }
                 },
-                child: Text(
-                  isRsvp
-                      ? 'Going (${event.rsvpIds.length})'
-                      : 'RSVP (${event.rsvpIds.length})',
-                  style: TextStyle(
-                    fontSize: FontSizes.caption,
-                    color: isRsvp ? VColors.primary : cs.outline,
-                  ),
-                ),
+                variant: ButtonVariant.text,
               ),
             );
           }),
@@ -148,11 +145,13 @@ class WorldEventsCard extends ConsumerWidget {
           ],
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Create',
             onPressed: () {
               final title = titleCtrl.text.trim();
               if (title.isEmpty) return;
@@ -172,7 +171,6 @@ class WorldEventsCard extends ConsumerWidget {
                   );
               Navigator.pop(ctx);
             },
-            child: const Text('Create'),
           ),
         ],
       ),

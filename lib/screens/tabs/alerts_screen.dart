@@ -13,6 +13,8 @@ import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../theme/design_system.dart';
 import '../../utils/navigation.dart';
+import '../../ui/buttons/v_button.dart';
+import '../../ui/icons/v_icons.dart';
 import '../../theme/v_colors.dart';
 
 enum _DateGroup { today, thisWeek, earlier }
@@ -106,7 +108,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(VIcons.arrowLeft),
           onPressed: () => safeBack(context),
         ),
         title: const Text('Alerts'),
@@ -116,9 +118,10 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
               animation: _markAllScale,
               builder: (context, child) =>
                   Transform.scale(scale: _markAllScale.value, child: child),
-              child: TextButton(
+              child: VButton(
+                label: 'Mark all read',
                 onPressed: _onMarkAllRead,
-                child: const Text('Mark all read'),
+                variant: ButtonVariant.text,
               ),
             ),
         ],
@@ -612,62 +615,33 @@ class _AllegianceRequestActions extends ConsumerWidget {
     return Row(
       children: [
         Expanded(
-          child: SizedBox(
-            height: 36,
-            child: OutlinedButton(
-              onPressed: requestId != null
-                  ? () async {
-                      ref
-                          .read(notificationProvider.notifier)
-                          .markRead(notification.id);
-                      await allyNotifier.declineRequest(requestId);
-                    }
-                  : null,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-                side: BorderSide(
-                  color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-              child: const Text(
-                'DECLINE',
-                style: TextStyle(fontSize: FontSizes.labelSm),
-              ),
-            ),
+          child: VButton(
+            label: 'DECLINE',
+            onPressed: requestId != null
+                ? () async {
+                    ref
+                        .read(notificationProvider.notifier)
+                        .markRead(notification.id);
+                    await allyNotifier.declineRequest(requestId);
+                  }
+                : null,
+            variant: ButtonVariant.outlined,
+            size: ButtonSize.small,
           ),
         ),
         const SizedBox(width: Spacing.sm),
         Expanded(
-          child: SizedBox(
-            height: 36,
-            child: FilledButton(
-              onPressed: requestId != null
-                  ? () async {
-                      ref
-                          .read(notificationProvider.notifier)
-                          .markRead(notification.id);
-                      await allyNotifier.acceptRequest(requestId);
-                    }
-                  : null,
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.tertiary,
-                foregroundColor: VColors.onTertiary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-              child: const Text(
-                'ACCEPT',
-                style: TextStyle(fontSize: FontSizes.labelSm),
-              ),
-            ),
+          child: VButton(
+            label: 'ACCEPT',
+            onPressed: requestId != null
+                ? () async {
+                    ref
+                        .read(notificationProvider.notifier)
+                        .markRead(notification.id);
+                    await allyNotifier.acceptRequest(requestId);
+                  }
+                : null,
+            size: ButtonSize.small,
           ),
         ),
       ],

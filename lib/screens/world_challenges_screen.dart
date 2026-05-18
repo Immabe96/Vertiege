@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/challenge.dart';
 import '../../services/challenge_service.dart';
@@ -6,6 +7,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../ui/icons/v_icons.dart';
+import '../ui/buttons/v_button.dart';
 
 class WorldChallengesScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -83,19 +86,18 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: challengeType,
-                  decoration: const InputDecoration(
-                    labelText: 'Type',
-                    border: OutlineInputBorder(),
+                FSelect<String>.rich(
+                  format: (value) => value == 'individual' ? 'Individual' : 'Collective',
+                  control: FSelectControl.lifted(
+                    value: challengeType,
+                    onChange: (v) { if (v != null) setDialogState(() => challengeType = v); },
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'individual', child: Text('Individual')),
-                    DropdownMenuItem(value: 'collective', child: Text('Collective')),
+                  label: const Text('Type'),
+                  hint: 'Select type',
+                  children: const [
+                    FSelectItem<String>(value: 'individual', title: Text('Individual')),
+                    FSelectItem<String>(value: 'collective', title: Text('Collective')),
                   ],
-                  onChanged: (v) {
-                    if (v != null) setDialogState(() => challengeType = v);
-                  },
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -136,11 +138,13 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
             ),
           ),
           actions: [
-            TextButton(
+            VButton(
+              label: 'Cancel',
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              variant: ButtonVariant.text,
             ),
-            FilledButton(
+            VButton(
+              label: 'Create',
               onPressed: () async {
                 if (titleController.text.trim().isEmpty) return;
                 final target = int.tryParse(targetController.text);
@@ -160,7 +164,6 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   _loadChallenges();
                 }
               },
-              child: const Text('Create'),
             ),
           ],
         ),
@@ -225,7 +228,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
               if (widget.isSovereignOrCouncil)
                 FilledButton.icon(
                   onPressed: _showCreateChallengeDialog,
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(VIcons.plus),
                   label: const Text('New Challenge'),
                 ),
             ],
@@ -359,7 +362,8 @@ class _ChallengeCard extends StatelessWidget {
           if (isSovereignOrCouncil && !isCompleted)
             Padding(
               padding: const EdgeInsets.only(top: VSpacing.sm),
-              child: TextButton(
+              child: VButton(
+                label: challenge.isActive ? 'Pause' : 'Resume',
                 onPressed: () async {
                   await ChallengeService.toggleChallenge(
                     challenge.id,
@@ -367,7 +371,7 @@ class _ChallengeCard extends StatelessWidget {
                   );
                   onToggle();
                 },
-                child: Text(challenge.isActive ? 'Pause' : 'Resume'),
+                variant: ButtonVariant.text,
               ),
             ),
         ],

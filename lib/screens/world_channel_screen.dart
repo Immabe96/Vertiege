@@ -13,6 +13,7 @@ import '../state/resident_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../ui/icons/v_icons.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
@@ -675,7 +676,7 @@ class _MessageBubbleState extends State<_MessageBubble>
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.reply, color: VColors.primary),
+              leading: const Icon(VIcons.arrowLeft, color: VColors.primary),
               title: const Text('Reply in Thread'),
               subtitle: const Text('Start or join a threaded conversation'),
               onTap: () {

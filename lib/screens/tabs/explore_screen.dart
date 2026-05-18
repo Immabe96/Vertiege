@@ -9,6 +9,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/ui.dart';
+import '../../ui/icons/v_icons.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -155,7 +156,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     ),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close, size: VIconSize.md),
+                            icon: const Icon(VIcons.x, size: VIconSize.md),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
@@ -679,7 +680,7 @@ class _WorldListCard extends StatelessWidget {
                           child: FilledButton.icon(
                             onPressed: () =>
                                 context.push('/explore/${world.id}'),
-                            icon: const Icon(Icons.open_in_new),
+                            icon: const Icon(VIcons.arrowLeft),
                             label: const Text('Enter World'),
                           ),
                         ),

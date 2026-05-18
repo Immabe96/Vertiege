@@ -10,6 +10,7 @@ import '../../services/supabase.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
 
 class SubmitAchievementScreen extends ConsumerStatefulWidget {
   const SubmitAchievementScreen({super.key});
@@ -315,7 +316,7 @@ class _SubmitAchievementScreenState
                     if (_proofImagePath != null)
                       OutlinedButton.icon(
                         onPressed: () => setState(() => _proofImagePath = null),
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(VIcons.x),
                         label: const Text('Remove'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: VColors.error,
@@ -352,7 +353,7 @@ class _SubmitAchievementScreenState
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.upload),
+                  : const Icon(VIcons.upload),
               label: Text(_isUploading ? 'Uploading...' : 'Submit for Review'),
             ),
           ),

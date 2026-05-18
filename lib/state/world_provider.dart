@@ -38,7 +38,7 @@ class WorldNotifier extends Notifier<WorldState> {
   @override
   WorldState build() {
     // Load local config worlds immediately — no network needed
-    return const WorldState(isLoading: true);
+    return const WorldState();
   }
 
   static const String _worldsCacheKey = '@worlds_cache';

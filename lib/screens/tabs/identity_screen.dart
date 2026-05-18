@@ -13,6 +13,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
+import '../../ui/buttons/v_button.dart';
+import '../../ui/icons/v_icons.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/profile/badge_display.dart';
 import '../../widgets/profile/edit_profile_sheet.dart';
@@ -91,25 +93,18 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           'You\'ll need to sign in again to access your worlds and progress.',
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Sign Out',
             onPressed: () async {
               Navigator.of(ctx).pop();
               await AuthService.signOut();
               if (mounted) context.go('/login');
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: VColors.error,
-            ),
-            child: const Text('Sign Out'),
           ),
         ],
       ),
@@ -536,7 +531,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () => _showEditProfileSheet(resident),
-                      icon: const Icon(Icons.edit, size: VIconSize.md),
+                      icon: const Icon(VIcons.edit, size: VIconSize.md),
                       label: const Text('Edit Profile'),
                     ),
                   ),

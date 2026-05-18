@@ -88,7 +88,7 @@ class ChallengeState {
 class ChallengeNotifier extends Notifier<ChallengeState> {
   @override
   ChallengeState build() {
-    return const ChallengeState(isLoading: false);
+    return const ChallengeState();
   }
 
   Future<void> loadChallengesForWorld(String worldId) async {
@@ -192,7 +192,7 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
   Future<void> claimReward(String challengeId) async {
     final challenge = state.activeChallenges.firstWhere(
       (c) => c.id == challengeId,
-      orElse: () => ChallengeData(
+      orElse: () => const ChallengeData(
         id: '',
         title: '',
         description: '',

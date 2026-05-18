@@ -1,5 +1,6 @@
 ﻿import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,8 @@ import '../services/supabase.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import 'twin_seal_setup_screen.dart';
+import '../ui/icons/v_icons.dart';
+import '../ui/buttons/v_button.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -135,16 +138,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Close',
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Close',
-              style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
+            variant: ButtonVariant.text,
           ),
         ],
       ),
@@ -182,18 +179,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Update',
             onPressed: () async {
               final email = controller.text.trim();
               if (email.isEmpty) return;
@@ -224,7 +216,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 }
               }
             },
-            child: const Text('Update'),
           ),
         ],
       ),
@@ -275,7 +266,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'New password',
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(VIcons.lock),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
                   ),
@@ -302,7 +293,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Confirm new password',
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(VIcons.lock),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
                   ),
@@ -326,18 +317,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Change',
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
               try {
@@ -367,7 +353,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 }
               }
             },
-            child: const Text('Change'),
           ),
         ],
       ),
@@ -426,21 +411,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
           actions: [
-            TextButton(
+            VButton(
+              label: 'Cancel',
               onPressed: () => Navigator.pop(ctx),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
-                ),
-              ),
+              variant: ButtonVariant.text,
             ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.error,
-              ),
+            VButton(
+              label: 'Delete My Account',
               onPressed: confirmText.trim() == 'DELETE'
                   ? () async {
                       try {
@@ -470,7 +447,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       }
                     }
                   : null,
-              child: const Text('Delete My Account'),
             ),
           ],
         ),
@@ -540,9 +516,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Close',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+            variant: ButtonVariant.text,
           ),
         ],
       ),
@@ -615,9 +592,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Close',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+            variant: ButtonVariant.text,
           ),
         ],
       ),
@@ -676,18 +654,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
           actions: [
-            TextButton(
+            VButton(
+              label: 'Cancel',
               onPressed: () => Navigator.pop(ctx),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
-                ),
-              ),
+              variant: ButtonVariant.text,
             ),
-            FilledButton(
+            VButton(
+              label: 'Validate & Restore',
               onPressed: () async {
                 final raw = controller.text.trim();
                 if (raw.isEmpty) {
@@ -740,7 +713,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   );
                 }
               },
-              child: const Text('Validate & Restore'),
             ),
           ],
         ),
@@ -904,7 +876,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   leading: const Icon(Icons.celebration, size: VIconSize.md),
                   title: const Text('Credits'),
                   subtitle: const Text('The people behind Vertiege'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _showCreditsDialog,
                 ),
               ],
@@ -920,7 +892,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: const Text(
                     'Review pending profession verification requests',
                   ),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: () => context.push('/admin/verifications'),
                 ),
               ],
@@ -934,7 +906,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   leading: const Icon(Icons.email_outlined, size: VIconSize.md),
                   title: const Text('Change Email'),
                   subtitle: const Text('Update your email address'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _showChangeEmailDialog,
                 ),
                 _sectionDivider(isDark),
@@ -942,7 +914,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   leading: const Icon(Icons.lock_outline, size: VIconSize.md),
                   title: const Text('Change Password'),
                   subtitle: const Text('Update your password'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _showChangePasswordDialog,
                 ),
                 _sectionDivider(isDark),
@@ -954,7 +926,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   title: const Text('Twin Seal (2FA)'),
                   subtitle: const Text('Add an extra layer of security'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -977,7 +949,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   subtitle: const Text('Permanently remove your account'),
                   trailing: const Icon(
-                    Icons.chevron_right,
+                    VIcons.chevronRight,
                     size: VIconSize.md,
                     color: VColors.error,
                   ),
@@ -1039,7 +1011,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 _sectionDivider(isDark),
                 SwitchListTile(
-                  secondary: const Icon(Icons.public, size: VIconSize.md),
+                  secondary: const Icon(VIcons.globe, size: VIconSize.md),
                   title: const Text('World Invites'),
                   subtitle: const Text('When invited to a new world'),
                   value: _worldInvitesEnabled,
@@ -1146,22 +1118,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       leading: const Icon(Icons.text_fields, size: VIconSize.md),
                       title: const Text('Text Size'),
                       subtitle: Text(textSize.name[0].toUpperCase() + textSize.name.substring(1)),
-                      trailing: DropdownButton<TextSize>(
-                        value: textSize,
-                        underline: const SizedBox.shrink(),
-                        items: TextSize.values
-                            .map(
-                              (t) => DropdownMenuItem(
-                                value: t,
-                                child: Text(t.name[0].toUpperCase() + t.name.substring(1)),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            ref.read(themeProvider.notifier).setTextSize(v);
-                          }
-                        },
+                      trailing: FSelect<TextSize>.rich(
+                        format: (value) => value.name[0].toUpperCase() + value.name.substring(1),
+                        control: FSelectControl.lifted(
+                          value: textSize,
+                          onChange: (v) { if (v != null) ref.read(themeProvider.notifier).setTextSize(v); },
+                        ),
+                        children: TextSize.values.map((t) => FSelectItem<TextSize>(
+                          value: t,
+                          title: Text(t.name[0].toUpperCase() + t.name.substring(1)),
+                        )).toList(),
                       ),
                     );
                   },
@@ -1255,15 +1221,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   title: const Text('Privacy Policy'),
                   subtitle: const Text('How we handle your data'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _showPrivacyPolicyDialog,
                 ),
                 _sectionDivider(isDark),
                 ListTile(
-                  leading: const Icon(Icons.gavel_outlined, size: VIconSize.md),
+                  leading: const Icon(VIcons.gavel, size: VIconSize.md),
                   title: const Text('Terms of Service'),
                   subtitle: const Text('Rules for using Vertiege'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _showTermsDialog,
                 ),
                 _sectionDivider(isDark),
@@ -1274,7 +1240,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   title: const Text('Open Source Licenses'),
                   subtitle: const Text('Third-party software licenses'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: 'Vertiege',
@@ -1293,7 +1259,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   leading: const Icon(Icons.backup, size: VIconSize.md),
                   title: const Text('Create Backup'),
                   subtitle: const Text('Export all app data as JSON'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: () async {
                     await BackupService.createBackup();
                     if (context.mounted) {
@@ -1311,7 +1277,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   leading: const Icon(Icons.restore, size: VIconSize.md),
                   title: const Text('Restore Backup'),
                   subtitle: const Text('Import previously saved data'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _showRestoreBackupDialog,
                 ),
                 _sectionDivider(isDark),
@@ -1322,7 +1288,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   title: const Text('Clear Cache'),
                   subtitle: Text('Frees up ~${_formatBytes(_cacheSizeBytes)}'),
-                  trailing: const Icon(Icons.chevron_right, size: VIconSize.md),
+                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   onTap: _cacheSizeBytes > 0 ? _clearCache : null,
                   enabled: _cacheSizeBytes > 0,
                 ),
@@ -1350,7 +1316,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   trailing: const Icon(
-                    Icons.chevron_right,
+                    VIcons.chevronRight,
                     size: VIconSize.md,
                     color: VColors.error,
                   ),
@@ -1504,41 +1470,27 @@ class _ResetDataConfirmationDialogState
             ),
       actions: _step == 0
           ? [
-              TextButton(
+              VButton(
+                label: 'Cancel',
                 onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
-                  ),
-                ),
+                variant: ButtonVariant.text,
               ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: VColors.error),
+              VButton(
+                label: 'Continue',
                 onPressed: _goToStep2,
-                child: const Text('Continue'),
               ),
             ]
           : [
-              TextButton(
+              VButton(
+                label: 'Back',
                 onPressed: _goBack,
-                child: Text(
-                  'Back',
-                  style: TextStyle(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
-                  ),
-                ),
+                variant: ButtonVariant.text,
               ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: VColors.error),
+              VButton(
+                label: 'Reset Everything',
                 onPressed: _typedText.trim() == 'RESET'
                     ? widget.onConfirmed
                     : null,
-                child: const Text('Reset Everything'),
               ),
             ],
     );

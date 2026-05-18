@@ -5,6 +5,8 @@ import '../../models/resident.dart';
 import '../../theme/v_tokens.dart';
 import '../../theme/v_colors.dart';
 import '../../utils/haptics.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class EditProfileSheet extends StatefulWidget {
   final Resident resident;
@@ -121,7 +123,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(VRadius.lg),
                   ),
-                  prefixIcon: const Icon(Icons.person_outline),
+                  prefixIcon: const Icon(VIcons.user),
                   filled: true,
                   counterText: '',
                 ),
@@ -156,7 +158,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                   ),
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(bottom: 56),
-                    child: Icon(Icons.edit_note),
+                    child: Icon(VIcons.edit),
                   ),
                   filled: true,
                   counterText: '',
@@ -199,21 +201,17 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 ),
               ),
               const SizedBox(height: VSpacing.xl),
-              FilledButton.icon(
-                onPressed: _saving ? null : _save,
-                icon: _saving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.check),
-                label: Text(_saving ? 'Saving...' : 'Save Changes'),
+              VButton(
+                label: 'Save Changes',
+                onPressed: _save,
+                icon: const Icon(VIcons.badgeCheck),
+                isLoading: _saving,
               ),
               const SizedBox(height: VSpacing.sm),
-              TextButton(
+              VButton(
+                label: 'Cancel',
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
+                variant: ButtonVariant.text,
               ),
             ],
           ),

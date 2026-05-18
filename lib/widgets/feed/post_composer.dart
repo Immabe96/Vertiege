@@ -12,6 +12,7 @@ import '../../theme/design_system.dart';
 import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
+import '../../ui/icons/v_icons.dart';
 
 class PostComposer extends ConsumerStatefulWidget {
   const PostComposer({super.key});
@@ -341,7 +342,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   // Close
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, size: IconSizes.md),
+                    icon: const Icon(VIcons.x, size: IconSizes.md),
                     color: VColors.outline,
                     splashRadius: TouchTargets.iconButton / 2,
                   ),

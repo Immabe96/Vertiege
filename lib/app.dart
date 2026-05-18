@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:forui/forui.dart';
 import 'state/theme_provider.dart';
 import 'state/resident_provider.dart';
 import 'state/notification_provider.dart';
@@ -11,12 +13,15 @@ import 'state/world_provider.dart';
 import 'state/event_provider.dart';
 import 'state/quest_provider.dart';
 import 'theme/app_theme.dart';
+import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
 import 'screens/splash_screen.dart';
 import 'services/daily_reward_service.dart';
 import 'services/storage_service.dart';
 import 'services/store_service.dart';
 import 'services/push_service.dart';
+import 'services/push_token_service.dart';
+import 'services/analytics_service.dart';
 import 'services/crash_reporter.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/offline_banner.dart';
@@ -29,8 +34,8 @@ class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
       _VirtualStatusWorldsAppState();
 }
 
-class _VirtualStatusWorldsAppState
-    extends ConsumerState<VirtualStatusWorldsApp> with WidgetsBindingObserver {
+class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
+    with WidgetsBindingObserver {
   bool _showSplash = true;
   bool _isOnline = true;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
@@ -39,10 +44,10 @@ class _VirtualStatusWorldsAppState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
-      final offline = results.every(
-        (r) => r == ConnectivityResult.none,
-      );
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final offline = results.every((r) => r == ConnectivityResult.none);
       if (mounted) setState(() => _isOnline = !offline);
     });
     Future.delayed(const Duration(seconds: 3), () {
@@ -106,6 +111,9 @@ class _VirtualStatusWorldsAppState
     try {
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
+        CrashReporter.instance.setUser(resident.id, name: resident.name);
+        unawaited(AnalyticsService.setUser(resident.id));
+        unawaited(PushTokenService.registerForResident(resident.id));
         await PushService.initialize(userId: resident.id);
       }
     } catch (e) {
@@ -180,29 +188,67 @@ class _VirtualStatusWorldsAppState
       return MaterialApp(
         title: 'Vertiege',
         debugShowCheckedModeBanner: false,
+        supportedLocales: FLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          ...FLocalizations.localizationsDelegates,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         home: const SplashScreen(),
         builder: (context, child) =>
-            MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: textScaler), child: child!),
+            _withForui(context, textScaler, child!, isDark: false),
       );
     }
+
+    final platformBrightness = MediaQuery.platformBrightnessOf(context);
+    final useDarkForui = switch (themeState.scheme) {
+      ThemeScheme.light => false,
+      ThemeScheme.dark => true,
+      ThemeScheme.system => platformBrightness == Brightness.dark,
+    };
 
     return MaterialApp.router(
       title: 'Vertiege',
       debugShowCheckedModeBanner: false,
+      supportedLocales: FLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        ...FLocalizations.localizationsDelegates,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeState.themeMode,
       routerConfig: router,
-      builder: (context, child) =>
-          OfflineBanner(
-            show: !_isOnline,
-            child: MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-              child: child!,
-            ),
+      builder: (context, child) => _withForui(
+        context,
+        textScaler,
+        OfflineBanner(show: !_isOnline, child: child!),
+        isDark: useDarkForui,
+      ),
+    );
+  }
+
+  Widget _withForui(
+    BuildContext context,
+    TextScaler textScaler,
+    Widget child, {
+    required bool isDark,
+  }) {
+    return FTheme(
+      data: isDark ? VertiegeForuiTheme.dark : VertiegeForuiTheme.light,
+      child: FToaster(
+        child: FTooltipGroup(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+            child: child,
           ),
+        ),
+      ),
     );
   }
 }

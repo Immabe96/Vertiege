@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -392,10 +393,16 @@ class _DropdownTile extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Text(label)),
-        DropdownButton<String>(
-          value: value,
-          items: items.map((e) => DropdownMenuItem(value: e.$1, child: Text(e.$2))).toList(),
-          onChanged: onChanged,
+        FSelect<String>.rich(
+          format: (value) => items.firstWhere((e) => e.$1 == value).$2,
+          control: FSelectControl.lifted(
+            value: value,
+            onChange: (v) { if (v != null) onChanged(v); },
+          ),
+          children: items.map((e) => FSelectItem<String>(
+            value: e.$1,
+            title: Text(e.$2),
+          )).toList(),
         ),
       ],
     );

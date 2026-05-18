@@ -10,6 +10,7 @@ import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/worlds/dominion_type_picker.dart';
+import '../ui/icons/v_icons.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -208,7 +209,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     height: 48,
                     child: FilledButton.icon(
                       onPressed: () => context.push('/achievements'),
-                      icon: const Icon(Icons.emoji_events),
+                      icon: const Icon(VIcons.trophy),
                       label: const Text('Go to Achievements'),
                       style: FilledButton.styleFrom(
                         backgroundColor: VColors.tertiary,
@@ -308,7 +309,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   height: 48,
                   child: FilledButton.icon(
                     onPressed: () => context.go('/achievements'),
-                    icon: const Icon(Icons.emoji_events),
+                    icon: const Icon(VIcons.trophy),
                     label: const Text('Go to Achievements'),
                     style: FilledButton.styleFrom(
                       backgroundColor: VColors.tertiary,
@@ -365,7 +366,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.public, color: VColors.primary, size: 20),
+                      Icon(VIcons.globe, color: VColors.primary, size: 20),
                       const SizedBox(width: Spacing.sm),
                       Text('World Details', style: theme.textTheme.titleMedium),
                     ],
@@ -393,7 +394,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       focusedBorder: const UnderlineInputBorder(
                         borderSide: BorderSide(color: VColors.primary),
                       ),
-                      prefixIcon: const Icon(Icons.edit_note),
+                      prefixIcon: const Icon(VIcons.edit),
                       filled: true,
                       fillColor: isDark
                           ? VColors.glassBackgroundDark
@@ -527,7 +528,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.tag, color: VColors.primary, size: 20),
+                      Icon(VIcons.tag, color: VColors.primary, size: 20),
                       const SizedBox(width: Spacing.sm),
                       Text(
                         'Default Channels',
@@ -579,7 +580,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                           color: VColors.onSurface,
                         ),
                       )
-                    : const Icon(Icons.add_circle_outline),
+                    : const Icon(VIcons.plus),
                 label: Text(_isCreating ? 'Creating...' : 'Create World'),
                 style: FilledButton.styleFrom(
                   backgroundColor: VColors.tertiary,

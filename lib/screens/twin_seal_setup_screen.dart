@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
+import '../ui/icons/v_icons.dart';
+import '../ui/buttons/v_button.dart';
 
 class TwinSealSetupScreen extends StatefulWidget {
   const TwinSealSetupScreen({super.key});
@@ -180,7 +182,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
           const SizedBox(height: Spacing.xl),
           FilledButton.icon(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.check),
+            icon: const Icon(VIcons.badgeCheck),
             label: const Text('Done'),
           ),
         ],
@@ -299,15 +301,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                 style: const TextStyle(color: VColors.error),
               ),
             ),
-        FilledButton(
-          onPressed: _isLoading ? null : _verifyAndEnroll,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Verify & Enable'),
+        VButton(
+          label: 'Verify & Enable',
+          onPressed: _verifyAndEnroll,
+          isLoading: _isLoading,
         ),
       ],
     );
@@ -350,7 +347,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.security),
+              : const Icon(VIcons.shield),
           label: const Text('Generate Secret'),
         ),
       ],

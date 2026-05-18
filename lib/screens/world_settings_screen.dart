@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,10 +14,12 @@ import '../services/quiet_hours_service.dart';
 import '../services/invite_service.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
+import '../ui/buttons/v_button.dart';
 import '../services/store_service.dart';
 import '../models/world.dart';
 import '../config/tiers.dart';
 import '../models/invite.dart';
+import '../ui/icons/v_icons.dart';
 import '../state/channel_provider.dart';
 import '../utils/tier_utils.dart';
 import '../widgets/core/glass_panel.dart';
@@ -206,16 +209,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           'They will be removed from the world and cannot rejoin.',
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
+          VButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Ban'),
+            label: 'Ban',
           ),
         ],
       ),
@@ -252,11 +253,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           decoration: _ghostInputDecoration(hintText: 'New channel name'),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Rename',
             onPressed: () {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
@@ -266,7 +269,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Rename'),
           ),
         ],
       ),
@@ -298,11 +300,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           ],
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Create',
             onPressed: () {
               final name = nameController.text.trim();
               if (name.isNotEmpty) {
@@ -321,7 +325,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                 );
               }
             },
-            child: const Text('Create'),
           ),
         ],
       ),
@@ -381,16 +384,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           'data associated with this world will be permanently deleted.',
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
+          VButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            label: 'Delete',
           ),
         ],
       ),
@@ -436,7 +437,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                 padding: const EdgeInsets.all(Spacing.lg),
                 child: Row(
                   children: [
-                    const Icon(Icons.auto_awesome, color: VColors.tertiary),
+                    const Icon(VIcons.sparkles, color: VColors.tertiary),
                     const SizedBox(width: Spacing.sm),
                     const Expanded(
                       child: Text(
@@ -587,7 +588,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           controller: _nameController,
                           decoration: _ghostInputDecoration(
                             hintText: 'Enter a name for your world',
-                            prefixIcon: const Icon(Icons.edit_note),
+                            prefixIcon: const Icon(VIcons.edit),
                           ),
                           textCapitalization: TextCapitalization.words,
                           maxLength: 50,
@@ -714,7 +715,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           height: TouchTargets.minimum,
                           child: OutlinedButton.icon(
                             onPressed: () => _showBannerGenerator(),
-                            icon: const Icon(Icons.auto_awesome),
+                            icon: const Icon(VIcons.sparkles),
                             label: const Text('Regenerate Banner'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: VColors.tertiary,
@@ -1094,23 +1095,16 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: Spacing.xs),
-                                      DropdownButton<int>(
-                                        value: _quietHours.startHour,
-                                        isExpanded: true,
-                                        items: List.generate(
-                                          24,
-                                          (i) => DropdownMenuItem(
-                                            value: i,
-                                            child: Text(
-                                              '${i.toString().padLeft(2, '0')}:00',
-                                            ),
-                                          ),
+                                      FSelect<int>.rich(
+                                        format: (value) => '${value.toString().padLeft(2, '0')}:00',
+                                        control: FSelectControl.lifted(
+                                          value: _quietHours.startHour,
+                                          onChange: (v) { if (v != null) _saveQuietHours(startHour: v); },
                                         ),
-                                        onChanged: (v) {
-                                          if (v != null) {
-                                            _saveQuietHours(startHour: v);
-                                          }
-                                        },
+                                        children: List.generate(24, (i) => FSelectItem<int>(
+                                          value: i,
+                                          title: Text('${i.toString().padLeft(2, '0')}:00'),
+                                        )),
                                       ),
                                     ],
                                   ),
@@ -1129,23 +1123,16 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: Spacing.xs),
-                                      DropdownButton<int>(
-                                        value: _quietHours.endHour,
-                                        isExpanded: true,
-                                        items: List.generate(
-                                          24,
-                                          (i) => DropdownMenuItem(
-                                            value: i,
-                                            child: Text(
-                                              '${i.toString().padLeft(2, '0')}:00',
-                                            ),
-                                          ),
+                                      FSelect<int>.rich(
+                                        format: (value) => '${value.toString().padLeft(2, '0')}:00',
+                                        control: FSelectControl.lifted(
+                                          value: _quietHours.endHour,
+                                          onChange: (v) { if (v != null) _saveQuietHours(endHour: v); },
                                         ),
-                                        onChanged: (v) {
-                                          if (v != null) {
-                                            _saveQuietHours(endHour: v);
-                                          }
-                                        },
+                                        children: List.generate(24, (i) => FSelectItem<int>(
+                                          value: i,
+                                          title: Text('${i.toString().padLeft(2, '0')}:00'),
+                                        )),
                                       ),
                                     ],
                                   ),
@@ -1423,7 +1410,7 @@ class _BoostWorldCard extends ConsumerWidget {
               onPressed: canBoost
                   ? () => _handleBoost(context, ref, world)
                   : null,
-              icon: const Icon(Icons.rocket_launch, size: 20),
+              icon: const Icon(VIcons.rocket, size: 20),
               label: Text(
                 enabled ? 'Boost World - \$4.99' : 'Boost unavailable',
               ),
@@ -1524,11 +1511,13 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
           autofocus: true,
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Create',
             onPressed: () async {
               final name = controller.text.trim();
               if (name.isEmpty) return;
@@ -1536,7 +1525,6 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
               Navigator.pop(ctx);
               _load();
             },
-            child: const Text('Create'),
           ),
         ],
       ),
@@ -1571,7 +1559,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
               ),
               TextButton.icon(
                 onPressed: _showCreateDialog,
-                icon: const Icon(Icons.add, size: IconSizes.sm),
+                icon: const Icon(VIcons.plus, size: IconSizes.sm),
                 label: const Text('Create'),
               ),
             ],

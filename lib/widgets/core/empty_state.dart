@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
+import '../../ui/icons/v_icons.dart';
 
 /// Variant determines the color tint applied to the empty state.
 enum EmptyStateVariant { default_, error, success }
@@ -207,7 +208,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                     opacity: _buttonFade,
                     child: FilledButton.icon(
                       onPressed: widget.onAction,
-                      icon: const Icon(Icons.refresh, size: IconSizes.sm),
+                      icon: const Icon(VIcons.arrowLeft, size: IconSizes.sm),
                       label: Text(widget.actionLabel!),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(

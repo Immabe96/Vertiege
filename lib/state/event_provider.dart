@@ -93,7 +93,7 @@ class EventNotifier extends Notifier<EventState> {
       final eventsByWorld = <String, List<WorldEvent>>{};
       for (final entry in map.entries) {
         eventsByWorld[entry.key] = (entry.value as List)
-            .map((e) => WorldEvent.fromJson(e))
+            .map((e) => WorldEvent.fromJson(e as Map<String, dynamic>))
             .toList();
       }
       state = EventState(eventsByWorld: eventsByWorld);

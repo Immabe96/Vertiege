@@ -5,6 +5,7 @@ import '../../theme/design_system.dart';
 import '../../models/channel.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../state/channel_provider.dart';
+import '../../ui/icons/v_icons.dart';
 
 class WorldSettingsChannels extends ConsumerWidget {
   final String worldId;
@@ -70,7 +71,7 @@ class WorldSettingsChannels extends ConsumerWidget {
             height: TouchTargets.minimum,
             child: OutlinedButton.icon(
               onPressed: () => onCreate(context),
-              icon: const Icon(Icons.add, size: 18),
+              icon: const Icon(VIcons.plus, size: 18),
               label: const Text('Add Channel'),
             ),
           ),

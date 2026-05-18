@@ -3,6 +3,7 @@ import '../../models/resident.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
 
 class TrophyCase extends StatelessWidget {
   final Resident resident;
@@ -28,7 +29,7 @@ class TrophyCase extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.emoji_events, size: VIconSize.sm, color: VColors.tertiary),
+              Icon(VIcons.trophy, size: VIconSize.sm, color: VColors.tertiary),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Trophy Case',
@@ -333,7 +334,7 @@ class _PrestigeStarsSection extends StatelessWidget {
                 stars,
                 (i) => Padding(
                   padding: EdgeInsets.only(right: i < stars - 1 ? 6 : 0),
-                  child: const Icon(Icons.star, color: VColors.tertiary, size: 28),
+                  child: const Icon(VIcons.sparkles, color: VColors.tertiary, size: 28),
                 ),
               ),
               const SizedBox(width: VSpacing.md),
@@ -402,7 +403,7 @@ class _RecentAchievementsSection extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.emoji_events, size: 14, color: VColors.tertiary),
+                  Icon(VIcons.trophy, size: 14, color: VColors.tertiary),
                   const SizedBox(width: VSpacing.xxs),
                   Text(
                     a.achievementId,

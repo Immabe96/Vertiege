@@ -4,6 +4,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
+import '../../ui/icons/v_icons.dart';
 
 class AchievementCard extends StatelessWidget {
   final Achievement achievement;
@@ -335,7 +336,7 @@ class _AchievementIcon extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: VColors.success,
                 ),
-                child: const Icon(Icons.check, size: 14, color: VColors.onPrimary),
+                child: const Icon(VIcons.badgeCheck, size: 14, color: VColors.onPrimary),
               ),
             ),
           if (status == AchievementStatus.submitted)
@@ -367,7 +368,7 @@ class _AchievementIcon extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: VColors.outline,
                 ),
-                child: const Icon(Icons.lock, size: 13, color: VColors.onPrimary),
+                child: const Icon(VIcons.lock, size: 13, color: VColors.onPrimary),
               ),
             ),
         ],

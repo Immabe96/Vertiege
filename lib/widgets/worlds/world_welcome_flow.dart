@@ -6,6 +6,8 @@ import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class WorldWelcomeFlow extends ConsumerStatefulWidget {
   final World world;
@@ -92,7 +94,7 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(VIcons.x),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -130,15 +132,10 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
               ),
             ),
             const SizedBox(height: VSpacing.lg),
-            FilledButton(
-              onPressed: _isLoading ? null : _next,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(_step < 2 ? 'Continue' : 'Enter World'),
+            VButton(
+              label: _step < 2 ? 'Continue' : 'Enter World',
+              onPressed: _next,
+              isLoading: _isLoading,
             ),
           ],
         ),
@@ -210,7 +207,7 @@ class _WelcomeStep extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.auto_awesome, size: VIconSize.sm, color: VColors.warning),
+                  Icon(VIcons.sparkles, size: VIconSize.sm, color: VColors.warning),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Text(
@@ -455,7 +452,7 @@ class _ActionCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right),
+            const Icon(VIcons.chevronRight),
           ],
         ),
       ),

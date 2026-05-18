@@ -10,6 +10,7 @@ import '../../theme/design_system.dart';
 import '../core/fade_in.dart';
 import '../core/loading_state.dart';
 import '../profile/cosmetic_avatar.dart';
+import '../../ui/buttons/v_button.dart';
 
 class WorldResidents extends ConsumerStatefulWidget {
   final World world;
@@ -140,13 +141,14 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
         if (_residents.length > 5)
           Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: TextButton(
+            child: VButton(
+              label: 'See all ${_residents.length} members',
               onPressed: () => context.push(
                 '/explore/${widget.world.id}/members'
                 '?name=${Uri.encodeComponent(widget.world.name)}'
                 '&sovereign=${Uri.encodeComponent(widget.world.sovereignId)}',
               ),
-              child: Text('See all ${_residents.length} members'),
+              variant: ButtonVariant.text,
             ),
           ),
       ],

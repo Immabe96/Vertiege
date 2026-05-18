@@ -4,9 +4,9 @@ import 'package:vertiege/models/world.dart';
 import 'package:vertiege/services/access_control.dart';
 
 void main() {
-  final hustler = Resident(id: '1', name: 'Test', tier: ResidentTier.hustlers);
-  final elite = Resident(id: '2', name: 'Elite', tier: ResidentTier.elite);
-  final apex = Resident(id: '3', name: 'Apex', tier: ResidentTier.apex);
+  final hustler = const Resident(id: '1', name: 'Test');
+  final elite = const Resident(id: '2', name: 'Elite', tier: ResidentTier.elite);
+  final apex = const Resident(id: '3', name: 'Apex', tier: ResidentTier.apex);
 
   final worldTier2 = const World(
     id: 'w1', name: 'Test', type: WorldType.wealth,
@@ -38,14 +38,13 @@ void main() {
     });
 
     test('verified profession grants access', () {
-      final doctor = Resident(id: '4', name: 'Doc', verifiedRoles: ['Medical']);
+      final doctor = const Resident(id: '4', name: 'Doc', verifiedRoles: ['Medical']);
       expect(canAccessWorld(doctor, worldMed), true);
     });
 
     test('explicitly unlocked wealth world grants access regardless of tier', () {
-      final poorButUnlocked = Resident(
+      final poorButUnlocked = const Resident(
         id: '5', name: 'Unlocked',
-        tier: ResidentTier.hustlers,
         wealthWorldsUnlocked: ['w1'],
       );
       expect(canAccessWorld(poorButUnlocked, worldTier2), true);

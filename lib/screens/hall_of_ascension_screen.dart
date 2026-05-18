@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/achievement.dart';
@@ -23,26 +24,8 @@ class HallOfAscensionScreen extends ConsumerStatefulWidget {
       _HallOfAscensionScreenState();
 }
 
-class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        setState(() {});
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,33 +58,16 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen>
               canAscend: canAscend,
             ),
           ],
-          TabBar(
-            controller: _tabController,
-            labelColor: VColors.tertiary,
-            unselectedLabelColor: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
-            labelStyle: const TextStyle(
-              fontSize: FontSizes.labelSm,
-              fontWeight: FontWeights.semiBold,
-              letterSpacing: LetterSpacing.label,
-            ),
-            isScrollable: true,
-            tabs: const [
-              Tab(text: 'TOTAL XP'),
-              Tab(text: 'WORLD PRESTIGE'),
-              Tab(text: 'ACHIEVEMENTS'),
-              Tab(text: 'REFERRALS'),
-            ],
-          ),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
+            child: FTabs(
+              expands: true,
+              scrollable: true,
+              control: const FTabControl.managed(),
               children: [
-                _XpLeaderboard(),
-                _PrestigeLeaderboard(),
-                _AchievementLeaderboard(),
-                _ReferralLeaderboard(),
+                FTabEntry(label: const Text('TOTAL XP'), child: _XpLeaderboard()),
+                FTabEntry(label: const Text('WORLD PRESTIGE'), child: _PrestigeLeaderboard()),
+                FTabEntry(label: const Text('ACHIEVEMENTS'), child: _AchievementLeaderboard()),
+                FTabEntry(label: const Text('REFERRALS'), child: _ReferralLeaderboard()),
               ],
             ),
           ),

@@ -3,6 +3,7 @@ import '../../theme/design_system.dart';
 import '../../theme/v_colors.dart';
 import '../../models/world.dart';
 import 'world_banner.dart';
+import '../../ui/icons/v_icons.dart';
 
 class WorldHeroBanner extends StatelessWidget {
   final String worldId;
@@ -48,7 +49,7 @@ class WorldHeroBanner extends StatelessWidget {
       actions: [
         if (onSettings != null)
           IconButton(
-            icon: const Icon(Icons.settings, size: IconSizes.md),
+            icon: const Icon(VIcons.settings, size: IconSizes.md),
             tooltip: 'World settings',
             onPressed: onSettings,
           ),
@@ -63,7 +64,7 @@ class WorldHeroBanner extends StatelessWidget {
                   child: TextButton.icon(
                     key: joinButtonKey,
                     onPressed: onJoin,
-                    icon: const Icon(Icons.exit_to_app, size: IconSizes.sm),
+                    icon: const Icon(VIcons.logOut, size: IconSizes.sm),
                     label: const Text('Leave'),
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
@@ -76,7 +77,7 @@ class WorldHeroBanner extends StatelessWidget {
                 child: FilledButton.icon(
                   key: joinButtonKey,
                   onPressed: onJoin,
-                  icon: const Icon(Icons.add, size: IconSizes.sm),
+                  icon: const Icon(VIcons.plus, size: IconSizes.sm),
                   label: const Text('Join'),
                   style: FilledButton.styleFrom(
                     backgroundColor: VColors.primary,

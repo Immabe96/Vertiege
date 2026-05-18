@@ -8,6 +8,7 @@ import '../models/post.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
 import '../models/notification.dart';
+import '../models/sync_status.dart';
 import '../services/moderation_filter.dart';
 import '../services/permission_service.dart';
 import '../services/supabase.dart';
@@ -17,7 +18,7 @@ import '../services/storage_service.dart';
 import '../services/media_service.dart';
 import '../services/post_service.dart';
 import '../services/world_service.dart';
-import '../services/offline_queue.dart';
+import '../repositories/post_repository.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
 import '../utils/haptics.dart';
@@ -33,6 +34,7 @@ class PostState {
   final List<Post> followingPosts;
   final Set<String> bookmarkedPostIds;
   final String? error;
+  final bool isLoading;
   final bool isPosting;
   final List<Post> scheduledPosts;
   final String? lastError;
@@ -44,6 +46,7 @@ class PostState {
     this.followingPosts = const [],
     this.bookmarkedPostIds = const {},
     this.error,
+    this.isLoading = false,
     this.isPosting = false,
     this.scheduledPosts = const [],
     this.lastError,
@@ -58,6 +61,7 @@ class PostState {
     List<Post>? followingPosts,
     Set<String>? bookmarkedPostIds,
     String? error,
+    bool? isLoading,
     bool clearError = false,
     bool? isPosting,
     List<Post>? scheduledPosts,
@@ -70,6 +74,7 @@ class PostState {
     followingPosts: followingPosts ?? this.followingPosts,
     bookmarkedPostIds: bookmarkedPostIds ?? this.bookmarkedPostIds,
     error: clearError ? null : error ?? this.error,
+    isLoading: isLoading ?? this.isLoading,
     isPosting: isPosting ?? this.isPosting,
     scheduledPosts: scheduledPosts ?? this.scheduledPosts,
     lastError: clearLastError ? null : lastError ?? this.lastError,
@@ -79,6 +84,7 @@ class PostState {
 }
 
 class PostNotifier extends Notifier<PostState> {
+  final PostRepository _postsRepository = const PostRepository();
   RealtimeChannel? _realtimeChannel;
   Timer? _schedulerTimer;
   final Map<String, Set<String>> _userReactions = {};
@@ -116,7 +122,9 @@ class PostNotifier extends Notifier<PostState> {
       final raw = await StorageService.getString(_scheduledKey);
       if (raw == null || raw.isEmpty) return;
       final list = jsonDecode(raw) as List<dynamic>;
-      final posts = list.map((e) => _postFromJson(e)).toList();
+      final posts = list
+          .map((e) => _postFromJson(e as Map<String, dynamic>))
+          .toList();
       state = state.copyWith(scheduledPosts: posts);
     } catch (_) {}
   }
@@ -146,18 +154,15 @@ class PostNotifier extends Notifier<PostState> {
         continue;
       }
       try {
-        await PostService.createPost(
-          residentId: post.residentId,
-          residentName: post.residentName,
-          worldId: post.worldId,
-          content: post.content,
-          imageUrl: post.imageUri,
-          residentAvatar: post.residentAvatar,
-          tierAtPosting: post.tierAtPosting.value,
-          isAnnouncement: post.isAnnouncement,
+        final result = await _postsRepository.createPost(
+          post.copyWith(syncStatus: SyncStatus.pending),
         );
+        if (result.isFailure) throw result.error ?? StateError('Post failed');
         state = state.copyWith(
-          posts: [post.copyWith(scheduledFor: null), ...state.posts],
+          posts: [
+            post.copyWith(syncStatus: SyncStatus.synced),
+            ...state.posts,
+          ],
           scheduledPosts: state.scheduledPosts
               .where((p) => p.id != post.id)
               .toList(),
@@ -173,9 +178,11 @@ class PostNotifier extends Notifier<PostState> {
         );
         state = state.copyWith(
           scheduledPosts: state.scheduledPosts
-              .map((p) => p.id == post.id
-                  ? p.copyWith(failedPublishes: p.failedPublishes + 1)
-                  : p)
+              .map(
+                (p) => p.id == post.id
+                    ? p.copyWith(failedPublishes: p.failedPublishes + 1)
+                    : p,
+              )
               .toList(),
         );
         _persistScheduled();
@@ -185,9 +192,7 @@ class PostNotifier extends Notifier<PostState> {
 
   Future<void> _persistScheduled() async {
     if (state.scheduledPosts.length == _lastPersistedCount) return;
-    final json = jsonEncode(
-      state.scheduledPosts.map(_postToJson).toList(),
-    );
+    final json = jsonEncode(state.scheduledPosts.map(_postToJson).toList());
     await StorageService.setString(_scheduledKey, json);
     _lastPersistedCount = state.scheduledPosts.length;
   }
@@ -279,39 +284,53 @@ class PostNotifier extends Notifier<PostState> {
       cloudImageUrl = await MediaService.uploadPostImage(imageUri, residentId);
     }
 
-    state = state.copyWith(posts: [post, ...state.posts]);
+    final optimisticPost = post.copyWith(
+      syncStatus: SyncStatus.pending,
+      localTempId: post.id,
+    );
+    state = state.copyWith(posts: [optimisticPost, ...state.posts]);
     _persist();
 
-    try {
-      await PostService.createPost(
-        residentId: residentId,
-        residentName: residentName,
-        worldId: worldId,
-        content: content,
-        imageUrl: cloudImageUrl,
-        residentAvatar: residentAvatar,
-        tierAtPosting: tierValue,
-        isAnnouncement: isAnnouncement,
-      );
-      state = state.copyWith(isPosting: false, clearLastError: true);
-    } catch (e) {
-      await OfflineQueue.enqueue('post', {
-        'residentId': residentId,
-        'residentName': residentName,
-        'worldId': worldId,
-        'content': content,
-        'imageUrl': cloudImageUrl,
-        'residentAvatar': residentAvatar,
-        'tierValue': tierValue,
-        'isAnnouncement': isAnnouncement,
-        'postId': post.id,
-      });
+    final result = await _postsRepository.createPost(
+      optimisticPost.copyWith(
+        imageUri: cloudImageUrl,
+        imageUris:
+            imageUris ?? (cloudImageUrl == null ? null : [cloudImageUrl]),
+      ),
+    );
+
+    if (result.isSuccess) {
       state = state.copyWith(
+        posts: state.posts.map((p) {
+          if (p.id != post.id) return p;
+          return p.copyWith(
+            syncStatus: SyncStatus.synced,
+            clearSyncError: true,
+          );
+        }).toList(),
+        isPosting: false,
+        clearLastError: true,
+      );
+    } else if (result.queued) {
+      state = state.copyWith(
+        isPosting: false,
+        lastError: 'Post queued for sync',
+      );
+    } else {
+      state = state.copyWith(
+        posts: state.posts.map((p) {
+          if (p.id != post.id) return p;
+          return p.copyWith(
+            syncStatus: SyncStatus.failed,
+            syncError: result.error?.toString() ?? 'Queued for sync',
+          );
+        }).toList(),
         error: 'Failed to post - tap to retry',
-        lastError: 'Failed to create post: $e',
+        lastError: 'Failed to create post: ${result.error}',
         isPosting: false,
       );
     }
+    _persist();
 
     ref.read(residentProvider.notifier).awardActivityXp('post', 5);
     ref.read(questProvider.notifier).onPostCreated();
@@ -366,8 +385,13 @@ class PostNotifier extends Notifier<PostState> {
 
     _userReactions.putIfAbsent(postId, () => {}).add(emoji);
 
-    // Persist to Supabase
-    PostService.addReaction(postId, emoji, residentId);
+    unawaited(
+      _postsRepository.addReaction(
+        postId: postId,
+        emoji: emoji,
+        residentId: residentId,
+      ),
+    );
 
     ref.read(residentProvider.notifier).awardActivityXp('reaction', 1);
 
@@ -375,7 +399,11 @@ class PostNotifier extends Notifier<PostState> {
     if (reactedPost != null && reactedPost.residentId != residentId) {
       ref
           .read(residentProvider.notifier)
-          .awardActivityXpForUser(reactedPost.residentId, 'received_reaction', 2);
+          .awardActivityXpForUser(
+            reactedPost.residentId,
+            'received_reaction',
+            2,
+          );
     }
 
     ref.read(questProvider.notifier).onReacted();
@@ -421,15 +449,19 @@ class PostNotifier extends Notifier<PostState> {
     }).toList();
     state = state.copyWith(posts: posts);
     _persist();
+    unawaited(_postsRepository.editPost(postId: postId, content: newContent));
   }
 
   void togglePin(String postId) {
+    final current = state.posts.where((p) => p.id == postId).firstOrNull;
+    final nextPinned = !(current?.isPinned ?? false);
     final posts = state.posts.map((p) {
-      if (p.id == postId) return p.copyWith(isPinned: !p.isPinned);
+      if (p.id == postId) return p.copyWith(isPinned: nextPinned);
       return p;
     }).toList();
     state = state.copyWith(posts: posts);
     _persist();
+    unawaited(_postsRepository.setPinned(postId: postId, isPinned: nextPinned));
   }
 
   void deletePost(String postId) {
@@ -441,6 +473,7 @@ class PostNotifier extends Notifier<PostState> {
     );
     _persist();
     _persistBookmarks();
+    unawaited(_postsRepository.deletePost(postId));
   }
 
   void clearError() {
@@ -459,8 +492,7 @@ class PostNotifier extends Notifier<PostState> {
     state = state.copyWith(posts: posts);
     _persist();
 
-    // Persist to Supabase
-    PostService.addComment(postId, comment.residentId, comment.content);
+    unawaited(_postsRepository.addComment(postId: postId, comment: comment));
 
     ref.read(questProvider.notifier).onCommentAdded();
     ref
@@ -519,6 +551,17 @@ class PostNotifier extends Notifier<PostState> {
 
     state = state.copyWith(posts: posts);
     _persist();
+    final updatedPost = posts.where((p) => p.id == postId).firstOrNull;
+    final updatedPoll = updatedPost?.poll;
+    if (updatedPost != null && updatedPoll != null) {
+      unawaited(
+        _postsRepository.votePoll(
+          post: updatedPost,
+          poll: updatedPoll,
+          residentId: resident.id,
+        ),
+      );
+    }
   }
 
   void toggleEventRsvp(String postId, String residentId) {
@@ -590,26 +633,18 @@ class PostNotifier extends Notifier<PostState> {
     await StorageService.setString(_bookmarksKey, json);
   }
 
-  Future<void> _syncBookmarkToSupabase(String postId, {required bool add}) async {
-    final client = maybeSupabase();
-    if (client == null) return;
+  Future<void> _syncBookmarkToSupabase(
+    String postId, {
+    required bool add,
+  }) async {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    try {
-      if (add) {
-        await client.from('bookmarks').upsert({
-          'user_id': resident.id,
-          'post_id': postId,
-        });
-      } else {
-        await client
-            .from('bookmarks')
-            .delete()
-            .eq('user_id', resident.id)
-            .eq('post_id', postId);
-      }
-    } catch (_) {}
+    await _postsRepository.setBookmark(
+      postId: postId,
+      residentId: resident.id,
+      bookmarked: add,
+    );
   }
 
   Future<void> loadBookmarks() async {
@@ -644,7 +679,7 @@ class PostNotifier extends Notifier<PostState> {
       final response = await client
           .from('bookmarks')
           .select('post_id')
-          .eq('user_id', resident.id);
+          .or('user_id.eq.${resident.id},resident_id.eq.${resident.id}');
       final list = response as List<dynamic>;
       return list.map((e) => e['post_id'] as String).toSet();
     } catch (_) {
@@ -706,7 +741,7 @@ class PostNotifier extends Notifier<PostState> {
     // not the original source iterable, so the caller's data is unaffected.
     final posts = List.of(source);
 
-    int _priority(Post p) {
+    int priority(Post p) {
       if (p.isDecree && (now - p.timestamp) < decreeExpiry) return 0;
       if (p.isPinned && !p.isDecree) return 1;
       if (p.isAnnouncement && !p.isPinned && !p.isDecree) return 2;
@@ -726,8 +761,8 @@ class PostNotifier extends Notifier<PostState> {
     }
 
     posts.sort((a, b) {
-      final pa = _priority(a);
-      final pb = _priority(b);
+      final pa = priority(a);
+      final pb = priority(b);
       if (pa != pb) return pa.compareTo(pb);
       if (pa == 3) {
         switch (sort) {
@@ -747,7 +782,8 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   double _hotScore(Post post) {
-    final totalReactions = post.reactions.values.fold<int>(0, (s, c) => s + c) +
+    final totalReactions =
+        post.reactions.values.fold<int>(0, (s, c) => s + c) +
         post.comments.length;
     final ageMs = DateTime.now().millisecondsSinceEpoch - post.timestamp;
     final ageHours = ageMs / (1000 * 60 * 60);
@@ -761,16 +797,19 @@ class PostNotifier extends Notifier<PostState> {
 
   Future<void> loadPosts() async {
     try {
+      state = state.copyWith(isLoading: true, clearError: true);
       _currentLimit = 20;
       _lastCursor = null;
       _hasMore = true;
 
-      final remote = await PostService.getPosts(limit: _currentLimit);
-      final posts = remote.items.map((e) => _postFromJson(e)).toList();
+      await _postsRepository.replayOutbox();
+      final remote = await _postsRepository.loadPosts(limit: _currentLimit);
+      final posts = remote.items.map(_postFromJson).toList();
       _hasMore = remote.hasMore;
       _lastCursor = remote.nextCursor;
       state = state.copyWith(
         posts: posts,
+        isLoading: false,
         clearError: true,
         hasMorePosts: _hasMore,
       );
@@ -779,7 +818,11 @@ class PostNotifier extends Notifier<PostState> {
     } catch (e) {
       final joinedWorldPosts = await _loadPostsFromJoinedWorlds();
       if (joinedWorldPosts != null) {
-        state = state.copyWith(posts: joinedWorldPosts, clearError: true);
+        state = state.copyWith(
+          posts: joinedWorldPosts,
+          isLoading: false,
+          clearError: true,
+        );
         _persist();
         unawaited(_subscribeRealtime());
         return;
@@ -788,11 +831,20 @@ class PostNotifier extends Notifier<PostState> {
       final raw = await StorageService.getString(StorageService.postsKey);
       if (raw != null && raw.isNotEmpty) {
         final list = jsonDecode(raw) as List<dynamic>;
-        final posts = list.map((e) => _postFromJson(e)).toList();
-        state = state.copyWith(posts: posts, clearError: true);
+        final posts = list
+            .map((e) => _postFromJson(e as Map<String, dynamic>))
+            .toList();
+        state = state.copyWith(
+          posts: posts,
+          isLoading: false,
+          clearError: true,
+        );
         return;
       }
-      state = state.copyWith(error: 'Failed to load posts: $e');
+      state = state.copyWith(
+        error: 'Failed to load posts: $e',
+        isLoading: false,
+      );
     }
   }
 
@@ -801,12 +853,12 @@ class PostNotifier extends Notifier<PostState> {
 
     state = state.copyWith(isLoadingMore: true);
     try {
-      final remote = await PostService.getPosts(
+      final remote = await _postsRepository.loadPosts(
         worldId: worldId,
         cursor: _lastCursor,
         limit: _currentLimit,
       );
-      final newPosts = remote.items.map((e) => _postFromJson(e)).toList();
+      final newPosts = remote.items.map(_postFromJson).toList();
       _hasMore = remote.hasMore;
       _lastCursor = remote.nextCursor;
       state = state.copyWith(
@@ -835,7 +887,7 @@ class PostNotifier extends Notifier<PostState> {
         resident.id,
         followingIds,
       );
-      final posts = remote.map((e) => _postFromJson(e)).toList();
+      final posts = remote.map(_postFromJson).toList();
       state = state.copyWith(followingPosts: posts, clearError: true);
     } catch (e) {
       state = state.copyWith(
@@ -906,7 +958,9 @@ class PostNotifier extends Notifier<PostState> {
     if (joinedWorldIds == null || joinedWorldIds.isEmpty) return null;
 
     final results = await Future.wait(
-      joinedWorldIds.map((worldId) => PostService.getPosts(worldId: worldId)),
+      joinedWorldIds.map(
+        (worldId) => _postsRepository.loadPosts(worldId: worldId),
+      ),
     );
 
     final posts = <Post>[];
@@ -914,7 +968,7 @@ class PostNotifier extends Notifier<PostState> {
     for (final result in results) {
       if (result.items.isNotEmpty) {
         hadSuccessfulRequest = true;
-        posts.addAll(result.items.map((e) => _postFromJson(e)));
+        posts.addAll(result.items.map(_postFromJson));
       }
     }
 
@@ -1006,6 +1060,9 @@ class PostNotifier extends Notifier<PostState> {
               .toList() ??
           [],
       failedPublishes: json['failedPublishes'] ?? 0,
+      syncStatus: SyncStatusJson.fromJson(json['syncStatus']),
+      localTempId: json['localTempId'] as String?,
+      syncError: json['syncError'] as String?,
     );
   }
 
@@ -1038,6 +1095,9 @@ class PostNotifier extends Notifier<PostState> {
     'scheduledFor': p.scheduledFor?.toIso8601String(),
     'awards': p.awards,
     'failedPublishes': p.failedPublishes,
+    'syncStatus': p.syncStatus.value,
+    'localTempId': p.localTempId,
+    'syncError': p.syncError,
     'comments': p.comments
         .map(
           (c) => {

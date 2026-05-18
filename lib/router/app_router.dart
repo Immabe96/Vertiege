@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../state/resident_provider.dart';
@@ -40,6 +41,7 @@ import '../screens/thread_screen.dart';
 import '../screens/challenges_screen.dart';
 import '../screens/league_screen.dart';
 import '../screens/world_discovery_screen.dart';
+import '../screens/twin_seal_setup_screen.dart';
 import '../models/message.dart';
 import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
@@ -74,10 +76,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Authenticated with a session
-      if (isLoading) {
-        if (location != '/splash') return '/splash';
-        return null;
-      }
+      if (isLoading) return null;
 
       if (resident == null) {
         // No resident profile yet — redirect to onboarding
@@ -326,6 +325,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const VerificationReviewScreen(),
       ),
       GoRoute(
+        path: '/twin-seal',
+        builder: (context, state) => const TwinSealSetupScreen(),
+      ),
+      GoRoute(
         path: '/invite/:code',
         builder: (context, state) =>
             _AcceptInviteScreen(code: state.pathParameters['code']!),
@@ -387,7 +390,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
       appBar: AppBar(title: const Text('Accept Invite')),
       body: Center(
         child: _loading
-            ? const CircularProgressIndicator()
+            ? const FCircularProgress()
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -457,7 +460,7 @@ class _ThreadDeepLinkScreenState extends State<_ThreadDeepLinkScreen> {
         if (snapshot.connectionState != ConnectionState.done) {
           return Scaffold(
             appBar: AppBar(title: const Text('Thread')),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const Center(child: FCircularProgress()),
           );
         }
 
@@ -481,7 +484,7 @@ class _ThreadDeepLinkScreenState extends State<_ThreadDeepLinkScreen> {
           channelId: message.channelId,
           worldId: '',
           parentMessage: message,
-          channelName: '',
+          channelName: 'Thread',
         );
       },
     );

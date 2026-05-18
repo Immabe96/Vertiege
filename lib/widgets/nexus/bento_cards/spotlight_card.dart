@@ -4,6 +4,7 @@ import '../../../theme/v_colors.dart';
 import '../../../models/resident.dart';
 import '../../../services/spotlight_service.dart';
 import '../../../widgets/profile/cosmetic_avatar.dart';
+import '../../../ui/icons/v_icons.dart';
 
 class SpotlightCard extends StatefulWidget {
   const SpotlightCard({super.key});
@@ -49,7 +50,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
       children: [
         Row(
           children: [
-            Icon(Icons.auto_awesome, color: VColors.tertiary, size: 16),
+            Icon(VIcons.sparkles, color: VColors.tertiary, size: 16),
             const SizedBox(width: Spacing.xs),
             Text(
               'Resident Spotlight',

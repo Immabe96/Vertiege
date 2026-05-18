@@ -8,6 +8,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../ui/media/v_avatar.dart';
+import '../../ui/icons/v_icons.dart';
 
 class LeagueScreen extends ConsumerStatefulWidget {
   const LeagueScreen({super.key});
@@ -67,7 +68,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(VIcons.arrowLeft),
             onPressed: () => ref.read(leagueProvider.notifier).loadLeague(),
           ),
         ],
@@ -224,7 +225,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.arrow_upward, size: 16, color: VColors.success),
+              const Icon(VIcons.chevronUp, size: 16, color: VColors.success),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Top ${LeagueService.promotionCount} promoted',
@@ -238,7 +239,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           ),
           Row(
             children: [
-              const Icon(Icons.arrow_downward, size: 16, color: VColors.error),
+              const Icon(VIcons.chevronRight, size: 16, color: VColors.error),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Bottom ${LeagueService.demotionCount} demoted',

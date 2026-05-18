@@ -101,7 +101,7 @@ class LeagueNotifier extends Notifier<LeagueState> {
   }
 
   Future<void> loadLeague() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
     try {
       final userId = ref.read(residentProvider).resident?.id;
       final residentId = ref.read(residentProvider).resident?.id;

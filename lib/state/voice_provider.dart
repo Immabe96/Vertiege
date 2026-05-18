@@ -10,6 +10,8 @@ class VoiceState {
   final bool isDeafened;
   final String? activeCampfireId;
   final String? activeCampfireName;
+  final String? activeWorldId;
+  final String? activeWorldName;
 
   const VoiceState({
     this.participants = const [],
@@ -18,6 +20,8 @@ class VoiceState {
     this.isDeafened = false,
     this.activeCampfireId,
     this.activeCampfireName,
+    this.activeWorldId,
+    this.activeWorldName,
   });
 
   VoiceState copyWith({
@@ -27,6 +31,8 @@ class VoiceState {
     bool? isDeafened,
     String? activeCampfireId,
     String? activeCampfireName,
+    String? activeWorldId,
+    String? activeWorldName,
   }) => VoiceState(
     participants: participants ?? this.participants,
     isConnected: isConnected ?? this.isConnected,
@@ -34,6 +40,8 @@ class VoiceState {
     isDeafened: isDeafened ?? this.isDeafened,
     activeCampfireId: activeCampfireId ?? this.activeCampfireId,
     activeCampfireName: activeCampfireName ?? this.activeCampfireName,
+    activeWorldId: activeWorldId ?? this.activeWorldId,
+    activeWorldName: activeWorldName ?? this.activeWorldName,
   );
 }
 
@@ -57,11 +65,15 @@ class VoiceNotifier extends Notifier<VoiceState> {
     required String channelName,
     required String residentId,
     required String residentName,
+    String worldId = '',
+    String worldName = '',
   }) async {
     state = state.copyWith(
       isConnected: true,
       activeCampfireId: channelId,
       activeCampfireName: channelName,
+      activeWorldId: worldId,
+      activeWorldName: worldName,
     );
     await VoiceService.joinCampfire(
       channelId: channelId,

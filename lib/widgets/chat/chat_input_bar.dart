@@ -2,6 +2,7 @@
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
+import '../../ui/icons/v_icons.dart';
 
 class ChatInputBar extends StatelessWidget {
   final TextEditingController controller;
@@ -92,7 +93,7 @@ class ChatInputBar extends StatelessWidget {
                     ),
                     if (onCancelReply != null)
                       IconButton(
-                        icon: const Icon(Icons.close, size: IconSizes.sm),
+                        icon: const Icon(VIcons.x, size: IconSizes.sm),
                         onPressed: onCancelReply,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -146,7 +147,7 @@ class ChatInputBar extends StatelessWidget {
                 const SizedBox(width: Spacing.sm),
                 IconButton(
                   onPressed: onSend,
-                  icon: const Icon(Icons.send_rounded),
+                  icon: const Icon(VIcons.send),
                   color: VColors.tertiary,
                   iconSize: IconSizes.lg,
                   padding: EdgeInsets.zero,

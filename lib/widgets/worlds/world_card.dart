@@ -13,6 +13,7 @@ import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
 import '../core/sovereign_card.dart';
+import '../../ui/icons/v_icons.dart';
 import 'world_icon.dart';
 import 'world_banner.dart';
 
@@ -132,7 +133,7 @@ class _CardBody extends ConsumerWidget {
           const SizedBox(height: 2),
           Row(
             children: [
-              Icon(Icons.people, size: 12, color: VColors.onSurfaceVariant),
+              Icon(VIcons.users, size: 12, color: VColors.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 '${world.memberCount} members',
@@ -195,7 +196,7 @@ class _CardBody extends ConsumerWidget {
               height: VTouchTarget.iconButton,
               child: OutlinedButton.icon(
                 onPressed: () => _handleBoost(context, ref),
-                icon: const Icon(Icons.rocket_launch, size: VIconSize.sm),
+                icon: const Icon(VIcons.rocket, size: VIconSize.sm),
                 label: const Text('Boost'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: VColors.tertiary,

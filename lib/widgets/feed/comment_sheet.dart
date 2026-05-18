@@ -5,6 +5,7 @@ import '../../theme/design_system.dart';
 import '../../utils/date_format.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../core/tier_badge.dart';
+import '../../ui/icons/v_icons.dart';
 
 enum CommentSort { best, newest, oldest }
 
@@ -230,7 +231,7 @@ class _CommentSheetState extends State<CommentSheet> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, size: IconSizes.sm),
+                        icon: const Icon(VIcons.x, size: IconSizes.sm),
                         onPressed: () => setState(() {
                           _replyToId = null;
                           _replyToName = null;
@@ -262,7 +263,7 @@ class _CommentSheetState extends State<CommentSheet> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.send),
+                      icon: const Icon(VIcons.send),
                       onPressed: () {
                         if (_controller.text.trim().isNotEmpty) {
                           // If replying, prepend parent ID reference
@@ -307,7 +308,7 @@ class _SortDropdown extends StatelessWidget {
           value: CommentSort.best,
           child: Row(
             children: [
-              Icon(Icons.whatshot, size: IconSizes.sm),
+              Icon(VIcons.flame, size: IconSizes.sm),
               SizedBox(width: Spacing.sm),
               Text('Best'),
             ],

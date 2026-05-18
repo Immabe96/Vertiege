@@ -21,9 +21,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentStep = 0;
 
   final _nameController = TextEditingController();
@@ -51,17 +49,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   bool get _isProfileValid => _nameController.text.trim().length >= 2;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(() {
-      setState(() => _currentStep = _tabController.index);
-    });
-  }
-
-  @override
   void dispose() {
-    _tabController.dispose();
     _nameController.dispose();
     _bioController.dispose();
     super.dispose();
@@ -69,13 +57,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   void _nextStep() {
     if (_currentStep < 2) {
-      _tabController.animateTo(_currentStep + 1);
+      setState(() => _currentStep = _currentStep + 1);
     }
   }
 
   void _prevStep() {
     if (_currentStep > 0) {
-      _tabController.animateTo(_currentStep - 1);
+      setState(() => _currentStep = _currentStep - 1);
     }
   }
 
@@ -220,21 +208,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 ],
               ),
             ),
-            // Tab bar
-            TabBar(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              tabs: const [
-                Tab(text: 'Profile'),
-                Tab(text: 'The Gate'),
-                Tab(text: 'World'),
-              ],
-            ),
             // Tab content
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
+              child: IndexedStack(
+                index: _currentStep,
                 children: [
                   _ProfileTab(
                     nameController: _nameController,

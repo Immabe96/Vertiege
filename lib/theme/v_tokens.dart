@@ -20,9 +20,9 @@ class VRadius {
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
-  static const double xl = 20;
-  static const double xxl = 24;
-  static const double xxxl = 28;
+  static const double xl = 18;
+  static const double xxl = 20;
+  static const double xxxl = 24;
   static const double pill = 9999;
 }
 
@@ -71,8 +71,8 @@ class VFontWeight {
 
 class VFontSize {
   VFontSize._();
-  static const double displayXl = 36;
-  static const double displayLg = 28;
+  static const double displayXl = 32;
+  static const double displayLg = 26;
   static const double headlineLg = 24;
   static const double headlineMd = 20;
   static const double headlineSm = 18;

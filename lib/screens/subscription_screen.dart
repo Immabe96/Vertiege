@@ -9,6 +9,8 @@ import '../theme/design_system.dart';
 import '../utils/navigation.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
+import '../ui/icons/v_icons.dart';
+import '../ui/buttons/v_button.dart';
 
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
@@ -96,7 +98,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       appBar: AppBar(
         title: const Text('The Vault'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(VIcons.arrowLeft),
           onPressed: () => safeBack(context),
         ),
       ),
@@ -233,7 +235,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
                 // ── Restore purchases ────────────────────────────
                 Center(
-                  child: TextButton(
+                  child: VButton(
+                    label: 'Restore Purchases',
                     onPressed: () async {
                       final messenger = ScaffoldMessenger.of(context);
                       await StoreService.restorePurchases();
@@ -247,10 +250,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         );
                       }
                     },
-                    child: const Text(
-                      'Restore Purchases',
-                      style: TextStyle(color: VColors.primary),
-                    ),
+                    variant: ButtonVariant.text,
                   ),
                 ),
                 const SizedBox(height: Spacing.xxl),
@@ -485,7 +485,7 @@ class _TierCard extends StatelessWidget {
                           color: VColors.onSurface,
                         ),
                       )
-                    : const Icon(Icons.star),
+                    : const Icon(VIcons.sparkles),
                 label: Text(isLoading ? 'Activating...' : 'UPGRADE'),
                 style: FilledButton.styleFrom(
                   backgroundColor: VColors.tertiary,
@@ -497,19 +497,10 @@ class _TierCard extends StatelessWidget {
               ),
             )
           else if (isActive)
-            SizedBox(
-              height: 48,
-              child: OutlinedButton(
-                onPressed: null,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: tierColor,
-                  side: BorderSide(color: tierColor.withValues(alpha: 0.4)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(RadiusTokens.card),
-                  ),
-                ),
-                child: const Text('ACTIVE'),
-              ),
+            VButton(
+              label: 'ACTIVE',
+              onPressed: null,
+              variant: ButtonVariant.outlined,
             ),
         ],
       ),

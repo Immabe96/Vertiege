@@ -8,6 +8,7 @@ import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -396,7 +397,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.arrow_forward),
+                            : const Icon(VIcons.arrowLeft),
                         label: Text(
                           _isLoading ? 'Creating account...' : 'Create Account',
                         ),

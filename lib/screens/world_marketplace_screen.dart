@@ -9,6 +9,7 @@ import '../../widgets/worlds/listing_card.dart';
 import '../../widgets/worlds/create_listing_dialog.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../ui/icons/v_icons.dart';
 
 class WorldMarketplaceScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -142,7 +143,7 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
             const SizedBox(height: VSpacing.md),
             FilledButton.icon(
               onPressed: _loadListings,
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(VIcons.arrowLeft),
               label: const Text('Retry'),
             ),
           ],
@@ -422,7 +423,7 @@ class _ListingDetailSheet extends StatelessWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.chat_outlined),
+                icon: const Icon(VIcons.message),
                 label: const Text('Contact Seller'),
               ),
             if (isOwner && listing.status == ListingStatus.active)
@@ -463,7 +464,7 @@ class _ListingDetailSheet extends StatelessWidget {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle, color: VColors.success),
+                    Icon(VIcons.badgeCheck, color: VColors.success),
                     SizedBox(width: VSpacing.sm),
                     Text(
                       'SOLD',

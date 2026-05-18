@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
+import '../../ui/icons/v_icons.dart';
 
 class CompletionHint extends StatefulWidget {
   final IconData icon;
@@ -41,7 +42,7 @@ class _CompletionHintState extends State<CompletionHint> {
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: Spacing.md),
-          child: Icon(Icons.close, color: theme.colorScheme.outline),
+          child: Icon(VIcons.x, color: theme.colorScheme.outline),
         ),
         onDismissed: (_) => setState(() => _dismissed = true),
         child: Material(

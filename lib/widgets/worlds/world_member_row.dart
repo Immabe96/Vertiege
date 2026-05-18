@@ -5,6 +5,7 @@ import '../../models/resident.dart';
 import '../../services/streak_service.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../core/shimmer.dart';
+import '../../ui/icons/v_icons.dart';
 
 class WorldMemberEntry {
   final Resident resident;
@@ -173,7 +174,7 @@ class WorldMemberRow extends StatelessWidget {
                 ),
               ],
               const Spacer(),
-              Icon(Icons.chevron_right, size: IconSizes.md, color: cs.outline),
+              Icon(VIcons.chevronRight, size: IconSizes.md, color: cs.outline),
             ],
           ),
         ),

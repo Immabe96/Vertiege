@@ -13,6 +13,7 @@ import '../widgets/core/fade_in.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
+import '../ui/icons/v_icons.dart';
 import '../widgets/profile/badge_display.dart';
 import '../widgets/shared/tier_icon.dart';
 
@@ -107,7 +108,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       const SizedBox(height: VSpacing.lg),
                       FilledButton.icon(
                         onPressed: _loadProfile,
-                        icon: const Icon(Icons.refresh),
+                        icon: const Icon(VIcons.arrowLeft),
                         label: const Text('Retry'),
                       ),
                     ],
@@ -287,7 +288,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       context.push('/chat/${room['id']}');
                     }
                   },
-                  icon: const Icon(Icons.chat_bubble_outline),
+                  icon: const Icon(VIcons.message),
                   label: const Text('Message'),
                 ),
                 const SizedBox(width: VSpacing.sm),
@@ -307,7 +308,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     if (isAlly) {
                       return OutlinedButton.icon(
                         onPressed: null,
-                        icon: const Icon(Icons.handshake),
+                        icon: const Icon(VIcons.handshake),
                         label: const Text('Allies'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: VColors.success,
@@ -318,7 +319,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     if (isPending) {
                       return OutlinedButton.icon(
                         onPressed: null,
-                        icon: const Icon(Icons.handshake_outlined),
+                        icon: const Icon(VIcons.handshake),
                         label: const Text('Pending'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: isDark
@@ -339,7 +340,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                             requesterId: currentId,
                             receiverId: resident.id,
                           ),
-                      icon: const Icon(Icons.handshake_outlined),
+                      icon: const Icon(VIcons.handshake),
                       label: const Text('Ally'),
                     );
                   },
@@ -359,7 +360,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                             onPressed: () => ref
                                 .read(residentProvider.notifier)
                                 .unfollow(resident.id),
-                            icon: const Icon(Icons.person_remove),
+                            icon: const Icon(VIcons.userMinus),
                             label: const Text('Unfollow'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: isDark
@@ -376,7 +377,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                             onPressed: () => ref
                                 .read(residentProvider.notifier)
                                 .follow(resident.id),
-                            icon: const Icon(Icons.person_add),
+                            icon: const Icon(VIcons.userPlus),
                             label: const Text('Follow'),
                           );
                   },

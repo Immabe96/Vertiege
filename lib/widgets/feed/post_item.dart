@@ -13,6 +13,8 @@ import '../../theme/colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/date_format.dart';
 import '../core/fade_in.dart';
+import '../../ui/buttons/v_button.dart';
+import '../../ui/icons/v_icons.dart';
 import '../core/glass_sheet.dart';
 import '../core/tier_badge.dart';
 import '../shared/tier_icon.dart';
@@ -390,11 +392,13 @@ class PostItem extends ConsumerWidget {
           decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Save',
             onPressed: () {
               final text = ctrl.text.trim();
               if (text.isNotEmpty) {
@@ -402,7 +406,6 @@ class PostItem extends ConsumerWidget {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Save'),
           ),
         ],
       ),
@@ -495,7 +498,7 @@ class PostItem extends ConsumerWidget {
                       // Navigate to full profile on second tap
                       context.push('/residents/${post.residentId}');
                     },
-                    icon: const Icon(Icons.person, size: IconSizes.sm),
+                    icon: const Icon(VIcons.user, size: IconSizes.sm),
                     label: const Text('View Profile'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
@@ -510,7 +513,7 @@ class PostItem extends ConsumerWidget {
                   Navigator.pop(context);
                   context.push('/residents/${post.residentId}');
                 },
-                icon: const Icon(Icons.person, size: IconSizes.sm),
+                icon: const Icon(VIcons.user, size: IconSizes.sm),
                 label: const Text('View My Profile'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
@@ -633,17 +636,15 @@ class _ReportSheetState extends State<_ReportSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => widget.onSubmit(
-                _reason,
-                _detailsController.text.trim().isEmpty
-                    ? null
-                    : _detailsController.text.trim(),
-              ),
-              child: const Text('Submit Report'),
+          VButton(
+            label: 'Submit Report',
+            onPressed: () => widget.onSubmit(
+              _reason,
+              _detailsController.text.trim().isEmpty
+                  ? null
+                  : _detailsController.text.trim(),
             ),
+            isFullWidth: true,
           ),
         ],
       ),
@@ -992,7 +993,7 @@ class _DecreeLabelState extends State<_DecreeLabel>
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.auto_awesome, size: 14, color: AppColors.tertiary),
+              Icon(VIcons.sparkles, size: 14, color: AppColors.tertiary),
               SizedBox(width: 4),
               Text(
                 'SOVEREIGN DECREE',

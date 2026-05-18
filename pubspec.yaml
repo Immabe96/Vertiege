@@ -37,6 +37,16 @@ dependencies:
   json_annotation: ^4.11.0
   confetti: ^0.8.0
 
+  connectivity_plus: any
+  forui: ^0.21.3
+  flutter_localizations:
+    sdk: flutter
+  firebase_core: ^4.9.0
+  firebase_messaging: ^16.2.2
+  firebase_crashlytics: ^5.2.2
+  firebase_analytics: ^12.4.1
+  firebase_remote_config: ^6.5.1
+  forui_assets: 0.21.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

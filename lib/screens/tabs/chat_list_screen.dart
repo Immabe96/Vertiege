@@ -13,6 +13,7 @@ import '../../theme/v_tokens.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
+import '../../ui/icons/v_icons.dart';
 
 enum _ChatMode { worlds, dms }
 
@@ -214,7 +215,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             const SizedBox(height: VSpacing.lg),
             FilledButton.icon(
               onPressed: () => context.push('/explore'),
-              icon: const Icon(Icons.public),
+              icon: const Icon(VIcons.globe),
               label: const Text('Explore Worlds'),
             ),
           ],
@@ -361,7 +362,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           const SizedBox(height: VSpacing.lg),
           FilledButton.icon(
             onPressed: () => context.push('/search'),
-            icon: const Icon(Icons.search),
+            icon: const Icon(VIcons.search),
             label: const Text('Find Residents'),
           ),
         ],

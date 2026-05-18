@@ -1,0 +1,29 @@
+{
+  "name": "vertiege",
+  "version": "1.0.0",
+  "description": "> A tier-gated social network where every world is a sovereign realm with entry conditions. Built with Flutter + Riverpod + Supabase + Sovereign Excellence dark theme.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Immabe96/Vertiege.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Immabe96/Vertiege/issues"
+  },
+  "homepage": "https://github.com/Immabe96/Vertiege#readme",
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

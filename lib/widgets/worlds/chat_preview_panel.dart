@@ -8,6 +8,8 @@ import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class ChatPreviewPanel extends ConsumerStatefulWidget {
   final String worldId;
@@ -210,7 +212,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   ),
                   IconButton(
                     onPressed: _sendMessage,
-                    icon: const Icon(Icons.send, size: IconSizes.sm),
+                    icon: const Icon(VIcons.send, size: IconSizes.sm),
                     color: VColors.tertiary,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
@@ -223,22 +225,17 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
             ),
             const SizedBox(height: Spacing.md),
             // View Channel button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  if (general != null) {
-                    context.push(
-                      '/explore/${widget.worldId}/general?id=${general.id}',
-                    );
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: VColors.tertiary,
-                  side: const BorderSide(color: VColors.glassBorder),
-                ),
-                child: const Text('VIEW CHANNEL'),
-              ),
+            VButton(
+              label: 'VIEW CHANNEL',
+              onPressed: () {
+                if (general != null) {
+                  context.push(
+                    '/explore/${widget.worldId}/general?id=${general.id}',
+                  );
+                }
+              },
+              variant: ButtonVariant.outlined,
+              isFullWidth: true,
             ),
           ],
         ),

@@ -13,6 +13,7 @@ import '../services/world_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/fade_in.dart';
+import '../ui/icons/v_icons.dart';
 import '../widgets/core/shimmer.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/worlds/world_icon.dart';
@@ -233,7 +234,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         actions: [
           if (_controller.text.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.clear),
+              icon: const Icon(VIcons.x),
               onPressed: () {
                 _controller.clear();
                 setState(() => _query = '');
@@ -421,7 +422,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       _focusNode.unfocus();
                     },
                     onDeleted: () => _removeRecentSearch(q),
-                    deleteIcon: const Icon(Icons.close, size: 14),
+                    deleteIcon: const Icon(VIcons.x, size: 14),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -563,7 +564,7 @@ class _WorldTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(VIcons.chevronRight),
             ),
           ),
         ),

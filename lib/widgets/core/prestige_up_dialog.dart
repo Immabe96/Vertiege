@@ -2,6 +2,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
+import '../../ui/buttons/v_button.dart';
 
 class PrestigeUpDialog extends StatefulWidget {
   final int prestigeLevel;
@@ -178,16 +179,10 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                   ),
                 ),
                 const SizedBox(height: Spacing.lg),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: VColors.tertiary,
-                      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
-                    ),
-                    child: const Text('Continue'),
-                  ),
+                VButton(
+                  label: 'Continue',
+                  onPressed: () => Navigator.of(context).pop(),
+                  isFullWidth: true,
                 ),
               ],
             ),

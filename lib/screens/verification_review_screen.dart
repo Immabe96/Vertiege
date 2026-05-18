@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../services/verification_service.dart';
@@ -18,22 +19,18 @@ class VerificationReviewScreen extends ConsumerStatefulWidget {
 }
 
 class _VerificationReviewScreenState
-    extends ConsumerState<VerificationReviewScreen>
-    with TickerProviderStateMixin {
+    extends ConsumerState<VerificationReviewScreen> {
   List<VerificationSubmission> _submissions = [];
   bool _loading = true;
-  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _load();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -112,17 +109,15 @@ class _VerificationReviewScreenState
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
         title: const Text('Verification Review'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Verifications'),
-            Tab(text: 'Flagged Posts'),
-          ],
-        ),
+
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildVerificationsTab(theme), _buildFlaggedPostsTab(theme)],
+      body: FTabs(
+        expands: true,
+        control: const FTabControl.managed(),
+        children: [
+          FTabEntry(label: const Text('Verifications'), child: _buildVerificationsTab(theme)),
+          FTabEntry(label: const Text('Flagged Posts'), child: _buildFlaggedPostsTab(theme)),
+        ],
       ),
     );
   }

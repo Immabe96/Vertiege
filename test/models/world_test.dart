@@ -4,14 +4,14 @@ import 'package:vertiege/models/world.dart';
 void main() {
   group('World serialization', () {
     test('constitution round-trips through toJson/fromJson', () {
-      final world = World(
+      final world = const World(
         id: 'w1',
         name: 'Test World',
         type: WorldType.wealth,
         description: 'A test world',
         sovereignId: 's1',
         sovereignName: 'Sovereign',
-        constitution: const WorldConstitution(
+        constitution: WorldConstitution(
           admission: 'application',
           minTier: 2,
           posting: 'moderated',

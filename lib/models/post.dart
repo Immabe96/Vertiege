@@ -1,4 +1,5 @@
 import 'resident.dart';
+import 'sync_status.dart';
 
 class Comment {
   final String id;
@@ -161,6 +162,11 @@ class Post {
   /// Number of failed publish attempts for scheduled posts.
   final int failedPublishes;
 
+  /// Local synchronization state for optimistic mutations.
+  final SyncStatus syncStatus;
+  final String? localTempId;
+  final String? syncError;
+
   const Post({
     required this.id,
     required this.worldId,
@@ -189,6 +195,9 @@ class Post {
     this.scheduledFor,
     this.awards = const [],
     this.failedPublishes = 0,
+    this.syncStatus = SyncStatus.synced,
+    this.localTempId,
+    this.syncError,
   });
 
   /// Resolves the effective list of image URIs, supporting both the legacy
@@ -231,6 +240,10 @@ class Post {
     DateTime? scheduledFor,
     List<String>? awards,
     int? failedPublishes,
+    SyncStatus? syncStatus,
+    String? localTempId,
+    String? syncError,
+    bool clearSyncError = false,
   }) => Post(
     id: id ?? this.id,
     worldId: worldId ?? this.worldId,
@@ -259,5 +272,8 @@ class Post {
     scheduledFor: scheduledFor ?? this.scheduledFor,
     awards: awards ?? this.awards,
     failedPublishes: failedPublishes ?? this.failedPublishes,
+    syncStatus: syncStatus ?? this.syncStatus,
+    localTempId: localTempId ?? this.localTempId,
+    syncError: clearSyncError ? null : (syncError ?? this.syncError),
   );
 }

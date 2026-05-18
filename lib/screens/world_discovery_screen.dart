@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/world.dart';
 import '../../services/world_service.dart';
@@ -16,9 +17,7 @@ class WorldDiscoveryScreen extends ConsumerStatefulWidget {
       _WorldDiscoveryScreenState();
 }
 
-class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
   final _searchController = TextEditingController();
   List<Map<String, dynamic>> _worlds = [];
   List<Map<String, dynamic>> _trending = [];
@@ -31,14 +30,12 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     _loadData();
   }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
-    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -91,17 +88,7 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen>
             fontWeight: VFontWeight.semiBold,
           ),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: VColors.primary,
-          unselectedLabelColor: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-          indicatorColor: VColors.primary,
-          tabs: const [
-            Tab(text: 'Browse'),
-            Tab(text: 'Trending'),
-            Tab(text: 'Featured'),
-          ],
-        ),
+
       ),
       body: Column(
         children: [
@@ -195,12 +182,13 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen>
             ),
           const SizedBox(height: VSpacing.sm),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
+            child: FTabs(
+              expands: true,
+              control: const FTabControl.managed(),
               children: [
-                _WorldList(worlds: _worlds, loading: _loading),
-                _WorldList(worlds: _trending, loading: _loading),
-                _WorldList(worlds: _featured, loading: _loading),
+                FTabEntry(label: const Text('Browse'), child: _WorldList(worlds: _worlds, loading: _loading)),
+                FTabEntry(label: const Text('Trending'), child: _WorldList(worlds: _trending, loading: _loading)),
+                FTabEntry(label: const Text('Featured'), child: _WorldList(worlds: _featured, loading: _loading)),
               ],
             ),
           ),

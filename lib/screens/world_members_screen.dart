@@ -12,6 +12,8 @@ import '../utils/tier_utils.dart';
 import '../services/crash_reporter.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
+import '../ui/buttons/v_button.dart';
+import '../ui/icons/v_icons.dart';
 import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 
@@ -101,7 +103,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
         title: Text('${widget.worldName} — Members'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(VIcons.search),
             onPressed: () => _showSearch(context),
           ),
         ],
@@ -368,12 +370,14 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                 const SizedBox(height: Spacing.md),
                 Row(
                   children: [
-                    TextButton(
+                    VButton(
+                      label: 'Cancel',
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
+                      variant: ButtonVariant.text,
                     ),
                     const Spacer(),
-                    FilledButton.icon(
+                    VButton(
+                      label: 'Save',
                       onPressed: () async {
                         final toAdd = selected.difference(original);
                         final toRemove = original.difference(selected);
@@ -394,7 +398,6 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                         await _load();
                       },
                       icon: const Icon(Icons.save_outlined),
-                      label: const Text('Save'),
                     ),
                   ],
                 ),
@@ -427,16 +430,17 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
           onChanged: (v) => setState(() => _search = v),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Clear',
             onPressed: () {
               setState(() => _search = '');
               Navigator.pop(ctx);
             },
-            child: const Text('Clear'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Done',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Done'),
           ),
         ],
       ),

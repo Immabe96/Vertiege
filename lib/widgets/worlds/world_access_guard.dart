@@ -13,6 +13,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/loading_state.dart';
 import 'access_icon.dart';
+import '../../ui/buttons/v_button.dart';
+import '../../ui/icons/v_icons.dart';
 
 class WorldAccessGuard extends ConsumerWidget {
   final String worldId;
@@ -39,9 +41,9 @@ class WorldAccessGuard extends ConsumerWidget {
 
     if (resident == null) {
       return Center(
-        child: FilledButton(
+        child: VButton(
+          label: 'Get Started',
           onPressed: () => context.go('/onboarding'),
-          child: const Text('Get Started'),
         ),
       );
     }
@@ -82,13 +84,11 @@ class WorldAccessGuard extends ConsumerWidget {
                   ],
                 )
               else
-                FilledButton(
+                VButton(
+                  label: world.type == WorldType.wealth
+                      ? 'Unlock Access'
+                      : 'Verify Profession',
                   onPressed: () => _handleAccess(context, ref, world, resident),
-                  child: Text(
-                    world.type == WorldType.wealth
-                        ? 'Unlock Access'
-                        : 'Verify Profession',
-                  ),
                 ),
             ],
           ),
@@ -166,7 +166,7 @@ class WorldAccessGuard extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                icon: const Icon(Icons.shopping_cart),
+                icon: const Icon(VIcons.shoppingCart),
                 label: Text('Buy $price'),
                 onPressed: () async {
                   Navigator.pop(ctx);
@@ -191,15 +191,14 @@ class WorldAccessGuard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  StoreService.restorePurchases();
-                },
-                child: const Text('Restore Purchases'),
-              ),
+            VButton(
+              label: 'Restore Purchases',
+              onPressed: () {
+                Navigator.pop(ctx);
+                StoreService.restorePurchases();
+              },
+              variant: ButtonVariant.text,
+              isFullWidth: true,
             ),
           ],
         ),
@@ -290,20 +289,19 @@ class _VerificationSheetState extends State<_VerificationSheet> {
               ),
             )
           else
-            OutlinedButton.icon(
+            VButton(
+              label: 'Upload proof document',
               onPressed: _pickProof,
-              icon: const Icon(Icons.upload_file),
-              label: const Text('Upload proof document'),
+              icon: const Icon(VIcons.upload),
+              variant: ButtonVariant.outlined,
             ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _proofPath != null
-                  ? () => widget.onSubmit(_proofPath!)
-                  : null,
-              child: const Text('Submit for Review'),
-            ),
+          VButton(
+            label: 'Submit for Review',
+            onPressed: _proofPath != null
+                ? () => widget.onSubmit(_proofPath!)
+                : null,
+            isFullWidth: true,
           ),
         ],
       ),

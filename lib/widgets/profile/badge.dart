@@ -3,6 +3,7 @@ import '../../config/cosmetics.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
+import '../../ui/icons/v_icons.dart';
 
 class Badge extends StatelessWidget {
   final String decorationId;
@@ -23,10 +24,10 @@ class Badge extends StatelessWidget {
                 height: 22,
                 fit: BoxFit.contain,
                 cacheWidth: 64,
-                errorBuilder: (_, _, _) => const Icon(Icons.star, size: 16),
+                errorBuilder: (_, _, _) => const Icon(VIcons.sparkles, size: 16),
               ),
             )
-          : const Icon(Icons.star, size: 16),
+          : const Icon(VIcons.sparkles, size: 16),
       label: Text(label, style: const TextStyle(fontSize: FontSizes.micro)),
       backgroundColor: VColors.surfaceContainerHighest,
       side: BorderSide.none,

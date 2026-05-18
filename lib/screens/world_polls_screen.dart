@@ -6,6 +6,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
+import '../ui/buttons/v_button.dart';
+import '../ui/icons/v_icons.dart';
 
 class WorldPollsScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -86,23 +88,26 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
                     ),
                   );
                 }),
-                TextButton.icon(
+                VButton(
+                  label: 'Add Option',
                   onPressed: () {
                     options.add('');
                     setDialogState(() {});
                   },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Option'),
+                  icon: const Icon(VIcons.plus),
+                  variant: ButtonVariant.text,
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(
+            VButton(
+              label: 'Cancel',
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              variant: ButtonVariant.text,
             ),
-            FilledButton(
+            VButton(
+              label: 'Create',
               onPressed: () async {
                 if (questionController.text.trim().isEmpty) return;
                 final validOptions = options.where((o) => o.trim().isNotEmpty).toList();
@@ -118,7 +123,6 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
                   _loadPolls();
                 }
               },
-              child: const Text('Create'),
             ),
           ],
         ),
@@ -183,7 +187,7 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
               if (widget.isSovereignOrCouncil)
                 FilledButton.icon(
                   onPressed: _showCreatePollDialog,
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(VIcons.plus),
                   label: const Text('New Poll'),
                 ),
             ],
@@ -354,12 +358,13 @@ class _PollCardState extends State<_PollCard> {
           if (widget.isSovereignOrCouncil && isActive)
             Padding(
               padding: const EdgeInsets.only(top: VSpacing.sm),
-              child: TextButton(
+              child: VButton(
+                label: 'Close Poll',
                 onPressed: () async {
                   await PollService.closePoll(widget.poll.id);
                   widget.onClose();
                 },
-                child: const Text('Close Poll'),
+                variant: ButtonVariant.text,
               ),
             ),
         ],

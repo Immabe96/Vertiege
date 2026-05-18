@@ -3,6 +3,7 @@ import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
+import '../../ui/buttons/v_button.dart';
 
 class WorldInviteSection extends StatelessWidget {
   final List<World> invites;
@@ -97,48 +98,17 @@ class WorldInviteSection extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        FilledButton(
+                        VButton(
+                          label: 'Accept',
                           onPressed: () => onAccept(world.id),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: VColors.tertiary,
-                            foregroundColor: VColors.onTertiary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Spacing.md,
-                              vertical: Spacing.sm,
-                            ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Accept',
-                            style: TextStyle(
-                              fontSize: FontSizes.labelSm,
-                              fontWeight: FontWeights.semiBold,
-                            ),
-                          ),
+                          size: ButtonSize.small,
                         ),
                         const SizedBox(width: Spacing.sm),
-                        OutlinedButton(
+                        VButton(
+                          label: 'Decline',
                           onPressed: () => onDecline(world.id),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: VColors.onSurfaceVariant,
-                            side: const BorderSide(
-                              color: VColors.glassBorder,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Spacing.md,
-                              vertical: Spacing.sm,
-                            ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Decline',
-                            style: TextStyle(
-                              fontSize: FontSizes.labelSm,
-                              fontWeight: FontWeights.semiBold,
-                            ),
-                          ),
+                          variant: ButtonVariant.outlined,
+                          size: ButtonSize.small,
                         ),
                       ],
                     ),

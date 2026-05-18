@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
+import '../../ui/buttons/v_button.dart';
 
 class AuthCallbackScreen extends ConsumerStatefulWidget {
   const AuthCallbackScreen({super.key});
@@ -136,9 +137,9 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: Spacing.lg),
-                  FilledButton(
+                  VButton(
+                    label: 'Back to Sign In',
                     onPressed: () => context.go('/login'),
-                    child: const Text('Back to Sign In'),
                   ),
                 ],
               ],

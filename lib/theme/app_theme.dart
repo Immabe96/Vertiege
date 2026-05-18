@@ -9,5 +9,5 @@ class AppTheme {
 
   static ThemeData get light => VTheme.light;
   static ThemeData get dark => VTheme.dark;
-  static ThemeData get theme => dark;
+  static ThemeData get theme => light;
 }

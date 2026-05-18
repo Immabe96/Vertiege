@@ -8,6 +8,8 @@ import '../../models/notification.dart';
 import '../../utils/time_ago.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class NexusNotificationsSheet extends ConsumerStatefulWidget {
   const NexusNotificationsSheet({super.key});
@@ -71,17 +73,18 @@ class _NexusNotificationsSheetState
                     ),
                     const Spacer(),
                     if (hasUnread)
-                      TextButton(
+                      VButton(
+                        label: 'Mark all read',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           ref
                               .read(notificationProvider.notifier)
                               .markAllRead();
                         },
-                        child: const Text('Mark all read'),
+                        variant: ButtonVariant.text,
                       ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(VIcons.x),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -311,7 +314,8 @@ class _AllegianceActions extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        OutlinedButton(
+        VButton(
+          label: 'Decline',
           onPressed: () async {
             ref.read(notificationProvider.notifier).markRead(notification.id);
             final pending = ref.read(allyProvider).pendingRequests;
@@ -319,21 +323,11 @@ class _AllegianceActions extends ConsumerWidget {
               await allyNotifier.declineRequest(pending.first.id);
             }
           },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: VColors.onSurfaceVariant,
-            side: const BorderSide(color: VColors.outlineVariant),
-            padding: const EdgeInsets.symmetric(
-              horizontal: VSpacing.sm,
-              vertical: VSpacing.xs,
-            ),
-          ),
-          child: const Text(
-            'Decline',
-            style: TextStyle(fontSize: VFontSize.labelSm),
-          ),
+          variant: ButtonVariant.outlined,
         ),
         const SizedBox(width: VSpacing.xs),
-        FilledButton(
+        VButton(
+          label: 'Accept',
           onPressed: () async {
             ref.read(notificationProvider.notifier).markRead(notification.id);
             final pending = ref.read(allyProvider).pendingRequests;
@@ -341,18 +335,6 @@ class _AllegianceActions extends ConsumerWidget {
               await allyNotifier.acceptRequest(pending.first.id);
             }
           },
-          style: FilledButton.styleFrom(
-            backgroundColor: VColors.tertiary,
-            foregroundColor: VColors.onTertiary,
-            padding: const EdgeInsets.symmetric(
-              horizontal: VSpacing.sm,
-              vertical: VSpacing.xs,
-            ),
-          ),
-          child: const Text(
-            'Accept',
-            style: TextStyle(fontSize: VFontSize.labelSm),
-          ),
         ),
       ],
     );

@@ -370,7 +370,6 @@ const List<Achievement> achievements = [
     title: 'Luxury Traveler',
     description: 'Stayed at a 5-star resort',
     xpValue: 80,
-    icon: 'star',
   ),
 
   // Finance (6)

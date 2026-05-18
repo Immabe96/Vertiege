@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,11 +8,13 @@ import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../widgets/core/glass_panel.dart';
-import '../../widgets/core/ghost_input.dart';
+import '../../ui/inputs/v_input.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../utils/id_generator.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
@@ -213,13 +216,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: Spacing.md),
-            child: FilledButton(
+            child: VButton(
+              label: 'PUBLISH',
               onPressed: worlds.isEmpty ? null : _publish,
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.tertiary,
-                foregroundColor: VColors.onTertiary,
-              ),
-              child: const Text('PUBLISH'),
             ),
           ),
         ],
@@ -255,51 +254,24 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       ),
                     ),
                     const SizedBox(width: Spacing.md),
-                    Expanded(
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
+                        Expanded(
+                      child: FSelect<String>.rich(
+                        format: (value) => selectedWorld.name,
+                        control: FSelectControl.lifted(
                           value: selectedWorld.id,
-                          dropdownColor: isDark
-                              ? VColors.surfaceContainerHighDark
-                              : VColors.surfaceContainerHigh,
-                          iconEnabledColor: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                          isExpanded: true,
-                          style: TextStyle(
-                            fontSize: FontSizes.headlineMd,
-                            fontWeight: FontWeights.semiBold,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
-                          ),
-                          items: worlds
-                              .map(
-                                (world) => DropdownMenuItem<String>(
-                                  value: world.id,
-                                  child: Text(
-                                    world.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value == null) return;
-                            setState(() {
-                              _selectedWorldId = value;
+                          onChange: (v) {
+                            if (v != null) setState(() {
+                              _selectedWorldId = v;
                               _isSovereignAnnouncement = false;
                               _isSovereignDecree = false;
                             });
                           },
                         ),
+                        children: worlds.map((world) => FSelectItem<String>(
+                          value: world.id,
+                          title: Text(world.name, overflow: TextOverflow.ellipsis),
+                        )).toList(),
                       ),
-                    ),
-                    Icon(
-                      Icons.expand_more,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -506,7 +478,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GhostInput(
+                  VInput(
                     controller: _titleController,
                     hint: 'Title of your dispatch...',
                   ),
@@ -528,7 +500,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     ],
                   ),
                   const SizedBox(height: Spacing.sm),
-                  GhostInput(
+                  VInput(
                     controller: _bodyController,
                     hint: 'Share your insights with the Nexus...',
                     maxLines: 8,
@@ -694,7 +666,7 @@ class _PollBuilder extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, size: IconSizes.md),
+              icon: const Icon(VIcons.x, size: IconSizes.md),
               onPressed: onRemove,
               color: isDark
                   ? VColors.onSurfaceVariantDark
@@ -705,7 +677,7 @@ class _PollBuilder extends StatelessWidget {
           const SizedBox(height: Spacing.md),
 
           // Question field
-          GhostInput(controller: questionController, hint: 'Poll question...'),
+          VInput(controller: questionController, hint: 'Poll question...'),
           const SizedBox(height: Spacing.md),
 
           // Options
@@ -719,7 +691,7 @@ class _PollBuilder extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: GhostInput(
+                    child: VInput(
                       controller: controller,
                       hint: 'Option ${index + 1}...',
                     ),
@@ -744,7 +716,7 @@ class _PollBuilder extends StatelessWidget {
           if (optionControllers.length < 5)
             TextButton.icon(
               onPressed: onAddOption,
-              icon: const Icon(Icons.add_circle_outline, size: IconSizes.sm),
+              icon: const Icon(VIcons.plus, size: IconSizes.sm),
               label: const Text(
                 'Add Option',
                 style: TextStyle(

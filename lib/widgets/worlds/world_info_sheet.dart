@@ -2,6 +2,7 @@
 import '../../theme/design_system.dart';
 import '../../theme/v_colors.dart';
 import '../../models/world.dart';
+import '../../ui/icons/v_icons.dart';
 
 class WorldInfoSheet extends StatefulWidget {
   final WorldBase world;
@@ -82,7 +83,7 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
             padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
             child: Row(
               children: [
-                Icon(Icons.auto_awesome, size: IconSizes.sm, color: cs.primary),
+                Icon(VIcons.sparkles, size: IconSizes.sm, color: cs.primary),
                 const SizedBox(width: Spacing.xs),
                 Expanded(
                   child: Text(
@@ -92,7 +93,7 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
                     ),
                   ),
                 ),
-                Icon(Icons.star, size: IconSizes.sm, color: VColors.tertiary),
+                Icon(VIcons.sparkles, size: IconSizes.sm, color: VColors.tertiary),
                 const SizedBox(width: Spacing.xs),
                 Text(
                   'Prestige ${world.prestige}',

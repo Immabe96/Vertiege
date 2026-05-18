@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
 import '../../theme/v_colors.dart';
 import 'shimmer.dart';
+import '../../ui/icons/v_icons.dart';
 
 class ImageViewer extends StatefulWidget {
   final String imageUrl;
@@ -109,7 +110,7 @@ class _ImageViewerState extends State<ImageViewer> {
             ),
           ),
           child: const Center(
-            child: Icon(Icons.close_rounded, color: VColors.onPrimary, size: 22),
+            child: Icon(VIcons.x, color: VColors.onPrimary, size: 22),
           ),
         ),
       ),

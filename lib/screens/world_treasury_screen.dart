@@ -6,6 +6,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
+import '../ui/buttons/v_button.dart';
+import '../ui/icons/v_icons.dart';
 
 class WorldTreasuryScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -78,11 +80,13 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
           ],
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Donate',
             onPressed: () async {
               final amount = int.tryParse(amountController.text);
               if (amount == null || amount <= 0) return;
@@ -97,7 +101,6 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
                 _loadData();
               }
             },
-            child: const Text('Donate'),
           ),
         ],
       ),
@@ -134,11 +137,13 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
           ],
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Withdraw',
             onPressed: () async {
               final amount = int.tryParse(amountController.text);
               if (amount == null || amount <= 0) return;
@@ -153,7 +158,6 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
                 _loadData();
               }
             },
-            child: const Text('Withdraw'),
           ),
         ],
       ),

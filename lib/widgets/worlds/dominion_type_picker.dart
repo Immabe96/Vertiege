@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
 
 class DominionTypePicker extends StatelessWidget {
   final DominionType? selected;
@@ -121,7 +122,7 @@ class _DominionTypeCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: VColors.primary, size: VIconSize.md),
+              Icon(VIcons.badgeCheck, color: VColors.primary, size: VIconSize.md),
           ],
         ),
       ),

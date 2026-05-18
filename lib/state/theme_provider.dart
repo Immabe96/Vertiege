@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum ThemeScheme { system, light, dark }
+
 enum TextSize { small, medium, large, xlarge }
 
 class ThemeState {
   final ThemeScheme scheme;
   final TextSize textSize;
-  const ThemeState({this.scheme = ThemeScheme.dark, this.textSize = TextSize.medium});
+  const ThemeState({
+    this.scheme = ThemeScheme.light,
+    this.textSize = TextSize.medium,
+  });
 
   ThemeMode get themeMode {
     switch (scheme) {
@@ -31,11 +35,10 @@ class ThemeState {
     TextSize.xlarge => 1.3,
   };
 
-  ThemeState copyWith({ThemeScheme? scheme, TextSize? textSize}) =>
-      ThemeState(
-        scheme: scheme ?? this.scheme,
-        textSize: textSize ?? this.textSize,
-      );
+  ThemeState copyWith({ThemeScheme? scheme, TextSize? textSize}) => ThemeState(
+    scheme: scheme ?? this.scheme,
+    textSize: textSize ?? this.textSize,
+  );
 }
 
 class ThemeNotifier extends Notifier<ThemeState> {
@@ -54,7 +57,7 @@ class ThemeNotifier extends Notifier<ThemeState> {
     if (themeValue != null) {
       final scheme = ThemeScheme.values.firstWhere(
         (s) => s.name == themeValue,
-        orElse: () => ThemeScheme.dark,
+        orElse: () => ThemeScheme.light,
       );
       state = state.copyWith(scheme: scheme);
     }

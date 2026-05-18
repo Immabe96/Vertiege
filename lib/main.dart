@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'screens/onboarding/the_gate_screen.dart';
 import 'services/crash_reporter.dart';
+import 'services/firebase_bootstrap.dart';
 
 bool _handlingFlutterError = false;
 
@@ -18,7 +19,10 @@ void main() async {
     if (_handlingFlutterError) return;
     _handlingFlutterError = true;
     try {
-      CrashReporter.instance.recordError(details.exception, details.stack ?? StackTrace.current);
+      CrashReporter.instance.recordError(
+        details.exception,
+        details.stack ?? StackTrace.current,
+      );
     } finally {
       _handlingFlutterError = false;
     }
@@ -28,8 +32,9 @@ void main() async {
     return true;
   };
 
-  await dotenv.load(fileName: '.env');
+  await dotenv.load();
   await loadGateCompletionStatus();
+  await FirebaseBootstrap.initialize();
 
   final url = dotenv.env['SUPABASE_URL'] ?? '';
   final anonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';

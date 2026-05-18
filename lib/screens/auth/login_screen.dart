@@ -9,6 +9,8 @@ import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -124,20 +126,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Send reset link',
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Send reset link'),
           ),
         ],
       ),
@@ -415,21 +411,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                         FadeIn(
                           delayMs: 300,
-                          child: FilledButton.icon(
-                            onPressed: _isLoading || !_isValid
-                                ? null
-                                : _handleLogin,
-                            icon: _isLoading
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.arrow_forward),
-                            label: Text(_isLoading ? 'Signing in...' : 'Sign In'),
-                          ),
+                        child: VButton(
+                          label: 'Sign In',
+                          onPressed: _isLoading || !_isValid ? null : _handleLogin,
+                          icon: const Icon(VIcons.arrowLeft),
+                          isLoading: _isLoading,
+                        ),
                         ),
                         const SizedBox(height: VSpacing.sm),
                         FadeIn(

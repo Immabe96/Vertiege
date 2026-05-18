@@ -5,6 +5,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
+import '../../ui/buttons/v_button.dart';
 
 class AllianceSection extends ConsumerWidget {
   final String worldId;
@@ -119,25 +120,10 @@ class AllianceSection extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      FilledButton(
+                      VButton(
+                        label: 'VISIT',
                         onPressed: () => context.push('/explore/$allyId'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: VColors.tertiary,
-                          foregroundColor: VColors.onTertiary,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Spacing.md,
-                            vertical: Spacing.sm,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: const Text(
-                          'VISIT',
-                          style: TextStyle(
-                            fontSize: FontSizes.labelSm,
-                            fontWeight: FontWeights.semiBold,
-                          ),
-                        ),
+                        size: ButtonSize.small,
                       ),
                     ],
                   ),

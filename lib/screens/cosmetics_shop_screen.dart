@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/listing.dart';
@@ -19,21 +20,8 @@ class CosmeticsShopScreen extends ConsumerStatefulWidget {
       _CosmeticsShopScreenState();
 }
 
-class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,50 +76,33 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen>
             ),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: VColors.primary,
-          unselectedLabelColor: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
-          indicatorColor: VColors.primary,
-          labelStyle: const TextStyle(
-            fontSize: VFontSize.labelSm,
-            fontWeight: VFontWeight.semiBold,
-          ),
-          tabs: const [
-            Tab(text: 'Passes'),
-            Tab(text: 'Seeds'),
-            Tab(text: 'Boosts'),
-            Tab(text: 'Cosmetics'),
-            Tab(text: 'Dominions'),
-          ],
-        ),
+
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: FTabs(
+        expands: true,
+        control: const FTabControl.managed(),
         children: [
-          _ShopGrid(
+          FTabEntry(label: const Text('Passes'), child: _ShopGrid(
             category: _ShopCategory.passes,
             items: _passes,
             coins: coins,
-          ),
-          _ShopGrid(
+          )),
+          FTabEntry(label: const Text('Seeds'), child: _ShopGrid(
             category: _ShopCategory.seeds,
             items: _seeds,
             coins: coins,
-          ),
-          _ShopGrid(
+          )),
+          FTabEntry(label: const Text('Boosts'), child: _ShopGrid(
             category: _ShopCategory.boosts,
             items: _boosts,
             coins: coins,
-          ),
-          _ShopGrid(
+          )),
+          FTabEntry(label: const Text('Cosmetics'), child: _ShopGrid(
             category: _ShopCategory.cosmetics,
             items: _cosmetics,
             coins: coins,
-          ),
-          const _DominionsTab(),
+          )),
+          FTabEntry(label: const Text('Dominions'), child: const _DominionsTab()),
         ],
       ),
     );

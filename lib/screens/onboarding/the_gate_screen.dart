@@ -13,6 +13,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
+import '../../ui/icons/v_icons.dart';
 import '../../utils/world_foundations.dart';
 import '../../widgets/core/glass_panel.dart';
 
@@ -344,7 +345,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 top: Spacing.sm,
                 left: Spacing.sm,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, size: 20),
+                  icon: const Icon(VIcons.chevronRight, size: 20),
                   color: isDark
                       ? VColors.onSurfaceVariantDark
                       : VColors.onSurfaceVariant,
@@ -449,7 +450,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: 56,
             child: FilledButton.icon(
               onPressed: _nextStage,
-              icon: const Icon(Icons.keyboard_double_arrow_right),
+              icon: const Icon(VIcons.chevronRight),
               label: const Text('ENTER THE GATE'),
               style: FilledButton.styleFrom(
                 backgroundColor: VColors.tertiary,
@@ -546,7 +547,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: 48,
             child: FilledButton.icon(
               onPressed: _selectedInterests.isEmpty ? null : _nextStage,
-              icon: const Icon(Icons.arrow_forward),
+              icon: const Icon(VIcons.arrowLeft),
               label: const Text('CONTINUE'),
               style: FilledButton.styleFrom(
                 backgroundColor: VColors.tertiary,
@@ -774,7 +775,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                       _joinedStarterWorldId = world.id;
                       _nextStage();
                     },
-              icon: const Icon(Icons.login),
+              icon: const Icon(VIcons.logOut),
               label: Text(
                 world.id.isEmpty ? 'LOADING WORLD' : 'ENTER THIS WORLD',
               ),
@@ -797,7 +798,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: 48,
             child: OutlinedButton.icon(
               onPressed: _nextStage,
-              icon: const Icon(Icons.travel_explore),
+              icon: const Icon(VIcons.globe),
               label: const Text('EXPLORE FIRST'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: isDark
@@ -894,7 +895,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                         color: VColors.onTertiary,
                       ),
                     )
-                  : const Icon(Icons.flag),
+                  : const Icon(VIcons.trophy),
               label: Text(_completing ? 'Entering Realm...' : 'OPEN THE REALM'),
               style: FilledButton.styleFrom(
                 backgroundColor: VColors.tertiary,
@@ -1146,7 +1147,7 @@ class _InterestCard extends StatelessWidget {
               ),
               if (isSelected) ...[
                 const SizedBox(height: Spacing.xs),
-                Icon(Icons.check_circle, size: 16, color: glow),
+                Icon(VIcons.badgeCheck, size: 16, color: glow),
               ],
             ],
           ),
@@ -1242,7 +1243,7 @@ class _GoalCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, size: 22, color: VColors.tertiary),
+              Icon(VIcons.badgeCheck, size: 22, color: VColors.tertiary),
           ],
         ),
       ),

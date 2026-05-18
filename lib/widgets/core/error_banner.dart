@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
+import '../../ui/buttons/v_button.dart';
 
 class SovereignErrorBanner extends StatelessWidget {
   final String message;
@@ -58,28 +59,15 @@ class SovereignErrorBanner extends StatelessWidget {
               ),
             ),
             if (onRetry != null)
-              TextButton(
+              VButton(
+                label: 'RETRY',
                 onPressed: onRetry,
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.sync,
-                      size: IconSizes.sm,
-                      color: VColors.tertiary,
-                    ),
-                    SizedBox(width: Spacing.xs),
-                    Text(
-                      'RETRY',
-                      style: TextStyle(
-                        fontSize: FontSizes.labelSm,
-                        fontWeight: FontWeights.semiBold,
-                      color: VColors.tertiary,
-                        letterSpacing: LetterSpacing.label,
-                      ),
-                    ),
-                  ],
+                icon: const Icon(
+                  Icons.sync,
+                  size: IconSizes.sm,
+                  color: VColors.tertiary,
                 ),
+                variant: ButtonVariant.text,
               ),
           ],
         ),

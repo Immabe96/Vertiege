@@ -13,6 +13,8 @@ import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../ui/buttons/v_button.dart';
+import '../ui/icons/v_icons.dart';
 import '../utils/date_format.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
@@ -804,7 +806,7 @@ class _MessageBubbleState extends State<_MessageBubble>
             ),
             const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.reply_rounded),
+              leading: const Icon(VIcons.arrowLeft),
               title: const Text('Reply'),
               onTap: () {
                 Navigator.pop(context);
@@ -813,7 +815,7 @@ class _MessageBubbleState extends State<_MessageBubble>
             ),
             if (isMe) ...[
               ListTile(
-                leading: const Icon(Icons.edit_outlined),
+                leading: const Icon(VIcons.edit),
                 title: const Text('Edit'),
                 onTap: () {
                   Navigator.pop(context);
@@ -862,11 +864,13 @@ class _MessageBubbleState extends State<_MessageBubble>
           ),
         ),
         actions: [
-          TextButton(
+          VButton(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            variant: ButtonVariant.text,
           ),
-          FilledButton(
+          VButton(
+            label: 'Save',
             onPressed: () {
               final newContent = controller.text.trim();
               if (newContent.isNotEmpty) {
@@ -874,7 +878,6 @@ class _MessageBubbleState extends State<_MessageBubble>
               }
               Navigator.pop(context);
             },
-            child: const Text('Save'),
           ),
         ],
       ),
@@ -1131,7 +1134,7 @@ class _ImagePreview extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: VIconSize.md),
+            icon: const Icon(VIcons.x, size: VIconSize.md),
             onPressed: onRemove,
             tooltip: 'Remove image',
           ),

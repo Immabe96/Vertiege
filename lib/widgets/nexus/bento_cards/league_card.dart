@@ -5,6 +5,7 @@ import '../../../state/resident_provider.dart';
 import '../../../services/league_service.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/design_system.dart';
+import '../../../ui/buttons/v_button.dart';
 
 class LeagueCard extends ConsumerWidget {
   const LeagueCard({super.key});
@@ -106,18 +107,13 @@ class LeagueCard extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: Spacing.sm),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/leagues');
-            },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
-              side: BorderSide(color: tierColor.withValues(alpha: 0.5)),
-            ),
-            child: const Text('View Standings'),
-          ),
+        VButton(
+          label: 'View Standings',
+          onPressed: () {
+            Navigator.pushNamed(context, '/leagues');
+          },
+          variant: ButtonVariant.outlined,
+          isFullWidth: true,
         ),
       ],
     );

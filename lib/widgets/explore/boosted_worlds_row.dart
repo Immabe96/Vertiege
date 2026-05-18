@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../theme/colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/icons/v_icons.dart';
 
 class BoostedWorldsRow extends StatelessWidget {
   final List<World> worlds;
@@ -50,7 +51,7 @@ class BoostedWorldsRow extends StatelessWidget {
                       color: VColors.tertiary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(VRadius.md),
                     ),
-                    child: const Icon(Icons.rocket_launch, color: VColors.tertiary, size: VIconSize.md),
+                    child: const Icon(VIcons.rocket, color: VColors.tertiary, size: VIconSize.md),
                   ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(

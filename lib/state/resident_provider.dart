@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import '../services/world_service.dart';
 import '../services/moderation_service.dart';
 import '../services/verification_service.dart';
 import '../services/supabase.dart';
+import '../repositories/world_repository.dart';
 import '../utils/haptics.dart';
 import 'achievement_provider.dart';
 import 'world_provider.dart';
@@ -37,13 +39,17 @@ class ResidentState {
     bool? isLoading,
     VerificationStatus? verificationStatus,
   }) => ResidentState(
-    resident: identical(resident, _unset) ? this.resident : resident as Resident?,
+    resident: identical(resident, _unset)
+        ? this.resident
+        : resident as Resident?,
     isLoading: isLoading ?? this.isLoading,
     verificationStatus: verificationStatus ?? this.verificationStatus,
   );
 }
 
 class ResidentNotifier extends Notifier<ResidentState> {
+  final WorldRepository _worldRepository = const WorldRepository();
+
   int _lastStreakCount = 0;
   int _lastJoinedWorldsCount = 0;
   double _cachedWorldPrestigeBonus = 0.0;
@@ -79,8 +85,15 @@ class ResidentNotifier extends Notifier<ResidentState> {
       // Fetch from Supabase first
       final remote = await ProfileService.getProfile(userId);
       if (remote != null) {
-        state = ResidentState(resident: remote, isLoading: false);
+        final cached = await _cachedResidentFor(userId);
+        final mergedWorldIds = {
+          ...remote.joinedWorldIds,
+          ...?cached?.joinedWorldIds,
+        }.toList();
+        final resident = remote.copyWith(joinedWorldIds: mergedWorldIds);
+        state = ResidentState(resident: resident, isLoading: false);
         _persist(); // cache locally
+        unawaited(_worldRepository.replayOutbox());
         return;
       }
       // Fallback to local cache
@@ -117,15 +130,13 @@ class ResidentNotifier extends Notifier<ResidentState> {
       }
     }
 
-    await ProfileService.upsertProfile(durableResident);
+    await _worldRepository.saveProfileMembership(durableResident);
     for (final worldId in durableResident.joinedWorldIds) {
-      try {
-        await WorldService.joinWorld(
-          worldId,
-          durableResident.id,
-          residentName: durableResident.name,
-        );
-      } catch (_) {}
+      await _worldRepository.joinWorld(
+        worldId: worldId,
+        residentId: durableResident.id,
+        residentName: durableResident.name,
+      );
     }
   }
 
@@ -162,9 +173,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
     // Save to Supabase
     if (state.resident != null) {
-      _saveResidentProfile(state.resident!).catchError(
-        (e) => debugPrint('Failed to save profile: $e'),
-      );
+      _saveResidentProfile(
+        state.resident!,
+      ).catchError((e) => debugPrint('Failed to save profile: $e'));
     }
   }
 
@@ -268,44 +279,44 @@ class ResidentNotifier extends Notifier<ResidentState> {
       state.resident?.tier != null && state.resident!.tier.value >= 4;
 
   int get customReactionSlots => switch (state.resident?.tier.value) {
-        null => 0,
-        1 => 0,
-        2 => 3,
-        3 => 5,
-        4 => 10,
-        5 => 999,
-        _ => 0,
-      };
+    null => 0,
+    1 => 0,
+    2 => 3,
+    3 => 5,
+    4 => 10,
+    5 => 999,
+    _ => 0,
+  };
 
   int get postPinLimit => switch (state.resident?.tier.value) {
-        null => 0,
-        1 => 0,
-        2 => 1,
-        3 => 3,
-        4 => 5,
-        5 => 10,
-        _ => 0,
-      };
+    null => 0,
+    1 => 0,
+    2 => 1,
+    3 => 3,
+    4 => 5,
+    5 => 10,
+    _ => 0,
+  };
 
   int get worldCreationLimit => switch (state.resident?.tier.value) {
-        null => 1,
-        1 => 1,
-        2 => 2,
-        3 => 1,
-        4 => 3,
-        5 => 999,
-        _ => 1,
-      };
+    null => 1,
+    1 => 1,
+    2 => 2,
+    3 => 1,
+    4 => 3,
+    5 => 999,
+    _ => 1,
+  };
 
   double get xpMultiplier => switch (state.resident?.tier.value) {
-        null => 1.0,
-        1 => 1.0,
-        2 => 1.1,
-        3 => 1.25,
-        4 => 1.5,
-        5 => 2.0,
-        _ => 1.0,
-      };
+    null => 1.0,
+    1 => 1.0,
+    2 => 1.1,
+    3 => 1.25,
+    4 => 1.5,
+    5 => 2.0,
+    _ => 1.0,
+  };
 
   Future<double> _calculateWorldPrestigeBonus() async {
     final r = state.resident;
@@ -324,14 +335,14 @@ class ResidentNotifier extends Notifier<ResidentState> {
   double get worldPrestigeBonus => _cachedWorldPrestigeBonus;
 
   int get dailyCoinBonus => switch (state.resident?.tier.value) {
-        null => 0,
-        1 => 0,
-        2 => 5,
-        3 => 15,
-        4 => 30,
-        5 => 50,
-        _ => 0,
-      };
+    null => 0,
+    1 => 0,
+    2 => 5,
+    3 => 15,
+    4 => 30,
+    5 => 50,
+    _ => 0,
+  };
 
   Future<int> awardActivityXp(String actionType, int baseXp) async {
     final r = state.resident;
@@ -342,7 +353,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
     try {
       final worldBonus = await _calculateWorldPrestigeBonus();
-      final totalMultiplier = xpMultiplier * (1.0 + worldBonus) * r.referralXpMultiplier;
+      final totalMultiplier =
+          xpMultiplier * (1.0 + worldBonus) * r.referralXpMultiplier;
       final adjustedXp = (baseXp * totalMultiplier).round();
 
       final response = await client.rpc(
@@ -429,10 +441,11 @@ class ResidentNotifier extends Notifier<ResidentState> {
     }
   }
 
-  Future<void> _performTierUpgrade(Resident oldResident, ResidentTier newTier) async {
-    state = state.copyWith(
-      resident: oldResident.copyWith(tier: newTier),
-    );
+  Future<void> _performTierUpgrade(
+    Resident oldResident,
+    ResidentTier newTier,
+  ) async {
+    state = state.copyWith(resident: oldResident.copyWith(tier: newTier));
     _persist();
 
     ref
@@ -445,15 +458,18 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
     Haptics.heavy();
 
-    ref.read(postProvider.notifier).addPost(
-      worldId: 'neon-district',
-      residentId: oldResident.id,
-      residentName: oldResident.name,
-      residentAvatar: oldResident.avatarUrl,
-      content: 'Just ascended to ${newTier.label} tier! ${oldResident.tier.label} -> ${newTier.label}',
-      tierValue: newTier.value,
-      isAnnouncement: true,
-    );
+    ref
+        .read(postProvider.notifier)
+        .addPost(
+          worldId: 'neon-district',
+          residentId: oldResident.id,
+          residentName: oldResident.name,
+          residentAvatar: oldResident.avatarUrl,
+          content:
+              'Just ascended to ${newTier.label} tier! ${oldResident.tier.label} -> ${newTier.label}',
+          tierValue: newTier.value,
+          isAnnouncement: true,
+        );
   }
 
   Future<void> checkTierUpgrade() async {
@@ -491,20 +507,14 @@ class ResidentNotifier extends Notifier<ResidentState> {
     try {
       await client.rpc(
         'award_rep_milestone_xp',
-        params: {
-          'p_user_id': r.id,
-          'p_world_id': worldId,
-          'p_new_rep': newRep,
-        },
+        params: {'p_user_id': r.id, 'p_world_id': worldId, 'p_new_rep': newRep},
       );
 
       const councilBonusXp = 500;
       final newTotalXp = r.totalXp + councilBonusXp;
       final newTier = ResidentTier.fromXp(newTotalXp);
 
-      state = state.copyWith(
-        resident: r.copyWith(totalXp: newTotalXp),
-      );
+      state = state.copyWith(resident: r.copyWith(totalXp: newTotalXp));
       _persist();
 
       if (newTier.value > r.tier.value) {
@@ -529,7 +539,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
     const referralBonusXp = 200;
     final newSuccessfulReferrals = r.successfulReferrals + 1;
-    final newReferralMultiplier = (1.0 + (newSuccessfulReferrals * 0.05)).clamp(1.0, 1.5);
+    final newReferralMultiplier = (1.0 + (newSuccessfulReferrals * 0.05)).clamp(
+      1.0,
+      1.5,
+    );
     final newTotalXp = r.totalXp + referralBonusXp;
     final newTier = ResidentTier.fromXp(newTotalXp);
 
@@ -543,11 +556,14 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
 
     try {
-      await client.from('profiles').update({
-        'total_xp': newTotalXp,
-        'successful_referrals': newSuccessfulReferrals,
-        'referral_xp_multiplier': newReferralMultiplier,
-      }).eq('id', referrerUserId);
+      await client
+          .from('profiles')
+          .update({
+            'total_xp': newTotalXp,
+            'successful_referrals': newSuccessfulReferrals,
+            'referral_xp_multiplier': newReferralMultiplier,
+          })
+          .eq('id', referrerUserId);
     } catch (_) {}
 
     if (newTier.value > r.tier.value) {
@@ -731,18 +747,12 @@ class ResidentNotifier extends Notifier<ResidentState> {
     state = state.copyWith(resident: updatedResident);
     _persist();
 
-    try {
-      if (WorldService.isRemoteWorldId(worldId)) {
-        await WorldService.joinWorld(worldId, r.id, residentName: r.name);
-      }
-      await ProfileService.upsertProfile(updatedResident);
-    } catch (_) {
-      if (WorldService.isRemoteWorldId(worldId)) {
-        state = state.copyWith(resident: r);
-        _persist();
-        return;
-      }
-    }
+    await _worldRepository.joinWorld(
+      worldId: worldId,
+      residentId: r.id,
+      residentName: r.name,
+    );
+    await _worldRepository.saveProfileMembership(updatedResident);
 
     worldNotifier.incrementMemberCount(worldId);
     final updatedWorld = ref.read(worldProvider).worlds[worldId];
@@ -764,7 +774,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       ),
     );
     _persist();
-    WorldService.leaveWorld(worldId, r.id);
+    unawaited(_worldRepository.leaveWorld(worldId: worldId, residentId: r.id));
     ref.read(worldProvider.notifier).decrementMemberCount(worldId);
     ref
         .read(worldProvider.notifier)
@@ -917,7 +927,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
   }
 
   bool get canAscend =>
-      state.resident != null && state.resident!.tier.value >= 5 && state.resident!.prestigeStars == 0;
+      state.resident != null &&
+      state.resident!.tier.value >= 5 &&
+      state.resident!.prestigeStars == 0;
 
   Future<bool> ascendToPrestige() async {
     final r = state.resident;
@@ -945,15 +957,18 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
     Haptics.heavy();
 
-    ref.read(postProvider.notifier).addPost(
-      worldId: 'neon-district',
-      residentId: r.id,
-      residentName: r.name,
-      residentAvatar: r.avatarUrl,
-      content: 'Just ascended to Prestige $newStars! ${prestigeFrameId.toUpperCase()} frame unlocked.',
-      tierValue: 5,
-      isAnnouncement: true,
-    );
+    ref
+        .read(postProvider.notifier)
+        .addPost(
+          worldId: 'neon-district',
+          residentId: r.id,
+          residentName: r.name,
+          residentAvatar: r.avatarUrl,
+          content:
+              'Just ascended to Prestige $newStars! ${prestigeFrameId.toUpperCase()} frame unlocked.',
+          tierValue: 5,
+          isAnnouncement: true,
+        );
 
     return true;
   }
@@ -1036,7 +1051,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
       totalXp: (json['totalXp'] as int?) ?? 0,
       prestigeLevel: (json['prestigeLevel'] as int?) ?? 0,
       prestigeStars: (json['prestigeStars'] as int?) ?? 0,
-      referralXpMultiplier: (json['referralXpMultiplier'] as num?)?.toDouble() ?? 1.0,
+      referralXpMultiplier:
+          (json['referralXpMultiplier'] as num?)?.toDouble() ?? 1.0,
       successfulReferrals: (json['successfulReferrals'] as int?) ?? 0,
       xpMultiplier: (json['xpMultiplier'] as num?)?.toDouble() ?? 1.0,
       dailyCoinBonus: (json['dailyCoinBonus'] as int?) ?? 0,
