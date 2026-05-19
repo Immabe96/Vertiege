@@ -3,6 +3,7 @@ import '../models/channel.dart';
 import '../models/world.dart';
 import '../utils/id_generator.dart';
 import '../utils/validators.dart' as validators;
+import '../utils/world_foundations.dart';
 import 'supabase.dart';
 import 'crash_reporter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -327,8 +328,9 @@ class WorldService {
   }
 
   static Future<List<WorldChannel>> createDefaultChannels(
-    String worldId,
-  ) async {
+    String worldId, {
+    World? world,
+  }) async {
     if (!isSupabaseConfigured()) return [];
     final existing = await getChannels(worldId);
     final existingNames = existing.map((c) => c.name.toLowerCase()).toSet();
@@ -365,6 +367,16 @@ class WorldService {
     for (var i = 0; i < defaults.length; i++) {
       final (name, desc, type) = defaults[i];
       if (existingNames.contains(name)) continue;
+
+      String foundationMarkdown = '';
+      if (world != null &&
+          (name == 'info' || name == 'rules' || name == 'roles')) {
+        foundationMarkdown = foundationMarkdownForChannel(
+          world: world,
+          channelName: name,
+        );
+      }
+
       final channel = WorldChannel(
         id: generateId(),
         worldId: worldId,
@@ -374,13 +386,12 @@ class WorldService {
         position: nextPosition + created.length,
         isDefault: true,
         createdAt: DateTime.now().millisecondsSinceEpoch,
+        foundationMarkdown: foundationMarkdown,
       );
       created.add(channel);
       try {
         await createChannel(channel);
       } catch (e, st) {
-        // Expected failure for duplicate channels — roll back and stop.
-        // Logged for diagnostics in case of unexpected errors.
         CrashReporter.instance.recordError(
           e,
           st,

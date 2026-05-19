@@ -109,12 +109,6 @@ class WorldNotifier extends Notifier<WorldState> {
 
     final worldId = worldData?['id'] as String? ?? generateId();
 
-    final channelNotifier = ref.read(channelProvider.notifier);
-    final channels = await WorldService.createDefaultChannels(worldId);
-    if (channels.isNotEmpty) {
-      channelNotifier.cacheChannels(worldId, channels);
-    }
-
     final newWorld = World(
       id: worldId,
       slug: worldData?['slug'] as String? ?? '',
@@ -133,6 +127,12 @@ class WorldNotifier extends Notifier<WorldState> {
       worldCurrencyName: worldCurrencyName ?? 'Coins',
       tags: tags ?? [],
     );
+
+    final channelNotifier = ref.read(channelProvider.notifier);
+    final channels = await WorldService.createDefaultChannels(worldId, world: newWorld);
+    if (channels.isNotEmpty) {
+      channelNotifier.cacheChannels(worldId, channels);
+    }
 
     state = state.copyWith(worlds: {...state.worlds, worldId: newWorld});
 

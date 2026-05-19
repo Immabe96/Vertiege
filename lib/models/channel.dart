@@ -63,6 +63,8 @@ class WorldChannel {
   final int position;
   final bool isDefault;
   final int createdAt;
+  final String foundationMarkdown;
+  final String foundationVersion;
 
   const WorldChannel({
     required this.id,
@@ -75,6 +77,8 @@ class WorldChannel {
     this.position = 0,
     this.isDefault = false,
     this.createdAt = 0,
+    this.foundationMarkdown = '',
+    this.foundationVersion = 'v1',
   });
 
   WorldChannel copyWith({
@@ -88,6 +92,8 @@ class WorldChannel {
     int? position,
     bool? isDefault,
     int? createdAt,
+    String? foundationMarkdown,
+    String? foundationVersion,
   }) => WorldChannel(
     id: id ?? this.id,
     worldId: worldId ?? this.worldId,
@@ -99,6 +105,8 @@ class WorldChannel {
     position: position ?? this.position,
     isDefault: isDefault ?? this.isDefault,
     createdAt: createdAt ?? this.createdAt,
+    foundationMarkdown: foundationMarkdown ?? this.foundationMarkdown,
+    foundationVersion: foundationVersion ?? this.foundationVersion,
   );
 
   Map<String, dynamic> toJson() => {
@@ -112,6 +120,8 @@ class WorldChannel {
     'position': position,
     'isDefault': isDefault,
     'createdAt': createdAt,
+    'foundationMarkdown': foundationMarkdown,
+    'foundationVersion': foundationVersion,
   };
 
   Map<String, dynamic> toSupabase() => {
@@ -127,6 +137,8 @@ class WorldChannel {
     'created_at': DateTime.fromMillisecondsSinceEpoch(
       createdAt,
     ).toIso8601String(),
+    'foundation_markdown': foundationMarkdown,
+    'foundation_version': foundationVersion,
   };
 
   static WorldChannel fromJson(Map<String, dynamic> json) => WorldChannel(
@@ -143,6 +155,8 @@ class WorldChannel {
     position: json['position'] ?? 0,
     isDefault: json['isDefault'] ?? false,
     createdAt: json['createdAt'] ?? 0,
+    foundationMarkdown: json['foundationMarkdown'] ?? '',
+    foundationVersion: json['foundationVersion'] ?? 'v1',
   );
 
   static WorldChannel fromSupabase(Map<String, dynamic> data) => WorldChannel(
@@ -161,5 +175,7 @@ class WorldChannel {
     createdAt:
         DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ??
         0,
+    foundationMarkdown: data['foundation_markdown'] ?? '',
+    foundationVersion: data['foundation_version'] ?? 'v1',
   );
 }
