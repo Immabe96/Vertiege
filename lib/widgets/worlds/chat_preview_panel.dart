@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/channel.dart';
@@ -101,9 +102,9 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
         : allMessages;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(Spacing.lg),
+
+      child: FCard(
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -115,7 +116,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   height: 16,
                   decoration: BoxDecoration(
                     color: VColors.tertiary,
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+
                   ),
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -142,7 +143,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
             // Messages
             if (messages.isEmpty)
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: Spacing.md),
+
                 child: Text(
                   'No messages yet. Start the conversation!',
                   style: TextStyle(
@@ -154,7 +155,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
             else
               ...messages.map(
                 (msg) => Padding(
-                  padding: const EdgeInsets.only(bottom: Spacing.sm),
+
                   child: RichText(
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -182,10 +183,9 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
               ),
             const SizedBox(height: Spacing.md),
             // Input bar
-            GlassPanel(
-              blur: 8,
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
+            FCard(
+
+
                 vertical: Spacing.xs,
               ),
               child: Row(
@@ -214,7 +214,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                     onPressed: _sendMessage,
                     icon: const Icon(VIcons.send, size: IconSizes.sm),
                     color: VColors.tertiary,
-                    padding: EdgeInsets.zero,
+
                     constraints: const BoxConstraints(
                       minWidth: 36,
                       minHeight: 36,

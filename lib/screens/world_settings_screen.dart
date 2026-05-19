@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -425,7 +425,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           constraints: const BoxConstraints(maxHeight: 600),
           decoration: BoxDecoration(
             color: isDark ? VColors.surfaceDark : VColors.surface,
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
             border: Border.all(
               color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
             ),
@@ -434,7 +434,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.all(Spacing.lg),
+
                 child: Row(
                   children: [
                     const Icon(VIcons.sparkles, color: VColors.tertiary),
@@ -463,8 +463,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
               ),
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    Spacing.lg,
+
                     0,
                     Spacing.lg,
                     Spacing.lg,
@@ -570,11 +569,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(Spacing.md),
+
                 children: [
                   // ── Overview ──────────────────────────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  FCard(
+
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -660,7 +659,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                   : null,
                               selectedColor: colorScheme.primaryContainer,
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.all(Spacing.sm),
+
                             );
                           }).toList(),
                         ),
@@ -694,8 +693,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Banner Generator ──────────────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  FCard(
+
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -730,8 +729,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Channels ───────────────────────────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  FCard(
+
                     child: WorldSettingsChannels(
                       worldId: widget.worldId,
                       sovereignId: world.sovereignId,
@@ -748,8 +747,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 3,
                       )))
-                    GlassPanel(
-                      padding: const EdgeInsets.all(Spacing.lg),
+                    FCard(
+
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -784,8 +783,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 4,
                       )))
-                    GlassPanel(
-                      padding: const EdgeInsets.all(Spacing.lg),
+                    FCard(
+
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -819,8 +818,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Invites ────────────────────────────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  FCard(
+
                     child: WorldSettingsInvites(
                       sovereignId: world.sovereignId,
                       residentId: resident?.id,
@@ -836,8 +835,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Member Management ──────────────────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  FCard(
+
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -877,13 +876,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                   world.sovereignId,
                                 );
                             return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: Spacing.sm,
+
                               ),
-                              child: GlassPanel(
-                                padding: const EdgeInsets.all(Spacing.md),
-                                borderRadius: BorderRadius.circular(
-                                  RadiusTokens.xl,
+                              child: FCard(
+
+
                                 ),
                                 child: Row(
                                   children: [
@@ -922,16 +919,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                     width: Spacing.sm,
                                                   ),
                                                   Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: Spacing.sm,
+
                                                           vertical: 2,
                                                         ),
                                                     decoration: BoxDecoration(
                                                       color: VColors.tertiary,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          RadiusTokens.pill,
+
                                                         ),
                                                   ),
                                                     child: Text(
@@ -952,18 +945,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                           Row(
                                             children: [
                                               Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: Spacing.sm,
+
                                                       vertical: 1,
                                                     ),
                                                 decoration: BoxDecoration(
                                                   color: tierStandingColor(
                                                     standing.level,
                                                   ).withValues(alpha: 0.15),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        RadiusTokens.pill,
+
                                                       ),
                                                 ),
                                                 child: Text(
@@ -1040,8 +1029,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Quiet Hours ──────────────────────────────────
-                  GlassPanel(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                  FCard(
+
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1180,7 +1169,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             : VColors.outlineVariant,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
                       ),
                       onTap: () => context.push(
                         '/audit-log/${widget.worldId}?name=${Uri.encodeComponent(world.name)}',
@@ -1191,12 +1180,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   // ── Danger Zone ──────────────────────────────────
                   Container(
-                    padding: const EdgeInsets.all(Spacing.lg),
+
                     decoration: BoxDecoration(
                       color: isDark
                           ? VColors.errorContainerDark
                           : VColors.errorContainer,
-                      borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
                       border: Border.all(
                         color: VColors.error.withValues(alpha: 0.3),
                       ),
@@ -1289,8 +1278,8 @@ class _BoostWorldCard extends ConsumerWidget {
     final enabled = StoreService.isEnabled;
     final canBoost = enabled && world.boostsRemaining > 0 && !isMaxLevel;
 
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.lg),
+    return FCard(
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1320,13 +1309,12 @@ class _BoostWorldCard extends ConsumerWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm + 4,
+
                   vertical: Spacing.xs + 2,
                 ),
                 decoration: BoxDecoration(
                   color: cs.primaryContainer,
-                  borderRadius: BorderRadius.circular(RadiusTokens.pill),
+
                 ),
                 child: Text(
                   'Level $currentLevel',
@@ -1362,7 +1350,7 @@ class _BoostWorldCard extends ConsumerWidget {
           // Progress bar
           if (!isMaxLevel)
             ClipRRect(
-              borderRadius: BorderRadius.circular(RadiusTokens.input),
+
               child: LinearProgressIndicator(
                 value: progressFraction,
                 minHeight: 6,
@@ -1502,7 +1490,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
             ? VColors.surfaceContainerHighDark
             : VColors.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.full),
+
         ),
         title: const Text('Create Rank'),
         content: TextField(
@@ -1535,8 +1523,8 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.lg),
+    return FCard(
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

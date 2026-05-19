@@ -1,3 +1,4 @@
+import 'package:forui/forui.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,7 +100,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                     slivers: [
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.all(VSpacing.md),
+
                           child: Column(
                             children: [
                               _buildLeagueHeader(leagueState, isDark),
@@ -112,7 +113,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                         ),
                       ),
                       SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+
                         sliver: _buildStandingsList(leagueState, isDark),
                       ),
                       const SliverToBoxAdapter(
@@ -133,9 +134,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final tierColor = LeagueService.getTierColor(userLeague.tier);
     final tierIcon = LeagueService.getTierIcon(userLeague.tier);
 
-    return GlassPanel(
+    return FCard(
       useBlur: false,
-      padding: const EdgeInsets.all(VSpacing.lg),
+
       child: Column(
         children: [
           Icon(tierIcon, size: 48, color: tierColor),
@@ -182,10 +183,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final hours = _timeRemaining.inHours % 24;
     final minutes = _timeRemaining.inMinutes % 60;
 
-    return GlassPanel(
+    return FCard(
       useBlur: false,
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.lg,
+
         vertical: VSpacing.md,
       ),
       child: Row(
@@ -214,10 +214,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   }
 
   Widget _buildPromotionInfo(bool isDark) {
-    return GlassPanel(
+    return FCard(
       useBlur: false,
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.lg,
+
         vertical: VSpacing.sm,
       ),
       child: Row(
@@ -272,7 +271,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           final isDemotionZone = rank > (standings.length - LeagueService.demotionCount);
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: VSpacing.xs),
+
             child: _buildStandingRow(
               participant: participant,
               rank: rank,
@@ -337,13 +336,12 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     return Container(
       decoration: BoxDecoration(
         color: rowBackground,
-        borderRadius: BorderRadius.circular(VRadius.md),
+
         border: isCurrentUser
             ? Border.all(color: VColors.primary.withValues(alpha: 0.3))
             : null,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
+
         vertical: VSpacing.sm,
       ),
       child: Row(

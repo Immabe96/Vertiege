@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -215,7 +215,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: Spacing.md),
+
             child: VButton(
               label: 'PUBLISH',
               onPressed: worlds.isEmpty ? null : _publish,
@@ -224,16 +224,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(Spacing.marginMobile),
+
         child: Column(
           children: [
             const SizedBox(height: Spacing.xl),
 
             // World selector
             if (worlds.isNotEmpty)
-              GlassPanel(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.lg,
+              FCard(
+
                   vertical: Spacing.md,
                 ),
                 child: Row(
@@ -245,7 +244,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         color: isDark
                             ? VColors.secondaryContainerDark
                             : VColors.secondaryContainer,
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+
                       ),
                       child: const Icon(
                         Icons.language,
@@ -277,8 +276,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 ),
               )
             else
-              GlassPanel(
-                padding: EdgeInsets.all(Spacing.lg),
+              FCard(
+
                 child: Row(
                   children: [
                     Icon(
@@ -318,8 +317,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     resident.id == selectedWorld.sovereignId;
                 if (!isCouncil && !isSov) return const SizedBox.shrink();
 
-                return GlassPanel(
-                  padding: const EdgeInsets.all(Spacing.lg),
+                return FCard(
+
                   child: Row(
                     children: [
                         Container(
@@ -327,7 +326,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           height: 48,
                           decoration: BoxDecoration(
                             color: VColors.tertiary.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(RadiusTokens.md),
+
                           ),
                           child: const Icon(
                             Icons.stars,
@@ -399,8 +398,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 final pinLimit = resident?.postPinLimit ?? 0;
                 if (pinLimit <= 0) return const SizedBox.shrink();
 
-                return GlassPanel(
-                  padding: const EdgeInsets.all(Spacing.lg),
+                return FCard(
+
                   child: Row(
                     children: [
                       Container(
@@ -408,7 +407,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: VColors.primary.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+
                         ),
                         child: const Icon(
                           Icons.push_pin,
@@ -473,8 +472,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             const SizedBox(height: Spacing.lg),
 
             // Editor
-            GlassPanel(
-              padding: const EdgeInsets.all(Spacing.xl),
+            FCard(
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -570,15 +569,14 @@ class _AttachChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.lg,
+
           vertical: Spacing.sm + 2,
         ),
         decoration: BoxDecoration(
           color: selected
               ? VColors.tertiary.withValues(alpha: 0.15)
               : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
-          borderRadius: BorderRadius.circular(RadiusTokens.full),
+
           border: Border.all(
             color: selected
                 ? VColors.tertiary.withValues(alpha: 0.4)
@@ -641,8 +639,8 @@ class _PollBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return GlassPanel(
-      padding: const EdgeInsets.all(Spacing.lg),
+    return FCard(
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -685,8 +683,7 @@ class _PollBuilder extends StatelessWidget {
             final index = entry.key;
             final controller = entry.value;
             return Padding(
-              padding: EdgeInsets.only(
-                bottom: index < optionControllers.length - 1 ? Spacing.sm : 0,
+
               ),
               child: Row(
                 children: [
@@ -799,7 +796,7 @@ class _FormatButton extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
+
           border: Border.all(
             color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
           ),

@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
@@ -33,11 +34,10 @@ class ChatInputBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       top: false,
-      child: GlassPanel(
-        blur: 10,
-        borderRadius: BorderRadius.zero,
-        padding: EdgeInsets.fromLTRB(
-          Spacing.sm,
+      child: FCard(
+
+
+
           replyToName != null ? Spacing.xs : Spacing.xs,
           Spacing.sm,
           Spacing.sm,
@@ -47,13 +47,12 @@ class ChatInputBar extends StatelessWidget {
           children: [
             if (replyToName != null)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
+
                   vertical: Spacing.xs,
                 ),
                 decoration: BoxDecoration(
                   color: VColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+
                   border: Border.all(
                     color: VColors.primary.withValues(alpha: 0.2),
                   ),
@@ -95,7 +94,7 @@ class ChatInputBar extends StatelessWidget {
                       IconButton(
                         icon: const Icon(VIcons.x, size: IconSizes.sm),
                         onPressed: onCancelReply,
-                        padding: EdgeInsets.zero,
+
                         constraints: const BoxConstraints(),
                       ),
                   ],
@@ -112,7 +111,7 @@ class ChatInputBar extends StatelessWidget {
                     tooltip: 'Attach image',
                     color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                     iconSize: IconSizes.lg,
-                    padding: EdgeInsets.zero,
+
                   ),
                 Expanded(
                   child: TextField(
@@ -150,13 +149,13 @@ class ChatInputBar extends StatelessWidget {
                   icon: const Icon(VIcons.send),
                   color: VColors.tertiary,
                   iconSize: IconSizes.lg,
-                  padding: EdgeInsets.zero,
+
                 ),
               ],
             ),
             if (typingIndicator != null && typingIndicator!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 2, left: Spacing.md),
+                 left: Spacing.md),
                 child: Text(
                   typingIndicator!,
                   style: TextStyle(

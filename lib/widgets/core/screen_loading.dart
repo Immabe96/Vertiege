@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
@@ -51,7 +52,7 @@ class ScreenLoading extends StatelessWidget {
         );
       case ScreenLoadingType.grid:
         return GridView.builder(
-          padding: const EdgeInsets.all(Spacing.md),
+
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             mainAxisSpacing: Spacing.md,
@@ -59,8 +60,8 @@ class ScreenLoading extends StatelessWidget {
             childAspectRatio: 0.85,
           ),
           itemCount: itemCount,
-          itemBuilder: (_, _) => GlassPanel(
-            padding: const EdgeInsets.all(Spacing.md),
+          itemBuilder: (_, _) => FCard(
+
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,16 +91,15 @@ class _GlassPostCardShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
+
         vertical: Spacing.sm,
       ),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(Spacing.md),
+      child: FCard(
+
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Pulse(width: 48, height: 48, borderRadius: RadiusTokens.full),
+            const Pulse(width: 48, height: 48,
             const SizedBox(width: Spacing.md),
             Expanded(
               child: Column(
@@ -109,15 +109,15 @@ class _GlassPostCardShimmer extends StatelessWidget {
                   Pulse(
                     width: MediaQuery.of(context).size.width * 0.35,
                     height: FontSizes.body,
-                    borderRadius: RadiusTokens.chip,
+
                   ),
                   const SizedBox(height: Spacing.sm),
-                  const Pulse(borderRadius: RadiusTokens.chip),
+                  const Pulse(
                   const SizedBox(height: Spacing.xs),
                   Pulse(
                     width: MediaQuery.of(context).size.width * 0.6,
                     height: 14,
-                    borderRadius: RadiusTokens.chip,
+
                   ),
                 ],
               ),
@@ -135,15 +135,14 @@ class _GlassChatTileShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
+
         vertical: Spacing.sm + 2,
       ),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(Spacing.md),
+      child: FCard(
+
         child: Row(
           children: [
-            const Pulse(width: 56, height: 56, borderRadius: RadiusTokens.full),
+            const Pulse(width: 56, height: 56,
             const SizedBox(width: Spacing.md),
             Expanded(
               child: Column(
@@ -152,13 +151,13 @@ class _GlassChatTileShimmer extends StatelessWidget {
                   Pulse(
                     width: MediaQuery.of(context).size.width * 0.3,
                     height: FontSizes.body,
-                    borderRadius: RadiusTokens.chip,
+
                   ),
                   const SizedBox(height: Spacing.xs + 2),
                   Pulse(
                     width: MediaQuery.of(context).size.width * 0.55,
                     height: FontSizes.body,
-                    borderRadius: RadiusTokens.chip,
+
                   ),
                 ],
               ),
@@ -176,32 +175,31 @@ class _ProfileShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.lg,
+
         vertical: Spacing.xl,
       ),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(Spacing.lg),
+      child: FCard(
+
         child: Column(
           children: [
             const Center(
               child: Pulse(
                 width: 80,
                 height: 80,
-                borderRadius: RadiusTokens.full,
+
               ),
             ),
             const SizedBox(height: Spacing.lg),
             const Pulse(
               width: 160,
               height: 20,
-              borderRadius: RadiusTokens.chip,
+
             ),
             const SizedBox(height: Spacing.sm),
             const Pulse(
               width: 100,
               height: 14,
-              borderRadius: RadiusTokens.chip,
+
             ),
             const SizedBox(height: Spacing.xl),
             Row(
@@ -209,9 +207,9 @@ class _ProfileShimmer extends StatelessWidget {
               children: List.generate(3, (_) => const _StatShimmer()),
             ),
             const SizedBox(height: Spacing.xl),
-            const Pulse(height: 14, borderRadius: RadiusTokens.chip),
+            const Pulse(height: 14,
             const SizedBox(height: Spacing.sm),
-            const Pulse(height: 14, borderRadius: RadiusTokens.chip),
+            const Pulse(height: 14,
           ],
         ),
       ),
@@ -226,9 +224,9 @@ class _StatShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: const [
-        Pulse(width: 48, height: 22, borderRadius: RadiusTokens.chip),
+        Pulse(width: 48, height: 22,
         SizedBox(height: Spacing.xs),
-        Pulse(width: 36, height: 12, borderRadius: RadiusTokens.chip),
+        Pulse(width: 36, height: 12,
       ],
     );
   }
@@ -246,32 +244,32 @@ class _DetailShimmer extends StatelessWidget {
           color: VColors.surfaceContainerHighest.withValues(alpha: 0.3),
         ),
         Padding(
-          padding: const EdgeInsets.all(Spacing.md),
-          child: GlassPanel(
-            padding: const EdgeInsets.all(Spacing.lg),
+
+          child: FCard(
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Pulse(
                   width: 200,
                   height: 24,
-                  borderRadius: RadiusTokens.chip,
+
                 ),
                 const SizedBox(height: Spacing.sm),
                 const Pulse(
                   width: 120,
                   height: 14,
-                  borderRadius: RadiusTokens.chip,
+
                 ),
                 const SizedBox(height: Spacing.lg),
-                const Pulse(height: 14, borderRadius: RadiusTokens.chip),
+                const Pulse(height: 14,
                 const SizedBox(height: Spacing.sm),
-                const Pulse(height: 14, borderRadius: RadiusTokens.chip),
+                const Pulse(height: 14,
                 const SizedBox(height: Spacing.sm),
                 const Pulse(
                   width: 200,
                   height: 14,
-                  borderRadius: RadiusTokens.chip,
+
                 ),
               ],
             ),
