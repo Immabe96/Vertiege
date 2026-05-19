@@ -11,6 +11,7 @@ Allowed to touch:
 - `lib/screens/onboarding/**`
 - `lib/screens/world_detail_screen.dart`
 - `lib/widgets/worlds/world_access_guard.dart`
+- `lib/services/access_control.dart`
 - `lib/state/world_provider.dart`
 - `lib/repositories/world_repository.dart`
 - `lib/services/world_service.dart`
@@ -19,6 +20,7 @@ Allowed to touch:
 
 Do not redesign screens in this task.
 Do not change Supabase schema unless a missing RPC/policy is directly required; if so, add a focused migration and document why.
+Only touch `lib/services/access_control.dart` for a narrow starter-world access fix, such as allowing `world.isDefault` before tier/profession checks.
 
 ## Required Work
 - Trace starter world auto-join from onboarding completion to resident/world membership state.
