@@ -16,9 +16,13 @@
 - `docs/DESIGN.md` — marked historical, Forui direction referenced
 - `docs/PROGRESS.md` — updated to new PLAN.md phase structure
 
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — not re-run (doc-only changes; stabilization report confirmed 0 warnings)
+- APK build not re-run (doc-only changes; Phase 13 CI will gate release builds)
+
 ### Unresolved Risks
-- APK build and `flutter test` not re-verified on this commit (Phase 13 CI will gate this)
-- Visual review of docs changes not needed (text-only)
+- APK not rebuilt with doc changes (unnecessary — only markdown files changed)
 
 ---
 
