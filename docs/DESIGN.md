@@ -1,8 +1,18 @@
-# Vertiege Design System -- Sovereign Excellence
+# Vertiege Design System
 
-A minimalist glassmorphism design system built on an OLED obsidian palette. The UI recedes so content competes, with glow borders reserved for tiered prestige moments.
+> **Status: HISTORICAL** — This document describes the old Sovereign Excellence glassmorphism/OLED-dark direction. The active design system is defined in [PLAN.md](../../PLAN.md) Phase 3 (Forui Design System Completion). This document is kept for reference during the migration.
 
-Source spec: `docs/superpowers/specs/2026-05-06-sovereign-excellence-design.md`
+The current direction is:
+- **Light theme:** white/minimal surfaces, dark readable text, compact spacing
+- **Dark theme:** AMOLED black, high-contrast text, restrained borders
+- **Forui primitives:** `VScaffold`, `VTopBar`, `VBottomNav`, `VCard`, `VListTile`, `VButton`, `VEmptyState`, etc.
+- No heavy gradients, blur panels, or arbitrary `Colors.*`
+
+---
+
+## Historical: Sovereign Excellence (glassmorphism + OLED)
+
+Original spec: `docs/superpowers/specs/2026-05-06-sovereign-excellence-design.md`
 Token files: `lib/theme/colors.dart`, `lib/theme/design_system.dart`
 
 ---

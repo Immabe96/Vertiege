@@ -1,27 +1,27 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-12 (UI/UX polish pass active)
+**Updated:** 2026-05-19 (PLAN.md long-horizon roadmap active)
 
 ## Vision
 
-Vertiege is a semi-social, semi-gamified gateway to a **Realm** of **Worlds**. Residents (users) are distinguished by real-world achievements, earn prestige, and level up. Three world types: Wealth (paid), Profession (proof-based), Custom/Dominion (user-created, gated by resident level). Governance via Council + Sovereign with inactivity ejection. Discord-style channels + Twitter-style feeds per world, aggregated into the Realm Feed (Nexus).
+Vertiege is a social world/community app where every world is an identity-rich realm with channels, residents, lore, posts, polls, quests, events, achievements, and economy features where relevant. Residents (users) are distinguished by real-world achievements, earn prestige, and level up. Three world types: Wealth (paid), Profession (proof-based), Custom/Dominion (user-created, gated by resident level). Governance via Council + Sovereign with inactivity ejection. Discord-style channels + Twitter-style feeds per world, aggregated into the Realm Feed (Nexus).
 
 Full vision: `.claude/../memory/vertiege-vision.md`
 
-## Current: Phase 3 - UI/UX Polish
+## Current: Phase 0 — Baseline & Merge (2026-05-19)
 
-### Completed in Phase 3 (2026-05-12)
-- Rebuilt World Discover with image-led world cards, visual rails, search, and consistent generated world artwork.
-- Rebuilt Chat tab so DMs are separate from joined-world channel navigation.
-- Replaced remaining generated placeholder artwork sets: world banners, avatars, badges, achievement medallions, profession medallions, tier emblems, empty states, splash/onboarding backgrounds, and app icon assets.
-- Replaced inconsistent full-screen/section spinners in ascension, hall, subscriptions, world invites, and access verification with glass loading states.
-- Added branded error state handling for resident profile failures and tightened mounted checks after async image/profile loads.
-- Removed visible placeholder-style event date copy (`TBD`) from event cards.
+Active plan: [PLAN.md](../../PLAN.md) — 13-phase Long-Horizon Product Completion Plan.
 
-### UI/UX QA Gate
-- Device smoke test on the next release build for real scrolling, tap targets, and tab flow.
-- Small inline activity indicators remain only where they are direct button/progress feedback.
-- Feature work should resume after this QA pass stays stable on-device.
+Design direction has moved from Sovereign Excellence (glassmorphism, OLED dark-first) to Forui (light-first, AMOLED dark, minimal surfaces, no blur panels). See PLAN.md Phase 3 for the Forui design rules.
+
+### Phase 0 checklist
+- [x] Merge `feat/stabilization-plan` into `main` (branches already at same commit)
+- [x] Delete stale merged branches
+- [x] Make PLAN.md the active working plan
+- [x] Update README.md, DESIGN.md, PROGRESS.md to remove glass/dark-first language
+- [ ] Verify APK builds and `flutter test` passes (Phase 13 CI setup pending)
+
+## Historical: Pre-PLAN.md work (2026-05-04 to 2026-05-19)
 
 ## Completed: Phase 2 - 9/9 gaps closed
 
@@ -126,10 +126,21 @@ adb install -r build\app\outputs\flutter-apk\app-release.apk
 - URL: https://wjaphoaxalvgjnrwqjwe.supabase.co
 - Key in .env (gitignored)
 
-## Upcoming Phases
+## Upcoming Phases (from PLAN.md)
 
 | Phase | Goal |
 |-------|------|
-| 2 — Gap Closure | Close the 9 gaps above, starting with council automation + dynamic prestige |
-| 3 — Polish | UI fit & finish, dead deps, font flash, loading states, scroll jank, branding |
-| 4 — Ship | Payments, Sentry crash reporting, push notifications, final APK, beta distribution |
+| 0 — Baseline & Merge | Accept stabilization as baseline, update docs |
+| 1 — Installed-App Polish | World rail readability, tab overflow, create-world, empty states |
+| 2 — Source of Truth Cleanup | Align README, DESIGN, PROGRESS, product-gap-audit |
+| 3 — Forui Design System | Standardize app primitives, replace legacy GlassPanel patterns |
+| 4 — Navigation & IA | Bottom tabs (Nexus/Discover/Chat/Identity/More), deep links |
+| 5 — World Content & Media | Distinct world identity, media pipeline, starter content |
+| 6 — Supabase Reliability | RLS audit, corrective migrations, RPCs, indexes |
+| 7 — Persistence & Outbox | Repository standard, durable mutations, offline reconciliation |
+| 8 — Performance | Fast startup, pagination, cache-first, image optimization |
+| 9 — Firebase Infrastructure | Crashlytics, Analytics, Remote Config, FCM |
+| 10 — Feature Completion | Close gap between vision and visible product |
+| 11 — Security & Privacy | RLS tests, rate limits, JWT verification, abuse prevention |
+| 12 — Accessibility & Quality | Text scaling, tap targets, semantics, keyboard avoidance |
+| 13 — Testing & CI | Unit/provider/widget/integration tests, CI APK build |

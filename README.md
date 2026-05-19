@@ -1,6 +1,6 @@
 # Vertiege v1.0.0-beta.4+1
 
-> A tier-gated social network where every world is a sovereign realm with entry conditions. Built with Flutter + Riverpod + Supabase + Sovereign Excellence dark theme.
+> A social world/community app where every world is an identity-rich realm with channels, residents, lore, and more. Built with Flutter + Riverpod + Supabase + Forui design system.
 
 <p align="center">
   <img src="assets/generated/avatar-1.png" width="64" />
@@ -402,28 +402,23 @@ All 10 providers use Riverpod `Notifier`/`NotifierProvider` pattern with `copyWi
 
 ## Theme & Design System
 
-### Sovereign Excellence — Dark Only
+### Forui Design System (active direction — see PLAN.md Phase 3)
 
-| Token Category | Values |
-|----------------|--------|
-| Surface | OLED obsidian: `#0A0A0B` (canvas), `#131316` (surface), `#1A1A1E` (surfaceContainer) |
-| Primary | Sovereign violet: `#8B7CF6` → `#A78BFA` |
-| Tertiary | Gold: `#D4A843` → `#F0C969` |
-| Ink | `#F4F4F5` (primary), `#A1A1AA` (secondary), `#71717A` (muted) |
-| Semantic | `#EF4444` (error), `#22C55E` (success), `#F59E0B` (warning) |
-| Tier Colors | Hustler `#F97316` (orange) → Elite `#8B7CF6` (violet) → Apex gold gradients |
-| Fonts | Space Grotesk (headlines), Inter (body), JetBrains Mono (code) |
-| Spacing Scale | 4, 6, 8, 10, 12, 16, 20, 24, 32, 40 |
-| Radius Scale | 4, 6, 8, 10, 12, 16, 20, 24, 9999 (pill) |
+| Rule | Value |
+|------|-------|
+| Light theme | White/minimal surfaces, dark readable text, compact spacing |
+| Dark theme | AMOLED black, high-contrast text, restrained borders |
+| Accent colors | Only for selected state, semantic status, world identity, rarity, or destructive/success/warning |
+| Gradients | Avoid heavy gradients and blur panels |
+| Image overlays | Use subtle scrims only when text overlays images |
 
-### Glass Tokens
+**App primitives:** `VScaffold`, `VTopBar`, `VBottomNav`, `VCard`, `VListTile`, `VButton`, `VEmptyState`, `VLoadingState`, `VErrorState`, `VImage`, `VWorldBadge`, `VSyncStatusBadge`.
 
-| Token | Value |
-|-------|-------|
-| Background Alpha | 0.55 |
-| Border Alpha | 0.12 |
-| Blur Sigma | 12 |
-| Gold Glow Alpha | 0.06 |
+### Historical: Sovereign Excellence (dark-first glassmorphism)
+
+>The design system below is **historical** and being replaced by the Forui direction above. It is kept for reference during migration.
+
+OLED obsidian palette, glassmorphism, glow borders for tiered prestige. See `docs/superpowers/specs/2026-05-06-sovereign-excellence-design.md` for the original spec.
 
 ---
 
@@ -662,8 +657,8 @@ On auth/onboarding/gate pages, fully authenticated → /
 | Routing | GoRouter 14.8 (StatefulShellRoute) |
 | Backend | Supabase 2.8 (Auth, Database, Realtime, Storage) / supabase_flutter |
 | Local Storage | SharedPreferences + FlutterSecureStorage |
-| UI | Material 3 Dark-Only + Custom Glass Design System |
-| Fonts | Google Fonts (Space Grotesk, Inter) |
+| UI | Forui + Material 3 (light-first, AMOLED dark) |
+| Fonts | System fonts with Forui typography (Google Fonts being phased out per PLAN.md Phase 3) |
 | Live Audio/Video | livekit_client 2.5.3 |
 | IAP | in_app_purchase 3.2 |
 | Images | image_picker 1.1 |
