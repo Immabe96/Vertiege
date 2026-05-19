@@ -12,8 +12,8 @@
 - **Missing Constraints: (FIXED: added unique constraints for memberships, bookmarks, reactions)** Need unique constraints for world memberships, bookmarks, reactions, and channel lookups.
 
 ## P2: Visible UX Quality Issues
-- **Legacy UI Components: (FIXED: Replaced GlassPanel, GlassSheet, and SovereignCard with Forui FCard and native counterparts)** Widespread use of `GlassPanel` (70+ instances), `GlassSheet`, `SovereignCard` instead of the required `forui` design system primitives.
-- **Inconsistent Theming: (FIXED: Softened heavy gradients to simple scrims, removed GoogleFonts overrides)** Heavy gradients, blurs, and `GoogleFonts` overrides exist. Light theme needs to be white/minimal and dark theme AMOLED black.
+- **Legacy UI Components: (FIXED: Replaced GlassPanel, GlassSheet, and SovereignCard with Forui FCard and native counterparts)** Widespread use of `GlassPanel` (70+ instances), `GlassSheet`, `SovereignCard` instead of the required `forui` design system primitives. Updated files: `lib/screens/world_discovery_screen.dart`, `lib/screens/tabs/explore_screen.dart`, `lib/widgets/worlds/world_card.dart`, `lib/widgets/worlds/world_banner.dart`, `lib/widgets/worlds/world_hero_banner.dart`, and `lib/widgets/explore/**`.
+- **Inconsistent Theming: (FIXED: Softened heavy gradients to simple scrims, removed GoogleFonts overrides)** Heavy gradients, blurs, and `GoogleFonts` overrides exist. Light theme needs to be white/minimal and dark theme AMOLED black. Removed GoogleFonts from `lib/widgets/explore/**` and gradients from `lib/widgets/worlds/world_banner.dart`.
 - **Empty States: (FIXED: Simplified empty state widget wrappers to rely on clean FCard styling)** Current empty states use noisy imagery. They should be replaced with minimal Forui-style empty states (subtle icon, short title, CTA).
 
 ## P3: Cleanup & Refactoring

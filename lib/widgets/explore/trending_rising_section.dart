@@ -1,5 +1,5 @@
-﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
+
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
@@ -47,7 +47,7 @@ class TrendingRisingSection extends StatelessWidget {
               const SizedBox(width: Spacing.sm),
               Text(
                 title,
-                style: GoogleFonts.manrope(
+                style: TextStyle(
                   fontSize: FontSizes.headlineLg,
                   fontWeight: FontWeights.semiBold,
                   color: badgeColor,

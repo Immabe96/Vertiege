@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/resident.dart';
@@ -165,22 +166,22 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         : null,
                     filled: true,
                     fillColor: isDark
-                        ? VColors.glassBackgroundDark
-                        : VColors.glassBackground,
+                        ? VColors.surfaceDark
+                        : VColors.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(VRadius.pill),
                       borderSide: BorderSide(
                         color: isDark
-                            ? VColors.glassBorderDark
-                            : VColors.glassBorder,
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(VRadius.pill),
                       borderSide: BorderSide(
                         color: isDark
-                            ? VColors.glassBorderDark
-                            : VColors.glassBorder,
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -453,16 +454,9 @@ class _WorldListCard extends StatelessWidget {
       child: InkWell(
         onTap: isLocked ? null : () => context.push('/explore/${world.id}'),
         borderRadius: BorderRadius.circular(VRadius.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? VColors.glassBackgroundDark
-                : VColors.glassBackground,
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-            ),
-          ),
+        child: SizedBox(
+        width: 160,
+        child: FCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -693,6 +687,7 @@ class _WorldListCard extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -807,18 +802,10 @@ class _TrendingWorldCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => context.push('/explore/${world.id}'),
-      child: Container(
+      child: SizedBox(
         width: 160,
-        decoration: BoxDecoration(
-          color: isDark
-              ? VColors.glassBackgroundDark
-              : VColors.glassBackground,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          border: Border.all(
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-          ),
-        ),
-        child: Padding(
+        child: FCard(
+          child: Padding(
           padding: const EdgeInsets.all(VSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -862,6 +849,7 @@ class _TrendingWorldCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

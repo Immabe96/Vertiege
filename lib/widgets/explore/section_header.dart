@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
@@ -31,11 +31,11 @@ class ExploreSectionHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.manrope(
-                fontSize: FontSizes.headlineLg,
-                fontWeight: FontWeights.semiBold,
-                color: VColors.primary,
-              ),
+              style: TextStyle(
+                  fontSize: FontSizes.headlineLg,
+                  fontWeight: FontWeights.semiBold,
+                  color: VColors.primary,
+                ),
             ),
           ),
         ],

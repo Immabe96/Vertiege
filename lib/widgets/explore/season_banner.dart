@@ -1,5 +1,5 @@
-﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
+
 import '../../models/world.dart';
 import '../../services/season_service.dart';
 import '../../theme/v_colors.dart';
@@ -57,11 +57,11 @@ class SeasonBanner extends StatelessWidget {
                   children: [
                     Text(
                       season.name.toUpperCase(),
-                      style: GoogleFonts.manrope(
-                        fontSize: FontSizes.bodyMd,
-                        fontWeight: FontWeights.bold,
-                        color: VColors.tertiary,
-                      ),
+                      style: TextStyle(
+                  fontSize: FontSizes.bodyMd,
+                  fontWeight: FontWeights.bold,
+                  color: VColors.tertiary,
+                ),
                     ),
                     const SizedBox(height: 4),
                     Text(

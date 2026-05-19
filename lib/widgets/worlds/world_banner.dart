@@ -110,7 +110,6 @@ class _WorldBannerPainter extends CustomPainter {
     _drawBackground(canvas, size);
     _drawPatterns(canvas, size);
     _drawIconSilhouette(canvas, size);
-    _drawVignette(canvas, size);
     _drawBottomGlow(canvas, size);
   }
 
@@ -124,12 +123,7 @@ class _WorldBannerPainter extends CustomPainter {
 
   /// Deep dark gradient from canvas to surface.
   void _drawBackground(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [VColors.surface, VColors.surface],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    final paint = Paint()..color = VColors.surface;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
 
@@ -280,34 +274,10 @@ class _WorldBannerPainter extends CustomPainter {
   }
 
   /// Subtle vignette overlay at the edges.
-  void _drawVignette(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(0, -0.1),
-        radius: 0.9,
-        colors: [Colors.transparent, VColors.surface.withValues(alpha: 0.55)],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-  }
+
 
   /// Tier-colored bottom border glow (4 px high).
   void _drawBottomGlow(Canvas canvas, Size size) {
-    const glowHeight = 4.0;
-    final paint = Paint()
-      ..shader =
-          LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              tierColor.withValues(alpha: 0.0),
-              tierColor.withValues(alpha: 0.30),
-            ],
-          ).createShader(
-            Rect.fromLTWH(0, size.height - glowHeight, size.width, glowHeight),
-          );
-    canvas.drawRect(
-      Rect.fromLTWH(0, size.height - glowHeight, size.width, glowHeight),
-      paint,
-    );
+    // Removed harsh glow to match app aesthetic
   }
 }

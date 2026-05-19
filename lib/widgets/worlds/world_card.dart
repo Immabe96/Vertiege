@@ -1,3 +1,4 @@
+import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,16 +13,10 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
-import '../core/sovereign_card.dart';
 import '../../ui/icons/v_icons.dart';
 import 'world_icon.dart';
 import 'world_banner.dart';
 
-CardTier _getPrestigeTier(int prestige) {
-  if (prestige >= 600) return CardTier.apex;
-  if (prestige >= 300) return CardTier.elite;
-  return CardTier.hustler;
-}
 
 class WorldCard extends ConsumerWidget {
   final World world;
@@ -34,14 +29,14 @@ class WorldCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final resident = ref.watch(residentProvider).resident;
     final isLocked = resident != null && !canAccessWorld(resident, world);
-    final tier = _getPrestigeTier(world.prestige);
 
     return FadeIn(
       delayMs: index * 60,
-      child: SovereignCard(
-        tier: tier,
+      child: GestureDetector(
         onTap: () => context.push('/explore/${world.id}'),
-        child: wide ? _WideLayout(world: world, isLocked: isLocked) : _SquareLayout(world: world, isLocked: isLocked),
+        child: FCard(
+          child: wide ? _WideLayout(world: world, isLocked: isLocked) : _SquareLayout(world: world, isLocked: isLocked),
+        ),
       ),
     );
   }

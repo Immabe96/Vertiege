@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/shimmer.dart';
@@ -9,14 +10,8 @@ class ShimmerWorldCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.card),
-        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: SizedBox(
+    return FCard(
+          child: SizedBox(
         height: 130,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
