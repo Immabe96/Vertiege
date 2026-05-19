@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:vertiege/theme/app_theme.dart';
 import 'package:vertiege/widgets/core/empty_state.dart';
+import 'package:vertiege/ui/feedback/v_states.dart';
 import 'package:vertiege/widgets/explore/section_header.dart';
 import 'package:vertiege/widgets/chat/scroll_fab.dart';
 
@@ -45,5 +46,42 @@ void main() {
       ),
     );
     expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+  });
+  testWidgets('AppEmptyState renders title and description', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: AppEmptyState(
+            title: 'No Data',
+            description: 'This is an empty state',
+            icon: Icons.inbox,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('No Data'), findsOneWidget);
+    expect(find.text('This is an empty state'), findsOneWidget);
+    expect(find.byIcon(Icons.inbox), findsOneWidget);
+  });
+
+  testWidgets('VEmptyState renders title and description', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: VEmptyState(
+            title: 'No Items',
+            description: 'There are no items here',
+            icon: Icons.list,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('No Items'), findsOneWidget);
+    expect(find.text('There are no items here'), findsOneWidget);
+    expect(find.byIcon(Icons.list), findsOneWidget);
   });
 }

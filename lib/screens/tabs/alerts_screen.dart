@@ -131,7 +131,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
               title: 'All caught up!',
               description: 'You have no notifications yet.',
               icon: Icons.notifications_outlined,
-              imageAsset: 'assets/generated/empty-notifications.jpg',
+
               variant: EmptyStateVariant.default_,
             )
           : _buildNotificationList(context, notifications, ref, theme),

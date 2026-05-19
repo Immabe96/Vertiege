@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
+import '../../ui/feedback/v_states.dart';
 import '../../theme/design_system.dart';
 import '../../utils/date_format.dart';
 import '../profile/cosmetic_avatar.dart';
@@ -173,11 +174,10 @@ class _CommentSheetState extends State<CommentSheet> {
               const Divider(),
               Expanded(
                 child: tree.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No comments yet',
-                          style: theme.textTheme.bodyMedium,
-                        ),
+                    ? const VEmptyState(
+                        title: 'No comments yet',
+                        description: 'Be the first to share your thoughts',
+                        icon: Icons.chat_bubble_outline,
                       )
                     : ListView.builder(
                         controller: scrollController,

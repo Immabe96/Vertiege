@@ -14,7 +14,7 @@
 ## P2: Visible UX Quality Issues
 - **Legacy UI Components: (FIXED: Replaced GlassPanel, GlassSheet, and SovereignCard with Forui FCard and native counterparts)** Widespread use of `GlassPanel` (70+ instances), `GlassSheet`, `SovereignCard` instead of the required `forui` design system primitives.
 - **Inconsistent Theming: (FIXED: Softened heavy gradients to simple scrims, removed GoogleFonts overrides)** Heavy gradients, blurs, and `GoogleFonts` overrides exist. Light theme needs to be white/minimal and dark theme AMOLED black.
-- **Empty States: (FIXED: Simplified empty state widget wrappers to rely on clean FCard styling)** Current empty states use noisy imagery. They should be replaced with minimal Forui-style empty states (subtle icon, short title, CTA).
+- **Empty States: (FIXED: Replaced image-heavy empty states with minimal Forui-style icon/title/body layouts)** Current empty states use noisy imagery. They should be replaced with minimal Forui-style empty states (subtle icon, short title, CTA).
 
 ## P3: Cleanup & Refactoring
 - **Build Requirements:** Android release builds require JDK 21 (system JDK 26 is unsupported for this build).

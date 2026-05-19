@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import '../ui/feedback/v_states.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -309,31 +310,10 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       );
     }
 
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.chat,
-            size: 48,
-            color: VColors.onSurfaceVariant,
-          ),
-          const SizedBox(height: VSpacing.md),
-          Text(
-            'No messages yet',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: VFontWeight.semiBold,
-            ),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'Be the first to say something in #${widget.channelName}',
-            style: TextStyle(
-              color: VColors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
+    return VEmptyState(
+      title: 'No messages yet',
+      description: 'Be the first to say something in #${widget.channelName}',
+      icon: Icons.chat,
     );
   }
 
