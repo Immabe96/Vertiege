@@ -25,6 +25,16 @@ Do not do broad regex replacements.
 - Keep typography compact and readable in light/dark modes.
 - Update audit doc with exact changes and residual risks.
 
+## Extra Safety Constraints
+- First inspect existing Forui usage in this repo and the installed `forui` package before naming or using Forui widgets.
+- Do not speculate about constructors such as `FCard` or `showFSheet`; verify they compile from package docs/source or existing usage.
+- If a Forui primitive lacks padding/border parameters, wrap its child in `Padding` or use an existing app wrapper instead of passing unsupported params.
+- Do not replace app navigation, routing, providers, repositories, Supabase code, or auth behavior.
+- Do not change `AppBar`/top-level shell behavior unless the problematic blur/glass code is directly inside the allowed Nexus scope.
+- List the exact files you expect to edit in the plan.
+- If another file is needed, pause and ask instead of expanding scope.
+- No root scratch files, no throwaway Dart probes, no shell replacement scripts, no broad regex rewrites.
+
 ## Verification
 Run:
 - `flutter analyze --no-fatal-infos --no-fatal-warnings`
