@@ -973,22 +973,24 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     }
 
     final worlds = ref.read(worldProvider).worlds.values;
+    final defaultWorlds = worlds.where((w) => w.isDefault).toList();
+    final fallbackWorld = defaultWorlds.isNotEmpty
+        ? defaultWorlds.first
+        : const World(
+            id: '',
+            slug: 'neon-district',
+            name: 'Neon District',
+            type: WorldType.wealth,
+            description: 'The entry point to the digital realm.',
+            sovereignId: '',
+            sovereignName: 'Vertiege',
+            icon: 'neon',
+            requiredTier: 1,
+          );
+
     return worlds.firstWhere(
       (world) => world.slug == slug,
-      orElse: () => worlds.firstWhere(
-        (world) => world.slug == 'neon-district',
-        orElse: () => const World(
-          id: '',
-          slug: 'neon-district',
-          name: 'Neon District',
-          type: WorldType.wealth,
-          description: 'The entry point to the digital realm.',
-          sovereignId: '',
-          sovereignName: 'Vertiege',
-          icon: 'neon',
-          requiredTier: 1,
-        ),
-      ),
+      orElse: () => fallbackWorld,
     );
   }
 

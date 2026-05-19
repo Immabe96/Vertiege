@@ -151,6 +151,9 @@ final Map<String, World> worldsConfig = {
     prestige: 5,
     icon: 'neon',
     requiredTier: 1,
+    isDefault: true,
+    lore:
+        'Neon District is the gateway to Vertiege — a bustling digital frontier where ambition meets opportunity. Here, newcomers learn the rhythms of world life: posting, connecting, and building reputation. The neon glow reflects the energy of first steps, bold ideas, and the social etiquette that binds residents together.',
   ),
   'azure-coast': const World(
     id: 'azure-coast',
@@ -163,6 +166,8 @@ final Map<String, World> worldsConfig = {
     prestige: 12,
     icon: 'azure',
     requiredTier: 2,
+    lore:
+        'Azure Coast is where coastal commerce thrives. Deals are struck on sunlit terraces, luxury culture sets the standard, and trade etiquette keeps the economy flowing. Residents here understand that wealth is built through relationships as much as transactions.',
   ),
   'sovereign-city': const World(
     id: 'sovereign-city',
@@ -175,6 +180,8 @@ final Map<String, World> worldsConfig = {
     prestige: 22,
     icon: 'sovereign',
     requiredTier: 3,
+    lore:
+        'Sovereign City is the seat of governance and influence. Formal conduct is expected, civic roles carry weight, and every decision ripples through the power structure. This is where residents learn that true authority comes from serving the community.',
   ),
   'golden-estate': const World(
     id: 'golden-estate',
@@ -186,6 +193,8 @@ final Map<String, World> worldsConfig = {
     prestige: 35,
     icon: 'golden',
     requiredTier: 4,
+    lore:
+        'Golden Estate preserves the traditions of legacy and patronage. Stewardship is valued above accumulation, and estate etiquette reflects generations of refined social order. Residents here are custodians of culture, not merely consumers of it.',
   ),
   'aetheria': const World(
     id: 'aetheria',
@@ -197,6 +206,8 @@ final Map<String, World> worldsConfig = {
     prestige: 48,
     icon: 'aetheria',
     requiredTier: 5,
+    lore:
+        'Aetheria sits at the mythic apex of Vertiege — a realm of legends, prestige, and ceremonial roles. Only the most accomplished residents earn entry, and their presence shapes the culture of every world below. This is where legacy becomes mythology.',
   ),
   'aviation-heights': const World(
     id: 'aviation-heights',
@@ -209,6 +220,8 @@ final Map<String, World> worldsConfig = {
     prestige: 18,
     icon: 'aviation',
     requiredProfession: 'Aviation',
+    lore:
+        'Aviation Heights is home to pilots, engineers, and aerospace visionaries. Safety-first rules govern every discussion, and squadron roles create a chain of trust at altitude. Here, the sky is not a limit — it is a starting point.',
   ),
   'medical-nexus': const World(
     id: 'medical-nexus',
@@ -221,6 +234,8 @@ final Map<String, World> worldsConfig = {
     prestige: 28,
     icon: 'medical',
     requiredProfession: 'Medical',
+    lore:
+        'Medical Nexus is a healthcare knowledge hub where clinical expertise meets community support. No unsafe medical advice is tolerated — evidence-based discussion and clinical roles maintain the standard. This is where healers learn from each other.',
   ),
   'financial-district': const World(
     id: 'financial-district',
@@ -232,6 +247,8 @@ final Map<String, World> worldsConfig = {
     prestige: 32,
     icon: 'finance',
     requiredProfession: 'Finance',
+    lore:
+        'Financial District is the center of market and capital discussion. No scams, no guaranteed advice — only rigorous analysis and transparent discussion. Analyst roles guide residents through the complexities of modern finance.',
   ),
   'tech-sprawl': const World(
     id: 'tech-sprawl',
@@ -243,17 +260,21 @@ final Map<String, World> worldsConfig = {
     prestige: 25,
     icon: 'tech',
     requiredProfession: 'Technology',
+    lore:
+        'Tech Sprawl is a builders\' paradise — a digital metropolis where code, product, and engineering converge. No exploit sharing is tolerated; instead, rigorous engineering practices and collaborative problem-solving define the culture.',
   ),
   'legal-plaza': const World(
     id: 'legal-plaza',
     name: 'Legal Plaza',
     type: WorldType.profession,
-    description: 'Where law and order shape the framework of society.',
+    description: 'Where law and civic debate shape the framework of society.',
     sovereignId: 'sovereign-legal',
     sovereignName: 'Justice Thorne',
     prestige: 20,
     icon: 'legal',
     requiredProfession: 'Legal',
+    lore:
+        'Legal Plaza is the forum for law and civic debate. No legal advice guarantees are offered — instead, rigorous argumentation and advocate roles help residents navigate the complexities of jurisprudence and civic responsibility.',
   ),
   'arts-pavilion': const World(
     id: 'arts-pavilion',
@@ -266,6 +287,8 @@ final Map<String, World> worldsConfig = {
     prestige: 15,
     icon: 'arts',
     requiredProfession: 'Arts',
+    lore:
+        'Arts Pavilion is a creative sanctuary where critique builds mastery. Attribution rules protect creators, and creator roles foster a culture of respectful feedback. This is where art is not just made — it is understood.',
   ),
   'crystal-shore': const World(
     id: 'crystal-shore',
@@ -277,6 +300,9 @@ final Map<String, World> worldsConfig = {
     prestige: 3,
     icon: 'crystal',
     requiredTier: 1,
+    isDefault: true,
+    lore:
+        'Crystal Shore is the calm newcomer\'s haven — a place of introductions, exploration, and low-pressure participation. The shimmering shores welcome those finding their footing, offering a gentle entry into the social rhythms of Vertiege.',
   ),
   'quantum-core': const World(
     id: 'quantum-core',
@@ -288,6 +314,8 @@ final Map<String, World> worldsConfig = {
     prestige: 24,
     icon: 'quantum',
     requiredProfession: 'Engineer',
+    lore:
+        'Quantum Core is where experimental rigor meets frontier science. Lab roles structure collaboration, and the pursuit of knowledge demands precision. This is where the impossible becomes merely difficult.',
   ),
   'silver-page': const World(
     id: 'silver-page',
@@ -300,6 +328,8 @@ final Map<String, World> worldsConfig = {
     prestige: 10,
     icon: 'silver',
     requiredProfession: 'Artist',
+    lore:
+        'Silver Page is a quiet realm of writers and storytellers. Critique etiquette ensures feedback strengthens rather than diminishes, and editorial roles maintain the quality of every published word. This is where stories find their voice.',
   ),
   'crimson-court': const World(
     id: 'crimson-court',
@@ -312,6 +342,8 @@ final Map<String, World> worldsConfig = {
     prestige: 16,
     icon: 'crimson',
     requiredTier: 2,
+    lore:
+        'Crimson Court is a realm of intrigue, alliances, and reputation boundaries. Status matters, but substance matters more. Residents here navigate the delicate balance between ambition and discretion, learning that power without trust is hollow.',
   ),
   'nova-station': const World(
     id: 'nova-station',
@@ -324,5 +356,7 @@ final Map<String, World> worldsConfig = {
     prestige: 42,
     icon: 'nova',
     requiredTier: 5,
+    lore:
+        'Nova Station is a frontier outpost at the edge of the known universe. Missions drive purpose, crew protocol maintains order, and exploration roles push the boundaries of what is possible. This is where the future is built.',
   ),
 };
