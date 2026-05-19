@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../models/challenge.dart';
 import 'supabase.dart';
 

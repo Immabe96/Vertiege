@@ -7,15 +7,22 @@ import '../utils/id_generator.dart';
 class ChannelState {
   final Map<String, List<WorldChannel>> channelsByWorld;
   final bool isLoading;
+  final String? error;
 
-  const ChannelState({this.channelsByWorld = const {}, this.isLoading = false});
+  const ChannelState({
+    this.channelsByWorld = const {},
+    this.isLoading = false,
+    this.error,
+  });
 
   ChannelState copyWith({
     Map<String, List<WorldChannel>>? channelsByWorld,
     bool? isLoading,
+    String? error,
   }) => ChannelState(
     channelsByWorld: channelsByWorld ?? this.channelsByWorld,
     isLoading: isLoading ?? this.isLoading,
+    error: error,
   );
 }
 
@@ -25,17 +32,19 @@ class ChannelNotifier extends Notifier<ChannelState> {
 
   Future<void> loadChannels(String worldId, {bool force = false}) async {
     if (!force && state.channelsByWorld.containsKey(worldId)) return;
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final channels = await WorldService.getChannels(worldId);
       state = state.copyWith(
         isLoading: false,
         channelsByWorld: {...state.channelsByWorld, worldId: channels},
+        error: null,
       );
-    } catch (_) {
+    } catch (e) {
       state = state.copyWith(
         isLoading: false,
         channelsByWorld: {...state.channelsByWorld, worldId: const []},
+        error: e.toString(),
       );
     }
   }

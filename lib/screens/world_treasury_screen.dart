@@ -7,7 +7,6 @@ import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
-import '../ui/icons/v_icons.dart';
 
 class WorldTreasuryScreen extends ConsumerStatefulWidget {
   final String worldId;

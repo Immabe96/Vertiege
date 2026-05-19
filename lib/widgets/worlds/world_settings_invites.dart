@@ -5,7 +5,6 @@ import '../../models/invite.dart';
 import '../../utils/date_format.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/loading_state.dart';
-import '../../ui/icons/v_icons.dart';
 
 class WorldSettingsInvites extends StatelessWidget {
   final String? sovereignId;

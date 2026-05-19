@@ -41,12 +41,12 @@ class FeedPreviewCard extends ConsumerWidget {
               ],
             ),
             GestureDetector(
-              onTap: () => context.push('/create-post'),
+              onTap: () => context.push('/'),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'View All',
+                    'Compose',
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
                       color: VColors.primary,

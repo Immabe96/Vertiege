@@ -241,7 +241,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             .withValues(alpha: 0.86),
         elevation: 0,
         title: Text(
-          resident.name,
+          'Identity',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: VFontWeight.semiBold,
           ),
@@ -869,11 +869,9 @@ class _PerksCard extends ConsumerWidget {
             Text(
               value,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: value.contains('Locked')
-                    ? (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant)
-                    : VColors.tertiary,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
                 fontWeight: VFontWeight.semiBold,
               ),
             ),
@@ -907,7 +905,9 @@ class _PerksCard extends ConsumerWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: VFontWeight.bold,
                 letterSpacing: 0.5,
-                color: VColors.primary,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
           ),

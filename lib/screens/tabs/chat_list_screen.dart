@@ -227,113 +227,118 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       (world) => world.id == _selectedWorldId,
       orElse: () => joinedWorlds.first,
     );
-    final channels =
-        ref.watch(channelProvider).channelsByWorld[selectedWorld.id] ?? [];
+    final channelState = ref.watch(channelProvider);
+    final allChannels =
+        channelState.channelsByWorld[selectedWorld.id] ?? [];
+    final channelError = channelState.error;
+    final channelLoading = channelState.isLoading;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final announcementChannels =
+        allChannels.where((c) => c.channelType == ChannelType.announcement).toList();
+    final chatChannels =
+        allChannels.where((c) => c.channelType != ChannelType.announcement).toList();
+
+    final world = ref.watch(worldProvider).worlds[selectedWorld.id];
+    final residentCount = world?.memberCount ?? 0;
+
+    // Discord-like two-panel layout
+    return Row(
       children: [
-        SizedBox(
-          height: 44,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-            itemCount: joinedWorlds.length,
-            separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
-            itemBuilder: (context, index) {
-              final world = joinedWorlds[index];
-              final isSelected = world.id == selectedWorld.id;
-              return GestureDetector(
-                onTap: () {
-                  setState(() => _selectedWorldId = world.id);
-                  ref.read(channelProvider.notifier).loadChannels(world.id);
-                },
-                child: AnimatedContainer(
-                  duration: VAnimation.fast,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: VSpacing.md,
-                    vertical: VSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? VColors.primary.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(VRadius.pill),
-                    border: Border.all(
-                      color: isSelected
-                          ? VColors.primary.withValues(alpha: 0.4)
-                          : Colors.transparent,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.public,
-                        size: VIconSize.sm,
-                        color: isSelected
-                            ? VColors.primary
-                            : VColors.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: VSpacing.xs),
-                      Text(
-                        world.name,
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? VFontWeight.semiBold
-                              : VFontWeight.regular,
-                          color: isSelected
-                              ? VColors.primary
-                              : VColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+        // Left rail — vertical world icons
+        _WorldRail(
+          worlds: joinedWorlds,
+          selectedWorldId: selectedWorld.id,
+          onWorldSelected: (worldId) {
+            setState(() => _selectedWorldId = worldId);
+            ref.read(channelProvider.notifier).loadChannels(worldId);
+          },
         ),
-        const Divider(height: 1),
+        // Right panel — world header + channel list
         Expanded(
-          child: channels.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.tag,
-                        size: 48,
-                        color: VColors.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: VSpacing.md),
-                      const Text(
-                        'No channels yet',
-                        style: TextStyle(fontWeight: VFontWeight.semiBold),
-                      ),
-                      const SizedBox(height: VSpacing.xs),
-                      Text(
-                        'This world does not have a public channel.',
-                        style: TextStyle(color: VColors.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
-                  itemCount: channels.length,
-                  itemBuilder: (context, index) {
-                    final channel = channels[index];
-                    final unreadCount = ref
-                        .read(chatProvider.notifier)
-                        .unreadCount(channel.id);
-                    return _ChannelTile(
-                      channel: channel,
-                      world: selectedWorld,
-                      unreadCount: unreadCount,
-                    );
-                  },
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _WorldPanelHeader(
+                worldName: selectedWorld.name,
+                residentCount: residentCount,
+                icon: selectedWorld.icon,
+                prestige: selectedWorld.prestige,
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: channelLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : channelError != null
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.cloud_off,
+                                  size: 48,
+                                  color: VColors.onSurfaceVariant,
+                                ),
+                                const SizedBox(height: VSpacing.md),
+                                const Text(
+                                  'Failed to load channels',
+                                  style: TextStyle(
+                                      fontWeight: VFontWeight.semiBold),
+                                ),
+                                const SizedBox(height: VSpacing.xs),
+                                const Text(
+                                  'Tap to retry',
+                                  style: TextStyle(
+                                      color: VColors.onSurfaceVariant),
+                                ),
+                                const SizedBox(height: VSpacing.lg),
+                                OutlinedButton.icon(
+                                  onPressed: () => ref
+                                      .read(channelProvider.notifier)
+                                      .loadChannels(selectedWorld.id,
+                                          force: true),
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          )
+                        : allChannels.isEmpty
+                            ? _EmptyChannels(worldId: selectedWorld.id)
+                            : ListView(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: VSpacing.sm),
+                                children: [
+                                  if (announcementChannels.isNotEmpty) ...[
+                                    _ChannelGroupHeader(label: 'Foundation'),
+                                    ...announcementChannels.map((channel) {
+                                      final unreadCount = ref
+                                          .read(chatProvider.notifier)
+                                          .unreadCount(channel.id);
+                                      return _ChannelTile(
+                                        channel: channel,
+                                        world: selectedWorld,
+                                        unreadCount: unreadCount,
+                                      );
+                                    }),
+                                  ],
+                                  if (chatChannels.isNotEmpty) ...[
+                                    _ChannelGroupHeader(label: 'Chat'),
+                                    ...chatChannels.map((channel) {
+                                      final unreadCount = ref
+                                          .read(chatProvider.notifier)
+                                          .unreadCount(channel.id);
+                                      return _ChannelTile(
+                                        channel: channel,
+                                        world: selectedWorld,
+                                        unreadCount: unreadCount,
+                                      );
+                                    }),
+                                  ],
+                                ],
+                              ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -665,6 +670,192 @@ class _ChannelTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _WorldRail extends StatelessWidget {
+  final List<World> worlds;
+  final String selectedWorldId;
+  final ValueChanged<String> onWorldSelected;
+
+  const _WorldRail({
+    required this.worlds,
+    required this.selectedWorldId,
+    required this.onWorldSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      width: 60,
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceDark : VColors.surface,
+        border: Border(
+          right: BorderSide(color: theme.dividerColor),
+        ),
+      ),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+        children: worlds.map((world) {
+          final isSelected = world.id == selectedWorldId;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
+            child: GestureDetector(
+              onTap: () => onWorldSelected(world.id),
+              child: Container(
+                width: 44,
+                height: 44,
+                margin: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? VColors.primary.withValues(alpha: 0.15)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  border: isSelected
+                      ? Border.all(
+                          color: VColors.primary.withValues(alpha: 0.4))
+                      : null,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.public,
+                    size: VIconSize.md,
+                    color: isSelected
+                        ? VColors.primary
+                        : (isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _WorldPanelHeader extends StatelessWidget {
+  final String worldName;
+  final int residentCount;
+  final String icon;
+  final int prestige;
+
+  const _WorldPanelHeader({
+    required this.worldName,
+    required this.residentCount,
+    required this.icon,
+    required this.prestige,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        VSpacing.sm,
+        VSpacing.md,
+        VSpacing.sm,
+      ),
+      color: isDark ? VColors.surfaceDark : VColors.surface,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  worldName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                  ),
+                ),
+                Text(
+                  '$residentCount Residents · Lv.$prestige',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChannelGroupHeader extends StatelessWidget {
+  final String label;
+
+  const _ChannelGroupHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        VSpacing.md,
+        VSpacing.md,
+        VSpacing.xs,
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: VFontSize.labelSm,
+          letterSpacing: 0.5,
+          fontWeight: VFontWeight.semiBold,
+          color: VColors.tertiary,
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyChannels extends ConsumerWidget {
+  final String worldId;
+
+  const _EmptyChannels({required this.worldId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    Future.microtask(() {
+      ref.read(channelProvider.notifier).ensureDefaultChannels(worldId);
+    });
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.tag,
+            size: 48,
+            color: VColors.onSurfaceVariant,
+          ),
+          const SizedBox(height: VSpacing.md),
+          const Text(
+            'No channels yet',
+            style: TextStyle(fontWeight: VFontWeight.semiBold),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          const Text(
+            'This world does not have a public channel.',
+            style: TextStyle(color: VColors.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }

@@ -2,7 +2,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/world.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/subscription_service.dart';
+import '../services/supabase.dart';
 import '../theme/design_system.dart';
 import '../theme/v_colors.dart';
 import '../state/world_provider.dart';
@@ -127,23 +129,42 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isCreating = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to create world: $e')));
+        final message = e is PostgrestException
+            ? 'Failed: ${e.message} (${e.code})'
+            : 'Failed to create world: $e';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(label: 'Dismiss', onPressed: () {}),
+          ),
+        );
       }
     }
   }
 
   static const _requiredTierLevel = 2; // High Roller or above (500+ XP)
   static const _requiredXp = 500;
+  static const _superuserEmail = 'ltyl.naughty@gmail.com';
+
+  bool get _isSuperuser {
+    try {
+      final email = maybeSupabase()?.auth.currentUser?.email;
+      return email == _superuserEmail;
+    } catch (_) {
+      return false;
+    }
+  }
 
   bool get _canCreateWorld {
+    if (_isSuperuser) return true;
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return false;
     return resident.tier.value >= _requiredTierLevel;
   }
 
   bool get _isAtWorldCreationLimit {
+    if (_isSuperuser) return false;
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return false;
     final worldState = ref.read(worldProvider);

@@ -20,9 +20,6 @@ class FirebaseBootstrap {
       await Firebase.initializeApp();
       _initialized = true;
       _lastError = null;
-      if (!kIsWeb && false) {
-        // FirebaseCrashReporter not yet implemented
-      }
       await Future.wait([
         AnalyticsService.initialize(),
         RemoteConfigService.initialize(),

@@ -21,7 +21,6 @@ import '../models/invite.dart';
 import '../ui/icons/v_icons.dart';
 import '../state/channel_provider.dart';
 import '../utils/tier_utils.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 import '../services/rank_service.dart';
 import '../models/rank.dart';

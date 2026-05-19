@@ -1,7 +1,5 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/id_generator.dart';
 import 'supabase.dart';
-import 'crash_reporter.dart';
 
 class AnnouncementService {
   static Future<List<Map<String, dynamic>>> getAnnouncements(

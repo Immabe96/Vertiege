@@ -81,7 +81,7 @@ class _CosmeticAvatarState extends State<CosmeticAvatar>
     final effectiveGradient = avatarFrame?.gradient;
 
     final frameColor = effectiveColor is Color
-        ? effectiveColor as Color
+        ? effectiveColor
         : Color(int.parse('FF$effectiveColor', radix: 16));
 
     Widget avatar = Container(

@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
-import '../../ui/icons/v_icons.dart';
 
 enum FeedSort { latest, hot, top }
 

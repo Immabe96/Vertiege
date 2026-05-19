@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../ui/icons/v_icons.dart';
 
 class ImagePickerWidget extends StatelessWidget {
   final ValueChanged<String> onImageSelected;

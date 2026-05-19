@@ -136,53 +136,16 @@ class _TabLayoutState extends ConsumerState<TabLayout>
   }
 
   _FabConfig? _fabForTab(int index, WidgetRef ref) {
-    final resident = ref.read(residentProvider).resident;
-    return switch (index) {
-      0 => _FabConfig(
-          icon: Icons.edit,
-          backgroundColor: VColors.primary,
-          foregroundColor: VColors.onPrimary,
-          onPressed: () => _showComposeModal(context),
-        ),
-      1 => _FabConfig(
-          icon: Icons.add,
-          backgroundColor: VColors.primary,
-          foregroundColor: VColors.onPrimary,
-          onPressed: () {
-            if ((resident?.tier.value ?? 0) >= 2) {
-              context.push('/create-world');
-            }
-          },
-        ),
-      2 => _FabConfig(
-          icon: Icons.edit,
-          backgroundColor: VColors.primary,
-          foregroundColor: VColors.onPrimary,
-          onPressed: () => _showNewDmModal(context, ref),
-        ),
-      3 => null,
-      4 => _FabConfig(
-          icon: Icons.edit,
-          backgroundColor: VColors.primary,
-          foregroundColor: VColors.onPrimary,
-          onPressed: () {
-            if (resident != null) _showEditProfileSheet(context, ref, resident);
-          },
-        ),
-      _ => null,
-    };
-  }
-
-  void _showNewDmModal(BuildContext context, WidgetRef ref) {
-    context.push('/search');
-  }
-
-  void _showEditProfileSheet(
-    BuildContext context,
-    WidgetRef ref,
-    dynamic resident,
-  ) {
-    context.push('/settings');
+    // Only show compose FAB on Nexus tab (index 0).
+    // Create-world moved to Explore page UI. New DM in Chat page header.
+    // Edit profile accessible from Identity page.
+    if (index != 0) return null;
+    return _FabConfig(
+      icon: Icons.edit,
+      backgroundColor: VColors.primary,
+      foregroundColor: VColors.onPrimary,
+      onPressed: () => _showComposeModal(context),
+    );
   }
 
   void _showComposeModal(BuildContext context) {

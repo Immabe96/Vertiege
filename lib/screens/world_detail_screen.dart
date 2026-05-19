@@ -31,7 +31,7 @@ import '../widgets/core/fade_in.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/error_banner.dart';
-import '../widgets/core/glow_border.dart';
+
 import '../state/post_provider.dart';
 import '../models/resident.dart';
 import '../models/world.dart' show World;
@@ -96,7 +96,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   }
 
   int _getTabCount(World? world, ResidentState residentState) {
-    int count = 3; // Feed, Channels, Members
+    int count = 4; // Info, Feed, Channels, Residents
     if (_shouldShowMarketTab(world)) count++;
     if (_shouldShowPollsTab(world, residentState.resident)) count++;
     if (_shouldShowTreasuryTab(world)) count++;
@@ -485,15 +485,19 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           ),
                         ),
                       ),
-                      // Gradient overlay (with tier tint at bottom)
+                      // Subtle bottom scrim for text readability
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, isDark ? VColors.surfaceDark : VColors.surface],
-                              stops: const [0.7, 1.0],
+                              colors: [
+                                Colors.transparent,
+                                (isDark ? VColors.surfaceDark : VColors.surface)
+                                    .withValues(alpha: 0.3),
+                              ],
+                              stops: const [0.85, 1.0],
                             ),
                           ),
                         ),
@@ -741,48 +745,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               ),
 
               // ── Live Chat Preview ──
-              SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 80,
-                  child: _WorldFoundationSummary(
-                    world: world,
-                    channels: channels,
-                    onOpenChannel: (name) => _openChannelByName(name, channels),
-                  ),
-                ),
-              ),
-
-              // ── Resource Vault ──
-              SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 100,
-                  child: ResourceVault(
-                    worldId: widget.worldId,
-                    channels: channels,
-                    vaultUnlocked: ref
-                        .read(worldProvider.notifier)
-                        .featuresForWorld(widget.worldId)
-                        .vault,
-                  ),
-                ),
-              ),
-
-              // ── Alliances Section ──
-              SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 115,
-                  child: ChatPreviewPanel(worldId: widget.worldId),
-                ),
-              ),
-
-              SliverToBoxAdapter(
-                child: FadeIn(
-                  delayMs: 130,
-                  child: AllianceSection(worldId: widget.worldId, world: world),
-                ),
-              ),
-
-              // ── Tab Bar — Tertiary label, uppercase ──
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _WorldTabBarDelegate(
@@ -802,7 +764,32 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                   controller: _tabController,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    // Feed tab: PostInput + Posts
+                    // Info tab: foundation, vault, chat, alliances
+                    SingleChildScrollView(
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        children: [
+                          _WorldFoundationSummary(
+                            world: world,
+                            channels: channels,
+                            onOpenChannel: (name) =>
+                                _openChannelByName(name, channels),
+                          ),
+                          ResourceVault(
+                            worldId: widget.worldId,
+                            channels: channels,
+                            vaultUnlocked: ref
+                                .read(worldProvider.notifier)
+                                .featuresForWorld(widget.worldId)
+                                .vault,
+                          ),
+                          ChatPreviewPanel(worldId: widget.worldId),
+                          AllianceSection(
+                              worldId: widget.worldId, world: world),
+                        ],
+                      ),
+                    ),
+                    // Feed tab
                     WorldFeedTab(
                       worldId: widget.worldId,
                       world: world,
@@ -810,7 +797,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                       posts: posts,
                       cs: cs,
                     ),
-                    // Channels tab: list or empty via GlassPanel
+
+                    // Channels tab: list or empty
                     channels.isEmpty
                         ? AppEmptyState(
                             title: 'Preparing channels',
@@ -827,12 +815,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             physics: const ClampingScrollPhysics(),
                             child: WorldChannelList(worldId: widget.worldId),
                           ),
-                    // Members tab: member rows or empty via GlassPanel
+                    // Resients tab
                     (!_membersLoading && _members.isEmpty)
                         ? const AppEmptyState(
                             title: 'No content',
                             description:
-                                'No members have joined this world yet.',
+                                'No residents have joined this world yet.',
                             icon: Icons.people_outline,
                             variant: EmptyStateVariant.default_,
                           )
@@ -937,9 +925,10 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
             fontWeight: VFontWeight.regular,
           ),
           tabs: [
+            const Tab(text: 'INFO'),
             const Tab(text: 'FEED'),
             const Tab(text: 'CHANNELS'),
-            const Tab(text: 'MEMBERS'),
+            const Tab(text: 'RESIDENTS'),
             if (showMarketTab) const Tab(text: 'MARKET'),
             if (showPollsTab) const Tab(text: 'POLLS'),
             if (showTreasuryTab) const Tab(text: 'TREASURY'),
@@ -977,7 +966,6 @@ class _WorldFoundationSummary extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final foundation = foundationForWorld(world);
     final guideChannels = _guideChannels;
-    final orientation = orientationStepsForWorld(world);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(VSpacing.md, 0, VSpacing.md, VSpacing.sm),
@@ -1055,7 +1043,7 @@ class _WorldFoundationSummary extends StatelessWidget {
             ),
             const SizedBox(height: VSpacing.lg),
             Text(
-              'Orientation Path',
+              'World Guide',
               style: TextStyle(
                 color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                 fontWeight: VFontWeight.bold,
@@ -1063,15 +1051,6 @@ class _WorldFoundationSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(height: VSpacing.sm),
-            for (var i = 0; i < orientation.length; i++)
-              _OrientationStepTile(
-                index: i + 1,
-                title: orientation[i].title,
-                description: orientation[i].description,
-                channel: orientation[i].channel,
-                onTap: () => onOpenChannel(orientation[i].channel),
-              ),
-            const SizedBox(height: VSpacing.md),
             Row(
               children: [
                 for (final channel in guideChannels)
@@ -1162,104 +1141,6 @@ class _FoundationChip extends StatelessWidget {
           color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
           fontSize: VFontSize.labelMd,
           fontWeight: VFontWeight.semiBold,
-        ),
-      ),
-    );
-  }
-}
-
-class _OrientationStepTile extends StatelessWidget {
-  final int index;
-  final String title;
-  final String description;
-  final String channel;
-  final VoidCallback onTap;
-
-  const _OrientationStepTile({
-    required this.index,
-    required this.title,
-    required this.description,
-    required this.channel,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: VSpacing.sm),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(VRadius.md),
-        child: Container(
-          padding: const EdgeInsets.all(VSpacing.md),
-          decoration: BoxDecoration(
-            color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.54),
-            borderRadius: BorderRadius.circular(VRadius.md),
-            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: VColors.tertiary.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(VRadius.sm),
-                ),
-                child: Text(
-                  '$index',
-                  style: TextStyle(
-                    color: VColors.tertiary,
-                    fontWeight: VFontWeight.bold,
-                    fontSize: VFontSize.labelMd,
-                  ),
-                ),
-              ),
-              const SizedBox(width: VSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                        fontWeight: VFontWeight.semiBold,
-                      ),
-                    ),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                fontSize: VFontSize.labelMd,
-              ),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(width: VSpacing.sm),
-      Text(
-        '#$channel',
-        style: TextStyle(
-          color: VColors.primary,
-          fontSize: VFontSize.labelMd,
-          fontWeight: VFontWeight.semiBold,
-        ),
-      ),
-      const SizedBox(width: VSpacing.xs),
-      Icon(
-        Icons.chevron_right,
-        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-        size: VIconSize.sm,
-      ),
-            ],
-          ),
         ),
       ),
     );

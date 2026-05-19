@@ -16,7 +16,7 @@ import '../screens/tabs/nexus_screen.dart';
 import '../screens/tabs/explore_screen.dart';
 import '../screens/tabs/chat_list_screen.dart';
 import '../screens/tabs/identity_screen.dart';
-import '../screens/tabs/create_post_screen.dart';
+
 import '../screens/tabs/alerts_screen.dart';
 import '../screens/world_detail_screen.dart';
 import '../screens/world_channel_screen.dart';
@@ -276,10 +276,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ascension-path',
         builder: (context, state) => const AscensionPathScreen(),
-      ),
-      GoRoute(
-        path: '/create-post',
-        builder: (context, state) => const CreatePostScreen(),
       ),
       GoRoute(
         path: '/create-world',
