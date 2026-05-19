@@ -79,18 +79,15 @@ class MarketplaceService {
   }
 
   static Future<bool> cancelListing(String listingId) async {
-    if (!isSupabaseConfigured()) return false;
-    final client = getSupabase();
-    try {
-      await client
-          .from('world_listings')
-          .update({'status': ListingStatus.cancelled.name})
-          .eq('id', listingId);
-      return true;
-    } catch (e) {
-      debugPrint('MarketplaceService.cancelListing error: $e');
-      return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to cancel listings.');
     }
+    final client = getSupabase();
+    await client
+        .from('world_listings')
+        .update({'status': ListingStatus.cancelled.name})
+        .eq('id', listingId);
+    return true;
   }
 
   static Future<List<Listing>> getMyListings(String worldId) async {
@@ -112,7 +109,9 @@ class MarketplaceService {
   }
 
   static Future<void> markAsSold(String listingId) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to mark listings as sold.');
+    }
     final client = getSupabase();
     await client
         .from('world_listings')

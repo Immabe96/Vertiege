@@ -38,10 +38,14 @@ class ChallengeService {
     int rewardCurrency = 0,
     DateTime? expiresAt,
   }) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to create challenges.');
+    }
     final client = getSupabase();
     final userId = client.auth.currentUser?.id;
-    if (userId == null) return null;
+    if (userId == null) {
+      throw StateError('Authentication required to create challenges.');
+    }
 
     final result = await client
         .from('world_challenges')
@@ -63,22 +67,21 @@ class ChallengeService {
   }
 
   static Future<bool> updateProgress(String challengeId, int contribution) async {
-    if (!isSupabaseConfigured()) return false;
-    final client = getSupabase();
-    try {
-      await client.rpc('update_challenge_progress', params: {
-        'p_challenge_id': challengeId,
-        'p_contribution': contribution,
-      });
-      return true;
-    } catch (e) {
-      debugPrint('ChallengeService.updateProgress error: $e');
-      return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to update challenge progress.');
     }
+    final client = getSupabase();
+    final result = await client.rpc('update_challenge_progress', params: {
+      'p_challenge_id': challengeId,
+      'p_contribution': contribution,
+    });
+    return result == true;
   }
 
   static Future<bool> toggleChallenge(String challengeId, bool isActive) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to toggle challenges.');
+    }
     final client = getSupabase();
     await client
         .from('world_challenges')
@@ -88,7 +91,9 @@ class ChallengeService {
   }
 
   static Future<bool> deleteChallenge(String challengeId) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to delete challenges.');
+    }
     final client = getSupabase();
     await client.from('world_challenges').delete().eq('id', challengeId);
     return true;

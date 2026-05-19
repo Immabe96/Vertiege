@@ -34,10 +34,14 @@ class PollService {
     String? channelId,
     int? expiresAt,
   }) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to create polls.');
+    }
     final client = getSupabase();
     final userId = client.auth.currentUser?.id;
-    if (userId == null) return null;
+    if (userId == null) {
+      throw StateError('Authentication required to create polls.');
+    }
 
     final result = await client
         .from('world_polls')
@@ -56,26 +60,32 @@ class PollService {
   }
 
   static Future<bool> voteOnPoll(String pollId, int optionIndex) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to vote on polls.');
+    }
     final client = getSupabase();
     final userId = client.auth.currentUser?.id;
-    if (userId == null) return false;
-
-    try {
-      await client.rpc('vote_on_poll', params: {
-        'p_poll_id': pollId,
-        'p_option_index': optionIndex,
-        'p_user_id': userId,
-      });
-      return true;
-    } catch (e) {
-      debugPrint('PollService.voteOnPoll error: $e');
-      return false;
+    if (userId == null) {
+      throw StateError('Authentication required to vote on polls.');
     }
+
+    final result = await client.rpc('vote_on_poll_v2', params: {
+      'p_poll_id': pollId,
+      'p_option_index': optionIndex,
+    });
+    final map = result as Map<String, dynamic>?;
+    final success = map?['success'] == true;
+    if (!success) {
+      final error = map?['error'] ?? 'Unknown error';
+      throw Exception('Poll vote failed: $error');
+    }
+    return true;
   }
 
   static Future<bool> closePoll(String pollId) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to close polls.');
+    }
     final client = getSupabase();
     await client
         .from('world_polls')
@@ -85,7 +95,9 @@ class PollService {
   }
 
   static Future<bool> deletePoll(String pollId) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to delete polls.');
+    }
     final client = getSupabase();
     await client.from('world_polls').delete().eq('id', pollId);
     return true;

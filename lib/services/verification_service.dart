@@ -49,27 +49,29 @@ class VerificationService {
   /// Upload a proof file to Supabase Storage. Returns the public URL.
   /// Validates file extension and size before upload.
   static Future<String?> uploadProof(String filePath, String residentId) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to upload verification proofs.');
+    }
 
     final ext = filePath.split('.').last.toLowerCase();
-    if (!_allowedExtensions.contains(ext)) return null;
+    if (!_allowedExtensions.contains(ext)) {
+      throw ArgumentError('Invalid file type. Allowed: $_allowedExtensions');
+    }
 
     final file = File(filePath);
     final fileSize = await file.length();
-    if (fileSize > _maxFileSize) return null;
+    if (fileSize > _maxFileSize) {
+      throw ArgumentError('File too large. Maximum size: 10MB');
+    }
 
     final client = getSupabase();
     final fileName =
         '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    try {
-      await client.storage.from(_bucket).upload(fileName, file);
-      return await client.storage
-          .from(_bucket)
-          .createSignedUrl(fileName, 365 * 24 * 60 * 60);
-    } catch (_) {
-      return null;
-    }
+    await client.storage.from(_bucket).upload(fileName, file);
+    return await client.storage
+        .from(_bucket)
+        .createSignedUrl(fileName, 365 * 24 * 60 * 60);
   }
 
   /// Submit a verification request for admin review.
@@ -79,7 +81,9 @@ class VerificationService {
     required String profession,
     required String proofUrl,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to submit verification.');
+    }
     final client = getSupabase();
     await client.from('verification_submissions').insert({
       'id': generateId(),
@@ -132,7 +136,9 @@ class VerificationService {
     String residentId,
     String profession,
   ) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to approve verifications.');
+    }
     final client = getSupabase();
     await client
         .from('verification_submissions')
@@ -142,7 +148,9 @@ class VerificationService {
 
   /// Reject a verification submission.
   static Future<void> reject(String submissionId, {String? notes}) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to reject verifications.');
+    }
     final client = getSupabase();
     await client
         .from('verification_submissions')

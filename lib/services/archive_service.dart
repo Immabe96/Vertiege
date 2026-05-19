@@ -43,16 +43,21 @@ class ArchiveService {
     List<String>? tags,
     List<Map<String, dynamic>>? citations,
   }) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to create documents.');
+    }
     final client = getSupabase();
     final userId = client.auth.currentUser?.id;
-    if (userId == null) return null;
+    if (userId == null) {
+      throw StateError('Authentication required to create documents.');
+    }
 
     final result = await client
         .from('archive_documents')
         .insert({
           'world_id': worldId,
           'author_id': userId,
+          'author_name': client.auth.currentUser?.userMetadata?['name'] ?? '',
           'title': title,
           'content': content,
           'category': category,
@@ -72,7 +77,9 @@ class ArchiveService {
     String? category,
     List<String>? tags,
   }) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to update documents.');
+    }
     final client = getSupabase();
     await client
         .from('archive_documents')
@@ -88,14 +95,18 @@ class ArchiveService {
   }
 
   static Future<bool> deleteDocument(String id) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to delete documents.');
+    }
     final client = getSupabase();
     await client.from('archive_documents').delete().eq('id', id);
     return true;
   }
 
   static Future<bool> incrementViews(String docId) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to increment document views.');
+    }
     final client = getSupabase();
     await client.rpc('increment_doc_views', params: {'p_doc_id': docId});
     return true;

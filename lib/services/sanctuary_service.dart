@@ -26,10 +26,14 @@ class SanctuaryService {
     required int moodLevel,
     String? moodNote,
   }) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to log moods.');
+    }
     final client = getSupabase();
     final userId = client.auth.currentUser?.id;
-    if (userId == null) return null;
+    if (userId == null) {
+      throw StateError('Authentication required to log moods.');
+    }
 
     final result = await client
         .from('sanctuary_moods')
@@ -67,10 +71,14 @@ class SanctuaryService {
     required String content,
     bool isAnonymous = false,
   }) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to post gratitude.');
+    }
     final client = getSupabase();
     final userId = client.auth.currentUser?.id;
-    if (userId == null) return null;
+    if (userId == null) {
+      throw StateError('Authentication required to post gratitude.');
+    }
 
     final result = await client
         .from('sanctuary_gratitude')
@@ -87,7 +95,9 @@ class SanctuaryService {
   }
 
   static Future<bool> deleteGratitude(String id) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to delete gratitude posts.');
+    }
     final client = getSupabase();
     await client.from('sanctuary_gratitude').delete().eq('id', id);
     return true;

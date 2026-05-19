@@ -16,7 +16,9 @@ class TreasuryService {
   }
 
   static Future<WorldTreasury?> initializeTreasury(String worldId) async {
-    if (!isSupabaseConfigured()) return null;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to initialize treasury.');
+    }
     final client = getSupabase();
     final result = await client
         .from('world_treasury')
@@ -44,34 +46,28 @@ class TreasuryService {
   }
 
   static Future<bool> donate(String worldId, int amount, String description) async {
-    if (!isSupabaseConfigured()) return false;
-    final client = getSupabase();
-    try {
-      await client.rpc('donate_to_treasury', params: {
-        'p_world_id': worldId,
-        'p_amount': amount,
-        'p_description': description,
-      });
-      return true;
-    } catch (e) {
-      debugPrint('TreasuryService.donate error: $e');
-      return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to donate to treasury.');
     }
+    final client = getSupabase();
+    final result = await client.rpc('donate_to_treasury', params: {
+      'p_world_id': worldId,
+      'p_amount': amount,
+      'p_description': description,
+    });
+    return result == true;
   }
 
   static Future<bool> withdraw(String worldId, int amount, String description) async {
-    if (!isSupabaseConfigured()) return false;
-    final client = getSupabase();
-    try {
-      await client.rpc('withdraw_from_treasury', params: {
-        'p_world_id': worldId,
-        'p_amount': amount,
-        'p_description': description,
-      });
-      return true;
-    } catch (e) {
-      debugPrint('TreasuryService.withdraw error: $e');
-      return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to withdraw from treasury.');
     }
+    final client = getSupabase();
+    final result = await client.rpc('withdraw_from_treasury', params: {
+      'p_world_id': worldId,
+      'p_amount': amount,
+      'p_description': description,
+    });
+    return result == true;
   }
 }

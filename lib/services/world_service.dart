@@ -82,7 +82,9 @@ class WorldService {
     int? taxRate,
     String? welcomeMessage,
   }) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to update worlds.');
+    }
     final client = getSupabase();
     final updates = <String, dynamic>{};
     if (name != null) updates['name'] = name;
@@ -104,7 +106,9 @@ class WorldService {
   }
 
   static Future<bool> deleteWorld(String worldId) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to delete worlds.');
+    }
     final client = getSupabase();
     await client.from('worlds').delete().eq('id', worldId);
     return true;

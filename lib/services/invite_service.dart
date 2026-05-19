@@ -23,7 +23,7 @@ class InviteService {
     };
 
     if (!isSupabaseConfigured()) {
-      return _toInvite(invite);
+      throw StateError('Supabase is required to create invites.');
     }
 
     final client = getSupabase();
@@ -49,7 +49,9 @@ class InviteService {
     String residentId, {
     String residentName = 'Member',
   }) async {
-    if (!isSupabaseConfigured()) return false;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to accept invites.');
+    }
     final client = getSupabase();
 
     // Increment uses
