@@ -3,8 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
 import '../services/media_service.dart';
+import '../services/mutation_outbox_service.dart';
 import '../services/storage_service.dart';
-import '../services/offline_queue.dart';
 import '../services/typing_service.dart';
 import '../utils/chat_unread.dart';
 import '../utils/id_generator.dart';
@@ -206,7 +206,7 @@ class ChatNotifier extends Notifier<ChatState> {
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
-      await OfflineQueue.enqueue('message', {
+      await MutationOutboxService.enqueue('chat.message', {
         'roomId': roomId,
         'senderId': senderId,
         'senderName': senderName,
@@ -422,7 +422,7 @@ class ChatNotifier extends Notifier<ChatState> {
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
-      await OfflineQueue.enqueue('message', {
+      await MutationOutboxService.enqueue('channel.message', {
         'worldId': worldId,
         'channelId': channelId,
         'senderId': senderId,

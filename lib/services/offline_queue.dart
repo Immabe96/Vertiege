@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/id_generator.dart';
 
+/// Deprecated: Use [MutationOutboxService] instead.
+/// MutationOutboxService provides deduplication, better error tracking,
+/// and debounced persistence via StorageService.
+@Deprecated('Use MutationOutboxService instead')
 class QueueItem {
   final String id;
   final String type;
@@ -34,6 +38,10 @@ class QueueItem {
   );
 }
 
+/// Deprecated: Use [MutationOutboxService] instead.
+/// MutationOutboxService provides deduplication, better error tracking,
+/// and debounced persistence via StorageService.
+@Deprecated('Use MutationOutboxService instead')
 class OfflineQueue {
   static const String _key = '@offline_queue';
   static const int _maxRetries = 3;
