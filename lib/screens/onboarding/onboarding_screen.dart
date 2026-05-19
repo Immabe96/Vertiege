@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
@@ -125,6 +126,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
 
+    // Ensure worlds are loaded before finding default worlds
+    final worldState = ref.read(worldProvider);
+    if (worldState.worlds.isEmpty && worldState.isLoading) {
+      try {
+        await ref.read(worldProvider.notifier).loadWorlds().timeout(
+              const Duration(seconds: 10),
+            );
+      } catch (_) {
+        // Continue with whatever worlds are available
+      }
+    }
+
     // New users only get starter worlds — verification/tier gates unlock the rest
     final starterWorlds = ref
         .read(worldProvider)
@@ -133,6 +146,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         .where((w) => w.isDefault)
         .map((w) => w.id)
         .toList();
+
+    // If no default worlds found in remote config, fall back to config defaults
+    if (starterWorlds.isEmpty) {
+      starterWorlds.addAll(
+        worldsConfig.values
+            .where((w) => w.isDefault)
+            .map((w) => w.id),
+      );
+    }
 
     ref.read(residentProvider.notifier).setResident(
           Resident(
