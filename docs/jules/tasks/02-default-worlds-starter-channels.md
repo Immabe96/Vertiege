@@ -1,5 +1,8 @@
 # Jules Task 02: Default Worlds And Starter Channels
 
+## Plan Approval Required
+Generate a plan first and wait for explicit approval before implementation. Do not auto-approve your own plan and do not open a PR until the plan has been approved.
+
 ## Goal
 Make default starter worlds explicit and give each default world unique persisted lore and starter channel text.
 

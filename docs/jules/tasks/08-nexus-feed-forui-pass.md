@@ -1,5 +1,8 @@
 # Jules Task 08: Nexus Feed Forui Pass
 
+## Plan Approval Required
+Generate a plan first and wait for explicit approval before implementation. Do not auto-approve your own plan and do not open a PR until the plan has been approved.
+
 ## Goal
 Make Nexus/feed UI compact, minimal, and Forui-aligned without changing data behavior.
 

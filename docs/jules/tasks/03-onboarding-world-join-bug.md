@@ -1,5 +1,8 @@
 # Jules Task 03: Onboarding And World Join Reliability
 
+## Plan Approval Required
+Generate a plan first and wait for explicit approval before implementation. Do not auto-approve your own plan and do not open a PR until the plan has been approved.
+
 ## Goal
 Fix the issue where users cannot enter the first starter world and get redirected back to Nexus.
 
