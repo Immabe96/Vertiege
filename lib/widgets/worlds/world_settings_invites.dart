@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../models/invite.dart';
@@ -141,10 +140,10 @@ class _InviteRow extends StatelessWidget {
         : '${invite.uses} uses (unlimited)';
 
     return Padding(
-
-      child: FCard(
-
-
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(Spacing.md),
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
         child: Row(
           children: [
             Icon(

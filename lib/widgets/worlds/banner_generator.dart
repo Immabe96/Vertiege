@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
@@ -58,7 +57,7 @@ class _BannerGeneratorState extends State<BannerGenerator> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-
+      padding: EdgeInsets.zero,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 1.6,
@@ -69,10 +68,10 @@ class _BannerGeneratorState extends State<BannerGenerator> {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () => widget.onSelect(index),
-          child: FCard(
-
+          child: GlassPanel(
+            padding: EdgeInsets.zero,
             child: ClipRRect(
-
+              borderRadius: BorderRadius.circular(RadiusTokens.xl),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -89,12 +88,13 @@ class _BannerGeneratorState extends State<BannerGenerator> {
                     bottom: Spacing.xs,
                     right: Spacing.sm,
                     child: Container(
-
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.sm,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: VColors.surface.withValues(alpha: 0.7),
-
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       child: Text(
                         'Variant ${index + 1}',
@@ -122,8 +122,8 @@ class _BannerGeneratorState extends State<BannerGenerator> {
 class _GeneratingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FCard(
-
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

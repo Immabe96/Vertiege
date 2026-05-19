@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/channel.dart';
@@ -24,9 +23,9 @@ class ResourceVault extends StatelessWidget {
     final guideChannels = _guideChannels;
 
     return Padding(
-
-      child: FCard(
-
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -112,15 +111,15 @@ class _GuideItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
       child: InkWell(
         onTap: onTap,
-
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: Container(
-
+          padding: const EdgeInsets.all(Spacing.md),
           decoration: BoxDecoration(
             color: VColors.surfaceContainer.withValues(alpha: 0.64),
-
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
             border: Border.all(color: VColors.glassBorder),
           ),
           child: Row(
@@ -130,7 +129,7 @@ class _GuideItem extends StatelessWidget {
                 height: 36,
                 decoration: BoxDecoration(
                   color: VColors.primary.withValues(alpha: 0.12),
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
                 child: Icon(
                   _icon,
@@ -186,10 +185,10 @@ class _VaultPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-       vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: VColors.tertiary.withValues(alpha: 0.12),
-
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
         border: Border.all(color: VColors.tertiary.withValues(alpha: 0.24)),
       ),
       child: Text(
@@ -211,10 +210,10 @@ class _VaultEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-
+      padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
         color: VColors.surfaceContainer.withValues(alpha: 0.5),
-
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         border: Border.all(color: VColors.glassBorder),
       ),
       child: const Text(

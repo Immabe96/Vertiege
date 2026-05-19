@@ -1,4 +1,3 @@
-import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -46,7 +45,7 @@ class _WorldInfoCardsState extends State<WorldInfoCards> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-
+      padding: const EdgeInsets.all(VSpacing.md),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 420;
@@ -117,13 +116,13 @@ class _InfoStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return FCard(
-
+    return GlassPanel(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-
+        borderRadius: BorderRadius.circular(VRadius.lg),
         child: Padding(
-
+          padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

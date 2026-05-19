@@ -1,4 +1,3 @@
-import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import 'glass_panel.dart';
 import 'shimmer.dart';
@@ -9,8 +8,8 @@ class GlassLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FCard(
-
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,7 +39,7 @@ class GlassLoadingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-
+      padding: const EdgeInsets.all(Spacing.marginMobile),
       itemCount: itemCount,
       separatorBuilder: (_, _) => const SizedBox(height: Spacing.sm + 4),
       itemBuilder: (_, _) => const GlassLoadingCard(),

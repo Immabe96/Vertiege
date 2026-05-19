@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
@@ -136,17 +136,18 @@ class _VerificationReviewScreenState
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.builder(
-
+        padding: const EdgeInsets.all(Spacing.md),
         itemCount: _submissions.length,
         itemBuilder: (_, i) {
           final s = _submissions[i];
           return Padding(
-
+            padding: EdgeInsets.only(
+              bottom: i < _submissions.length - 1 ? Spacing.sm : 0,
             ),
             child: Padding(
-
-              child: FCard(
-
+              padding: EdgeInsets.zero,
+              child: GlassPanel(
+                padding: const EdgeInsets.all(Spacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -160,7 +161,8 @@ class _VerificationReviewScreenState
                                     ? VColors.primaryContainerDark
                                     : VColors.primaryContainer)
                                 .withValues(alpha: 0.12),
-
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.full,
                             ),
                           ),
                           child: Icon(
@@ -213,7 +215,7 @@ class _VerificationReviewScreenState
                     if (s.proofUrl.isNotEmpty) ...[
                       const SizedBox(height: Spacing.md),
                       ClipRRect(
-
+                        borderRadius: BorderRadius.circular(RadiusTokens.full),
                         child: Image.network(
                           s.proofUrl,
                           height: 176,
@@ -227,7 +229,8 @@ class _VerificationReviewScreenState
                                       ? VColors.surfaceContainerDark
                                       : VColors.surfaceContainerLow)
                                   .withValues(alpha: 0.5),
-
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.full,
                               ),
                             ),
                             child: Icon(
@@ -267,14 +270,15 @@ class _VerificationReviewScreenState
 
     return ListView.builder(
       itemCount: flaggedPosts.length,
-
+      padding: const EdgeInsets.all(Spacing.md),
       itemBuilder: (_, i) {
         final post = flaggedPosts[i];
         return Padding(
-
+          padding: EdgeInsets.only(
+            bottom: i < flaggedPosts.length - 1 ? Spacing.sm : 0,
           ),
-          child: FCard(
-
+          child: GlassPanel(
+            padding: const EdgeInsets.all(Spacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -345,12 +349,12 @@ class _VerificationReviewScreenState
                 // Content preview
                 Container(
                   width: double.infinity,
-
+                  padding: const EdgeInsets.all(Spacing.sm),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerHighest.withValues(
                       alpha: 0.3,
                     ),
-
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Text(
                     post.content,

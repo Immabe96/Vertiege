@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -332,7 +331,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                               : (isDark
                                   ? VColors.glassBorderDark
                                   : VColors.glassBorder),
-
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                       );
                     }),
@@ -366,7 +365,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   Widget _buildStage1() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-
+      padding: const EdgeInsets.all(Spacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -462,7 +461,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   letterSpacing: LetterSpacing.label,
                 ),
                 shape: RoundedRectangleBorder(
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
               ),
             ),
@@ -481,7 +480,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   Widget _buildStage2() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.lg,
         Spacing.section,
         Spacing.lg,
         Spacing.lg,
@@ -560,7 +560,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   fontWeight: FontWeights.bold,
                 ),
                 shape: RoundedRectangleBorder(
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
               ),
             ),
@@ -601,7 +601,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     final accent = WorldAssets.accentForWorld(world.assetKey);
 
     return Container(
-
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.lg,
         Spacing.section,
         Spacing.lg,
         Spacing.lg,
@@ -631,14 +632,15 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           const SizedBox(height: Spacing.xl),
 
           // ── World card preview ────────────────────────────
-          FCard(
-
-
+          GlassPanel(
+            padding: EdgeInsets.zero,
+            borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(RadiusTokens.cardFeatured),
                   ),
                   child: SizedBox(
                     height: 150,
@@ -655,7 +657,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   ),
                 ),
                 Padding(
-
+                  padding: const EdgeInsets.all(Spacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -666,7 +668,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                             height: 46,
                             decoration: BoxDecoration(
                               color: accent.withValues(alpha: 0.16),
-
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.card,
                               ),
                             ),
                             child: Icon(
@@ -784,7 +787,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   fontWeight: FontWeights.bold,
                 ),
                 shape: RoundedRectangleBorder(
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
               ),
             ),
@@ -805,7 +808,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
                 ),
                 shape: RoundedRectangleBorder(
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
               ),
             ),
@@ -823,7 +826,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   Widget _buildStage4() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.lg,
         Spacing.section,
         Spacing.lg,
         Spacing.lg,
@@ -859,7 +863,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               children: _GateGoal.values.map((goal) {
                 final isSelected = _selectedGoal == goal;
                 return Padding(
-
+                  padding: const EdgeInsets.only(bottom: Spacing.md),
                   child: _GoalCard(
                     goal: goal,
                     isSelected: isSelected,
@@ -901,7 +905,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                   fontWeight: FontWeights.bold,
                 ),
                 shape: RoundedRectangleBorder(
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
               ),
             ),
@@ -1031,12 +1035,13 @@ class _GatePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
         vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-
+        borderRadius: BorderRadius.circular(RadiusTokens.pill),
         border: Border.all(color: color.withValues(alpha: 0.26)),
       ),
       child: Text(
@@ -1079,7 +1084,7 @@ class _InterestCard extends StatelessWidget {
           color: isSelected
               ? glow.withValues(alpha: 0.12)
               : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
-
+          borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
           border: Border.all(
             color: isSelected
                 ? glow.withValues(alpha: 0.5)
@@ -1097,7 +1102,7 @@ class _InterestCard extends StatelessWidget {
               : null,
         ),
         child: Padding(
-
+          padding: const EdgeInsets.all(Spacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1109,7 +1114,7 @@ class _InterestCard extends StatelessWidget {
                   color: isSelected
                       ? glow.withValues(alpha: 0.25)
                       : glow.withValues(alpha: 0.08),
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.card),
                 ),
                 child: Icon(
                   interest.icon,
@@ -1174,12 +1179,12 @@ class _GoalCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: AnimDurations.fast,
-
+        padding: const EdgeInsets.all(Spacing.md),
         decoration: BoxDecoration(
           color: isSelected
               ? VColors.tertiary.withValues(alpha: 0.12)
               : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
-
+          borderRadius: BorderRadius.circular(RadiusTokens.card),
           border: Border.all(
             color: isSelected
                 ? VColors.tertiary.withValues(alpha: 0.5)
@@ -1196,7 +1201,7 @@ class _GoalCard extends StatelessWidget {
                 color: VColors.tertiary.withValues(
                   alpha: isSelected ? 0.25 : 0.08,
                 ),
-
+                borderRadius: BorderRadius.circular(RadiusTokens.card),
               ),
               child: Icon(goal.icon, size: 22, color: VColors.tertiary),
             ),

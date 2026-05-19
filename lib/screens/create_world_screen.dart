@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/world.dart';
@@ -175,10 +174,10 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(title: const Text('Create Dominion World')),
       body: ListView(
-
+        padding: const EdgeInsets.all(Spacing.md),
         children: [
-          FCard(
-
+          GlassPanel(
+            padding: const EdgeInsets.all(Spacing.xl),
             child: Column(
               children: [
                 Icon(
@@ -248,10 +247,10 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(title: const Text('Create Dominion World')),
       body: ListView(
-
+        padding: const EdgeInsets.all(Spacing.md),
         children: [
-          FCard(
-
+          GlassPanel(
+            padding: const EdgeInsets.all(Spacing.xl),
             child: Column(
               children: [
                 Icon(Icons.lock_outline, size: 64, color: VColors.tertiary),
@@ -276,7 +275,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 const SizedBox(height: Spacing.lg),
                 // ── Progress bar ──────────────────────────────
                 ClipRRect(
-
+                  borderRadius: BorderRadius.circular(VRadius.md),
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 16,
@@ -357,11 +356,11 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-
+          padding: const EdgeInsets.all(Spacing.md),
           children: [
             // ── World Details ──────────────────────────────────────
-            FCard(
-
+            GlassPanel(
+              padding: const EdgeInsets.all(Spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -500,7 +499,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                                   : VColors.glassBorder),
                         ),
                         visualDensity: VisualDensity.compact,
-
+                        padding: const EdgeInsets.all(Spacing.sm),
                       );
                     }).toList(),
                   ),
@@ -511,8 +510,8 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             const SizedBox(height: Spacing.md),
 
             // ── Dominion Type ────────────────────────────────────────
-            FCard(
-
+            GlassPanel(
+              padding: const EdgeInsets.all(Spacing.md),
               child: DominionTypePicker(
                 selected: _selectedDominionType,
                 onSelected: (type) => setState(() => _selectedDominionType = type),
@@ -522,8 +521,8 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             const SizedBox(height: Spacing.md),
 
             // ── Channels ───────────────────────────────────────────
-            FCard(
-
+            GlassPanel(
+              padding: const EdgeInsets.all(Spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

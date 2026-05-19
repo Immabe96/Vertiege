@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/moderation_service.dart';
@@ -107,7 +106,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                 await Future<void>.delayed(const Duration(milliseconds: 200));
               },
               child: ListView.builder(
-
+                padding: const EdgeInsets.all(Spacing.md),
                 itemCount: _entries.length,
                 itemBuilder: (context, index) {
                   final entry = _entries[index];
@@ -119,10 +118,11 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                   final count = details?['count'] as int?;
 
                   return Padding(
-
+                    padding: EdgeInsets.only(
+                      bottom: index < _entries.length - 1 ? Spacing.sm : 0,
                     ),
-                    child: FCard(
-
+                    child: GlassPanel(
+                      padding: const EdgeInsets.all(Spacing.md),
                       child: Row(
                         children: [
                           Container(
@@ -133,7 +133,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                       ? VColors.surfaceContainerHighestDark
                                       : VColors.surfaceContainerHighest)
                                   .withValues(alpha: 0.5),
-
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.md,
                               ),
                             ),
                             child: Icon(

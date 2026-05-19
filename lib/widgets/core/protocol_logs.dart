@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
@@ -10,8 +9,8 @@ class ProtocolLogs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FCard(
-
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -22,7 +21,7 @@ class ProtocolLogs extends StatelessWidget {
                 height: 20,
                 decoration: BoxDecoration(
                   color: VColors.error,
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
               ),
               const SizedBox(width: Spacing.sm),
@@ -39,7 +38,7 @@ class ProtocolLogs extends StatelessWidget {
           const SizedBox(height: Spacing.md),
           ...logs.map(
             (log) => Padding(
-
+              padding: const EdgeInsets.only(bottom: Spacing.xs),
               child: Text(
                 log,
                 style: const TextStyle(

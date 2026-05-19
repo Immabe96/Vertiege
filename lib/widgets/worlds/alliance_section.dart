@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/world_provider.dart';
@@ -30,9 +29,9 @@ class AllianceSection extends ConsumerWidget {
     if (alliances.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-
-      child: FCard(
-
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -43,7 +42,7 @@ class AllianceSection extends ConsumerWidget {
                   height: 16,
                   decoration: BoxDecoration(
                     color: VColors.tertiary,
-
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -80,9 +79,9 @@ class AllianceSection extends ConsumerWidget {
               final iconData = iconMap[iconStr] ?? Icons.public;
 
               return Padding(
-
-                child: FCard(
-
+                padding: const EdgeInsets.only(bottom: Spacing.sm),
+                child: GlassPanel(
+                  padding: const EdgeInsets.all(Spacing.md),
                   child: Row(
                     children: [
                       Container(
@@ -90,7 +89,7 @@ class AllianceSection extends ConsumerWidget {
                         height: 40,
                         decoration: BoxDecoration(
                           color: VColors.tertiary.withValues(alpha: 0.12),
-
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                         child: Icon(
                           iconData,

@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/subscription_service.dart';
@@ -106,7 +105,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       body: _loading
           ? const SafeArea(child: GlassLoadingList(itemCount: 3))
           : ListView(
-
+              padding: const EdgeInsets.all(Spacing.lg),
               children: [
                 // ── Header ────────────────────────────────────────
                 Center(
@@ -117,7 +116,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         height: 64,
                         decoration: BoxDecoration(
                           color: VColors.tertiary.withValues(alpha: 0.15),
-
+                          borderRadius: BorderRadius.circular(
+                            RadiusTokens.cardFeatured,
                           ),
                         ),
                         child: const Icon(
@@ -152,11 +152,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 // ── Purchase confirmation message ────────────────
                 if (_purchaseMessage != null) ...[
                   Container(
-
+                    padding: const EdgeInsets.all(Spacing.md),
                     margin: const EdgeInsets.only(bottom: Spacing.lg),
                     decoration: BoxDecoration(
                       color: VColors.success.withValues(alpha: 0.1),
-
+                      borderRadius: BorderRadius.circular(RadiusTokens.card),
                       border: Border.all(
                         color: VColors.success.withValues(alpha: 0.3),
                       ),
@@ -196,7 +196,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       : '/month';
 
                   return Padding(
-
+                    padding: const EdgeInsets.only(bottom: Spacing.md),
                     child: _TierCard(
                       tierName: benefits['label'] as String,
                       tierColor:
@@ -348,9 +348,9 @@ class _TierCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return FCard(
-
-
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.xl),
+      borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -368,12 +368,13 @@ class _TierCard extends StatelessWidget {
               ),
               if (isActive)
                 Container(
-
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
                     vertical: Spacing.xs,
                   ),
                   decoration: BoxDecoration(
                     color: tierColor.withValues(alpha: 0.15),
-
+                    borderRadius: BorderRadius.circular(RadiusTokens.pill),
                     border: Border.all(color: tierColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
@@ -404,7 +405,7 @@ class _TierCard extends StatelessWidget {
               if (pricePeriod.isNotEmpty) ...[
                 const SizedBox(width: Spacing.xs),
                 Padding(
-
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
                     pricePeriod,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -430,7 +431,7 @@ class _TierCard extends StatelessWidget {
           // ── Features ────────────────────────────────────────
           ...features.map(
             (feature) => Padding(
-
+              padding: const EdgeInsets.only(bottom: Spacing.sm),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -490,7 +491,7 @@ class _TierCard extends StatelessWidget {
                   backgroundColor: VColors.tertiary,
                   foregroundColor: VColors.onTertiary,
                   shape: RoundedRectangleBorder(
-
+                    borderRadius: BorderRadius.circular(RadiusTokens.card),
                   ),
                 ),
               ),

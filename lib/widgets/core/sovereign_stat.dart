@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -25,12 +24,13 @@ class SovereignStat extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: FCard(
+      child: GlassPanel(
         useBlur: false,
-
+        padding: const EdgeInsets.symmetric(
+          vertical: Spacing.lg,
           horizontal: Spacing.sm,
         ),
-
+        borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

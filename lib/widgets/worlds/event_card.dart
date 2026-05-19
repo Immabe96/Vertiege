@@ -1,5 +1,4 @@
-import 'package:forui/forui.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
@@ -24,8 +23,8 @@ class EventCard extends ConsumerWidget {
         ? formatTimestamp(post.eventStartsAt!)
         : 'Date pending';
 
-    return FCard(
-
+    return GlassPanel(
+      padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,7 +35,7 @@ class EventCard extends ConsumerWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: VColors.warning.withValues(alpha: 0.12),
-
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
                 child: const Icon(
                   Icons.event,

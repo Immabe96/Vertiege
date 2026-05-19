@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -94,9 +94,9 @@ class _PrestigeHeader extends ConsumerWidget {
         : (prestigeStars == 1 ? 'Apex I' : 'Apex $prestigeStars');
 
     return Padding(
-
-      child: FCard(
-
+      padding: const EdgeInsets.all(Spacing.md),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         children: [
           Row(
@@ -104,7 +104,7 @@ class _PrestigeHeader extends ConsumerWidget {
               ...List.generate(
                 prestigeStars,
                 (i) => Padding(
-
+                  padding: EdgeInsets.only(right: i < prestigeStars - 1 ? 4 : 0),
                   child: const Icon(Icons.star, color: VColors.tertiary, size: 24),
                 ),
               ),
@@ -165,7 +165,7 @@ class _PrestigeHeader extends ConsumerWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: VColors.tertiary,
                   foregroundColor: VColors.onTertiary,
-
+                  padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
                 ),
               ),
             ),
@@ -343,7 +343,7 @@ Widget _buildLeaderboardList(
   }
 
   return ListView.builder(
-
+    padding: const EdgeInsets.all(Spacing.md),
     itemCount: entries.length,
     itemBuilder: (context, index) {
       final entry = entries[index];
@@ -354,9 +354,9 @@ Widget _buildLeaderboardList(
       return FadeIn(
         delayMs: index * 50,
         child: Padding(
-
-          child: FCard(
-
+          padding: const EdgeInsets.only(bottom: Spacing.sm),
+          child: GlassPanel(
+            padding: const EdgeInsets.all(Spacing.md),
             border: isTop3
                 ? Border.all(
                     color: glowColor.withValues(alpha: 0.4),
@@ -383,7 +383,7 @@ Widget _buildLeaderboardList(
                     decoration: BoxDecoration(
                       color: _rankColor(rank, isDark: isDark)
                           .withValues(alpha: 0.15),
-
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       border: isTop3
                           ? Border.all(
                               color: _rankColor(rank, isDark: isDark),
