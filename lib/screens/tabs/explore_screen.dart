@@ -8,8 +8,8 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/ui.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../widgets/core/empty_state.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -400,7 +400,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(VSpacing.xxl),
-                  child: VEmptyState(
+                  child: AppEmptyState(
                     title: _searchQuery.isNotEmpty
                         ? 'No worlds found'
                         : 'No worlds available',

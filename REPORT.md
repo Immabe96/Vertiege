@@ -23,6 +23,69 @@
 
 ### Unresolved Risks
 - APK not rebuilt with doc changes (unnecessary — only markdown files changed)
+- Codex visual review needed for Phase 1 UI changes (see below)
+
+---
+
+## Phase 1: Immediate Installed-App Polish — COMPLETED (2026-05-19)
+
+### World detail tabs → Feed, Channels, Residents, More
+- Removed INFO tab and conditional tabs (MARKET, POLLS, TREASURY, CHALLENGES)
+- Tabs now: FEED, CHANNELS, RESIDENTS, MORE
+- `_WorldTabBarDelegate` simplified — no conditional tab parameters
+- Old INFO content (foundation, vault, chat preview, alliances) moved into More
+- Conditional feature screens accessible via More tab links with "coming soon" messaging where applicable
+
+### Foundation vs Guide separation
+- `_WorldFoundationSummary` split into separate `_FoundationCard` and `_GuideCard`
+- Foundation card: premise, focus chips, access label
+- Guide card: info/rules/roles channel shortcuts + Open General Discussion
+- Foundation chip borders changed from `glassBorder` to `outlineVariant`
+
+### World rail with readable names
+- `_WorldRail` widened from 60px to 72px
+- World names displayed below icons (8px font, centered, single line)
+- `WorldAssets.iconForWorld()` used instead of hardcoded `Icons.public`
+- Selected world gets primary color tint on both icon and label
+
+### Glass token cleanup
+- `_ModeSwitch` container: `glassBackground` → `surfaceContainerLow`/`surfaceContainerDark`
+- `_ModeSwitch` border: `glassBorder` → `outlineVariant`
+- `GlassLoadingList` replaced with `CircularProgressIndicator` in world_detail loading state
+
+### Empty state migration
+- `explore_screen.dart`: `VEmptyState` → `AppEmptyState`, removed unused `ui.dart` import
+- `nexus_screen.dart`: `VEmptyState` → `AppEmptyState`, `VErrorState` → `AppErrorState`
+- Removed `GlassLoadingList` import from world_detail_screen.dart
+
+### Create-world verification
+- Already solid from stabilization Task 9 (superuser bypass, PostgrestException error display, form validation)
+
+### Files Changed (Phase 1)
+- `lib/screens/world_detail_screen.dart` — tab refactor, More tab, Foundation/Guide split, loading state
+- `lib/screens/tabs/chat_list_screen.dart` — world rail with names, glass token removal, WorldAssets import
+- `lib/screens/tabs/explore_screen.dart` — VEmptyState → AppEmptyState migration
+- `lib/screens/tabs/nexus_screen.dart` — VEmptyState → AppEmptyState, VErrorState → AppErrorState
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` — 0 errors, 0 warnings
+
+### Codex Visual Review Needed
+- Screen/asset: World detail tabs (Feed/Channels/Residents/More)
+- Why visual inspection is needed: Tab layout change from 4+conditional to fixed 4; need to verify no label clipping, proper indicator rendering, More tab content scroll/layout
+- How to reproduce/open it: Open any world from Explore screen
+- Related files: `lib/screens/world_detail_screen.dart`
+
+- Screen/asset: Chat world rail with names
+- Why visual inspection is needed: Rail widened from 60→72px, world names added below icons; need to verify text fits, no overflow, readability on device
+- How to reproduce/open it: Navigate to Chat tab with joined worlds
+- Related files: `lib/screens/tabs/chat_list_screen.dart`
+
+- Screen/asset: Empty states in Explore and Nexus screens
+- Why visual inspection is needed: Widget swap from VEmptyState to AppEmptyState; verify rendering, icon colors, spacing in both light and dark themes
+- How to reproduce/open it: Explore with no worlds, or Nexus with empty feed
+- Related files: `lib/screens/tabs/explore_screen.dart`, `lib/screens/tabs/nexus_screen.dart`
 
 ---
 

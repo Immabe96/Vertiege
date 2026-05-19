@@ -14,6 +14,7 @@ import '../../utils/time_ago.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../utils/world_assets.dart';
 
 enum _ChatMode { worlds, dms }
 
@@ -469,11 +470,11 @@ class _ModeSwitch extends StatelessWidget {
       padding: const EdgeInsets.all(VSpacing.xs),
       decoration: BoxDecoration(
         color: isDark
-            ? VColors.glassBackgroundDark
-            : VColors.glassBackground,
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),
       ),
       child: Row(
@@ -692,7 +693,7 @@ class _WorldRail extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      width: 60,
+      width: 72,
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceDark : VColors.surface,
         border: Border(
@@ -703,14 +704,18 @@ class _WorldRail extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
         children: worlds.map((world) {
           final isSelected = world.id == selectedWorldId;
+          final worldIcon = WorldAssets.iconForWorld(world.id);
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
             child: GestureDetector(
               onTap: () => onWorldSelected(world.id),
               child: Container(
-                width: 44,
-                height: 44,
-                margin: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
+                width: 64,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: VSpacing.xs,
+                  vertical: VSpacing.xs,
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? VColors.primary.withValues(alpha: 0.15)
@@ -721,16 +726,36 @@ class _WorldRail extends StatelessWidget {
                           color: VColors.primary.withValues(alpha: 0.4))
                       : null,
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.public,
-                    size: VIconSize.md,
-                    color: isSelected
-                        ? VColors.primary
-                        : (isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant),
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      worldIcon,
+                      size: VIconSize.md,
+                      color: isSelected
+                          ? VColors.primary
+                          : (isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      world.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight:
+                            isSelected ? VFontWeight.semiBold : VFontWeight.regular,
+                        color: isSelected
+                            ? VColors.primary
+                            : (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

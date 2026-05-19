@@ -18,8 +18,6 @@ import '../widgets/worlds/world_member_row.dart';
 import '../widgets/worlds/world_info_cards.dart';
 import '../widgets/worlds/world_feed_tab.dart';
 import '../widgets/worlds/world_detail_members.dart';
-import '../widgets/worlds/chat_preview_panel.dart';
-import '../widgets/worlds/alliance_section.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
 import '../services/legacy_service.dart';
@@ -28,7 +26,6 @@ import '../utils/world_foundations.dart';
 import '../utils/navigation.dart';
 
 import '../widgets/core/fade_in.dart';
-import '../widgets/core/loading_state.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/error_banner.dart';
 
@@ -38,10 +35,8 @@ import '../models/world.dart' show World;
 import '../widgets/worlds/resource_vault.dart';
 import '../widgets/worlds/world_share_card.dart';
 import '../widgets/shared/share_button.dart';
-import '../screens/world_marketplace_screen.dart';
-import '../screens/world_polls_screen.dart';
-import '../screens/world_treasury_screen.dart';
-import '../screens/world_challenges_screen.dart';
+import '../widgets/worlds/alliance_section.dart';
+import '../widgets/worlds/chat_preview_panel.dart';
 
 class WorldDetailScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -68,46 +63,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   int _displayedEvents = 0;
   bool _statsAnimated = false;
 
-  bool _shouldShowMarketTab(World? world) {
-    if (world == null) return false;
-    return world.type.name == 'dominion' || world.prestige >= 30;
-  }
-
-  bool _shouldShowPollsTab(World? world, Resident? resident) {
-    if (world == null || resident == null) return false;
-    return resident.joinedWorldIds.contains(widget.worldId);
-  }
-
-  bool _shouldShowTreasuryTab(World? world) {
-    if (world == null) return false;
-    return world.prestige >= 25;
-  }
-
-  bool _shouldShowChallengesTab(World? world, Resident? resident) {
-    if (world == null || resident == null) return false;
-    return resident.joinedWorldIds.contains(widget.worldId);
-  }
-
   bool _isSovereignOrCouncil(Resident? resident, World world) {
     if (resident == null) return false;
     if (resident.id == world.sovereignId) return true;
     final member = _members.where((m) => m.resident.id == resident.id).firstOrNull;
     return member != null && member.rep >= 5000;
   }
-
-  int _getTabCount(World? world, ResidentState residentState) {
-    int count = 4; // Info, Feed, Channels, Residents
-    if (_shouldShowMarketTab(world)) count++;
-    if (_shouldShowPollsTab(world, residentState.resident)) count++;
-    if (_shouldShowTreasuryTab(world)) count++;
-    if (_shouldShowChallengesTab(world, residentState.resident)) count++;
-    return count;
-  }
-
-  int _computeTabCount(WorldState ws, ResidentState rs) => _getTabCount(
-    ws.worlds[widget.worldId],
-    rs,
-  );
 
   void _ensureTabController(int length) {
     if (_tabController == null || _tabController!.length != length) {
@@ -346,8 +307,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final cs = theme.colorScheme;
     final isJoined = resident?.joinedWorldIds.contains(widget.worldId) ?? false;
 
-    final tabCount = _computeTabCount(worldState, ref.watch(residentProvider));
-    _ensureTabController(tabCount);
+    _ensureTabController(4); // Feed, Channels, Residents, More
 
     final scaleAnimation =
         TweenSequence<double>([
@@ -365,7 +325,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (worldState.isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
-        body: const GlassLoadingList(itemCount: 3),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -750,10 +710,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 delegate: _WorldTabBarDelegate(
                   controller: _tabController!,
                   color: prestigeTierColor,
-                  showMarketTab: _shouldShowMarketTab(world),
-                  showPollsTab: _shouldShowPollsTab(world, resident),
-                  showTreasuryTab: _shouldShowTreasuryTab(world),
-                  showChallengesTab: _shouldShowChallengesTab(world, resident),
                 ),
               ),
 
@@ -764,31 +720,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                   controller: _tabController,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    // Info tab: foundation, vault, chat, alliances
-                    SingleChildScrollView(
-                      padding: EdgeInsets.zero,
-                      child: Column(
-                        children: [
-                          _WorldFoundationSummary(
-                            world: world,
-                            channels: channels,
-                            onOpenChannel: (name) =>
-                                _openChannelByName(name, channels),
-                          ),
-                          ResourceVault(
-                            worldId: widget.worldId,
-                            channels: channels,
-                            vaultUnlocked: ref
-                                .read(worldProvider.notifier)
-                                .featuresForWorld(widget.worldId)
-                                .vault,
-                          ),
-                          ChatPreviewPanel(worldId: widget.worldId),
-                          AllianceSection(
-                              worldId: widget.worldId, world: world),
-                        ],
-                      ),
-                    ),
                     // Feed tab
                     WorldFeedTab(
                       worldId: widget.worldId,
@@ -797,7 +728,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                       posts: posts,
                       cs: cs,
                     ),
-
                     // Channels tab: list or empty
                     channels.isEmpty
                         ? AppEmptyState(
@@ -815,10 +745,10 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             physics: const ClampingScrollPhysics(),
                             child: WorldChannelList(worldId: widget.worldId),
                           ),
-                    // Resients tab
+                    // Residents tab
                     (!_membersLoading && _members.isEmpty)
                         ? const AppEmptyState(
-                            title: 'No content',
+                            title: 'No residents yet',
                             description:
                                 'No residents have joined this world yet.',
                             icon: Icons.people_outline,
@@ -834,26 +764,20 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                               membersLoading: _membersLoading,
                             ),
                           ),
-                    if (_shouldShowMarketTab(world))
-                      WorldMarketplaceScreen(
-                        worldId: widget.worldId,
-                        isMember: isJoined,
-                      ),
-                    if (_shouldShowPollsTab(world, resident))
-                      WorldPollsScreen(
-                        worldId: widget.worldId,
-                        isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
-                      ),
-                    if (_shouldShowTreasuryTab(world))
-                      WorldTreasuryScreen(
-                        worldId: widget.worldId,
-                        isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
-                      ),
-                    if (_shouldShowChallengesTab(world, resident))
-                      WorldChallengesScreen(
-                        worldId: widget.worldId,
-                        isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
-                      ),
+                    // More tab
+                    _MoreTab(
+                      world: world,
+                      worldId: widget.worldId,
+                      channels: channels,
+                      resident: resident,
+                      isJoined: isJoined,
+                      isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
+                      onOpenChannel: (name) =>
+                          _openChannelByName(name, channels),
+                      onSettings: onSettings,
+                      onShare: () => _showWorldShareSheet(world),
+                      prestigeTierColor: prestigeTierColor,
+                    ),
                   ],
                 ),
               ),
@@ -868,18 +792,10 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabController controller;
   final Color color;
-  final bool showMarketTab;
-  final bool showPollsTab;
-  final bool showTreasuryTab;
-  final bool showChallengesTab;
 
   const _WorldTabBarDelegate({
     required this.controller,
     required this.color,
-    this.showMarketTab = false,
-    this.showPollsTab = false,
-    this.showTreasuryTab = false,
-    this.showChallengesTab = false,
   });
 
   @override
@@ -924,15 +840,11 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
             fontSize: VFontSize.labelSm,
             fontWeight: VFontWeight.regular,
           ),
-          tabs: [
-            const Tab(text: 'INFO'),
-            const Tab(text: 'FEED'),
-            const Tab(text: 'CHANNELS'),
-            const Tab(text: 'RESIDENTS'),
-            if (showMarketTab) const Tab(text: 'MARKET'),
-            if (showPollsTab) const Tab(text: 'POLLS'),
-            if (showTreasuryTab) const Tab(text: 'TREASURY'),
-            if (showChallengesTab) const Tab(text: 'CHALLENGES'),
+          tabs: const [
+            Tab(text: 'FEED'),
+            Tab(text: 'CHANNELS'),
+            Tab(text: 'RESIDENTS'),
+            Tab(text: 'MORE'),
           ],
         ),
       ),
@@ -942,96 +854,250 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _WorldTabBarDelegate oldDelegate) {
     return oldDelegate.controller != controller ||
-        oldDelegate.color != color ||
-        oldDelegate.showMarketTab != showMarketTab ||
-        oldDelegate.showPollsTab != showPollsTab ||
-        oldDelegate.showTreasuryTab != showTreasuryTab ||
-        oldDelegate.showChallengesTab != showChallengesTab;
+        oldDelegate.color != color;
   }
 }
 
-class _WorldFoundationSummary extends StatelessWidget {
+class _MoreTab extends ConsumerWidget {
   final World world;
+  final String worldId;
   final List<WorldChannel> channels;
+  final Resident? resident;
+  final bool isJoined;
+  final bool isSovereignOrCouncil;
   final ValueChanged<String> onOpenChannel;
+  final VoidCallback? onSettings;
+  final VoidCallback onShare;
+  final Color prestigeTierColor;
 
-  const _WorldFoundationSummary({
+  const _MoreTab({
     required this.world,
+    required this.worldId,
     required this.channels,
+    required this.resident,
+    required this.isJoined,
+    required this.isSovereignOrCouncil,
     required this.onOpenChannel,
+    required this.onSettings,
+    required this.onShare,
+    required this.prestigeTierColor,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final features = ref.read(worldProvider.notifier).featuresForWorld(worldId);
+    final showMarket = world.type.name == 'dominion' || world.prestige >= 30;
+    final showTreasury = world.prestige >= 25;
+    final settingsTap = onSettings; // local capture for null promotion
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(VSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Foundation card
+          _FoundationCard(world: world),
+          const SizedBox(height: VSpacing.md),
+          // Guide card
+          _GuideCard(
+            world: world,
+            channels: channels,
+            onOpenChannel: onOpenChannel,
+          ),
+          const SizedBox(height: VSpacing.md),
+          // Quick links
+          _SectionHeader(title: 'Quick Links', isDark: isDark),
+          const SizedBox(height: VSpacing.sm),
+          if (isJoined)
+            _MoreLink(
+              icon: Icons.people_outline,
+              label: 'Residents',
+              onTap: () => context.push(
+                '/explore/$worldId/members'
+                '?name=${Uri.encodeComponent(world.name)}'
+                '&sovereign=${Uri.encodeComponent(world.sovereignId)}',
+              ),
+            ),
+          if (settingsTap != null && features.governance)
+            _MoreLink(
+              icon: Icons.settings,
+              label: 'World Settings',
+              onTap: settingsTap,
+            ),
+          _MoreLink(
+            icon: Icons.share_outlined,
+            label: 'Share World',
+            onTap: onShare,
+          ),
+          if (showMarket && isJoined)
+            _MoreLink(
+              icon: Icons.storefront,
+              label: 'Marketplace',
+              onTap: () => _showFeatureComingSoon(context),
+            ),
+          if (isJoined)
+            _MoreLink(
+              icon: Icons.how_to_vote,
+              label: 'Polls',
+              onTap: () => _showFeatureComingSoon(context),
+            ),
+          if (showTreasury && isJoined)
+            _MoreLink(
+              icon: Icons.account_balance_wallet,
+              label: 'Treasury',
+              onTap: () => _showFeatureComingSoon(context),
+            ),
+          if (isJoined)
+            _MoreLink(
+              icon: Icons.emoji_events,
+              label: 'Challenges',
+              onTap: () => _showFeatureComingSoon(context),
+            ),
+          const SizedBox(height: VSpacing.md),
+          // World info section
+          _SectionHeader(title: 'World Info', isDark: isDark),
+          const SizedBox(height: VSpacing.sm),
+          ResourceVault(
+            worldId: worldId,
+            channels: channels,
+            vaultUnlocked: features.vault,
+          ),
+          const SizedBox(height: VSpacing.md),
+          ChatPreviewPanel(worldId: worldId),
+          const SizedBox(height: VSpacing.md),
+          AllianceSection(worldId: worldId, world: world),
+        ],
+      ),
+    );
+  }
+
+  void _showFeatureComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Coming soon — this feature is in development')),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final bool isDark;
+
+  const _SectionHeader({required this.title, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: VFontSize.labelSm,
+        fontWeight: VFontWeight.semiBold,
+        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+}
+
+class _MoreLink extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MoreLink({
+    required this.icon,
+    required this.label,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foundation = foundationForWorld(world);
-    final guideChannels = _guideChannels;
+    return ListTile(
+      leading: Icon(icon, size: VIconSize.md, color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+      title: Text(label, style: TextStyle(fontSize: VFontSize.bodyMd)),
+      trailing: const Icon(Icons.chevron_right, size: VIconSize.sm),
+      onTap: onTap,
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+}
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(VSpacing.md, 0, VSpacing.md, VSpacing.sm),
-      child: Container(
-        padding: const EdgeInsets.all(VSpacing.lg),
-        decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(VRadius.xl),
-          border: Border.all(
-            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-          ),
+class _FoundationCard extends StatelessWidget {
+  final World world;
+
+  const _FoundationCard({required this.world});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final foundation = foundationForWorld(world);
+
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.xl),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: VColors.tertiary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(VRadius.lg),
-                  ),
-                  child: const Icon(
-                    Icons.account_tree_outlined,
-                    color: VColors.tertiary,
-                    size: VIconSize.md,
-                  ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: VColors.tertiary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
                 ),
-                const SizedBox(width: VSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'World Foundation',
-                        style: TextStyle(
-                          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                          fontWeight: VFontWeight.bold,
-                          fontSize: VFontSize.bodyLg,
-                        ),
-                      ),
-                      Text(
-                        _accessLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                          fontSize: VFontSize.labelMd,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: const Icon(
+                  Icons.account_tree_outlined,
+                  color: VColors.tertiary,
+                  size: VIconSize.md,
                 ),
-              ],
-            ),
-            const SizedBox(height: VSpacing.md),
-            Text(
-              foundation.premise,
-              style: TextStyle(
-                color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                fontSize: VFontSize.bodyMd,
-                height: 1.35,
               ),
+              const SizedBox(width: VSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Foundation',
+                      style: TextStyle(
+                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                        fontWeight: VFontWeight.bold,
+                        fontSize: VFontSize.bodyLg,
+                      ),
+                    ),
+                    Text(
+                      _accessLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                        fontSize: VFontSize.labelMd,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: VSpacing.md),
+          Text(
+            foundation.premise,
+            style: TextStyle(
+              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              fontSize: VFontSize.bodyMd,
+              height: 1.35,
             ),
+          ),
+          if (foundation.focus.isNotEmpty) ...[
             const SizedBox(height: VSpacing.md),
             Wrap(
               spacing: VSpacing.xs,
@@ -1041,48 +1107,95 @@ class _WorldFoundationSummary extends StatelessWidget {
                   _FoundationChip(label: item),
               ],
             ),
-            const SizedBox(height: VSpacing.lg),
-            Text(
-              'World Guide',
-              style: TextStyle(
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                fontWeight: VFontWeight.bold,
-                fontSize: VFontSize.bodyMd,
-              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String get _accessLabel {
+    if (world.requiredProfession != null) {
+      return 'Verified ${world.requiredProfession} world';
+    }
+    return 'Tier ${world.requiredTier} ${tierNames[world.requiredTier] ?? 'access'}';
+  }
+}
+
+class _GuideCard extends StatelessWidget {
+  final World world;
+  final List<WorldChannel> channels;
+  final ValueChanged<String> onOpenChannel;
+
+  const _GuideCard({
+    required this.world,
+    required this.channels,
+    required this.onOpenChannel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final guideChannels = _guideChannels;
+
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.xl),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Guide',
+            style: TextStyle(
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              fontWeight: VFontWeight.bold,
+              fontSize: VFontSize.bodyLg,
             ),
-            const SizedBox(height: VSpacing.sm),
-            Row(
-              children: [
-                for (final channel in guideChannels)
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: channel == guideChannels.last ? 0 : VSpacing.sm,
-                      ),
-                      child: _GuideButton(
-                        label: channel.name,
-                        icon: _iconForChannel(channel.name),
-                        onTap: () => onOpenChannel(channel.name),
-                      ),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            'Start here to learn about this world.',
+            style: TextStyle(
+              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              fontSize: VFontSize.labelMd,
+            ),
+          ),
+          const SizedBox(height: VSpacing.md),
+          Row(
+            children: [
+              for (final channel in guideChannels)
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: channel == guideChannels.last ? 0 : VSpacing.sm,
+                    ),
+                    child: _GuideButton(
+                      label: channel.name,
+                      icon: _iconForChannel(channel.name),
+                      onTap: () => onOpenChannel(channel.name),
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: VSpacing.sm),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => onOpenChannel('general'),
-                icon: const Icon(Icons.forum_outlined, size: VIconSize.sm),
-                label: const Text('Open General Discussion'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: VColors.tertiary,
-                  side: BorderSide(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
                 ),
+            ],
+          ),
+          const SizedBox(height: VSpacing.sm),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => onOpenChannel('general'),
+              icon: const Icon(Icons.forum_outlined, size: VIconSize.sm),
+              label: const Text('Open General Discussion'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: VColors.tertiary,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1100,13 +1213,6 @@ class _WorldFoundationSummary extends StatelessWidget {
       WorldChannel(id: 'rules', worldId: '', name: 'rules'),
       WorldChannel(id: 'roles', worldId: '', name: 'roles'),
     ];
-  }
-
-  String get _accessLabel {
-    if (world.requiredProfession != null) {
-      return 'Verified ${world.requiredProfession} world';
-    }
-    return 'Tier ${world.requiredTier} ${tierNames[world.requiredTier] ?? 'access'}';
   }
 
   IconData _iconForChannel(String name) => switch (name.toLowerCase()) {
@@ -1133,7 +1239,7 @@ class _FoundationChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
+        border: Border.all(color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant),
       ),
       child: Text(
         label,

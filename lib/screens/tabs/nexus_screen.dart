@@ -8,6 +8,7 @@ import '../../models/post.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/ui.dart';
+import '../../widgets/core/empty_state.dart';
 import '../../widgets/feed/post_item.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/nexus/bento_grid.dart';
@@ -499,7 +500,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
                     if (postHasError)
                       SliverToBoxAdapter(
-                        child: VErrorState(
+                        child: AppErrorState(
                           message: postError ?? 'Something went wrong',
                           onRetry: () =>
                               ref.read(postProvider.notifier).loadPosts(),
@@ -548,7 +549,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
   Widget _buildEmptyState() {
     if (_searchQuery.isNotEmpty) {
-      return VEmptyState(
+      return AppEmptyState(
         title: 'No results for "$_searchQuery"',
         description: 'Try a different search term',
         icon: Icons.search_off,
@@ -556,20 +557,20 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     }
     switch (_tab) {
       case _FeedTab.following:
-        return const VEmptyState(
+        return const AppEmptyState(
           title: 'No posts from followed residents',
           description: 'Follow residents to see their posts here',
           icon: Icons.people_outline,
         );
       case _FeedTab.announcements:
-        return const VEmptyState(
+        return const AppEmptyState(
           title: 'No announcements yet',
           description:
               'Announcements from world moderators will appear here',
           icon: Icons.campaign_outlined,
         );
       case _FeedTab.all:
-        return const VEmptyState(
+        return const AppEmptyState(
           title: 'No posts yet',
           description: 'Be the first to share something with the community!',
           icon: Icons.auto_awesome,
