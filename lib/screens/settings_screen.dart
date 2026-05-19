@@ -1118,37 +1118,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   builder: (context, ref, _) {
                     final themeState = ref.watch(themeProvider);
                     final textSize = themeState.textSize;
-                    return ListTile(
-                      leading: const Icon(
-                        Icons.text_fields,
-                        size: VIconSize.md,
-                      ),
-                      title: const Text('Text Size'),
-                      subtitle: Text(
-                        textSize.name[0].toUpperCase() +
-                            textSize.name.substring(1),
-                      ),
-                      trailing: FSelect<TextSize>.rich(
-                        format: (value) =>
-                            value.name[0].toUpperCase() +
-                            value.name.substring(1),
-                        control: FSelectControl.lifted(
-                          value: textSize,
-                          onChange: (v) {
-                            if (v != null)
-                              ref.read(themeProvider.notifier).setTextSize(v);
-                          },
-                        ),
-                        children: TextSize.values
-                            .map(
-                              (t) => FSelectItem<TextSize>(
-                                value: t,
-                                title: Text(
-                                  t.name[0].toUpperCase() + t.name.substring(1),
-                                ),
+                    return Padding(
+                      padding: const EdgeInsets.all(VSpacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.text_fields, size: VIconSize.md),
+                              const SizedBox(width: VSpacing.md),
+                              Text(
+                                'Text Size',
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
-                            )
-                            .toList(),
+                            ],
+                          ),
+                          const SizedBox(height: VSpacing.sm),
+                          Text(
+                            'Adjust the application text size',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                ),
+                          ),
+                          const SizedBox(height: VSpacing.md),
+                          FSelect<TextSize>.rich(
+                            format: (value) =>
+                                value.name[0].toUpperCase() +
+                                value.name.substring(1),
+                            control: FSelectControl.lifted(
+                              value: textSize,
+                              onChange: (v) {
+                                if (v != null) {
+                                  ref
+                                      .read(themeProvider.notifier)
+                                      .setTextSize(v);
+                                }
+                              },
+                            ),
+                            children: TextSize.values
+                                .map(
+                                  (t) => FSelectItem<TextSize>(
+                                    value: t,
+                                    title: Text(
+                                      t.name[0].toUpperCase() +
+                                          t.name.substring(1),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -1441,10 +1463,10 @@ class _ResetDataConfirmationDialogState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: VColors.error),
-          const SizedBox(width: VSpacing.sm),
+          Icon(Icons.warning_amber_rounded, color: VColors.error),
+          SizedBox(width: VSpacing.sm),
           Text('Reset all data?', style: TextStyle(color: VColors.error)),
         ],
       ),
