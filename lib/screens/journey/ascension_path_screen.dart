@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,7 +65,7 @@ class AscensionPathScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(Spacing.md),
+
           child: Column(
             children: [
               // Title
@@ -96,9 +97,9 @@ class AscensionPathScreen extends ConsumerWidget {
               const SizedBox(height: Spacing.lg),
 
               // XP Stats
-              GlassPanel(
+              FCard(
                 useBlur: false,
-                padding: const EdgeInsets.all(Spacing.md),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -221,7 +222,7 @@ class AscensionPathScreen extends ConsumerWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: VColors.tertiary,
                     foregroundColor: VColors.onTertiary,
-                    padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+
                   ),
                 ),
               ),

@@ -130,7 +130,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         .read(worldProvider)
         .worlds
         .values
-        .where((w) => w.slug == 'neon-district' || w.slug == 'crystal-shore')
+        .where((w) => w.isDefault)
         .map((w) => w.id)
         .toList();
 

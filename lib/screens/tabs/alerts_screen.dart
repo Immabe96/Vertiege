@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -195,7 +196,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
             ),
           ],
           // Bottom padding so content isn't obscured by the nav bar.
-          const SliverPadding(padding: EdgeInsets.only(bottom: 96)),
+          const SliverPadding(
         ],
       ),
     );
@@ -243,8 +244,7 @@ class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
   ) {
     return Container(
       color: backgroundColor,
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
+
         vertical: Spacing.sm,
       ),
       alignment: Alignment.centerLeft,
@@ -348,8 +348,7 @@ class _NotificationSliverList extends StatelessWidget {
         return FadeIn(
           delayMs: index * 60,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.md,
+
               vertical: Spacing.xs,
             ),
             child: Dismissible(
@@ -372,13 +371,13 @@ class _NotificationSliverList extends StatelessWidget {
                 color: VColors.success,
                 icon: Icons.check,
                 alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: Spacing.lg),
+
               ),
               secondaryBackground: _SwipeBackground(
                 color: theme.colorScheme.outline.withValues(alpha: 0.45),
                 icon: Icons.archive,
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: Spacing.lg),
+
               ),
               child: _NotificationCard(
                 notification: n,
@@ -435,7 +434,7 @@ class _SwipeBackground extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
       ),
       alignment: alignment,
       padding: padding,
@@ -472,9 +471,9 @@ class _NotificationCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        child: GlassPanel(
-          padding: EdgeInsets.zero,
+
+        child: FCard(
+
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -488,8 +487,7 @@ class _NotificationCard extends StatelessWidget {
                         width: 3,
                         decoration: const BoxDecoration(
                           color: VColors.primary,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(RadiusTokens.xl),
+
                             bottomLeft: Radius.circular(RadiusTokens.xl),
                           ),
                         ),
@@ -497,7 +495,7 @@ class _NotificationCard extends StatelessWidget {
                     // ── Card body ──
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.all(Spacing.md),
+
                         child: Row(
                           children: [
                             // ── Type icon in tinted container ──
@@ -506,8 +504,7 @@ class _NotificationCard extends StatelessWidget {
                               height: 36,
                               decoration: BoxDecoration(
                                 color: typeColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  RadiusTokens.input,
+
                                 ),
                               ),
                               child: Icon(
@@ -557,8 +554,7 @@ class _NotificationCard extends StatelessWidget {
               ),
               if (actions != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    Spacing.md,
+
                     0,
                     Spacing.md,
                     Spacing.sm,

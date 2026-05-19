@@ -1,3 +1,4 @@
+import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
@@ -9,7 +10,7 @@ class BentoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+
       child: Wrap(
         spacing: Spacing.sm,
         runSpacing: Spacing.sm,
@@ -53,9 +54,9 @@ class _BentoCardTile extends StatelessWidget {
 
     final child = SizedBox(
       width: width,
-      child: GlassPanel(
+      child: FCard(
         useBlur: false,
-        padding: const EdgeInsets.all(Spacing.md),
+
         child: card.child,
       ),
     );

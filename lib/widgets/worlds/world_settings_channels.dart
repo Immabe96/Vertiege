@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -97,13 +98,13 @@ class _ChannelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(Spacing.md),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
+      child: FCard(
+
+
         child: InkWell(
           onTap: channel.isDefault ? null : onRename,
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
           child: Row(
             children: [
               Icon(

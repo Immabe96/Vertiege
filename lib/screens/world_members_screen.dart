@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../config/tiers.dart';
@@ -128,7 +129,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                 await Future<void>.delayed(const Duration(milliseconds: 200));
               },
               child: ListView.builder(
-                padding: const EdgeInsets.all(Spacing.md),
+
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final m = filtered[index];
@@ -141,17 +142,16 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                   final memberRanks = _ranksForResident(residentId);
 
                   return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: index < filtered.length - 1 ? Spacing.sm : 0,
+
                     ),
                     child: FadeIn(
                       delayMs: index * 40,
-                      child: GlassPanel(
-                        padding: const EdgeInsets.all(Spacing.md),
-                        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                      child: FCard(
+
+
                         child: InkWell(
                           onTap: () => context.push('/residents/$residentId'),
-                          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+
                           child: Row(
                             children: [
                               // Avatar
@@ -184,15 +184,12 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                         if (isSovereign) ...[
                                           const SizedBox(width: Spacing.sm),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: Spacing.sm,
+
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
                                               color: VColors.tertiary,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    RadiusTokens.pill,
+
                                                   ),
                                             ),
                                             child: Text(
@@ -211,16 +208,14 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                       children: [
                                         // Tier badge
                                         Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: Spacing.sm,
+
                                             vertical: 1,
                                           ),
                                           decoration: BoxDecoration(
                                             color: tierColor.withValues(
                                               alpha: 0.15,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              RadiusTokens.pill,
+
                                             ),
                                           ),
                                           child: Text(
@@ -325,8 +320,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              Spacing.lg,
+
               Spacing.sm,
               Spacing.lg,
               Spacing.lg,
@@ -457,10 +451,10 @@ class _RankChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _parseRankColor(rank.colorHex);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+       vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
@@ -480,12 +474,12 @@ class _MoreRanksChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+       vertical: 2),
       decoration: BoxDecoration(
         color: isDark
             ? VColors.glassBackgroundDark
             : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+
         border: Border.all(
           color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
         ),

@@ -1,3 +1,4 @@
+import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -376,7 +377,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
         body: ListView(
-          padding: const EdgeInsets.all(VSpacing.md),
+
           children: [
             SovereignErrorBanner(
               message: _errorMessage ?? 'Failed to load world',
@@ -552,22 +553,20 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                         left: 0,
                         right: 0,
                         child: Padding(
-                          padding: const EdgeInsets.all(VSpacing.xl),
+
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Tier badge — colored by prestige tier
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: VSpacing.md,
+
                                   vertical: VSpacing.xs,
                                 ),
                                 decoration: BoxDecoration(
                                   color: prestigeTierColor.withValues(
                                     alpha: 0.12,
                                   ),
-                                  borderRadius: BorderRadius.circular(
-                                    VRadius.md,
+
                                   ),
                                   border: Border.all(
                                     color: prestigeTierColor.withValues(
@@ -605,8 +604,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                   ),
                                   const SizedBox(width: VSpacing.sm),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: VSpacing.sm,
+
                                       vertical: VSpacing.xs,
                                     ),
                                     decoration: BoxDecoration(
@@ -618,8 +616,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
-                                      borderRadius: BorderRadius.circular(
-                                        VRadius.pill,
+
                                       ),
                                       boxShadow: [
                                         BoxShadow(
@@ -832,7 +829,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                 .ensureDefaultChannels(widget.worldId),
                           )
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.all(VSpacing.md),
+
                             physics: const ClampingScrollPhysics(),
                             child: WorldChannelList(worldId: widget.worldId),
                           ),
@@ -846,7 +843,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                             variant: EmptyStateVariant.default_,
                           )
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.all(VSpacing.md),
+
                             physics: const ClampingScrollPhysics(),
                             child: WorldDetailMembers(
                               worldId: widget.worldId,
@@ -989,10 +986,10 @@ class _WorldFoundationSummary extends StatelessWidget {
     final orientation = orientationStepsForWorld(world);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(VSpacing.md, 0, VSpacing.md, VSpacing.sm),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(VSpacing.lg),
-        borderRadius: BorderRadius.circular(VRadius.xl),
+       0, VSpacing.md, VSpacing.sm),
+      child: FCard(
+
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1003,7 +1000,7 @@ class _WorldFoundationSummary extends StatelessWidget {
                   height: 42,
                   decoration: BoxDecoration(
                     color: VColors.tertiary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(VRadius.lg),
+
                   ),
                   child: const Icon(
                     Icons.account_tree_outlined,
@@ -1080,8 +1077,7 @@ class _WorldFoundationSummary extends StatelessWidget {
                 for (final channel in guideChannels)
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        right: channel == guideChannels.last ? 0 : VSpacing.sm,
+
                       ),
                       child: _GuideButton(
                         label: channel.name,
@@ -1150,13 +1146,12 @@ class _FoundationChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.sm,
+
         vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
         color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(VRadius.md),
+
         border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
       ),
       child: Text(
@@ -1190,15 +1185,15 @@ class _OrientationStepTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(bottom: VSpacing.sm),
+
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(VRadius.md),
+
         child: Container(
-          padding: const EdgeInsets.all(VSpacing.md),
+
           decoration: BoxDecoration(
             color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.54),
-            borderRadius: BorderRadius.circular(VRadius.md),
+
             border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
           ),
           child: Row(
@@ -1209,7 +1204,7 @@ class _OrientationStepTile extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: VColors.tertiary.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(VRadius.sm),
+
                 ),
                 child: Text(
                   '$index',
@@ -1285,15 +1280,14 @@ class _GuideButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(VRadius.md),
+
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: VSpacing.xs,
+
           vertical: VSpacing.sm,
         ),
         decoration: BoxDecoration(
           color: VColors.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(VRadius.md),
+
           border: Border.all(color: VColors.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
@@ -1362,7 +1356,7 @@ class _PrestigeProgressBar extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         ClipRRect(
-          borderRadius: BorderRadius.circular(VRadius.sm),
+
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 4,

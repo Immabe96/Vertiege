@@ -1,3 +1,4 @@
+import 'package:forui/forui.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,8 +30,8 @@ class WorldDetailMembers extends ConsumerWidget {
     return Column(
       children: [
         // Member avatars wrapped in GlassPanel
-        GlassPanel(
-          padding: const EdgeInsets.all(Spacing.md),
+        FCard(
+
           child: WorldMemberRow(
             members: members,
             isLoading: membersLoading,

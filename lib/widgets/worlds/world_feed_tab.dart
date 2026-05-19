@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -45,9 +46,9 @@ class WorldFeedTab extends ConsumerWidget {
           PostInput(worldId: worldId, sovereignId: world.sovereignId)
         else
           Padding(
-            padding: const EdgeInsets.all(Spacing.md),
-            child: GlassPanel(
-              padding: const EdgeInsets.all(Spacing.md),
+
+            child: FCard(
+
               child: Row(
                 children: [
                   Icon(
@@ -73,14 +74,13 @@ class WorldFeedTab extends ConsumerWidget {
           SizedBox(
             height: 200,
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+
               scrollDirection: Axis.horizontal,
               itemCount: eventPosts.length,
               itemBuilder: (context, index) => SizedBox(
                 width: 300,
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    right: index < eventPosts.length - 1 ? Spacing.sm : 0,
+
                   ),
                   child: EventCard(post: eventPosts[index]),
                 ),
@@ -96,8 +96,7 @@ class WorldFeedTab extends ConsumerWidget {
                   icon: Icons.auto_awesome,
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.only(
-                    bottom: Spacing.xxl + Spacing.xxl,
+
                   ),
                   itemCount: regularPosts.length,
                   itemBuilder: (context, index) => PostItem(

@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -20,7 +21,7 @@ class WorldInviteSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 4),
+       vertical: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,7 +32,7 @@ class WorldInviteSection extends StatelessWidget {
                 height: 20,
                 decoration: BoxDecoration(
                         color: VColors.tertiary,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+
                 ),
               ),
               const SizedBox(width: Spacing.sm),
@@ -50,10 +51,10 @@ class WorldInviteSection extends StatelessWidget {
             final iconData = _iconForWorldType(world.type);
             final memberLabel = '${world.memberCount} members';
             return Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
-              child: GlassPanel(
+
+              child: FCard(
                 useBlur: false,
-                padding: const EdgeInsets.all(Spacing.md),
+
                 child: Row(
                   children: [
                     Container(
@@ -61,7 +62,7 @@ class WorldInviteSection extends StatelessWidget {
                       height: 40,
                       decoration: BoxDecoration(
                         color: VColors.tertiary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+
                       ),
                       child: Icon(
                         iconData,
