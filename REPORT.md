@@ -89,6 +89,40 @@
 
 ---
 
+## Phase 2: Product Source Of Truth Cleanup — COMPLETED (2026-05-19)
+
+### README.md rewrite
+- Overview updated: "social world/community app" (not "sovereign realm platform" or "semi-gamified")
+- Dart file count: 290 → 309, directories: 11 → 12
+- Removed duplicate/confused file count table
+- Removed `/create-post` route and CreatePostScreen (deleted in stabilization)
+- Screen descriptions updated: ChatListScreen describes Discord-style two-panel layout, WorldDetailScreen tabs are Feed/Channels/Residents/More
+- Glass language removed from 12 screen/widget descriptions or marked [LEGACY]
+- Core widgets marked [LEGACY] where still glass-based, pointing to PLAN.md Phase 3 migration
+- CI test count: 47 → 101
+
+### PROGRESS.md update
+- Current phase: Phase 2 (was Phase 0)
+- Phases 0 and 1 marked completed with summaries
+- Test verification added: 101 pass, 0 errors/warnings
+
+### product-gap-audit.md created
+- 18 gaps classified: 4 Critical, 5 High, 3 Medium, 6 Low
+- Each gap mapped to the PLAN.md phase that addresses it
+- Critical: push notifications, auth deep links, realtime, offline durability
+- High: glass UI remaining, navigation IA, world content, image pipeline, font flash
+
+### DESIGN.md
+- Already marked historical in Phase 0 — no further changes needed
+- Full Forui design doc will be created in Phase 3
+
+### Files Changed (Phase 2)
+- `README.md` — overview, counts, screen/widget descriptions, CI stats
+- `docs/PROGRESS.md` — phase tracking updated
+- `docs/audits/product-gap-audit.md` — new (18-item gap audit)
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`

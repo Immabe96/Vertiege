@@ -37,9 +37,9 @@
 
 ## Overview
 
-Vertiege is a semi-social, semi-gamified sovereign realm platform. Users create residents, join tier-gated worlds, earn prestige through activity, and ascend through five tiers — from Hustler to Apex.
+Vertiege is a social world/community app where every world is an identity-rich realm with channels, residents, lore, posts, polls, quests, events, achievements, and economy features. Users create residents, join worlds, earn prestige through activity, and ascend through five tiers — from Hustler to Apex.
 
-**290 Dart files** across **11 directories**.
+**309 Dart files** across **12 directories**.
 
 | Category | Count |
 |----------|-------|
@@ -54,14 +54,6 @@ Vertiege is a semi-social, semi-gamified sovereign realm platform. Users create 
 | Utils | 13 |
 | Repositories | 4 |
 | UI | 8 |
-| Widgets | 93 |
-| State Providers | 10 |
-| Services | 26 |
-| Models | 12 |
-| Theme | 3 |
-| Router | 1 |
-| Config | 4 |
-| Utils | 8 |
 
 ---
 
@@ -109,9 +101,9 @@ lib/
 
 | Screen | Route | Description |
 |--------|-------|-------------|
-| LoginScreen | `/login` | Email/password login with glass panels, tactile buttons, auth error card |
+| LoginScreen | `/login` | Email/password login with surface cards, auth error card |
 | SignUpScreen | `/signup` | Email/password sign-up creating a new Supabase auth user |
-| AuthCallbackScreen | `/auth/callback` | Post-authentication transitional screen with gradient background and loading indicator |
+| AuthCallbackScreen | `/auth/callback` | Post-authentication transitional screen with loading indicator |
 
 ### Onboarding (2 screens)
 
@@ -120,24 +112,23 @@ lib/
 | OnboardingScreen | `/onboarding` | Profile setup: picks avatar image, enters display name, creates initial resident record |
 | TheGateScreen | `/the-gate` | Immersive 3-step intro: cosmic background, tier reveal, world path selection, marks gate completion for routing |
 
-### Tab Screens (7 screens + 1 layout)
+### Tab Screens (6 screens + 1 layout)
 
 | Screen | Route | Description |
 |--------|-------|-------------|
-| TabLayout | — | 4-tab bottom navigation shell (Nexus, Explore, Chat, Identity) with notification badge and quick-post FAB |
+| TabLayout | — | Bottom navigation shell (Nexus, Explore, Chat, Identity) with notification badge and quick-post FAB |
 | NexusScreen | `/` | Main feed: luminary nameplate greeting, bento grid (5 cards: prestige, quests, season, trending, feed preview), tab/sort controls, post list with infinite scroll, scroll-to-top FAB |
-| ExploreScreen | `/explore` | World discovery: search bar, season banner, filter pills (All/Wealth/Profession/Dominion), featured worlds row, boosted realms row, trending/rising sections, view mode toggle (Grid/Tier/List), 2-column grid |
-| ChatListScreen | `/chat` | DM list: glass cards with cosmetic avatars, status dots, time-ago stamps, unread badges, New Chat button, Explore Worlds CTA on empty state |
-| IdentityScreen | `/identity` | Current user profile: hero avatar with gold glow, luminary nameplate, tier icon, subscription badge, streak display, bio, Edit Profile + Share buttons, achievement grid, referral chip, sign out |
-| CreatePostScreen | `/create-post` | Post composer with ghost input, image picker, and world selector |
+| ExploreScreen | `/explore` | World discovery: search bar, season banner, filter pills (All/Wealth/Profession/Dominion), featured worlds row, trending/rising sections, view mode toggle, grid layout |
+| ChatListScreen | `/chat` | Discord-style two-panel layout: left world rail with icons + names, right panel with channel list, unread badges, DM mode toggle |
+| IdentityScreen | `/identity` | Current user profile: avatar, luminary nameplate, tier icon, subscription badge, streak display, bio, Edit Profile + Share buttons, achievement grid, sign out |
 | AlertsScreen | `/notifications` | Notification feed grouped by today/this week/earlier with fade-in animation |
 
 ### World Screens (6 screens)
 
 | Screen | Route | Description |
 |--------|-------|-------------|
-| WorldDetailScreen | `/explore/:worldId` | Master world view: full-bleed procedural banner with tier glow, hero section with world name/sovereign/stats, info cards (members/posts/events), live chat preview, resource vault, alliances section, tab bar (Feed/Channels/Members), join/leave with pulse animation |
-| WorldChannelScreen | `/explore/:worldId/:channelName` | Channel chat: message grouper with date separators, message bubbles (sent/received/system), chat images, glass input bar with send button, scroll-to-bottom FAB |
+| WorldDetailScreen | `/explore/:worldId` | Master world view: full-bleed banner, hero section with world name/stats, info cards (members/posts/events), tab bar (Feed/Channels/Residents/More), join/leave |
+| WorldChannelScreen | `/explore/:worldId/:channelName` | Channel chat: message grouper with date separators, message bubbles (sent/received/system), chat images, input bar with send button, scroll-to-bottom FAB |
 | WorldSettingsScreen | `/explore/:worldId/settings` | Sovereign management: edit name/description/constitution, manage channels (add/edit/delete/reorder), invite management, boost via IAP |
 | WorldMembersScreen | `/explore/:worldId/members` | Member roster: search, standing levels with tier colors, sovereign badges, rep values, profile navigation, error state with retry |
 | CreateWorldScreen | `/create-world` | World creation: name, type selector (wealth/profession/dominion), icon picker, description, constitution editor, subscription gate for tier-restricted creation |
@@ -147,10 +138,10 @@ lib/
 
 | Screen | Route | Description |
 |--------|-------|-------------|
-| SplashScreen | `/splash` | Animated splash: scaling gold globe icon, fade-in Vertiege title, tagline, pulsing loader, procedural decorative shapes (4 positioned glass shapes) |
+| SplashScreen | `/splash` | Animated splash: scaling globe icon, fade-in Vertiege title, pulsing loader |
 | SettingsScreen | `/settings` | App settings: theme mode toggle, text size slider, notification preferences, backup/restore data, sign out, delete account |
-| ResidentProfileScreen | `/residents/:id` | Other resident's profile: cosmetic avatar, luminary nameplate, tier standing, achievements list, DM entry point, follow/unfollow |
-| ChatRoomScreen | `/chat/:roomId` | Full DM chat: message grouper with date separators, glass-style bubbles, image sharing/attachment, typing indicator (3 bouncing dots), image preview bar, scroll FAB |
+| ResidentProfileScreen | `/residents/:id` | Other resident's profile: avatar, luminary nameplate, tier standing, achievements list, DM entry point, follow/unfollow |
+| ChatRoomScreen | `/chat/:roomId` | Full DM chat: message grouper with date separators, image sharing/attachment, typing indicator, image preview bar, scroll FAB |
 | CosmeticsShopScreen | `/shop` | Cosmetics marketplace: frames, badges, nameplate styles as unlockable items |
 | SeasonScreen | `/season` | Season leaderboard: current season name/dates, top worlds ranked by composite score with trend indicators (up/down arrows) |
 | SubscriptionScreen | `/subscription` | Subscription tiers (Resident/Patrician/Sovereign Elite) with benefits comparison and IAP purchase buttons |
@@ -166,28 +157,28 @@ lib/
 
 | Widget | Purpose |
 |--------|---------|
-| GlassPanel | Reusable frosted-glass container with configurable blur, borders, padding, rounded corners |
-| GlassSheet | Glass-morphism bottom sheet with blur overlay, gold drag handle |
-| SovereignCard | Tier-aware card wrapper: GlowBorder (Apex) or GlassPanel (lower tiers) |
-| GlowBorder | Tier-colored glow effect border (Apex gold, Elite violet, Hustler orange) |
-| FadeIn | Entrance animation: fade + slide + optional scale with configurable delay/duration/curve, 2s fallback |
+| GlassPanel | [LEGACY — being replaced per PLAN.md Phase 3] Frosted-glass container |
+| GlassSheet | [LEGACY] Glass-morphism bottom sheet |
+| SovereignCard | [LEGACY] Tier-aware card wrapper |
+| GlowBorder | [LEGACY] Tier-colored glow effect border |
+| FadeIn | Entrance animation: fade + slide + optional scale |
 | Shimmer / Pulse | Skeleton loading animations for placeholders |
-| EmptyState / AppEmptyState | Branded animated empty state with icon, message, optional CTA button |
-| GlassLoadingList / ScreenLoading | Full-screen skeleton loaders: feed, list, grid, profile, detail variants |
-| ErrorBanner | Sovereign-styled error with code label, message, retry button |
-| NotificationBell | Bell icon with unread count badge, animated pulse |
-| GhostInput | Styled text input with glass border and accent colors |
-| TactileButton | Duolingo-inspired pressable button with 3px drop animation |
-| StatusDot | Discord-style presence dot (online/idle/dnd/offline) |
-| SovereignStat | Icon + value + label stat in glass panel |
-| XpToast | Overlay-based XP gain toast: slides up, bounces, shows "+XP", fades out |
-| DailyRewardDialog | Celebratory glass-modal for daily reward collection |
-| ProtocolLogs | Read-only glass panel with monospace log entries |
-| ImageViewer | Full-screen image viewer with hero animation and dismiss gesture |
+| AppEmptyState | Minimal empty state with icon, message, optional CTA (Forui-style) |
+| GlassLoadingList / ScreenLoading | [LEGACY] Full-screen skeleton loaders being replaced |
+| ErrorBanner | Error display with message and retry button |
+| NotificationBell | Bell icon with unread count badge |
+| GhostInput | [LEGACY] Styled text input with border accents |
+| TactileButton | Pressable button with drop animation |
+| StatusDot | Presence dot (online/idle/dnd/offline) |
+| SovereignStat | [LEGACY] Icon + value + label stat in glass panel |
+| XpToast | Overlay-based XP gain toast |
+| DailyRewardDialog | Daily reward collection modal |
+| ProtocolLogs | [LEGACY] Monospace log entries panel |
+| ImageViewer | Full-screen image viewer with hero animation |
 | OfflineBanner | Conditional banner when connectivity is lost |
-| ContextualChips | Dynamic chip row for contextual actions (tips, quests, invites) |
-| SafeAsyncBuilder | Generic async UI: loading/error/empty/data states in one widget |
-| SovereignProgressBar | Thin 4px progress bar with current/max and tier accent |
+| ContextualChips | Dynamic chip row for contextual actions |
+| SafeAsyncBuilder | Generic async UI: loading/error/empty/data states |
+| SovereignProgressBar | Thin progress bar with current/max and tier accent |
 
 ### Worlds (21 widgets)
 
@@ -196,7 +187,7 @@ lib/
 | WorldCard | Compact card for explore grid: banner, icon, name, prestige, member count, tier badge, lock badge |
 | WorldBanner | Procedural banner generated deterministically from world ID |
 | WorldHeroBanner | Expandable hero with scroll parallax, join button, settings gear |
-| WorldIcon | Frosted-glass icon container from WorldAssets |
+| WorldIcon | World icon container from WorldAssets |
 | WorldInfoSheet | Bottom sheet: description, stats, quick actions |
 | WorldInfoCards | Stat trio (members, posts, events) for detail header |
 | WorldChannelList | Vertical clickable channel tiles |
@@ -205,13 +196,13 @@ lib/
 | WorldFeedTab | Combined feed: post input + post/event list |
 | WorldDetailMembers | Members tab: leaderboard, rows, events, residents |
 | WorldMemberRow | Horizontal scrollable member avatars with rep/tier |
-| EventCard | Glass card: event title, date/time, RSVP action |
+| EventCard | Event card: event title, date/time, RSVP action |
 | Leaderboard | Top members by reputation with rank/avatar/rep |
 | AccessIcon | Lock/unlock/denied icon with semantic colors |
 | WorldAccessGuard | Gate widget: checks tier/profession against world requirements |
 | WorldShareCard | 9:16 story-format share card with procedural banner |
 | BannerGenerator | AI-assisted banner generator (4 procedural variants) |
-| ResourceVault | Glass placeholder for world resource storage (Elder+ gated) |
+| ResourceVault | World resource storage (Elder+ gated) |
 | AllianceSection | Allied worlds display with navigation |
 | ChatPreviewPanel | Recent messages preview for a world |
 
@@ -224,8 +215,8 @@ lib/
 | Badge | Chip badge for a single earned decoration |
 | BadgeDisplay | Horizontal wrap of multiple earned badges |
 | NameBanner | Small name+profession near avatars in post/comment contexts |
-| ShareCard | Glass export card: avatar, nameplate, tier, XP |
-| AchievementShareCard | Glass export card for newly earned achievements |
+| ShareCard | [LEGACY] Export card: avatar, nameplate, tier, XP |
+| AchievementShareCard | [LEGACY] Export card for newly earned achievements |
 | CompletionHint | Tap target toggling "share"/"copied" with haptic feedback |
 | ReferralChip | Referral code as copy-to-clipboard chip |
 | SubscriptionBadge | Tier badge (Resident/Patrician/Sovereign Elite) |
@@ -276,7 +267,7 @@ lib/
 |--------|---------|
 | ChatMessageGrouper | Groups raw messages into ChatDisplayItem (date separator, first/subsequent) |
 | ChatDateSeparator | Centered date label with horizontal rules |
-| ChatInputBar | Glass input: send button + optional attachment icon |
+| ChatInputBar | Message input: send button + optional attachment icon |
 | ChatImage | Network/local image bubble with rounded corners |
 | ScrollFab | Scroll-to-bottom floating action button |
 
@@ -295,7 +286,7 @@ lib/
 | TierIcon | Tier 1-5 → Material icon with corresponding color |
 | ProgressBar | Fill-based bar with current/max, label, tier accent |
 | ShareButton | RepaintBoundary wrapper: captures child as PNG → native share sheet |
-| FilterPill | Glass-style selectable chip with icon + label |
+| FilterPill | [LEGACY] Selectable chip with icon + label |
 | ImagePickerWidget | Gallery image picker returning file path |
 
 ### Auth (1 widget)
@@ -722,7 +713,7 @@ flutter build appbundle --release    # Play Store AAB
 ### CI/CD
 GitHub Actions workflow at `.github/workflows/ci.yml`:
 - `flutter analyze` (lint gate)
-- `flutter test` (47 tests)
+- `flutter test` (101 tests)
 - `flutter build apk --debug`
 
 ---

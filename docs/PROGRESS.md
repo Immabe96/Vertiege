@@ -1,6 +1,6 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-19 (PLAN.md long-horizon roadmap active)
+**Updated:** 2026-05-19 (Phase 2 — Product Source Of Truth Cleanup active)
 
 ## Vision
 
@@ -8,18 +8,20 @@ Vertiege is a social world/community app where every world is an identity-rich r
 
 Full vision: `.claude/../memory/vertiege-vision.md`
 
-## Current: Phase 0 — Baseline & Merge (2026-05-19)
+## Current: Phase 2 — Product Source Of Truth Cleanup (2026-05-19)
 
 Active plan: [PLAN.md](../../PLAN.md) — 13-phase Long-Horizon Product Completion Plan.
 
-Design direction has moved from Sovereign Excellence (glassmorphism, OLED dark-first) to Forui (light-first, AMOLED dark, minimal surfaces, no blur panels). See PLAN.md Phase 3 for the Forui design rules.
+Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur panels). See PLAN.md Phase 3 for the Forui design rules. Historical Sovereign Excellence docs marked as such.
 
-### Phase 0 checklist
-- [x] Merge `feat/stabilization-plan` into `main` (branches already at same commit)
-- [x] Delete stale merged branches
-- [x] Make PLAN.md the active working plan
-- [x] Update README.md, DESIGN.md, PROGRESS.md to remove glass/dark-first language
-- [ ] Verify APK builds and `flutter test` passes (Phase 13 CI setup pending)
+### Completed phases
+- [x] **Phase 0 — Baseline & Merge**: Branches merged, stale branches deleted, PLAN.md activated
+- [x] **Phase 1 — Installed-App Polish**: Tabs → Feed/Channels/Residents/More, world rail with names, Foundation/Guide split, empty states migrated, glass tokens removed
+- [ ] **Phase 2 — Source of Truth Cleanup** (in progress): README updated, product-gap-audit pending
+
+### Verification
+- `flutter test` — 101 tests pass
+- `flutter analyze` — 0 errors, 0 warnings
 
 ## Historical: Pre-PLAN.md work (2026-05-04 to 2026-05-19)
 
