@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_system.dart';
 import 'package:vertiege/theme/colors.dart';
 import '../config/tiers.dart';
@@ -32,7 +31,6 @@ import '../widgets/core/fade_in.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/error_banner.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/glow_border.dart';
 import '../state/post_provider.dart';
 import '../models/resident.dart';
@@ -594,7 +592,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                   Flexible(
                                     child: Text(
                                       world.name,
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: TextStyle(
                                         fontSize: VFontSize.headlineLg,
                                         fontWeight: VFontWeight.bold,
                                         color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -610,14 +608,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                       vertical: VSpacing.xs,
                                     ),
                                     decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          VColors.tertiary,
-                                          VColors.tertiaryDark,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
+                                      color: VColors.tertiary,
                                       borderRadius: BorderRadius.circular(
                                         VRadius.pill,
                                       ),
@@ -990,9 +981,15 @@ class _WorldFoundationSummary extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(VSpacing.md, 0, VSpacing.md, VSpacing.sm),
-      child: GlassPanel(
+      child: Container(
         padding: const EdgeInsets.all(VSpacing.lg),
-        borderRadius: BorderRadius.circular(VRadius.xl),
+        decoration: BoxDecoration(
+          color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(VRadius.xl),
+          border: Border.all(
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
