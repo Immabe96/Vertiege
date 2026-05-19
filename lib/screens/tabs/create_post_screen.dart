@@ -7,7 +7,6 @@ import '../../models/post.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
-import '../../widgets/core/glass_panel.dart';
 import '../../ui/inputs/v_input.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
@@ -231,7 +230,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
             // World selector
             if (worlds.isNotEmpty)
-              GlassPanel(
+              _Card(
                 padding: const EdgeInsets.symmetric(
                   horizontal: Spacing.lg,
                   vertical: Spacing.md,
@@ -277,7 +276,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 ),
               )
             else
-              GlassPanel(
+              _Card(
                 padding: EdgeInsets.all(Spacing.lg),
                 child: Row(
                   children: [
@@ -318,7 +317,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     resident.id == selectedWorld.sovereignId;
                 if (!isCouncil && !isSov) return const SizedBox.shrink();
 
-                return GlassPanel(
+                return _Card(
                   padding: const EdgeInsets.all(Spacing.lg),
                   child: Row(
                     children: [
@@ -399,7 +398,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 final pinLimit = resident?.postPinLimit ?? 0;
                 if (pinLimit <= 0) return const SizedBox.shrink();
 
-                return GlassPanel(
+                return _Card(
                   padding: const EdgeInsets.all(Spacing.lg),
                   child: Row(
                     children: [
@@ -473,7 +472,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             const SizedBox(height: Spacing.lg),
 
             // Editor
-            GlassPanel(
+            _Card(
               padding: const EdgeInsets.all(Spacing.xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,7 +640,7 @@ class _PollBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return GlassPanel(
+    return _Card(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -798,11 +797,8 @@ class _FormatButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+          color: isDark ? VColors.surfaceContainerHighDark : VColors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-          ),
         ),
         child: Center(
           child: Text(
@@ -818,6 +814,30 @@ class _FormatButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const _Card({required this.child, required this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
     );
   }
 }
