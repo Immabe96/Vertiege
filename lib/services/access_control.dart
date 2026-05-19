@@ -12,6 +12,12 @@ const Map<String, List<String>> professionAliases = {
 };
 
 bool canAccessWorld(Resident resident, World world) {
+  // Default worlds are always accessible
+  if (world.isDefault) return true;
+
+  // If resident has already joined, allow access
+  if (resident.joinedWorldIds.contains(world.id)) return true;
+
   switch (world.type) {
     case WorldType.wealth:
       return resident.tier.value >= (world.requiredTier ?? 1) ||

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,8 +37,7 @@ class WorldChannelScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WorldChannelScreen> createState() =>
-      _WorldChannelScreenState();
+  ConsumerState<WorldChannelScreen> createState() => _WorldChannelScreenState();
 }
 
 class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
@@ -166,10 +165,8 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        backgroundColor:
-            (isDark ? VColors.surfaceDark : VColors.surface).withValues(
-              alpha: 0.86,
-            ),
+        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
+            .withValues(alpha: 0.86),
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,58 +197,56 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : messages.isEmpty
-                    ? _buildEmpty(channel)
-                    : Stack(
-                        children: [
-                          ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: VSpacing.sm,
-                              vertical: VSpacing.sm,
-                            ),
-                            itemCount:
-                                displayItems.length +
-                                (pinnedMessages.isNotEmpty ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (pinnedMessages.isNotEmpty && index == 0) {
-                                return _PinnedMessagesPanel(
-                                  pinnedMessages: pinnedMessages,
-                                  residentId: resident?.id ?? '',
-                                  worldId: widget.worldId,
-                                  channelName: widget.channelName,
-                                  canPin: canPin,
-                                  onTogglePin: (msgId, pin) {
-                                    ref
-                                        .read(chatProvider.notifier)
-                                        .togglePin(
-                                          channelId: widget.channelId,
-                                          messageId: msgId,
-                                          isPinned: pin,
-                                        );
-                                  },
-                                );
-                              }
-                              final itemIndex = pinnedMessages.isNotEmpty
-                                  ? index - 1
-                                  : index;
-                              final item = displayItems[itemIndex];
-                              return _buildItem(
-                                item,
-                                resident?.id ?? '',
-                                canPin: canPin,
-                              );
-                            },
-                          ),
-                          if (_showScrollFab)
-                            Positioned(
-                              right: VSpacing.md,
-                              bottom: VSpacing.sm,
-                              child: ChatScrollFab(
-                                onTap: _scrollToBottom,
-                              ),
-                            ),
-                        ],
+                ? _buildEmpty(channel)
+                : Stack(
+                    children: [
+                      ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: VSpacing.sm,
+                          vertical: VSpacing.sm,
+                        ),
+                        itemCount:
+                            displayItems.length +
+                            (pinnedMessages.isNotEmpty ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (pinnedMessages.isNotEmpty && index == 0) {
+                            return _PinnedMessagesPanel(
+                              pinnedMessages: pinnedMessages,
+                              residentId: resident?.id ?? '',
+                              worldId: widget.worldId,
+                              channelName: widget.channelName,
+                              canPin: canPin,
+                              onTogglePin: (msgId, pin) {
+                                ref
+                                    .read(chatProvider.notifier)
+                                    .togglePin(
+                                      channelId: widget.channelId,
+                                      messageId: msgId,
+                                      isPinned: pin,
+                                    );
+                              },
+                            );
+                          }
+                          final itemIndex = pinnedMessages.isNotEmpty
+                              ? index - 1
+                              : index;
+                          final item = displayItems[itemIndex];
+                          return _buildItem(
+                            item,
+                            resident?.id ?? '',
+                            canPin: canPin,
+                          );
+                        },
                       ),
+                      if (_showScrollFab)
+                        Positioned(
+                          right: VSpacing.md,
+                          bottom: VSpacing.sm,
+                          child: ChatScrollFab(onTap: _scrollToBottom),
+                        ),
+                    ],
+                  ),
           ),
           if (!canPostInChannel)
             Container(
@@ -293,7 +288,9 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
 
   Widget _buildEmpty(WorldChannel? channel) {
     final world = ref.watch(worldProvider).worlds[widget.worldId];
-    final foundation = world == null
+    final foundation = channel?.foundationMarkdown.trim().isNotEmpty == true
+        ? channel!.foundationMarkdown
+        : world == null
         ? ''
         : foundationMarkdownForChannel(
             world: world,
@@ -313,24 +310,18 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.chat,
-            size: 48,
-            color: VColors.onSurfaceVariant,
-          ),
+          Icon(Icons.chat, size: 48, color: VColors.onSurfaceVariant),
           const SizedBox(height: VSpacing.md),
           Text(
             'No messages yet',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: VFontWeight.semiBold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: VFontWeight.semiBold),
           ),
           const SizedBox(height: VSpacing.xs),
           Text(
             'Be the first to say something in #${widget.channelName}',
-            style: TextStyle(
-              color: VColors.onSurfaceVariant,
-            ),
+            style: TextStyle(color: VColors.onSurfaceVariant),
           ),
         ],
       ),
@@ -439,7 +430,9 @@ class _FoundationPanel extends StatelessWidget {
                     Text(
                       '# $channelName',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                        color: isDark
+                            ? VColors.onSurfaceDark
+                            : VColors.onSurface,
                         fontWeight: VFontWeight.bold,
                       ),
                     ),
@@ -490,11 +483,11 @@ class _FoundationPanel extends StatelessWidget {
   }
 
   IconData _iconFor(String name) => switch (name.toLowerCase()) {
-        'info' => Icons.info_outline,
-        'rules' => Icons.gavel_outlined,
-        'roles' => Icons.badge_outlined,
-        _ => Icons.description_outlined,
-      };
+    'info' => Icons.info_outline,
+    'rules' => Icons.gavel_outlined,
+    'roles' => Icons.badge_outlined,
+    _ => Icons.description_outlined,
+  };
 }
 
 class _MessageBubble extends StatefulWidget {
@@ -631,8 +624,8 @@ class _MessageBubbleState extends State<_MessageBubble>
           alignment: isSystem
               ? Alignment.center
               : isMe
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
+              ? Alignment.centerRight
+              : Alignment.centerLeft,
           child: Container(
             margin: margin,
             constraints: BoxConstraints(
@@ -641,18 +634,18 @@ class _MessageBubbleState extends State<_MessageBubble>
             child: isSystem
                 ? _buildSystemBubble()
                 : isMe
-                    ? GestureDetector(
-                        onLongPress: widget.canPin
-                            ? () => _showPinContextMenu(context)
-                            : null,
-                        child: _buildSentBubble(showHeader),
-                      )
-                    : GestureDetector(
-                        onLongPress: widget.canPin
-                            ? () => _showPinContextMenu(context)
-                            : null,
-                        child: _buildReceivedBubble(showHeader),
-                      ),
+                ? GestureDetector(
+                    onLongPress: widget.canPin
+                        ? () => _showPinContextMenu(context)
+                        : null,
+                    child: _buildSentBubble(showHeader),
+                  )
+                : GestureDetector(
+                    onLongPress: widget.canPin
+                        ? () => _showPinContextMenu(context)
+                        : null,
+                    child: _buildReceivedBubble(showHeader),
+                  ),
           ),
         ),
       ),
@@ -667,9 +660,7 @@ class _MessageBubbleState extends State<_MessageBubble>
       context: context,
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(VRadius.xl),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(VRadius.xl)),
       ),
       builder: (_) => SafeArea(
         child: Column(
@@ -977,11 +968,7 @@ class _PinnedMessagesPanelState extends State<_PinnedMessagesPanel> {
             onTap: () => setState(() => _expanded = !_expanded),
             child: Row(
               children: [
-                const Icon(
-                  Icons.push_pin,
-                  size: 14,
-                  color: VColors.tertiary,
-                ),
+                const Icon(Icons.push_pin, size: 14, color: VColors.tertiary),
                 const SizedBox(width: VSpacing.xs),
                 Expanded(
                   child: Text(

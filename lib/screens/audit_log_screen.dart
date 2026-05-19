@@ -5,7 +5,6 @@ import '../services/moderation_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../utils/date_format.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/empty_state.dart';
 
@@ -121,7 +120,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                     padding: EdgeInsets.only(
                       bottom: index < _entries.length - 1 ? Spacing.sm : 0,
                     ),
-                    child: GlassPanel(
+                    child: _Card(
                       padding: const EdgeInsets.all(Spacing.md),
                       child: Row(
                         children: [
@@ -201,6 +200,29 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                 },
               ),
             ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  const _Card({required this.child, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
     );
   }
 }

@@ -7,7 +7,6 @@ import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 
 class VerificationReviewScreen extends ConsumerStatefulWidget {
@@ -146,7 +145,7 @@ class _VerificationReviewScreenState
             ),
             child: Padding(
               padding: EdgeInsets.zero,
-              child: GlassPanel(
+              child: _Card(
                 padding: const EdgeInsets.all(Spacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +276,7 @@ class _VerificationReviewScreenState
           padding: EdgeInsets.only(
             bottom: i < flaggedPosts.length - 1 ? Spacing.sm : 0,
           ),
-          child: GlassPanel(
+          child: _Card(
             padding: const EdgeInsets.all(Spacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,6 +380,29 @@ class _VerificationReviewScreenState
           ),
         );
       },
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  const _Card({required this.child, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
     );
   }
 }

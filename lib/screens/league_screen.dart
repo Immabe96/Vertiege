@@ -6,7 +6,6 @@ import '../../state/resident_provider.dart';
 import '../../services/league_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/core/glass_panel.dart';
 import '../../ui/media/v_avatar.dart';
 import '../../ui/icons/v_icons.dart';
 
@@ -133,7 +132,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final tierColor = LeagueService.getTierColor(userLeague.tier);
     final tierIcon = LeagueService.getTierIcon(userLeague.tier);
 
-    return GlassPanel(
+    return _Card(
       useBlur: false,
       padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
@@ -182,7 +181,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final hours = _timeRemaining.inHours % 24;
     final minutes = _timeRemaining.inMinutes % 60;
 
-    return GlassPanel(
+    return _Card(
       useBlur: false,
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.lg,
@@ -214,7 +213,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   }
 
   Widget _buildPromotionInfo(bool isDark) {
-    return GlassPanel(
+    return _Card(
       useBlur: false,
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.lg,
@@ -393,6 +392,30 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final bool useBlur;
+
+  const _Card({required this.child, this.padding, this.useBlur = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
     );
   }
 }

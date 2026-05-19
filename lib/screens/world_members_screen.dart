@@ -14,7 +14,6 @@ import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 
 class WorldMembersScreen extends ConsumerStatefulWidget {
@@ -146,7 +145,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                     ),
                     child: FadeIn(
                       delayMs: index * 40,
-                      child: GlassPanel(
+                      child: _Card(
                         padding: const EdgeInsets.all(Spacing.md),
                         borderRadius: BorderRadius.circular(RadiusTokens.xl),
                         child: InkWell(
@@ -524,4 +523,28 @@ Color _parseRankColor(String hex) {
   final normalized = hex.startsWith('#') ? hex.substring(1) : hex;
   final value = int.tryParse('FF$normalized', radix: 16);
   return value == null ? VColors.tertiary : Color(value);
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
+
+  const _Card({required this.child, this.padding, this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
+    );
+  }
 }

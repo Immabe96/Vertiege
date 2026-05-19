@@ -45,10 +45,22 @@ class MutationOutboxService {
   }
 
   static Future<void> replay(MutationReplayHandler handler) async {
+    await replayWhere((_) => true, handler);
+  }
+
+  static Future<void> replayWhere(
+    bool Function(MutationOutboxItem mutation) shouldReplay,
+    MutationReplayHandler handler,
+  ) async {
     final items = await getAll();
     final remaining = <MutationOutboxItem>[];
 
     for (final item in items) {
+      if (!shouldReplay(item)) {
+        remaining.add(item);
+        continue;
+      }
+
       if (item.retryCount >= maxRetries) {
         remaining.add(item);
         continue;

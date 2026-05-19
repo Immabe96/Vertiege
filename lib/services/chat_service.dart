@@ -46,6 +46,7 @@ class ChatService {
   }
 
   static Future<void> sendMessage({
+    required String messageId,
     required String roomId,
     required String senderId,
     required String senderName,
@@ -61,7 +62,7 @@ class ChatService {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
     final payload = <String, dynamic>{
-      'id': generateId(),
+      'id': messageId,
       'room_id': roomId,
       'sender_id': senderId,
       'sender_name': senderName,
@@ -89,6 +90,7 @@ class ChatService {
           e.message.contains('reply_to');
       if (!missingDisplayColumns) rethrow;
       final fallback = <String, dynamic>{
+        'id': messageId,
         'room_id': roomId,
         'sender_id': senderId,
         'content': content,
@@ -170,10 +172,10 @@ class ChatService {
     String? imageUrl,
   }) async {
     if (!isSupabaseConfigured()) throw Exception('Supabase not configured');
-    if (!WorldService.isRemoteWorldId(worldId) ||
-        !WorldService.isRemoteWorldId(channelId) ||
-        !WorldService.isRemoteWorldId(senderId)) {
-      throw ArgumentError('Channel messages require cloud UUID ids.');
+    if (worldId.trim().isEmpty ||
+        channelId.trim().isEmpty ||
+        senderId.trim().isEmpty) {
+      throw ArgumentError('Channel messages require non-empty cloud ids.');
     }
     final client = getSupabase();
 
@@ -220,11 +222,13 @@ class ChatService {
           .select()
           .single();
       if (TextParser.containsAllResidents(content)) {
-        unawaited(_broadcastMentionNotifications(
-          worldId: worldId,
-          senderId: senderId,
-          senderName: senderName,
-        ));
+        unawaited(
+          _broadcastMentionNotifications(
+            worldId: worldId,
+            senderId: senderId,
+            senderName: senderName,
+          ),
+        );
       }
       return Map<String, dynamic>.from(inserted);
     } on PostgrestException catch (e) {
@@ -243,11 +247,13 @@ class ChatService {
           .select()
           .single();
       if (TextParser.containsAllResidents(content)) {
-        unawaited(_broadcastMentionNotifications(
-          worldId: worldId,
-          senderId: senderId,
-          senderName: senderName,
-        ));
+        unawaited(
+          _broadcastMentionNotifications(
+            worldId: worldId,
+            senderId: senderId,
+            senderName: senderName,
+          ),
+        );
       }
       return Map<String, dynamic>.from(inserted);
     }
@@ -476,6 +482,7 @@ class ChatService {
   }
 
   static Future<void> sendThreadReply({
+    required String messageId,
     required String channelId,
     required String senderId,
     required String senderName,
@@ -487,7 +494,7 @@ class ChatService {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
     final payload = <String, dynamic>{
-      'id': generateId(),
+      'id': messageId,
       'channel_id': channelId,
       'sender_id': senderId,
       'sender_name': senderName,
@@ -545,18 +552,44 @@ class ChatService {
   }) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
+    final dmMessage = await client
+        .from('chat_messages')
+        .select('reactions')
+        .eq('id', messageId)
+        .maybeSingle();
+    if (dmMessage != null) {
+      final raw = dmMessage['reactions'];
+      final reactions = raw is Map<String, dynamic>
+          ? raw.map((key, value) => MapEntry(key, List<String>.from(value)))
+          : <String, List<String>>{};
+      final users = List<String>.from(reactions[emoji] ?? const <String>[]);
+      if (add) {
+        if (!users.contains(userId)) users.add(userId);
+        reactions[emoji] = users;
+      } else {
+        users.remove(userId);
+        if (users.isEmpty) {
+          reactions.remove(emoji);
+        } else {
+          reactions[emoji] = users;
+        }
+      }
+      await client
+          .from('chat_messages')
+          .update({'reactions': reactions})
+          .eq('id', messageId);
+      return;
+    }
     if (add) {
-      await client.rpc('add_reaction', params: {
-        'msg_id': messageId,
-        'emoji': emoji,
-        'resident_id': userId,
-      });
+      await client.rpc(
+        'add_reaction',
+        params: {'msg_id': messageId, 'emoji': emoji, 'resident_id': userId},
+      );
     } else {
-      await client.rpc('remove_reaction', params: {
-        'msg_id': messageId,
-        'emoji': emoji,
-        'resident_id': userId,
-      });
+      await client.rpc(
+        'remove_reaction',
+        params: {'msg_id': messageId, 'emoji': emoji, 'resident_id': userId},
+      );
     }
   }
 
@@ -567,25 +600,29 @@ class ChatService {
   }) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    await client.from('chat_messages').update({
-      'content': newContent,
-      'is_edited': true,
-      'edited_at': DateTime.now().toIso8601String(),
-    }).eq('id', messageId);
+    await client
+        .from('chat_messages')
+        .update({
+          'content': newContent,
+          'is_edited': true,
+          'edited_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', messageId);
   }
 
   // F-03: Delete message
-  static Future<void> deleteMessage({
-    required String messageId,
-  }) async {
+  static Future<void> deleteMessage({required String messageId}) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    await client.from('chat_messages').update({
-      'content': 'This message was deleted',
-      'is_deleted': true,
-      'image_url': null,
-      'reply_to_content': null,
-      'reply_to_image_url': null,
-    }).eq('id', messageId);
+    await client
+        .from('chat_messages')
+        .update({
+          'content': 'This message was deleted',
+          'is_deleted': true,
+          'image_url': null,
+          'reply_to_content': null,
+          'reply_to_image_url': null,
+        })
+        .eq('id', messageId);
   }
 }

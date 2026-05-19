@@ -3,7 +3,6 @@ import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_system.dart';
 import '../theme/v_colors.dart';
 import '../state/world_provider.dart';
@@ -506,7 +505,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         const SizedBox(width: Spacing.sm),
         Text(
           title,
-          style: GoogleFonts.manrope(
+          style: TextStyle(
             fontSize: FontSizes.bodyMd,
             fontWeight: FontWeights.bold,
             color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -573,7 +572,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                 padding: const EdgeInsets.all(Spacing.md),
                 children: [
                   // ── Overview ──────────────────────────────────
-                  GlassPanel(
+                  _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -694,7 +693,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Banner Generator ──────────────────────
-                  GlassPanel(
+                  _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -730,7 +729,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Channels ───────────────────────────────────
-                  GlassPanel(
+                  _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: WorldSettingsChannels(
                       worldId: widget.worldId,
@@ -748,7 +747,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 3,
                       )))
-                    GlassPanel(
+                    _Card(
                       padding: const EdgeInsets.all(Spacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -784,7 +783,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 4,
                       )))
-                    GlassPanel(
+                    _Card(
                       padding: const EdgeInsets.all(Spacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -819,7 +818,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Invites ────────────────────────────────────
-                  GlassPanel(
+                  _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: WorldSettingsInvites(
                       sovereignId: world.sovereignId,
@@ -836,7 +835,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Member Management ──────────────────────────
-                  GlassPanel(
+                  _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -880,7 +879,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               padding: const EdgeInsets.only(
                                 bottom: Spacing.sm,
                               ),
-                              child: GlassPanel(
+                              child: _Card(
                                 padding: const EdgeInsets.all(Spacing.md),
                                 borderRadius: BorderRadius.circular(
                                   RadiusTokens.xl,
@@ -1040,7 +1039,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: Spacing.md),
 
                   // ── Quiet Hours ──────────────────────────────────
-                  GlassPanel(
+                  _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1289,7 +1288,7 @@ class _BoostWorldCard extends ConsumerWidget {
     final enabled = StoreService.isEnabled;
     final canBoost = enabled && world.boostsRemaining > 0 && !isMaxLevel;
 
-    return GlassPanel(
+    return _Card(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1535,7 +1534,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return GlassPanel(
+    return _Card(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1606,3 +1605,27 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
 
 Color _parseHex(String hex) =>
     Color(int.parse('FF${hex.substring(1)}', radix: 16));
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
+
+  const _Card({required this.child, this.padding, this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
+    );
+  }
+}

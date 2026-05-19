@@ -8,7 +8,6 @@ import '../theme/v_colors.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/worlds/dominion_type_picker.dart';
 import '../ui/icons/v_icons.dart';
 
@@ -176,7 +175,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
-          GlassPanel(
+          _Card(
             padding: const EdgeInsets.all(Spacing.xl),
             child: Column(
               children: [
@@ -249,7 +248,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
-          GlassPanel(
+          _Card(
             padding: const EdgeInsets.all(Spacing.xl),
             child: Column(
               children: [
@@ -359,7 +358,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
           padding: const EdgeInsets.all(Spacing.md),
           children: [
             // ── World Details ──────────────────────────────────────
-            GlassPanel(
+            _Card(
               padding: const EdgeInsets.all(Spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,7 +509,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             const SizedBox(height: Spacing.md),
 
             // ── Dominion Type ────────────────────────────────────────
-            GlassPanel(
+            _Card(
               padding: const EdgeInsets.all(Spacing.md),
               child: DominionTypePicker(
                 selected: _selectedDominionType,
@@ -521,7 +520,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             const SizedBox(height: Spacing.md),
 
             // ── Channels ───────────────────────────────────────────
-            GlassPanel(
+            _Card(
               padding: const EdgeInsets.all(Spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,6 +592,29 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  const _Card({required this.child, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
     );
   }
 }

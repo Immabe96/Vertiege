@@ -1,13 +1,11 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../utils/navigation.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/loading_state.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
@@ -129,7 +127,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       const SizedBox(height: Spacing.md),
                       Text(
                         'The Vault',
-                        style: GoogleFonts.manrope(
+                        style: TextStyle(
                           fontSize: FontSizes.headlineLg,
                           fontWeight: FontWeights.bold,
                           color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -348,7 +346,7 @@ class _TierCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return GlassPanel(
+    return _Card(
       padding: const EdgeInsets.all(Spacing.xl),
       borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
       child: Column(
@@ -360,7 +358,7 @@ class _TierCard extends StatelessWidget {
             children: [
               Text(
                 tierName,
-                style: GoogleFonts.manrope(
+                style: TextStyle(
                   fontSize: FontSizes.headlineMd,
                   fontWeight: FontWeights.bold,
                   color: tierColor,
@@ -396,7 +394,7 @@ class _TierCard extends StatelessWidget {
             children: [
               Text(
                 price,
-                style: GoogleFonts.manrope(
+                style: TextStyle(
                   fontSize: FontSizes.displayXl,
                   fontWeight: FontWeights.bold,
                   color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -504,6 +502,30 @@ class _TierCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
+
+  const _Card({required this.child, this.padding, this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.xl),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
     );
   }
 }

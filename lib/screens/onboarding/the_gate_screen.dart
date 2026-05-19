@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
@@ -15,7 +14,6 @@ import '../../theme/design_system.dart';
 import '../../utils/world_assets.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../utils/world_foundations.dart';
-import '../../widgets/core/glass_panel.dart';
 
 /// Key used to track whether the resident has completed The Gate.
 const gateCompletedKey = 'the_gate_completed';
@@ -412,7 +410,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           Text(
             'Welcome to\nthe Realm',
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
+            style: TextStyle(
               fontSize: FontSizes.displayXl,
               fontWeight: FontWeights.bold,
               color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -425,7 +423,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           Text(
             'Your sovereign journey begins',
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
+            style: TextStyle(
               fontSize: FontSizes.bodyLg,
               color: VColors.tertiary,
             ),
@@ -455,7 +453,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               style: FilledButton.styleFrom(
                 backgroundColor: VColors.tertiary,
                 foregroundColor: VColors.onTertiary,
-                textStyle: GoogleFonts.manrope(
+                textStyle: TextStyle(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                   letterSpacing: LetterSpacing.label,
@@ -492,7 +490,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── Header ────────────────────────────────────────
           Text(
             'Choose your\nfirst signal',
-            style: GoogleFonts.manrope(
+            style: TextStyle(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
               color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -555,7 +553,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 disabledBackgroundColor: isDark
                     ? VColors.surfaceContainerDark
                     : VColors.surfaceContainerLow,
-                textStyle: GoogleFonts.manrope(
+                textStyle: TextStyle(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                 ),
@@ -613,7 +611,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── Header ────────────────────────────────────────
           Text(
             'Your first\nworld foundation',
-            style: GoogleFonts.manrope(
+            style: TextStyle(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
               color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -632,7 +630,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           const SizedBox(height: Spacing.xl),
 
           // ── World card preview ────────────────────────────
-          GlassPanel(
+          _Card(
             padding: EdgeInsets.zero,
             borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
             child: Column(
@@ -685,7 +683,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                               children: [
                                 Text(
                                   world.name,
-                                  style: GoogleFonts.manrope(
+                                  style: TextStyle(
                                     fontSize: FontSizes.headlineMd,
                                     fontWeight: FontWeights.bold,
                                     color: isDark
@@ -782,7 +780,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               style: FilledButton.styleFrom(
                 backgroundColor: VColors.tertiary,
                 foregroundColor: VColors.onTertiary,
-                textStyle: GoogleFonts.manrope(
+                textStyle: TextStyle(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                 ),
@@ -838,7 +836,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── Header ────────────────────────────────────────
           Text(
             'Choose your\nfirst rite',
-            style: GoogleFonts.manrope(
+            style: TextStyle(
               fontSize: FontSizes.headlineLg,
               fontWeight: FontWeights.bold,
               color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
@@ -900,7 +898,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               style: FilledButton.styleFrom(
                 backgroundColor: VColors.tertiary,
                 foregroundColor: VColors.onTertiary,
-                textStyle: GoogleFonts.manrope(
+                textStyle: TextStyle(
                   fontSize: FontSizes.bodyMd,
                   fontWeight: FontWeights.bold,
                 ),
@@ -1021,6 +1019,32 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     }
 
     return particles;
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
+
+  const _Card({required this.child, this.padding, this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.xl),
+      decoration: BoxDecoration(
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
+        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
+    );
   }
 }
 

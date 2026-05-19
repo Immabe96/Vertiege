@@ -9,7 +9,6 @@ import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
 import '../widgets/core/fade_in.dart';
-import '../widgets/core/glass_panel.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/prestige_up_dialog.dart';
@@ -95,7 +94,7 @@ class _PrestigeHeader extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.all(Spacing.md),
-      child: GlassPanel(
+      child: _Card(
         padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         children: [
@@ -355,7 +354,7 @@ Widget _buildLeaderboardList(
         delayMs: index * 50,
         child: Padding(
           padding: const EdgeInsets.only(bottom: Spacing.sm),
-          child: GlassPanel(
+          child: _Card(
             padding: const EdgeInsets.all(Spacing.md),
             border: isTop3
                 ? Border.all(
@@ -433,4 +432,28 @@ Widget _buildLeaderboardList(
       );
     },
   );
+}
+
+class _Card extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final Border? border;
+
+  const _Card({required this.child, this.padding, this.border});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: border ?? Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: child,
+    );
+  }
 }

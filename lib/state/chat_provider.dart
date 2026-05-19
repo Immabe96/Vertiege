@@ -96,6 +96,7 @@ class ChatNotifier extends Notifier<ChatState> {
       }
       state = state.copyWith(typingUsers: current);
     }
+
     TypingService.addListener(handler);
   }
 
@@ -110,6 +111,7 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(isLoadingRooms: true);
 
     try {
+      await _replayQueuedChatMutations();
       final rooms = await ChatService.getRooms(
         residentId,
       ).timeout(const Duration(seconds: 5));
@@ -124,6 +126,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> loadDmMessages(String roomId, {bool force = false}) async {
     if (!force && state.dmMessages.containsKey(roomId)) return;
+    await _replayQueuedChatMutations();
     final msgs = await ChatService.getMessages(roomId);
     state = state.copyWith(
       dmMessages: {...state.dmMessages, roomId: _toChannelMessages(msgs)},
@@ -135,14 +138,18 @@ class ChatNotifier extends Notifier<ChatState> {
     return messages.where((m) {
       if (m.autoDeleteAfterSeconds == null) return true;
       final created = DateTime.fromMillisecondsSinceEpoch(m.createdAt);
-      return created.add(Duration(seconds: m.autoDeleteAfterSeconds!)).isAfter(now);
+      return created
+          .add(Duration(seconds: m.autoDeleteAfterSeconds!))
+          .isAfter(now);
     }).toList();
   }
 
   static const String _autoDeletePrefsPrefix = 'auto_delete_';
 
   Future<int?> getAutoDeleteForRoom(String roomId) async {
-    final raw = await StorageService.getString('$_autoDeletePrefsPrefix$roomId');
+    final raw = await StorageService.getString(
+      '$_autoDeletePrefsPrefix$roomId',
+    );
     if (raw == null) return null;
     return int.tryParse(raw);
   }
@@ -151,7 +158,10 @@ class ChatNotifier extends Notifier<ChatState> {
     if (seconds == null) {
       await StorageService.remove('$_autoDeletePrefsPrefix$roomId');
     } else {
-      await StorageService.setString('$_autoDeletePrefsPrefix$roomId', seconds.toString());
+      await StorageService.setString(
+        '$_autoDeletePrefsPrefix$roomId',
+        seconds.toString(),
+      );
     }
   }
 
@@ -196,6 +206,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     try {
       await ChatService.sendMessage(
+        messageId: msg.id,
         roomId: roomId,
         senderId: senderId,
         senderName: senderName,
@@ -216,9 +227,7 @@ class ChatNotifier extends Notifier<ChatState> {
         'autoDeleteAfterSeconds': autoDeleteAfterSeconds,
         'messageId': msg.id,
       });
-      final failedMsg = msg.copyWith(
-        content: 'Failed to send - tap to retry',
-      );
+      final failedMsg = msg.copyWith(content: 'Failed to send - tap to retry');
       final updated = state.dmMessages[roomId]
           ?.map((m) => m.id == msg.id ? failedMsg : m)
           .toList();
@@ -349,6 +358,7 @@ class ChatNotifier extends Notifier<ChatState> {
     bool force = false,
   }) async {
     if (!force && state.channelMessages.containsKey(channelId)) return;
+    await _replayQueuedChatMutations();
     final msgs = await ChatService.getChannelMessages(channelId);
     state = state.copyWith(
       channelMessages: {
@@ -432,9 +442,7 @@ class ChatNotifier extends Notifier<ChatState> {
         'imageUrl': durableImageUrl,
         'messageId': msg.id,
       });
-      final failedMsg = msg.copyWith(
-        content: 'Failed to send - tap to retry',
-      );
+      final failedMsg = msg.copyWith(content: 'Failed to send - tap to retry');
       final updated = allMessages
           .map((m) => m.id == msg.id ? failedMsg : m)
           .toList();
@@ -548,6 +556,7 @@ class ChatNotifier extends Notifier<ChatState> {
     );
     try {
       await ChatService.sendThreadReply(
+        messageId: msg.id,
         channelId: channelId,
         senderId: senderId,
         senderName: senderName,
@@ -636,6 +645,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     try {
       await ChatService.sendMessage(
+        messageId: msg.id,
         roomId: roomId,
         senderId: senderId,
         senderName: senderName,
@@ -814,6 +824,45 @@ class ChatNotifier extends Notifier<ChatState> {
         ),
       )
       .toList();
+
+  Future<void> _replayQueuedChatMutations() async {
+    await MutationOutboxService.replayWhere(
+      (mutation) =>
+          mutation.type == 'chat.message' || mutation.type == 'channel.message',
+      (mutation) async {
+        switch (mutation.type) {
+          case 'chat.message':
+            final payload = mutation.payload;
+            await ChatService.sendMessage(
+              messageId: payload['messageId'] as String,
+              roomId: payload['roomId'] as String,
+              senderId: payload['senderId'] as String,
+              senderName: payload['senderName'] as String,
+              senderAvatar: payload['senderAvatar'] as String?,
+              content: payload['content'] as String,
+              imageUrl: payload['imageUrl'] as String?,
+              autoDeleteAfterSeconds: payload['autoDeleteAfterSeconds'] as int?,
+            );
+            return;
+          case 'channel.message':
+            final payload = mutation.payload;
+            await ChatService.sendChannelMessage(
+              messageId: payload['messageId'] as String,
+              worldId: payload['worldId'] as String,
+              channelId: payload['channelId'] as String,
+              senderId: payload['senderId'] as String,
+              senderName: payload['senderName'] as String,
+              senderAvatar: payload['senderAvatar'] as String?,
+              content: payload['content'] as String,
+              imageUrl: payload['imageUrl'] as String?,
+            );
+            return;
+          default:
+            return;
+        }
+      },
+    );
+  }
 
   Map<String, DateTime> _mergeLatestMessageTime(
     Map<String, DateTime> existing,
