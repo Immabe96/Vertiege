@@ -25,6 +25,28 @@ if ([string]::IsNullOrWhiteSpace($ApiKey)) {
   throw 'Set JULES_API_KEY in your environment before running this script.'
 }
 
+$MemoryPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'docs/jules/JULES_MEMORY.md'
+
+function Add-JulesMemory {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Prompt
+  )
+
+  if (Test-Path $MemoryPath) {
+    $memory = Get-Content $MemoryPath -Raw
+    return @"
+$memory
+
+---
+
+$Prompt
+"@
+  }
+
+  return $Prompt
+}
+
 function Invoke-Jules {
   param(
     [Parameter(Mandatory = $true)]
@@ -62,6 +84,7 @@ switch ($Command) {
     if ([string]::IsNullOrWhiteSpace($Source)) { throw '-Source is required, for example sources/github/Immabe96/Vertiege.' }
     if ([string]::IsNullOrWhiteSpace($Prompt)) { throw '-Prompt is required.' }
     if ([string]::IsNullOrWhiteSpace($Title)) { $Title = 'Vertiege Jules Task' }
+    $Prompt = Add-JulesMemory -Prompt $Prompt
 
     $body = @{
       title = $Title
