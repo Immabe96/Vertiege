@@ -1,5 +1,90 @@
 # Vertiege Implementation Report
 
+## Codex Firebase/Persistence Update - 2026-05-20
+
+### Completed in this pass
+- Other-agent Firebase/Supabase push work has been reviewed and consolidated into the current local worktree.
+- The notification Edge Function is deployed and responds with the healthy no-token path when called with the configured webhook secret.
+- The SQL notification trigger is active on `public.notifications` inserts.
+- The webhook secret has been rotated out of SQL and moved to Supabase Vault/Edge Function secrets.
+- Foreground FCM messages now surface in-app through a snackbar with route action.
+- Resident-scoped service initialization now reruns when the resident becomes available, so startup timing should not skip token registration.
+- Chat messages now have a SharedPreferences cache for fast reload, while sends still use Supabase/outbox as the durable path.
+- Chat mutation methods now throw/queue when Supabase is unavailable instead of silently returning fake success.
+- `device_tokens` RLS was tightened so app inserts/updates must use `resident_id = auth.uid()::text`.
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` passes with info-level suggestions only.
+- `flutter test` passes: 108 tests.
+- Release APK built successfully: `build/app/outputs/flutter-apk/app-release.apk` (137,613,967 bytes, built 2026-05-20 05:30).
+
+### Current token verification
+As of the latest Supabase check, project `wjaphoaxalvgjnrwqjwe` has:
+- `public.device_tokens`: 0 rows
+- `profiles.fcm_token`: 0 rows
+
+If manual FCM tokens are added for testing, they must be inserted into `public.device_tokens` in project `wjaphoaxalvgjnrwqjwe`; the `send-push` Edge Function reads from that table.
+
+### Immediate manual verification
+- Install the latest APK built at 05:30.
+- Log in as Immabe and accept the notification permission prompt.
+- Recheck `public.device_tokens` and `public.debug_logs`.
+- Insert a test notification row for Immabe only after a token row exists.
+- If token rows still do not appear, build a debug APK or connect `adb logcat` to inspect Firebase initialization/token errors.
+
+## HANDOFF STATE — 2026-05-20
+
+### Current situation
+- Other-agent Firebase/Supabase push work has been reviewed and consolidated into the current local worktree.
+- The notification Edge Function is deployed and responds with the healthy no-token path when called with the configured webhook secret.
+- The SQL notification trigger is active on `public.notifications` inserts.
+- The webhook secret has been rotated out of SQL and moved to Supabase Vault/Edge Function secrets.
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` passes with info-level suggestions only.
+- Target APK path remains `build/app/outputs/flutter-apk/app-release.apk`.
+
+### Push notification status
+The server-side fanout path is now configured, but real-device push delivery still needs one more phone-side verification pass because `public.device_tokens` was empty in the agent report.
+
+Chain of issues found and fixed:
+1. `device_tokens.id` had NOT NULL but no default → fixed (added gen_random_uuid() default)
+2. `device_tokens.created_at` had NOT NULL but no default → fixed (added now() default)
+3. RLS policy blocked device_tokens INSERT → fixed (rewrote policy)
+4. Firebase service account JSON may have been stale → updated from `C:\Users\Immabe\Downloads\veritage-firebase-adminsdk-fbsvc-1a8fd32229.json`
+5. Webhook secret was previously embedded in SQL → rotated and moved to Supabase Vault.
+
+If `device_tokens` is still empty after installing the latest build and logging in, inspect `public.debug_logs` and the local `fb_status` / `fb_error` values written by the app.
+
+Diagnostic code was added to `push_token_service.dart` (writes to `public.debug_logs`) but no logs appeared — suggesting `isSupabaseConfigured()` returns false at that point in the app lifecycle, or Firebase init fails before PushTokenService runs.
+
+### Likely next step for push
+- Build a debug APK (`flutter build apk --debug`) to get verbose Firebase logs
+- Or connect via `adb logcat` to see Firebase initialization errors
+- Or add a visible dialog on startup showing `FirebaseBootstrap.isInitialized` and `FirebaseBootstrap.lastError`
+- Rebuild/install the APK with the latest diagnostic code before rechecking `device_tokens`.
+
+### ALSO BROKEN: Data loss on app clear
+- Posts and messages stored in SharedPreferences, wiped on clear
+- Supabase fetch works but SharedPreferences cache is primary store
+- Need Phase 7 repository adoption (LoadState, AppFailure types exist but not used)
+
+### ALSO: Supabase security warnings
+User shared security linter output. Key items:
+- 5 functions missing `SET search_path` (SECURITY DEFINER risk)
+- 20+ SECURITY DEFINER functions callable by `anon` role
+- `pg_net` extension in public schema
+- `debug_logs` and `league_participants` have RLS always-true policies
+- `avatars` and `post-media` storage buckets allow public listing
+- CSV of slow queries at `C:\Users\Immabe\Downloads\Supabase Query Performance Statements (wjaphoaxalvgjnrwqjwe).csv`
+
+### Files with uncommitted changes
+- `lib/services/firebase_bootstrap.dart` — no functional changes (diagnostic attempt, reverted)
+- `lib/services/push_token_service.dart` — diagnostic `_debugLog` calls added
+- `lib/app.dart` — FirebaseBootstrap import + SharedPreferences status writes added
+
+### APK location
+`build\app\outputs\flutter-apk\app-release.apk` (130.1MB, built 2026-05-20 03:21 - this is the OLD build without diagnostics)
+Need to rebuild or transfer the newer build from the `flutter clean` + rebuild output.
+
+---
+
 ## Phase 0: Baseline & Merge — COMPLETED (2026-05-19)
 
 - `feat/stabilization-plan` already at same commit as `main` (`b9d5a1c`) — merge was a no-op
@@ -689,15 +774,11 @@ What follows is an honest inventory of every incomplete item, grouped by phase. 
 - `flutter build apk --release --no-tree-shake-icons` passed.
 - APK path: `build/app/outputs/flutter-apk/app-release.apk` (131.1 MB).
 - Firebase CLI authenticated and sees project `veritage` with Android and iOS apps.
-- Supabase `send-push` endpoint responds, but currently reports `WEBHOOK_SECRET not set`.
+- Supabase `send-push` endpoint responds with the healthy no-token path when called with the configured webhook secret.
 
 ## Manual Setup Still Required
 
-- Set Supabase Edge Function secrets:
-  - `WEBHOOK_SECRET`
-  - `SUPABASE_SERVICE_ROLE_KEY`
-  - `FIREBASE_SERVICE_ACCOUNT_JSON`
-- Create Supabase Database Webhook for `public.notifications` inserts pointing to `https://wjaphoaxalvgjnrwqjwe.supabase.co/functions/v1/send-push`.
+- Edge Function secrets are set and the SQL-native notification trigger is active.
 - Enable/configure Google provider in Supabase Auth.
 - Add Google OAuth callback URL: `https://wjaphoaxalvgjnrwqjwe.supabase.co/auth/v1/callback`.
 - Add Supabase redirect URL: `vertiege://auth/callback`.

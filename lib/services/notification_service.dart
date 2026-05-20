@@ -1,5 +1,6 @@
 import 'supabase.dart';
 import '../models/notification.dart';
+import 'crash_reporter.dart';
 
 /// Service for synchronizing notifications with the Supabase backend.
 class NotificationService {
@@ -11,25 +12,19 @@ class NotificationService {
   ) async {
     if (!isSupabaseConfigured()) return [];
 
-    try {
-      final client = getSupabase();
-      final data = await client
-          .from('notifications')
-          .select()
-          .eq('recipient_id', recipientId)
-          .order('created_at', ascending: false)
-          .limit(50);
+    final client = getSupabase();
+    final data = await client
+        .from('notifications')
+        .select()
+        .eq('recipient_id', recipientId)
+        .order('created_at', ascending: false)
+        .limit(50);
 
-      return (data as List)
-          .map(
-            (json) =>
-                AppNotification.fromSupabase(json as Map<String, dynamic>),
-          )
-          .toList();
-    } catch (e) {
-      // Log error or handle gracefully
-      return [];
-    }
+    return (data as List)
+        .map(
+          (json) => AppNotification.fromSupabase(json as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Marks a specific notification as read in the database.
@@ -37,13 +32,17 @@ class NotificationService {
     if (!isSupabaseConfigured()) return;
 
     try {
-      final client = getSupabase();
-      await client
+      await getSupabase()
           .from('notifications')
           .update({'read': true})
           .eq('id', notificationId);
-    } catch (e) {
-      // Log error
+    } catch (error, stackTrace) {
+      CrashReporter.instance.recordError(
+        error,
+        stackTrace,
+        hint: 'notification mark read',
+      );
+      rethrow;
     }
   }
 
@@ -52,14 +51,18 @@ class NotificationService {
     if (!isSupabaseConfigured()) return;
 
     try {
-      final client = getSupabase();
-      await client
+      await getSupabase()
           .from('notifications')
           .update({'read': true})
           .eq('recipient_id', recipientId)
           .eq('read', false);
-    } catch (e) {
-      // Log error
+    } catch (error, stackTrace) {
+      CrashReporter.instance.recordError(
+        error,
+        stackTrace,
+        hint: 'notification mark all read',
+      );
+      rethrow;
     }
   }
 
@@ -72,12 +75,16 @@ class NotificationService {
     if (!isSupabaseConfigured()) return;
 
     try {
-      final client = getSupabase();
-      await client
+      await getSupabase()
           .from('notifications')
           .insert(notification.toSupabase(recipientId));
-    } catch (e) {
-      // Log error
+    } catch (error, stackTrace) {
+      CrashReporter.instance.recordError(
+        error,
+        stackTrace,
+        hint: 'notification create',
+      );
+      rethrow;
     }
   }
 }

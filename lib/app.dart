@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:forui/forui.dart';
+import 'models/notification.dart';
 import 'state/theme_provider.dart';
 import 'state/resident_provider.dart';
 import 'state/notification_provider.dart';
@@ -23,6 +25,8 @@ import 'services/push_service.dart';
 import 'services/push_token_service.dart';
 import 'services/analytics_service.dart';
 import 'services/crash_reporter.dart';
+import 'services/firebase_bootstrap.dart';
+import 'services/firebase_messaging_handlers.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/offline_banner.dart';
 
@@ -40,6 +44,9 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   bool _isOnline = true;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   StreamSubscription<String>? _notificationRouteSubscription;
+  StreamSubscription<RemoteMessage>? _foregroundPushSubscription;
+  String? _residentServicesInitializedFor;
+  final Set<String> _recentNotificationSnackIds = {};
 
   @override
   void initState() {
@@ -56,6 +63,9 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         if (!mounted) return;
         ref.read(appRouterProvider).go(route);
       },
+    );
+    _foregroundPushSubscription = PushTokenService.foregroundMessages.listen(
+      _showForegroundPush,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startBackgroundLoads();
@@ -112,21 +122,54 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     } catch (e) {
       debugPrint('StoreService init failed: $e');
     }
+    final resident = ref.read(residentProvider).resident;
+    if (resident != null) {
+      await _initializeResidentServices(resident.id);
+    }
+  }
+
+  Future<void> _initializeResidentServices(String residentId) async {
+    if (_residentServicesInitializedFor == residentId) return;
+    _residentServicesInitializedFor = residentId;
+
     try {
       final resident = ref.read(residentProvider).resident;
-      if (resident != null) {
-        CrashReporter.instance.setUser(resident.id, name: resident.name);
-        unawaited(AnalyticsService.setUser(resident.id));
-        final initialRoute = await PushTokenService.initializeForResident(
-          resident.id,
-        );
-        if (initialRoute != null && mounted) {
-          ref.read(appRouterProvider).go(initialRoute);
-        }
-        await PushService.initialize(userId: resident.id);
+      if (resident == null || resident.id != residentId) return;
+
+      CrashReporter.instance.setUser(resident.id, name: resident.name);
+      unawaited(AnalyticsService.setUser(resident.id));
+      final initialRoute = await PushTokenService.initializeForResident(
+        resident.id,
+      );
+      if (initialRoute != null && mounted) {
+        ref.read(appRouterProvider).go(initialRoute);
+      }
+      await PushService.initialize(userId: resident.id);
+      unawaited(
+        _safeLoad(
+          'notifications',
+          ref.read(notificationProvider.notifier).loadNotifications,
+        ),
+      );
+      unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
+      unawaited(
+        _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
+      );
+
+      final fbOk = FirebaseBootstrap.isInitialized;
+      unawaited(
+        StorageService.setString('fb_status', fbOk ? 'connected' : 'offline'),
+      );
+      if (!fbOk) {
+        final err = '${FirebaseBootstrap.lastError ?? "unknown"}';
+        unawaited(StorageService.setString('fb_error', err));
+      } else {
+        unawaited(StorageService.remove('fb_error'));
       }
     } catch (e) {
+      _residentServicesInitializedFor = null;
       debugPrint('PushService init failed: $e');
+      _showStatusSnackbar('Notification setup needs attention.');
     }
   }
 
@@ -141,6 +184,116 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         hint: 'splash background load: $name',
       );
     }
+  }
+
+  void _showStatusSnackbar(String message) {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    });
+  }
+
+  void _showForegroundPush(RemoteMessage message) {
+    final id =
+        message.data['notification_id'] ??
+        message.data['notificationId'] ??
+        message.messageId ??
+        message.sentTime?.millisecondsSinceEpoch.toString() ??
+        DateTime.now().millisecondsSinceEpoch.toString();
+    final title = message.notification?.title ?? 'Vertiege';
+    final body =
+        message.notification?.body ??
+        message.data['message']?.toString() ??
+        'You have a new notification.';
+    _showInAppNotification(
+      id: id.toString(),
+      title: title,
+      body: body,
+      route: routeFromRemoteMessage(message),
+    );
+  }
+
+  void _showRealtimeNotification(
+    NotificationState? previous,
+    NotificationState next,
+  ) {
+    if (previous == null || previous.isLoading) return;
+    final previousIds = previous.notifications.map((n) => n.id).toSet();
+    final fresh = next.notifications
+        .where((n) => !n.read && !previousIds.contains(n.id))
+        .toList();
+    if (fresh.isEmpty) return;
+
+    final notification = fresh.first;
+    _showInAppNotification(
+      id: notification.id,
+      title: _notificationTitle(notification.type),
+      body: notification.message,
+      route: _routeForNotification(notification),
+    );
+  }
+
+  void _showInAppNotification({
+    required String id,
+    required String title,
+    required String body,
+    String? route,
+  }) {
+    if (!mounted || !_markNotificationSnackShown(id)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('$title\n$body', maxLines: 3),
+          duration: const Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          action: route == null
+              ? null
+              : SnackBarAction(
+                  label: 'Open',
+                  onPressed: () => ref.read(appRouterProvider).go(route),
+                ),
+        ),
+      );
+    });
+  }
+
+  bool _markNotificationSnackShown(String id) {
+    if (_recentNotificationSnackIds.contains(id)) return false;
+    _recentNotificationSnackIds.add(id);
+    Timer(const Duration(seconds: 30), () {
+      _recentNotificationSnackIds.remove(id);
+    });
+    return true;
+  }
+
+  String _notificationTitle(NotificationType type) => switch (type) {
+    NotificationType.like => 'New reaction',
+    NotificationType.comment => 'New comment',
+    NotificationType.worldUnlocked => 'World unlocked',
+    NotificationType.tierUpgrade => 'Tier upgraded',
+    NotificationType.welcome => 'Welcome',
+    NotificationType.modAction => 'Moderation update',
+    NotificationType.ranking => 'World ranking',
+    NotificationType.streakReminder => 'Streak reminder',
+    NotificationType.reactionMilestone => 'Reaction milestone',
+    NotificationType.mention => 'Mention',
+    NotificationType.allegianceRequest => 'Allegiance request',
+  };
+
+  String _routeForNotification(AppNotification notification) {
+    if (notification.postId != null) return '/post/${notification.postId}';
+    if (notification.worldId != null) return '/explore/${notification.worldId}';
+    return '/notifications/${notification.id}';
   }
 
   void _checkDailyReward() {
@@ -177,6 +330,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   void dispose() {
     _connectivitySubscription?.cancel();
     _notificationRouteSubscription?.cancel();
+    _foregroundPushSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -190,6 +344,16 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<ResidentState>(residentProvider, (previous, next) {
+      final resident = next.resident;
+      if (resident == null) return;
+      unawaited(_initializeResidentServices(resident.id));
+    });
+    ref.listen<NotificationState>(
+      notificationProvider,
+      _showRealtimeNotification,
+    );
+
     final router = ref.watch(appRouterProvider);
     final themeState = ref.watch(themeProvider);
     final textScaler = TextScaler.linear(themeState.textScale);

@@ -59,7 +59,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
-    final isPriority = type == NotificationType.modAction ||
+    final isPriority =
+        type == NotificationType.modAction ||
         type == NotificationType.tierUpgrade ||
         type == NotificationType.welcome;
 
@@ -80,9 +81,11 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
-      NotificationService.createNotification(
-        recipientId: resident.id,
-        notification: n,
+      unawaited(
+        NotificationService.createNotification(
+          recipientId: resident.id,
+          notification: n,
+        ).catchError((_) {}),
       );
     }
   }
@@ -112,7 +115,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     }
     _persist();
 
-    NotificationService.markRead(id);
+    unawaited(NotificationService.markRead(id).catchError((_) {}));
   }
 
   void markAllRead() {
@@ -127,20 +130,30 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
-      NotificationService.markAllRead(resident.id);
+      unawaited(
+        NotificationService.markAllRead(resident.id).catchError((_) {}),
+      );
     }
   }
 
   Future<void> loadNotifications() async {
     state = state.copyWith(isLoading: true);
+    final cached = await _loadCachedNotifications();
+    if (cached.isNotEmpty) {
+      _unreadCount = cached.where((n) => !n.read).length;
+      state = NotificationState(
+        notifications: cached,
+        quietNotifications: state.quietNotifications,
+      );
+    }
 
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
       unawaited(_subscribeRealtime(resident.id));
-      final remoteNotifications = await NotificationService.getNotifications(
-        resident.id,
-      );
-      if (remoteNotifications.isNotEmpty) {
+      try {
+        final remoteNotifications = await NotificationService.getNotifications(
+          resident.id,
+        );
         _unreadCount = remoteNotifications.where((n) => !n.read).length;
         state = NotificationState(
           notifications: remoteNotifications,
@@ -148,29 +161,32 @@ class NotificationNotifier extends Notifier<NotificationState> {
         );
         _persist();
         return;
+      } catch (_) {
+        if (cached.isNotEmpty) {
+          state = state.copyWith(isLoading: false);
+          return;
+        }
       }
     }
 
+    state = NotificationState(notifications: cached, isLoading: false);
+    _unreadCount = cached.where((n) => !n.read).length;
+  }
+
+  Future<List<AppNotification>> _loadCachedNotifications() async {
     try {
       final json = await StorageService.getString(
         StorageService.notificationsKey,
       );
       if (json != null) {
         final list = jsonDecode(json) as List;
-        final notifications = list
+        return list
             .map((e) => _fromJson(e as Map<String, dynamic>))
             .whereType<AppNotification>()
             .toList();
-        _unreadCount = notifications.where((n) => !n.read).length;
-        state = NotificationState(
-          notifications: notifications,
-          isLoading: false,
-        );
-        return;
       }
     } catch (_) {}
-    state = const NotificationState(isLoading: false);
-    _unreadCount = 0;
+    return const [];
   }
 
   int get unreadCount => _unreadCount;

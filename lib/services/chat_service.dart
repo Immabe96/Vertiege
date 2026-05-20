@@ -59,7 +59,9 @@ class ChatService {
     String? replyToContent,
     int? autoDeleteAfterSeconds,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is not configured; message queued locally.');
+    }
     final client = getSupabase();
     final payload = <String, dynamic>{
       'id': messageId,
@@ -353,7 +355,9 @@ class ChatService {
     required String messageId,
     required bool isPinned,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is not configured; pin was not saved.');
+    }
     final client = getSupabase();
     await client
         .from('channel_messages')
@@ -491,7 +495,9 @@ class ChatService {
     required String threadId,
     String? senderAvatar,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is not configured; reply was not saved.');
+    }
     final client = getSupabase();
     final payload = <String, dynamic>{
       'id': messageId,
@@ -550,7 +556,9 @@ class ChatService {
     required String emoji,
     required bool add,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is not configured; reaction was not saved.');
+    }
     final client = getSupabase();
     final dmMessage = await client
         .from('chat_messages')
@@ -598,7 +606,9 @@ class ChatService {
     required String messageId,
     required String newContent,
   }) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is not configured; edit was not saved.');
+    }
     final client = getSupabase();
     await client
         .from('chat_messages')
@@ -612,7 +622,9 @@ class ChatService {
 
   // F-03: Delete message
   static Future<void> deleteMessage({required String messageId}) async {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is not configured; delete was not saved.');
+    }
     final client = getSupabase();
     await client
         .from('chat_messages')

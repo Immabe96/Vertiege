@@ -8,6 +8,7 @@ import 'analytics_service.dart';
 import 'crash_reporter.dart';
 import 'firebase_bootstrap.dart';
 import 'firebase_messaging_handlers.dart';
+import 'storage_service.dart';
 import 'supabase.dart';
 
 class PushTokenService {
@@ -15,29 +16,50 @@ class PushTokenService {
 
   static final StreamController<String> _notificationRoutes =
       StreamController<String>.broadcast();
+  static final StreamController<RemoteMessage> _foregroundMessages =
+      StreamController<RemoteMessage>.broadcast();
   static StreamSubscription<String>? _tokenRefreshSubscription;
   static bool _messageHandlersRegistered = false;
   static String? _residentId;
 
   static Stream<String> get notificationRoutes => _notificationRoutes.stream;
+  static Stream<RemoteMessage> get foregroundMessages =>
+      _foregroundMessages.stream;
 
   static Future<String?> initializeForResident(String residentId) async {
-    if (!FirebaseBootstrap.isInitialized || kIsWeb || !isSupabaseConfigured()) {
+    if (!FirebaseBootstrap.isInitialized) {
+      await _debugLog('push_init_skipped', 'Firebase not initialized');
+      return null;
+    }
+    if (kIsWeb) {
+      await _debugLog('push_init_skipped', 'Running on web');
+      return null;
+    }
+    if (!isSupabaseConfigured()) {
+      await _debugLog('push_init_skipped', 'Supabase not configured');
       return null;
     }
 
     _residentId = residentId;
     final messaging = FirebaseMessaging.instance;
     await messaging.setAutoInitEnabled(true);
-    await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: true,
-    );
+    await _ensurePermission(messaging);
 
-    final token = await messaging.getToken();
-    await _upsertToken(token);
+    try {
+      final token = await messaging.getToken();
+      if (token == null || token.isEmpty) {
+        await _debugLog('push_no_token', 'FCM getToken returned null/empty');
+      } else {
+        await _upsertToken(token);
+        await _debugLog(
+          'push_token_registered',
+          'Token upserted: ${token.length} chars',
+        );
+      }
+    } catch (e, st) {
+      await _debugLog('push_token_error', '$e');
+      CrashReporter.instance.recordError(e, st, hint: 'fcm token registration');
+    }
     _listenForTokenRefresh();
     _registerMessageHandlers();
 
@@ -47,6 +69,35 @@ class PushTokenService {
     return routeFromRemoteMessage(initialMessage);
   }
 
+  static Future<void> _debugLog(String tag, String message) async {
+    if (!isSupabaseConfigured()) return;
+    try {
+      await getSupabase().from('debug_logs').insert({
+        'tag': tag,
+        'message': message,
+      });
+    } catch (_) {}
+  }
+
+  static Future<NotificationSettings> _ensurePermission(
+    FirebaseMessaging messaging,
+  ) async {
+    var settings = await messaging.getNotificationSettings();
+    if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+      settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+    }
+
+    final status = settings.authorizationStatus.name;
+    await StorageService.setString('push_permission_status', status);
+    await _debugLog('push_permission_status', status);
+    return settings;
+  }
+
   static Future<void> registerForResident(String residentId) async {
     await initializeForResident(residentId);
   }
@@ -54,7 +105,15 @@ class PushTokenService {
   static void _listenForTokenRefresh() {
     _tokenRefreshSubscription ??= FirebaseMessaging.instance.onTokenRefresh
         .listen(
-          (token) => unawaited(_upsertToken(token)),
+          (token) {
+            unawaited(_upsertToken(token));
+            unawaited(
+              _debugLog(
+                'push_token_refreshed',
+                'Token refreshed: ${token.length} chars',
+              ),
+            );
+          },
           onError: (Object error, StackTrace stackTrace) {
             CrashReporter.instance.recordError(
               error,
@@ -71,6 +130,7 @@ class PushTokenService {
 
     FirebaseMessaging.onMessage.listen((message) {
       unawaited(_recordMessageEvent('notification_foreground', message));
+      _foregroundMessages.add(message);
       CrashReporter.instance.addBreadcrumb(
         message.messageId ?? 'foreground message',
         category: 'fcm',

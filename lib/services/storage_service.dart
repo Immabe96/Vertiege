@@ -10,6 +10,7 @@ class StorageService {
   static const String residentKey = '@resident_data';
   static const String postsKey = '@posts_data';
   static const String notificationsKey = '@notifications_data';
+  static const String chatMessagesKey = '@chat_messages_data';
   static const String achievementsKey = '@achievements_data';
   static const String themeKey = '@theme_preference';
   static const String channelsKey = '@channels_data';
@@ -104,6 +105,7 @@ class StorageService {
       residentKey,
       postsKey,
       notificationsKey,
+      chatMessagesKey,
       achievementsKey,
       themeKey,
       channelsKey,

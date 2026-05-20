@@ -35,6 +35,7 @@ migrate_working_dir/
 node_modules/
 analyze_output.txt
 android/hs_err_pid*.log
+supabase/.temp/
 
 # Symbolication related
 app.*.symbols

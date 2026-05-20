@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
@@ -58,6 +61,11 @@ class ChatNotifier extends Notifier<ChatState> {
 
   @override
   ChatState build() {
+    ref.listen<ChatState>(chatProvider, (previous, next) {
+      if (previous == null) return;
+      unawaited(_persistMessages(next));
+    });
+    unawaited(_loadCachedMessages());
     ref.onDispose(_dispose);
     return const ChatState();
   }
@@ -879,6 +887,73 @@ class ChatNotifier extends Notifier<ChatState> {
     }
     return {...existing, channelId: createdAt};
   }
+
+  Future<void> _loadCachedMessages() async {
+    final raw = await StorageService.getString(StorageService.chatMessagesKey);
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      state = state.copyWith(
+        dmMessages: _decodeMessageMap(data['dmMessages']),
+        channelMessages: _decodeMessageMap(data['channelMessages']),
+        channelReads: _decodeDateMap(data['channelReads']),
+        channelLatestMessageTimes: _decodeDateMap(
+          data['channelLatestMessageTimes'],
+        ),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _persistMessages(ChatState snapshot) async {
+    final payload = jsonEncode({
+      'dmMessages': _encodeMessageMap(snapshot.dmMessages),
+      'channelMessages': _encodeMessageMap(snapshot.channelMessages),
+      'channelReads': _encodeDateMap(snapshot.channelReads),
+      'channelLatestMessageTimes': _encodeDateMap(
+        snapshot.channelLatestMessageTimes,
+      ),
+    });
+    await StorageService.setStringDebounced(
+      StorageService.chatMessagesKey,
+      payload,
+    );
+  }
+
+  Map<String, List<ChannelMessage>> _decodeMessageMap(dynamic value) {
+    if (value is! Map) return const {};
+    return value.map((key, rawList) {
+      final messages = rawList is List
+          ? rawList
+                .whereType<Map>()
+                .map(
+                  (item) =>
+                      ChannelMessage.fromJson(Map<String, dynamic>.from(item)),
+                )
+                .toList()
+          : const <ChannelMessage>[];
+      return MapEntry(key.toString(), messages);
+    });
+  }
+
+  Map<String, dynamic> _encodeMessageMap(
+    Map<String, List<ChannelMessage>> messages,
+  ) => messages.map(
+    (key, value) =>
+        MapEntry(key, value.map((message) => message.toJson()).toList()),
+  );
+
+  Map<String, DateTime> _decodeDateMap(dynamic value) {
+    if (value is! Map) return const {};
+    final result = <String, DateTime>{};
+    for (final entry in value.entries) {
+      final parsed = DateTime.tryParse(entry.value?.toString() ?? '');
+      if (parsed != null) result[entry.key.toString()] = parsed;
+    }
+    return result;
+  }
+
+  Map<String, String> _encodeDateMap(Map<String, DateTime> dates) =>
+      dates.map((key, value) => MapEntry(key, value.toIso8601String()));
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(

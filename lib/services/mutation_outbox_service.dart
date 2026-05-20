@@ -94,6 +94,9 @@ class MutationOutboxService {
   static String _dedupeKey(String type, Map<String, dynamic> payload) {
     final subject =
         payload['postId'] ??
+        payload['messageId'] ??
+        payload['channelId'] ??
+        payload['roomId'] ??
         payload['id'] ??
         payload['worldId'] ??
         payload['residentId'] ??
