@@ -1,0 +1,62 @@
+import 'remote_config_service.dart';
+
+/// Central feature flag lookup.
+///
+/// All flags default to false when Firebase is unavailable.
+/// Firebase Remote Config can override any flag remotely without a new build.
+class FeatureFlags {
+  FeatureFlags._();
+
+  // ── Feature gates ──
+
+  static bool get marketplace =>
+      RemoteConfigService.getBool('marketplace_enabled', fallback: false);
+
+  static bool get treasury =>
+      RemoteConfigService.getBool('treasury_enabled', fallback: false);
+
+  static bool get quests =>
+      RemoteConfigService.getBool('quests_enabled', fallback: true);
+
+  static bool get events =>
+      RemoteConfigService.getBool('events_enabled', fallback: true);
+
+  static bool get polls =>
+      RemoteConfigService.getBool('polls_enabled', fallback: false);
+
+  static bool get challenges =>
+      RemoteConfigService.getBool('challenges_enabled', fallback: false);
+
+  // ── UI knobs ──
+
+  static bool get foruiStrictMode =>
+      RemoteConfigService.getBool('forui_strict_mode', fallback: true);
+
+  static bool get postOutboxEnabled =>
+      RemoteConfigService.getBool('post_outbox_enabled', fallback: true);
+
+  static bool get verboseErrors =>
+      RemoteConfigService.getBool('verbose_errors', fallback: false);
+
+  // ── Pagination ──
+
+  static int get feedPageSize =>
+      RemoteConfigService.getInt('feed_page_size', fallback: 20);
+
+  static int get commentsPageSize =>
+      RemoteConfigService.getInt('comments_page_size', fallback: 20);
+
+  static int get chatPageSize =>
+      RemoteConfigService.getInt('chat_page_size', fallback: 30);
+
+  static int get notificationsPageSize =>
+      RemoteConfigService.getInt('notifications_page_size', fallback: 20);
+
+  // ── App ──
+
+  static int get minimumBuild =>
+      RemoteConfigService.getInt('minimum_build', fallback: 1);
+
+  static String get maintenanceBanner =>
+      RemoteConfigService.getString('maintenance_banner', fallback: '');
+}

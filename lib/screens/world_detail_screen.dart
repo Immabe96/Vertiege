@@ -21,6 +21,7 @@ import '../widgets/worlds/world_detail_members.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
 import '../services/legacy_service.dart';
+import '../services/feature_flags.dart';
 import '../state/event_provider.dart';
 import '../utils/world_foundations.dart';
 import '../utils/navigation.dart';
@@ -930,29 +931,29 @@ class _MoreTab extends ConsumerWidget {
             label: 'Share World',
             onTap: onShare,
           ),
-          if (showMarket && isJoined)
+          if (FeatureFlags.marketplace && showMarket && isJoined)
             _MoreLink(
               icon: Icons.storefront,
               label: 'Marketplace',
-              onTap: () => _showFeatureComingSoon(context),
+              onTap: () => context.push('/explore/$worldId/marketplace'),
             ),
-          if (isJoined)
+          if (FeatureFlags.polls && isJoined)
             _MoreLink(
               icon: Icons.how_to_vote,
               label: 'Polls',
-              onTap: () => _showFeatureComingSoon(context),
+              onTap: () => context.push('/explore/$worldId/polls'),
             ),
-          if (showTreasury && isJoined)
+          if (FeatureFlags.treasury && showTreasury && isJoined)
             _MoreLink(
               icon: Icons.account_balance_wallet,
               label: 'Treasury',
-              onTap: () => _showFeatureComingSoon(context),
+              onTap: () => context.push('/explore/$worldId/treasury'),
             ),
-          if (isJoined)
+          if (FeatureFlags.challenges && isJoined)
             _MoreLink(
               icon: Icons.emoji_events,
               label: 'Challenges',
-              onTap: () => _showFeatureComingSoon(context),
+              onTap: () => context.push('/explore/$worldId/challenges'),
             ),
           const SizedBox(height: VSpacing.md),
           // World info section
@@ -969,12 +970,6 @@ class _MoreTab extends ConsumerWidget {
           AllianceSection(worldId: worldId, world: world),
         ],
       ),
-    );
-  }
-
-  void _showFeatureComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Coming soon — this feature is in development')),
     );
   }
 }

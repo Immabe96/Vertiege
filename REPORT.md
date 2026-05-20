@@ -351,8 +351,46 @@
 - `flutter analyze` — 0 errors, 0 warnings
 
 ### Action Item for Immabe
-- Follow `docs/firebase-setup-guide.md` to enable Firebase Crashlytics, Analytics, and Remote Config in the Firebase Console
-- Place `google-services.json` in `android/app/`
+- Firebase is now wired via FlutterFire CLI — `google-services.json` is in place
+- Verify Crashlytics by running the app and checking Firebase Console
+
+---
+
+## Phase 10: Feature Completion Roadmap — IN PROGRESS (2026-05-19)
+
+### Feature flags wired to UI
+- `FeatureFlags` service wraps Remote Config for clean boolean/int/string gating
+- `RemoteConfigService` extended with `getInt`/`getString` methods
+- World detail More tab: coming-soon replaced with flag-gated visibility
+  - Marketplace, Polls, Treasury, Challenges now hidden when flags are off
+  - When flags are on, links navigate to actual feature screens
+- Routes added: `/explore/:worldId/marketplace`, `/explore/:worldId/polls`, `/explore/:worldId/treasury`, `/explore/:worldId/challenges`
+- Removed `_showFeatureComingSoon` dead code
+
+### Flag defaults (from Remote Config)
+- `marketplace_enabled`: false (gated until ready)
+- `treasury_enabled`: false
+- `polls_enabled`: false
+- `challenges_enabled`: false
+- `quests_enabled`: true
+- `events_enabled`: true
+
+### Remaining in Phase 10
+- Unified composer for post creation
+- Post detail screen
+- Quest/event completion flows
+- Search expansion (posts, channels, tags)
+- Full moderation pipeline
+
+### Files Changed (Phase 10)
+- `lib/services/feature_flags.dart` — new (centralized flag lookup)
+- `lib/services/remote_config_service.dart` — added getInt/getString
+- `lib/screens/world_detail_screen.dart` — coming-soon → flag-gated routes
+- `lib/router/app_router.dart` — marketplace/polls/treasury/challenges routes
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
 
 ---
 

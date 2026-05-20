@@ -42,6 +42,10 @@ import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
 import '../screens/challenges_screen.dart';
+import '../screens/world_marketplace_screen.dart';
+import '../screens/world_polls_screen.dart';
+import '../screens/world_treasury_screen.dart';
+import '../screens/world_challenges_screen.dart';
 import '../screens/league_screen.dart';
 import '../screens/world_discovery_screen.dart';
 import '../screens/twin_seal_setup_screen.dart';
@@ -186,6 +190,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                               state.uri.queryParameters['name'] ?? 'World',
                           sovereignId:
                               state.uri.queryParameters['sovereign'] ?? '',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'marketplace',
+                        builder: (context, state) => WorldMarketplaceScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          isMember: state.uri.queryParameters['member'] == 'true',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'polls',
+                        builder: (context, state) => WorldPollsScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'treasury',
+                        builder: (context, state) => WorldTreasuryScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'challenges',
+                        builder: (context, state) => WorldChallengesScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
                         ),
                       ),
                     ],

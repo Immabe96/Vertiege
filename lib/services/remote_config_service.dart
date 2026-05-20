@@ -50,4 +50,18 @@ class RemoteConfigService {
     }
     return _remoteConfig!.getBool(key);
   }
+
+  static int getInt(String key, {int fallback = 0}) {
+    if (!FirebaseBootstrap.isInitialized || _remoteConfig == null) {
+      return fallback;
+    }
+    return _remoteConfig!.getInt(key);
+  }
+
+  static String getString(String key, {String fallback = ''}) {
+    if (!FirebaseBootstrap.isInitialized || _remoteConfig == null) {
+      return fallback;
+    }
+    return _remoteConfig!.getString(key);
+  }
 }
