@@ -318,6 +318,44 @@
 
 ---
 
+## Phase 9: Firebase Infrastructure Completion — COMPLETED (2026-05-19)
+
+### Remote Config defaults expanded
+- Feature flags: marketplace, treasury, quests, events, polls, challenges (each gated)
+- Pagination: feed (20), comments (20), chat (30), notifications (20), marketplace (20), residents (20)
+- Performance: startup_load_limit (20), verbose_errors (false)
+- App: minimum_build (1), maintenance_banner (empty)
+
+### Analytics events standardized
+- Created `AnalyticsEvents` class with 28 event constants
+- Events: onboarding, worlds, channels, posts, comments, reactions, bookmarks, notifications, marketplace, quests, errors, outbox, app lifecycle
+- PII rule: never log message body, post body, email, or user-generated text
+
+### Firebase setup guide
+- Created `docs/firebase-setup-guide.md` — step-by-step noob-friendly guide
+- Covers: project creation, google-services.json placement, Crashlytics/FCM/Remote Config enablement, verification checklist
+
+### Existing Firebase services (verified)
+- `CrashReporter` with ConsoleCrashReporter default, ready for Firebase swap
+- `AnalyticsService` wrapping Firebase Analytics with initialization gating
+- `PushTokenService` registering FCM tokens to Supabase `device_tokens`
+- `FirebaseBootstrap` for safe Firebase initialization
+
+### Files Changed (Phase 9)
+- `lib/services/remote_config_service.dart` — expanded defaults (8 → 21 keys)
+- `lib/services/analytics_events.dart` — new (28 event constants)
+- `docs/firebase-setup-guide.md` — new (6-step setup guide)
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+### Action Item for Immabe
+- Follow `docs/firebase-setup-guide.md` to enable Firebase Crashlytics, Analytics, and Remote Config in the Firebase Console
+- Place `google-services.json` in `android/app/`
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`

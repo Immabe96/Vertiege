@@ -17,8 +17,29 @@ class RemoteConfigService {
       ),
     );
     await _remoteConfig?.setDefaults(const {
+      // Feature flags
+      'marketplace_enabled': false,
+      'treasury_enabled': false,
+      'quests_enabled': true,
+      'events_enabled': true,
+      'polls_enabled': false,
+      'challenges_enabled': false,
+      // UI
       'forui_strict_mode': true,
       'post_outbox_enabled': true,
+      'verbose_errors': false,
+      // Pagination
+      'feed_page_size': 20,
+      'comments_page_size': 20,
+      'chat_page_size': 30,
+      'notifications_page_size': 20,
+      'marketplace_page_size': 20,
+      'residents_page_size': 20,
+      // Performance
+      'startup_load_limit': 20,
+      // App
+      'minimum_build': 1,
+      'maintenance_banner': '',
     });
     await _remoteConfig?.fetchAndActivate();
   }
