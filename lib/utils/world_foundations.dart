@@ -6,6 +6,7 @@ class WorldFoundation {
   final List<String> focus;
   final List<String> culture;
   final String entryPrompt;
+  final String? safetyDisclaimer;
 
   const WorldFoundation({
     required this.premise,
@@ -13,6 +14,7 @@ class WorldFoundation {
     required this.culture,
     this.entryPrompt =
         'Introduce yourself with what you are building, learning, or looking for.',
+    this.safetyDisclaimer,
   });
 }
 
@@ -72,7 +74,7 @@ String foundationMarkdownForChannel({
   final foundation = foundationForWorld(world);
   return switch (normalized) {
     'info' => _infoMarkdown(world, foundation),
-    'rules' => _rulesMarkdown(world),
+    'rules' => _rulesMarkdown(world, foundation),
     'roles' => _rolesMarkdown(world),
     _ => '',
   };
@@ -110,7 +112,11 @@ ${foundation.entryPrompt}
 ''';
 }
 
-String _rulesMarkdown(World world) {
+String _rulesMarkdown(World world, WorldFoundation foundation) {
+  final disclaimer = foundation.safetyDisclaimer;
+  final disclaimerBlock = disclaimer != null
+      ? '\n### 7. Safety Disclaimer\n$disclaimer\n'
+      : '';
   return '''
 ## ${world.name} Rules
 
@@ -131,7 +137,7 @@ Use #info for orientation, #roles for standing and permissions, and #general for
 
 ### 6. Council Standard
 Council and sovereign actions should be visible, consistent, and boringly fair. Moderation exists to protect the world, not personal status.
-''';
+$disclaimerBlock''';
 }
 
 String _rolesMarkdown(World world) {
