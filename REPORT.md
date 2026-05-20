@@ -424,6 +424,127 @@
 
 ---
 
+## Remaining Work (NOT DONE)
+
+What follows is an honest inventory of every incomplete item, grouped by phase. These still need human attention.
+
+### Phase 0 — Baseline & Merge
+- [ ] APK not rebuilt with doc changes (unnecessary — markdown-only)
+- [ ] Codex visual review not performed on any phase (no image-reading capability in this session)
+
+### Phase 1 — Installed-App Polish
+- [ ] **Codex visual review** — world rail readability, tab labels, empty state rendering in light/dark themes
+- [ ] APK not rebuilt — UI changes need on-device smoke test
+
+### Phase 2 — Source-of-Truth Cleanup
+- [ ] `docs/DESIGN.md` is marked historical but no new Forui design doc written (deferred to Phase 3 — also not written)
+- [ ] `product-gap-audit.md` 18-item list not yet validated against live APK
+
+### Phase 3 — Forui Design System
+- [ ] **No new design system document** — Forui design rules are only in PLAN.md Phase 3, not in a standalone doc
+- [ ] `GlassPanel` and `GlassModal` still exist as widget names (confusing — they no longer use glass)
+- [ ] 25 `IconButton` widgets lack `tooltip`/`semanticLabel`
+- [ ] `SovereignCard` and `GlowBorder` still used in `world_card.dart` — not migrated
+- [ ] `VCard(isGlass: true)` parameter still exists — `isGlass` name is misleading after glass removal
+- [ ] `VButton(ButtonVariant.glass)` variant still exists — name is misleading
+- [ ] **Codex visual review** — all screens after glass→surface token migration
+
+### Phase 4 — Navigation & IA
+- [ ] `AuthCallbackScreen` is still a placeholder (loading indicator only, no magic-link/OAuth/password-reset handling)
+- [ ] Notification deep-link route (`/notifications/:id`) redirects to world but does not navigate to the actual notification target (post, comment, etc.)
+- [ ] Post deep-link route (`/post/:postId`) redirects to world detail — does not scroll to the actual post
+- [ ] Tab bar icons not tested on device at new 5-tab density
+
+### Phase 5 — World Content & Media
+- [ ] **Safety disclaimer VALUES not yet set for any world** — `safetyDisclaimer` field is null for all 15 worlds. Infrastructure exists, content missing.
+- [ ] Only 2 starter worlds (`neon-district`, `crystal-shore`) have full foundation content — remaining 13 have auto-generated or minimal lore
+- [ ] `VImage` widget created but **not adopted anywhere** — all screens still use `NetworkImage`, `AssetImage`, or `CosmeticAvatar` directly
+- [ ] No image compression implemented for bundled assets
+- [ ] Storage bucket policies not verified for avatars, world banners, post media
+- [ ] Channel text does not yet include safety disclaimers in rendered output (`$disclaimerBlock` is in the generator but untested)
+
+### Phase 6 — Supabase Reliability
+- [ ] RLS policies on 10+ tables not verified by actual test queries (only code audit)
+- [ ] 2 unapplied migrations (`20260519_001`, `20260519_add_rpc`) still in folder — not applied to remote
+- [ ] 9 recommended indexes not created in Supabase
+- [ ] 10 recommended RPCs not created
+- [ ] Storage bucket policies not audited
+- [ ] Fresh Supabase project migration run not tested
+
+### Phase 7 — Persistence & Outbox
+- [ ] Only 4 repositories exist (notification, profile, post, world) — **10+ missing** (chat, achievements, quests, events, polls, marketplace, treasury, alliances, cosmetics)
+- [ ] `LoadState<T>` type created but **not adopted** by any existing provider
+- [ ] `AppFailure` type created but **not adopted** by any service or repository
+- [ ] `RetryPolicy` type created but **not wired** into `MutationOutboxService`
+- [ ] `ConflictResolution` enum exists but **no conflict detection logic** exists
+- [ ] Some providers still write to `SharedPreferences` directly (bypassing repository layer)
+- [ ] Offline reconciliation not end-to-end tested
+
+### Phase 8 — Performance
+- [ ] No pagination implemented for feed, comments, channel messages, notifications, marketplace, or residents (page size flags exist but are not consumed)
+- [ ] No image thumbnailing in lists — full banners loaded in rail/list cells
+- [ ] No precaching of world icons/banners
+- [ ] No performance tracing implemented (`PerformanceTraceName` type does not exist)
+- [ ] No bundled image compression audit done
+
+### Phase 9 — Firebase
+- [ ] Crashlytics not verified working on device (Firebase Console check pending)
+- [ ] Analytics events defined (`AnalyticsEvents` class) but **never actually fired** from any screen
+- [ ] Remote Config defaults set but **not tested** with actual Firebase project
+- [ ] FCM push notification fanout not wired (needs Supabase Edge Function)
+- [ ] Foreground notification display not implemented (in-app notifications are polling-based, not push)
+- [ ] `CrashReporter` still uses `ConsoleCrashReporter` default — **Firebase Crashlytics not wired** (the `FirebaseCrashReporter` class referenced in comments does not exist)
+
+### Phase 10 — Feature Completion
+- [ ] **Massive scope** — 10 major feature areas, most with only infrastructure in place:
+  - **Nexus/feed**: No unified composer, no post detail screen, no edit/delete/pin UI, no report/hide/mute flow from UI
+  - **Worlds**: Settings/roles/permissions partially done, no world analytics
+  - **Chat**: No last-read marker, no edit/delete messages, no attachments, no @mentions beyond parsing
+  - **Quests/events**: Definitions exist in config, no completion flow, no RSVP UI, no reminders
+  - **Marketplace/treasury**: Screen files exist, **no transaction logic**, **no real data flow**
+  - **Cosmetics/achievements**: Inventory screen exists, no equip flow, no rarity styles
+  - **Governance/polls**: Screen files exist, no creation flow, no voting, no realtime
+  - **Search**: `SearchScreen` exists, searches worlds and residents only — not posts, channels, or tags
+  - **Identity**: Edit profile works, no avatar upload to Supabase Storage, no account export/delete
+  - **Admin/moderation**: Verification review screen exists, **no reports queue**, **no takedown/suspension flow**, **no real moderation pipeline**
+- [ ] Marketplace, treasury, polls, challenges are feature-flagged OFF — they will not appear in the UI
+
+### Phase 11 — Security
+- [ ] **No RLS denial tests written** — only code audit of policies
+- [ ] Storage bucket policies not tested
+- [ ] Rate limiting is client-side only — no server-side rate limiting
+- [ ] Edge Functions not created (no JWT verification on server side)
+- [ ] Account deletion/export not implemented
+- [ ] Block/mute/report flows exist as services but **not wired to UI** (no block button, no mute button, report only on PostItem)
+- [ ] No world-specific safety rules channel text rendered (infrastructure exists, content missing — see Phase 5)
+
+### Phase 12 — Accessibility
+- [ ] 25 IconButtons missing `tooltip`/`semanticLabel` (53% coverage)
+- [ ] Text scaling not tested on device at 1.0x / 1.3x / 1.6x
+- [ ] World rail icons at 44x44 (should be 48x48 minimum)
+- [ ] Reduced motion not implemented (no `disableAnimations` checks)
+- [ ] No internationalization — all strings are hardcoded English
+- [ ] Pull-to-refresh only on some screens (Nexus, Chat, WorldDetail) — missing on Identity, Explore, More
+
+### Phase 13 — Testing & CI
+- [ ] **No widget/golden tests** — 101 tests are all unit tests (config, models, utils, services)
+- [ ] **No integration tests**
+- [ ] **No RLS tests**
+- [ ] **No performance tests**
+- [ ] CI uses `flutter analyze --no-fatal-infos --no-fatal-warnings` which suppresses ALL info/warnings — real warnings could be hidden
+- [ ] CI artifact upload not tested on GitHub Actions
+- [ ] CI does not run migration validation (no Supabase connection in CI)
+- [ ] Firebase App Distribution not configured
+
+### Cross-Phase
+- [ ] **ALL Codex visual reviews are pending** — every phase has visual review requests that need a human with image-reading capability
+- [ ] APK has not been built or installed on device since Phase 1
+- [ ] `FirebaseCrashReporter` class does not exist — the `CrashReporter` abstraction has the method signatures but only `ConsoleCrashReporter` is implemented
+- [ ] `docs/firebase-setup-guide.md` written but steps not executed (Enable Crashlytics in Firebase Console)
+- [ ] The word "glass" still appears in widget class names (`GlassPanel`, `GlassModal`, `GlassSheet`, `GlassLoadingCard`, `GlassLoadingList`, `_GlassNavBar`) even though they no longer use glass effects — confusing for future readers
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`
