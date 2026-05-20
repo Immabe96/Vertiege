@@ -50,9 +50,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       final offline = results.every((r) => r == ConnectivityResult.none);
       if (mounted) setState(() => _isOnline = !offline);
     });
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _showSplash = false);
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startBackgroundLoads();
       _waitForCriticalLoads();

@@ -296,6 +296,28 @@
 
 ---
 
+## Phase 8: Performance & Loading Speed — COMPLETED (2026-05-19)
+
+### Splash optimization
+- Removed 3-second fixed splash delay in app startup
+- Splash now dismisses as soon as resident + world loads complete (with 3s timeout safety net)
+- Daily reward dialog delay (800ms) retained as UX pacing
+
+### Loading strategy (documented)
+- Resident/world loaded first (critical path, unblocks UI)
+- Achievements, events, quests, store, notifications lazy-loaded via fire-and-forget
+- Push token registration deferred until resident available
+- Cache-first display with server refresh pattern in place
+
+### Files Changed (Phase 8)
+- `lib/app.dart` — removed fixed 3-second splash delay
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`
