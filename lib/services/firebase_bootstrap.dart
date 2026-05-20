@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../firebase_options.dart';
 import 'analytics_service.dart';
 import 'crash_reporter.dart';
 import 'remote_config_service.dart';
@@ -17,7 +18,9 @@ class FirebaseBootstrap {
   static Future<void> initialize() async {
     if (_initialized) return;
     try {
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
       _initialized = true;
       _lastError = null;
       await Future.wait([
