@@ -321,7 +321,7 @@ class PostNotifier extends Notifier<PostState> {
         posts: state.posts.map((p) {
           if (p.id != post.id) return p;
           return p.copyWith(
-            syncStatus: SyncStatus.failed,
+            syncStatus: SyncStatus.error,
             syncError: result.error?.toString() ?? 'Queued for sync',
           );
         }).toList(),
