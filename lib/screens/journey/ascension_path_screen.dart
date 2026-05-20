@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../config/achievements.dart';
 import '../../models/achievement.dart';
 import '../../state/resident_provider.dart';
@@ -55,7 +54,7 @@ class AscensionPathScreen extends ConsumerWidget {
         elevation: 0,
         title: Text(
           'Ascension Path',
-          style: GoogleFonts.manrope(
+          style: TextStyle(
             fontSize: FontSizes.headlineMd,
             fontWeight: FontWeights.bold,
             color: VColors.tertiary,
@@ -70,7 +69,7 @@ class AscensionPathScreen extends ConsumerWidget {
               // Title
               Text(
                 'Ascension Path',
-                style: GoogleFonts.manrope(
+                style: TextStyle(
                   fontSize: FontSizes.displayXl,
                   fontWeight: FontWeights.bold,
                   color: VColors.tertiary,

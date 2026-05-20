@@ -1415,7 +1415,7 @@ class _BoostWorldCard extends ConsumerWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: canBoost ? VColors.tertiary : null,
                 foregroundColor: canBoost
-                    ? (isDark ? VColors.onSurfaceDark : Colors.black)
+                    ? (isDark ? VColors.onSurfaceDark : VColors.onTertiary)
                     : null,
               ),
             ),

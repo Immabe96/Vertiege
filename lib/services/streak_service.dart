@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/v_colors.dart';
 import '../models/world_streak.dart';
 import '../services/supabase.dart';
 
@@ -84,8 +85,8 @@ class StreakService {
   }
 
   static Color getStreakFlameColor(int streak) {
-    if (streak >= 30) return const Color(0xFFFFD700);
-    if (streak >= 7) return Colors.red;
-    return Colors.orange;
+    if (streak >= 30) return VColors.tertiary;
+    if (streak >= 7) return VColors.error;
+    return VColors.warning;
   }
 }

@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -151,7 +150,7 @@ class WorldShareCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.manrope(
+                    style: TextStyle(
                       fontSize: FontSizes.headlineLg,
                       fontWeight: FontWeights.bold,
                       color: VColors.onSurface,
@@ -312,7 +311,7 @@ class _ShareStat extends StatelessWidget {
         const SizedBox(height: Spacing.xs),
         Text(
           value,
-          style: GoogleFonts.manrope(
+          style: TextStyle(
             fontSize: FontSizes.headlineMd,
             fontWeight: FontWeights.bold,
             color: VColors.onSurface,

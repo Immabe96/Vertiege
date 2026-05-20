@@ -920,14 +920,11 @@ class _LockedAchievementCard extends StatelessWidget {
               ),
             ),
             Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                child: Container(
-                  color: (isDark
-                          ? VColors.surfaceDark
-                          : VColors.surface)
-                      .withValues(alpha: 0.3),
-                ),
+              child: Container(
+                color: (isDark
+                        ? VColors.surfaceDark
+                        : VColors.surface)
+                    .withValues(alpha: 0.6),
               ),
             ),
             Positioned.fill(

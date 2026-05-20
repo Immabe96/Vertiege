@@ -89,17 +89,13 @@ class _StatusDotState extends State<StatusDot>
     final glassSize = widget.size + widget.borderWidth * 2 + 4;
     return Opacity(
       opacity: opacity.clamp(0.0, 1.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.full),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: Container(
+      child: Container(
             width: glassSize,
             height: glassSize,
             decoration: BoxDecoration(
-              color: VColors.glassBackground,
+              color: VColors.surfaceContainerLow,
               shape: BoxShape.circle,
-              border: Border.all(color: VColors.glassBorder),
+              border: Border.all(color: VColors.outlineVariant),
             ),
             child: Center(
               child: Container(
@@ -112,8 +108,6 @@ class _StatusDotState extends State<StatusDot>
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 }

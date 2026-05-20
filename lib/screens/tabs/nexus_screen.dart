@@ -142,15 +142,12 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: AppBar(
+        child: AppBar(
               toolbarHeight: 56,
               elevation: 0,
               backgroundColor: isDark
-                  ? VColors.surfaceDark.withValues(alpha: 0.85)
-                  : VColors.surface.withValues(alpha: 0.72),
+                  ? VColors.surfaceDark.withValues(alpha: 0.92)
+                  : VColors.surface.withValues(alpha: 0.92),
               title: _searchExpanded
                   ? TextField(
                       controller: _searchController,
@@ -256,8 +253,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                 ),
               ],
             ),
-          ),
-        ),
       ),
       body: DecoratedBox(
         decoration: BoxDecoration(

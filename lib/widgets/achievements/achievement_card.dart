@@ -462,7 +462,7 @@ class _AiConfidenceChip extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.15),
+          color: VColors.warning.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(VRadius.md),
         ),
         child: Row(

@@ -45,14 +45,8 @@ class WorldIcon extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Center(
-            child: Icon(icon, size: size * 0.5, color: iconColor),
-          ),
-        ),
+      child: Center(
+        child: Icon(icon, size: size * 0.5, color: iconColor),
       ),
     );
   }

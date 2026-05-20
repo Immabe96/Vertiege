@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
+/// Container card with surface-aware background.
+///
+/// Replaces legacy glassmorphism with clean surface container colors.
+/// BackdropFilter is opt-in for documented exceptions only
+/// (image viewers, export/share visuals, image scrims).
 class GlassPanel extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -20,7 +25,7 @@ class GlassPanel extends StatelessWidget {
     this.borderRadius,
     this.border,
     this.blur = 12,
-    this.useBlur = true,
+    this.useBlur = false,
     this.shadows,
   });
 
@@ -32,16 +37,19 @@ class GlassPanel extends StatelessWidget {
     final container = Container(
       padding: padding ?? const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
         borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
-        border: border ?? Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder, width: 0.5),
+        border: border ?? Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          width: 0.5,
+        ),
         boxShadow:
             shadows ??
             [
               BoxShadow(
-                color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+                color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
       ),
@@ -78,24 +86,24 @@ class GlassModal extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(RadiusTokens.xl),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: padding ?? const EdgeInsets.all(Spacing.lg),
-          decoration: BoxDecoration(
-            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
-            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder, width: 0.5),
-            boxShadow: [
-              BoxShadow(
-                color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
+      child: Container(
+        padding: padding ?? const EdgeInsets.all(Spacing.lg),
+        decoration: BoxDecoration(
+          color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          border: Border.all(
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+            width: 0.5,
           ),
-          child: child,
+          boxShadow: [
+            BoxShadow(
+              color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
+        child: child,
       ),
     );
   }

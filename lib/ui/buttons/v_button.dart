@@ -170,13 +170,13 @@ class _GlassButton extends StatelessWidget {
         padding: padding,
         decoration: BoxDecoration(
           color: isDark
-              ? VColors.glassBackgroundDark
-              : VColors.glassBackground,
+              ? VColors.surfaceContainerDark
+              : VColors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(VRadius.md),
           border: Border.all(
             color: isDark
-                ? VColors.glassBorderDark
-                : VColors.glassBorder,
+                ? VColors.outlineVariantDark
+                : VColors.outlineVariant,
           ),
         ),
         alignment: Alignment.center,

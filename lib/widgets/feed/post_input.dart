@@ -391,8 +391,8 @@ class _PostInputState extends ConsumerState<PostInput>
   // ── Character count ────────────────────────────────────────
 
   Color _charCountColor(int length) {
-    if (length >= _maxChars) return Colors.red;
-    if (length >= _warnChars) return Colors.orange;
+    if (length >= _maxChars) return VColors.error;
+    if (length >= _warnChars) return VColors.warning;
     return Theme.of(context).colorScheme.outline;
   }
 
@@ -649,7 +649,7 @@ class _PostInputState extends ConsumerState<PostInput>
                         onPressed: _sent || charLength > _maxChars
                             ? null
                             : _submit,
-                        color: _sent ? Colors.green : theme.colorScheme.primary,
+                        color: _sent ? VColors.success : theme.colorScheme.primary,
                         iconSize: IconSizes.md,
                       ),
                     ),

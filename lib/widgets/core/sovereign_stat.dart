@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
@@ -51,7 +50,7 @@ class SovereignStat extends StatelessWidget {
                     opacity: progress,
                     child: Text(
                       '$value',
-                      style: GoogleFonts.manrope(
+                      style: TextStyle(
                         fontSize: FontSizes.displayXl,
                         fontWeight: FontWeights.bold,
                         color: theme.colorScheme.onSurface,

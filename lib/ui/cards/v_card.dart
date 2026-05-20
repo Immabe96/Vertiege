@@ -33,15 +33,13 @@ class VCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final defaultBg = isGlass
-        ? (isDark ? VColors.glassBackgroundDark : VColors.glassBackground)
-        : (backgroundColor ?? theme.colorScheme.surfaceContainerLow);
+    final defaultBg = backgroundColor ?? (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow);
 
     final defaultBorder = isGlass
         ? Border.all(
             color: isDark
-                ? VColors.glassBorderDark
-                : VColors.glassBorder,
+                ? VColors.outlineVariantDark
+                : VColors.outlineVariant,
           )
         : Border.all(
             color: isDark

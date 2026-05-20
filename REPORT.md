@@ -123,6 +123,62 @@
 
 ---
 
+## Phase 3: Forui Design System Completion — COMPLETED (2026-05-19)
+
+### New Forui primitives (in lib/ui/)
+- `media/v_image.dart` — standardized image with fallback chain (network → asset → placeholder)
+- `feedback/v_world_badge.dart` — world icon + name badge for world rails/lists
+- `feedback/v_sync_badge.dart` — sync/connectivity status badge (synced/syncing/pending/offline/error)
+- Updated `ui.dart` barrel with Forui component guidance
+
+### GoogleFonts removed (10 files)
+- Replaced all `GoogleFonts.manrope()` and `GoogleFonts.spaceGrotesk()` with `TextStyle()`
+- Removed `import 'package:google_fonts/google_fonts.dart'` from all 10 files
+- System fonts now flow from Forui theme (`FTypography.defaultFontFamily`)
+
+### GlassPanel/GlassModal — surface tokens
+- `GlassPanel`: `glassBackground` → `surfaceContainerLow`/`surfaceContainerDark`
+- `GlassPanel`: `glassBorder` → `outlineVariant`
+- `GlassPanel`: `useBlur` default changed to `false` (BackdropFilter opt-in only)
+- `GlassModal`: Same token migration, BackdropFilter removed
+- This fixes all 26 `GlassPanel` usages and `GlassModal` in one edit
+
+### VCard/VButton glass variant fixed
+- `VCard(isGlass: true)`: Uses surface container + outline variant tokens
+- `VButton(ButtonVariant.glass)`: Same migration
+
+### BackdropFilter removed from non-exception usages (5 files)
+- `nexus_screen.dart` — AppBar blur removed
+- `world_icon.dart` — icon container blur removed
+- `achievements_index.dart` — locked overlay blur removed
+- `xp_toast.dart` — toast blur removed, glass token migration
+- `status_dot.dart` — status dot blur removed, glass token migration
+- `glass_panel.dart` — blur disabled by default; only `image_viewer.dart` keeps BackdropFilter
+
+### Arbitrary Colors.* replaced with VColors (6 files)
+- `streak_service.dart` — `Colors.red`/`Colors.orange`/`Color(0xFFFFD700)` → `VColors.error`/`VColors.warning`/`VColors.tertiary`
+- `achievement_card.dart` — `Colors.orange` → `VColors.warning`
+- `post_input.dart` — `Colors.red`/`Colors.orange`/`Colors.green` → `VColors.error`/`VColors.warning`/`VColors.success`
+- `world_settings_screen.dart` — `Colors.black` → `VColors.onTertiary`
+- `world_detail_screen.dart` — `Colors.white`/`Colors.black26` kept (readable image overlays — documented exception)
+
+### Files Changed (Phase 3)
+- 23 modified files, 3 new files (`lib/ui/media/v_image.dart`, `lib/ui/feedback/v_world_badge.dart`, `lib/ui/feedback/v_sync_badge.dart`)
+- Key files: `glass_panel.dart`, `v_card.dart`, `v_button.dart`, `xp_toast.dart`, `status_dot.dart`, `world_icon.dart`, `nexus_screen.dart`, `streak_service.dart`, `post_input.dart`, `achievement_card.dart`
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` — 0 errors, 0 warnings
+
+### Codex Visual Review Needed
+- Screen/asset: World detail tabs, chat world rail, empty states (from Phase 1)
+- Plus: All screens after glass → surface token migration
+- Why visual inspection is needed: GlassPanel now renders with flat surface colors, BackdropFilter removed from 5 components
+- How to reproduce: Navigate app normally after rebuild
+- Related files: All 23 modified files in this phase
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`

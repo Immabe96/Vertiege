@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
@@ -95,7 +94,7 @@ class LuminaryNameplate extends StatelessWidget {
   }
 
   TextStyle _buildStyle(int tier, {bool isDark = false}) {
-    final baseStyle = GoogleFonts.manrope(fontSize: fontSize);
+    final baseStyle = TextStyle(fontSize: fontSize);
 
     switch (tier) {
       case 5:
@@ -182,7 +181,7 @@ class _ApexNameplateState extends State<_ApexNameplate>
 
   @override
   Widget build(BuildContext context) {
-    final baseStyle = GoogleFonts.manrope(
+    final baseStyle = TextStyle(
       fontSize: widget.fontSize,
       fontWeight: VFontWeight.bold,
       color: VColors.onPrimary,

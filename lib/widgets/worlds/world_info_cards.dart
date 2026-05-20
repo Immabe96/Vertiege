@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:vertiege/theme/colors.dart';
 import '../../models/world.dart';
@@ -144,7 +143,7 @@ class _InfoStatCard extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   value,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: TextStyle(
                     fontSize: VFontSize.headlineMd,
                     fontWeight: VFontWeight.bold,
                     color: isDark ? VColors.onSurfaceDark : VColors.onSurface,

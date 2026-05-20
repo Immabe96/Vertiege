@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
@@ -233,7 +232,7 @@ class AchievementShareCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.manrope(
+                  style: TextStyle(
                     fontSize: FontSizes.headlineMd,
                     fontWeight: FontWeights.bold,
                     color: VColors.onSurface,

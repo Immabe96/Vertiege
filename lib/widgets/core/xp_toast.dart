@@ -92,17 +92,15 @@ class _XpToastWidgetState extends State<_XpToastWidget>
         },
         child: ClipRRect(
           borderRadius: BorderRadius.circular(RadiusTokens.pill),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-            child: Container(
+          child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: Spacing.md,
                 vertical: Spacing.sm + 2,
               ),
               decoration: BoxDecoration(
-                color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+                color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
+                border: Border.all(color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant),
                 boxShadow: [
                   // Outer glow in gold
                   BoxShadow(
@@ -141,7 +139,6 @@ class _XpToastWidgetState extends State<_XpToastWidget>
                   ),
                 ],
               ),
-            ),
           ),
         ),
       ),

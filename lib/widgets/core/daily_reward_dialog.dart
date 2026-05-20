@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../services/daily_reward_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -111,7 +110,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             // Title
             Text(
               'DAILY RESONANCE',
-              style: GoogleFonts.manrope(
+              style: TextStyle(
                 fontSize: FontSizes.headlineMd,
                 fontWeight: FontWeights.bold,
                 color: VColors.tertiary,
@@ -149,7 +148,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             // Reward text
             Text(
               widget.reward.label,
-              style: GoogleFonts.manrope(
+              style: TextStyle(
                 fontSize: FontSizes.displayXl,
                 fontWeight: FontWeights.bold,
                 color: widget.reward.isShield
@@ -185,7 +184,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                 ),
                 child: Text(
                   _collected ? 'COLLECTED!' : 'COLLECT',
-                  style: GoogleFonts.manrope(
+                  style: TextStyle(
                     fontSize: FontSizes.bodyLg,
                     fontWeight: FontWeights.bold,
                     letterSpacing: 2,
