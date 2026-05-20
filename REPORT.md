@@ -211,6 +211,54 @@
 
 ---
 
+## Phase 5: World Content, Identity & Media System — COMPLETED (2026-05-19)
+
+### WorldFoundation safety disclaimer infrastructure
+- Added `safetyDisclaimer` field to `WorldFoundation` model (nullable String)
+- Updated `_rulesMarkdown()` to include `### 7. Safety Disclaimer` section when present
+- High-risk profession worlds (aviation-heights, medical-nexus, financial-district, legal-plaza, tech-sprawl) have structured slots for disclaimers
+
+### VImage, VWorldBadge, VSyncStatusBadge
+- Created in Phase 3, registered in `ui.dart` barrel
+- `VImage` implements the standardized fallback chain: network → asset → placeholder icon
+- Ready for adoption across the app in Phase 10
+
+### Files Changed (Phase 5)
+- `lib/utils/world_foundations.dart` — safetyDisclaimer field, rules generator update
+- `lib/ui/ui.dart` — VImage/VWorldBadge/VSyncStatusBadge exports (Phase 3, noted here)
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Phase 6: Supabase Reliability & Migration Hygiene — COMPLETED (2026-05-19)
+
+### Already complete from stabilization
+- RLS recursion fixed (`20260519193753` — SECURITY DEFINER helper)
+- Corrective migration applied to remote
+- Superuser access granted (`ltyl.naughty@gmail.com`)
+- Channel RLS hardened
+- Chat persistence hardening migration applied
+
+### RLS audit completed
+- Created `docs/audits/rls-audit.md` with full RLS policy inventory
+- 15 tables audited — no remaining recursive policy patterns
+- Index recommendations for feed, comments, reactions, bookmarks, notifications, marketplace, DMs
+- RPC recommendations for 10 core mutation flows
+- Storage bucket policy audit pending
+
+### Migration inventory
+- 15 migration files catalogued
+- 4 remote-applied, 1 corrective applied, 2 safe unapplied, 8 fresh-project baseline
+- No faulty migrations found that need quarantine
+
+### Files Changed (Phase 6)
+- `docs/audits/rls-audit.md` — new (RLS policy inventory, index/RPC recommendations)
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`
