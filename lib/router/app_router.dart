@@ -6,6 +6,7 @@ import '../state/resident_provider.dart';
 import '../state/notification_provider.dart';
 import '../state/post_provider.dart';
 import '../services/supabase.dart';
+import '../services/analytics_service.dart';
 import '../services/invite_service.dart';
 import '../services/chat_service.dart';
 import '../screens/onboarding/onboarding_screen.dart';
@@ -64,6 +65,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     initialLocation: '/',
+    observers: AnalyticsService.navigatorObservers,
     redirect: (context, state) {
       final location = state.uri.path;
 

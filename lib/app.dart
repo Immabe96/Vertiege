@@ -39,6 +39,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   bool _showSplash = true;
   bool _isOnline = true;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  StreamSubscription<String>? _notificationRouteSubscription;
 
   @override
   void initState() {
@@ -50,6 +51,12 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       final offline = results.every((r) => r == ConnectivityResult.none);
       if (mounted) setState(() => _isOnline = !offline);
     });
+    _notificationRouteSubscription = PushTokenService.notificationRoutes.listen(
+      (route) {
+        if (!mounted) return;
+        ref.read(appRouterProvider).go(route);
+      },
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startBackgroundLoads();
       _waitForCriticalLoads();
@@ -110,7 +117,12 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       if (resident != null) {
         CrashReporter.instance.setUser(resident.id, name: resident.name);
         unawaited(AnalyticsService.setUser(resident.id));
-        unawaited(PushTokenService.registerForResident(resident.id));
+        final initialRoute = await PushTokenService.initializeForResident(
+          resident.id,
+        );
+        if (initialRoute != null && mounted) {
+          ref.read(appRouterProvider).go(initialRoute);
+        }
         await PushService.initialize(userId: resident.id);
       }
     } catch (e) {
@@ -164,6 +176,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   @override
   void dispose() {
     _connectivitySubscription?.cancel();
+    _notificationRouteSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

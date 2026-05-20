@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 /// Crash reporting abstraction.
@@ -17,6 +18,10 @@ abstract class CrashReporter {
   static CrashReporter? _instance;
 
   static CrashReporter get instance => _instance ??= ConsoleCrashReporter();
+
+  static void install(CrashReporter reporter) {
+    _instance = reporter;
+  }
 
   /// Record a caught exception. Call this in every silent catch block.
   void recordError(Object error, StackTrace stack, {String? hint});
@@ -58,6 +63,46 @@ class ConsoleCrashReporter implements CrashReporter {
   @override
   void log(String message) {
     debugPrint('LOG: $message');
+  }
+}
+
+class FirebaseCrashReporter implements CrashReporter {
+  FirebaseCrashReporter(this._crashlytics);
+
+  final FirebaseCrashlytics _crashlytics;
+
+  static Future<FirebaseCrashReporter> create() async {
+    final crashlytics = FirebaseCrashlytics.instance;
+    await crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
+    return FirebaseCrashReporter(crashlytics);
+  }
+
+  @override
+  void recordError(Object error, StackTrace stack, {String? hint}) {
+    _crashlytics.recordError(error, stack, reason: hint, fatal: false);
+  }
+
+  @override
+  void addBreadcrumb(String message, {String? category}) {
+    _crashlytics.log(category == null ? message : '[$category] $message');
+  }
+
+  @override
+  void setUser(String id, {String? name}) {
+    _crashlytics.setUserIdentifier(id);
+    if (name != null && name.isNotEmpty) {
+      _crashlytics.setCustomKey('resident_name_available', true);
+    }
+  }
+
+  @override
+  void setCustomKey(String key, String value) {
+    _crashlytics.setCustomKey(key, value);
+  }
+
+  @override
+  void log(String message) {
+    _crashlytics.log(message);
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/widgets.dart';
 
 import 'firebase_bootstrap.dart';
 
@@ -11,6 +12,12 @@ class AnalyticsService {
     if (!FirebaseBootstrap.isInitialized) return;
     _analytics = FirebaseAnalytics.instance;
     await _analytics?.setAnalyticsCollectionEnabled(true);
+  }
+
+  static List<NavigatorObserver> get navigatorObservers {
+    final analytics = _analytics;
+    if (!FirebaseBootstrap.isInitialized || analytics == null) return const [];
+    return [FirebaseAnalyticsObserver(analytics: analytics)];
   }
 
   static Future<void> logEvent(

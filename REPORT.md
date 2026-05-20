@@ -659,3 +659,46 @@ What follows is an honest inventory of every incomplete item, grouped by phase. 
 - `lib/router/app_router.dart` — removed /create-post route
 - `lib/widgets/nexus/bento_cards/feed_preview_card.dart` — Compose link fix
 - 13 pre-existing warnings fixed across 12 files
+
+---
+
+# Firebase + Supabase Hybrid Completion Report - 2026-05-20
+
+## Completed
+
+- Added Firebase Crashlytics reporter wiring for production error reporting.
+- Added Firebase Analytics navigation observer support for `go_router`.
+- Added Remote Config defaults for feature flags and runtime tuning.
+- Added Firebase App Check activation with debug/release providers; enforcement remains disabled until real-device verification.
+- Added Firebase Performance service wrapper; Android Gradle auto-instrumentation is disabled because it crashes local release builds.
+- Added FCM background handler, foreground/opened/cold-start route parsing, and resident-scoped push token registration.
+- Added Android `POST_NOTIFICATIONS` permission and native notification channel `vertiege_notifications`.
+- Aligned notification channel routes to the existing `/campfire/:channelId` route.
+- Added route parser tests for notification payloads.
+- Deployed Supabase `send-push` Edge Function version 2 with `verify_jwt = false` and custom `WEBHOOK_SECRET` bearer validation.
+- Applied Supabase migration `firebase_storage_and_notification_completion`.
+- Verified remote buckets: `avatars`, `post-media`, `world-banners`, `world-icons`, `marketplace-media`, `chat-attachments`, `verification-proofs`.
+- Verified `verification-proofs` is private.
+- Verified `device_tokens` columns include `app_version`, `build_number`, and `last_seen_at`.
+- Verified required token/notification indexes exist.
+
+## Verification
+
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` passed with info-level suggestions only.
+- `flutter test` passed: 108 tests.
+- `flutter build apk --release --no-tree-shake-icons` passed.
+- APK path: `build/app/outputs/flutter-apk/app-release.apk` (131.1 MB).
+- Firebase CLI authenticated and sees project `veritage` with Android and iOS apps.
+- Supabase `send-push` endpoint responds, but currently reports `WEBHOOK_SECRET not set`.
+
+## Manual Setup Still Required
+
+- Set Supabase Edge Function secrets:
+  - `WEBHOOK_SECRET`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `FIREBASE_SERVICE_ACCOUNT_JSON`
+- Create Supabase Database Webhook for `public.notifications` inserts pointing to `https://wjaphoaxalvgjnrwqjwe.supabase.co/functions/v1/send-push`.
+- Enable/configure Google provider in Supabase Auth.
+- Add Google OAuth callback URL: `https://wjaphoaxalvgjnrwqjwe.supabase.co/auth/v1/callback`.
+- Add Supabase redirect URL: `vertiege://auth/callback`.
+- Verify real-device push receipt and notification tap routing after secrets/webhook are configured.

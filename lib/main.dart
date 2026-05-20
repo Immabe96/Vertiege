@@ -9,11 +9,14 @@ import 'app.dart';
 import 'screens/onboarding/the_gate_screen.dart';
 import 'services/crash_reporter.dart';
 import 'services/firebase_bootstrap.dart';
+import 'services/firebase_messaging_handlers.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 bool _handlingFlutterError = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   FlutterError.onError = (details) {
     if (_handlingFlutterError) return;

@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 
 import '../firebase_options.dart';
 import 'analytics_service.dart';
+import 'app_check_service.dart';
 import 'crash_reporter.dart';
+import 'performance_service.dart';
 import 'remote_config_service.dart';
 
 class FirebaseBootstrap {
@@ -21,10 +23,13 @@ class FirebaseBootstrap {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      CrashReporter.install(await FirebaseCrashReporter.create());
       _initialized = true;
       _lastError = null;
+      await AppCheckService.initialize();
       await Future.wait([
         AnalyticsService.initialize(),
+        PerformanceService.initialize(),
         RemoteConfigService.initialize(),
       ]);
     } catch (error, stackTrace) {
