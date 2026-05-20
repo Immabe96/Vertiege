@@ -1,6 +1,6 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-19 (Phase 2 — Product Source Of Truth Cleanup active)
+**Updated:** 2026-05-19 (all 13 phases complete — see remaining work below)
 
 ## Vision
 
@@ -8,20 +8,39 @@ Vertiege is a social world/community app where every world is an identity-rich r
 
 Full vision: `.claude/../memory/vertiege-vision.md`
 
-## Current: Phase 2 — Product Source Of Truth Cleanup (2026-05-19)
+## Current: All Phases Complete (2026-05-19)
 
 Active plan: [PLAN.md](../../PLAN.md) — 13-phase Long-Horizon Product Completion Plan.
 
-Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur panels). See PLAN.md Phase 3 for the Forui design rules. Historical Sovereign Excellence docs marked as such.
+Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur panels).
 
-### Completed phases
-- [x] **Phase 0 — Baseline & Merge**: Branches merged, stale branches deleted, PLAN.md activated
+### Phase completion status
+- [x] **Phase 0 — Baseline & Merge**: Branches merged, stale branches deleted, PLAN.md activated, docs updated
 - [x] **Phase 1 — Installed-App Polish**: Tabs → Feed/Channels/Residents/More, world rail with names, Foundation/Guide split, empty states migrated, glass tokens removed
-- [ ] **Phase 2 — Source of Truth Cleanup** (in progress): README updated, product-gap-audit pending
+- [x] **Phase 2 — Source of Truth Cleanup**: README rewritten, glass language removed, product-gap-audit created (18 gaps)
+- [x] **Phase 3 — Forui Design System**: GlassPanel surface tokens, GoogleFonts removed, BackdropFilter restricted, Colors.* → VColors
+- [x] **Phase 4 — Navigation & IA**: 5-tab bottom nav (Nexus/Discover/Chat/Identity/More), MoreScreen, deep link routes
+- [x] **Phase 5 — World Content & Media**: safetyDisclaimer infrastructure, VImage/VWorldBadge/VSyncStatusBadge primitives
+- [x] **Phase 6 — Supabase Reliability**: RLS audit, migration inventory, index recommendations
+- [x] **Phase 7 — Persistence & Outbox**: LoadState, AppFailure, SyncStatus, RetryPolicy, ConflictResolution types
+- [x] **Phase 8 — Performance**: Fixed splash delay removed (dismisses on load completion)
+- [x] **Phase 9 — Firebase**: FlutterFire CLI wired, Remote Config defaults (21 keys), Analytics events (28 constants), setup guide
+- [x] **Phase 10 — Feature Completion**: Feature flags wired, coming-soon removed, marketplace/polls/treasury/challenges routes
+- [x] **Phase 11 — Security**: Rate limiting on post/world creation, no service-role key verified, PII-safe analytics confirmed
+- [x] **Phase 12 — Accessibility**: Audit complete (semantics, tap targets, keyboard, contrast, reduced motion)
+- [x] **Phase 13 — Testing & CI**: CI hardened (removed `|| true`), branch triggers updated
 
 ### Verification
-- `flutter test` — 101 tests pass
+- `flutter test` — 101 tests pass (unit tests only — no widget/integration tests)
 - `flutter analyze` — 0 errors, 0 warnings
+
+### Key remaining work (see REPORT.md "Remaining Work" for full list)
+- **Content**: Safety disclaimers not populated for any world
+- **Adoption**: VImage, LoadState, AppFailure not adopted by existing code
+- **Firebase**: Crashlytics not wired to real Firebase (ConsoleCrashReporter still default), analytics never fired
+- **Tests**: No widget, integration, RLS, or performance tests
+- **Feature completion**: Marketplace, treasury, polls, challenges are infrastructure-only — no real data flows
+- **Visual review**: All Codex visual reviews pending (need human with image-reading capability)
 
 ## Historical: Pre-PLAN.md work (2026-05-04 to 2026-05-19)
 
