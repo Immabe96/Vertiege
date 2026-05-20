@@ -212,6 +212,9 @@ class PostNotifier extends Notifier<PostState> {
     bool isDecree = false,
     DateTime? scheduledFor,
   }) async {
+    if (!RateLimiter.canProceed('create_post_$residentId', windowMs: 5000, maxCalls: 3)) {
+      return;
+    }
     state = state.copyWith(isPosting: true);
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {

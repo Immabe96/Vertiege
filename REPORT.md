@@ -394,6 +394,36 @@
 
 ---
 
+## Phase 11: Security, Privacy & Abuse Prevention — COMPLETED (2026-05-19)
+
+### Verified secure
+- No service-role key in Flutter app (anon key only)
+- Superuser bypass scoped to `ltyl.naughty@gmail.com` with `is_world_member()` RLS helper
+- Analytics events are PII-safe (IDs only, never message body, post body, email, or user text)
+
+### Rate limiting hardened
+- Post creation: 3 posts per 5 seconds per resident
+- World creation: 2 worlds per 30 seconds per sovereign
+- Chat messages: 3 messages per 5 seconds per room/channel (existing)
+- Reactions: 1 per second per post (existing)
+
+### Outstanding (future phases)
+- RLS denial tests for all tables
+- Storage bucket policy verification
+- Edge Function JWT verification
+- Account deletion/export UI
+- Block/mute/report wiring
+
+### Files Changed (Phase 11)
+- `lib/state/post_provider.dart` — rate limit on addPost (3 per 5s)
+- `lib/state/world_provider.dart` — rate limit on createWorld (2 per 30s)
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`

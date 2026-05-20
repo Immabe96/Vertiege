@@ -10,6 +10,7 @@ import '../services/council_service.dart';
 import '../services/prestige_service.dart';
 import '../services/store_service.dart';
 import '../utils/id_generator.dart';
+import '../utils/rate_limiter.dart';
 import 'channel_provider.dart';
 
 class WorldState {
@@ -95,6 +96,9 @@ class WorldNotifier extends Notifier<WorldState> {
     String? worldCurrencyName,
     List<String>? tags,
   }) async {
+    if (!RateLimiter.canProceed('create_world_$sovereignId', windowMs: 30000, maxCalls: 2)) {
+      return 'rate_limited';
+    }
     final worldData = await WorldService.createWorld(
       name: name,
       type: 'dominion',
