@@ -3,6 +3,8 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../state/resident_provider.dart';
+import '../state/notification_provider.dart';
+import '../state/post_provider.dart';
 import '../services/supabase.dart';
 import '../services/invite_service.dart';
 import '../services/chat_service.dart';
@@ -16,6 +18,7 @@ import '../screens/tabs/nexus_screen.dart';
 import '../screens/tabs/explore_screen.dart';
 import '../screens/tabs/chat_list_screen.dart';
 import '../screens/tabs/identity_screen.dart';
+import '../screens/tabs/more_screen.dart';
 
 import '../screens/tabs/alerts_screen.dart';
 import '../screens/world_detail_screen.dart';
@@ -209,16 +212,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/shop',
-                builder: (context, state) => const CosmeticsShopScreen(),
+                path: '/identity',
+                builder: (context, state) => const IdentityScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/identity',
-                builder: (context, state) => const IdentityScreen(),
+                path: '/more',
+                builder: (context, state) => const MoreScreen(),
               ),
             ],
           ),
@@ -248,6 +251,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/shop',
+        builder: (context, state) => const CosmeticsShopScreen(),
       ),
       GoRoute(
         path: '/settings',
@@ -328,6 +335,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/invite/:code',
         builder: (context, state) =>
             _AcceptInviteScreen(code: state.pathParameters['code']!),
+      ),
+      // Deep-link: notifications
+      GoRoute(
+        path: '/notifications/:id',
+        builder: (context, state) => _NotificationDeepLink(
+          notificationId: state.pathParameters['id']!,
+        ),
+      ),
+      // Deep-link: post detail
+      GoRoute(
+        path: '/post/:postId',
+        builder: (context, state) => _PostDeepLink(
+          postId: state.pathParameters['postId']!,
+        ),
       ),
     ],
   );
@@ -483,6 +504,105 @@ class _ThreadDeepLinkScreenState extends State<_ThreadDeepLinkScreen> {
           channelName: 'Thread',
         );
       },
+    );
+  }
+}
+
+/// Deep-link handler for notification taps.
+///
+/// Reads the notification from the provider, marks it read,
+/// and redirects to the relevant target screen.
+class _NotificationDeepLink extends ConsumerWidget {
+  final String notificationId;
+
+  const _NotificationDeepLink({required this.notificationId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifs = ref.watch(notificationProvider).notifications;
+    final notif = notifs.where((n) => n.id == notificationId).firstOrNull;
+
+    // Mark as read
+    if (notif != null && !notif.read) {
+      Future.microtask(() {
+        ref.read(notificationProvider.notifier).markRead(notificationId);
+      });
+    }
+
+    // Redirect based on notification data
+    final target = notif?.worldId != null
+        ? '/explore/${notif!.worldId}'
+        : '/';
+    Future.microtask(() => context.go(target));
+
+    return Scaffold(
+      body: Center(
+        child: AppEmptyState(
+          title: 'Opening...',
+          icon: Icons.open_in_new,
+          actionLabel: 'Go Home',
+          onAction: () => context.go('/'),
+        ),
+      ),
+    );
+  }
+}
+
+/// Deep-link handler for post detail links.
+///
+/// Resolves the post's world and navigates to the world detail feed
+/// where the post can be viewed in context.
+class _PostDeepLink extends ConsumerStatefulWidget {
+  final String postId;
+
+  const _PostDeepLink({required this.postId});
+
+  @override
+  ConsumerState<_PostDeepLink> createState() => _PostDeepLinkState();
+}
+
+class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolve();
+  }
+
+  Future<void> _resolve() async {
+    try {
+      final posts = ref.read(postProvider).posts;
+      final post = posts.where((p) => p.id == widget.postId).firstOrNull;
+      if (post != null && mounted) {
+        context.go('/explore/${post.worldId}');
+        return;
+      }
+      // Fallback: navigate to nexus
+      if (mounted) context.go('/');
+    } catch (_) {
+      if (mounted) {
+        setState(() { _loading = false; _error = 'Post not found'; });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return Scaffold(
+      appBar: AppBar(title: const Text('Post')),
+      body: AppEmptyState(
+        title: 'Post unavailable',
+        description: _error ?? 'This post could not be found.',
+        icon: Icons.article_outlined,
+        variant: EmptyStateVariant.error,
+        actionLabel: 'Go Home',
+        onAction: () => context.go('/'),
+      ),
     );
   }
 }

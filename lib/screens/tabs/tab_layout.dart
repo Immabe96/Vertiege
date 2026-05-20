@@ -176,18 +176,18 @@ class _GlassNavBar extends ConsumerWidget {
 
   static const _destinations = [
     (icon: Icons.hub_outlined, activeIcon: Icons.hub, label: 'Nexus'),
-    (icon: Icons.public_outlined, activeIcon: Icons.public, label: 'Worlds'),
+    (icon: Icons.explore_outlined, activeIcon: Icons.explore, label: 'Discover'),
     (
       icon: Icons.chat_bubble_outline,
       activeIcon: Icons.chat_bubble,
       label: 'Chat',
     ),
-    (icon: Icons.storefront_outlined, activeIcon: Icons.storefront, label: 'Shop'),
     (
       icon: Icons.account_circle_outlined,
       activeIcon: Icons.account_circle,
       label: 'Identity',
     ),
+    (icon: Icons.more_horiz, activeIcon: Icons.more_horiz, label: 'More'),
   ];
 
   @override
@@ -204,13 +204,13 @@ class _GlassNavBar extends ConsumerWidget {
             height: 64,
             decoration: BoxDecoration(
               color: isDark
-                  ? VColors.glassBackgroundDark
-                  : VColors.glassBackground,
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(VRadius.xl),
               border: Border.all(
                 color: isDark
-                    ? VColors.glassBorderDark
-                    : VColors.glassBorder,
+                    ? VColors.outlineVariantDark
+                    : VColors.outlineVariant,
                 width: 1,
               ),
               boxShadow: [
@@ -347,13 +347,13 @@ class _FloatingCampfireBar extends ConsumerWidget {
               ),
               decoration: BoxDecoration(
                 color: isDark
-                    ? VColors.glassBackgroundDark
-                    : VColors.glassBackground,
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(VRadius.pill),
                 border: Border.all(
                   color: isDark
-                      ? VColors.glassBorderDark
-                      : VColors.glassBorder,
+                      ? VColors.outlineVariantDark
+                      : VColors.outlineVariant,
                 ),
                 boxShadow: VShadow.lg,
               ),

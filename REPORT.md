@@ -179,6 +179,38 @@
 
 ---
 
+## Phase 4: Navigation & Information Architecture — COMPLETED (2026-05-19)
+
+### Bottom nav restructured (Nexus/Discover/Chat/Identity/More)
+- "Worlds" tab → "Discover" (explore icon)
+- "Shop" tab → "More" (more_horiz icon)
+- Nav order: Nexus, Discover, Chat, Identity, More (5 tabs)
+- Nav bar glass tokens replaced with surface tokens
+
+### MoreScreen created
+- New `lib/screens/tabs/more_screen.dart` — secondary navigation hub
+- Sections: Your Journey (Achievements, Ascension, Hall), Account (Shop, Subscription, Settings, Notifications), Explore (Discover, Search, Challenges, Leagues, Season)
+- Cosmetics Shop moved from tab to standalone route, accessible via More
+
+### Router updates
+- Branch 3: Shopify → Identity; Branch 4: new More
+- `/shop` added as standalone route
+- Deep link routes added: `/post/:postId` (resolves to world detail), `/notifications/:id` (marks read + navigates to world)
+
+### FloatingCampfireBar
+- Glass tokens replaced with surface container + outline variant
+
+### Files Changed (Phase 4)
+- `lib/screens/tabs/tab_layout.dart` — nav destinations, glass token cleanup
+- `lib/router/app_router.dart` — tab branches reordered, deep link routes, providers import
+- `lib/screens/tabs/more_screen.dart` — new
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
 ## Historical: Stabilization Plan Execution Report
 
 **Branch:** `feat/stabilization-plan`
