@@ -224,7 +224,7 @@ Prior [accessibility-audit.md](./accessibility-audit.md):
 
 ## 10. Release workflow (2026-05-21)
 
-- **In-repo work** continues on `develop` without `git push` until you decide.
+- **Push `develop`** after meaningful batches so CI builds the APK artifact.
 - **`main` / Release APK** only after: audits addressed, CI green, your manual device pass, and any fixes.
 - **Device UAT** is owner-run at the end; report screen + expected vs actual.
 
