@@ -10,7 +10,7 @@ Stable APKs: **[GitHub Releases](https://github.com/Immabe96/Vertiege/releases)*
 
 ## How we develop
 
-Same workflow on **your PC** or **Cursor Cloud**:
+Local workflow on your PC:
 
 1. Work on **`develop`** (or a `fix/*` / `feature/*` branch → PR into `develop`).
 2. **GitHub builds the APK** — you do not need a local release build.

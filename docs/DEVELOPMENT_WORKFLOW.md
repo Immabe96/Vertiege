@@ -1,18 +1,18 @@
 # Development workflow
 
-Same process for **local PC** and **Cursor Cloud**: you write code; **GitHub builds the APK**; **`main` updates only when that build passes**.
+Local development on your PC: you write code; **GitHub builds the APK**; **`main` updates only when that build passes**.
 
 ## Branch roles
 
 | Branch | Purpose |
 |--------|---------|
 | **`develop`** | Integration branch — merge your work here |
-| **`fix/*`**, **`feature/*`**, **`cursor/*`** | Short-lived branches → open PR into `develop` |
+| **`fix/*`**, **`feature/*`** | Short-lived branches → open PR into `develop` |
 | **`main`** | Release line — updated by automation after green `develop` CI. Do not push here directly |
 
 ```mermaid
 flowchart TD
-  A[Your PC or Cloud Agent] -->|PR or push| B[develop]
+  A[Your PC] -->|PR or push| B[develop]
   B --> C[GitHub CI: analyze, test, APK]
   C -->|pass| D[Promote → main]
   D --> E[GitHub Release APK]
@@ -28,11 +28,7 @@ flowchart TD
 
 ---
 
-## Local PC (low RAM friendly)
-
-Use your machine for **editing, `flutter run`, analyze, and tests**. Skip the release APK build locally — GitHub does that.
-
-### One-time setup
+## One-time setup
 
 ```bash
 git clone https://github.com/Immabe96/Vertiege.git
@@ -42,7 +38,9 @@ cp .env.template .env    # SUPABASE_URL, SUPABASE_ANON_KEY for device testing
 flutter pub get
 ```
 
-### Daily loop
+## Daily loop
+
+Use your machine for **editing, `flutter run`, analyze, and tests**. Skip the release APK build locally — GitHub does that (low RAM friendly).
 
 ```bash
 git checkout develop
@@ -83,22 +81,11 @@ After the PR merges (or you push `develop`):
 
 ---
 
-## Cursor Cloud Agent
-
-Same branches and outcomes; agent runs in the cloud instead of your IDE.
-
-1. Check out **`develop`**
-2. Branch `cursor/<task>-d10b`
-3. PR into **`develop`**
-4. CI → promote → Release (same as local)
-
----
-
 ## GitHub workflows
 
 | Workflow | When | Result |
 |----------|------|--------|
-| **CI** | Push to `develop`, `fix/*`, `feature/*`, `cursor/**`, …; PRs to `develop` | APK artifact |
+| **CI** | Push to `develop`, `fix/*`, `feature/*`, …; PRs to `develop` | APK artifact |
 | **Promote to main** | After successful CI on `develop` | Merges `develop` → `main` |
 | **Release APK** | Push to `main` | GitHub Release + `app-release.apk` |
 
