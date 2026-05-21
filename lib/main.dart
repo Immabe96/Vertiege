@@ -35,7 +35,7 @@ void main() async {
     return true;
   };
 
-  await dotenv.load();
+  await dotenv.load(isOptional: true);
   await loadGateCompletionStatus();
   await FirebaseBootstrap.initialize();
 
