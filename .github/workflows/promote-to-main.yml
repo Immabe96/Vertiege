@@ -1,0 +1,52 @@
+# After develop passes CI (buildable APK), fast-forward main to match develop.
+name: Promote to main
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [develop]
+
+  workflow_dispatch:
+
+concurrency:
+  group: promote-to-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'develop'
+      )
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge develop into main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin develop main
+
+          MAIN_SHA=$(git rev-parse origin/main)
+          DEVELOP_SHA=$(git rev-parse origin/develop)
+
+          if [ "$MAIN_SHA" = "$DEVELOP_SHA" ]; then
+            echo "main already matches develop; nothing to promote."
+            exit 0
+          fi
+
+          git checkout main
+          git merge origin/develop -m "chore: promote develop to main after successful APK build"
+          git push origin main
