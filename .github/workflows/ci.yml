@@ -1,14 +1,26 @@
+# Development CI: analyze, test, and build APK on the integration branch.
+# main is updated only after this workflow succeeds (see promote-to-main.yml).
 name: CI
 
 on:
   push:
     branches:
-      - main
+      - develop
       - 'phase-*'
       - 'fix-*'
+      - 'cursor/**'
   pull_request:
-    branches: [main]
+    branches:
+      - develop
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   verify-android:
@@ -24,7 +36,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
 
       - name: Install dependencies
@@ -42,9 +54,10 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vertiege-release-apk-${{ github.sha }}
+          name: vertiege-apk-${{ github.ref_name }}-${{ github.sha }}
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+          retention-days: 90

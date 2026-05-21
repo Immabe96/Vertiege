@@ -710,11 +710,12 @@ flutter build apk --release          # Signed release APK (145MB)
 flutter build appbundle --release    # Play Store AAB
 ```
 
-### CI/CD
-GitHub Actions workflow at `.github/workflows/ci.yml`:
-- `flutter analyze` (lint gate)
-- `flutter test` (101 tests)
-- `flutter build apk --debug`
+### CI/CD and releases
+
+- **`develop`** — all development; CI builds and uploads an APK artifact on each push.
+- **`main`** — updated only when `develop` passes CI; [GitHub Releases](https://github.com/Immabe96/Vertiege/releases) publish a downloadable `app-release.apk`.
+
+See [docs/CLOUD_WORKFLOW.md](docs/CLOUD_WORKFLOW.md) for the full cloud branching model.
 
 ---
 
