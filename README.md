@@ -711,10 +711,12 @@ flutter build appbundle --release    # Play Store AAB
 ```
 
 ### CI/CD
-GitHub Actions workflow at `.github/workflows/ci.yml`:
+GitHub Actions workflow at `.github/workflows/ci.yml` runs on pushes to `main`, `phase-*`, `fix-*`, and `cursor/**`, and on pull requests targeting `main`:
 - `flutter analyze` (lint gate)
-- `flutter test` (101 tests)
-- `flutter build apk --debug`
+- `flutter test`
+- `flutter build apk --release` (uploaded as a workflow artifact)
+
+See [docs/CLOUD_WORKFLOW.md](docs/CLOUD_WORKFLOW.md) for the Cursor Cloud Agent development loop.
 
 ---
 
