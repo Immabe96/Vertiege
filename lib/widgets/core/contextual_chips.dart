@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
@@ -25,7 +25,7 @@ class ContextualChips extends ConsumerWidget {
     int invitesCount = 0;
 
     if (resident != null) {
-      // ── New resident (< 7 days proxy) ──
+      // -- New resident (< 7 days proxy) --
       if (resident.tier.value == 1 &&
           resident.joinedWorldIds.isEmpty &&
           resident.streakCount == 0) {
@@ -39,7 +39,7 @@ class ContextualChips extends ConsumerWidget {
         );
       }
 
-      // ── Council member ──
+      // -- Council member --
       if (resident.tier.value >= 4 || resident.verifiedRoles.isNotEmpty) {
         chips.add(
           _ContextChip(
@@ -51,7 +51,7 @@ class ContextualChips extends ConsumerWidget {
         );
       }
 
-      // ── Pending world invites ──
+      // -- Pending world invites --
       final allWorlds = worldState.worlds.values.toList();
       invitesCount = allWorlds
           .where((w) => !resident.joinedWorldIds.contains(w.id))
@@ -68,7 +68,7 @@ class ContextualChips extends ConsumerWidget {
       }
     }
 
-    // ── Active quest ──
+    // -- Active quest --
     final activeQuests = questState.quests
         .where((q) => !q.claimed && !q.isComplete)
         .toList();

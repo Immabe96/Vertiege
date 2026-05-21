@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -76,7 +76,7 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
   }
 }
 
-// ── Prestige Header ──────────────────────────────────────
+// -- Prestige Header --------------------------------------
 
 class _PrestigeHeader extends ConsumerWidget {
   final dynamic resident;
@@ -176,7 +176,7 @@ class _PrestigeHeader extends ConsumerWidget {
   }
 }
 
-// ── Leaderboard Entry ────────────────────────────────────
+// -- Leaderboard Entry ------------------------------------
 
 class _LeaderEntry {
   final String id;
@@ -222,7 +222,7 @@ Color _rankGlowColor(int rank) {
   }
 }
 
-// ── XP Leaderboard ──────────────────────────────────────
+// -- XP Leaderboard --------------------------------------
 
 class _XpLeaderboard extends ConsumerWidget {
   @override
@@ -231,7 +231,7 @@ class _XpLeaderboard extends ConsumerWidget {
     final resident = ref.watch(residentProvider).resident;
 
     if (resident == null) {
-      return const GlassLoadingList(itemCount: 4);
+      return const VLoadingList(itemCount: 4);
     }
 
     final entries = <_LeaderEntry>[
@@ -249,7 +249,7 @@ class _XpLeaderboard extends ConsumerWidget {
   }
 }
 
-// ── Prestige Leaderboard ────────────────────────────────
+// -- Prestige Leaderboard --------------------------------
 
 class _PrestigeLeaderboard extends ConsumerWidget {
   @override
@@ -275,7 +275,7 @@ class _PrestigeLeaderboard extends ConsumerWidget {
   }
 }
 
-// ── Achievement Leaderboard ─────────────────────────────
+// -- Achievement Leaderboard -----------------------------
 
 class _AchievementLeaderboard extends ConsumerWidget {
   @override
@@ -302,7 +302,7 @@ class _AchievementLeaderboard extends ConsumerWidget {
   }
 }
 
-// ── Referral Leaderboard ────────────────────────────────
+// -- Referral Leaderboard --------------------------------
 
 class _ReferralLeaderboard extends ConsumerWidget {
   @override
@@ -325,7 +325,7 @@ class _ReferralLeaderboard extends ConsumerWidget {
   }
 }
 
-// ── Shared Leaderboard List Builder ─────────────────────
+// -- Shared Leaderboard List Builder ---------------------
 
 Widget _buildLeaderboardList(
   BuildContext context,

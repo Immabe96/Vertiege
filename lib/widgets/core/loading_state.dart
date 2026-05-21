@@ -3,12 +3,12 @@ import 'glass_panel.dart';
 import 'shimmer.dart';
 import '../../theme/design_system.dart';
 
-class GlassLoadingCard extends StatelessWidget {
-  const GlassLoadingCard({super.key});
+class VLoadingCard extends StatelessWidget {
+  const VLoadingCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
+    return VSurfacePanel(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,9 +32,9 @@ class GlassLoadingCard extends StatelessWidget {
   }
 }
 
-class GlassLoadingList extends StatelessWidget {
+class VLoadingList extends StatelessWidget {
   final int itemCount;
-  const GlassLoadingList({super.key, this.itemCount = 5});
+  const VLoadingList({super.key, this.itemCount = 5});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,13 @@ class GlassLoadingList extends StatelessWidget {
       padding: const EdgeInsets.all(Spacing.marginMobile),
       itemCount: itemCount,
       separatorBuilder: (_, _) => const SizedBox(height: Spacing.sm + 4),
-      itemBuilder: (_, _) => const GlassLoadingCard(),
+      itemBuilder: (_, _) => const VLoadingCard(),
     );
   }
 }
+
+@Deprecated('Use VLoadingCard')
+typedef GlassLoadingCard = VLoadingCard;
+
+@Deprecated('Use VLoadingList')
+typedef GlassLoadingList = VLoadingList;

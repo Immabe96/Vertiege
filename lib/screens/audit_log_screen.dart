@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/moderation_service.dart';
@@ -88,9 +88,9 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: Text('${widget.worldName} — Realm Audit')),
+      appBar: AppBar(title: Text('${widget.worldName} � Realm Audit')),
       body: _loading
-          ? const GlassLoadingList(itemCount: 8)
+          ? const VLoadingList(itemCount: 8)
           : _error != null
           ? AppErrorState(message: _error!, onRetry: _load)
           : _entries.isEmpty

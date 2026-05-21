@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../config/tiers.dart';
@@ -99,7 +99,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        title: Text('${widget.worldName} — Members'),
+        title: Text('${widget.worldName} � Members'),
         actions: [
           IconButton(
             icon: const Icon(VIcons.search),
@@ -108,7 +108,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
         ],
       ),
       body: _loading
-          ? const GlassLoadingList(itemCount: 6)
+          ? const VLoadingList(itemCount: 6)
           : _error != null
           ? AppErrorState(message: _error, onRetry: _load)
           : filtered.isEmpty

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/world_provider.dart';
@@ -30,7 +30,7 @@ class AllianceSection extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +80,7 @@ class AllianceSection extends ConsumerWidget {
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: Spacing.sm),
-                child: GlassPanel(
+                child: VSurfacePanel(
                   padding: const EdgeInsets.all(Spacing.md),
                   child: Row(
                     children: [

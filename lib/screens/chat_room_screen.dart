@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -779,7 +779,7 @@ class _MessageBubbleState extends State<_MessageBubble>
               padding: const EdgeInsets.all(VSpacing.md),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['👍', '❤️', '😂', '😮', '😢', '🔥']
+                children: ['??', '??', '??', '??', '??', '??']
                     .map(
                       (emoji) => GestureDetector(
                         onTap: () {
@@ -896,16 +896,16 @@ class _MessageBubbleState extends State<_MessageBubble>
             spacing: VSpacing.sm,
             runSpacing: VSpacing.sm,
             children: [
-              '👍',
-              '❤️',
-              '😂',
-              '😮',
-              '😢',
-              '🔥',
-              '🎉',
-              '👀',
-              '💯',
-              '🚀',
+              '??',
+              '??',
+              '??',
+              '??',
+              '??',
+              '??',
+              '??',
+              '??',
+              '??',
+              '??',
             ]
                 .map(
                   (emoji) => GestureDetector(

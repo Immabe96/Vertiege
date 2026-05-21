@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -46,7 +46,7 @@ class WorldFeedTab extends ConsumerWidget {
         else
           Padding(
             padding: const EdgeInsets.all(Spacing.md),
-            child: GlassPanel(
+            child: VSurfacePanel(
               padding: const EdgeInsets.all(Spacing.md),
               child: Row(
                 children: [

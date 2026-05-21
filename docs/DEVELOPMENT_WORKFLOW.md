@@ -109,3 +109,11 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 - **Protect `develop`:** require **CI** to pass before merge (optional)
 
 Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE_SUPABASE_HYBRID_SETUP.md)
+
+## Release gate (before `main` / APK)
+
+1. Finish audit/fix work on `develop`; **push `develop` to origin** so CI builds the APK.
+2. Run CI locally: `flutter analyze` + `flutter test`.
+3. **Manual device checks** on the CI APK (you report issues).
+4. Fix any findings, push again, wait for green CI.
+5. Promote to `main` / Release when audits and device pass are done.

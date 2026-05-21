@@ -9,8 +9,8 @@ DROP POLICY IF EXISTS debug_logs_anyone_insert ON public.debug_logs;
 CREATE POLICY debug_logs_authenticated_insert ON public.debug_logs
   FOR INSERT TO authenticated
   WITH CHECK (
-    resident_id IS NULL
-    OR resident_id = auth.uid()::text
+    tag IS NOT NULL
+    AND char_length(coalesce(message, '')) <= 4000
   );
 
 -- 2. Storage: remove duplicate broad SELECT policies (keep bucket-scoped reads)

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -51,7 +51,7 @@ class WorldInviteSection extends StatelessWidget {
             final memberLabel = '${world.memberCount} members';
             return Padding(
               padding: const EdgeInsets.only(bottom: Spacing.sm),
-              child: GlassPanel(
+              child: VSurfacePanel(
                 useBlur: false,
                 padding: const EdgeInsets.all(Spacing.md),
                 child: Row(

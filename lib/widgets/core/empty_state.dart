@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/v_colors.dart';
@@ -9,7 +9,7 @@ enum EmptyStateVariant { default_, error, success }
 /// A compact, minimal "no data" widget for Vertiege.
 ///
 /// Displays a subtle icon, short title, useful body text, and optional CTA button.
-/// No glass, no gradients, no heavy animations — clean and compact.
+/// No glass, no gradients, no heavy animations � clean and compact.
 class AppEmptyState extends ConsumerStatefulWidget {
   final String title;
   final String? description;

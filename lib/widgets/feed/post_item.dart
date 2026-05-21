@@ -420,7 +420,7 @@ class PostItem extends ConsumerWidget {
         .isFollowing(post.residentId);
     final tierLabel = post.tierAtPosting.label;
 
-    showGlassSheet(
+    showAppSheet(
       context,
       Padding(
         padding: const EdgeInsets.all(Spacing.lg),

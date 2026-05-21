@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/channel.dart';
@@ -24,7 +24,7 @@ class ResourceVault extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -155,7 +155,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
           ),
           Expanded(
             child: isLoading
-                ? const GlassLoadingList(itemCount: 5)
+                ? const VLoadingList(itemCount: 5)
                 : messages.isEmpty
                     ? AppEmptyState(
                         title: 'No replies yet',

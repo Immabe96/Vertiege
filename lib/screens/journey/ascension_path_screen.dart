@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/achievements.dart';
@@ -25,7 +25,7 @@ class AscensionPathScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
         appBar: AppBar(title: const Text('Ascension Path')),
-        body: const SafeArea(child: GlassLoadingList(itemCount: 3)),
+        body: const SafeArea(child: VLoadingList(itemCount: 3)),
       );
     }
 
@@ -95,7 +95,7 @@ class AscensionPathScreen extends ConsumerWidget {
               const SizedBox(height: Spacing.lg),
 
               // XP Stats
-              GlassPanel(
+              VSurfacePanel(
                 useBlur: false,
                 padding: const EdgeInsets.all(Spacing.md),
                 child: Column(

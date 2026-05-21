@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -12,7 +12,7 @@ class AchievementCard extends StatelessWidget {
   final VoidCallback? onPress;
   final int index;
 
-  /// AI confidence score from The Archivist (0.0–1.0).
+  /// AI confidence score from The Archivist (0.0�1.0).
   final double? aiConfidence;
 
   /// AI verifier notes.
@@ -177,7 +177,7 @@ class AchievementCard extends StatelessWidget {
   }
 }
 
-// ─── Achievement Icon with gradient, ring, and status overlay ───────
+// --- Achievement Icon with gradient, ring, and status overlay -------
 
 class _AchievementIcon extends StatelessWidget {
   final double progress;
@@ -377,7 +377,7 @@ class _AchievementIcon extends StatelessWidget {
   }
 }
 
-// ─── XP Badge ───────────────────────────────────────────────────────
+// --- XP Badge -------------------------------------------------------
 
 class _XpBadge extends StatelessWidget {
   final int xp;
@@ -404,7 +404,7 @@ class _XpBadge extends StatelessWidget {
   }
 }
 
-// ─── Status Chip ────────────────────────────────────────────────────
+// --- Status Chip ----------------------------------------------------
 
 class _StatusChip extends StatelessWidget {
   final String label;
@@ -448,7 +448,7 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-// ─── AI Confidence Chip (The Archivist) ─────────────────────────────
+// --- AI Confidence Chip (The Archivist) -----------------------------
 
 class _AiConfidenceChip extends StatelessWidget {
   final double? confidence;

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/channel.dart';
@@ -102,7 +102,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +182,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
               ),
             const SizedBox(height: Spacing.md),
             // Input bar
-            GlassPanel(
+            VSurfacePanel(
               blur: 8,
               padding: const EdgeInsets.symmetric(
                 horizontal: Spacing.md,

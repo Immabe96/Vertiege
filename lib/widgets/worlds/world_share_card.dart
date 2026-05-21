@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -8,7 +8,7 @@ import 'world_banner.dart';
 /// A glassmorphism-styled share card for social media.
 ///
 /// Renders a 9:16 story-format card showing a world's procedural banner,
-/// name, stats, tier badge, and a call-to-action tagline — all tinted by
+/// name, stats, tier badge, and a call-to-action tagline � all tinted by
 /// the world's prestige tier color.
 class WorldShareCard extends StatelessWidget {
   final World world;
@@ -68,7 +68,7 @@ class WorldShareCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // ── Procedural Banner ──────────────────────────────
+          // -- Procedural Banner ------------------------------
           SizedBox(
             width: 360,
             height: 260,
@@ -82,7 +82,7 @@ class WorldShareCard extends StatelessWidget {
             ),
           ),
 
-          // ── Card Body ──────────────────────────────────────
+          // -- Card Body --------------------------------------
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -270,7 +270,7 @@ class WorldShareCard extends StatelessWidget {
             ),
           ),
 
-          // ── Tier-colored bottom accent bar ─────────────────
+          // -- Tier-colored bottom accent bar -----------------
           Container(
             width: double.infinity,
             height: 4,

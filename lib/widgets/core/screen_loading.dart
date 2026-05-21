@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
@@ -59,7 +59,7 @@ class ScreenLoading extends StatelessWidget {
             childAspectRatio: 0.85,
           ),
           itemCount: itemCount,
-          itemBuilder: (_, _) => GlassPanel(
+          itemBuilder: (_, _) => VSurfacePanel(
             padding: const EdgeInsets.all(Spacing.md),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -80,9 +80,9 @@ class ScreenLoading extends StatelessWidget {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 // Glass-styled shimmer placeholders
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 
 class _GlassPostCardShimmer extends StatelessWidget {
   const _GlassPostCardShimmer();
@@ -94,7 +94,7 @@ class _GlassPostCardShimmer extends StatelessWidget {
         horizontal: Spacing.md,
         vertical: Spacing.sm,
       ),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +139,7 @@ class _GlassChatTileShimmer extends StatelessWidget {
         horizontal: Spacing.md,
         vertical: Spacing.sm + 2,
       ),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.md),
         child: Row(
           children: [
@@ -180,7 +180,7 @@ class _ProfileShimmer extends StatelessWidget {
         horizontal: Spacing.lg,
         vertical: Spacing.xl,
       ),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           children: [
@@ -247,7 +247,7 @@ class _DetailShimmer extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(Spacing.md),
-          child: GlassPanel(
+          child: VSurfacePanel(
             padding: const EdgeInsets.all(Spacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

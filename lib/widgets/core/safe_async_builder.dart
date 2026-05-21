@@ -34,7 +34,7 @@ class SafeAsyncBuilder<T> extends StatelessWidget {
     }
 
     if (isLoading && (!showDataWhileLoading || data == null)) {
-      return loadingWidget ?? const GlassLoadingList(itemCount: 6);
+      return loadingWidget ?? const VLoadingList(itemCount: 6);
     }
 
     if (data != null) {

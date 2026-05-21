@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
@@ -33,7 +33,7 @@ class ChatInputBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       top: false,
-      child: GlassPanel(
+      child: VSurfacePanel(
         blur: 10,
         borderRadius: BorderRadius.zero,
         padding: EdgeInsets.fromLTRB(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
@@ -71,7 +71,7 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
         ),
         const SizedBox(height: 8),
         if (_loading)
-          const GlassLoadingCard()
+          const VLoadingCard()
         else if (_residents.isEmpty)
           Text('No residents yet', style: theme.textTheme.bodyMedium)
         else

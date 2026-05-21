@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -84,7 +84,7 @@ class WorldBanner extends StatelessWidget {
   }
 }
 
-// ── Procedural Painter ────────────────────────────────────────
+// -- Procedural Painter ----------------------------------------
 
 class _WorldBannerPainter extends CustomPainter {
   final String worldId;
@@ -120,7 +120,7 @@ class _WorldBannerPainter extends CustomPainter {
       oldDelegate.worldType != worldType ||
       oldDelegate.prestige != prestige;
 
-  // ── Layers ──────────────────────────────────────────────────
+  // -- Layers --------------------------------------------------
 
   /// Deep dark gradient from canvas to surface.
   void _drawBackground(Canvas canvas, Size size) {
@@ -242,7 +242,7 @@ class _WorldBannerPainter extends CustomPainter {
     );
   }
 
-  /// Small glowing scatter dots — positions seeded from worldId hash.
+  /// Small glowing scatter dots � positions seeded from worldId hash.
   void _drawAccentDots(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = tierColor.withValues(alpha: 0.2)

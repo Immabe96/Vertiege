@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
@@ -169,7 +169,7 @@ class AchievementShareCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // ── Category Header ───────────────────────────────
+          // -- Category Header -------------------------------
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
@@ -256,7 +256,7 @@ class AchievementShareCard extends StatelessWidget {
             ),
           ),
 
-          // ── Spacer ─────────────────────────────────────────
+          // -- Spacer -----------------------------------------
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -318,7 +318,7 @@ class AchievementShareCard extends StatelessWidget {
                   ),
                   const SizedBox(height: Spacing.sm),
                   Text(
-                    '${resident.tier.label}  •  $totalXp XP',
+                    '${resident.tier.label}  �  $totalXp XP',
                     style: TextStyle(
                       fontSize: FontSizes.labelSm,
                       color: VColors.outline,
@@ -371,7 +371,7 @@ class AchievementShareCard extends StatelessWidget {
             ),
           ),
 
-          // ── Category-colored bottom accent bar ─────────────
+          // -- Category-colored bottom accent bar -------------
           Container(
             width: double.infinity,
             height: 4,

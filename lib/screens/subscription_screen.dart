@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
@@ -101,11 +101,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ),
       ),
       body: _loading
-          ? const SafeArea(child: GlassLoadingList(itemCount: 3))
+          ? const SafeArea(child: VLoadingList(itemCount: 3))
           : ListView(
               padding: const EdgeInsets.all(Spacing.lg),
               children: [
-                // ── Header ────────────────────────────────────────
+                // -- Header ----------------------------------------
                 Center(
                   child: Column(
                     children: [
@@ -147,7 +147,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
                 const SizedBox(height: Spacing.xl),
 
-                // ── Purchase confirmation message ────────────────
+                // -- Purchase confirmation message ----------------
                 if (_purchaseMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(Spacing.md),
@@ -180,7 +180,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   ),
                 ],
 
-                // ── Tier Cards ───────────────────────────────────
+                // -- Tier Cards -----------------------------------
                 ...SubscriptionTier.values.map((tier) {
                   final benefits = SubscriptionService.getBenefits(tier);
                   final isActive = tier == _currentTier;
@@ -216,7 +216,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
                 const SizedBox(height: Spacing.xl),
 
-                // ── Footer ────────────────────────────────────────
+                // -- Footer ----------------------------------------
                 Center(
                   child: Text(
                     'All subscriptions support the Vertiege realm.\nCancel anytime.',
@@ -231,7 +231,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
                 const SizedBox(height: Spacing.lg),
 
-                // ── Restore purchases ────────────────────────────
+                // -- Restore purchases ----------------------------
                 Center(
                   child: VButton(
                     label: 'Restore Purchases',
@@ -352,7 +352,7 @@ class _TierCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Tier name + active badge ────────────────────────
+          // -- Tier name + active badge ------------------------
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -388,7 +388,7 @@ class _TierCard extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.lg),
 
-          // ── Price ───────────────────────────────────────────
+          // -- Price -------------------------------------------
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -419,14 +419,14 @@ class _TierCard extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.lg),
 
-          // ── Divider ─────────────────────────────────────────
+          // -- Divider -----------------------------------------
           Container(
             height: 1,
             color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
           ),
           const SizedBox(height: Spacing.lg),
 
-          // ── Features ────────────────────────────────────────
+          // -- Features ----------------------------------------
           ...features.map(
             (feature) => Padding(
               padding: const EdgeInsets.only(bottom: Spacing.sm),
@@ -468,7 +468,7 @@ class _TierCard extends StatelessWidget {
 
           const SizedBox(height: Spacing.lg),
 
-          // ── Upgrade button ──────────────────────────────────
+          // -- Upgrade button ----------------------------------
           if (onUpgrade != null)
             SizedBox(
               height: 48,

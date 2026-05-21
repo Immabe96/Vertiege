@@ -29,7 +29,7 @@ class WorldDetailMembers extends ConsumerWidget {
     return Column(
       children: [
         // Member avatars wrapped in GlassPanel
-        GlassPanel(
+        VSurfacePanel(
           padding: const EdgeInsets.all(Spacing.md),
           child: WorldMemberRow(
             members: members,

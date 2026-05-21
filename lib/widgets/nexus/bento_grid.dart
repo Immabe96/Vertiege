@@ -53,7 +53,7 @@ class _BentoCardTile extends StatelessWidget {
 
     final child = SizedBox(
       width: width,
-      child: GlassPanel(
+      child: VSurfacePanel(
         useBlur: false,
         padding: const EdgeInsets.all(Spacing.md),
         child: card.child,

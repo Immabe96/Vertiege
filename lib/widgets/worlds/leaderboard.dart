@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
@@ -78,7 +78,7 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        child: GlassLoadingCard(),
+        child: VLoadingCard(),
       );
     }
 

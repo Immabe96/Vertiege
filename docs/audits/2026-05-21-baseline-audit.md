@@ -222,11 +222,21 @@ Prior [accessibility-audit.md](./accessibility-audit.md):
 
 ---
 
-## 10. Suggested next agent work (after your input)
+## 10. Release workflow (2026-05-21)
 
-1. Pull/create local migration files for remote-only `202605201*` versions (from dashboard or `supabase db pull`).
-2. Update `rls-audit.md` + `product-gap-audit.md` from this baseline.
-3. Start Phase 1 device issues or Phase 3 glass removal (small PRs into `develop`).
+- **In-repo work** continues on `develop` without `git push` until you decide.
+- **`main` / Release APK** only after: audits addressed, CI green, your manual device pass, and any fixes.
+- **Device UAT** is owner-run at the end; report screen + expected vs actual.
+
+### Agent progress
+
+- [x] Migration reconciliation
+- [x] Security advisor documented
+- [x] `20260521120000_security_followup` applied to remote
+- [x] Product-gap + RLS audits refreshed
+- [x] Chat world rail readability
+- [x] Glass rename → `VSurfacePanel`, `VLoadingCard`, `_AppNavBar`, `showAppSheet`
+- [ ] Your manual device checklist (deferred)
 
 ---
 

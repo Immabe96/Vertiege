@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -112,7 +112,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     int newCursorPos;
 
     if (selStart == selEnd) {
-      // No selection — insert empty marker pair
+      // No selection � insert empty marker pair
       newText =
           '${text.substring(0, selStart)}$marker$marker${text.substring(selStart)}';
       newCursorPos = selStart + marker.length;

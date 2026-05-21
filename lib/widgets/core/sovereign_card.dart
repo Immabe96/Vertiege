@@ -35,7 +35,7 @@ class SovereignCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = glass
-        ? GlassPanel(
+        ? VSurfacePanel(
             useBlur: useBlur,
             padding: const EdgeInsets.all(Spacing.md),
             child: child,

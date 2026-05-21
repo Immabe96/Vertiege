@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
@@ -180,7 +180,7 @@ class _TierCelebrationState extends State<TierCelebration>
   }
 }
 
-// ─── Celebration Card ───────────────────────────────────────────────
+// --- Celebration Card -----------------------------------------------
 
 class _CelebrationCard extends StatelessWidget {
   final ResidentTier tier;
@@ -259,7 +259,7 @@ class _CelebrationCard extends StatelessWidget {
   }
 }
 
-// ─── Pulsing Tier Icon ──────────────────────────────────────────────
+// --- Pulsing Tier Icon ----------------------------------------------
 
 class _PulsingTierIcon extends StatefulWidget {
   final ResidentTier tier;
@@ -321,7 +321,7 @@ class _PulsingTierIconState extends State<_PulsingTierIcon>
   }
 }
 
-// ─── Perk Item ──────────────────────────────────────────────────────
+// --- Perk Item ------------------------------------------------------
 
 class _PerkItem extends StatelessWidget {
   final String perk;
@@ -383,7 +383,7 @@ class _PerkItem extends StatelessWidget {
   }
 }
 
-// ─── Confetti Canvas ────────────────────────────────────────────────
+// --- Confetti Canvas ------------------------------------------------
 
 class _ConfettiCanvas extends StatefulWidget {
   final AnimationController controller;

@@ -1,4 +1,4 @@
-ï»¿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../models/invite.dart';
@@ -105,7 +105,7 @@ class WorldSettingsInvites extends StatelessWidget {
         ],
         if (isLoadingInvites) ...[
           const SizedBox(height: Spacing.md),
-          const GlassLoadingCard(),
+          const VLoadingCard(),
         ] else if (invites.isNotEmpty) ...[
           const SizedBox(height: Spacing.md),
           const Divider(),
@@ -140,7 +140,7 @@ class _InviteRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.sm),
-      child: GlassPanel(
+      child: VSurfacePanel(
         padding: const EdgeInsets.all(Spacing.md),
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
         child: Row(
@@ -164,9 +164,9 @@ class _InviteRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$usesLabel  Â·  $displayDate'
-                    '${invite.isExpired ? '  Â·  Expired' : ''}'
-                    '${invite.isExhausted ? '  Â·  Exhausted' : ''}',
+                    '$usesLabel  ·  $displayDate'
+                    '${invite.isExpired ? '  ·  Expired' : ''}'
+                    '${invite.isExhausted ? '  ·  Exhausted' : ''}',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: VColors.outline,
                     ),

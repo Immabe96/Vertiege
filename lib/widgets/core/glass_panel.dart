@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
@@ -9,7 +9,7 @@ import '../../theme/design_system.dart';
 /// Replaces legacy glassmorphism with clean surface container colors.
 /// BackdropFilter is opt-in for documented exceptions only
 /// (image viewers, export/share visuals, image scrims).
-class GlassPanel extends StatelessWidget {
+class VSurfacePanel extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final BorderRadius? borderRadius;
@@ -18,7 +18,7 @@ class GlassPanel extends StatelessWidget {
   final bool useBlur;
   final List<BoxShadow>? shadows;
 
-  const GlassPanel({
+  const VSurfacePanel({
     super.key,
     required this.child,
     this.padding,
@@ -73,11 +73,11 @@ class GlassPanel extends StatelessWidget {
   }
 }
 
-class GlassModal extends StatelessWidget {
+class VSurfaceModal extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
 
-  const GlassModal({super.key, required this.child, this.padding});
+  const VSurfaceModal({super.key, required this.child, this.padding});
 
   @override
   Widget build(BuildContext context) {
@@ -108,3 +108,9 @@ class GlassModal extends StatelessWidget {
     );
   }
 }
+
+@Deprecated('Use VSurfacePanel')
+typedef GlassPanel = VSurfacePanel;
+
+@Deprecated('Use VSurfaceModal')
+typedef GlassModal = VSurfaceModal;

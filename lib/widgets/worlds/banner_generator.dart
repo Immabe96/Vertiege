@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
@@ -68,7 +68,7 @@ class _BannerGeneratorState extends State<BannerGenerator> {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () => widget.onSelect(index),
-          child: GlassPanel(
+          child: VSurfacePanel(
             padding: EdgeInsets.zero,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(RadiusTokens.xl),
@@ -122,7 +122,7 @@ class _BannerGeneratorState extends State<BannerGenerator> {
 class _GeneratingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
+    return VSurfacePanel(
       padding: const EdgeInsets.all(Spacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -205,14 +205,14 @@ class _PulseWidgetState extends State<_PulseWidget>
   }
 }
 
-// ── Variant model ────────────────────────────────────────
+// -- Variant model ----------------------------------------
 
 class _Variant {
   final int index;
   const _Variant({required this.index});
 }
 
-// ── Procedural variant painter ────────────────────────────
+// -- Procedural variant painter ----------------------------
 
 class _VariantPainter extends CustomPainter {
   final int seed;

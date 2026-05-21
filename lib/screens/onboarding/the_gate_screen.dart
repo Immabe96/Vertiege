@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,14 +28,14 @@ Future<void> loadGateCompletionStatus() async {
   gateCompletedCache = prefs.getBool(gateCompletedKey) ?? false;
 }
 
-/// Marks The Gate as complete — persists to storage, Supabase, and updates cache.
+/// Marks The Gate as complete � persists to storage, Supabase, and updates cache.
 Future<void> markGateCompleted() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(gateCompletedKey, true);
   gateCompletedCache = true;
 }
 
-// ── Interest type ──────────────────────────────────────────────────
+// -- Interest type --------------------------------------------------
 
 enum _GateInterest { execute, foundation, craft, capital, governance }
 
@@ -101,7 +101,7 @@ extension _GateInterestX on _GateInterest {
   }
 }
 
-// ── Goal type ──────────────────────────────────────────────────────
+// -- Goal type ------------------------------------------------------
 
 enum _GateGoal { readCharter, learnStandard, firstSignal }
 
@@ -162,9 +162,9 @@ extension _GateGoalX on _GateGoal {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------
 // The Gate Screen
-// ═════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------
 
 class TheGateScreen extends ConsumerStatefulWidget {
   const TheGateScreen({super.key});
@@ -293,10 +293,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       body: SafeArea(
         child: Stack(
           children: [
-            // ── Decorative shapes ────────────────────────────
+            // -- Decorative shapes ----------------------------
             ..._buildParticles(),
 
-            // ── Page content ─────────────────────────────────
+            // -- Page content ---------------------------------
             PageView(
               controller: _pageController,
               physics: const NeverScrollableScrollPhysics(),
@@ -308,7 +308,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               ],
             ),
 
-            // ── Progress indicator ───────────────────────────
+            // -- Progress indicator ---------------------------
             if (_stage > 0 && _stage < _totalStages - 1)
               Positioned(
                 top: Spacing.md,
@@ -337,7 +337,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 ),
               ),
 
-            // ── Back button ─────────────────────────────────
+            // -- Back button ---------------------------------
             if (_stage > 0 && !_completing)
               Positioned(
                 top: Spacing.sm,
@@ -356,9 +356,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
   // Stage 1: Welcome (Gate entrance)
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
 
   Widget _buildStage1() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -369,7 +369,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
         children: [
           const Spacer(flex: 2),
 
-          // ── Animated Vertiege logo ────────────────────────
+          // -- Animated Vertiege logo ------------------------
           AnimatedBuilder(
             animation: _pulseController,
             builder: (context, child) {
@@ -406,7 +406,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.xxl),
 
-          // ── Title ─────────────────────────────────────────
+          // -- Title -----------------------------------------
           Text(
             'Welcome to\nthe Realm',
             textAlign: TextAlign.center,
@@ -419,7 +419,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.lg),
 
-          // ── Subtitle ──────────────────────────────────────
+          // -- Subtitle --------------------------------------
           Text(
             'Your sovereign journey begins',
             textAlign: TextAlign.center,
@@ -443,7 +443,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const Spacer(flex: 2),
 
-          // ── ENTER THE GATE button ─────────────────────────
+          // -- ENTER THE GATE button -------------------------
           SizedBox(
             height: 56,
             child: FilledButton.icon(
@@ -471,9 +471,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
   // Stage 2: Choose Your Signal
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
 
   Widget _buildStage2() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -487,7 +487,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Header ────────────────────────────────────────
+          // -- Header ----------------------------------------
           Text(
             'Choose your\nfirst signal',
             style: TextStyle(
@@ -509,7 +509,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.xl),
 
-          // ── Bento grid of interest cards ──────────────────
+          // -- Bento grid of interest cards ------------------
           Expanded(
             child: SingleChildScrollView(
               child: Wrap(
@@ -540,7 +540,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const SizedBox(height: Spacing.lg),
 
-          // ── CONTINUE button ───────────────────────────────
+          // -- CONTINUE button -------------------------------
           SizedBox(
             height: 48,
             child: FilledButton.icon(
@@ -580,9 +580,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
   // Stage 3: Your First World
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
 
   Widget _buildStage3() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -608,7 +608,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Header ────────────────────────────────────────
+          // -- Header ----------------------------------------
           Text(
             'Your first\nworld foundation',
             style: TextStyle(
@@ -629,7 +629,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.xl),
 
-          // ── World card preview ────────────────────────────
+          // -- World card preview ----------------------------
           _Card(
             padding: EdgeInsets.zero,
             borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
@@ -738,7 +738,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const Spacer(),
 
-          // ── JOIN WORLD button ──────────────────────────────
+          // -- JOIN WORLD button ------------------------------
           SizedBox(
             height: 48,
             child: FilledButton.icon(
@@ -817,9 +817,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
   // Stage 4: Set Your First Rite
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
 
   Widget _buildStage4() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -833,7 +833,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Header ────────────────────────────────────────
+          // -- Header ----------------------------------------
           Text(
             'Choose your\nfirst rite',
             style: TextStyle(
@@ -855,7 +855,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           ),
           const SizedBox(height: Spacing.xl),
 
-          // ── Goal cards ────────────────────────────────────
+          // -- Goal cards ------------------------------------
           Expanded(
             child: ListView(
               children: _GateGoal.values.map((goal) {
@@ -879,7 +879,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const SizedBox(height: Spacing.lg),
 
-          // ── BEGIN YOUR JOURNEY button ─────────────────────
+          // -- BEGIN YOUR JOURNEY button ---------------------
           SizedBox(
             height: 56,
             child: FilledButton.icon(
@@ -930,9 +930,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
   // Particle decorations
-  // ═══════════════════════════════════════════════════════════════
+  // ---------------------------------------------------------------
 
   String _accessLabel(World world) {
     if (world.requiredProfession != null) {
@@ -1048,9 +1048,9 @@ class _Card extends StatelessWidget {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------
 // Interest Card (Stage 2)
-// ═════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------
 
 class _GatePill extends StatelessWidget {
   final String label;
@@ -1183,9 +1183,9 @@ class _InterestCard extends StatelessWidget {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------
 // Goal Card (Stage 4)
-// ═════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------
 
 class _GoalCard extends StatelessWidget {
   final _GateGoal goal;

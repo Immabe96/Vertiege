@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import 'glass_panel.dart';
@@ -9,7 +9,7 @@ class ProtocolLogs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
+    return VSurfacePanel(
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

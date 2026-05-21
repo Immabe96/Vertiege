@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -78,7 +78,7 @@ class WorldAccessGuard extends ConsumerWidget {
               if (isVerifying)
                 const Column(
                   children: [
-                    GlassLoadingCard(),
+                    VLoadingCard(),
                     SizedBox(height: 12),
                     Text('Submitting verification...'),
                   ],

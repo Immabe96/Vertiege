@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../core/glass_panel.dart';
@@ -23,7 +23,7 @@ class SovereignStat extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: GlassPanel(
+      child: VSurfacePanel(
         useBlur: false,
         padding: const EdgeInsets.symmetric(
           vertical: Spacing.lg,

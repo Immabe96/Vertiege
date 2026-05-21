@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -118,7 +118,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: _GlassNavBar(
+      bottomNavigationBar: _AppNavBar(
         index: index,
         unread: unread,
         onTabTap: (i) {
@@ -163,12 +163,12 @@ class _TabLayoutState extends ConsumerState<TabLayout>
   }
 }
 
-class _GlassNavBar extends ConsumerWidget {
+class _AppNavBar extends ConsumerWidget {
   final int index;
   final int unread;
   final void Function(int) onTabTap;
 
-  const _GlassNavBar({
+  const _AppNavBar({
     required this.index,
     required this.unread,
     required this.onTabTap,

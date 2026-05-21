@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
@@ -89,7 +89,7 @@ class _VerificationReviewScreenState
     }
   }
 
-  // ── Flagged post actions ───────────────────────────────────────
+  // -- Flagged post actions ---------------------------------------
 
   void _approvePost(Post post) {
     ref.read(postProvider.notifier).editPostStatus(post.id, 'published');
@@ -123,7 +123,7 @@ class _VerificationReviewScreenState
 
   Widget _buildVerificationsTab(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    if (_loading) return const GlassLoadingList();
+    if (_loading) return const VLoadingList();
     if (_submissions.isEmpty) {
       return const AppEmptyState(
         title: 'No pending verifications',

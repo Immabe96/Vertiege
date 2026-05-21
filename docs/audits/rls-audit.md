@@ -114,7 +114,7 @@
 
 - [x] Reconcile migration files with remote — see [migration-reconciliation](./2026-05-21-migration-reconciliation.md)
 - [ ] Verify RLS on tables listed in "Requires Verification"
-- [ ] Apply `20260521120000_security_followup` when ready (debug_logs tighten, storage list, anon revoke completion)
+- [x] Apply `20260521120000_security_followup` on remote (2026-05-21)
 - [ ] Add recommended indexes for feed, comments, reactions, notifications, and marketplace
 - [ ] Create transactional RPCs for core mutations
 - [ ] Audit storage bucket policies for avatars, world banners, post media, and verification evidence

@@ -115,7 +115,7 @@ class _InfoStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GlassPanel(
+    return VSurfacePanel(
       padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,

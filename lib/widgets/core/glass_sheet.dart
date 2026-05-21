@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 /// A bottom sheet wrapper using forui's FSheet.
@@ -17,7 +17,7 @@ class GlassSheet extends StatelessWidget {
 }
 
 /// Shows a modal sheet using forui's [showFSheet].
-void showGlassSheet(
+void showAppSheet(
   BuildContext context,
   Widget child, {
   double initialSize = 0.7,
@@ -33,3 +33,14 @@ void showGlassSheet(
     builder: (_) => SingleChildScrollView(child: child),
   );
 }
+
+@Deprecated('Use showAppSheet')
+void showGlassSheet(
+  BuildContext context,
+  Widget child, {
+  double initialSize = 0.7,
+  double minSize = 0.25,
+  double maxSize = 0.95,
+}) =>
+    showAppSheet(context, child,
+        initialSize: initialSize, minSize: minSize, maxSize: maxSize);
