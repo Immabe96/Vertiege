@@ -1,127 +1,115 @@
 # Product Gap Audit
 
-**Date:** 2026-05-19
-**Scope:** Gaps between app vision (PLAN.md) and current implementation as of Phase 2.
+**Date:** 2026-05-19 (original) · **Refreshed:** 2026-05-21  
+**Scope:** Gaps between app vision ([PLAN.md](../../PLAN.md)) and `develop` as of baseline audit.
+
+See also: [2026-05-21-baseline-audit.md](./2026-05-21-baseline-audit.md)
+
+---
+
+## Resolved or improved since 2026-05-19
+
+| # | Was | Now (2026-05-21) |
+|---|-----|------------------|
+| 1 | No push fanout | Edge function + DB trigger on remote; **3 `device_tokens` rows** — verify delivery on device |
+| 2 | Auth callback placeholder | `AuthCallbackScreen` loads session + resident and routes |
+| 3 | No realtime | Posts + chat DM/channel subscriptions active |
+| 6 | 4 bottom tabs | **5 tabs:** Nexus, Explore, Chat, Identity, More |
+| 9 | Google Fonts flash | **No `GoogleFonts` in `lib/`** |
+| 16 | Unapplied migrations | Remote/local tail **reconciled** — [migration-reconciliation](./2026-05-21-migration-reconciliation.md) |
 
 ---
 
 ## Critical Gaps (block production use)
 
-### 1. No push notification delivery
-- FCM token registration exists but no Edge Function fanout or device token sync
-- Notifications are in-app only; nothing reaches the device when app is closed
-- **PLAN.md Phase 9** covers this
+### 1. Push delivery not fully verified
+- Server path configured; tokens exist on remote
+- **Remaining:** background notification smoke test on device
+- **PLAN.md Phase 9**
 
-### 2. Auth deep-link handling is a placeholder
-- `AuthCallbackScreen` shows a loading indicator but doesn't handle magic links, OAuth redirects, or password reset callbacks
-- **PLAN.md Phase 4** covers deep link routes
+### 2. ~~Auth deep-link placeholder~~ — fixed
+- OAuth/magic-link callback handled in `auth_callback.dart`
+- Deep links for post/world/notification targets still incomplete
 
-### 3. No realtime subscriptions active
-- Supabase Realtime is configured but channels are not subscribed with proper presence or broadcast
-- World channels load via polling/refresh, not realtime push
-- **PLAN.md Phase 6** covers realtime audit
+### 3. Realtime partial
+- Posts and chat subscribed; not all tables (notifications still FCM-first)
+- **PLAN.md Phase 6**
 
 ### 4. Offline durability is partial
-- `MutationOutboxService` exists but missed mutations may not reconcile correctly after restart
-- Some providers write to SharedPreferences directly, bypassing repository layer
-- **PLAN.md Phase 7** covers repository/outbox standardization
+- `MutationOutboxService` exists; some caches still authoritative in edge paths
+- Clear-app-data test still required
+- **PLAN.md Phase 7**
 
 ---
 
 ## High Gaps (visible to users)
 
-### 5. Glass/legacy UI remains in ~60% of screens
-- `GlassPanel`, `GlassSheet`, `SovereignCard`, `GlassLoadingList` still used across 20+ files
-- Screens like HallOfAscension, AscensionPath, Subscription, WorldSettings still use glass loading
-- **PLAN.md Phase 3** covers Forui migration completion
+### 5. Glass/legacy UI (~25 files)
+- `GlassPanel`, `GlassSheet`, `SovereignCard`; `_GlassNavBar` on `TabLayout`
+- **PLAN.md Phase 3**
 
-### 6. Navigation doesn't match target IA
-- Bottom tabs are Nexus/Explore/Chat/Identity (4 tabs) — PLAN.md Phase 4 specifies Nexus/Discover/Chat/Identity/More (5 tabs)
-- No deep link handling for notification targets, post detail, or profile routes
-- **PLAN.md Phase 4** covers this
+### 6. Deep links incomplete
+- Five-tab IA done; notification/post/profile deep routes still thin
+- **PLAN.md Phase 4**
 
-### 7. World content is generic for non-starter worlds
-- 14 default worlds exist in config but only `neon-district` and `crystal-shore` have full foundation content
-- Remaining worlds have auto-generated or minimal lore
-- **PLAN.md Phase 5** covers world content completion
+### 7. World content generic for non-starter worlds
+- Only `neon-district` and `crystal-shore` have full foundation content
+- **PLAN.md Phase 5**
 
-### 8. Image pipeline is inconsistent
-- Some screens use `NetworkImage` directly instead of `CosmeticAvatar` or `VImage`
-- No standardized fallback chain (Supabase → bundled asset → category placeholder → empty icon)
-- Storage bucket policies not verified for all media types
-- **PLAN.md Phase 5** covers media pipeline
+### 8. Image pipeline inconsistent
+- Fallback chain and bucket policy verification ongoing
+- **PLAN.md Phase 5**
 
-### 9. Font loading can cause flash
-- Google Fonts (`Space Grotesk`, `Inter`) loaded dynamically may cause text flash on first render
-- **PLAN.md Phase 3** covers replacing Google Fonts with system fonts
+### 9. ~~Google Fonts~~ — resolved
 
 ---
 
 ## Medium Gaps (feature completeness)
 
-### 10. Features exist as screens but aren't integrated
-- Marketplace, Treasury, Polls, Challenges have dedicated screen files but aren't wired with real data or transaction logic
-- These screens were moved to More tab in Phase 1 with "coming soon" messaging
-- **PLAN.md Phase 10** covers feature completion
+### 10. Feature screens not fully integrated
+- Marketplace, Treasury, Polls, Challenges — partial / “coming soon” copy
+- **PLAN.md Phase 10**
 
-### 11. Search is global but limited
-- Searches worlds and residents but not posts, channels, or tags
-- No recent searches persistence across sessions
-- **PLAN.md Phase 10** covers search expansion
+### 11. Search limited
+- Worlds + residents; not posts/channels/tags
+- **PLAN.md Phase 10**
 
-### 12. Composer is FAB-only on Nexus
-- No inline composer on feed cards or world detail
-- FAB opens modal; no dedicated compose screen (CreatePostScreen removed in stabilization)
-- **PLAN.md Phase 10** covers composer unification
+### 12. Composer FAB-only on Nexus
+- **PLAN.md Phase 10**
 
 ---
 
 ## Low Gaps (infrastructure and polish)
 
-### 13. Crash reporting is console-only
-- `CrashReporter` abstraction exists with `ConsoleCrashReporter` default
-- Firebase Crashlytics integration not complete
-- **PLAN.md Phase 9** covers this
+### 13–15. Firebase infra
+- Crashlytics, Analytics, Remote Config — wiring per Phase 9
 
-### 14. No analytics tracking
-- No events fired for onboarding, world views, post creation, or errors
-- **PLAN.md Phase 9** covers this
+### 16. ~~Migration drift~~ — reconciled in repo (May-12 remote-only history documented)
 
-### 15. Remote Config not wired
-- No feature flags — Marketplace, Treasury, Quests, Events can't be toggled without a build
-- **PLAN.md Phase 9** covers this
+### 17. Accessibility
+- Icon tooltips partial; text-scale device test not done
+- **PLAN.md Phase 12**
 
-### 16. Migrations have unapplied files
-- Two unapplied migrations (`20260519_001`, `20260519_add_rpc`) are safe but not applied to remote
-- **PLAN.md Phase 6** covers migration hygiene
-
-### 17. No accessibility semantics
-- Icon-only buttons lack semantic labels
-- No text scaling testing beyond default
-- **PLAN.md Phase 12** covers accessibility
-
-### 18. Test coverage is narrow
-- 101 tests exist but cover mainly config, models, utils, and services
-- No widget/golden tests for screens, no integration tests, no RLS tests
-- **PLAN.md Phase 13** covers test expansion
+### 18. Test coverage
+- **108 tests**; still narrow on widgets/integration/RLS
+- **PLAN.md Phase 13**
 
 ---
 
 ## Not Gaps (by design)
 
-- **No service-role key in Flutter app**: Anon key only — correct
-- **Immabe superuser bypass**: Hardcoded email check is intentional admin access per PLAN.md
-- **IAP gated in dev mode**: `StoreService.isEnabled => false` in debug — intentional safety
-- **Starter worlds auto-join**: New residents auto-join `neon-district` and `crystal-shore` — intentional
-- **Splash delay**: Currently has fixed delay — PLAN.md Phase 8 will address
+- Anon key only in Flutter — correct
+- Immabe superuser bypass — intentional
+- IAP disabled in debug — intentional
+- Starter worlds auto-join — intentional
 
 ---
 
-## Summary
+## Summary (2026-05-21)
 
-| Severity | Count | Phases that address |
-|----------|-------|---------------------|
-| Critical | 4 | 4, 6, 7, 9 |
-| High | 5 | 3, 4, 5 |
-| Medium | 3 | 10 |
-| Low | 6 | 9, 6, 12, 13 |
+| Severity | Open | Notes |
+|----------|------|-------|
+| Critical | 3 | Push verify, realtime breadth, persistence |
+| High | 4 | Glass UI, deep links, world content, images |
+| Medium | 3 | Features, search, composer |
+| Low | 4 | Firebase infra, a11y, tests |

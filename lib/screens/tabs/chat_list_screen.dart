@@ -693,7 +693,7 @@ class _WorldRail extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      width: 72,
+      width: 88,
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceDark : VColors.surface,
         border: Border(
@@ -709,8 +709,11 @@ class _WorldRail extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
             child: GestureDetector(
               onTap: () => onWorldSelected(world.id),
-              child: Container(
-                width: 64,
+              behavior: HitTestBehavior.opaque,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
+                child: Container(
+                width: 80,
                 padding: const EdgeInsets.symmetric(
                   horizontal: VSpacing.xs,
                   vertical: VSpacing.xs,
@@ -731,7 +734,7 @@ class _WorldRail extends StatelessWidget {
                   children: [
                     Icon(
                       worldIcon,
-                      size: VIconSize.md,
+                      size: VIconSize.lg,
                       color: isSelected
                           ? VColors.primary
                           : (isDark
@@ -741,11 +744,11 @@ class _WorldRail extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       world.name,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 8,
+                        fontSize: 10,
                         fontWeight:
                             isSelected ? VFontWeight.semiBold : VFontWeight.regular,
                         color: isSelected
@@ -758,6 +761,7 @@ class _WorldRail extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
             ),
           );
         }).toList(),

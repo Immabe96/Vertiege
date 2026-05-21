@@ -1,25 +1,27 @@
 # RLS & Migration Audit
 
-**Date:** 2026-05-19
+**Date:** 2026-05-19 · **Updated:** 2026-05-21  
 **Phase:** 6 — Supabase Reliability
 
 ---
 
-## Migration Status
+## Migration Status (2026-05-21)
+
+**Remote:** 32 versions applied — full manifest in [2026-05-21-migration-reconciliation.md](./2026-05-21-migration-reconciliation.md).
+
+**Local `supabase/migrations/`:** 12 files aligned with remote tail (`20260519144052` … `20260520150000`).
+
+**Archived:** Fresh-project-only SQL in `supabase/migrations_archive/fresh_project_only/` — do not apply to `wjaphoaxalvgjnrwqjwe`.
 
 | Migration | Status | Notes |
 |-----------|--------|-------|
-| `20260519144052` | Applied (remote) | Phase 2 RLS policy fix; historical — contains replaced `is_world_member()` |
-| `20260519144556` | Applied (remote) | Seed default world channels |
-| `20260519145412` | Applied (remote) | Chat persistence hardening |
-| `20260519145904` | Applied (remote) | Grant immabe superuser + `is_world_member()` fix |
-| `20260519193753` | Applied (remote) | Corrective: fix world_members policy recursion (SECURITY DEFINER) |
-| `20260519_001` | Unapplied (safe) | Phase 1 migration RLS safety — kept for reference |
-| `20260519_add_rpc` | Unapplied (safe) | RPC additions — kept for reference |
-| `20260515_complete_fresh_schema` | Fresh-project baseline | Full schema for new Supabase projects |
-| `20260516_*` | Fresh-project | Feature migrations for new projects |
-| `20260517_fix_notifications_policy` | Fresh-project | Notification policy fix |
-| `20260518_forui_hybrid_persistence_overhaul` | Fresh-project | Forui persistence |
+| `20260519144052` … `20260519193753` | Applied | RLS fixes, channels, chat, superuser |
+| `20260520080241` | Applied | Firebase storage + notifications |
+| `20260520115334` | Applied | Webhook secret to Vault |
+| `20260520121347` | Applied | `device_tokens` own-row RLS |
+| `20260520130000` | Applied | Security corrective (anon revoke, search_path) |
+| `20260520140000` | Applied | `create_world_full` RPC |
+| `20260520150000` | Applied | Daily rewards / events tables |
 
 ---
 
@@ -31,7 +33,11 @@
 - `channels` — no recursive policy
 - `channel_messages` — no recursive policy
 
-### Requires Verification (not yet audited in this phase)
+### Verified on remote (2026-05-21)
+- `device_tokens` — own-row policies via `20260520121347`
+- `world_members`, `posts`, `channels`, `channel_messages` — recursion fix `20260519193753`
+
+### Requires Verification (spot-check in SQL editor)
 - `worlds` — SELECT/INSERT/UPDATE/DELETE policies
 - `profiles` — SELECT/UPDATE policies
 - `comments` — SELECT/INSERT/DELETE policies
@@ -106,8 +112,9 @@
 
 ## Outstanding Actions
 
-- [ ] Apply `20260519_001` and `20260519_add_rpc` to remote or explicitly quarantine
+- [x] Reconcile migration files with remote — see [migration-reconciliation](./2026-05-21-migration-reconciliation.md)
 - [ ] Verify RLS on tables listed in "Requires Verification"
+- [ ] Apply `20260521120000_security_followup` when ready (debug_logs tighten, storage list, anon revoke completion)
 - [ ] Add recommended indexes for feed, comments, reactions, notifications, and marketplace
 - [ ] Create transactional RPCs for core mutations
 - [ ] Audit storage bucket policies for avatars, world banners, post media, and verification evidence
