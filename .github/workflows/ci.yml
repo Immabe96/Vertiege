@@ -58,7 +58,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vertiege-apk-${{ github.ref_name }}-${{ github.sha }}
+          name: vertiege-apk-${{ github.run_id }}
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 90
