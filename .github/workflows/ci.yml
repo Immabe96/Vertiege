@@ -8,6 +8,7 @@ on:
       - develop
       - 'phase-*'
       - 'fix-*'
+      - 'feature/*'
       - 'cursor/**'
   pull_request:
     branches:
