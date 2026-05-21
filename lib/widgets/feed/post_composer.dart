@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -290,7 +290,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // -- Drag handle ------------------------------
+            // ── Drag handle ──────────────────────────────
             Center(
               child: Container(
                 margin: const EdgeInsets.only(
@@ -306,7 +306,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
               ),
             ),
 
-            // -- Header ------------------------------------
+            // ── Header ────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
               child: Row(
@@ -352,7 +352,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
             const SizedBox(height: Spacing.sm),
 
-            // -- World selector chips ---------------------
+            // ── World selector chips ─────────────────────
             if (worlds.length > 1)
               SizedBox(
                 height: 36,
@@ -423,7 +423,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
             const SizedBox(height: Spacing.md),
 
-            // -- Main text area ----------------------------
+            // ── Main text area ────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
               child: TextField(
@@ -464,7 +464,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
               ),
             ),
 
-            // -- Image preview -----------------------------
+            // ── Image preview ─────────────────────────────
             if (_imageUri != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -509,19 +509,19 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
             const SizedBox(height: Spacing.md),
 
-            // -- Bottom toolbar ----------------------------
+            // ── Bottom toolbar ────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
               child: Row(
                 children: [
-                  // -- Image attach ----------------------
+                  // ── Image attach ──────────────────────
                   ImagePickerWidget(
                     onImageSelected: (uri) => setState(() => _imageUri = uri),
                   ),
 
                   const SizedBox(width: Spacing.xs),
 
-                  // -- Save draft ------------------------
+                  // ── Save draft ────────────────────────
                   _CompactTool(
                     icon: Icons.drafts_outlined,
                     tooltip: 'Save draft',
@@ -531,7 +531,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         : null,
                   ),
 
-                  // -- Announcement toggle ---------------
+                  // ── Announcement toggle ───────────────
                   if (canAnnounce)
                     _CompactTool(
                       icon: Icons.campaign,
@@ -541,7 +541,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                           setState(() => _isAnnouncement = !_isAnnouncement),
                     ),
 
-                  // -- Schedule --------------------------
+                  // ── Schedule ──────────────────────────
                   _CompactTool(
                     icon: _scheduledFor != null
                         ? Icons.schedule
@@ -555,7 +555,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
                   const Spacer(),
 
-                  // -- Character counter -----------------
+                  // ── Character counter ─────────────────
                   SizedBox(
                     width: TouchTargets.minimum,
                     height: TouchTargets.minimum,
@@ -582,7 +582,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
                   const SizedBox(width: Spacing.sm),
 
-                  // -- Send button ------------------------
+                  // ── Send button ────────────────────────
                   ScaleTransition(
                     scale: _sendScale,
                     child: GestureDetector(
@@ -622,7 +622,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
   }
 }
 
-// -- Compact toolbar button --------------------------------
+// ── Compact toolbar button ────────────────────────────────
 
 class _CompactTool extends StatelessWidget {
   final IconData icon;

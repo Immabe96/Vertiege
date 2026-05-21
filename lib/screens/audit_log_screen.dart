@@ -88,7 +88,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: Text('${widget.worldName} — Realm Audit')),
+      appBar: AppBar(title: Text('${widget.worldName} â€” Realm Audit')),
       body: _loading
           ? const VLoadingList(itemCount: 8)
           : _error != null

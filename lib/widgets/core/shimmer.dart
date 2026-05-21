@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 
@@ -78,9 +78,9 @@ class Shimmer extends StatelessWidget {
   }
 }
 
-// ----------------------------------------------------------
-// ShimmerPostCard � backward-compatible, uses Pulse
-// ----------------------------------------------------------
+// ──────────────────────────────────────────────────────────
+// ShimmerPostCard — backward-compatible, uses Pulse
+// ──────────────────────────────────────────────────────────
 
 class ShimmerPostCard extends StatelessWidget {
   const ShimmerPostCard({super.key});
@@ -124,9 +124,9 @@ class ShimmerPostCard extends StatelessWidget {
   }
 }
 
-// ----------------------------------------------------------
-// ShimmerChatTile � backward-compatible, uses Pulse
-// ----------------------------------------------------------
+// ──────────────────────────────────────────────────────────
+// ShimmerChatTile — backward-compatible, uses Pulse
+// ──────────────────────────────────────────────────────────
 
 class ShimmerChatTile extends StatelessWidget {
   const ShimmerChatTile({super.key});

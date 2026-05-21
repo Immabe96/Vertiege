@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,7 +115,7 @@ class _PostInputState extends ConsumerState<PostInput>
     super.dispose();
   }
 
-  // -- Autocomplete --------------------------------------------
+  // ── Autocomplete ────────────────────────────────────────────
 
   static const List<String> _trendingHashtags = [
     'vertiege',
@@ -281,7 +281,7 @@ class _PostInputState extends ConsumerState<PostInput>
     _focusNode.requestFocus();
   }
 
-  // -- Drafts -------------------------------------------------
+  // ── Drafts ─────────────────────────────────────────────────
 
   String get _draftKey {
     final residentId = ref.read(residentProvider).resident?.id ?? 'anon';
@@ -334,7 +334,7 @@ class _PostInputState extends ConsumerState<PostInput>
     setState(() => _hasDraft = false);
   }
 
-  // -- Submit -------------------------------------------------
+  // ── Submit ─────────────────────────────────────────────────
 
   Future<void> _submit() async {
     final content = _controller.text.trim();
@@ -388,7 +388,7 @@ class _PostInputState extends ConsumerState<PostInput>
     });
   }
 
-  // -- Character count ----------------------------------------
+  // ── Character count ────────────────────────────────────────
 
   Color _charCountColor(int length) {
     if (length >= _maxChars) return VColors.error;
@@ -396,7 +396,7 @@ class _PostInputState extends ConsumerState<PostInput>
     return Theme.of(context).colorScheme.outline;
   }
 
-  // -- Build --------------------------------------------------
+  // ── Build ──────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -424,7 +424,7 @@ class _PostInputState extends ConsumerState<PostInput>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // -- Draft banner ---------------------------------
+            // ── Draft banner ─────────────────────────────────
             if (_hasDraft)
               Container(
                 margin: const EdgeInsets.only(bottom: Spacing.sm),
@@ -476,7 +476,7 @@ class _PostInputState extends ConsumerState<PostInput>
                 ),
               ),
 
-            // -- World selector (Nexus) -------------------------
+            // ── World selector (Nexus) ─────────────────────────
             if (widget.showWorldSelector && worlds.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: Spacing.sm),
@@ -526,7 +526,7 @@ class _PostInputState extends ConsumerState<PostInput>
                 ),
               ),
 
-            // -- Announcement toggle ---------------------------
+            // ── Announcement toggle ───────────────────────────
             if (canAnnounce)
               Padding(
                 padding: const EdgeInsets.only(bottom: Spacing.sm),
@@ -571,7 +571,7 @@ class _PostInputState extends ConsumerState<PostInput>
                 ),
               ),
 
-            // -- Text input + actions --------------------------
+            // ── Text input + actions ──────────────────────────
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -661,7 +661,7 @@ class _PostInputState extends ConsumerState<PostInput>
               ],
             ),
 
-            // -- Image preview ----------------------------------
+            // ── Image preview ──────────────────────────────────
             if (_imageUri != null) ...[
               const SizedBox(height: Spacing.sm),
               Stack(

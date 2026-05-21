@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -215,12 +215,12 @@ class _TrailPathPainter extends CustomPainter {
   String _tierIconForIndex(int index) {
     // Single-char icons for canvas rendering
     return switch (index) {
-      0 => '?', // ? triangle
-      1 => '?', // ? diamond
-      2 => '?', // ? star
-      3 => '?', // ? shield
-      4 => '?', // ? flag
-      _ => '?', // ? circle
+      0 => '▲', // ▲ triangle
+      1 => '◆', // ◆ diamond
+      2 => '☆', // ☆ star
+      3 => '♕', // ♕ shield
+      4 => '⚑', // ⚑ flag
+      _ => '●', // ● circle
     };
   }
 

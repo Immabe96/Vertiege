@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+ï»¿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
@@ -110,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Brand icon — gold gradient on obsidian
+              // Brand icon â€” gold gradient on obsidian
               Transform.scale(
                 scale: _iconScale.value,
                 child: Container(
@@ -157,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
               const SizedBox(height: Spacing.sm),
-              // Tagline — gold tint
+              // Tagline â€” gold tint
               Opacity(
                 opacity: _taglineFade.value,
               child: Text(
@@ -170,7 +170,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               ),
               const SizedBox(height: Spacing.xxl + Spacing.lg),
-              // Loading indicator — gold accent
+              // Loading indicator â€” gold accent
               Opacity(
                 opacity: _loaderFade.value,
                 child: SizedBox(
@@ -196,7 +196,7 @@ class _SplashScreenState extends State<SplashScreen>
       opacity: _shapesFade.value,
       child: const Stack(
         children: [
-          // Top-right large shape — gold
+          // Top-right large shape â€” gold
           Positioned(
             top: -120,
             right: -80,
@@ -207,7 +207,7 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: 0.08,
           ),
           ),
-          // Bottom-left medium shape — primary violet
+          // Bottom-left medium shape â€” primary violet
           Positioned(
             bottom: -100,
             left: -60,
@@ -218,7 +218,7 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: 0.07,
           ),
           ),
-          // Top-left small shape — gold
+          // Top-left small shape â€” gold
           Positioned(
             top: 80,
             left: -40,
@@ -229,7 +229,7 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: 0.06,
           ),
           ),
-          // Bottom-right small shape — violet
+          // Bottom-right small shape â€” violet
           Positioned(
             bottom: 180,
             right: -50,

@@ -1,4 +1,4 @@
-import 'dart:io';
+ï»¿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -138,7 +138,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
     }
 
-    // New users only get starter worlds — verification/tier gates unlock the rest
+    // New users only get starter worlds â€” verification/tier gates unlock the rest
     final starterWorlds = ref
         .read(worldProvider)
         .worlds
@@ -501,7 +501,7 @@ class _ProfileTab extends StatelessWidget {
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
-            'Self-declared — verification coming later.\nAll users start at the bottom and rank up.',
+            'Self-declared â€” verification coming later.\nAll users start at the bottom and rank up.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: isDark

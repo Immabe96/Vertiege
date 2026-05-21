@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../state/world_provider.dart';
@@ -101,7 +101,7 @@ class TrendingCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Prestige ${world.prestige}  �  ${world.memberCount} members',
+                            'Prestige ${world.prestige}  •  ${world.memberCount} members',
                             style: const TextStyle(
                               fontSize: FontSizes.labelSm,
                               color: VColors.outline,

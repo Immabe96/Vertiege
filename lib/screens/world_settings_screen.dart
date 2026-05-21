@@ -439,7 +439,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     const SizedBox(width: Spacing.sm),
                     const Expanded(
                       child: Text(
-                        'The Herald � Banner Generator',
+                        'The Herald — Banner Generator',
                         style: TextStyle(
                           fontSize: FontSizes.headlineMd,
                           fontWeight: FontWeights.semiBold,
@@ -494,7 +494,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     );
   }
 
-  // -- Section header builder --------------------------------------
+  // ── Section header builder ──────────────────────────────────────
 
   Widget _sectionHeader(IconData icon, String title) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -514,7 +514,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     );
   }
 
-  // -- Label above field -------------------------------------------
+  // ── Label above field ───────────────────────────────────────────
 
   Widget _fieldLabel(String text) {
     return Text(
@@ -525,7 +525,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     );
   }
 
-  // -- Ghost/underline input decoration ----------------------------
+  // ── Ghost/underline input decoration ────────────────────────────
 
   InputDecoration _ghostInputDecoration({
     String? hintText,
@@ -570,7 +570,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(Spacing.md),
                 children: [
-                  // -- Overview ----------------------------------
+                  // ── Overview ──────────────────────────────────
                   _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
@@ -691,7 +691,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Banner Generator ----------------------
+                  // ── Banner Generator ──────────────────────
                   _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
@@ -727,7 +727,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Channels -----------------------------------
+                  // ── Channels ───────────────────────────────────
                   _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: WorldSettingsChannels(
@@ -742,7 +742,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Lounge Settings (tier-gated) -------------
+                  // ── Lounge Settings (tier-gated) ─────────────
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 3,
                       )))
@@ -778,7 +778,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       )))
                     const SizedBox(height: Spacing.md),
 
-                  // -- Governance (tier-gated) -----------------
+                  // ── Governance (tier-gated) ─────────────────
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 4,
                       )))
@@ -816,7 +816,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Invites ------------------------------------
+                  // ── Invites ────────────────────────────────────
                   _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: WorldSettingsInvites(
@@ -833,7 +833,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Member Management --------------------------
+                  // ── Member Management ──────────────────────────
                   _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
@@ -1037,7 +1037,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Quiet Hours ----------------------------------
+                  // ── Quiet Hours ──────────────────────────────────
                   _Card(
                     padding: const EdgeInsets.all(Spacing.lg),
                     child: Column(
@@ -1145,13 +1145,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Boost World (dominion only) -----------------
+                  // ── Boost World (dominion only) ─────────────────
                   if (world.type == WorldType.dominion) ...[
                     _BoostWorldCard(worldId: widget.worldId),
                     const SizedBox(height: Spacing.md),
                   ],
 
-                  // -- Ranks ----------------------------------------
+                  // ── Ranks ────────────────────────────────────────
                   if (resident?.id == world.sovereignId)
                     _RanksSection(
                       worldId: widget.worldId,
@@ -1160,7 +1160,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Realm Audit ----------------------------------
+                  // ── Realm Audit ──────────────────────────────────
                   if (resident?.id == world.sovereignId)
                     ListTile(
                       leading: const Icon(
@@ -1187,7 +1187,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: Spacing.md),
 
-                  // -- Danger Zone ----------------------------------
+                  // ── Danger Zone ──────────────────────────────────
                   Container(
                     padding: const EdgeInsets.all(Spacing.lg),
                     decoration: BoxDecoration(
@@ -1256,9 +1256,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   }
 }
 
-// ----------------------------------------------------------
-// Boost World Card � dominion world level progression via IAP
-// ----------------------------------------------------------
+// ──────────────────────────────────────────────────────────
+// Boost World Card — dominion world level progression via IAP
+// ──────────────────────────────────────────────────────────
 
 class _BoostWorldCard extends ConsumerWidget {
   final String worldId;

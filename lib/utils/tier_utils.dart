@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/v_colors.dart';
 
 /// Maps standing level to a tier-appropriate color for the standing badge.

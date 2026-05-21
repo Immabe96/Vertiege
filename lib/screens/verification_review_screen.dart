@@ -89,7 +89,7 @@ class _VerificationReviewScreenState
     }
   }
 
-  // -- Flagged post actions ---------------------------------------
+  // ── Flagged post actions ───────────────────────────────────────
 
   void _approvePost(Post post) {
     ref.read(postProvider.notifier).editPostStatus(post.id, 'published');

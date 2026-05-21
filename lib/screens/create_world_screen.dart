@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/world.dart';
@@ -293,7 +293,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   ),
                 ),
                 const SizedBox(height: Spacing.lg),
-                // -- Progress bar ------------------------------
+                // ── Progress bar ──────────────────────────────
                 ClipRRect(
                   borderRadius: BorderRadius.circular(VRadius.md),
                   child: LinearProgressIndicator(
@@ -360,12 +360,12 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // -- Level gate: must be High Roller (tier >= 2) -------------
+    // ── Level gate: must be High Roller (tier >= 2) ─────────────
     if (!_canCreateWorld) {
       return _buildLockedView(context);
     }
 
-    // -- World creation limit gate --------------------------------
+    // ── World creation limit gate ────────────────────────────────
     if (_tierLoaded && _isAtWorldCreationLimit) {
       return _buildWorldLimitReachedView(context);
     }
@@ -378,7 +378,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
         child: ListView(
           padding: const EdgeInsets.all(Spacing.md),
           children: [
-            // -- World Details --------------------------------------
+            // ── World Details ──────────────────────────────────────
             _Card(
               padding: const EdgeInsets.all(Spacing.md),
               child: Column(
@@ -529,7 +529,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: Spacing.md),
 
-            // -- Dominion Type ----------------------------------------
+            // ── Dominion Type ────────────────────────────────────────
             _Card(
               padding: const EdgeInsets.all(Spacing.md),
               child: DominionTypePicker(
@@ -540,7 +540,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: Spacing.md),
 
-            // -- Channels -------------------------------------------
+            // ── Channels ───────────────────────────────────────────
             _Card(
               padding: const EdgeInsets.all(Spacing.md),
               child: Column(
@@ -586,7 +586,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: Spacing.xl),
 
-            // -- Submit � gold CTA ----------------------------------
+            // ── Submit — gold CTA ──────────────────────────────────
             SizedBox(
               height: 48,
               child: FilledButton.icon(

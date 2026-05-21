@@ -1,4 +1,4 @@
-import '../services/supabase.dart';
+﻿import '../services/supabase.dart';
 import '../theme/v_colors.dart';
 
 enum SubscriptionTier { resident, patrician, sovereignElite }
@@ -11,7 +11,7 @@ class SubscriptionService {
   static String? _cachedUserId;
 
   /// Verifies subscription tier from Supabase (server-side).
-  /// Caches result in memory only � never persists to SharedPreferences.
+  /// Caches result in memory only — never persists to SharedPreferences.
   static Future<SubscriptionTier> verifySubscription(String userId) async {
     if (_cachedUserId == userId && _cachedTier != null) {
       return _cachedTier!;

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ï»¿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -245,7 +245,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     // Discord-like two-panel layout
     return Row(
       children: [
-        // Left rail — vertical world icons
+        // Left rail â€” vertical world icons
         _WorldRail(
           worlds: joinedWorlds,
           selectedWorldId: selectedWorld.id,
@@ -254,7 +254,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             ref.read(channelProvider.notifier).loadChannels(worldId);
           },
         ),
-        // Right panel — world header + channel list
+        // Right panel â€” world header + channel list
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -811,7 +811,7 @@ class _WorldPanelHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$residentCount Residents · Lv.$prestige',
+                  '$residentCount Residents Â· Lv.$prestige',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: isDark
                         ? VColors.onSurfaceVariantDark

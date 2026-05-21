@@ -62,7 +62,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     super.dispose();
   }
 
-  // -- Date grouping helpers ------------------------------------------
+  // ── Date grouping helpers ──────────────────────────────────────────
 
   _DateGroup _groupForNotification(AppNotification n) {
     final now = DateTime.now();
@@ -84,7 +84,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     };
   }
 
-  // -- Mark all read animation ----------------------------------------
+  // ── Mark all read animation ────────────────────────────────────────
 
   void _onMarkAllRead() {
     HapticFeedback.lightImpact();
@@ -92,7 +92,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     ref.read(notificationProvider.notifier).markAllRead();
   }
 
-  // -- Build ----------------------------------------------------------
+  // ── Build ──────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +137,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     );
   }
 
-  // -- Notification list with grouped slivers -------------------------
+  // ── Notification list with grouped slivers ─────────────────────────
 
   Widget _buildNotificationList(
     BuildContext context,
@@ -201,9 +201,9 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
   }
 }
 
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 // Sticky section header
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final String title;
@@ -271,9 +271,9 @@ class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
       textColor != oldDelegate.textColor;
 }
 
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 // Notification item list with dual-swipe cards
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _NotificationSliverList extends StatelessWidget {
   final List<AppNotification> notifications;
@@ -356,12 +356,12 @@ class _NotificationSliverList extends StatelessWidget {
               direction: DismissDirection.horizontal,
               confirmDismiss: (direction) async {
                 if (direction == DismissDirection.startToEnd) {
-                  // Swipe right ? mark as read, keep in list.
+                  // Swipe right → mark as read, keep in list.
                   HapticFeedback.lightImpact();
                   notifier.markRead(n.id);
                   return false;
                 } else {
-                  // Swipe left ? archive (mark as read and dismiss).
+                  // Swipe left → archive (mark as read and dismiss).
                   HapticFeedback.lightImpact();
                   notifier.markRead(n.id);
                   return true;
@@ -411,9 +411,9 @@ class _NotificationSliverList extends StatelessWidget {
   }
 }
 
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 // Swipe backgrounds
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _SwipeBackground extends StatelessWidget {
   final Color color;
@@ -443,9 +443,9 @@ class _SwipeBackground extends StatelessWidget {
   }
 }
 
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 // Enhanced notification card with glass styling
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _NotificationCard extends StatelessWidget {
   final AppNotification notification;
@@ -481,7 +481,7 @@ class _NotificationCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // -- Left accent border for unread --
+                    // ── Left accent border for unread ──
                     if (unread)
                       Container(
                         width: 3,
@@ -493,13 +493,13 @@ class _NotificationCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    // -- Card body --
+                    // ── Card body ──
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(Spacing.md),
                         child: Row(
                           children: [
-                            // -- Type icon in tinted container --
+                            // ── Type icon in tinted container ──
                             Container(
                               width: 36,
                               height: 36,
@@ -516,7 +516,7 @@ class _NotificationCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: Spacing.md),
-                            // -- Message --
+                            // ── Message ──
                             Expanded(
                               child: Text(
                                 n.message,
@@ -538,7 +538,7 @@ class _NotificationCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: Spacing.sm),
-                            // -- Relative timestamp --
+                            // ── Relative timestamp ──
                             TimeAgo(
                               DateTime.fromMillisecondsSinceEpoch(n.createdAt),
                               style: theme.textTheme.labelSmall?.copyWith(

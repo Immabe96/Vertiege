@@ -80,9 +80,9 @@ class ScreenLoading extends StatelessWidget {
   }
 }
 
-// --------------------------------------------------------------
+// ──────────────────────────────────────────────────────────────
 // Glass-styled shimmer placeholders
-// --------------------------------------------------------------
+// ──────────────────────────────────────────────────────────────
 
 class _GlassPostCardShimmer extends StatelessWidget {
   const _GlassPostCardShimmer();

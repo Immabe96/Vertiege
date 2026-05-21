@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../models/world.dart';
 import '../theme/v_colors.dart';
 
@@ -129,7 +129,7 @@ class WorldAssets {
     Icons.emoji_events,
   ];
 
-  // -- Public API ----------------------------------------------
+  // ── Public API ──────────────────────────────────────────────
 
   /// Returns a unique accent color for a world based on its ID hash.
   static Color accentForWorld(String worldId) {
@@ -174,7 +174,7 @@ class WorldAssets {
     return VColors.tierHustler;
   }
 
-  /// Alias for [glowForPrestige] � clean name for UI-tier coloring.
+  /// Alias for [glowForPrestige] — clean name for UI-tier coloring.
   static Color colorForPrestige(int prestige) => glowForPrestige(prestige);
 
   /// Returns a map of pattern parameters for procedural banner generation.

@@ -164,9 +164,9 @@ class _InviteRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$usesLabel  ·  $displayDate'
-                    '${invite.isExpired ? '  ·  Expired' : ''}'
-                    '${invite.isExhausted ? '  ·  Exhausted' : ''}',
+                    '$usesLabel  Â·  $displayDate'
+                    '${invite.isExpired ? '  Â·  Expired' : ''}'
+                    '${invite.isExhausted ? '  Â·  Exhausted' : ''}',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: VColors.outline,
                     ),

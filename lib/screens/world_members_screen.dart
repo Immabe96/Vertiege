@@ -99,7 +99,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        title: Text('${widget.worldName} — Members'),
+        title: Text('${widget.worldName} â€” Members'),
         actions: [
           IconButton(
             icon: const Icon(VIcons.search),

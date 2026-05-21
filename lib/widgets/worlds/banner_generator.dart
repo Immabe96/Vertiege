@@ -205,14 +205,14 @@ class _PulseWidgetState extends State<_PulseWidget>
   }
 }
 
-// -- Variant model ----------------------------------------
+// ── Variant model ────────────────────────────────────────
 
 class _Variant {
   final int index;
   const _Variant({required this.index});
 }
 
-// -- Procedural variant painter ----------------------------
+// ── Procedural variant painter ────────────────────────────
 
 class _VariantPainter extends CustomPainter {
   final int seed;
