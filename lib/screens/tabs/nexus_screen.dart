@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
+import '../../services/world_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../models/post.dart';
@@ -49,6 +50,13 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final postState = ref.read(postProvider);
+      if (postState.posts.isEmpty && !postState.isLoading) {
+        ref.read(postProvider.notifier).loadPosts();
+      }
+    });
   }
 
   @override
@@ -106,16 +114,29 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
     final posts = ref.watch(
       postProvider.select((postState) {
+        final joinedIds = resident?.joinedWorldIds
+                .where(WorldService.isRemoteWorldId)
+                .toSet() ??
+            {};
         var filtered = switch (_tab) {
-          _FeedTab.all => postState.posts,
-          _FeedTab.following =>
-            postState.posts
-                .where(
-                  (p) => resident?.following.contains(p.residentId) ?? false,
-                )
-                .toList(),
-          _FeedTab.announcements =>
-            postState.posts.where((p) => p.isAnnouncement).toList(),
+          _FeedTab.all => postState.posts
+              .where((p) => joinedIds.isEmpty || joinedIds.contains(p.worldId))
+              .toList(),
+          _FeedTab.following => postState.posts.where((p) {
+            if (!joinedIds.contains(p.worldId)) return false;
+            final inMutual =
+                postState.mutualWorldResidentIds.contains(p.residentId);
+            final follows =
+                resident?.following.contains(p.residentId) ?? false;
+            return inMutual && follows;
+          }).toList(),
+          _FeedTab.announcements => postState.posts
+              .where(
+                (p) =>
+                    p.isAnnouncement &&
+                    (joinedIds.isEmpty || joinedIds.contains(p.worldId)),
+              )
+              .toList(),
         };
 
         if (_searchQuery.isNotEmpty) {
@@ -556,8 +577,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     switch (_tab) {
       case _FeedTab.following:
         return const AppEmptyState(
-          title: 'No posts from followed residents',
-          description: 'Follow residents to see their posts here',
+          title: 'No posts from people you follow',
+          description:
+              'Follow residents in your worlds to see their posts here',
           icon: Icons.people_outline,
         );
       case _FeedTab.announcements:

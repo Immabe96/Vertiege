@@ -22,6 +22,27 @@ class PostRepository {
   static const unbookmarkPostMutation = 'post.unbookmark';
   static const votePollMutation = 'post.poll.vote';
 
+  /// Residents who share at least one of [worldIds] (for Nexus "Following" filter).
+  Future<Set<String>> residentIdsInWorlds(
+    List<String> worldIds, {
+    String? excludeResidentId,
+  }) async {
+    if (!isSupabaseConfigured() || worldIds.isEmpty) return {};
+    final client = getSupabase();
+    final data = await client
+        .from('world_members')
+        .select('resident_id')
+        .inFilter('world_id', worldIds);
+    final ids = <String>{};
+    for (final row in (data as List).cast<Map<String, dynamic>>()) {
+      final id = row['resident_id'] as String?;
+      if (id == null || id.isEmpty) continue;
+      if (excludeResidentId != null && id == excludeResidentId) continue;
+      ids.add(id);
+    }
+    return ids;
+  }
+
   Future<PaginatedResult<Map<String, dynamic>>> loadPosts({
     String? worldId,
     String? cursor,

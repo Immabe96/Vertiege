@@ -492,7 +492,7 @@ class _PostInputState extends ConsumerState<PostInput>
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(RadiusTokens.input),
                     ),
-                    labelText: 'Post to',
+                    labelText: 'Post to (Nexus shows all joined worlds)',
                     labelStyle: theme.textTheme.labelSmall,
                   ),
                   items: [
@@ -507,7 +507,10 @@ class _PostInputState extends ConsumerState<PostInput>
                             color: theme.colorScheme.outline,
                           ),
                           const SizedBox(width: Spacing.xs),
-                          Text('My Feed', style: theme.textTheme.labelMedium),
+                          Text(
+                            'Default world',
+                            style: theme.textTheme.labelMedium,
+                          ),
                         ],
                       ),
                     ),

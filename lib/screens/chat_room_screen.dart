@@ -239,6 +239,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final recipientName = _recipientName(room, resident?.id ?? '');
     final recipientAvatar = _recipientAvatar(room);
     final recipientId = _recipientId(room, resident?.id ?? '');
+    final recipientPresence = _presenceFromRoom(room, resident?.id ?? '');
 
     final displayItems = buildChatDisplayItems(messages);
 
@@ -264,6 +265,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         recipientName,
         recipientAvatar,
         recipientId,
+        recipientPresence,
       ),
       body: Column(
         children: [
@@ -332,12 +334,29 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     );
   }
 
+  Presence _presenceFromRoom(
+    Map<String, dynamic>? room,
+    String currentUserId,
+  ) {
+    if (room == null) return Presence.offline;
+    final otherLastSeen = room['other_last_seen_at'] as int?;
+    if (otherLastSeen == null || otherLastSeen == 0) {
+      return Presence.offline;
+    }
+    final lastSeen = DateTime.fromMillisecondsSinceEpoch(otherLastSeen);
+    final diff = DateTime.now().difference(lastSeen).inMinutes;
+    if (diff < 3) return Presence.online;
+    if (diff < 15) return Presence.idle;
+    return Presence.offline;
+  }
+
   PreferredSizeWidget _buildAppBar(
     ThemeData theme,
     bool isDark,
     String recipientName,
     String? recipientAvatar,
     String? recipientId,
+    Presence presence,
   ) {
     return AppBar(
       backgroundColor:
@@ -367,16 +386,26 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const StatusDot(
-                    presence: Presence.online,
+                  StatusDot(
+                    presence: presence,
                     size: 6,
                     borderWidth: 1,
                   ),
                   const SizedBox(width: VSpacing.xs),
                   Text(
-                    'Online',
+                    switch (presence) {
+                      Presence.online => 'Online',
+                      Presence.idle => 'Idle',
+                      Presence.offline => 'Offline',
+                    },
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.success,
+                      color: switch (presence) {
+                        Presence.online => VColors.success,
+                        Presence.idle => VColors.warning,
+                        Presence.offline => isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      },
                       fontSize: VFontSize.labelSm,
                     ),
                   ),

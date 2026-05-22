@@ -40,10 +40,13 @@ class PostState {
   final String? lastError;
   final bool isLoadingMore;
   final bool hasMorePosts;
+  /// Residents in any joined world (for Nexus mutual-world filter).
+  final Set<String> mutualWorldResidentIds;
 
   const PostState({
     this.posts = const [],
     this.followingPosts = const [],
+    this.mutualWorldResidentIds = const {},
     this.bookmarkedPostIds = const {},
     this.error,
     this.isLoading = false,
@@ -59,6 +62,7 @@ class PostState {
   PostState copyWith({
     List<Post>? posts,
     List<Post>? followingPosts,
+    Set<String>? mutualWorldResidentIds,
     Set<String>? bookmarkedPostIds,
     String? error,
     bool? isLoading,
@@ -72,6 +76,8 @@ class PostState {
   }) => PostState(
     posts: posts ?? this.posts,
     followingPosts: followingPosts ?? this.followingPosts,
+    mutualWorldResidentIds:
+        mutualWorldResidentIds ?? this.mutualWorldResidentIds,
     bookmarkedPostIds: bookmarkedPostIds ?? this.bookmarkedPostIds,
     error: clearError ? null : error ?? this.error,
     isLoading: isLoading ?? this.isLoading,
@@ -813,22 +819,35 @@ class PostNotifier extends Notifier<PostState> {
   Future<void> loadPosts() async {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
-      _currentLimit = 20;
+      _currentLimit = 25;
       _lastCursor = null;
-      _hasMore = true;
+      _hasMore = false;
 
       await _postsRepository.replayOutbox();
-      final remote = await _postsRepository.loadPosts(limit: _currentLimit);
-      final merged = remote.items.map(_postFromJson).toList();
+
+      final resident = ref.read(residentProvider).resident;
+      final joinedWorldIds = resident?.joinedWorldIds
+              .where(WorldService.isRemoteWorldId)
+              .toList() ??
+          <String>[];
+
+      Set<String> mutualIds = {};
+      if (joinedWorldIds.isNotEmpty && resident != null) {
+        mutualIds = await _postsRepository.residentIdsInWorlds(
+          joinedWorldIds,
+          excludeResidentId: resident.id,
+        );
+      }
+
       final joinedWorldPosts = await _loadPostsFromJoinedWorlds();
-      final posts = _mergePosts(merged, joinedWorldPosts);
-      _hasMore = remote.hasMore;
-      _lastCursor = remote.nextCursor;
+      final posts = joinedWorldPosts ?? [];
+
       state = state.copyWith(
         posts: posts,
+        mutualWorldResidentIds: mutualIds,
         isLoading: false,
         clearError: true,
-        hasMorePosts: _hasMore,
+        hasMorePosts: false,
       );
       _persist();
       unawaited(_subscribeRealtime());
@@ -983,23 +1002,21 @@ class PostNotifier extends Notifier<PostState> {
         .toList();
     if (joinedWorldIds == null || joinedWorldIds.isEmpty) return null;
 
-    final results = await Future.wait(
-      joinedWorldIds.map(
-        (worldId) => _postsRepository.loadPosts(worldId: worldId),
-      ),
-    );
-
     final posts = <Post>[];
-    var hadSuccessfulRequest = false;
-    for (final result in results) {
-      if (result.items.isNotEmpty) {
-        hadSuccessfulRequest = true;
+    for (final worldId in joinedWorldIds) {
+      try {
+        final result = await _postsRepository.loadPosts(
+          worldId: worldId,
+          limit: _currentLimit,
+        );
         posts.addAll(result.items.map(_postFromJson));
+      } catch (_) {
+        // Skip worlds that fail; continue with others.
       }
     }
 
-    if (!hadSuccessfulRequest) return null;
-    return _sortPosts(posts).take(50).toList();
+    if (posts.isEmpty) return [];
+    return _sortPosts(posts).take(150).toList();
   }
 
   static Post _postFromJson(Map<String, dynamic> json) {
