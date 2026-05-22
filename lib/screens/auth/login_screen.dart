@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../services/verifier_session.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/core/fade_in.dart';
@@ -59,6 +60,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
 
       if (!mounted) return;
+
+      VerifierSession.exit();
 
       await ref.read(residentProvider.notifier).loadResident();
       if (!mounted) return;

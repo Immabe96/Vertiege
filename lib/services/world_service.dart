@@ -9,7 +9,12 @@ import 'crash_reporter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WorldService {
-  static bool isRemoteWorldId(String worldId) => validators.isUuid(worldId);
+  /// True when [worldId] refers to a row in Supabase `worlds` (UUID or slug pk).
+  static bool isRemoteWorldId(String worldId) {
+    if (validators.isUuid(worldId)) return true;
+    // Default/seeded worlds use slug ids (e.g. neon-district, crystal-shore).
+    return RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(worldId);
+  }
 
   // --- World CRUD ---
 

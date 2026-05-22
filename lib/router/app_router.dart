@@ -38,7 +38,10 @@ import '../screens/cosmetics_shop_screen.dart';
 import '../screens/hall_of_ascension_screen.dart';
 import '../screens/journey/ascension_path_screen.dart';
 import '../screens/season_screen.dart';
-import '../screens/verification_review_screen.dart';
+import '../screens/auth/verifier_login_screen.dart';
+import '../screens/verifier_portal_screen.dart';
+import '../services/admin_access_service.dart';
+import '../services/verifier_session.dart';
 import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
@@ -72,29 +75,52 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Never interrupt deep-link auth callbacks or splash
       if (location == '/auth/callback' || location == '/splash') return null;
 
+      final isVerifierRoute = location.startsWith('/verifier');
+      final isVerifierLogin = location == '/verifier/login';
+
+      // Legacy admin URL → verifier portal
+      if (location == '/admin/verifications') return '/verifier/review';
+
+      final hasSession = supabaseClient?.auth.currentSession != null;
+      final currentUser = supabaseClient?.auth.currentUser;
+      final isVerifier = AdminAccessService.isVerifierUser(currentUser);
+
+      // ── Verifier portal (staff only, no main app) ─────────────────
+      if (isVerifierRoute) {
+        if (!hasSession) {
+          return isVerifierLogin ? null : '/verifier/login';
+        }
+        if (!isVerifier) {
+          return '/verifier/login';
+        }
+        if (location == '/verifier/review' && !VerifierSession.active) {
+          return '/verifier/login';
+        }
+        if (isVerifierLogin && VerifierSession.active) {
+          return '/verifier/review';
+        }
+        return null;
+      }
+
+      if (hasSession && isVerifier && VerifierSession.active) {
+        return '/verifier/review';
+      }
+
       // Auth pages are always accessible (they handle their own state)
       final isAuthPage = location == '/login' || location == '/signup';
 
-      // Check for a cached Supabase session (synchronous)
-      final hasSession = supabaseClient?.auth.currentSession != null;
-
       if (!hasSession) {
-        // Not authenticated — allow access only to auth pages
         if (!isAuthPage) return '/login';
         return null;
       }
 
-      // Authenticated with a session
       if (isLoading) return null;
 
       if (resident == null) {
-        // No resident profile yet — redirect to onboarding
         if (location != '/onboarding') return '/onboarding';
         return null;
       }
 
-      // Authenticated with resident but hasn't completed The Gate
-      // Onboarding + Gate are now merged into a single flow
       final gateDone = resident.gateCompleted;
       if (!gateDone) {
         if (location != '/onboarding') {
@@ -103,13 +129,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Tier-gated routes — redirect home if not authorized
       final tier = resident.tier.value;
-      if (location.startsWith('/admin') && tier < 4) return '/';
       if (location == '/create-world' && tier < 2) return '/';
       if (location == '/subscription' && tier < 2) return '/';
 
-      // Authenticated with resident — redirect away from auth/onboarding pages
       if (isAuthPage || location == '/onboarding' || location == '/the-gate') {
         return '/';
       }
@@ -358,8 +381,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/admin/verifications',
-        builder: (context, state) => const VerificationReviewScreen(),
+        path: '/verifier/login',
+        builder: (context, state) => const VerifierLoginScreen(),
+      ),
+      GoRoute(
+        path: '/verifier/review',
+        builder: (context, state) => const VerifierPortalScreen(),
       ),
       GoRoute(
         path: '/twin-seal',

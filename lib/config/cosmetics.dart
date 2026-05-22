@@ -109,7 +109,17 @@ const Map<String, String> decorationLabels = {
   'Finance_badge': 'Verified Financier',
   'Arts_badge': 'Verified Artist',
   'Aviation_badge': 'Verified Pilot',
+  'Technology_badge': 'Verified Technologist',
 };
+
+/// Profession badges earned via verification (not shop cosmetics).
+List<String> professionBadgeIdsFor(Iterable<String> verifiedRoles) {
+  return verifiedRoles
+      .map((role) => '${role}_badge')
+      .where(decorationLabels.containsKey)
+      .toSet()
+      .toList();
+}
 
 enum DecorationType {
   circle,
@@ -130,6 +140,7 @@ DecorationType decorationTypeForBadge(String badgeId) {
     'Finance_badge' => DecorationType.ripple,
     'Arts_badge' => DecorationType.crosshair,
     'Aviation_badge' => DecorationType.hexagonRipple,
+    'Technology_badge' => DecorationType.progressBar,
     _ => DecorationType.target,
   };
 }

@@ -11,10 +11,12 @@ class BadgeDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     if (earnedBadgeIds.isEmpty) return const SizedBox.shrink();
 
+    final uniqueProfessionBadges = earnedBadgeIds.toSet().toList();
+
     return Wrap(
       spacing: Spacing.sm,
       runSpacing: Spacing.xs,
-      children: earnedBadgeIds
+      children: uniqueProfessionBadges
           .map((id) => badge_widget.Badge(decorationId: id))
           .toList(),
     );

@@ -27,6 +27,7 @@ import '../../widgets/profile/subscription_badge.dart';
 import '../../widgets/profile/trophy_case.dart';
 import '../../widgets/core/tier_up_dialog.dart';
 import '../../config/achievements.dart';
+import '../../config/cosmetics.dart';
 
 class IdentityScreen extends ConsumerStatefulWidget {
   const IdentityScreen({super.key});
@@ -722,8 +723,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
           const Divider(height: 1),
 
-          // ── Badges section ─────────────────────────────
-          if (resident.decorations.isNotEmpty) ...[
+          // ── Badges section (profession verifications only) ──
+          if (professionBadgeIdsFor(resident.verifiedRoles).isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 VSpacing.lg,
@@ -750,7 +751,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: BadgeDisplay(earnedBadgeIds: resident.decorations),
+              child: BadgeDisplay(
+                earnedBadgeIds: professionBadgeIdsFor(resident.verifiedRoles),
+              ),
             ),
             const SizedBox(height: VSpacing.lg),
             const Divider(height: 1),

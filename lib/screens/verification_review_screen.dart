@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../services/verification_service.dart';
+import '../services/achievement_review_service.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/design_system.dart';
@@ -10,7 +11,10 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/loading_state.dart';
 
 class VerificationReviewScreen extends ConsumerStatefulWidget {
-  const VerificationReviewScreen({super.key});
+  const VerificationReviewScreen({super.key, this.onSignOut});
+
+  /// When set (verifier portal), shows sign-out instead of normal back navigation.
+  final VoidCallback? onSignOut;
 
   @override
   ConsumerState<VerificationReviewScreen> createState() =>
@@ -20,12 +24,15 @@ class VerificationReviewScreen extends ConsumerStatefulWidget {
 class _VerificationReviewScreenState
     extends ConsumerState<VerificationReviewScreen> {
   List<VerificationSubmission> _submissions = [];
+  List<PendingAchievementSubmission> _achievementSubmissions = [];
   bool _loading = true;
+  bool _achievementsLoading = true;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _loadAchievements();
   }
 
   @override
@@ -40,6 +47,17 @@ class _VerificationReviewScreenState
       setState(() {
         _submissions = pending;
         _loading = false;
+      });
+    }
+  }
+
+  Future<void> _loadAchievements() async {
+    setState(() => _achievementsLoading = true);
+    final pending = await AchievementReviewService.getPending();
+    if (mounted) {
+      setState(() {
+        _achievementSubmissions = pending;
+        _achievementsLoading = false;
       });
     }
   }
@@ -107,14 +125,29 @@ class _VerificationReviewScreenState
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       appBar: AppBar(
-        title: const Text('Verification Review'),
-
+        title: const Text('Staff review'),
+        automaticallyImplyLeading: widget.onSignOut == null,
+        actions: [
+          if (widget.onSignOut != null)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Sign out',
+              onPressed: widget.onSignOut,
+            ),
+        ],
       ),
       body: FTabs(
         expands: true,
         control: const FTabControl.managed(),
         children: [
-          FTabEntry(label: const Text('Verifications'), child: _buildVerificationsTab(theme)),
+          FTabEntry(
+            label: const Text('Professions'),
+            child: _buildVerificationsTab(theme),
+          ),
+          FTabEntry(
+            label: const Text('Achievements'),
+            child: _buildAchievementsTab(theme),
+          ),
           FTabEntry(label: const Text('Flagged Posts'), child: _buildFlaggedPostsTab(theme)),
         ],
       ),
@@ -244,6 +277,152 @@ class _VerificationReviewScreenState
                     ],
                   ],
                 ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _approveAchievement(PendingAchievementSubmission s) async {
+    await AchievementReviewService.approve(
+      userId: s.userId,
+      achievementId: s.achievementId,
+    );
+    _loadAchievements();
+  }
+
+  Future<void> _rejectAchievement(PendingAchievementSubmission s) async {
+    final notesController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reject achievement?'),
+        content: TextField(
+          controller: notesController,
+          decoration: const InputDecoration(
+            hintText: 'Reason (optional)',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 2,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await AchievementReviewService.reject(
+        userId: s.userId,
+        achievementId: s.achievementId,
+        notes: notesController.text.trim(),
+      );
+      _loadAchievements();
+    }
+  }
+
+  Widget _buildAchievementsTab(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    if (_achievementsLoading) return const VLoadingList();
+    if (_achievementSubmissions.isEmpty) {
+      return const AppEmptyState(
+        title: 'No pending achievements',
+        description:
+            'Submitted achievement proofs (e.g. education, career) appear here.',
+        icon: Icons.emoji_events_outlined,
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _loadAchievements,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(Spacing.md),
+        itemCount: _achievementSubmissions.length,
+        itemBuilder: (_, i) {
+          final s = _achievementSubmissions[i];
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: i < _achievementSubmissions.length - 1 ? Spacing.sm : 0,
+            ),
+            child: _Card(
+              padding: const EdgeInsets.all(Spacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.emoji_events, color: VColors.primary),
+                      const SizedBox(width: Spacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.residentName,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeights.bold,
+                              ),
+                            ),
+                            Text(
+                              s.achievementTitle,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: VColors.primary,
+                              ),
+                            ),
+                            if (s.submittedAt != null)
+                              Text(
+                                s.submittedAt!.toLocal().toString(),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: VColors.error),
+                        tooltip: 'Reject',
+                        onPressed: () => _rejectAchievement(s),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.check, color: VColors.success),
+                        tooltip: 'Approve',
+                        onPressed: () => _approveAchievement(s),
+                      ),
+                    ],
+                  ),
+                  if (s.aiNotes != null && s.aiNotes!.isNotEmpty) ...[
+                    const SizedBox(height: Spacing.sm),
+                    Text(s.aiNotes!, style: theme.textTheme.bodySmall),
+                  ],
+                  if (s.proofUri != null &&
+                      s.proofUri!.isNotEmpty &&
+                      s.proofUri!.startsWith('http')) ...[
+                    const SizedBox(height: Spacing.md),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(RadiusTokens.full),
+                      child: Image.network(
+                        s.proofUri!,
+                        height: 176,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           );

@@ -115,6 +115,20 @@ Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE
 
 AI code navigation (optional, local): [CODEGRAPH.md](CODEGRAPH.md) — semantic index for Cursor MCP; run `.\scripts\codegraph-index.ps1` once per clone.
 
+**Verifier portal (staff):** not in Settings. After installing the APK:
+
+1. Connect the phone with USB debugging and run:
+
+   ```powershell
+   adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.imma96.virtual_status_worlds
+   ```
+
+2. Sign in with a verifier account (`is_verifier` in Supabase Auth, or email in `VERIFIER_ADMIN_EMAILS`).
+
+3. You only see **Staff review** (profession verifications, **achievement queue**, flagged posts) and **Sign out**.
+
+Use normal app login (`/login`) for everyday play; use the deep link above for review work only.
+
 ## Release gate (before `main` / APK)
 
 1. Finish audit/fix work on `develop`; **push `develop` to origin** so CI builds the APK.

@@ -886,22 +886,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
 
-            _sectionHeader('MODERATION', isDark),
-            _sectionCard(
-              isDark: isDark,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.verified_user, size: VIconSize.md),
-                  title: const Text('Verification Review'),
-                  subtitle: const Text(
-                    'Review pending profession verification requests',
-                  ),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
-                  onTap: () => context.push('/admin/verifications'),
-                ),
-              ],
-            ),
-
             _sectionHeader('ACCOUNT', isDark),
             _sectionCard(
               isDark: isDark,

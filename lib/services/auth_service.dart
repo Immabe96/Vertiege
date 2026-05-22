@@ -1,5 +1,6 @@
 import 'supabase.dart';
 import 'secure_storage_service.dart';
+import 'verifier_session.dart';
 import 'crash_reporter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -125,6 +126,7 @@ class AuthService {
   }
 
   static Future<void> signOut() async {
+    VerifierSession.exit();
     final client = maybeSupabase();
     if (client != null) {
       await client.auth.signOut();
