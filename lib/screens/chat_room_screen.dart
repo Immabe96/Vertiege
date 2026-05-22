@@ -430,12 +430,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                     switch (presence) {
                       Presence.online => 'Online',
                       Presence.idle => 'Idle',
+                      Presence.dnd => 'Do not disturb',
                       Presence.offline => 'Offline',
                     },
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: switch (presence) {
                         Presence.online => VColors.success,
                         Presence.idle => VColors.warning,
+                        Presence.dnd => VColors.error,
                         Presence.offline => isDark
                             ? VColors.onSurfaceVariantDark
                             : VColors.onSurfaceVariant,

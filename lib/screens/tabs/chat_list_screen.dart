@@ -230,6 +230,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       (world) => world.id == _selectedWorldId,
       orElse: () => joinedWorlds.first,
     );
+    final currentUserId = ref.read(residentProvider).resident?.id;
     final channelState = ref.watch(channelProvider);
     final allChannels =
         channelState.channelsByWorld[selectedWorld.id] ?? [];
@@ -318,7 +319,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                           .read(chatProvider.notifier)
                                           .unreadCount(
                                             channel.id,
-                                            currentUserId: residentId,
+                                            currentUserId: currentUserId,
                                           );
                                       return _ChannelTile(
                                         channel: channel,
@@ -334,7 +335,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                           .read(chatProvider.notifier)
                                           .unreadCount(
                                             channel.id,
-                                            currentUserId: residentId,
+                                            currentUserId: currentUserId,
                                           );
                                       return _ChannelTile(
                                         channel: channel,
