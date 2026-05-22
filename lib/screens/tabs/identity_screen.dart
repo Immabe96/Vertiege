@@ -9,6 +9,7 @@ import '../../services/subscription_service.dart';
 import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
+import '../../state/post_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
@@ -262,7 +263,25 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               try {
                 await ref.read(residentProvider.notifier).loadResident();
                 await ref.read(achievementProvider.notifier).loadAchievements();
-              } catch (_) {}
+                await ref.read(postProvider.notifier).loadPosts();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Profile refreshed'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } catch (_) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Refresh failed'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
             },
           ),
           IconButton(

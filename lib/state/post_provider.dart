@@ -285,6 +285,13 @@ class PostNotifier extends Notifier<PostState> {
     String? cloudImageUrl = imageUri;
     if (imageUri != null && !imageUri.startsWith('http')) {
       cloudImageUrl = await MediaService.uploadPostImage(imageUri, residentId);
+      if (cloudImageUrl == null) {
+        state = state.copyWith(
+          isPosting: false,
+          lastError: 'Image upload failed',
+        );
+        return;
+      }
     }
 
     final optimisticPost = post.copyWith(
@@ -303,10 +310,15 @@ class PostNotifier extends Notifier<PostState> {
     );
 
     if (result.isSuccess) {
+      final syncedUris = cloudImageUrl == null
+          ? null
+          : (imageUris ?? [cloudImageUrl]);
       state = state.copyWith(
         posts: state.posts.map((p) {
           if (p.id != post.id) return p;
           return p.copyWith(
+            imageUri: cloudImageUrl ?? p.imageUri,
+            imageUris: syncedUris ?? p.imageUris,
             syncStatus: SyncStatus.synced,
             clearSyncError: true,
           );
@@ -807,7 +819,9 @@ class PostNotifier extends Notifier<PostState> {
 
       await _postsRepository.replayOutbox();
       final remote = await _postsRepository.loadPosts(limit: _currentLimit);
-      final posts = remote.items.map(_postFromJson).toList();
+      final merged = remote.items.map(_postFromJson).toList();
+      final joinedWorldPosts = await _loadPostsFromJoinedWorlds();
+      final posts = _mergePosts(merged, joinedWorldPosts);
       _hasMore = remote.hasMore;
       _lastCursor = remote.nextCursor;
       state = state.copyWith(
@@ -948,6 +962,15 @@ class PostNotifier extends Notifier<PostState> {
           },
         )
         .subscribe();
+  }
+
+  List<Post> _mergePosts(List<Post> primary, List<Post>? extra) {
+    if (extra == null || extra.isEmpty) return primary;
+    final byId = {for (final p in primary) p.id: p};
+    for (final p in extra) {
+      byId.putIfAbsent(p.id, () => p);
+    }
+    return _sortPosts(byId.values);
   }
 
   Future<List<Post>?> _loadPostsFromJoinedWorlds() async {

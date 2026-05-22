@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'analytics_events.dart';
 import 'analytics_service.dart';
@@ -79,9 +80,18 @@ class PushTokenService {
     } catch (_) {}
   }
 
+  static Future<void> _ensureAndroidPostNotifications() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+    final status = await Permission.notification.status;
+    if (!status.isGranted) {
+      await Permission.notification.request();
+    }
+  }
+
   static Future<NotificationSettings> _ensurePermission(
     FirebaseMessaging messaging,
   ) async {
+    await _ensureAndroidPostNotifications();
     var settings = await messaging.getNotificationSettings();
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
       settings = await messaging.requestPermission(

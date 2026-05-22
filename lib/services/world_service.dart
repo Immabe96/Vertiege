@@ -51,7 +51,8 @@ class WorldService {
       'prestige': 1,
       'icon': icon,
       'is_default': false,
-      'sort_order': DateTime.now().millisecondsSinceEpoch,
+      // Postgres `sort_order` is INT; ms since epoch overflows (22003).
+      'sort_order': DateTime.now().millisecondsSinceEpoch ~/ 1000,
       'created_at': DateTime.now().toIso8601String(),
       if (motto != null && motto.isNotEmpty) 'motto': motto,
       if (accentColor != null && accentColor.isNotEmpty)

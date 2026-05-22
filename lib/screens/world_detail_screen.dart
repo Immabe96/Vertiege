@@ -717,7 +717,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
               // ── Live Chat Preview ──
               SliverPersistentHeader(
-                pinned: true,
+                pinned: false,
                 delegate: _WorldTabBarDelegate(
                   controller: _tabController!,
                   color: prestigeTierColor,

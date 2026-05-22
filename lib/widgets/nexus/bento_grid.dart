@@ -51,8 +51,10 @@ class _BentoCardTile extends StatelessWidget {
         break;
     }
 
+    final minHeight = card.size == BentoSize.small ? 148.0 : null;
     final child = SizedBox(
       width: width,
+      height: minHeight,
       child: VSurfacePanel(
         useBlur: false,
         padding: const EdgeInsets.all(Spacing.md),

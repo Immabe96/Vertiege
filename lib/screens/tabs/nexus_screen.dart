@@ -1,6 +1,7 @@
 ﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../state/resident_provider.dart';
 import '../../state/post_provider.dart';
 import '../../state/notification_provider.dart';
@@ -396,37 +397,39 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                     ),
 
                     SliverToBoxAdapter(
-                      child: const BentoGrid(
+                      child: BentoGrid(
                         cards: [
-                          BentoCard(
+                          const BentoCard(
                             child: PrestigeProgressCard(),
                             size: BentoSize.medium,
                           ),
                           BentoCard(
-                            child: DailyQuestCard(),
+                            child: const DailyQuestCard(),
                             size: BentoSize.small,
+                            onTap: () => context.push('/challenges'),
                           ),
-                          BentoCard(
+                          const BentoCard(
                             child: SeasonSnapshotCard(),
                             size: BentoSize.small,
                           ),
-                          BentoCard(
+                          const BentoCard(
                             child: SpotlightCard(),
                             size: BentoSize.medium,
                           ),
                           BentoCard(
-                            child: ChallengesCard(),
+                            child: const ChallengesCard(),
+                            size: BentoSize.small,
+                            onTap: () => context.push('/challenges'),
+                          ),
+                          const BentoCard(
+                            child: LeagueCard(),
                             size: BentoSize.small,
                           ),
-                          BentoCard(
-                            child: const LeagueCard(),
-                            size: BentoSize.small,
-                          ),
-                          BentoCard(
+                          const BentoCard(
                             child: TrendingCard(),
                             size: BentoSize.large,
                           ),
-                          BentoCard(
+                          const BentoCard(
                             child: FeedPreviewCard(),
                             size: BentoSize.large,
                           ),

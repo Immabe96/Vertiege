@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../state/league_provider.dart';
 import '../../../state/resident_provider.dart';
 import '../../../services/league_service.dart';
@@ -109,9 +110,7 @@ class LeagueCard extends ConsumerWidget {
         const SizedBox(height: Spacing.sm),
         VButton(
           label: 'View Standings',
-          onPressed: () {
-            Navigator.pushNamed(context, '/leagues');
-          },
+          onPressed: () => context.push('/leagues'),
           variant: ButtonVariant.outlined,
           isFullWidth: true,
         ),

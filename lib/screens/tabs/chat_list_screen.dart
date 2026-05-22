@@ -41,10 +41,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final worldState = ref.watch(worldProvider);
     final joinedWorlds = resident == null
         ? <World>[]
-        : resident.joinedWorldIds
-              .map((id) => worldState.worlds[id])
-              .whereType<World>()
-              .toList();
+        : (resident.joinedWorldIds
+                  .map((id) => worldState.worlds[id])
+                  .whereType<World>()
+                  .toList()
+              ..sort((a, b) => a.name.compareTo(b.name)));
 
     if (residentId != null && !_didTriggerDmLoad) {
       _didTriggerDmLoad = true;
@@ -424,19 +425,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Presence _presence(Map<String, dynamic> room) {
     final otherLastSeen = room['other_last_seen_at'] as int?;
     if (otherLastSeen == null || otherLastSeen == 0) {
-      final lastAt = room['last_message_at'] as String?;
-      if (lastAt == null) return Presence.offline;
-      final last = DateTime.tryParse(lastAt);
-      if (last == null) return Presence.offline;
-      final diff = DateTime.now().difference(last).inMinutes;
-      if (diff < 2) return Presence.online;
-      if (diff < 10) return Presence.idle;
       return Presence.offline;
     }
     final lastSeen = DateTime.fromMillisecondsSinceEpoch(otherLastSeen);
     final diff = DateTime.now().difference(lastSeen).inMinutes;
-    if (diff < 2) return Presence.online;
-    if (diff < 10) return Presence.idle;
+    if (diff < 3) return Presence.online;
+    if (diff < 15) return Presence.idle;
     return Presence.offline;
   }
 

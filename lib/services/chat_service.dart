@@ -42,7 +42,61 @@ class ChatService {
         .select()
         .contains('resident_ids', [residentId])
         .order('last_message_at', ascending: false);
-    return (data as List).cast<Map<String, dynamic>>();
+    final rooms = (data as List).cast<Map<String, dynamic>>();
+    return _enrichDmRooms(rooms, residentId);
+  }
+
+  static Future<List<Map<String, dynamic>>> _enrichDmRooms(
+    List<Map<String, dynamic>> rooms,
+    String residentId,
+  ) async {
+    if (rooms.isEmpty || !isSupabaseConfigured()) return rooms;
+
+    final otherIds = <String>{};
+    for (final room in rooms) {
+      final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
+      for (final id in ids) {
+        if (id != residentId && id.isNotEmpty) otherIds.add(id);
+      }
+    }
+    if (otherIds.isEmpty) return rooms;
+
+    final client = getSupabase();
+    final profiles = await client
+        .from('profiles')
+        .select('id, name, avatar_url, last_seen_at')
+        .inFilter('id', otherIds.toList());
+
+    final byId = <String, Map<String, dynamic>>{};
+    for (final row in (profiles as List).cast<Map<String, dynamic>>()) {
+      final id = row['id'] as String?;
+      if (id != null) byId[id] = row;
+    }
+
+    return rooms.map((room) {
+      final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
+      final otherId = ids.firstWhere(
+        (id) => id != residentId,
+        orElse: () => ids.isNotEmpty ? ids.first : '',
+      );
+      final profile = otherId.isEmpty ? null : byId[otherId];
+      if (profile == null) return room;
+
+      final lastSeen = profile['last_seen_at'];
+      int? lastSeenMs;
+      if (lastSeen is int) {
+        lastSeenMs = lastSeen;
+      } else if (lastSeen is String) {
+        lastSeenMs = DateTime.tryParse(lastSeen)?.millisecondsSinceEpoch;
+      }
+
+      return {
+        ...room,
+        'other_name': profile['name'] ?? room['other_name'],
+        'other_avatar': profile['avatar_url'] ?? room['other_avatar'],
+        'other_last_seen_at': lastSeenMs,
+      };
+    }).toList();
   }
 
   static Future<void> sendMessage({

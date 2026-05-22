@@ -23,6 +23,7 @@ import '../profile/luminary_nameplate.dart';
 import 'comment_sheet.dart';
 import 'reaction_bar.dart';
 import 'heart_animation.dart';
+import 'post_image.dart';
 
 class PostItem extends ConsumerWidget {
   final Post post;
@@ -265,14 +266,7 @@ class PostItem extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: post.allImageUris.length == 1
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            child: Image.network(
-                              post.allImageUris.first,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                          )
+                        ? PostImage(uri: post.allImageUris.first)
                         : _ImageCarousel(imageUris: post.allImageUris),
                   ),
                 ],
@@ -1043,10 +1037,9 @@ class _ImageCarouselState extends State<_ImageCarousel> {
               itemCount: widget.imageUris.length,
               onPageChanged: (index) => setState(() => _currentPage = index),
               itemBuilder: (context, index) {
-                return Image.network(
-                  widget.imageUris[index],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
+                return PostImage(
+                  uri: widget.imageUris[index],
+                  height: 250,
                 );
               },
             ),

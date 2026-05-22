@@ -6,6 +6,7 @@ import '../models/repository_result.dart';
 import '../models/sync_status.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/supabase.dart';
+import '../services/world_service.dart';
 import '../utils/validators.dart' as validators;
 
 class PostRepository {
@@ -29,7 +30,7 @@ class PostRepository {
     if (!isSupabaseConfigured()) {
       return const PaginatedResult(items: [], hasMore: false);
     }
-    if (worldId != null && !_isUuid(worldId)) {
+    if (worldId != null && !WorldService.isRemoteWorldId(worldId)) {
       return const PaginatedResult(items: [], hasMore: false);
     }
 
