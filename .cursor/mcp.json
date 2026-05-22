@@ -6,14 +6,13 @@
     },
     "codegraph": {
       "type": "stdio",
-      "command": "npx",
+      "command": "powershell",
       "args": [
-        "-y",
-        "@colbymchenry/codegraph@latest",
-        "serve",
-        "--mcp",
-        "--path",
-        "${workspaceFolder}"
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/codegraph-serve.ps1"
       ]
     }
   }
