@@ -446,19 +446,19 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           ),
                         ),
                       ),
-                      // Subtle bottom scrim for text readability
+                      // Scrim so title/description stay readable on any banner
                       Positioned.fill(
-                        child: Container(
+                        child: DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Colors.transparent,
-                                (isDark ? VColors.surfaceDark : VColors.surface)
-                                    .withValues(alpha: 0.3),
+                                Colors.black.withValues(alpha: 0.15),
+                                Colors.black.withValues(alpha: 0.55),
+                                Colors.black.withValues(alpha: 0.82),
                               ],
-                              stops: const [0.85, 1.0],
+                              stops: const [0.35, 0.72, 1.0],
                             ),
                           ),
                         ),
@@ -557,10 +557,16 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                   Flexible(
                                     child: Text(
                                       world.name,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: VFontSize.headlineLg,
                                         fontWeight: VFontWeight.bold,
-                                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                                        color: Colors.white,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black45,
+                                            blurRadius: 8,
+                                          ),
+                                        ],
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -614,10 +620,14 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                               Text(
                                 world.description,
                                 style: TextStyle(
-                                  fontSize: VFontSize.bodyLg,
-                                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                                  fontSize: VFontSize.bodyMd,
+                                  color: Colors.white.withValues(alpha: 0.92),
+                                  height: 1.35,
+                                  shadows: const [
+                                    Shadow(color: Colors.black38, blurRadius: 6),
+                                  ],
                                 ),
-                                maxLines: 2,
+                                maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               // Prestige progress bar
@@ -638,7 +648,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                   ),
                                   style: TextStyle(
                                     fontSize: VFontSize.labelMd,
-                                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                                    color: Colors.white.withValues(alpha: 0.75),
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),

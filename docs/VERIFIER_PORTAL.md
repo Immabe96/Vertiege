@@ -36,15 +36,22 @@ Internally, verifier login sets `VerifierSession.active`; player login clears it
 
 ## Open verifier login on a device (APK)
 
+**Easiest (after build with in-app link):** Player **Login** screen → **Staff verification portal** (bottom).
+
+**ADB deep link** (requires APK with router fix for `vertiege://verifier/login`):
+
 1. Enable USB debugging, install the CI APK.
 2. On your PC:
 
    ```powershell
+   adb shell am force-stop com.imma96.virtual_status_worlds
    adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.imma96.virtual_status_worlds
    ```
 
-3. Sign in with a verifier account.
-4. Review pending items; tap **Sign out** when done.
+3. You should see **Staff** sign-in (not the normal player login). If you still see player login, install a newer APK — older builds mapped this deep link to `/login` by mistake.
+
+4. Sign in with a verifier account.
+5. Review pending items; tap **Sign out** when done.
 
 ## Local development
 

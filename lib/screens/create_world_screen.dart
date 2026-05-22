@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../models/world.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -56,7 +57,13 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     super.initState();
     _nameController = TextEditingController();
     _descController = TextEditingController();
+    _nameController.addListener(_onFormChanged);
+    _descController.addListener(_onFormChanged);
     _loadSubscriptionTier();
+  }
+
+  void _onFormChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadSubscriptionTier() async {
@@ -82,8 +89,34 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     super.dispose();
   }
 
+  bool get _isFormReady {
+    final name = _nameController.text.trim();
+    final desc = _descController.text.trim();
+    return name.length >= 3 &&
+        desc.length >= 10 &&
+        _selectedDominionType != null;
+  }
+
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_selectedDominionType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Choose a dominion type before creating your world.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Check world name and description — fix any errors above.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
@@ -587,26 +620,29 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             const SizedBox(height: Spacing.xl),
 
             // ── Submit — gold CTA ──────────────────────────────────
-            SizedBox(
-              height: 48,
-              child: FilledButton.icon(
-                onPressed: _isCreating ? null : _submit,
-                icon: _isCreating
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: VColors.onSurface,
+            FButton(
+              onPress: _isCreating || !_isFormReady ? null : _submit,
+              child: _isCreating
+                  ? const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: FCircularProgress(),
                         ),
-                      )
-                    : const Icon(VIcons.plus),
-                label: Text(_isCreating ? 'Creating...' : 'Create World'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: VColors.tertiary,
-                  foregroundColor: VColors.onTertiary,
-                ),
-              ),
+                        SizedBox(width: Spacing.sm),
+                        Text('Creating...'),
+                      ],
+                    )
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(VIcons.plus, size: 20),
+                        SizedBox(width: Spacing.sm),
+                        Text('Create World'),
+                      ],
+                    ),
             ),
 
             const SizedBox(height: Spacing.xl),

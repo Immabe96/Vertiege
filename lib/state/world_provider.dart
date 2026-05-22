@@ -97,7 +97,9 @@ class WorldNotifier extends Notifier<WorldState> {
     List<String>? tags,
   }) async {
     if (!RateLimiter.canProceed('create_world_$sovereignId', windowMs: 30000, maxCalls: 2)) {
-      return 'rate_limited';
+      throw StateError(
+        'Please wait a moment before creating another world.',
+      );
     }
     final worldData = await WorldService.createWorld(
       name: name,

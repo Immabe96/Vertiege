@@ -544,6 +544,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: VSpacing.lg),
+                  FadeIn(
+                    delayMs: 450,
+                    child: TextButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () => context.go('/verifier/login'),
+                      child: Text(
+                        'Staff verification portal',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: VSpacing.xxl),
                 ],
               ),

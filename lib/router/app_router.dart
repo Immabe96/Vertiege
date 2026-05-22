@@ -70,7 +70,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     observers: AnalyticsService.navigatorObservers,
     redirect: (context, state) {
-      final location = state.uri.path;
+      final uri = state.uri;
+      var location = uri.path;
+
+      // Android deep link: vertiege://verifier/login → host=verifier, path=/login
+      if (uri.host == 'verifier' && !location.startsWith('/verifier')) {
+        if (location == '/login' || location.isEmpty || location == '/') {
+          return '/verifier/login';
+        }
+        return '/verifier$location';
+      }
 
       // Never interrupt deep-link auth callbacks or splash
       if (location == '/auth/callback' || location == '/splash') return null;

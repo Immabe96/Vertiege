@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
-import 'package:vertiege/theme/colors.dart';
 import '../../models/world.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
 
 class WorldInfoCards extends StatefulWidget {
   final World world;
@@ -115,61 +115,69 @@ class _InfoStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return VSurfacePanel(
-      padding: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: VIconSize.md, color: color),
-                  const Spacer(),
-                  if (onTap != null)
-                    Icon(
-                      Icons.chevron_right,
-                      size: VIconSize.sm,
-                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+    return FCard.raw(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          child: Padding(
+            padding: const EdgeInsets.all(VSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, size: VIconSize.md, color: color),
+                    const Spacer(),
+                    if (onTap != null)
+                      Icon(
+                        Icons.chevron_right,
+                        size: VIconSize.sm,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                  ],
+                ),
+                const Spacer(),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: VFontSize.headlineMd,
+                      fontWeight: VFontWeight.bold,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
-                ],
-              ),
-              const Spacer(),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: VFontSize.headlineMd,
-                    fontWeight: VFontWeight.bold,
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                   ),
                 ),
-              ),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: VFontSize.labelMd,
-                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                  fontWeight: VFontWeight.semiBold,
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: VFontSize.labelMd,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                    fontWeight: VFontWeight.semiBold,
+                  ),
                 ),
-              ),
-              Text(
-                detail,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: VFontSize.labelMd,
-                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                Text(
+                  detail,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: VFontSize.labelMd,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

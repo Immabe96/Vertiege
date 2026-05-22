@@ -106,7 +106,8 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 | CI failed | Fix analyze/test/build errors on `develop`, push again |
 | Black screen on APK launch | CI must set `SUPABASE_*` secrets; app uses `dotenv.load(isOptional: true)` |
 | Channels empty but world “joined” | Need `world_members` row — slug worlds must sync on join ([DEVICE_UAT.md](DEVICE_UAT.md)) |
-| Install APK | `adb install -r` after `gh run download` — see [DEVICE_UAT.md](DEVICE_UAT.md) |
+| Install APK | `adb uninstall` then `adb install -r` — see [DEVICE_UAT.md](DEVICE_UAT.md) (clear cache ≠ uninstall) |
+| “App already installed” | Package still on device or signature mismatch — use `adb uninstall` in DEVICE_UAT |
 
 ## Recommended GitHub settings
 

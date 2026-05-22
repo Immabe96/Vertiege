@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../services/world_service.dart';
+import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
+import '../../forui/v_hub_page.dart';
 import '../../widgets/worlds/world_card.dart';
 
 class WorldDiscoveryScreen extends ConsumerStatefulWidget {
@@ -77,42 +80,82 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Discover Worlds',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
-        ),
+    final resident = ref.watch(residentProvider).resident;
+    final canCreateWorld = (resident?.tier.value ?? 0) >= 2;
 
-      ),
+    return VHubPage(
+      title: 'Discover Worlds',
+      showBack: true,
+      footer: canCreateWorld
+          ? Padding(
+              padding: const EdgeInsets.all(VSpacing.md),
+              child: FButton(
+                onPress: () => context.push('/create-world'),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(FIcons.plus, size: 18),
+                    SizedBox(width: VSpacing.sm),
+                    Text('Create World'),
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(VSpacing.md),
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.sm,
+            ),
             child: TextField(
               controller: _searchController,
+              onChanged: (v) {
+                setState(() {});
+                _onSearchChanged(v);
+              },
               decoration: InputDecoration(
                 hintText: 'Search worlds...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(
+                  FIcons.search,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(FIcons.x, size: 18),
                         onPressed: () {
                           _searchController.clear();
+                          setState(() {});
                           _loadData();
                         },
                       )
                     : null,
+                filled: true,
+                fillColor: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(VRadius.lg),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? VColors.outlineVariantDark
+                        : VColors.outlineVariant,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.lg),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? VColors.outlineVariantDark
+                        : VColors.outlineVariant,
+                  ),
                 ),
               ),
-              onChanged: _onSearchChanged,
             ),
           ),
           Padding(
@@ -250,7 +293,7 @@ class _WorldList extends StatelessWidget {
         final world = World.fromSupabase(worldData);
         return Padding(
           padding: const EdgeInsets.only(bottom: VSpacing.sm),
-          child: WorldCard(world: world),
+          child: WorldCard(world: world, index: index, plainStyle: true),
         );
       },
     );

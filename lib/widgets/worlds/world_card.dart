@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../state/resident_provider.dart';
@@ -28,20 +29,48 @@ class WorldCard extends ConsumerWidget {
   final int index;
   final bool wide;
 
-  const WorldCard({super.key, required this.world, this.index = 0, this.wide = false});
+  /// Clean list style for Discover — no prestige glow border.
+  final bool plainStyle;
+
+  const WorldCard({
+    super.key,
+    required this.world,
+    this.index = 0,
+    this.wide = false,
+    this.plainStyle = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resident = ref.watch(residentProvider).resident;
     final isLocked = resident != null && !canAccessWorld(resident, world);
     final tier = _getPrestigeTier(world.prestige);
+    final layout = wide
+        ? _WideLayout(world: world, isLocked: isLocked, plainStyle: plainStyle)
+        : _SquareLayout(world: world, isLocked: isLocked, plainStyle: plainStyle);
+
+    if (plainStyle) {
+      return FadeIn(
+        delayMs: index * 40,
+        child: FCard.raw(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => context.push('/explore/${world.id}'),
+              borderRadius: BorderRadius.circular(VRadius.lg),
+              child: layout,
+            ),
+          ),
+        ),
+      );
+    }
 
     return FadeIn(
       delayMs: index * 60,
       child: SovereignCard(
         tier: tier,
         onTap: () => context.push('/explore/${world.id}'),
-        child: wide ? _WideLayout(world: world, isLocked: isLocked) : _SquareLayout(world: world, isLocked: isLocked),
+        child: layout,
       ),
     );
   }
@@ -52,8 +81,13 @@ class WorldCard extends ConsumerWidget {
 class _SquareLayout extends StatelessWidget {
   final World world;
   final bool isLocked;
+  final bool plainStyle;
 
-  const _SquareLayout({required this.world, required this.isLocked});
+  const _SquareLayout({
+    required this.world,
+    required this.isLocked,
+    this.plainStyle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +95,11 @@ class _SquareLayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _BannerThumbnail(world: world, compact: false),
+        _BannerThumbnail(
+          world: world,
+          compact: false,
+          plainStyle: plainStyle,
+        ),
         _CardBody(world: world, isLocked: isLocked),
       ],
     );
@@ -73,8 +111,13 @@ class _SquareLayout extends StatelessWidget {
 class _WideLayout extends StatelessWidget {
   final World world;
   final bool isLocked;
+  final bool plainStyle;
 
-  const _WideLayout({required this.world, required this.isLocked});
+  const _WideLayout({
+    required this.world,
+    required this.isLocked,
+    this.plainStyle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +128,11 @@ class _WideLayout extends StatelessWidget {
         children: [
           SizedBox(
             width: 120,
-            child: _BannerThumbnail(world: world, compact: true),
+            child: _BannerThumbnail(
+              world: world,
+              compact: true,
+              plainStyle: plainStyle,
+            ),
           ),
           Expanded(
             child: _CardBody(world: world, isLocked: isLocked),
@@ -136,7 +183,7 @@ class _CardBody extends ConsumerWidget {
               Icon(VIcons.users, size: 12, color: VColors.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
-                '${world.memberCount} members',
+                '${world.memberCount} ${world.memberCount == 1 ? 'member' : 'members'}',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: VColors.onSurfaceVariant,
                 ),
@@ -238,8 +285,13 @@ class _CardBody extends ConsumerWidget {
 class _BannerThumbnail extends StatelessWidget {
   final World world;
   final bool compact;
+  final bool plainStyle;
 
-  const _BannerThumbnail({required this.world, this.compact = false});
+  const _BannerThumbnail({
+    required this.world,
+    this.compact = false,
+    this.plainStyle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -287,8 +339,8 @@ class _BannerThumbnail extends StatelessWidget {
               ),
             ),
 
-            // World icon overlaid at bottom-center of thumbnail
-            if (!compact)
+            // World icon overlaid at bottom-center (skip in plain discover cards)
+            if (!compact && !plainStyle)
               Positioned(
                 bottom: -6,
                 left: 0,

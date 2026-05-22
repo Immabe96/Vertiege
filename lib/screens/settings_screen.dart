@@ -16,6 +16,8 @@ import '../theme/v_tokens.dart';
 import 'twin_seal_setup_screen.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
+import '../forui/v_hub_page.dart';
+import '../widgets/v_section_list.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -741,180 +743,167 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _sectionHeader(String title, bool isDark) {
-    final theme = Theme.of(context);
+  Widget _appearancePanel({
+    required ThemeData theme,
+    required bool isDark,
+    required ThemeScheme scheme,
+  }) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        VSpacing.md,
-        VSpacing.md,
-        VSpacing.md,
-        VSpacing.sm,
-      ),
-      child: Text(
-        title,
-        style: theme.textTheme.labelSmall?.copyWith(
-          fontWeight: VFontWeight.bold,
-          letterSpacing: 0.5,
-          color: VColors.primary,
-        ),
-      ),
-    );
-  }
-
-  Widget _sectionCard({required List<Widget> children, required bool isDark}) {
-    _estimateCacheSize();
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.xs,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark
-              ? VColors.surfaceContainerDark
-              : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          border: Border.all(
-            color: isDark
-                ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                : VColors.outlineVariant.withValues(alpha: 0.3),
+      padding: const EdgeInsets.all(VSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.palette,
+                size: VIconSize.md,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+              const SizedBox(width: VSpacing.md),
+              Text(
+                'Theme',
+                style: TextStyle(
+                  fontSize: VFontSize.bodyMd,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+              ),
+            ],
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
+          const SizedBox(height: VSpacing.sm),
+          SegmentedButton<ThemeScheme>(
+            segments: const [
+              ButtonSegment(
+                value: ThemeScheme.system,
+                label: Text('Auto'),
+                icon: Icon(Icons.brightness_auto, size: VIconSize.sm),
+              ),
+              ButtonSegment(
+                value: ThemeScheme.light,
+                label: Text('Light'),
+                icon: Icon(Icons.light_mode, size: VIconSize.sm),
+              ),
+              ButtonSegment(
+                value: ThemeScheme.dark,
+                label: Text('Dark'),
+                icon: Icon(Icons.dark_mode, size: VIconSize.sm),
+              ),
+            ],
+            selected: {scheme},
+            onSelectionChanged: (selected) {
+              ref.read(themeProvider.notifier).setScheme(selected.first);
+            },
+          ),
+          const SizedBox(height: VSpacing.md),
+          Row(
+            children: [
+              Icon(
+                Icons.text_fields,
+                size: VIconSize.md,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+              const SizedBox(width: VSpacing.md),
+              Text(
+                'Text Size',
+                style: TextStyle(
+                  fontSize: VFontSize.bodyMd,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Consumer(
+            builder: (context, ref, _) {
+              final textSize = ref.watch(themeProvider).textSize;
+              return FSelect<TextSize>.rich(
+                format: (value) =>
+                    value.name[0].toUpperCase() + value.name.substring(1),
+                control: FSelectControl.lifted(
+                  value: textSize,
+                  onChange: (v) {
+                    if (v != null) {
+                      ref.read(themeProvider.notifier).setTextSize(v);
+                    }
+                  },
+                ),
+                children: TextSize.values
+                    .map(
+                      (t) => FSelectItem<TextSize>(
+                        value: t,
+                        title: Text(
+                          t.name[0].toUpperCase() + t.name.substring(1),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _sectionDivider(bool isDark) {
-    return Divider(
-      height: 1,
-      indent: VSpacing.lg + VSpacing.sm,
-      color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    _estimateCacheSize();
     final themeState = ref.watch(themeProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final variantColor = isDark
+        ? VColors.onSurfaceVariantDark
+        : VColors.onSurfaceVariant;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Settings',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
-        ),
-      ),
+    return VHubPage(
+      title: 'Settings',
+      showBack: true,
       body: RefreshIndicator(
         onRefresh: () async => _loadPrefs(),
         child: ListView(
-          padding: const EdgeInsets.only(bottom: VSpacing.xxl),
+          padding: const EdgeInsets.all(VSpacing.md),
           children: [
-            _sectionHeader('ABOUT', isDark),
-            _sectionCard(
-              isDark: isDark,
+            VSectionList(
+              title: 'About',
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(VSpacing.md),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(VRadius.lg),
-                          gradient: VColors.gradientPrimary,
-                        ),
-                        child: const Icon(
-                          Icons.public,
-                          color: VColors.onPrimary,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: VSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Vertiege',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: VFontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Version 1.0.0 (build 1)',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Made with Flutter & Supabase',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                FTile(
+                  title: Text(
+                    'Version 1.0.0-beta.4',
+                    style: TextStyle(
+                      fontSize: VFontSize.bodySm,
+                      color: variantColor,
+                    ),
                   ),
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(Icons.celebration, size: VIconSize.md),
-                  title: const Text('Credits'),
-                  subtitle: const Text('The people behind Vertiege'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.celebration,
+                  label: 'Credits',
                   onTap: _showCreditsDialog,
                 ),
               ],
             ),
-
-            _sectionHeader('ACCOUNT', isDark),
-            _sectionCard(
-              isDark: isDark,
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Account',
               children: [
-                ListTile(
-                  leading: const Icon(Icons.email_outlined, size: VIconSize.md),
-                  title: const Text('Change Email'),
-                  subtitle: const Text('Update your email address'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.email_outlined,
+                  label: 'Change Email',
                   onTap: _showChangeEmailDialog,
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(Icons.lock_outline, size: VIconSize.md),
-                  title: const Text('Change Password'),
-                  subtitle: const Text('Update your password'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.lock_outline,
+                  label: 'Change Password',
                   onTap: _showChangePasswordDialog,
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(
-                    Icons.security,
-                    size: VIconSize.md,
-                    color: VColors.tertiary,
-                  ),
-                  title: const Text('Twin Seal (2FA)'),
-                  subtitle: const Text('Add an extra layer of security'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.security,
+                  label: 'Twin Seal (2FA)',
+                  iconColor: VColors.tertiary,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -924,39 +913,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     );
                   },
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete_outline,
-                    size: VIconSize.md,
-                    color: VColors.error,
-                  ),
-                  title: const Text(
-                    'Delete Account',
-                    style: TextStyle(color: VColors.error),
-                  ),
-                  subtitle: const Text('Permanently remove your account'),
-                  trailing: const Icon(
-                    VIcons.chevronRight,
-                    size: VIconSize.md,
-                    color: VColors.error,
-                  ),
+                VSectionTile(
+                  icon: Icons.delete_outline,
+                  label: 'Delete Account',
+                  iconColor: VColors.error,
+                  titleColor: VColors.error,
                   onTap: _showDeleteAccountDialog,
                 ),
               ],
             ),
-
-            _sectionHeader('NOTIFICATIONS', isDark),
-            _sectionCard(
-              isDark: isDark,
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Notifications',
               children: [
-                SwitchListTile(
-                  secondary: const Icon(
-                    Icons.notifications_active,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Push Notifications'),
-                  subtitle: const Text('Receive push notifications'),
+                VSectionSwitchTile(
+                  icon: Icons.notifications_active,
+                  label: 'Push Notifications',
                   value: _pushEnabled,
                   onChanged: _prefsLoaded
                       ? (v) {
@@ -965,14 +937,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                       : null,
                 ),
-                _sectionDivider(isDark),
-                SwitchListTile(
-                  secondary: const Icon(
-                    Icons.favorite_border,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Likes'),
-                  subtitle: const Text('When someone likes your post'),
+                VSectionSwitchTile(
+                  icon: Icons.favorite_border,
+                  label: 'Likes',
                   value: _likesEnabled,
                   onChanged: _prefsLoaded
                       ? (v) {
@@ -981,14 +948,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                       : null,
                 ),
-                _sectionDivider(isDark),
-                SwitchListTile(
-                  secondary: const Icon(
-                    Icons.mode_comment_outlined,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Comments'),
-                  subtitle: const Text('When someone comments on your post'),
+                VSectionSwitchTile(
+                  icon: Icons.mode_comment_outlined,
+                  label: 'Comments',
                   value: _commentsEnabled,
                   onChanged: _prefsLoaded
                       ? (v) {
@@ -997,11 +959,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                       : null,
                 ),
-                _sectionDivider(isDark),
-                SwitchListTile(
-                  secondary: const Icon(VIcons.globe, size: VIconSize.md),
-                  title: const Text('World Invites'),
-                  subtitle: const Text('When invited to a new world'),
+                VSectionSwitchTile(
+                  icon: VIcons.globe,
+                  label: 'World Invites',
                   value: _worldInvitesEnabled,
                   onChanged: _prefsLoaded
                       ? (v) {
@@ -1010,14 +970,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                       : null,
                 ),
-                _sectionDivider(isDark),
-                SwitchListTile(
-                  secondary: const Icon(
-                    Icons.military_tech,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Tier Upgrades'),
-                  subtitle: const Text('When your tier level changes'),
+                VSectionSwitchTile(
+                  icon: Icons.military_tech,
+                  label: 'Tier Upgrades',
                   value: _tierUpgradesEnabled,
                   onChanged: _prefsLoaded
                       ? (v) {
@@ -1028,140 +983,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
-
-            _sectionHeader('APPEARANCE', isDark),
-            _sectionCard(
-              isDark: isDark,
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Appearance',
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: VSpacing.md,
-                    vertical: VSpacing.sm,
+                FTile.raw(
+                  child: _appearancePanel(
+                    theme: theme,
+                    isDark: isDark,
+                    scheme: themeState.scheme,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.palette, size: VIconSize.md),
-                          const SizedBox(width: VSpacing.md),
-                          Text(
-                            'Theme',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: VFontWeight.medium,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: VSpacing.sm),
-                      Text(
-                        'Light, dark, or follow system',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: VSpacing.sm),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: SegmentedButton<ThemeScheme>(
-                          segments: const [
-                            ButtonSegment(
-                              value: ThemeScheme.system,
-                              label: Text('Auto'),
-                              icon: Icon(
-                                Icons.brightness_auto,
-                                size: VIconSize.sm,
-                              ),
-                            ),
-                            ButtonSegment(
-                              value: ThemeScheme.light,
-                              label: Text('Light'),
-                              icon: Icon(Icons.light_mode, size: VIconSize.sm),
-                            ),
-                            ButtonSegment(
-                              value: ThemeScheme.dark,
-                              label: Text('Dark'),
-                              icon: Icon(Icons.dark_mode, size: VIconSize.sm),
-                            ),
-                          ],
-                          selected: {themeState.scheme},
-                          onSelectionChanged: (scheme) {
-                            ref
-                                .read(themeProvider.notifier)
-                                .setScheme(scheme.first);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _sectionDivider(isDark),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final themeState = ref.watch(themeProvider);
-                    final textSize = themeState.textSize;
-                    return Padding(
-                      padding: const EdgeInsets.all(VSpacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.text_fields, size: VIconSize.md),
-                              const SizedBox(width: VSpacing.md),
-                              Text(
-                                'Text Size',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: VSpacing.sm),
-                          Text(
-                            'Adjust the application text size',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
-                                ),
-                          ),
-                          const SizedBox(height: VSpacing.md),
-                          FSelect<TextSize>.rich(
-                            format: (value) =>
-                                value.name[0].toUpperCase() +
-                                value.name.substring(1),
-                            control: FSelectControl.lifted(
-                              value: textSize,
-                              onChange: (v) {
-                                if (v != null) {
-                                  ref
-                                      .read(themeProvider.notifier)
-                                      .setTextSize(v);
-                                }
-                              },
-                            ),
-                            children: TextSize.values
-                                .map(
-                                  (t) => FSelectItem<TextSize>(
-                                    value: t,
-                                    title: Text(
-                                      t.name[0].toUpperCase() +
-                                          t.name.substring(1),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
                 ),
               ],
             ),
-
             Consumer(
               builder: (context, ref, _) {
                 final resident = ref.watch(residentProvider).resident;
@@ -1178,59 +1012,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 return Column(
                   children: [
-                    _sectionHeader('TIER PERKS', isDark),
-                    _sectionCard(
-                      isDark: isDark,
+                    const SizedBox(height: VSpacing.md),
+                    VSectionList(
+                      title: 'Tier Perks',
                       children: [
                         _PerkTile(
                           icon: Icons.trending_up,
                           title: 'XP Multiplier',
                           value: 'x${multiplier.toStringAsFixed(2)}',
-                          isDark: isDark,
+
                         ),
-                        _sectionDivider(isDark),
                         _PerkTile(
                           icon: Icons.monetization_on,
                           title: 'Daily Coin Bonus',
                           value: '+$coinBonus',
-                          isDark: isDark,
+
                         ),
-                        _sectionDivider(isDark),
                         _PerkTile(
                           icon: Icons.emoji_emotions,
                           title: 'Custom Reactions',
                           value: '$reactionSlots slots',
-                          isDark: isDark,
+
                         ),
-                        _sectionDivider(isDark),
                         _PerkTile(
                           icon: Icons.push_pin,
                           title: 'Post Pins',
                           value: pinLimit > 0
                               ? '$pinLimit available'
                               : 'Locked',
-                          isDark: isDark,
+
                         ),
-                        _sectionDivider(isDark),
                         _PerkTile(
                           icon: Icons.language,
                           title: 'World Creation',
                           value: '$worldLimit worlds',
-                          isDark: isDark,
+
                         ),
-                        _sectionDivider(isDark),
                         _PerkTile(
                           icon: Icons.local_bar,
                           title: 'Lounge Access',
                           value: hasLounge ? 'Unlocked' : 'Locked',
-                          isDark: isDark,
+
                         ),
-                        _sectionDivider(isDark),
                         _PerkTile(
                           icon: Icons.how_to_vote,
                           title: 'Governance Vote',
                           value: hasVote ? 'Unlocked' : 'Locked',
-                          isDark: isDark,
+
                         ),
                       ],
                     ),
@@ -1238,57 +1066,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
-
-            _sectionHeader('PRIVACY & LEGAL', isDark),
-            _sectionCard(
-              isDark: isDark,
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Privacy & Legal',
               children: [
-                ListTile(
-                  leading: const Icon(
-                    Icons.privacy_tip_outlined,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Privacy Policy'),
-                  subtitle: const Text('How we handle your data'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.privacy_tip_outlined,
+                  label: 'Privacy Policy',
                   onTap: _showPrivacyPolicyDialog,
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(VIcons.gavel, size: VIconSize.md),
-                  title: const Text('Terms of Service'),
-                  subtitle: const Text('Rules for using Vertiege'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: VIcons.gavel,
+                  label: 'Terms of Service',
                   onTap: _showTermsDialog,
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(
-                    Icons.article_outlined,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Open Source Licenses'),
-                  subtitle: const Text('Third-party software licenses'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.article_outlined,
+                  label: 'Open Source Licenses',
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: 'Vertiege',
-                    applicationVersion: '1.0.0',
+                    applicationVersion: '1.0.0-beta.4',
                     applicationLegalese: 'Copyright 2025 Vertiege',
                   ),
                 ),
               ],
             ),
-
-            _sectionHeader('DATA', isDark),
-            _sectionCard(
-              isDark: isDark,
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Data',
               children: [
-                ListTile(
-                  leading: const Icon(Icons.backup, size: VIconSize.md),
-                  title: const Text('Create Backup'),
-                  subtitle: const Text('Export all app data as JSON'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.backup,
+                  label: 'Create Backup',
                   onTap: () async {
                     await BackupService.createBackup();
                     if (context.mounted) {
@@ -1301,60 +1111,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                   },
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(Icons.restore, size: VIconSize.md),
-                  title: const Text('Restore Backup'),
-                  subtitle: const Text('Import previously saved data'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.restore,
+                  label: 'Restore Backup',
                   onTap: _showRestoreBackupDialog,
                 ),
-                _sectionDivider(isDark),
-                ListTile(
-                  leading: const Icon(
-                    Icons.cleaning_services_outlined,
-                    size: VIconSize.md,
-                  ),
-                  title: const Text('Clear Cache'),
-                  subtitle: Text('Frees up ~${_formatBytes(_cacheSizeBytes)}'),
-                  trailing: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                VSectionTile(
+                  icon: Icons.cleaning_services_outlined,
+                  label: 'Clear Cache (${_formatBytes(_cacheSizeBytes)})',
                   onTap: _cacheSizeBytes > 0 ? _clearCache : null,
                   enabled: _cacheSizeBytes > 0,
                 ),
               ],
             ),
-
-            _sectionHeader('DANGER ZONE', isDark),
-            _sectionCard(
-              isDark: isDark,
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Danger Zone',
               children: [
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete_forever,
-                    size: VIconSize.md,
-                    color: VColors.error,
-                  ),
-                  title: const Text(
-                    'Reset All Data',
-                    style: TextStyle(color: VColors.error),
-                  ),
-                  subtitle: Text(
-                    'Clear all local data and start fresh',
-                    style: TextStyle(
-                      color: VColors.error.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  trailing: const Icon(
-                    VIcons.chevronRight,
-                    size: VIconSize.md,
-                    color: VColors.error,
-                  ),
+                VSectionTile(
+                  icon: Icons.delete_forever,
+                  label: 'Reset All Data',
+                  iconColor: VColors.error,
+                  titleColor: VColors.error,
                   onTap: _showResetDataDialog,
                 ),
               ],
             ),
-
-            const SizedBox(height: VSpacing.lg),
           ],
         ),
       ),
@@ -1362,54 +1144,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-class _PerkTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-  final bool isDark;
-
-  const _PerkTile({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: VIconSize.sm, color: VColors.tertiary),
-          const SizedBox(width: VSpacing.md),
-          Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: value.contains('Locked')
-                  ? (isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant)
-                  : VColors.tertiary,
-              fontWeight: VFontWeight.semiBold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+class _PerkTile extends FTile {
+  _PerkTile({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) : super(
+         prefix: Builder(
+           builder: (context) => Icon(
+             icon,
+             color: context.theme.colors.mutedForeground,
+           ),
+         ),
+         title: Builder(
+           builder: (context) => Text(
+             title,
+             style: TextStyle(color: context.theme.colors.foreground),
+           ),
+         ),
+         details: Builder(
+           builder: (context) {
+             final valueColor = value.contains('Locked')
+                 ? context.theme.colors.mutedForeground
+                 : VColors.tertiary;
+             return Text(
+               value,
+               style: TextStyle(
+                 color: valueColor,
+                 fontWeight: FontWeight.w600,
+               ),
+             );
+           },
+         ),
+       );
 }
 
 class _ResetDataConfirmationDialog extends StatefulWidget {
