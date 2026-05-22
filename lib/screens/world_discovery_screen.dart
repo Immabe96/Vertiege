@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
+import '../../services/admin_access_service.dart';
 import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
@@ -81,7 +82,9 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final resident = ref.watch(residentProvider).resident;
-    final canCreateWorld = (resident?.tier.value ?? 0) >= 2;
+    final canCreateWorld = AdminAccessService.canCreateWorld(
+      tierValue: resident?.tier.value ?? 0,
+    );
 
     return VHubPage(
       title: 'Discover Worlds',

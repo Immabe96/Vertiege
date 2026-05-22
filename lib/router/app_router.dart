@@ -139,7 +139,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final tier = resident.tier.value;
-      if (location == '/create-world' && tier < 2) return '/';
+      if (location == '/create-world' &&
+          !AdminAccessService.canCreateWorld(tierValue: tier)) {
+        return '/';
+      }
       // Subscription is the upgrade path — tier-1 users must reach it from More.
 
       if (isAuthPage || location == '/onboarding' || location == '/the-gate') {

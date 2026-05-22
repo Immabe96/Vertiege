@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../models/world.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/admin_access_service.dart';
 import '../services/subscription_service.dart';
 import '../services/supabase.dart';
 import '../theme/design_system.dart';
@@ -178,22 +179,12 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
   static const _requiredTierLevel = 2; // High Roller or above (500+ XP)
   static const _requiredXp = 500;
-  static const _superuserEmail = 'ltyl.naughty@gmail.com';
-
-  bool get _isSuperuser {
-    try {
-      final email = maybeSupabase()?.auth.currentUser?.email;
-      return email == _superuserEmail;
-    } catch (_) {
-      return false;
-    }
-  }
+  bool get _isSuperuser => AdminAccessService.isCurrentSessionSuperuser();
 
   bool get _canCreateWorld {
-    if (_isSuperuser) return true;
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return false;
-    return resident.tier.value >= _requiredTierLevel;
+    return AdminAccessService.canCreateWorld(tierValue: resident.tier.value);
   }
 
   bool get _isAtWorldCreationLimit {

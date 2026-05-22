@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../services/access_control.dart';
+import '../../services/admin_access_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
@@ -111,7 +112,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             tooltip: 'Discover Worlds',
             onPressed: () => context.push('/explore/discover'),
           ),
-          if ((resident?.tier.value ?? 0) >= 2)
+          if (AdminAccessService.canCreateWorld(
+            tierValue: resident?.tier.value ?? 0,
+          ))
             IconButton(
               icon: Icon(
                 Icons.add,
