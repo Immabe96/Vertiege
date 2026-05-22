@@ -24,6 +24,7 @@ class ChatState {
   final Map<String, DateTime> channelLatestMessageTimes;
   final Map<String, Set<String>> typingUsers;
   final bool isLoadingRooms;
+  final String? roomsLoadError;
 
   const ChatState({
     this.dmRooms = const [],
@@ -33,6 +34,7 @@ class ChatState {
     this.channelLatestMessageTimes = const {},
     this.typingUsers = const {},
     this.isLoadingRooms = false,
+    this.roomsLoadError,
   });
 
   ChatState copyWith({
@@ -43,6 +45,8 @@ class ChatState {
     Map<String, DateTime>? channelLatestMessageTimes,
     Map<String, Set<String>>? typingUsers,
     bool? isLoadingRooms,
+    String? roomsLoadError,
+    bool clearRoomsLoadError = false,
   }) => ChatState(
     dmRooms: dmRooms ?? this.dmRooms,
     dmMessages: dmMessages ?? this.dmMessages,
@@ -52,6 +56,8 @@ class ChatState {
         channelLatestMessageTimes ?? this.channelLatestMessageTimes,
     typingUsers: typingUsers ?? this.typingUsers,
     isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
+    roomsLoadError:
+        clearRoomsLoadError ? null : (roomsLoadError ?? this.roomsLoadError),
   );
 }
 
@@ -118,20 +124,27 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> loadDmRooms(String residentId) async {
     if (state.isLoadingRooms) return;
-    state = state.copyWith(isLoadingRooms: true);
+    state = state.copyWith(isLoadingRooms: true, clearRoomsLoadError: true);
 
     try {
       await _replayQueuedChatMutations();
       final rooms = await ChatService.getRooms(
         residentId,
       ).timeout(const Duration(seconds: 5));
-      state = state.copyWith(dmRooms: rooms, isLoadingRooms: false);
+      state = state.copyWith(
+        dmRooms: rooms,
+        isLoadingRooms: false,
+        clearRoomsLoadError: true,
+      );
       for (final room in rooms) {
         final roomId = room['id'] as String?;
         if (roomId != null) subscribeToDm(roomId);
       }
     } catch (_) {
-      state = state.copyWith(isLoadingRooms: false);
+      state = state.copyWith(
+        isLoadingRooms: false,
+        roomsLoadError: 'Could not load conversations. Pull to refresh.',
+      );
     }
   }
 
@@ -998,6 +1011,11 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Map<String, String> _encodeDateMap(Map<String, DateTime> dates) =>
       dates.map((key, value) => MapEntry(key, value.toIso8601String()));
+
+  void clearForSignOut() {
+    unsubscribeAll();
+    state = const ChatState();
+  }
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(

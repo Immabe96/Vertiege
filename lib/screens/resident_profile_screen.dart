@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../forui/v_hub_page.dart';
 import '../models/resident.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
@@ -70,18 +71,9 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          _profile?.name ?? 'Resident',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
-        ),
-      ),
+    return VHubPage(
+      title: _profile?.name ?? 'Resident',
+      showBack: true,
       body: _loading
           ? const ScreenLoading.profile()
           : _error != null || _profile == null
@@ -284,7 +276,8 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       currentId,
                       resident.id,
                     );
-                    if (room != null && mounted) {
+                    if (room != null) {
+                      if (!mounted) return;
                       context.push('/dm/${room['id']}');
                     }
                   },

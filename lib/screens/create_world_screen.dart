@@ -177,7 +177,6 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     }
   }
 
-  static const _requiredTierLevel = 2; // High Roller or above (500+ XP)
   static const _requiredXp = 500;
   bool get _isSuperuser => AdminAccessService.isCurrentSessionSuperuser();
 

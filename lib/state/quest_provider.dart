@@ -180,6 +180,10 @@ class QuestNotifier extends Notifier<QuestState> {
     });
     StorageService.setStringDebounced('@quests_data', json);
   }
+
+  void clearForSignOut() {
+    state = const QuestState();
+  }
 }
 
 final questProvider = NotifierProvider<QuestNotifier, QuestState>(

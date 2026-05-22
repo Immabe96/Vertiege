@@ -1,4 +1,6 @@
-# Device UAT log
+# Device UAT
+
+**Current Android package:** `com.vertiege`. If upgrading from an older build, also run `adb uninstall com.imma96.virtual_status_worlds`.
 
 Manual checks on **CI APK** before promoting `develop` → `main`. Owner-run; update this file as you test.
 
@@ -8,7 +10,7 @@ Manual checks on **CI APK** before promoting `develop` → `main`. Owner-run; up
 # After green CI on develop — replace RUN_ID
 gh run download RUN_ID -n vertiege-apk-RUN_ID -D build/ci-artifacts/latest
 
-adb uninstall com.imma96.virtual_status_worlds
+adb uninstall com.vertiege
 adb install -r build/ci-artifacts/latest/app-release.apk
 ```
 
@@ -28,7 +30,7 @@ Requires GitHub secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` in CI (APK embeds
 
 ```powershell
 adb devices
-adb uninstall com.imma96.virtual_status_worlds
+adb uninstall com.vertiege
 adb shell pm list packages | findstr virtual_status
 # (no output = gone)
 
@@ -64,17 +66,17 @@ If you **truly** uninstalled and install still failed, one of these is almost al
 
 1. **Server state** — Login uses Supabase. Worlds, posts, and profile live in the cloud. Reinstall + same account = same account data (expected).
 2. **Google backup (optional)** — Some devices restore app backup on reinstall (settings, `shared_preferences`). That only runs **after** a successful install; it does not block install.
-3. **Orphan files** — Photos you saved to the gallery, or rare keystore entries, can outlive the app but **do not** block installing `com.imma96.virtual_status_worlds` again.
+3. **Orphan files** — Photos you saved to the gallery, or rare keystore entries, can outlive the app but **do not** block installing `com.vertiege` again.
 
 **Prove whether the package is gone (run before installing APK):**
 
 ```powershell
 adb shell pm list packages | findstr virtual_status
-adb shell pm path com.imma96.virtual_status_worlds
+adb shell pm path com.vertiege
 ```
 
 - First command: **no line** = uninstalled for this user.
-- Second command: `Package not found` = gone. Any path returned = still installed → use `adb uninstall com.imma96.virtual_status_worlds`.
+- Second command: `Package not found` = gone. Any path returned = still installed → use `adb uninstall com.vertiege`.
 
 **If the phone says Uninstall but `pm list` still shows the app:** try Settings → Apps → Vertiege → Storage → **Clear storage**, then Uninstall again; or remove from a **work profile** / **Secure Folder** / **dual-app** clone if you use one. `adb uninstall` removes the package for the USB-connected user when the UI didn’t.
 
@@ -91,8 +93,8 @@ Same as above: the **package is still registered** (often another user / work pr
 
 ```powershell
 # Remove for all users (USB debugging on)
-adb shell pm uninstall --user 0 com.imma96.virtual_status_worlds
-adb shell pm uninstall --user 10 com.imma96.virtual_status_worlds
+adb shell pm uninstall --user 0 com.vertiege
+adb shell pm uninstall --user 10 com.vertiege
 # Or loop users from: adb shell pm list users
 
 adb shell pm list packages | findstr virtual_status
@@ -142,7 +144,7 @@ Applied for `neon-district` and `crystal-shore` for Ahugaaf and ＤＡＫＩ. Ne
 ## Verifier portal smoke
 
 ```powershell
-adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.imma96.virtual_status_worlds
+adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.vertiege
 ```
 
 - [ ] Sign in as verifier

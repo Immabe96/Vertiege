@@ -1,5 +1,31 @@
 # Vertiege Implementation Report
 
+## Full-app audit — 2026-05-21 (in progress)
+
+### Done this pass
+- **Phases 0–3** (navigation, Forui hubs, identity UX, error surfaces, AI verification off, dead widgets removed).
+- **Phase 1 security** (remote): RPC `auth.uid()` checks, storage path policies, anon EXECUTE revoked on write RPCs (~29 → ~10 intentional RLS helpers).
+- **Android package** `com.vertiege`; Firebase Android app **Vertiege** active (`1:92526224561:android:7b7a9f6f448f61ca7cae90`). Legacy `com.imma96.virtual_status_worlds` app still registered in Firebase — safe to delete when no longer needed.
+- **Google OAuth** wired in app (`AuthService.signInWithGoogle`, `vertiege://auth/callback`); Supabase Web client + Android SHA-1 documented in `docs/plan/PACKAGE_ID_COM_VERTIEGE.md`.
+- **Platform display names**: Windows/Linux/macOS/iOS/web titles and macOS product `vertiege` (was `virtual_status_worlds`).
+
+### Supabase security advisor (2026-05-21, project `wjaphoaxalvgjnrwqjwe`)
+- Remaining **anon** callable SECURITY DEFINER: RLS helpers (`is_world_member`, `is_banned_from_world`, `handle_new_user`, `notify_push_on_insert`, etc.) — review before further revoke.
+- **authenticated** callable write RPCs — expected for app; protected by in-function checks after Phase 1 migrations.
+- **pg_net** in public schema — low priority WARN.
+- **Leaked password protection** — Pro only; skip on Free plan.
+- Performance advisor not run this pass.
+
+### Blocked on you (manual)
+- Device UAT (`docs/DEVICE_UAT.md`), Google provider saved in Supabase dashboard, email password rules (Free), uninstall legacy APK if installed.
+- **No release APK** until audit + UAT complete.
+
+### Deferred
+- Full theme migration off `design_system.dart` / `colors.dart` shims (~90 files).
+- Real AI vision + moderation API; performance remediation; asset manifest pipeline.
+
+---
+
 ## Codex Firebase/Persistence Update - 2026-05-20
 
 ### Completed in this pass

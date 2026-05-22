@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:92526224561:android:d523bec23fcecd1f7cae90",
+        "mobilesdk_app_id": "1:92526224561:android:7b7a9f6f448f61ca7cae90",
         "android_client_info": {
-          "package_name": "com.imma96.virtual_status_worlds"
+          "package_name": "com.vertiege"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "92526224561-d4q4ecq0b6v1kfd4sh2l8im2t27pedce.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBZTPAlGRd_kMw743Fe0qJkVHNeeJySU80"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "92526224561-d4q4ecq0b6v1kfd4sh2l8im2t27pedce.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

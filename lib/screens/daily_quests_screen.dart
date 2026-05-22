@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../forui/v_hub_page.dart';
 import '../state/quest_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -15,8 +17,9 @@ class DailyQuestsScreen extends ConsumerWidget {
     final questState = ref.watch(questProvider);
     final quests = questState.quests;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Daily Quests')),
+    return VHubPage(
+      title: 'Daily Quests',
+      showBack: true,
       body: quests.isEmpty
           ? Center(
               child: Text(
@@ -33,7 +36,7 @@ class DailyQuestsScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final q = quests[index];
                 final progress = q.target > 0 ? q.progress / q.target : 0.0;
-                return Card(
+                return FCard(
                   child: Padding(
                     padding: const EdgeInsets.all(VSpacing.md),
                     child: Column(
@@ -44,7 +47,9 @@ class DailyQuestsScreen extends ConsumerWidget {
                           style: theme.textTheme.titleSmall,
                         ),
                         const SizedBox(height: VSpacing.xs),
-                        LinearProgressIndicator(value: progress.clamp(0.0, 1.0)),
+                        LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                        ),
                         const SizedBox(height: VSpacing.xs),
                         Text(
                           '${q.progress}/${q.target} · ${q.xpReward} XP',
@@ -53,8 +58,8 @@ class DailyQuestsScreen extends ConsumerWidget {
                         if (q.isComplete && !q.claimed)
                           Padding(
                             padding: const EdgeInsets.only(top: VSpacing.sm),
-                            child: FilledButton(
-                              onPressed: () => ref
+                            child: FButton(
+                              onPress: () => ref
                                   .read(questProvider.notifier)
                                   .claimQuest(q.id),
                               child: const Text('Claim reward'),

@@ -116,6 +116,10 @@ class ChannelNotifier extends Notifier<ChannelState> {
       channelsByWorld: {...state.channelsByWorld, worldId: channels},
     );
   }
+
+  void clearForSignOut() {
+    state = const ChannelState();
+  }
 }
 
 final channelProvider = NotifierProvider<ChannelNotifier, ChannelState>(

@@ -27,7 +27,7 @@
 -dontwarn retrofit2.KotlinExtensions$*
 
 # Keep model classes (used by reflection for JSON serialization)
--keep class com.imma96.virtual_status_worlds.** { *; }
+-keep class com.vertiege.** { *; }
 
 # R8: suppress missing optional dependencies
 -dontwarn com.google.android.play.core.**

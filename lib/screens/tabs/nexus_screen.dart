@@ -9,16 +9,13 @@ import '../../state/notification_provider.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/ui.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/feed/post_item.dart';
-import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/nexus/bento_grid.dart';
 import '../../widgets/nexus/bento_cards/daily_quest_card.dart';
 import '../../widgets/nexus/bento_cards/prestige_progress_card.dart';
 import '../../widgets/nexus/bento_cards/season_snapshot_card.dart';
 import '../../widgets/nexus/bento_cards/trending_card.dart';
-import '../../widgets/nexus/bento_cards/feed_preview_card.dart';
 import '../../widgets/nexus/bento_cards/spotlight_card.dart';
 import '../../widgets/nexus/bento_cards/challenges_card.dart';
 import '../../widgets/nexus/bento_cards/league_card.dart';
@@ -299,117 +296,19 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Nexus Activity',
+                              'Nexus',
                               style: theme.textTheme.headlineLarge?.copyWith(
                                 fontWeight: VFontWeight.semiBold,
                                 color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                               ),
                             ),
-                            const SizedBox(height: VSpacing.sm),
-                            VCard(
-                              isGlass: true,
-                              padding: const EdgeInsets.all(VSpacing.lg),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        Flexible(
-                                          child: LuminaryNameplate(
-                                            name: resident?.name ?? 'Traveler',
-                                            tier: resident?.tier.value ?? 1,
-                                            fontSize: VFontSize.bodyLg,
-                                            title: resident?.title,
-                                          ),
-                                        ),
-                                        if (resident != null) ...[
-                                          const SizedBox(
-                                            width: VSpacing.sm,
-                                          ),
-                                          Container(
-                                            padding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: VSpacing.sm,
-                                                  vertical: 2,
-                                                ),
-                                            decoration: BoxDecoration(
-                                              color: isDark
-                                                  ? VColors.primaryContainerDark
-                                                  : VColors.primaryContainer,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    VRadius.pill,
-                                                  ),
-                                            ),
-                                            child: Text(
-                                              resident.tier.label,
-                                              style: theme.textTheme
-                                                  .labelSmall?.copyWith(
-                                                fontSize: VFontSize.labelSm,
-                                                fontWeight: VFontWeight.bold,
-                                                color: isDark
-                                                    ? VColors
-                                                        .onPrimaryContainerDark
-                                                    : VColors
-                                                        .onPrimaryContainer,
-                                              ),
-                                            ),
-                                          ),
-                                          if (resident.streakCount > 0) ...[
-                                            const SizedBox(
-                                              width: VSpacing.sm,
-                                            ),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: VSpacing.sm,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: VColors.warning
-                                                    .withValues(alpha: 0.15),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      VRadius.pill,
-                                                    ),
-                                                border: Border.all(
-                                                  color: VColors.warning
-                                                      .withValues(alpha: 0.3),
-                                                ),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(
-                                                    Icons
-                                                        .local_fire_department,
-                                                    size: 14,
-                                                    color: VColors.warning,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    '${resident.streakCount}',
-                                                    style: theme.textTheme
-                                                        .labelSmall?.copyWith(
-                                                      fontSize:
-                                                          VFontSize.labelSm,
-                                                      fontWeight:
-                                                          VFontWeight.bold,
-                                                      color: VColors.warning,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: VSpacing.sm),
-                                ],
+                            const SizedBox(height: VSpacing.xs),
+                            Text(
+                              'Progress and shortcuts — your feed is below.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -440,7 +339,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           BentoCard(
                             child: const ChallengesCard(),
                             size: BentoSize.small,
-                            onTap: () => context.push('/daily-quests'),
+                            onTap: () => context.push('/challenges'),
                           ),
                           const BentoCard(
                             child: LeagueCard(),
@@ -448,10 +347,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           ),
                           const BentoCard(
                             child: TrendingCard(),
-                            size: BentoSize.large,
-                          ),
-                          const BentoCard(
-                            child: FeedPreviewCard(),
                             size: BentoSize.large,
                           ),
                         ],

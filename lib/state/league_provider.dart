@@ -130,14 +130,15 @@ class LeagueNotifier extends Notifier<LeagueState> {
         standings.add(LeagueParticipant.fromMap(standingsData[i], i + 1));
       }
 
-      int userRank = standings.indexWhere((p) => p.userId == effectiveUserId);
-      if (userRank == -1) userRank = 0;
+      final userRankIndex =
+          standings.indexWhere((p) => p.userId == effectiveUserId);
+      final displayRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
 
       state = state.copyWith(
         currentSeason: season,
         userLeague: UserLeagueInfo(
           tier: userTier,
-          rank: userRank + 1,
+          rank: displayRank,
           weeklyXp: userWeeklyXp,
         ),
         standings: standings,
@@ -155,7 +156,9 @@ class LeagueNotifier extends Notifier<LeagueState> {
     try {
       await LeagueService.addXP(residentId, amount);
       await refreshStandings();
-    } catch (_) {}
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
   }
 
   Future<void> refreshStandings() async {
@@ -170,22 +173,30 @@ class LeagueNotifier extends Notifier<LeagueState> {
       }
 
       final residentId = ref.read(residentProvider).resident?.id;
-      int userRank = standings.indexWhere((p) => p.userId == residentId);
-      if (userRank == -1) userRank = 0;
+      final userRankIndex =
+          standings.indexWhere((p) => p.userId == residentId);
+      final displayRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
 
-      final updatedWeeklyXp = standings.isNotEmpty && userRank < standings.length
-          ? standings[userRank].weeklyXp
+      final updatedWeeklyXp = userRankIndex >= 0 && userRankIndex < standings.length
+          ? standings[userRankIndex].weeklyXp
           : userLeague.weeklyXp;
 
       state = state.copyWith(
         standings: standings,
         userLeague: UserLeagueInfo(
           tier: userLeague.tier,
-          rank: userRank + 1,
+          rank: displayRank,
           weeklyXp: updatedWeeklyXp,
         ),
+        error: null,
       );
-    } catch (_) {}
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
+  }
+
+  void clearForSignOut() {
+    state = const LeagueState();
   }
 }
 

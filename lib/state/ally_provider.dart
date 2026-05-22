@@ -89,6 +89,10 @@ class AllyNotifier extends Notifier<AllyState> {
   bool isAlly(String otherId) => state.allies.any(
     (a) => a.requesterId == otherId || a.receiverId == otherId,
   );
+
+  void clearForSignOut() {
+    state = const AllyState();
+  }
 }
 
 final allyProvider = NotifierProvider<AllyNotifier, AllyState>(

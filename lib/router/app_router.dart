@@ -76,6 +76,11 @@ final goRouterRefreshProvider = Provider<GoRouterRefresh>((ref) {
     ),
     (_, __) => refresh.refresh(),
   );
+  final client = maybeSupabase();
+  if (client != null) {
+    final sub = client.auth.onAuthStateChange.listen((_) => refresh.refresh());
+    ref.onDispose(sub.cancel);
+  }
   return refresh;
 });
 
@@ -624,29 +629,46 @@ class _ThreadDeepLinkScreenState extends State<_ThreadDeepLinkScreen> {
 ///
 /// Reads the notification from the provider, marks it read,
 /// and redirects to the relevant target screen.
-class _NotificationDeepLink extends ConsumerWidget {
+class _NotificationDeepLink extends ConsumerStatefulWidget {
   final String notificationId;
 
   const _NotificationDeepLink({required this.notificationId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifs = ref.watch(notificationProvider).notifications;
-    final notif = notifs.where((n) => n.id == notificationId).firstOrNull;
+  ConsumerState<_NotificationDeepLink> createState() =>
+      _NotificationDeepLinkState();
+}
 
-    // Mark as read
+class _NotificationDeepLinkState extends ConsumerState<_NotificationDeepLink> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _redirect());
+  }
+
+  Future<void> _redirect() async {
+    final notifs = ref.read(notificationProvider).notifications;
+    final notif =
+        notifs.where((n) => n.id == widget.notificationId).firstOrNull;
+
     if (notif != null && !notif.read) {
-      Future.microtask(() {
-        ref.read(notificationProvider.notifier).markRead(notificationId);
-      });
+      ref.read(notificationProvider.notifier).markRead(widget.notificationId);
     }
 
-    // Redirect based on notification data
-    final target = notif?.worldId != null
-        ? '/explore/${notif!.worldId}'
-        : '/';
-    Future.microtask(() => context.go(target));
+    if (!context.mounted) return;
+    final postId = notif?.postId;
+    final worldId = notif?.worldId;
+    if (worldId != null && postId != null && postId.isNotEmpty) {
+      context.go('/explore/$worldId?post=$postId');
+    } else if (worldId != null) {
+      context.go('/explore/$worldId');
+    } else {
+      context.go('/');
+    }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: AppEmptyState(
@@ -686,12 +708,23 @@ class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
   Future<void> _resolve() async {
     try {
       final posts = ref.read(postProvider).posts;
-      final post = posts.where((p) => p.id == widget.postId).firstOrNull;
+      var post = posts.where((p) => p.id == widget.postId).firstOrNull;
+      if (post == null && isSupabaseConfigured()) {
+        final row = await getSupabase()
+            .from('posts')
+            .select('world_id')
+            .eq('id', widget.postId)
+            .maybeSingle();
+        final worldId = row?['world_id'] as String?;
+        if (worldId != null && mounted) {
+          context.go('/explore/$worldId?post=${widget.postId}');
+          return;
+        }
+      }
       if (post != null && mounted) {
-        context.go('/explore/${post.worldId}');
+        context.go('/explore/${post.worldId}?post=${widget.postId}');
         return;
       }
-      // Fallback: navigate to nexus
       if (mounted) context.go('/');
     } catch (_) {
       if (mounted) {

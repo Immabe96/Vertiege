@@ -15,6 +15,7 @@ import 'state/world_provider.dart';
 import 'state/event_provider.dart';
 import 'state/quest_provider.dart';
 import 'state/league_provider.dart';
+import 'state/ally_provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
@@ -71,7 +72,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startBackgroundLoads();
       _waitForCriticalLoads();
-      _checkDailyReward();
     });
   }
 
@@ -87,21 +87,11 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   /// Fire-and-forget all data loads independently. No provider blocks another.
   void _startBackgroundLoads() {
-    // Each provider loads independently — failures are silent and non-blocking
-    ref.read(themeProvider.notifier).loadFromPrefs(); // fire-and-forget
-    unawaited(_safeLoad('worlds', ref.read(worldProvider.notifier).loadWorlds));
-    unawaited(
-      _safeLoad('resident', ref.read(residentProvider.notifier).loadResident),
-    );
+    // Resident/worlds load in _waitForCriticalLoads; notifications load with push init.
+    ref.read(themeProvider.notifier).loadFromPrefs();
     unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
     unawaited(
       _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
-    );
-    unawaited(
-      _safeLoad(
-        'notifications',
-        ref.read(notificationProvider.notifier).loadNotifications,
-      ),
     );
     unawaited(
       _safeLoad(
@@ -112,9 +102,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     unawaited(_safeLoad('events', ref.read(eventProvider.notifier).loadEvents));
     unawaited(_safeLoad('quests', ref.read(questProvider.notifier).loadQuests));
     unawaited(_safeLoad('league', ref.read(leagueProvider.notifier).loadLeague));
-    ref.read(residentProvider.notifier).touchPresence(); // fire-and-forget
-
-    // Initialize push notifications and IAP store
     unawaited(_safeInitServices());
   }
 
@@ -147,6 +134,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         ref.read(appRouterProvider).go(initialRoute);
       }
       await PushService.initialize(userId: resident.id);
+      unawaited(ref.read(allyProvider.notifier).loadAll(resident.id));
       unawaited(
         _safeLoad(
           'notifications',
@@ -339,6 +327,12 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final resident = ref.read(residentProvider).resident;
+      if (resident != null) {
+        ref.read(residentProvider.notifier).checkStreakRisk();
+      }
+    }
     if (state == AppLifecycleState.paused) {
       StorageService.flush();
     }
@@ -349,7 +343,11 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     ref.listen<ResidentState>(residentProvider, (previous, next) {
       final resident = next.resident;
       if (resident == null) return;
-      unawaited(_initializeResidentServices(resident.id));
+      if (previous?.resident?.id != resident.id) {
+        unawaited(_initializeResidentServices(resident.id));
+        unawaited(ref.read(residentProvider.notifier).touchPresence());
+        _checkDailyReward();
+      }
     });
     ref.listen<NotificationState>(
       notificationProvider,

@@ -45,9 +45,6 @@ class AdminAccessService {
     final email = user.email?.trim().toLowerCase();
     if (email == null || email.isEmpty) return false;
 
-    const bootstrap = 'ltyl.naughty@gmail.com';
-    if (email == bootstrap) return true;
-
     for (final allowed in _superuserEmailsFromEnv()) {
       if (email == allowed) return true;
     }

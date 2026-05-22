@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.imma96" "\0"
-            VALUE "FileDescription", "virtual_status_worlds" "\0"
+            VALUE "CompanyName", "Vertiege" "\0"
+            VALUE "FileDescription", "Vertiege" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "virtual_status_worlds" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.imma96. All rights reserved." "\0"
-            VALUE "OriginalFilename", "virtual_status_worlds.exe" "\0"
-            VALUE "ProductName", "virtual_status_worlds" "\0"
+            VALUE "InternalName", "vertiege" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Vertiege. All rights reserved." "\0"
+            VALUE "OriginalFilename", "vertiege.exe" "\0"
+            VALUE "ProductName", "Vertiege" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

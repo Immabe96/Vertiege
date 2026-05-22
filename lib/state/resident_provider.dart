@@ -24,11 +24,13 @@ import 'league_provider.dart';
 class ResidentState {
   final Resident? resident;
   final bool isLoading;
+  final String? loadError;
   final VerificationStatus verificationStatus;
 
   const ResidentState({
     this.resident,
     this.isLoading = true,
+    this.loadError,
     this.verificationStatus = VerificationStatus.idle,
   });
 
@@ -37,12 +39,15 @@ class ResidentState {
   ResidentState copyWith({
     Object? resident = _unset,
     bool? isLoading,
+    String? loadError,
+    bool clearLoadError = false,
     VerificationStatus? verificationStatus,
   }) => ResidentState(
     resident: identical(resident, _unset)
         ? this.resident
         : resident as Resident?,
     isLoading: isLoading ?? this.isLoading,
+    loadError: clearLoadError ? null : (loadError ?? this.loadError),
     verificationStatus: verificationStatus ?? this.verificationStatus,
   );
 }
@@ -75,7 +80,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
   }
 
   Future<void> loadResident() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearLoadError: true);
     try {
       final userId = maybeSupabase()?.auth.currentUser?.id;
       if (userId == null) {
@@ -102,9 +107,27 @@ class ResidentNotifier extends Notifier<ResidentState> {
         state = ResidentState(resident: cached, isLoading: false);
         return;
       }
-      state = const ResidentState(isLoading: false);
+      state = const ResidentState(
+        isLoading: false,
+        loadError: 'Profile not found. Try signing in again.',
+      );
     } catch (_) {
-      state = const ResidentState(isLoading: false);
+      final fallbackId = maybeSupabase()?.auth.currentUser?.id;
+      if (fallbackId != null) {
+        final cached = await _cachedResidentFor(fallbackId);
+        if (cached != null) {
+          state = ResidentState(
+            resident: cached,
+            isLoading: false,
+            loadError: 'Showing cached profile (offline).',
+          );
+          return;
+        }
+      }
+      state = const ResidentState(
+        isLoading: false,
+        loadError: 'Could not load your profile. Pull to refresh.',
+      );
     }
   }
 
@@ -385,16 +408,9 @@ class ResidentNotifier extends Notifier<ResidentState> {
       }
 
       return actualXp;
-    } catch (_) {
-      final newTotalXp = r.totalXp + baseXp;
-      state = state.copyWith(
-        resident: r.copyWith(
-          totalXp: newTotalXp,
-          lastActivityAt: DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-      _persist();
-      return baseXp;
+    } catch (e) {
+      debugPrint('award_activity_xp failed: $e');
+      return 0;
     }
   }
 
@@ -1128,6 +1144,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
       );
     }
     return {};
+  }
+
+  void clearForSignOut() {
+    state = const ResidentState(isLoading: false, resident: null);
   }
 }
 

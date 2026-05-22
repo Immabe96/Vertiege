@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBZTPAlGRd_kMw743Fe0qJkVHNeeJySU80',
-    appId: '1:92526224561:android:d523bec23fcecd1f7cae90',
+    appId: '1:92526224561:android:7b7a9f6f448f61ca7cae90',
     messagingSenderId: '92526224561',
     projectId: 'veritage',
     storageBucket: 'veritage.firebasestorage.app',
@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '92526224561',
     projectId: 'veritage',
     storageBucket: 'veritage.firebasestorage.app',
-    iosBundleId: 'com.imma96.virtualStatusWorlds',
+    iosBundleId: 'com.vertiege',
   );
 }

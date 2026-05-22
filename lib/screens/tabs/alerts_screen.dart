@@ -126,14 +126,64 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
             ),
         ],
       ),
-      body: notifications.isEmpty
-          ? const AppEmptyState(
-              title: 'All caught up!',
-              description: 'You have no notifications yet.',
-              icon: Icons.notifications_outlined,
-              variant: EmptyStateVariant.default_,
-            )
-          : _buildNotificationList(context, notifications, ref, theme),
+      body: Column(
+        children: [
+          if (notifState.error != null)
+            Material(
+              color: VColors.warning.withValues(alpha: 0.12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.cloud_off,
+                      size: 18,
+                      color: VColors.warning,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        notifState.error!,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => ref
+                          .read(notificationProvider.notifier)
+                          .loadNotifications(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: notifications.isEmpty && notifState.error == null
+                ? const AppEmptyState(
+                    title: 'All caught up!',
+                    description: 'You have no notifications yet.',
+                    icon: Icons.notifications_outlined,
+                    variant: EmptyStateVariant.default_,
+                  )
+                : notifications.isEmpty
+                    ? Center(
+                        child: Text(
+                          notifState.error ?? 'No notifications',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      )
+                    : _buildNotificationList(
+                        context,
+                        notifications,
+                        ref,
+                        theme,
+                      ),
+          ),
+        ],
+      ),
     );
   }
 

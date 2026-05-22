@@ -437,7 +437,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                         if (ctx.mounted) Navigator.pop(ctx);
                         if (context.mounted) {
-                          await AuthService.signOut();
+                          await AuthService.signOut(ref: ref);
                           if (context.mounted) {
                             context.go('/login');
                           }
@@ -904,14 +904,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.security,
                   label: 'Twin Seal (2FA)',
                   iconColor: VColors.tertiary,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const TwinSealSetupScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => context.push('/twin-seal'),
                 ),
                 VSectionTile(
                   icon: Icons.delete_outline,

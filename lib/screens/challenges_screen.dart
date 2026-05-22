@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../../forui/v_hub_page.dart';
 import '../../state/challenge_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -29,23 +29,9 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor:
-            (isDark ? VColors.surfaceDark : VColors.surface).withValues(
-              alpha: 0.86,
-            ),
-        elevation: 0,
-        title: const Text(
-          'Seasonal Challenges',
-          style: TextStyle(fontWeight: VFontWeight.semiBold),
-        ),
-        leading: IconButton(
-          icon: const Icon(VIcons.arrowLeft),
-          onPressed: () => context.pop(),
-        ),
-      ),
+    return VHubPage(
+      title: 'Seasonal Challenges',
+      showBack: true,
       body: challengeState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : challengeState.activeChallenges.isEmpty

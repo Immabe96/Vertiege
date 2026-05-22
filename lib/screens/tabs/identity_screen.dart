@@ -43,6 +43,8 @@ class IdentityScreen extends ConsumerStatefulWidget {
 
 class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   final _scrollController = ScrollController();
+  final _exploreSectionKey = GlobalKey();
+  bool _handledRouteTab = false;
   int _previousXp = 0;
   SubscriptionTier _subscriptionTier = SubscriptionTier.resident;
   List<Map<String, dynamic>> _highPrestigeWorlds = [];
@@ -81,6 +83,25 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_handledRouteTab) return;
+    final tab = GoRouterState.of(context).uri.queryParameters['tab'];
+    if (tab == 'allies') {
+      _handledRouteTab = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _exploreSectionKey.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 350),
+          );
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
@@ -107,7 +128,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             label: 'Sign Out',
             onPressed: () async {
               Navigator.of(ctx).pop();
-              await AuthService.signOut();
+              await AuthService.signOut(ref: ref);
               if (mounted) context.go('/login');
             },
           ),
@@ -175,8 +196,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final achievements = ref.watch(achievementProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isLoading = resident == null && residentState.isLoading;
-
     ref.listen<ResidentState>(residentProvider, (prev, next) {
       if (prev?.resident != null &&
           next.resident != null &&
@@ -193,17 +212,46 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       }
     });
 
-    if (isLoading) {
-      return Scaffold(
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        body: const Center(child: CircularProgressIndicator()),
+    if (residentState.isLoading) {
+      return const VHubPage(
+        title: 'Wall of Honour',
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (resident == null) {
-      return Scaffold(
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        body: const Center(child: CircularProgressIndicator()),
+      return VHubPage(
+        title: 'Wall of Honour',
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(VSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person_off,
+                  size: 48,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
+                const SizedBox(height: VSpacing.md),
+                Text(
+                  residentState.loadError ??
+                      'Could not load your profile.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge,
+                ),
+                const SizedBox(height: VSpacing.lg),
+                FilledButton(
+                  onPressed: () =>
+                      ref.read(residentProvider.notifier).loadResident(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -248,23 +296,21 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
         await ref.read(achievementProvider.notifier).loadAchievements();
         await ref.read(postProvider.notifier).loadPosts();
         await _loadHighPrestigeWorlds();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Honour wall refreshed'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Honour wall refreshed'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       } catch (_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Refresh failed'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Refresh failed'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
 
@@ -394,26 +440,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     padding: const EdgeInsets.only(top: VSpacing.xs),
                     child: SubscriptionBadge(tier: _subscriptionTier),
                   ),
-
-                // REP badge
-                const SizedBox(height: VSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: VSpacing.lg,
-                    vertical: VSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: VColors.tertiary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(VRadius.pill),
-                  ),
-                  child: Text(
-                    '$totalRep REP',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: VColors.tertiary,
-                      fontWeight: VFontWeight.bold,
-                    ),
-                  ),
-                ),
 
                 // Bio
                 if (resident.bio.isNotEmpty) ...[
@@ -557,46 +583,73 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           ),
           const SizedBox(height: VSpacing.lg),
 
-          // ── Tier Progress ───────────────────────────
+          // ── Progress (tier bar + XP + collapsible perks) ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-            child: Column(
-              children: [
-                SovereignProgressBar(
-                  progress: tierProgress,
-                  color: VColors.primary,
-                  label: '${resident.tier.label} Tier',
-                  trailing: nextThreshold != null
-                      ? 'Next: $nextTierName'
-                      : 'Max Tier',
+            child: Container(
+              padding: const EdgeInsets.all(VSpacing.md),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(VRadius.lg),
+                border: Border.all(
+                  color: isDark
+                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                      : VColors.outlineVariant.withValues(alpha: 0.3),
                 ),
-                const SizedBox(height: VSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${currentXp - currentThreshold} / ${nextThreshold != null ? nextThreshold - currentThreshold : 0} XP',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Progress',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
                     ),
-                    Text(
-                      '$currentXp total XP',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                        fontWeight: VFontWeight.semiBold,
-                      ),
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  SovereignProgressBar(
+                    progress: tierProgress,
+                    color: VColors.primary,
+                    label: resident.tier.label,
+                    trailing: nextThreshold != null ? nextTierName : 'Max',
+                  ),
+                  const SizedBox(height: VSpacing.xs),
+                  Text(
+                    nextThreshold != null
+                        ? '$currentXp XP total · ${(nextThreshold - currentXp).clamp(0, 1 << 30)} XP to $nextTierName'
+                        : '$currentXp XP · max tier reached',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  Theme(
+                    data: theme.copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: EdgeInsets.zero,
+                      title: Text(
+                        'Tier perks',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      ),
+                      children: [
+                        _PerksCard(
+                          tier: tierValue,
+                          isDark: isDark,
+                          showHeader: false,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: VSpacing.lg),
-
-          // ── Tier Perks ────────────────────────────────
-          _PerksCard(tier: tierValue, isDark: isDark),
-
           const SizedBox(height: VSpacing.xl),
 
           // ── Action Buttons ─────────────────────────────
@@ -757,27 +810,22 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           const SizedBox(height: VSpacing.lg),
 
           Padding(
+            key: _exploreSectionKey,
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             child: VSectionList(
               title: 'Explore',
               children: [
                 VSectionTile(
-                  icon: Icons.emoji_events,
-                  label: 'All achievements',
-                  iconColor: VColors.tertiary,
-                  onTap: () => context.push('/achievements'),
-                ),
-                VSectionTile(
                   icon: Icons.people,
                   label: 'Following (${resident.following.length})',
-                  onTap: () => context.push('/search'),
+                  onTap: () => context.push('/search?mode=following'),
                 ),
                 VSectionTile(
                   icon: Icons.handshake,
                   label: allyCount == 0
                       ? 'Find allies'
                       : 'Allies ($allyCount)',
-                  onTap: () => context.push('/search'),
+                  onTap: () => context.push('/search?mode=allies'),
                 ),
                 VSectionTile(
                   icon: Icons.leaderboard,
@@ -820,19 +868,18 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
           const SizedBox(height: VSpacing.sm),
 
-          // ── Sign out ───────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: VColors.error),
-              title: const Text(
-                'Sign Out',
-                style: TextStyle(color: VColors.error),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(VRadius.lg),
-              ),
-              onTap: _confirmSignOut,
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            child: VSectionList(
+              title: 'Session',
+              children: [
+                VSectionTile(
+                  icon: Icons.logout,
+                  label: 'Sign Out',
+                  iconColor: VColors.error,
+                  onTap: _confirmSignOut,
+                ),
+              ],
             ),
           ),
 
@@ -847,8 +894,13 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 class _PerksCard extends ConsumerWidget {
   final int tier;
   final bool isDark;
+  final bool showHeader;
 
-  const _PerksCard({required this.tier, required this.isDark});
+  const _PerksCard({
+    required this.tier,
+    required this.isDark,
+    this.showHeader = true,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -902,30 +954,7 @@ class _PerksCard extends ConsumerWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              VSpacing.md,
-              VSpacing.md,
-              VSpacing.md,
-              VSpacing.sm,
-            ),
-            child: Text(
-              'TIER PERKS',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: VFontWeight.bold,
-                letterSpacing: 0.5,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Container(
+    final perksBody = Container(
             decoration: BoxDecoration(
               color: isDark
                   ? VColors.surfaceContainerDark
@@ -975,7 +1004,36 @@ class _PerksCard extends ConsumerWidget {
                 ),
               ],
             ),
+          );
+
+    if (!showHeader) {
+      return perksBody;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.sm,
+            ),
+            child: Text(
+              'TIER PERKS',
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: VFontWeight.bold,
+                letterSpacing: 0.5,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
           ),
+          perksBody,
         ],
       ),
     );

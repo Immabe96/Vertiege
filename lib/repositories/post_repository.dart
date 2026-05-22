@@ -7,8 +7,6 @@ import '../models/sync_status.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/supabase.dart';
 import '../services/world_service.dart';
-import '../utils/validators.dart' as validators;
-
 class PostRepository {
   const PostRepository();
 
@@ -378,6 +376,4 @@ class PostRepository {
     'poll': post.poll?.toJson(),
     'scheduled_for': post.scheduledFor?.toIso8601String(),
   };
-
-  static bool _isUuid(String value) => validators.isUuid(value);
 }

@@ -44,8 +44,8 @@ Internally, verifier login sets `VerifierSession.active`; player login clears it
 2. On your PC:
 
    ```powershell
-   adb shell am force-stop com.imma96.virtual_status_worlds
-   adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.imma96.virtual_status_worlds
+   adb shell am force-stop com.vertiege
+   adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.vertiege
    ```
 
 3. You should see **Staff** sign-in (not the normal player login). If you still see player login, install a newer APK — older builds mapped this deep link to `/login` by mistake.

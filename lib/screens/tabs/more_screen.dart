@@ -16,27 +16,6 @@ class MoreScreen extends StatelessWidget {
         padding: const EdgeInsets.all(VSpacing.md),
         children: [
           VSectionList(
-            title: 'Your Journey',
-            children: [
-              VSectionTile(
-                icon: Icons.emoji_events,
-                label: 'Achievements',
-                onTap: () => context.push('/achievements'),
-              ),
-              VSectionTile(
-                icon: Icons.trending_up,
-                label: 'Ascension Path',
-                onTap: () => context.push('/ascension-path'),
-              ),
-              VSectionTile(
-                icon: Icons.leaderboard,
-                label: 'Hall of Ascension',
-                onTap: () => context.push('/hall-of-ascension'),
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.md),
-          VSectionList(
             title: 'Account',
             children: [
               VSectionTile(
@@ -58,37 +37,6 @@ class MoreScreen extends StatelessWidget {
                 icon: Icons.notifications,
                 label: 'Notifications',
                 onTap: () => context.push('/notifications'),
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.md),
-          VSectionList(
-            title: 'Explore',
-            children: [
-              VSectionTile(
-                icon: Icons.public,
-                label: 'Discover Worlds',
-                onTap: () => context.push('/explore/discover'),
-              ),
-              VSectionTile(
-                icon: Icons.search,
-                label: 'Search',
-                onTap: () => context.push('/search'),
-              ),
-              VSectionTile(
-                icon: Icons.emoji_events,
-                label: 'Challenges',
-                onTap: () => context.push('/challenges'),
-              ),
-              VSectionTile(
-                icon: Icons.groups,
-                label: 'Leagues',
-                onTap: () => context.push('/leagues'),
-              ),
-              VSectionTile(
-                icon: Icons.calendar_month,
-                label: 'Season',
-                onTap: () => context.push('/season'),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/post.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
 import '../../models/resident.dart';
@@ -10,7 +11,7 @@ import '../feed/post_input.dart';
 import '../feed/post_item.dart';
 import 'event_card.dart';
 
-class WorldFeedTab extends ConsumerWidget {
+class WorldFeedTab extends ConsumerStatefulWidget {
   final String worldId;
   final dynamic world;
   final Resident? resident;
@@ -19,6 +20,7 @@ class WorldFeedTab extends ConsumerWidget {
 
   /// When true, builds a single [ListView] for [NestedScrollView] tab bodies.
   final bool primaryScroll;
+  final String? highlightPostId;
 
   const WorldFeedTab({
     super.key,
@@ -28,10 +30,63 @@ class WorldFeedTab extends ConsumerWidget {
     required this.posts,
     required this.cs,
     this.primaryScroll = false,
+    this.highlightPostId,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorldFeedTab> createState() => _WorldFeedTabState();
+}
+
+class _WorldFeedTabState extends ConsumerState<WorldFeedTab> {
+  final _highlightKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.highlightPostId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToHighlight());
+    }
+  }
+
+  void _scrollToHighlight() {
+    final ctx = _highlightKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 400),
+        alignment: 0.2,
+      );
+    }
+  }
+
+  Widget _postTile(Post post, int index, String worldId, String? highlightId) {
+    final highlighted = highlightId != null && post.id == highlightId;
+    return Container(
+      key: highlighted ? _highlightKey : null,
+      margin: highlighted
+          ? const EdgeInsets.symmetric(
+              horizontal: Spacing.sm,
+              vertical: Spacing.xs,
+            )
+          : null,
+      decoration: highlighted
+          ? BoxDecoration(
+              border: Border.all(color: VColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
+            )
+          : null,
+      child: PostItem(post: post, index: index, worldId: worldId),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final worldId = widget.worldId;
+    final world = widget.world;
+    final resident = widget.resident;
+    final posts = widget.posts;
+    final primaryScroll = widget.primaryScroll;
+    final highlightPostId = widget.highlightPostId;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final eventPosts = posts
@@ -43,7 +98,7 @@ class WorldFeedTab extends ConsumerWidget {
 
     final postHeader = resident != null &&
             world != null &&
-            WorldPermissions.canPost(resident!, worldId, world.sovereignId)
+            WorldPermissions.canPost(resident, worldId, world.sovereignId)
         ? PostInput(worldId: worldId, sovereignId: world.sovereignId)
         : Padding(
             padding: const EdgeInsets.all(Spacing.md),
@@ -108,10 +163,11 @@ class WorldFeedTab extends ConsumerWidget {
                       bottom: Spacing.xxl + Spacing.xxl,
                     ),
                     itemCount: regularPosts.length,
-                    itemBuilder: (context, index) => PostItem(
-                      post: regularPosts[index],
-                      index: index,
-                      worldId: worldId,
+                    itemBuilder: (context, index) => _postTile(
+                      regularPosts[index] as Post,
+                      index,
+                      worldId,
+                      highlightPostId,
                     ),
                   ),
           ),
@@ -153,10 +209,11 @@ class WorldFeedTab extends ConsumerWidget {
         else
           ...List.generate(
             regularPosts.length,
-            (index) => PostItem(
-              post: regularPosts[index],
-              index: index,
-              worldId: worldId,
+            (index) => _postTile(
+              regularPosts[index] as Post,
+              index,
+              worldId,
+              highlightPostId,
             ),
           ),
       ],

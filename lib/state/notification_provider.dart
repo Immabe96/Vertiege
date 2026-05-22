@@ -13,20 +13,25 @@ class NotificationState {
   final List<AppNotification> notifications;
   final List<AppNotification> quietNotifications;
   final bool isLoading;
+  final String? error;
   const NotificationState({
     this.notifications = const [],
     this.quietNotifications = const [],
     this.isLoading = true,
+    this.error,
   });
 
   NotificationState copyWith({
     List<AppNotification>? notifications,
     List<AppNotification>? quietNotifications,
     bool? isLoading,
+    String? error,
+    bool clearError = false,
   }) => NotificationState(
     notifications: notifications ?? this.notifications,
     quietNotifications: quietNotifications ?? this.quietNotifications,
     isLoading: isLoading ?? this.isLoading,
+    error: clearError ? null : (error ?? this.error),
   );
 }
 
@@ -155,21 +160,24 @@ class NotificationNotifier extends Notifier<NotificationState> {
           resident.id,
         );
         _unreadCount = remoteNotifications.where((n) => !n.read).length;
-        state = NotificationState(
+        state = state.copyWith(
           notifications: remoteNotifications,
           isLoading: false,
+          clearError: true,
         );
         _persist();
         return;
-      } catch (_) {
+      } catch (e) {
         if (cached.isNotEmpty) {
-          state = state.copyWith(isLoading: false);
+          state = state.copyWith(isLoading: false, error: e.toString());
           return;
         }
+        state = state.copyWith(isLoading: false, error: e.toString());
+        return;
       }
     }
 
-    state = NotificationState(notifications: cached, isLoading: false);
+    state = state.copyWith(notifications: cached, isLoading: false, clearError: true);
     _unreadCount = cached.where((n) => !n.read).length;
   }
 
@@ -281,6 +289,14 @@ class NotificationNotifier extends Notifier<NotificationState> {
     } catch (_) {
       return null;
     }
+  }
+
+  void clearForSignOut() {
+    _realtimeSubscription?.cancel();
+    _realtimeSubscription = null;
+    _realtimeResidentId = null;
+    _unreadCount = 0;
+    state = const NotificationState(isLoading: false);
   }
 
   static Map<String, dynamic> _toJson(AppNotification n) => {

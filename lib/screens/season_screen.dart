@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../forui/v_hub_page.dart';
 import '../models/season.dart';
 import '../services/season_service.dart';
 import '../state/world_provider.dart';
@@ -43,21 +44,9 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
         .where((s) => myWorlds.any((w) => w.id == s.worldId))
         .toList();
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Sovereign Seasons',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-            color: VColors.tertiary,
-          ),
-        ),
-        centerTitle: true,
-      ),
+    return VHubPage(
+      title: 'Sovereign Seasons',
+      showBack: true,
       body: isLoaded
           ? CustomScrollView(
               slivers: [
@@ -141,7 +130,7 @@ class _SeasonHero extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
         VSpacing.xl,
-        100,
+        VSpacing.lg,
         VSpacing.xl,
         VSpacing.xl,
       ),

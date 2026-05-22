@@ -1,8 +1,11 @@
-import 'supabase.dart';
-import 'secure_storage_service.dart';
-import 'verifier_session.dart';
-import 'crash_reporter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../state/session_reset.dart';
+import 'crash_reporter.dart';
+import 'secure_storage_service.dart';
+import 'supabase.dart';
+import 'verifier_session.dart';
 
 class AuthService {
   static SupabaseClient _requireClient() {
@@ -125,13 +128,16 @@ class AuthService {
     );
   }
 
-  static Future<void> signOut() async {
+  static Future<void> signOut({WidgetRef? ref}) async {
     VerifierSession.exit();
     final client = maybeSupabase();
     if (client != null) {
       await client.auth.signOut();
     }
     await SecureStorageService.clearAll();
+    if (ref != null) {
+      resetUserSessionState(ref);
+    }
   }
 
   static Future<Session?> getSession() async {

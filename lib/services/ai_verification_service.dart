@@ -5,6 +5,9 @@
 /// API (Claude / GPT-4V).  For now it uses heuristics that simulate AI
 /// verification with reasonable defaults.
 class AiVerificationService {
+  /// When false, all proofs stay in human review (no auto-approve path).
+  static const bool autoVerificationEnabled = false;
+
   /// Analyzes a proof submission and returns an [AiVerificationResult].
   ///
   /// [proofUrl]  – URL of the uploaded proof image, or 'manual' for text-only.
@@ -16,8 +19,6 @@ class AiVerificationService {
     required String category,
   }) async {
     // Simulate AI analysis delay (network + inference time)
-    await Future.delayed(const Duration(milliseconds: 800));
-
     // TODO: Replace with real AI moderation (Claude / GPT-4V vision API).
     // Real implementation should analyze the proof image for authenticity,
     // extract relevant text/features, and return a meaningful confidence score.
@@ -26,7 +27,7 @@ class AiVerificationService {
       confidence: null,
       autoApproved: false,
       extractedText: '',
-      notes: 'AI verification not yet implemented — manual review required',
+      notes: 'Submitted for human review — automated checks are not enabled yet',
     );
   }
 }

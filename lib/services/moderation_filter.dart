@@ -11,6 +11,9 @@
 /// before production launch. The current implementation is a
 /// placeholder that only catches the most obvious violations.
 class ModerationFilter {
+  /// When true, route checks through a remote moderation API (not wired yet).
+  static const bool remoteApiEnabled = false;
+
   // ── Stage 1: Profanity word list ──────────────────────────
 
   static const _profanityList = {

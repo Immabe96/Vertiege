@@ -32,7 +32,7 @@
 | Symptom | Typical cause | Mitigation |
 |---------|----------------|------------|
 | Black screen on launch | Missing `.env` in APK | CI embeds secrets; `dotenv.load(isOptional: true)` |
-| “Package conflicts” after uninstall | Package still on another Android user (e.g. `system_clone` user 11) | `adb shell pm uninstall --user N com.imma96.virtual_status_worlds` |
+| “Package conflicts” after uninstall | Package still on another Android user (e.g. `system_clone` user 11) | `adb shell pm uninstall --user N com.vertiege` |
 | Cannot install CI APK over local build | Different signing keys (CI debug vs local keystore) | Full uninstall, then install CI artifact |
 | Data “comes back” after reinstall | Supabase account state (expected) | Not a failed uninstall |
 

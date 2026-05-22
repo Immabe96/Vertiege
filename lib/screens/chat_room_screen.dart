@@ -6,6 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/message.dart';
@@ -299,17 +301,26 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       }
     }
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: _buildAppBar(
-        theme,
-        isDark,
-        recipientName,
-        recipientAvatar,
-        recipientId,
-        recipientPresence,
+    return FScaffold(
+      header: FHeader.nested(
+        prefixes: [
+          FHeaderAction(
+            icon: const Icon(FIcons.chevronLeft),
+            onPress: () {
+              if (context.canPop()) context.pop();
+            },
+          ),
+        ],
+        title: _buildHeaderTitle(
+          theme,
+          isDark,
+          recipientName,
+          recipientAvatar,
+          recipientId,
+          recipientPresence,
+        ),
       ),
-      body: Column(
+      child: Column(
         children: [
           Expanded(
             child: messages.isEmpty
@@ -384,7 +395,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     return presenceFromProfileField(room['other_last_seen_at']);
   }
 
-  PreferredSizeWidget _buildAppBar(
+  Widget _buildHeaderTitle(
     ThemeData theme,
     bool isDark,
     String recipientName,
@@ -392,14 +403,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     String? recipientId,
     Presence presence,
   ) {
-    return AppBar(
-      backgroundColor:
-          (isDark ? VColors.surfaceDark : VColors.surface).withValues(
-            alpha: 0.86,
-          ),
-      elevation: 0,
-      titleSpacing: VSpacing.xs,
-      title: Row(
+    return Row(
         children: [
           CosmeticAvatar(
             imageUrl: recipientAvatar,
@@ -450,7 +454,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             ],
           ),
         ],
-      ),
     );
   }
 

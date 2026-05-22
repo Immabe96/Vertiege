@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../forui/v_hub_page.dart';
 import '../../state/league_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../services/league_service.dart';
@@ -59,19 +61,15 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        title: const Text('Ascension Leagues'),
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(VIcons.arrowLeft),
-            onPressed: () => ref.read(leagueProvider.notifier).loadLeague(),
-          ),
-        ],
-      ),
+    return VHubPage(
+      title: 'Ascension Leagues',
+      showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
+        ),
+      ],
       body: leagueState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : leagueState.error != null
@@ -153,7 +151,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Rank #${userLeague.rank}',
+                userLeague.rank > 0 ? 'Rank #${userLeague.rank}' : 'Unranked',
                 style: TextStyle(
                   fontSize: VFontSize.bodyLg,
                   fontWeight: VFontWeight.semiBold,

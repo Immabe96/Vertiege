@@ -182,11 +182,18 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         Expanded(
           child: _mode == _ChatMode.worlds
               ? _buildWorldChats(joinedWorlds)
-              : chatState.isLoadingRooms
-                  ? const Center(child: CircularProgressIndicator())
-                  : chatState.dmRooms.isEmpty
-                      ? _buildEmptyDmState()
-                      : _buildRoomList(theme, isDark, chatState.dmRooms, residentId),
+              : chatState.roomsLoadError != null
+                  ? _buildDmLoadError(theme, isDark, chatState.roomsLoadError!)
+                  : chatState.isLoadingRooms
+                      ? const Center(child: CircularProgressIndicator())
+                      : chatState.dmRooms.isEmpty
+                          ? _buildEmptyDmState()
+                          : _buildRoomList(
+                              theme,
+                              isDark,
+                              chatState.dmRooms,
+                              residentId,
+                            ),
         ),
       ],
     );
@@ -351,6 +358,41 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDmLoadError(ThemeData theme, bool isDark, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(VSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off, size: 48, color: VColors.error),
+            const SizedBox(height: VSpacing.md),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: VSpacing.lg),
+            FilledButton.icon(
+              onPressed: () {
+                final id = ref.read(residentProvider).resident?.id;
+                if (id != null) {
+                  ref.read(chatProvider.notifier).loadDmRooms(id);
+                }
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

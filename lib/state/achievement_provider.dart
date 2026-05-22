@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/achievement.dart';
 import '../models/resident.dart';
@@ -13,6 +14,7 @@ import 'resident_provider.dart';
 class AchievementState {
   final List<UserAchievement> userAchievements;
   final bool isLoading;
+  final String? error;
   final int totalXp;
   final List<String> recentlyUnlockedIds;
   final ResidentTier? celebrationTier;
@@ -20,6 +22,7 @@ class AchievementState {
   const AchievementState({
     this.userAchievements = const [],
     this.isLoading = true,
+    this.error,
     this.totalXp = 0,
     this.recentlyUnlockedIds = const [],
     this.celebrationTier,
@@ -28,6 +31,8 @@ class AchievementState {
   AchievementState copyWith({
     List<UserAchievement>? userAchievements,
     bool? isLoading,
+    String? error,
+    bool clearError = false,
     int? totalXp,
     List<String>? recentlyUnlockedIds,
     ResidentTier? celebrationTier,
@@ -35,6 +40,7 @@ class AchievementState {
   }) => AchievementState(
     userAchievements: userAchievements ?? this.userAchievements,
     isLoading: isLoading ?? this.isLoading,
+    error: clearError ? null : (error ?? this.error),
     totalXp: totalXp ?? this.totalXp,
     recentlyUnlockedIds: recentlyUnlockedIds ?? this.recentlyUnlockedIds,
     celebrationTier: clearCelebration
@@ -80,8 +86,9 @@ class AchievementNotifier extends Notifier<AchievementState> {
       category: achDef?.category.name ?? '',
     );
 
-    final shouldAutoVerify =
-        aiResult.autoApproved && (aiResult.confidence ?? 0) >= 0.75;
+    final shouldAutoVerify = AiVerificationService.autoVerificationEnabled &&
+        aiResult.autoApproved &&
+        (aiResult.confidence ?? 0) >= 0.75;
     await _persistCloudSubmission(
       achievementId: achievementId,
       proofUri: proofUri,
@@ -312,7 +319,11 @@ class AchievementNotifier extends Notifier<AchievementState> {
   int calculateTotalXp() => _calculateTotalXp(state.userAchievements);
 
   Future<void> loadAchievements() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
+    var achievements = <UserAchievement>[];
+    var localFailed = false;
+    var cloudFailed = false;
+
     try {
       final json = await StorageService.getString(
         StorageService.achievementsKey,
@@ -320,19 +331,97 @@ class AchievementNotifier extends Notifier<AchievementState> {
       if (json != null) {
         final data = jsonDecode(json) as Map<String, dynamic>;
         final list = data['userAchievements'] as List? ?? [];
-        final achievements = list
+        achievements = list
             .map((e) => _fromJson(e as Map<String, dynamic>))
             .toList();
-        final totalXp = _calculateTotalXp(achievements);
-        state = state.copyWith(
-          userAchievements: achievements,
-          isLoading: false,
-          totalXp: totalXp,
-        );
-        return;
       }
-    } catch (_) {}
-    state = state.copyWith(isLoading: false);
+    } catch (e) {
+      localFailed = true;
+      debugPrint('loadAchievements local cache failed: $e');
+    }
+
+    try {
+      final userId =
+          ref.read(residentProvider).resident?.id ??
+          maybeSupabase()?.auth.currentUser?.id;
+      if (userId != null && isSupabaseConfigured()) {
+        final rows = await getSupabase()
+            .from('user_achievements')
+            .select()
+            .eq('user_id', userId);
+        achievements = _mergeWithCloud(
+          achievements,
+          List<Map<String, dynamic>>.from(rows),
+        );
+      }
+    } catch (e) {
+      cloudFailed = true;
+      debugPrint('loadAchievements cloud sync failed: $e');
+    }
+
+    final totalXp = _calculateTotalXp(achievements);
+    String? loadError;
+    if (achievements.isEmpty && (localFailed || cloudFailed)) {
+      loadError = cloudFailed
+          ? 'Could not sync achievements. Showing offline data when available.'
+          : 'Could not load achievements.';
+    } else if (cloudFailed && achievements.isNotEmpty) {
+      loadError = 'Using cached achievements (sync failed).';
+    }
+
+    state = state.copyWith(
+      userAchievements: achievements,
+      isLoading: false,
+      totalXp: totalXp,
+      error: loadError,
+    );
+    _persist();
+  }
+
+  List<UserAchievement> _mergeWithCloud(
+    List<UserAchievement> local,
+    List<Map<String, dynamic>> rows,
+  ) {
+    final byId = {for (final a in local) a.achievementId: a};
+    for (final row in rows) {
+      final cloud = _fromCloudRow(row);
+      final existing = byId[cloud.achievementId];
+      if (existing == null || _statusRank(cloud.status) >= _statusRank(existing.status)) {
+        byId[cloud.achievementId] = cloud;
+      }
+    }
+    return byId.values.toList();
+  }
+
+  int _statusRank(AchievementStatus status) => switch (status) {
+    AchievementStatus.verified => 2,
+    AchievementStatus.submitted => 1,
+    AchievementStatus.locked => 0,
+  };
+
+  static UserAchievement _fromCloudRow(Map<String, dynamic> row) {
+    final statusName = row['status'] as String? ?? 'locked';
+    return UserAchievement(
+      achievementId: row['achievement_id'] as String,
+      status: AchievementStatus.values.firstWhere(
+        (s) => s.name == statusName,
+        orElse: () => AchievementStatus.submitted,
+      ),
+      proofUri: row['proof_uri'] as String?,
+      submittedAt: _parseMillis(row['submitted_at']),
+      verifiedAt: _parseMillis(row['verified_at']),
+      aiConfidence: (row['ai_confidence'] as num?)?.toDouble(),
+      aiNotes: row['ai_notes'] as String?,
+    );
+  }
+
+  static int? _parseMillis(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) {
+      return DateTime.tryParse(value)?.millisecondsSinceEpoch;
+    }
+    return null;
   }
 
   void _persist() {
@@ -366,6 +455,11 @@ class AchievementNotifier extends Notifier<AchievementState> {
         aiConfidence: (json['aiConfidence'] as num?)?.toDouble(),
         aiNotes: json['aiNotes'] as String?,
       );
+
+  void clearForSignOut() {
+    _lastTotalXp = 0;
+    state = const AchievementState();
+  }
 
   static Map<String, dynamic> _toJson(UserAchievement a) => {
     'achievementId': a.achievementId,

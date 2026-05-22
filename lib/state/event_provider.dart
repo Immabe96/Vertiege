@@ -107,6 +107,10 @@ class EventNotifier extends Notifier<EventState> {
     }
     StorageService.setStringDebounced('@events_data', jsonEncode(encoded));
   }
+
+  void clearForSignOut() {
+    state = const EventState();
+  }
 }
 
 final eventProvider = NotifierProvider<EventNotifier, EventState>(

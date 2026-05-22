@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/design_system.dart';
@@ -15,8 +16,8 @@ import '../widgets/worlds/world_channel_list.dart';
 import '../widgets/worlds/world_banner.dart';
 import '../widgets/worlds/world_member_row.dart';
 
-import '../widgets/worlds/world_info_cards.dart';
 import '../widgets/worlds/world_feed_tab.dart';
+import '../widgets/v_section_list.dart';
 import '../widgets/worlds/world_detail_members.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
@@ -63,6 +64,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   int _displayedPosts = 0;
   int _displayedEvents = 0;
   bool _statsAnimated = false;
+  String? _highlightPostId;
+  bool _appliedPostQuery = false;
 
   bool _isSovereignOrCouncil(Resident? resident, World world) {
     if (resident == null) return false;
@@ -182,6 +185,20 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
           _displayedPosts = ((targetPosts * i) / steps).round();
           _displayedEvents = ((targetEvents * i) / steps).round();
         });
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_appliedPostQuery) return;
+    _appliedPostQuery = true;
+    final postId = GoRouterState.of(context).uri.queryParameters['post'];
+    if (postId != null && postId.isNotEmpty) {
+      _highlightPostId = postId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _tabController?.animateTo(0);
       });
     }
   }
@@ -322,7 +339,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
           ),
         );
 
-    // ── Loading state ──
+    // â”€â”€ Loading state â”€â”€
     if (worldState.isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
@@ -330,7 +347,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       );
     }
 
-    // ── Error state ──
+    // â”€â”€ Error state â”€â”€
     if (_hasError && world == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
@@ -356,7 +373,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       );
     }
 
-    // ── World not found ──
+    // â”€â”€ World not found â”€â”€
     if (world == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('World')),
@@ -410,7 +427,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
           },
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              // ── Hero — Reddit-style collapsible header (pull to stretch) ──
+              // â”€â”€ Hero â€” Reddit-style collapsible header (pull to stretch) â”€â”€
               SliverAppBar(
                 expandedHeight: heroHeight,
                 pinned: true,
@@ -501,7 +518,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Tier badge — colored by prestige tier
+                              // Tier badge â€” colored by prestige tier
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: VSpacing.md,
@@ -597,46 +614,27 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: VSpacing.xs),
-                              // Description
-                              Text(
-                                world.description,
-                                style: TextStyle(
-                                  fontSize: VFontSize.bodyMd,
-                                  color: Colors.white.withValues(alpha: 0.92),
-                                  height: 1.35,
-                                  shadows: const [
-                                    Shadow(color: Colors.black38, blurRadius: 6),
-                                  ],
-                                ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              // Prestige progress bar
-                              const SizedBox(height: VSpacing.sm),
-                              _PrestigeProgressBar(
-                                prestige: world.prestige,
-                                tierColor: prestigeTierColor,
-                                isDark: isDark,
-                              ),
-                              // Founded date (legacy)
-                              if (world.createdAt > 0) ...[
-                                const SizedBox(height: VSpacing.sm),
+                              if (world.description.trim().isNotEmpty) ...[
+                                const SizedBox(height: VSpacing.xs),
                                 Text(
-                                  LegacyService.formatFoundedDate(
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                      world.createdAt,
-                                    ),
-                                  ),
+                                  world.description.trim(),
                                   style: TextStyle(
-                                    fontSize: VFontSize.labelMd,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    fontStyle: FontStyle.italic,
+                                    fontSize: VFontSize.bodyMd,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    height: 1.3,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Colors.black38,
+                                        blurRadius: 6,
+                                      ),
+                                    ],
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                               const SizedBox(height: VSpacing.lg),
-                              // Action buttons — colored by prestige tier
+                              // Action buttons â€” colored by prestige tier
                               Row(
                                 children: [
                                   ScaleTransition(
@@ -679,12 +677,10 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 ),
               ),
 
-              // ── Bento Info Cards — GlassPanel stat cards ──
               SliverToBoxAdapter(
                 child: FadeIn(
                   delayMs: 60,
-                  child: WorldInfoCards(
-                    world: world,
+                  child: _WorldStatsStrip(
                     members: _displayedMembers,
                     posts: _displayedPosts,
                     events: _displayedEvents,
@@ -722,6 +718,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     posts: posts,
                     cs: cs,
                     primaryScroll: true,
+                    highlightPostId: _highlightPostId,
                   ),
                 ),
                 _WorldDetailTabScroll(
@@ -774,7 +771,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                         _openChannelByName(name, channels),
                     onSettings: onSettings,
                     onShare: () => _showWorldShareSheet(world),
-                    prestigeTierColor: prestigeTierColor,
                   ),
                 ),
               ],
@@ -787,6 +783,143 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 }
 
 /// Tab body that shares one outer scroll with the world hero + stats.
+/// Single stats row (members / posts / events) â€” shown once below hero.
+class _WorldStatsStrip extends StatefulWidget {
+  final int members;
+  final int posts;
+  final int events;
+  final VoidCallback onVisible;
+  final VoidCallback onMembersTap;
+
+  const _WorldStatsStrip({
+    required this.members,
+    required this.posts,
+    required this.events,
+    required this.onVisible,
+    required this.onMembersTap,
+  });
+
+  @override
+  State<_WorldStatsStrip> createState() => _WorldStatsStripState();
+}
+
+class _WorldStatsStripState extends State<_WorldStatsStrip> {
+  bool _triggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_triggered && mounted) {
+        _triggered = true;
+        widget.onVisible();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        VSpacing.sm,
+        VSpacing.md,
+        VSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _StatChip(
+              icon: Icons.people_outline,
+              value: '${widget.members}',
+              label: 'Residents',
+              onTap: widget.onMembersTap,
+              isDark: isDark,
+            ),
+          ),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: _StatChip(
+              icon: Icons.forum_outlined,
+              value: '${widget.posts}',
+              label: 'Posts',
+              isDark: isDark,
+            ),
+          ),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: _StatChip(
+              icon: Icons.event_available_outlined,
+              value: '${widget.events}',
+              label: 'Events',
+              isDark: isDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final bool isDark;
+  final VoidCallback? onTap;
+
+  const _StatChip({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.isDark,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FCard.raw(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: VSpacing.sm,
+              vertical: VSpacing.md,
+            ),
+            child: Column(
+              children: [
+                Icon(icon, size: VIconSize.md, color: VColors.primary),
+                const SizedBox(height: VSpacing.xs),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: VFontSize.headlineSm,
+                    fontWeight: VFontWeight.bold,
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: VFontSize.labelMd,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _WorldDetailTabScroll extends StatelessWidget {
   final Widget child;
 
@@ -910,47 +1043,75 @@ class _ManageTab extends ConsumerWidget {
       );
     }
 
+    final links = <FTileMixin>[
+      if (FeatureFlags.treasury && showTreasury)
+        VSectionTile(
+          icon: Icons.account_balance_wallet,
+          label: 'Treasury',
+          onTap: () => context.push('/explore/$worldId/treasury'),
+        ),
+      if (FeatureFlags.marketplace && showMarket)
+        VSectionTile(
+          icon: Icons.storefront,
+          label: 'Marketplace',
+          onTap: () => context.push('/explore/$worldId/marketplace'),
+        ),
+      if (FeatureFlags.polls)
+        VSectionTile(
+          icon: Icons.how_to_vote,
+          label: 'Polls',
+          onTap: () => context.push('/explore/$worldId/polls'),
+        ),
+      if (FeatureFlags.challenges)
+        VSectionTile(
+          icon: Icons.emoji_events,
+          label: 'World challenges',
+          onTap: () => context.push('/explore/$worldId/challenges'),
+        ),
+    ];
+
+    if (links.isEmpty) {
+      return const AppEmptyState(
+        title: 'Economy not available',
+        description: 'No economy modules are enabled for this world yet.',
+        icon: Icons.savings_outlined,
+        variant: EmptyStateVariant.default_,
+      );
+    }
+
+    final prestigeColor = world.prestige >= 40
+        ? VColors.tierApex
+        : world.prestige >= 20
+        ? VColors.primary
+        : VColors.tierHustler;
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionHeader(title: 'Economy & governance', isDark: isDark),
-        const SizedBox(height: VSpacing.sm),
-        if (FeatureFlags.treasury && showTreasury)
-          _MoreLink(
-            icon: Icons.account_balance_wallet,
-            label: 'Treasury',
-            onTap: () => context.push('/explore/$worldId/treasury'),
-          ),
-        if (FeatureFlags.marketplace && showMarket)
-          _MoreLink(
-            icon: Icons.storefront,
-            label: 'Marketplace',
-            onTap: () => context.push('/explore/$worldId/marketplace'),
-          ),
-        if (FeatureFlags.polls)
-          _MoreLink(
-            icon: Icons.how_to_vote,
-            label: 'Polls',
-            onTap: () => context.push('/explore/$worldId/polls'),
-          ),
-        if (FeatureFlags.challenges)
-          _MoreLink(
-            icon: Icons.emoji_events,
-            label: 'World challenges',
-            onTap: () => context.push('/explore/$worldId/challenges'),
-          ),
-        if (!FeatureFlags.treasury &&
-            !FeatureFlags.marketplace &&
-            !FeatureFlags.polls &&
-            !FeatureFlags.challenges)
-          Text(
-            'No economy modules enabled for this world yet.',
-            style: TextStyle(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+        VSectionList(title: 'Economy & governance', children: links),
+        const SizedBox(height: VSpacing.md),
+        FCard.raw(
+          child: Padding(
+            padding: const EdgeInsets.all(VSpacing.md),
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome, color: prestigeColor),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Prestige ${world.prestige} Â· unlocks economy features',
+                    style: TextStyle(
+                      fontSize: VFontSize.bodySm,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+        ),
       ],
     );
   }
@@ -966,7 +1127,6 @@ class _MoreTab extends ConsumerWidget {
   final ValueChanged<String> onOpenChannel;
   final VoidCallback? onSettings;
   final VoidCallback onShare;
-  final Color prestigeTierColor;
 
   const _MoreTab({
     required this.world,
@@ -978,7 +1138,6 @@ class _MoreTab extends ConsumerWidget {
     required this.onOpenChannel,
     required this.onSettings,
     required this.onShare,
-    required this.prestigeTierColor,
   });
 
   @override
@@ -987,49 +1146,83 @@ class _MoreTab extends ConsumerWidget {
     final features = ref.read(worldProvider.notifier).featuresForWorld(worldId);
     final settingsTap = onSettings; // local capture for null promotion
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(VSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Foundation card
-          _FoundationCard(world: world),
-          const SizedBox(height: VSpacing.md),
-          // Guide card
-          _GuideCard(
-            world: world,
-            channels: channels,
-            onOpenChannel: onOpenChannel,
+    final foundation = foundationForWorld(world);
+    final quickLinks = <FTileMixin>[
+      VSectionTile(
+        icon: Icons.share_outlined,
+        label: 'Share world',
+        onTap: onShare,
+      ),
+      if (isJoined)
+        VSectionTile(
+          icon: Icons.people_outline,
+          label: 'Full resident roster',
+          onTap: () => context.push(
+            '/explore/$worldId/members'
+            '?name=${Uri.encodeComponent(world.name)}'
+            '&sovereign=${Uri.encodeComponent(world.sovereignId)}',
           ),
-          const SizedBox(height: VSpacing.md),
-          // Quick links
-          _SectionHeader(title: 'Quick Links', isDark: isDark),
-          const SizedBox(height: VSpacing.sm),
-          if (isJoined)
-            _MoreLink(
-              icon: Icons.people_outline,
-              label: 'Residents',
-              onTap: () => context.push(
-                '/explore/$worldId/members'
-                '?name=${Uri.encodeComponent(world.name)}'
-                '&sovereign=${Uri.encodeComponent(world.sovereignId)}',
+        ),
+      if (settingsTap != null && features.governance)
+        VSectionTile(
+          icon: Icons.settings,
+          label: 'World settings',
+          onTap: settingsTap,
+        ),
+    ];
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: VSpacing.xxl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FCard.raw(
+            child: Padding(
+              padding: const EdgeInsets.all(VSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'About',
+                    style: TextStyle(
+                      fontWeight: VFontWeight.bold,
+                      fontSize: VFontSize.bodyLg,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Text(
+                    foundation.premise,
+                    style: TextStyle(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                      fontSize: VFontSize.bodyMd,
+                      height: 1.35,
+                    ),
+                  ),
+                  if (world.createdAt > 0) ...[
+                    const SizedBox(height: VSpacing.sm),
+                    Text(
+                      LegacyService.formatFoundedDate(
+                        DateTime.fromMillisecondsSinceEpoch(world.createdAt),
+                      ),
+                      style: TextStyle(
+                        fontSize: VFontSize.labelMd,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-          if (settingsTap != null && features.governance)
-            _MoreLink(
-              icon: Icons.settings,
-              label: 'World Settings',
-              onTap: settingsTap,
-            ),
-          _MoreLink(
-            icon: Icons.share_outlined,
-            label: 'Share World',
-            onTap: onShare,
           ),
           const SizedBox(height: VSpacing.md),
-          // World info section
-          _SectionHeader(title: 'World Info', isDark: isDark),
-          const SizedBox(height: VSpacing.sm),
+          VSectionList(title: 'Social & links', children: quickLinks),
+          const SizedBox(height: VSpacing.md),
           ResourceVault(
             worldId: worldId,
             channels: channels,
@@ -1041,386 +1234,6 @@ class _MoreTab extends ConsumerWidget {
           AllianceSection(worldId: worldId, world: world),
         ],
       ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final bool isDark;
-
-  const _SectionHeader({required this.title, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: VFontSize.labelSm,
-        fontWeight: VFontWeight.semiBold,
-        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-}
-
-class _MoreLink extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _MoreLink({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ListTile(
-      leading: Icon(icon, size: VIconSize.md, color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
-      title: Text(label, style: TextStyle(fontSize: VFontSize.bodyMd)),
-      trailing: const Icon(Icons.chevron_right, size: VIconSize.sm),
-      onTap: onTap,
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-    );
-  }
-}
-
-class _FoundationCard extends StatelessWidget {
-  final World world;
-
-  const _FoundationCard({required this.world});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foundation = foundationForWorld(world);
-
-    return Container(
-      padding: const EdgeInsets.all(VSpacing.lg),
-      decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(VRadius.xl),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: VColors.tertiary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-                child: const Icon(
-                  Icons.account_tree_outlined,
-                  color: VColors.tertiary,
-                  size: VIconSize.md,
-                ),
-              ),
-              const SizedBox(width: VSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Foundation',
-                      style: TextStyle(
-                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                        fontWeight: VFontWeight.bold,
-                        fontSize: VFontSize.bodyLg,
-                      ),
-                    ),
-                    Text(
-                      _accessLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                        fontSize: VFontSize.labelMd,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.md),
-          Text(
-            foundation.premise,
-            style: TextStyle(
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-              fontSize: VFontSize.bodyMd,
-              height: 1.35,
-            ),
-          ),
-          if (foundation.focus.isNotEmpty) ...[
-            const SizedBox(height: VSpacing.md),
-            Wrap(
-              spacing: VSpacing.xs,
-              runSpacing: VSpacing.xs,
-              children: [
-                for (final item in foundation.focus.take(3))
-                  _FoundationChip(label: item),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String get _accessLabel {
-    if (world.requiredProfession != null) {
-      return 'Verified ${world.requiredProfession} world';
-    }
-    return 'Tier ${world.requiredTier} ${tierNames[world.requiredTier] ?? 'access'}';
-  }
-}
-
-class _GuideCard extends StatelessWidget {
-  final World world;
-  final List<WorldChannel> channels;
-  final ValueChanged<String> onOpenChannel;
-
-  const _GuideCard({
-    required this.world,
-    required this.channels,
-    required this.onOpenChannel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final guideChannels = _guideChannels;
-
-    return Container(
-      padding: const EdgeInsets.all(VSpacing.lg),
-      decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(VRadius.xl),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Guide',
-            style: TextStyle(
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-              fontWeight: VFontWeight.bold,
-              fontSize: VFontSize.bodyLg,
-            ),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'Start here to learn about this world.',
-            style: TextStyle(
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-              fontSize: VFontSize.labelMd,
-            ),
-          ),
-          const SizedBox(height: VSpacing.md),
-          Row(
-            children: [
-              for (final channel in guideChannels)
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: channel == guideChannels.last ? 0 : VSpacing.sm,
-                    ),
-                    child: _GuideButton(
-                      label: channel.name,
-                      icon: _iconForChannel(channel.name),
-                      onTap: () => onOpenChannel(channel.name),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => onOpenChannel('general'),
-              icon: const Icon(Icons.forum_outlined, size: VIconSize.sm),
-              label: const Text('Open General Discussion'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: VColors.tertiary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<WorldChannel> get _guideChannels {
-    const names = {'info', 'rules', 'roles'};
-    final result =
-        channels
-            .where((channel) => names.contains(channel.name.toLowerCase()))
-            .toList()
-          ..sort((a, b) => a.position.compareTo(b.position));
-    if (result.isNotEmpty) return result;
-    return const [
-      WorldChannel(id: 'info', worldId: '', name: 'info'),
-      WorldChannel(id: 'rules', worldId: '', name: 'rules'),
-      WorldChannel(id: 'roles', worldId: '', name: 'roles'),
-    ];
-  }
-
-  IconData _iconForChannel(String name) => switch (name.toLowerCase()) {
-    'info' => Icons.info_outline,
-    'rules' => Icons.gavel_outlined,
-    'roles' => Icons.badge_outlined,
-    _ => Icons.tag,
-  };
-}
-
-class _FoundationChip extends StatelessWidget {
-  final String label;
-
-  const _FoundationChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.sm,
-        vertical: VSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-          fontSize: VFontSize.labelMd,
-          fontWeight: VFontWeight.semiBold,
-        ),
-      ),
-    );
-  }
-}
-
-class _GuideButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _GuideButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(VRadius.md),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: VSpacing.xs,
-          vertical: VSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: VColors.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(VRadius.md),
-          border: Border.all(color: VColors.primary.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: VColors.primary, size: VIconSize.md),
-            const SizedBox(height: VSpacing.xs),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                fontSize: VFontSize.labelMd,
-                fontWeight: VFontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PrestigeProgressBar extends StatelessWidget {
-  final int prestige;
-  final Color tierColor;
-  final bool isDark;
-
-  const _PrestigeProgressBar({required this.prestige, required this.tierColor, this.isDark = false});
-
-  @override
-  Widget build(BuildContext context) {
-    const thresholds = [5, 15, 25, 40, 55];
-    int currentLevel = 0;
-    int nextThreshold = thresholds.first;
-    for (int i = 0; i < thresholds.length; i++) {
-      if (prestige >= thresholds[i]) {
-        currentLevel = i + 1;
-        nextThreshold = i + 1 < thresholds.length ? thresholds[i + 1] : thresholds.last + 15;
-      } else {
-        nextThreshold = thresholds[i];
-        break;
-      }
-    }
-    final prevThreshold = currentLevel > 0 ? thresholds[currentLevel - 1] : 0;
-    final range = nextThreshold - prevThreshold;
-    final progress = range > 0 ? ((prestige - prevThreshold) / range).clamp(0.0, 1.0) : 1.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Prestige $prestige',
-              style: TextStyle(fontSize: VFontSize.labelMd, fontWeight: VFontWeight.semiBold, color: tierColor),
-            ),
-            if (currentLevel < thresholds.length)
-              Text(
-                'Next: $nextThreshold',
-                style: TextStyle(fontSize: VFontSize.labelMd, color: (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant).withValues(alpha: 0.7)),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(VRadius.sm),
-          child: LinearProgressIndicator(
-            value: progress,
-            minHeight: 4,
-            backgroundColor: (isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest).withValues(alpha: 0.3),
-            valueColor: AlwaysStoppedAnimation<Color>(tierColor),
-          ),
-        ),
-      ],
     );
   }
 }

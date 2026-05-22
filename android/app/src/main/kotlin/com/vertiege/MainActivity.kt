@@ -1,4 +1,4 @@
-package com.imma96.virtual_status_worlds
+package com.vertiege
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

@@ -313,23 +313,18 @@ class ChatService {
     required String senderId,
     required String senderName,
   }) async {
-    final members = await WorldService.getMembers(worldId);
-    final notifications = <Map<String, dynamic>>[];
-    for (final member in members) {
-      final residentId = member['resident_id'] ?? member['id'] ?? '';
-      if (residentId.isEmpty || residentId == senderId) continue;
-      final notification = AppNotification(
-        id: generateId(),
-        type: NotificationType.mention,
-        message: '$senderName mentioned everyone',
-        worldId: worldId,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
+    if (!isSupabaseConfigured()) return;
+    try {
+      await getSupabase().rpc(
+        'broadcast_world_mention_notifications',
+        params: {
+          'p_world_id': worldId,
+          'p_sender_id': senderId,
+          'p_message': '$senderName mentioned everyone',
+        },
       );
-      notifications.add(notification.toSupabase(residentId));
-    }
-    if (notifications.isNotEmpty) {
-      final client = getSupabase();
-      await client.from('notifications').insert(notifications);
+    } catch (_) {
+      // Mention fan-out is best-effort; channel message already persisted.
     }
   }
 

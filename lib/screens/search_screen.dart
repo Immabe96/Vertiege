@@ -9,6 +9,8 @@ import '../models/post.dart';
 import '../models/resident.dart';
 import '../state/world_provider.dart';
 import '../state/post_provider.dart';
+import '../state/resident_provider.dart';
+import '../state/ally_provider.dart';
 import '../services/world_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -21,6 +23,8 @@ import '../widgets/worlds/world_icon.dart';
 const _recentSearchesKey = '@recent_searches';
 const _maxRecentSearches = 5;
 
+enum _SearchMode { all, following, allies }
+
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
@@ -32,6 +36,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   String _query = '';
+  _SearchMode _mode = _SearchMode.all;
+  bool _appliedRouteQuery = false;
   List<String> _recentSearches = [];
   List<_ResidentEntry> _allResidents = [];
   bool _loadingResidents = true;
@@ -44,6 +50,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _focusNode.addListener(() {
       if (mounted) setState(() {});
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_appliedRouteQuery) return;
+    _appliedRouteQuery = true;
+    final params = GoRouterState.of(context).uri.queryParameters;
+    final q = params['q'];
+    if (q != null && q.isNotEmpty) {
+      final decoded = Uri.decodeComponent(q);
+      final normalized =
+          decoded.startsWith('#') ? decoded.substring(1) : decoded;
+      _controller.text = normalized;
+      _query = normalized;
+    }
+    final mode = params['mode'] ?? params['tab'];
+    if (mode == 'following') {
+      _mode = _SearchMode.following;
+    } else if (mode == 'allies') {
+      _mode = _SearchMode.allies;
+      final resident = ref.read(residentProvider).resident;
+      if (resident != null) {
+        ref.read(allyProvider.notifier).loadAll(resident.id);
+      }
+    }
   }
 
   @override
@@ -125,6 +157,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   _SearchResults _search(String q) {
+    final resident = ref.read(residentProvider).resident;
+    if (_mode == _SearchMode.following && resident != null && q.length < 2) {
+      final followingIds = resident.following.toSet();
+      final residents = _allResidents
+          .where((e) => followingIds.contains(e.resident.id))
+          .toList()
+        ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
+      return _SearchResults(residents: residents);
+    }
+    if (_mode == _SearchMode.allies && q.length < 2) {
+      final allies = ref.read(allyProvider).allies;
+      final allyIds = <String>{};
+      for (final a in allies) {
+        if (resident != null) {
+          allyIds.add(
+            a.requesterId == resident.id ? a.receiverId : a.requesterId,
+          );
+        }
+      }
+      final residents = _allResidents
+          .where((e) => allyIds.contains(e.resident.id))
+          .toList()
+        ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
+      return _SearchResults(residents: residents);
+    }
+
     if (q.length < 2) return const _SearchResults();
     final lower = q.toLowerCase();
 
@@ -180,7 +238,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final isFocused = _focusNode.hasFocus;
     final showRecent =
         isFocused && _controller.text.isEmpty && _recentSearches.isNotEmpty;
-    final results = _query.length >= 2 ? _search(_query) : null;
+    final results = _query.length >= 2 || _mode != _SearchMode.all
+        ? _search(_query)
+        : null;
 
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,

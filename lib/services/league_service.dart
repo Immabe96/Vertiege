@@ -84,9 +84,12 @@ class LeagueService {
     return (response is int) ? response : 0;
   }
 
+  /// Weekly reset runs on the server (cron). Not exposed to the client.
+  @Deprecated('Server-only cron job')
   static Future<void> processWeeklyReset() async {
-    final client = getSupabase();
-    await client.rpc('process_league_reset');
+    throw UnsupportedError(
+      'process_league_reset is not callable from the app',
+    );
   }
 
   static Future<void> assignNewUserLeague(String userId) async {

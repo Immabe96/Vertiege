@@ -108,11 +108,16 @@ class PostNotifier extends Notifier<PostState> {
 
     ref.listen<PostState>(postProvider, (prev, next) {
       if (prev == null) return;
-      if (next.posts.length > prev.posts.length) {
-        final newPost = next.posts.first;
-        ref.read(residentProvider.notifier).addRep(newPost.worldId, 5);
-        _checkPostMilestones(newPost.residentId);
-        _triggerPrestigeUpdate(newPost.worldId);
+      final residentId = ref.read(residentProvider).resident?.id;
+      if (residentId == null) return;
+      final prevIds = prev.posts.map((p) => p.id).toSet();
+      for (final post in next.posts) {
+        if (!prevIds.contains(post.id) && post.residentId == residentId) {
+          ref.read(residentProvider.notifier).addRep(post.worldId, 5);
+          _checkPostMilestones(post.residentId);
+          _triggerPrestigeUpdate(post.worldId);
+          break;
+        }
       }
     });
 
@@ -983,15 +988,6 @@ class PostNotifier extends Notifier<PostState> {
         .subscribe();
   }
 
-  List<Post> _mergePosts(List<Post> primary, List<Post>? extra) {
-    if (extra == null || extra.isEmpty) return primary;
-    final byId = {for (final p in primary) p.id: p};
-    for (final p in extra) {
-      byId.putIfAbsent(p.id, () => p);
-    }
-    return _sortPosts(byId.values);
-  }
-
   Future<List<Post>?> _loadPostsFromJoinedWorlds() async {
     final joinedWorldIds = ref
         .read(residentProvider)
@@ -1155,6 +1151,13 @@ class PostNotifier extends Notifier<PostState> {
         )
         .toList(),
   };
+
+  void clearForSignOut() {
+    unawaited(_realtimeChannel?.unsubscribe());
+    _realtimeChannel = null;
+    _schedulerTimer?.cancel();
+    state = const PostState();
+  }
 }
 
 final postProvider = NotifierProvider<PostNotifier, PostState>(

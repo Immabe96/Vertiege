@@ -71,7 +71,7 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
           ...archiveChannels.map((channel) => _ArchiveItem(
                 channel: channel,
                 onTap: () => context.push(
-                  '/explore/\${widget.worldId}/\${Uri.encodeComponent(channel.name)}?id=\${Uri.encodeComponent(channel.id)}',
+                  '/explore/${widget.worldId}/${Uri.encodeComponent(channel.name)}?id=${Uri.encodeComponent(channel.id)}',
                 ),
               )),
         ],

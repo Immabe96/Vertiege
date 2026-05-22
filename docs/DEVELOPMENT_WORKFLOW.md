@@ -39,6 +39,10 @@ cp .env.template .env    # SUPABASE_URL, SUPABASE_ANON_KEY for device testing
 flutter pub get
 ```
 
+**Android package ID:** `com.vertiege` (see [plan/PACKAGE_ID_COM_VERTIEGE.md](plan/PACKAGE_ID_COM_VERTIEGE.md)).  
+`android/app/google-services.json` must match that package (committed after Firebase registration).  
+Google sign-in: Supabase **Web** OAuth client + Google Cloud **Android** client (SHA-1).
+
 ## Daily loop
 
 Use your machine for **editing, `flutter run`, analyze, and tests**. Skip the release APK build locally — GitHub does that (low RAM friendly).
@@ -103,11 +107,12 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 | `main` did not move | Open Actions → **CI** on `develop` — must be green |
 | No new Release | Check **Release APK** after develop **CI** (needs `build-apk` job + artifact) |
 | Out of RAM locally | Stop local APK builds; use `flutter run` + GitHub CI only |
+| Local `flutter build apk` fails with `26.0.1` | Gradle/Kotlin does not support JDK 26 yet. Install **JDK 21** (CI uses Java 21), set `JAVA_HOME`, or run `.\scripts\ci-local.ps1` |
 | CI failed | Fix analyze/test/build errors on `develop`, push again |
 | Black screen on APK launch | CI must set `SUPABASE_*` secrets; app uses `dotenv.load(isOptional: true)` |
 | Channels empty but world “joined” | Need `world_members` row — slug worlds must sync on join ([DEVICE_UAT.md](DEVICE_UAT.md)) |
 | Install APK | `adb uninstall` then `adb install -r` — see [DEVICE_UAT.md](DEVICE_UAT.md) (clear cache ≠ uninstall) |
-| “App already installed” | Package still on device or signature mismatch — use `adb uninstall` in DEVICE_UAT |
+| “App already installed” | Uninstall `com.vertiege` (or legacy `com.imma96.virtual_status_worlds`) — see [DEVICE_UAT.md](DEVICE_UAT.md) |
 
 ## Recommended GitHub settings
 
@@ -119,9 +124,11 @@ Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE
 
 | Doc | Purpose |
 |-----|---------|
+| [plan/MANUAL_REMAINING.md](plan/MANUAL_REMAINING.md) | Dashboard steps (auth, Firebase, Free plan limits) |
+| [plan/PACKAGE_ID_COM_VERTIEGE.md](plan/PACKAGE_ID_COM_VERTIEGE.md) | `com.vertiege`, SHA-1, OAuth redirects |
 | [CODEGRAPH.md](CODEGRAPH.md) | Local code map for Cursor (optional; not in CI) |
 | [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) | Staff-only verification login |
-| [DEVICE_UAT.md](DEVICE_UAT.md) | Device test checklist + 2026-05-22 findings |
+| [DEVICE_UAT.md](DEVICE_UAT.md) | Device test checklist + adb install notes |
 
 ## Release gate (before `main` / APK)
 
