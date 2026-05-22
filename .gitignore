@@ -1,3 +1,6 @@
+# Local JDK for ci-local.ps1 (optional download)
+.jdk/
+
 # Miscellaneous
 *.class
 *.log

@@ -5,8 +5,11 @@ $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 function Find-Java21 {
+    $repoRoot = Split-Path $PSScriptRoot -Parent
     $candidates = @(
         $env:JAVA_HOME,
+        "$repoRoot\.jdk\jdk21",
+        "$repoRoot\.jdk\*\bin\..",
         "C:\Program Files\Eclipse Adoptium\jdk-21*",
         "C:\Program Files\Java\jdk-21*",
         "C:\Program Files\Microsoft\jdk-21*"
@@ -51,5 +54,6 @@ $apk = "build\app\outputs\flutter-apk\app-release.apk"
 if (Test-Path $apk) {
     $info = Get-Item $apk
     Write-Host ""
-    Write-Host "OK: $($info.FullName) ($([math]::Round($info.Length / 1MB, 2)) MB)"
+    $sizeMb = [math]::Round($info.Length / 1048576, 2)
+    Write-Host "OK: $($info.FullName) ($sizeMb MB)"
 }
