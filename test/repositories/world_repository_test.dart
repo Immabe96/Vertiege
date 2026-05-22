@@ -28,7 +28,7 @@ void main() {
     },
   );
 
-  test('joinWorld does not queue local starter world ids', () async {
+  test('joinWorld does not queue client-only pseudo world ids', () async {
     const repository = WorldRepository();
 
     final result = await repository.joinWorld(

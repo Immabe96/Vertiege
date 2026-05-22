@@ -9,10 +9,14 @@ import 'crash_reporter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WorldService {
+  /// Client-only pseudo-worlds (e.g. Nexus feed) — never synced to `world_members`.
+  static const Set<String> localOnlyWorldIds = {'nexus'};
+
   /// True when [worldId] refers to a row in Supabase `worlds` (UUID or slug pk).
   static bool isRemoteWorldId(String worldId) {
+    if (localOnlyWorldIds.contains(worldId)) return false;
     if (validators.isUuid(worldId)) return true;
-    // Default/seeded worlds use slug ids (e.g. neon-district, crystal-shore).
+    // Seeded worlds use slug ids (e.g. neon-district, aetheria, crystal-shore).
     return RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(worldId);
   }
 
