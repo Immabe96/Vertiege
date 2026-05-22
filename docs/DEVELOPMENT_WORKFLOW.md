@@ -113,6 +113,8 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 
 Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE_SUPABASE_HYBRID_SETUP.md)
 
+AI code navigation (optional, local): [CODEGRAPH.md](CODEGRAPH.md) — semantic index for Cursor MCP; run `.\scripts\codegraph-index.ps1` once per clone.
+
 ## Release gate (before `main` / APK)
 
 1. Finish audit/fix work on `develop`; **push `develop` to origin** so CI builds the APK.
