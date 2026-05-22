@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updatedAt":  "2026-05-22T12:50:48.7667199Z",
+    "updatedAt":  "2026-05-22T12:59:40.2474826Z",
     "stagingDir":  "assets/staging/generated",
     "finalDir":  "assets/generated",
     "workflowDoc":  "docs/assets/CODEX_IMAGE_WORKFLOW.md",
@@ -761,12 +761,12 @@
                       "transparent":  true,
                       "size":  "512x512",
                       "noText":  true,
-                      "status":  "pending",
+                      "status":  "generated",
                       "prompt":  "Achievement category icon: briefcase, 3D metallic emblem, centered.",
                       "negativePrompt":  "no text, no letters, no numbers, no words, no labels, no monograms, transparent background, isolated emblem only, no white square backdrop, no drop shadow card",
                       "stagingPath":  "assets/staging/generated/ach-career.png",
                       "finalPath":  "assets/generated/ach-career.png",
-                      "generatedAt":  null,
+                      "generatedAt":  "2026-05-22T12:59:40.2306859Z",
                       "approvedAt":  null,
                       "notes":  null
                   },
