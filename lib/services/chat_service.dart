@@ -7,6 +7,7 @@ import '../utils/text_parser.dart';
 import 'moderation_filter.dart';
 import 'supabase.dart';
 import 'world_service.dart';
+import '../utils/presence_utils.dart';
 
 class ChatService {
   static Future<Map<String, dynamic>?> getOrCreateRoom(
@@ -82,19 +83,11 @@ class ChatService {
       final profile = otherId.isEmpty ? null : byId[otherId];
       if (profile == null) return room;
 
-      final lastSeen = profile['last_seen_at'];
-      int? lastSeenMs;
-      if (lastSeen is int) {
-        lastSeenMs = lastSeen;
-      } else if (lastSeen is String) {
-        lastSeenMs = DateTime.tryParse(lastSeen)?.millisecondsSinceEpoch;
-      }
-
       return {
         ...room,
         'other_name': profile['name'] ?? room['other_name'],
         'other_avatar': profile['avatar_url'] ?? room['other_avatar'],
-        'other_last_seen_at': lastSeenMs,
+        'other_last_seen_at': parseLastSeenMs(profile['last_seen_at']),
       };
     }).toList();
   }

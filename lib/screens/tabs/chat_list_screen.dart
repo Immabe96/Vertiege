@@ -10,6 +10,7 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
@@ -423,15 +424,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   Presence _presence(Map<String, dynamic> room) {
-    final otherLastSeen = room['other_last_seen_at'] as int?;
-    if (otherLastSeen == null || otherLastSeen == 0) {
-      return Presence.offline;
-    }
-    final lastSeen = DateTime.fromMillisecondsSinceEpoch(otherLastSeen);
-    final diff = DateTime.now().difference(lastSeen).inMinutes;
-    if (diff < 3) return Presence.online;
-    if (diff < 15) return Presence.idle;
-    return Presence.offline;
+    return presenceFromProfileField(room['other_last_seen_at']);
   }
 
   String _timeLabel(String? iso) {
@@ -911,7 +904,10 @@ class _DmRoomTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push('/chat/${room['id']}'),
+        onTap: () => context.push(
+          '/chat/${room['id']}',
+          extra: presence,
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.md,

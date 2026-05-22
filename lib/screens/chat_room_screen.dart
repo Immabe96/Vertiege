@@ -16,6 +16,8 @@ import '../theme/v_tokens.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
 import '../utils/date_format.dart';
+import '../utils/presence_utils.dart';
+import '../services/supabase.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
@@ -27,8 +29,13 @@ import '../widgets/core/status_dot.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;
+  final Presence? initialPresence;
 
-  const ChatRoomScreen({super.key, required this.roomId});
+  const ChatRoomScreen({
+    super.key,
+    required this.roomId,
+    this.initialPresence,
+  });
 
   @override
   ConsumerState<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -46,6 +53,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   int _previousOtherMessageCount = 0;
 
   final Set<String> _animatedMessageIds = {};
+  Presence? _headerPresence;
 
   String? _replyToMessageId;
   String? _replyToSenderId;
@@ -68,6 +76,38 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         notifier.markChannelRead(channelId: roomId, residentId: resident.id);
       }
     });
+    _headerPresence = widget.initialPresence;
+    unawaited(_refreshRecipientPresence());
+  }
+
+  Future<void> _refreshRecipientPresence() async {
+    final resident = ref.read(residentProvider).resident;
+    final rooms = ref.read(chatProvider).dmRooms;
+    final room = rooms.cast<Map<String, dynamic>?>().firstWhere(
+      (r) => r?['id'] == widget.roomId,
+      orElse: () => null,
+    );
+    final otherId = _recipientId(room, resident?.id ?? '');
+    if (otherId.isEmpty || !isSupabaseConfigured()) return;
+
+    try {
+      final row = await getSupabase()
+          .from('profiles')
+          .select('last_seen_at')
+          .eq('id', otherId)
+          .maybeSingle();
+      if (!mounted) return;
+      setState(() {
+        _headerPresence = presenceFromProfileField(row?['last_seen_at']);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      if (_headerPresence == null && room != null) {
+        setState(() {
+          _headerPresence = presenceFromProfileField(room['other_last_seen_at']);
+        });
+      }
+    }
   }
 
   @override
@@ -239,7 +279,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final recipientName = _recipientName(room, resident?.id ?? '');
     final recipientAvatar = _recipientAvatar(room);
     final recipientId = _recipientId(room, resident?.id ?? '');
-    final recipientPresence = _presenceFromRoom(room, resident?.id ?? '');
+    final recipientPresence = _headerPresence ??
+        widget.initialPresence ??
+        _presenceFromRoom(room, resident?.id ?? '');
 
     final displayItems = buildChatDisplayItems(messages);
 
@@ -339,15 +381,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     String currentUserId,
   ) {
     if (room == null) return Presence.offline;
-    final otherLastSeen = room['other_last_seen_at'] as int?;
-    if (otherLastSeen == null || otherLastSeen == 0) {
-      return Presence.offline;
-    }
-    final lastSeen = DateTime.fromMillisecondsSinceEpoch(otherLastSeen);
-    final diff = DateTime.now().difference(lastSeen).inMinutes;
-    if (diff < 3) return Presence.online;
-    if (diff < 15) return Presence.idle;
-    return Presence.offline;
+    return presenceFromProfileField(room['other_last_seen_at']);
   }
 
   PreferredSizeWidget _buildAppBar(

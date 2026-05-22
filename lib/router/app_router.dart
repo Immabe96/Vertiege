@@ -25,6 +25,7 @@ import '../screens/tabs/alerts_screen.dart';
 import '../screens/world_detail_screen.dart';
 import '../screens/world_channel_screen.dart';
 import '../screens/chat_room_screen.dart';
+import '../widgets/core/status_dot.dart';
 import '../screens/resident_profile_screen.dart';
 import '../screens/achievements/achievements_index.dart';
 import '../screens/achievements/achievement_category.dart';
@@ -271,8 +272,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':roomId',
-                    builder: (context, state) =>
-                        ChatRoomScreen(roomId: state.pathParameters['roomId']!),
+                    builder: (context, state) => ChatRoomScreen(
+                      roomId: state.pathParameters['roomId']!,
+                      initialPresence: state.extra is Presence
+                          ? state.extra! as Presence
+                          : null,
+                    ),
                   ),
                 ],
               ),
