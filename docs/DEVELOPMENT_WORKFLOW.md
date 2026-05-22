@@ -25,7 +25,7 @@ flowchart TD
 | Build | Where |
 |-------|--------|
 | **Stable** | [GitHub Releases](https://github.com/Immabe96/Vertiege/releases) — `app-release.apk` after each `main` update |
-| **Latest develop** | Actions → **CI** → artifact `vertiege-apk-develop-<sha>` (90 days) |
+| **Latest develop** | Actions → **CI** → artifact `vertiege-apk-<run_id>` (90 days) — see [DEVICE_UAT.md](DEVICE_UAT.md) |
 
 ---
 
@@ -104,6 +104,9 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 | No new Release | Check **Release APK** after develop **CI** (needs `build-apk` job + artifact) |
 | Out of RAM locally | Stop local APK builds; use `flutter run` + GitHub CI only |
 | CI failed | Fix analyze/test/build errors on `develop`, push again |
+| Black screen on APK launch | CI must set `SUPABASE_*` secrets; app uses `dotenv.load(isOptional: true)` |
+| Channels empty but world “joined” | Need `world_members` row — slug worlds must sync on join ([DEVICE_UAT.md](DEVICE_UAT.md)) |
+| Install APK | `adb install -r` after `gh run download` — see [DEVICE_UAT.md](DEVICE_UAT.md) |
 
 ## Recommended GitHub settings
 
@@ -113,26 +116,18 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 
 Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE_SUPABASE_HYBRID_SETUP.md)
 
-AI code navigation (optional, local): [CODEGRAPH.md](CODEGRAPH.md) — semantic index for Cursor MCP; run `.\scripts\codegraph-index.ps1` once per clone.
-
-**Verifier portal (staff):** not in Settings. After installing the APK:
-
-1. Connect the phone with USB debugging and run:
-
-   ```powershell
-   adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.imma96.virtual_status_worlds
-   ```
-
-2. Sign in with a verifier account (`is_verifier` in Supabase Auth, or email in `VERIFIER_ADMIN_EMAILS`).
-
-3. You only see **Staff review** (profession verifications, **achievement queue**, flagged posts) and **Sign out**.
-
-Use normal app login (`/login`) for everyday play; use the deep link above for review work only.
+| Doc | Purpose |
+|-----|---------|
+| [CODEGRAPH.md](CODEGRAPH.md) | Local code map for Cursor (optional; not in CI) |
+| [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) | Staff-only verification login |
+| [DEVICE_UAT.md](DEVICE_UAT.md) | Device test checklist + 2026-05-22 findings |
 
 ## Release gate (before `main` / APK)
 
-1. Finish audit/fix work on `develop`; **push `develop` to origin** so CI builds the APK.
-2. Run CI locally: `flutter analyze` + `flutter test`.
-3. **Manual device checks** on the CI APK (you report issues).
-4. Fix any findings, push again, wait for green CI.
-5. Promote to `main` / Release when audits and device pass are done.
+1. Push `develop` → green **CI** (`verify` + `build-apk` on develop only).
+2. Download APK artifact; install via adb ([DEVICE_UAT.md](DEVICE_UAT.md)).
+3. Complete device UAT checklist; log issues in [DEVICE_UAT.md](DEVICE_UAT.md).
+4. Fix findings, push again, wait for green CI.
+5. Promote to `main` when UAT and audits are satisfied.
+
+**Staff review** is not part of player UAT — smoke-test [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) separately.

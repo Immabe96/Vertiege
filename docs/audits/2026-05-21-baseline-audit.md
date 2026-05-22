@@ -14,7 +14,7 @@
 | **Supabase migrations** | **Reconciled (2026-05-21)** | 12 active local files match remote tail; May-12 history documented — see [migration-reconciliation](./2026-05-21-migration-reconciliation.md) |
 | **Security** | **Advisor run** | 0 errors, 6 WARN categories — see [security-advisor](./2026-05-21-security-advisor.md) |
 | **UI/UX (static)** | In progress | 25 files still use glass/legacy widgets; custom `_GlassNavBar` |
-| **UI/UX (device)** | Not run | Manual UAT on installed build (see below) |
+| **UI/UX (device)** | In progress | See [DEVICE_UAT.md](../DEVICE_UAT.md) — league tester issues logged 2026-05-22 |
 | **Persistence** | Partial | Repositories exist for 5 domains; prefs still used for cache/UI prefs |
 | **Push** | **Partially verified** | `device_tokens` = 3 rows on remote (2026-05-21); device delivery still needs your smoke test |
 
@@ -215,10 +215,13 @@ Prior [accessibility-audit.md](./accessibility-audit.md):
 
 - [x] Supabase **Security Advisor** — 0 errors, 6 WARN types ([security-advisor](./2026-05-21-security-advisor.md))
 - [x] Remote migrations `20260520130000`, `140000`, `150000` — restored into repo
-- [ ] **Device UAT** (~30 min): Chat worlds rail, world detail tabs, create world, Nexus feed
+- [ ] **Device UAT** (~30 min): use [DEVICE_UAT.md](../DEVICE_UAT.md) checklist
+- [x] **League tester blockers (2026-05-22):** channels/search/members — root cause `world_members` + slug join (see DEVICE_UAT)
+- [x] **Verifier portal:** `/verifier/login` — profession + achievement review ([VERIFIER_PORTAL.md](../VERIFIER_PORTAL.md))
+- [x] **Identity badges:** profession badges from `verifiedRoles` (not shop decorations)
 - [ ] **Push smoke:** login → `device_tokens` row → test notification insert
 - [ ] **Clear app data** test: posts/chat still recover from Supabase after relaunch
-- [ ] Optional: download `develop` CI APK from GitHub Actions
+- [ ] Re-test channels/search after APK with slug-join fix (`1d081f0+`)
 
 ---
 
@@ -236,7 +239,9 @@ Prior [accessibility-audit.md](./accessibility-audit.md):
 - [x] Product-gap + RLS audits refreshed
 - [x] Chat world rail readability
 - [x] Glass rename → `VSurfacePanel`, `VLoadingCard`, `_AppNavBar`, `showAppSheet`
-- [ ] Your manual device checklist (deferred)
+- [x] Verifier portal + achievement review queue
+- [x] Slug `world_members` join fix (CI `1d081f0`)
+- [ ] Full device checklist — [DEVICE_UAT.md](../DEVICE_UAT.md)
 
 ---
 
