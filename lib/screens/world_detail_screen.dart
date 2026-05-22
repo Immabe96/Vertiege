@@ -308,7 +308,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final cs = theme.colorScheme;
     final isJoined = resident?.joinedWorldIds.contains(widget.worldId) ?? false;
 
-    _ensureTabController(4); // Feed, Channels, Residents, More
+    _ensureTabController(5); // Feed, Channels, People, Manage, More
 
     final scaleAnimation =
         TweenSequence<double>([
@@ -408,11 +408,39 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
             _statsAnimated = false;
             await Future<void>.delayed(const Duration(milliseconds: 200));
           },
-          child: CustomScrollView(
-            slivers: [
-              // ── Hero Section — Full-bleed banner with tier glow ──
-              SliverToBoxAdapter(
-                child: Container(
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+              // ── Hero — Reddit-style collapsible header (pull to stretch) ──
+              SliverAppBar(
+                expandedHeight: heroHeight,
+                pinned: true,
+                stretch: true,
+                backgroundColor:
+                    isDark ? VColors.surfaceDark : VColors.surface,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () =>
+                      safeBack(context, fallback: '/explore'),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.share_outlined, color: Colors.white),
+                    tooltip: 'Share world',
+                    onPressed: () => _showWorldShareSheet(world),
+                  ),
+                  if (onSettings != null)
+                    IconButton(
+                      icon: const Icon(Icons.settings, color: Colors.white),
+                      tooltip: 'World settings',
+                      onPressed: onSettings,
+                    ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  stretchModes: const [
+                    StretchMode.zoomBackground,
+                    StretchMode.blurBackground,
+                  ],
+                  background: Container(
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
@@ -463,52 +491,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                           ),
                         ),
                       ),
-                      // Back button
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + VSpacing.sm,
-                        left: VSpacing.sm,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: VIconSize.lg,
-                            shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
-                          ),
-                          onPressed: () =>
-                              safeBack(context, fallback: '/explore'),
-                        ),
-                      ),
-                      // Share button (top-right, left of settings)
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + VSpacing.sm,
-                        right: (onSettings != null ? 56.0 : VSpacing.sm),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.share_outlined,
-                            color: Colors.white,
-                            size: VIconSize.lg,
-                            shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
-                          ),
-                          tooltip: 'Share world',
-                          onPressed: () => _showWorldShareSheet(world),
-                        ),
-                      ),
-                      // Settings gear (top-right)
-                      if (onSettings != null)
-                        Positioned(
-                          top: MediaQuery.of(context).padding.top + VSpacing.sm,
-                          right: VSpacing.sm,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.settings,
-                              color: Colors.white,
-                              size: VIconSize.lg,
-                              shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
-                            ),
-                            tooltip: 'World settings',
-                            onPressed: onSettings,
-                          ),
-                        ),
                       // Content overlay at bottom
                       Positioned(
                         bottom: 0,
@@ -694,6 +676,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     ],
                   ),
                 ),
+                ),
               ),
 
               // ── Bento Info Cards — GlassPanel stat cards ──
@@ -715,87 +698,118 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 ),
               ),
 
-              // ── Live Chat Preview ──
-              SliverPersistentHeader(
-                pinned: false,
-                delegate: _WorldTabBarDelegate(
-                  controller: _tabController!,
-                  color: prestigeTierColor,
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
                 ),
-              ),
-
-              // ── Tab Content ──
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: TabBarView(
-                  controller: _tabController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    // Feed tab
-                    WorldFeedTab(
-                      worldId: widget.worldId,
-                      world: world,
-                      resident: resident,
-                      posts: posts,
-                      cs: cs,
-                    ),
-                    // Channels tab: list or empty
-                    channels.isEmpty
-                        ? AppEmptyState(
-                            title: 'Preparing channels',
-                            description:
-                                'This world is getting its starter channels.',
-                            icon: Icons.forum_outlined,
-                            actionLabel: 'Retry',
-                            onAction: () => ref
-                                .read(channelProvider.notifier)
-                                .ensureDefaultChannels(widget.worldId),
-                          )
-                        : SingleChildScrollView(
-                            padding: const EdgeInsets.all(VSpacing.md),
-                            physics: const ClampingScrollPhysics(),
-                            child: WorldChannelList(worldId: widget.worldId),
-                          ),
-                    // Residents tab
-                    (!_membersLoading && _members.isEmpty)
-                        ? const AppEmptyState(
-                            title: 'No residents yet',
-                            description:
-                                'No residents have joined this world yet.',
-                            icon: Icons.people_outline,
-                            variant: EmptyStateVariant.default_,
-                          )
-                        : SingleChildScrollView(
-                            padding: const EdgeInsets.all(VSpacing.md),
-                            physics: const ClampingScrollPhysics(),
-                            child: WorldDetailMembers(
-                              worldId: widget.worldId,
-                              world: world,
-                              members: _members,
-                              membersLoading: _membersLoading,
-                            ),
-                          ),
-                    // More tab
-                    _MoreTab(
-                      world: world,
-                      worldId: widget.worldId,
-                      channels: channels,
-                      resident: resident,
-                      isJoined: isJoined,
-                      isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
-                      onOpenChannel: (name) =>
-                          _openChannelByName(name, channels),
-                      onSettings: onSettings,
-                      onShare: () => _showWorldShareSheet(world),
-                      prestigeTierColor: prestigeTierColor,
-                    ),
-                  ],
+                sliver: SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _WorldTabBarDelegate(
+                    controller: _tabController!,
+                    color: prestigeTierColor,
+                  ),
                 ),
               ),
             ],
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                _WorldDetailTabScroll(
+                  child: WorldFeedTab(
+                    worldId: widget.worldId,
+                    world: world,
+                    resident: resident,
+                    posts: posts,
+                    cs: cs,
+                    primaryScroll: true,
+                  ),
+                ),
+                _WorldDetailTabScroll(
+                  child: channels.isEmpty
+                      ? AppEmptyState(
+                          title: 'Preparing channels',
+                          description:
+                              'This world is getting its starter channels.',
+                          icon: Icons.forum_outlined,
+                          actionLabel: 'Retry',
+                          onAction: () => ref
+                              .read(channelProvider.notifier)
+                              .ensureDefaultChannels(widget.worldId),
+                        )
+                      : WorldChannelList(worldId: widget.worldId),
+                ),
+                _WorldDetailTabScroll(
+                  child: (!_membersLoading && _members.isEmpty)
+                      ? const AppEmptyState(
+                          title: 'No residents yet',
+                          description:
+                              'No residents have joined this world yet.',
+                          icon: Icons.people_outline,
+                          variant: EmptyStateVariant.default_,
+                        )
+                      : WorldDetailMembers(
+                          worldId: widget.worldId,
+                          world: world,
+                          members: _members,
+                          membersLoading: _membersLoading,
+                        ),
+                ),
+                _WorldDetailTabScroll(
+                  child: _ManageTab(
+                    world: world,
+                    worldId: widget.worldId,
+                    isJoined: isJoined,
+                  ),
+                ),
+                _WorldDetailTabScroll(
+                  child: _MoreTab(
+                    world: world,
+                    worldId: widget.worldId,
+                    channels: channels,
+                    resident: resident,
+                    isJoined: isJoined,
+                    isSovereignOrCouncil:
+                        _isSovereignOrCouncil(resident, world),
+                    onOpenChannel: (name) =>
+                        _openChannelByName(name, channels),
+                    onSettings: onSettings,
+                    onShare: () => _showWorldShareSheet(world),
+                    prestigeTierColor: prestigeTierColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Tab body that shares one outer scroll with the world hero + stats.
+class _WorldDetailTabScroll extends StatelessWidget {
+  final Widget child;
+
+  const _WorldDetailTabScroll({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                child: child,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -854,7 +868,8 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
           tabs: const [
             Tab(text: 'FEED'),
             Tab(text: 'CHANNELS'),
-            Tab(text: 'RESIDENTS'),
+            Tab(text: 'PEOPLE'),
+            Tab(text: 'MANAGE'),
             Tab(text: 'MORE'),
           ],
         ),
@@ -866,6 +881,78 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _WorldTabBarDelegate oldDelegate) {
     return oldDelegate.controller != controller ||
         oldDelegate.color != color;
+  }
+}
+
+class _ManageTab extends ConsumerWidget {
+  final World world;
+  final String worldId;
+  final bool isJoined;
+
+  const _ManageTab({
+    required this.world,
+    required this.worldId,
+    required this.isJoined,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final showMarket = world.type.name == 'dominion' || world.prestige >= 30;
+    final showTreasury = world.prestige >= 25;
+
+    if (!isJoined) {
+      return const AppEmptyState(
+        title: 'Join to manage',
+        description: 'Economy and world tools unlock after you join.',
+        icon: Icons.lock_outline,
+        variant: EmptyStateVariant.default_,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(title: 'Economy & governance', isDark: isDark),
+        const SizedBox(height: VSpacing.sm),
+        if (FeatureFlags.treasury && showTreasury)
+          _MoreLink(
+            icon: Icons.account_balance_wallet,
+            label: 'Treasury',
+            onTap: () => context.push('/explore/$worldId/treasury'),
+          ),
+        if (FeatureFlags.marketplace && showMarket)
+          _MoreLink(
+            icon: Icons.storefront,
+            label: 'Marketplace',
+            onTap: () => context.push('/explore/$worldId/marketplace'),
+          ),
+        if (FeatureFlags.polls)
+          _MoreLink(
+            icon: Icons.how_to_vote,
+            label: 'Polls',
+            onTap: () => context.push('/explore/$worldId/polls'),
+          ),
+        if (FeatureFlags.challenges)
+          _MoreLink(
+            icon: Icons.emoji_events,
+            label: 'World challenges',
+            onTap: () => context.push('/explore/$worldId/challenges'),
+          ),
+        if (!FeatureFlags.treasury &&
+            !FeatureFlags.marketplace &&
+            !FeatureFlags.polls &&
+            !FeatureFlags.challenges)
+          Text(
+            'No economy modules enabled for this world yet.',
+            style: TextStyle(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+      ],
+    );
   }
 }
 
@@ -898,8 +985,6 @@ class _MoreTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final features = ref.read(worldProvider.notifier).featuresForWorld(worldId);
-    final showMarket = world.type.name == 'dominion' || world.prestige >= 30;
-    final showTreasury = world.prestige >= 25;
     final settingsTap = onSettings; // local capture for null promotion
 
     return SingleChildScrollView(
@@ -941,30 +1026,6 @@ class _MoreTab extends ConsumerWidget {
             label: 'Share World',
             onTap: onShare,
           ),
-          if (FeatureFlags.marketplace && showMarket && isJoined)
-            _MoreLink(
-              icon: Icons.storefront,
-              label: 'Marketplace',
-              onTap: () => context.push('/explore/$worldId/marketplace'),
-            ),
-          if (FeatureFlags.polls && isJoined)
-            _MoreLink(
-              icon: Icons.how_to_vote,
-              label: 'Polls',
-              onTap: () => context.push('/explore/$worldId/polls'),
-            ),
-          if (FeatureFlags.treasury && showTreasury && isJoined)
-            _MoreLink(
-              icon: Icons.account_balance_wallet,
-              label: 'Treasury',
-              onTap: () => context.push('/explore/$worldId/treasury'),
-            ),
-          if (FeatureFlags.challenges && isJoined)
-            _MoreLink(
-              icon: Icons.emoji_events,
-              label: 'Challenges',
-              onTap: () => context.push('/explore/$worldId/challenges'),
-            ),
           const SizedBox(height: VSpacing.md),
           // World info section
           _SectionHeader(title: 'World Info', isDark: isDark),

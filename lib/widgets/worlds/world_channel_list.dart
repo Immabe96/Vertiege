@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/channel.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
+import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
@@ -122,7 +123,10 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
         for (final ch in ungrouped)
           _ChannelTile(
             channel: ch,
-            unreadCount: ref.read(chatProvider.notifier).unreadCount(ch.id),
+            unreadCount: ref.read(chatProvider.notifier).unreadCount(
+              ch.id,
+              currentUserId: ref.read(residentProvider).resident?.id,
+            ),
             onTap: () => context.push(
               '/explore/${widget.worldId}/${ch.name}?id=${ch.id}',
             ),
@@ -174,7 +178,10 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
           for (final ch in wardChannels)
             _ChannelTile(
               channel: ch,
-              unreadCount: ref.read(chatProvider.notifier).unreadCount(ch.id),
+              unreadCount: ref.read(chatProvider.notifier).unreadCount(
+                ch.id,
+                currentUserId: ref.read(residentProvider).resident?.id,
+              ),
               onTap: () => context.push(
                 '/explore/${widget.worldId}/${ch.name}?id=${ch.id}',
               ),

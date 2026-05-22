@@ -14,6 +14,7 @@ import 'state/post_provider.dart';
 import 'state/world_provider.dart';
 import 'state/event_provider.dart';
 import 'state/quest_provider.dart';
+import 'state/league_provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
@@ -110,6 +111,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     );
     unawaited(_safeLoad('events', ref.read(eventProvider.notifier).loadEvents));
     unawaited(_safeLoad('quests', ref.read(questProvider.notifier).loadQuests));
+    unawaited(_safeLoad('league', ref.read(leagueProvider.notifier).loadLeague));
     ref.read(residentProvider.notifier).touchPresence(); // fire-and-forget
 
     // Initialize push notifications and IAP store

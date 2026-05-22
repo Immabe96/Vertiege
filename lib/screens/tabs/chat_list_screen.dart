@@ -316,7 +316,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     ...announcementChannels.map((channel) {
                                       final unreadCount = ref
                                           .read(chatProvider.notifier)
-                                          .unreadCount(channel.id);
+                                          .unreadCount(
+                                            channel.id,
+                                            currentUserId: residentId,
+                                          );
                                       return _ChannelTile(
                                         channel: channel,
                                         world: selectedWorld,
@@ -329,7 +332,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     ...chatChannels.map((channel) {
                                       final unreadCount = ref
                                           .read(chatProvider.notifier)
-                                          .unreadCount(channel.id);
+                                          .unreadCount(
+                                            channel.id,
+                                            currentUserId: residentId,
+                                          );
                                       return _ChannelTile(
                                         channel: channel,
                                         world: selectedWorld,

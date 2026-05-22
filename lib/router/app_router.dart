@@ -47,6 +47,7 @@ import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
 import '../screens/challenges_screen.dart';
+import '../screens/daily_quests_screen.dart';
 import '../screens/world_marketplace_screen.dart';
 import '../screens/world_polls_screen.dart';
 import '../screens/world_treasury_screen.dart';
@@ -58,19 +59,38 @@ import '../models/message.dart';
 import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
+import 'go_router_refresh.dart';
+
+/// Stable listenable — resident/auth changes refresh redirects only (no router rebuild).
+final goRouterRefreshProvider = Provider<GoRouterRefresh>((ref) {
+  final refresh = GoRouterRefresh();
+  ref.onDispose(refresh.dispose);
+  ref.listen(
+    residentProvider.select(
+      (s) => (
+        s.isLoading,
+        s.resident?.id,
+        s.resident?.gateCompleted,
+        s.resident?.tier.value,
+      ),
+    ),
+    (_, __) => refresh.refresh(),
+  );
+  return refresh;
+});
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final residentState = ref.watch(
-    residentProvider.select((s) => (s.resident, s.isLoading)),
-  );
-  final resident = residentState.$1;
-  final isLoading = residentState.$2;
+  final refreshListenable = ref.watch(goRouterRefreshProvider);
   final supabaseClient = maybeSupabase();
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: refreshListenable,
     observers: AnalyticsService.navigatorObservers,
     redirect: (context, state) {
+      final residentState = ref.read(residentProvider);
+      final resident = residentState.resident;
+      final isLoading = residentState.isLoading;
       final uri = state.uri;
       var location = uri.path;
 
@@ -310,6 +330,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             ResidentProfileScreen(residentId: state.pathParameters['id']!),
       ),
+      // Full-screen DM from search/profile (outside shell — avoids white screen).
+      GoRoute(
+        path: '/dm/:roomId',
+        builder: (context, state) => ChatRoomScreen(
+          roomId: state.pathParameters['roomId']!,
+          initialPresence: state.extra is Presence
+              ? state.extra! as Presence
+              : null,
+        ),
+      ),
       GoRoute(
         path: '/achievements',
         builder: (context, state) => const AchievementsIndexScreen(),
@@ -345,6 +375,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/challenges',
         builder: (context, state) => const ChallengesScreen(),
+      ),
+      GoRoute(
+        path: '/daily-quests',
+        builder: (context, state) => const DailyQuestsScreen(),
       ),
       GoRoute(
         path: '/leagues',

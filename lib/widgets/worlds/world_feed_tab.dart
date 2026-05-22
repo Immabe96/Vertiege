@@ -17,6 +17,9 @@ class WorldFeedTab extends ConsumerWidget {
   final List<dynamic> posts;
   final ColorScheme cs;
 
+  /// When true, builds a single [ListView] for [NestedScrollView] tab bodies.
+  final bool primaryScroll;
+
   const WorldFeedTab({
     super.key,
     required this.worldId,
@@ -24,6 +27,7 @@ class WorldFeedTab extends ConsumerWidget {
     required this.resident,
     required this.posts,
     required this.cs,
+    this.primaryScroll = false,
   });
 
   @override
@@ -37,14 +41,11 @@ class WorldFeedTab extends ConsumerWidget {
         .where((p) => (p as dynamic).isEvent != true)
         .toList();
 
-    return Column(
-      children: [
-        if (resident != null &&
+    final postHeader = resident != null &&
             world != null &&
-            WorldPermissions.canPost(resident!, worldId, world.sovereignId))
-          PostInput(worldId: worldId, sovereignId: world.sovereignId)
-        else
-          Padding(
+            WorldPermissions.canPost(resident!, worldId, world.sovereignId)
+        ? PostInput(worldId: worldId, sovereignId: world.sovereignId)
+        : Padding(
             padding: const EdgeInsets.all(Spacing.md),
             child: VSurfacePanel(
               padding: const EdgeInsets.all(Spacing.md),
@@ -53,22 +54,75 @@ class WorldFeedTab extends ConsumerWidget {
                   Icon(
                     Icons.lock,
                     size: IconSizes.md,
-                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
                   const SizedBox(width: Spacing.sm + 4),
                   Expanded(
                     child: Text(
                       'Member+ required to post',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+          );
+
+    if (!primaryScroll) {
+      return Column(
+        children: [
+          postHeader,
+          if (eventPosts.isNotEmpty)
+            SizedBox(
+              height: 200,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                scrollDirection: Axis.horizontal,
+                itemCount: eventPosts.length,
+                itemBuilder: (context, index) => SizedBox(
+                  width: 300,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: index < eventPosts.length - 1 ? Spacing.sm : 0,
+                    ),
+                    child: EventCard(post: eventPosts[index]),
+                  ),
+                ),
+              ),
+            ),
+          Expanded(
+            child: regularPosts.isEmpty && eventPosts.isEmpty
+                ? const AppEmptyState(
+                    title: 'No posts yet',
+                    description: 'Be the first to post in this world',
+                    icon: Icons.auto_awesome,
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.only(
+                      bottom: Spacing.xxl + Spacing.xxl,
+                    ),
+                    itemCount: regularPosts.length,
+                    itemBuilder: (context, index) => PostItem(
+                      post: regularPosts[index],
+                      index: index,
+                      worldId: worldId,
+                    ),
+                  ),
           ),
-        // Event posts section (before regular posts)
+        ],
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: Spacing.xxl + Spacing.xxl),
+      children: [
+        postHeader,
         if (eventPosts.isNotEmpty)
           SizedBox(
             height: 200,
@@ -87,26 +141,24 @@ class WorldFeedTab extends ConsumerWidget {
               ),
             ),
           ),
-        // Posts list
-        Expanded(
-          child: regularPosts.isEmpty && eventPosts.isEmpty
-              ? const AppEmptyState(
-                  title: 'No posts yet',
-                  description: 'Be the first to post in this world',
-                  icon: Icons.auto_awesome,
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(
-                    bottom: Spacing.xxl + Spacing.xxl,
-                  ),
-                  itemCount: regularPosts.length,
-                  itemBuilder: (context, index) => PostItem(
-                    post: regularPosts[index],
-                    index: index,
-                    worldId: worldId,
-                  ),
-                ),
-        ),
+        if (regularPosts.isEmpty && eventPosts.isEmpty)
+          const Padding(
+            padding: EdgeInsets.all(Spacing.xl),
+            child: AppEmptyState(
+              title: 'No posts yet',
+              description: 'Be the first to post in this world',
+              icon: Icons.auto_awesome,
+            ),
+          )
+        else
+          ...List.generate(
+            regularPosts.length,
+            (index) => PostItem(
+              post: regularPosts[index],
+              index: index,
+              worldId: worldId,
+            ),
+          ),
       ],
     );
   }

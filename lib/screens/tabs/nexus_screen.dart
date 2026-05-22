@@ -427,7 +427,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           BentoCard(
                             child: const DailyQuestCard(),
                             size: BentoSize.small,
-                            onTap: () => context.push('/challenges'),
+                            onTap: () => context.push('/daily-quests'),
                           ),
                           const BentoCard(
                             child: SeasonSnapshotCard(),
@@ -440,7 +440,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           BentoCard(
                             child: const ChallengesCard(),
                             size: BentoSize.small,
-                            onTap: () => context.push('/challenges'),
+                            onTap: () => context.push('/daily-quests'),
                           ),
                           const BentoCard(
                             child: LeagueCard(),

@@ -18,10 +18,17 @@ int countUnreadMessages({
   required List<ChannelMessage> loadedMessages,
   required DateTime? lastReadAt,
   required DateTime? latestMessageAt,
+  String? excludeSenderId,
 }) {
   if (loadedMessages.isNotEmpty) {
-    if (lastReadAt == null) return loadedMessages.length;
-    return loadedMessages.where((message) {
+    final relevant = excludeSenderId == null
+        ? loadedMessages
+        : loadedMessages
+            .where((m) => m.senderId != excludeSenderId)
+            .toList();
+    if (relevant.isEmpty) return 0;
+    if (lastReadAt == null) return relevant.length;
+    return relevant.where((message) {
       if (message.createdAt <= 0) return false;
       return DateTime.fromMillisecondsSinceEpoch(
         message.createdAt,
@@ -40,11 +47,13 @@ bool hasUnreadMessages({
   required List<ChannelMessage> loadedMessages,
   required DateTime? lastReadAt,
   required DateTime? latestMessageAt,
+  String? excludeSenderId,
 }) {
   return countUnreadMessages(
         loadedMessages: loadedMessages,
         lastReadAt: lastReadAt,
         latestMessageAt: latestMessageAt,
+        excludeSenderId: excludeSenderId,
       ) >
       0;
 }

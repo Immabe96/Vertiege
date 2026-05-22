@@ -41,22 +41,34 @@ class LeagueService {
 
   static Future<Map<String, dynamic>> getUserLeague(String userId) async {
     final client = getSupabase();
+    final season = await getCurrentSeason();
+    final seasonId = season['id'] as String?;
+    if (seasonId == null) return {};
+
     final response = await client
         .from('league_participants')
         .select('*, league_seasons(*)')
         .eq('user_id', userId)
+        .eq('season_id', seasonId)
         .maybeSingle();
 
     if (response == null) return {};
     return response;
   }
 
-  static Future<List<Map<String, dynamic>>> getLeagueStandings(String leagueTier) async {
+  static Future<List<Map<String, dynamic>>> getLeagueStandings(
+    String leagueTier,
+  ) async {
     final client = getSupabase();
+    final season = await getCurrentSeason();
+    final seasonId = season['id'] as String?;
+    if (seasonId == null) return [];
+
     final response = await client
         .from('league_participants')
         .select('user_id, profiles(name, avatar_url), weekly_xp, league_tier')
         .eq('league_tier', leagueTier)
+        .eq('season_id', seasonId)
         .order('weekly_xp', ascending: false)
         .order('updated_at', ascending: false);
 

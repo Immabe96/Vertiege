@@ -1,7 +1,9 @@
 ﻿import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../forui/v_hub_page.dart';
 import '../../config/achievements.dart' as config;
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
@@ -86,18 +88,15 @@ class AchievementsIndexScreen extends ConsumerWidget {
     final currentTier = config.getTierForXp(state.totalXp);
     final nextTierInfo = _computeNextTier(state.totalXp, currentTier);
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Achievements',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
+    return VHubPage(
+      title: 'Achievements',
+      showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.plus),
+          onPress: () => context.push('/achievements/submit'),
         ),
-      ),
+      ],
       body: RefreshIndicator(
         onRefresh: () async =>
             ref.read(achievementProvider.notifier).loadAchievements(),
@@ -178,7 +177,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '$verifiedCount of $totalAchievements earned',
+                    '$verifiedCount / $totalAchievements verified',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: isDark
                           ? VColors.onSurfaceVariantDark
@@ -186,6 +185,17 @@ class AchievementsIndexScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
+              child: Text(
+                'Tap a category to browse and submit photo proof.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
               ),
             ),
             const SizedBox(height: VSpacing.sm),

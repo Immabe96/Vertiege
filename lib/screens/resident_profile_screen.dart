@@ -285,7 +285,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       resident.id,
                     );
                     if (room != null && mounted) {
-                      context.push('/chat/${room['id']}');
+                      context.push('/dm/${room['id']}');
                     }
                   },
                   icon: const Icon(VIcons.message),

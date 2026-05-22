@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../forui/v_hub_page.dart';
+import '../../widgets/v_section_list.dart';
+import '../../widgets/identity/honour_stat_chip.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../services/auth_service.dart';
@@ -212,6 +216,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final verifiedAchievementCount = achievements.userAchievements
         .where((a) => a.status == AchievementStatus.verified)
         .length;
+    final allyCount = ref.watch(allyProvider).allies.length;
 
     final totalRep = resident.worldStandings.values.fold<int>(
       0,
@@ -236,70 +241,52 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     };
     final nextTierName = tierNames[nextTierValue] ?? 'Max';
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
-            .withValues(alpha: 0.86),
-        elevation: 0,
-        title: Text(
-          'Identity',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
+    Future<void> refreshHonourWall() async {
+      Haptics.light();
+      try {
+        await ref.read(residentProvider.notifier).loadResident();
+        await ref.read(achievementProvider.notifier).loadAchievements();
+        await ref.read(postProvider.notifier).loadPosts();
+        await _loadHighPrestigeWorlds();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Honour wall refreshed'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Refresh failed'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+
+    return VHubPage(
+      title: 'Wall of Honour',
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: refreshHonourWall,
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.refresh,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-              size: VIconSize.md,
-            ),
-            tooltip: 'Refresh',
-            onPressed: () async {
-              Haptics.light();
-              try {
-                await ref.read(residentProvider.notifier).loadResident();
-                await ref.read(achievementProvider.notifier).loadAchievements();
-                await ref.read(postProvider.notifier).loadPosts();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Profile refreshed'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              } catch (_) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Refresh failed'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              }
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.settings_outlined,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-            ),
-            tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ),
-      body: ListView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
+        FHeaderAction(
+          icon: const Icon(FIcons.settings),
+          onPress: () => context.push('/settings'),
+        ),
+      ],
+      body: RefreshIndicator(
+        onRefresh: refreshHonourWall,
+        child: ListView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: VSpacing.xxl),
+          children: [
           // ── Hero Section ──────────────────────────────
           Container(
             padding: const EdgeInsets.all(VSpacing.lg),
@@ -489,6 +476,77 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
           ),
 
+          // ── Honour stats (achievements · worlds · rep) ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: Row(
+              children: [
+                Expanded(
+                  child: HonourStatChip(
+                    icon: Icons.emoji_events,
+                    value: '$verifiedAchievementCount',
+                    label: 'Verified',
+                    accent: VColors.tertiary,
+                    onTap: () => context.push('/achievements'),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: HonourStatChip(
+                    icon: Icons.public,
+                    value: '${resident.joinedWorldIds.length}',
+                    label: 'Worlds',
+                    accent: VColors.primary,
+                    onTap: () => context.push('/explore'),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: HonourStatChip(
+                    icon: Icons.military_tech,
+                    value: '$totalRep',
+                    label: 'REP',
+                    accent: VColors.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          TrophyCase(
+            resident: resident,
+            achievements: achievements.userAchievements,
+            totalXp: currentXp,
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          if (professionBadgeIdsFor(resident.verifiedRoles).isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.lg,
+                0,
+                VSpacing.lg,
+                VSpacing.sm,
+              ),
+              child: Text(
+                'BADGES',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: VColors.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: BadgeDisplay(
+                earnedBadgeIds: professionBadgeIdsFor(resident.verifiedRoles),
+              ),
+            ),
+            const SizedBox(height: VSpacing.lg),
+          ],
+
           // ── Referral Code ──────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
@@ -583,42 +641,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           ),
           const SizedBox(height: VSpacing.xl),
 
-          // ── Stats Row ─────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.emoji_events,
-                    value: '$verifiedAchievementCount',
-                    label: 'Achievements',
-                    onTap: () => context.push('/achievements'),
-                  ),
-                ),
-                const SizedBox(width: VSpacing.sm),
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.people,
-                    value: '${resident.following.length}',
-                    label: 'Following',
-                    onTap: () => context.push('/search'),
-                  ),
-                ),
-                const SizedBox(width: VSpacing.sm),
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.public,
-                    value: '${resident.joinedWorldIds.length}',
-                    label: 'Worlds',
-                    onTap: () => context.push('/explore'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: VSpacing.lg),
-
           // ── World Prestige Bonus ───────────────────────
           if (_highPrestigeWorlds.isNotEmpty)
             Padding(
@@ -704,14 +726,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
           if (resident.streakCount > 0) const SizedBox(height: VSpacing.lg),
 
-          // ── Trophy Case ─────────────────────────────────
-          TrophyCase(
-            resident: resident,
-            achievements: achievements.userAchievements,
-            totalXp: currentXp,
-          ),
-          const SizedBox(height: VSpacing.lg),
-
           // ── Completion hints ────────────────────────────
           if (resident.bio.isEmpty)
             Padding(
@@ -740,91 +754,68 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               resident.profession!.isEmpty)
             const SizedBox(height: VSpacing.sm),
 
-          const Divider(height: 1),
+          const SizedBox(height: VSpacing.lg),
 
-          // ── Badges section (profession verifications only) ──
-          if (professionBadgeIdsFor(resident.verifiedRoles).isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                VSpacing.lg,
-                VSpacing.lg,
-                VSpacing.lg,
-                VSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.emoji_events,
-                    size: VIconSize.sm,
-                    color: VColors.tertiary,
-                  ),
-                  const SizedBox(width: VSpacing.xs),
-                  Text(
-                    'Badges',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: VFontWeight.semiBold,
-                    ),
-                  ),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            child: VSectionList(
+              title: 'Explore',
+              children: [
+                VSectionTile(
+                  icon: Icons.emoji_events,
+                  label: 'All achievements',
+                  iconColor: VColors.tertiary,
+                  onTap: () => context.push('/achievements'),
+                ),
+                VSectionTile(
+                  icon: Icons.people,
+                  label: 'Following (${resident.following.length})',
+                  onTap: () => context.push('/search'),
+                ),
+                VSectionTile(
+                  icon: Icons.handshake,
+                  label: allyCount == 0
+                      ? 'Find allies'
+                      : 'Allies ($allyCount)',
+                  onTap: () => context.push('/search'),
+                ),
+                VSectionTile(
+                  icon: Icons.leaderboard,
+                  label: 'Hall of Ascension',
+                  onTap: () => context.push('/hall-of-ascension'),
+                ),
+                VSectionTile(
+                  icon: Icons.leaderboard_outlined,
+                  label: 'Weekly league',
+                  onTap: () => context.push('/leagues'),
+                ),
+                VSectionTile(
+                  icon: Icons.explore,
+                  label: 'Daily quests',
+                  onTap: () => context.push('/daily-quests'),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: BadgeDisplay(
-                earnedBadgeIds: professionBadgeIdsFor(resident.verifiedRoles),
-              ),
+          ),
+          const SizedBox(height: VSpacing.md),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            child: VSectionList(
+              title: 'Vault',
+              children: [
+                VSectionTile(
+                  icon: Icons.monetization_on,
+                  label: 'Sovereign Regalia · ${resident.sovereignCoins} coins',
+                  iconColor: VColors.tertiary,
+                  onTap: () => context.push('/shop'),
+                ),
+                VSectionTile(
+                  icon: Icons.workspace_premium,
+                  label: 'Subscription',
+                  onTap: () => context.push('/subscription'),
+                ),
+              ],
             ),
-            const SizedBox(height: VSpacing.lg),
-            const Divider(height: 1),
-          ],
-
-          // ── Navigation Links ──────────────────────────
-          _NavTile(
-            icon: Icons.emoji_events,
-            iconColor: VColors.tertiary,
-            title: 'Achievements',
-            subtitle: '$verifiedAchievementCount verified · $currentXp XP',
-            onTap: () => context.push('/achievements'),
-          ),
-          Consumer(
-            builder: (context, ref, _) {
-              final allies = ref.watch(allyProvider).allies;
-              return _NavTile(
-                icon: Icons.handshake,
-                iconColor: allies.isNotEmpty
-                    ? VColors.tertiary
-                    : (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant),
-                title: 'Allies',
-                subtitle: allies.isNotEmpty
-                    ? '${allies.length} ${allies.length == 1 ? 'ally' : 'allies'}'
-                    : 'Find residents to connect',
-                onTap: () => context.push('/search'),
-              );
-            },
-          ),
-          _NavTile(
-            icon: Icons.leaderboard,
-            iconColor: VColors.tertiary,
-            title: 'Hall of Ascension',
-            subtitle: 'View global rankings',
-            onTap: () => context.push('/hall-of-ascension'),
-          ),
-          _NavTile(
-            icon: Icons.monetization_on,
-            iconColor: VColors.tertiary,
-            title: 'Sovereign Regalia',
-            subtitle: '${resident.sovereignCoins} Sovereign Coins',
-            onTap: () => context.push('/shop'),
-          ),
-          _NavTile(
-            icon: Icons.settings_outlined,
-            iconColor: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
-            title: 'Settings',
-            onTap: () => context.push('/settings'),
           ),
 
           const SizedBox(height: VSpacing.sm),
@@ -847,6 +838,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
           const SizedBox(height: VSpacing.xxl),
         ],
+        ),
       ),
     );
   }
@@ -990,132 +982,3 @@ class _PerksCard extends ConsumerWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final VoidCallback onTap;
-
-  const _StatCard({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        child: Container(
-          padding: const EdgeInsets.all(VSpacing.md),
-          decoration: BoxDecoration(
-            color: isDark
-                ? VColors.glassBackgroundDark
-                : VColors.glassBackground,
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, size: VIconSize.md, color: VColors.primary),
-              const SizedBox(height: VSpacing.xs),
-              Text(
-                value,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              Text(
-                label,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavTile extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-
-  const _NavTile({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: VSpacing.lg,
-            vertical: VSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: VIconSize.md, color: iconColor),
-              const SizedBox(width: VSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: VFontWeight.regular,
-                      ),
-                    ),
-                    if (subtitle != null)
-                      Text(
-                        subtitle!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                size: VIconSize.md,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

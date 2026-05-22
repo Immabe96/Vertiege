@@ -47,6 +47,11 @@ String? routeFromRemoteMessage(RemoteMessage message) {
     return '/post/$postId';
   }
 
+  final roomId = data['room_id'] ?? data['roomId'] ?? data['dm_room_id'];
+  if (roomId is String && roomId.isNotEmpty) {
+    return '/dm/$roomId';
+  }
+
   final channelId = data['channel_id'] ?? data['channelId'];
   if (channelId is String && channelId.isNotEmpty) {
     return '/campfire/$channelId';
