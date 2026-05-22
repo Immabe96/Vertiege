@@ -131,6 +131,34 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         onRefresh: () => ref.read(worldProvider.notifier).loadWorlds(),
         child: CustomScrollView(
           slivers: [
+            if (state.loadError != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    VSpacing.md,
+                    VSpacing.sm,
+                    VSpacing.md,
+                    0,
+                  ),
+                  child: Material(
+                    color: isDark
+                        ? VColors.errorContainerDark
+                        : VColors.errorContainer,
+                    borderRadius: BorderRadius.circular(VRadius.lg),
+                    child: Padding(
+                      padding: const EdgeInsets.all(VSpacing.md),
+                      child: Text(
+                        state.loadError!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? VColors.onErrorContainerDark
+                              : VColors.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(

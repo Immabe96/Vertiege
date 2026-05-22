@@ -370,7 +370,7 @@ class _NotificationSliverList extends StatelessWidget {
               context.push('/identity');
               break;
             case NotificationType.allegianceRequest:
-              context.push('/identity?tab=allies');
+              context.push('/allies');
               break;
             case NotificationType.welcome:
               context.push('/explore');

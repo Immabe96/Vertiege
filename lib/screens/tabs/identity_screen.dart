@@ -90,13 +90,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     if (tab == 'allies') {
       _handledRouteTab = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final ctx = _exploreSectionKey.currentContext;
-        if (ctx != null) {
-          Scrollable.ensureVisible(
-            ctx,
-            duration: const Duration(milliseconds: 350),
-          );
-        }
+        if (mounted) context.push('/allies');
       });
     }
   }
@@ -818,14 +812,14 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 VSectionTile(
                   icon: Icons.people,
                   label: 'Following (${resident.following.length})',
-                  onTap: () => context.push('/search?mode=following'),
+                  onTap: () => context.push('/following'),
                 ),
                 VSectionTile(
                   icon: Icons.handshake,
                   label: allyCount == 0
                       ? 'Find allies'
                       : 'Allies ($allyCount)',
-                  onTap: () => context.push('/search?mode=allies'),
+                  onTap: () => context.push('/allies'),
                 ),
                 VSectionTile(
                   icon: Icons.leaderboard,

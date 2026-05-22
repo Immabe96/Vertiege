@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/channel.dart';
-import '../models/notification.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
 import 'moderation_filter.dart';
 import 'supabase.dart';
-import 'world_service.dart';
 import '../utils/presence_utils.dart';
 
 class ChatService {

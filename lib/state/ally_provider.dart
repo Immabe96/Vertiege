@@ -6,21 +6,26 @@ class AllyState {
   final List<Ally> allies;
   final List<Ally> pendingRequests;
   final bool isLoading;
+  final String? loadError;
 
   const AllyState({
     this.allies = const [],
     this.pendingRequests = const [],
     this.isLoading = false,
+    this.loadError,
   });
 
   AllyState copyWith({
     List<Ally>? allies,
     List<Ally>? pendingRequests,
     bool? isLoading,
+    String? loadError,
+    bool clearLoadError = false,
   }) => AllyState(
     allies: allies ?? this.allies,
     pendingRequests: pendingRequests ?? this.pendingRequests,
     isLoading: isLoading ?? this.isLoading,
+    loadError: clearLoadError ? null : (loadError ?? this.loadError),
   );
 }
 
@@ -29,14 +34,22 @@ class AllyNotifier extends Notifier<AllyState> {
   AllyState build() => const AllyState();
 
   Future<void> loadAll(String residentId) async {
-    state = state.copyWith(isLoading: true);
-    final allies = await AllyService.fetchAllies(residentId);
-    final pending = await AllyService.fetchPendingRequests(residentId);
-    state = state.copyWith(
-      allies: allies,
-      pendingRequests: pending,
-      isLoading: false,
-    );
+    state = state.copyWith(isLoading: true, clearLoadError: true);
+    try {
+      final allies = await AllyService.fetchAllies(residentId);
+      final pending = await AllyService.fetchPendingRequests(residentId);
+      state = state.copyWith(
+        allies: allies,
+        pendingRequests: pending,
+        isLoading: false,
+        clearLoadError: true,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        loadError: 'Could not load allies. Pull to refresh.',
+      );
+    }
   }
 
   Future<void> sendRequest({

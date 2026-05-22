@@ -35,6 +35,7 @@ import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
 import '../screens/world_members_screen.dart';
 import '../screens/search_screen.dart';
+import '../screens/connections_screen.dart';
 import '../screens/cosmetics_shop_screen.dart';
 import '../screens/hall_of_ascension_screen.dart';
 import '../screens/journey/ascension_path_screen.dart';
@@ -372,6 +373,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/search',
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/following',
+        builder: (context, state) => const FollowingScreen(),
+      ),
+      GoRoute(
+        path: '/allies',
+        builder: (context, state) => const AlliesScreen(),
       ),
       GoRoute(
         path: '/season',

@@ -6,7 +6,6 @@ import '../models/world.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/admin_access_service.dart';
 import '../services/subscription_service.dart';
-import '../services/supabase.dart';
 import '../theme/design_system.dart';
 import '../theme/v_colors.dart';
 import '../state/world_provider.dart';

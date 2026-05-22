@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../state/challenge_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/design_system.dart';
@@ -73,25 +72,22 @@ class ChallengesCard extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: Spacing.md),
-        GestureDetector(
-          onTap: () => context.push('/challenges'),
-          child: Row(
-            children: [
-              Text(
-                'View All',
-                style: const TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  color: VColors.primary,
-                ),
-              ),
-              const SizedBox(width: Spacing.xs),
-              const Icon(
-                Icons.chevron_right,
-                size: IconSizes.sm,
+        const Row(
+          children: [
+            Text(
+              'View All',
+              style: TextStyle(
+                fontSize: FontSizes.labelSm,
                 color: VColors.primary,
               ),
-            ],
-          ),
+            ),
+            SizedBox(width: Spacing.xs),
+            Icon(
+              Icons.chevron_right,
+              size: IconSizes.sm,
+              color: VColors.primary,
+            ),
+          ],
         ),
       ],
     );

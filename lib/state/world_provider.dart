@@ -17,21 +17,26 @@ class WorldState {
   final Map<String, World> worlds;
   final bool isLoading;
   final List<Alliance> alliances;
+  final String? loadError;
 
   const WorldState({
     this.worlds = const {},
     this.isLoading = true,
     this.alliances = const [],
+    this.loadError,
   });
 
   WorldState copyWith({
     Map<String, World>? worlds,
     bool? isLoading,
     List<Alliance>? alliances,
+    String? loadError,
+    bool clearLoadError = false,
   }) => WorldState(
     worlds: worlds ?? this.worlds,
     isLoading: isLoading ?? this.isLoading,
     alliances: alliances ?? this.alliances,
+    loadError: clearLoadError ? null : (loadError ?? this.loadError),
   );
 }
 
@@ -45,7 +50,7 @@ class WorldNotifier extends Notifier<WorldState> {
   static const String _worldsCacheKey = '@worlds_cache';
 
   Future<void> loadWorlds() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearLoadError: true);
     try {
       final remote = await WorldService.loadWorlds().timeout(
         const Duration(seconds: 8),
@@ -55,11 +60,22 @@ class WorldNotifier extends Notifier<WorldState> {
         final world = World.fromSupabase(data);
         if (world.id.isNotEmpty) worlds[world.id] = world;
       }
-      state = state.copyWith(worlds: worlds, isLoading: false);
+      state = state.copyWith(
+        worlds: worlds,
+        isLoading: false,
+        clearLoadError: true,
+      );
       await _cacheWorlds(worlds);
     } catch (_) {
       final cached = await _loadCachedWorlds();
-      state = state.copyWith(worlds: cached ?? const {}, isLoading: false);
+      final hasCache = cached != null && cached.isNotEmpty;
+      state = state.copyWith(
+        worlds: cached ?? const {},
+        isLoading: false,
+        loadError: hasCache
+            ? 'Showing cached worlds (sync failed). Pull to refresh.'
+            : 'Could not load worlds. Pull to refresh.',
+      );
     }
 
     try {

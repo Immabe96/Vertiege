@@ -252,13 +252,34 @@ No Crashlytics pull run (optional follow-up via `crashlytics_get_report`).
 
 ---
 
+## Pass 2 audit (2026-05-23)
+
+**Verified on device:** `com.vertiege` 1.0.0-beta.4, Google sign-in OK, **15** `device_tokens` rows.
+
+| Finding | Severity | Pass 2 action |
+|---------|----------|---------------|
+| Following/Allies → generic Search | Medium | **Fix:** `/following`, `/allies` hub screens |
+| Unused imports (4) | Low | **Fix:** removed |
+| `google_sign_in` unused (OAuth via Supabase) | Low | **Fix:** removed from pubspec |
+| ChallengesCard double tap | Low | **Fix:** bento `onTap` only |
+| World load silent failure | Medium | **Fix:** `worldProvider.loadError` + Explore banner |
+| Ally load silent failure | Medium | **Fix:** `allyProvider.loadError` |
+| 36 auth + 10 anon DEFINER WARN | Medium | Intentional; review per-function later |
+| Performance advisor (RLS/index) | Medium | Deferred — dedicated DB pass |
+| 61 pending badge assets | Low | Deferred |
+| Forui migration incomplete | Low | Deferred |
+| Theme bridge (`design_system.dart`) | Low | Deferred |
+| Real AI / moderation API | Medium | Deferred (flag off) |
+
+---
+
 ## Manual UAT checklist (post-fix APK)
 
 - [ ] Nexus → Challenges → `/challenges` screen
 - [ ] Nexus → Daily Quests → `/daily-quests`
 - [ ] World → Manage → Marketplace, Treasury, Polls, Challenges
 - [ ] Achievements → category → proof sheet → upload → pending state
-- [ ] Identity → Following / Allies (not generic search)
+- [x] Identity → Following / Allies → `/following`, `/allies` (Pass 2)
 - [ ] Profile → Message → DM room (no white screen)
 - [ ] League XP non-zero when season active
 - [ ] Sign out / gate / verifier routes unaffected

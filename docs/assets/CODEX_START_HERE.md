@@ -1,5 +1,7 @@
 # Codex: start here (image refresh)
 
+**ChatGPT batch (no Cursor agent):** see [CHATGPT_BATCH.md](CHATGPT_BATCH.md) and run `.\scripts\image_gen.ps1 export-chatgpt`.
+
 Copy the block below into a **new Codex chat** tied to this repo.
 
 ---
