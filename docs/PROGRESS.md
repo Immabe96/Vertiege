@@ -1,6 +1,6 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-21 (launch polish + asset CI)
+**Updated:** 2026-05-23 (waves 1–4 + screen rebuild + audit pass 2)
 
 ## Vision
 
