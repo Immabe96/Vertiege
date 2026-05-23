@@ -5,6 +5,8 @@ import '../../theme/v_colors.dart';
 import '../shared/tier_icon.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../config/achievements.dart' as ach_config;
+import '../achievements/achievement_avatar_surface.dart';
 
 class TrophyCase extends StatelessWidget {
   final Resident resident;
@@ -394,16 +396,21 @@ class _RecentAchievementsSection extends StatelessWidget {
           spacing: VSpacing.sm,
           runSpacing: VSpacing.sm,
           children: verified.map((a) {
+            final def = ach_config.achievements
+                .where((ach) => ach.id == a.achievementId)
+                .firstOrNull;
+            final label = def?.title ?? a.achievementId;
+            final brightness = theme.brightness;
             return Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: VSpacing.sm,
                 vertical: VSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: VColors.tertiary.withValues(alpha: 0.12),
+                color: achievementChipBackground(brightness),
                 borderRadius: BorderRadius.circular(VRadius.pill),
                 border: Border.all(
-                  color: VColors.tertiary.withValues(alpha: 0.25),
+                  color: achievementChipBorder(brightness),
                 ),
               ),
               child: Row(
@@ -412,7 +419,7 @@ class _RecentAchievementsSection extends StatelessWidget {
                   Icon(VIcons.trophy, size: 14, color: VColors.tertiary),
                   const SizedBox(width: VSpacing.xxs),
                   Text(
-                    a.achievementId,
+                    label,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: VColors.tertiary,
                       fontWeight: VFontWeight.semiBold,

@@ -3,6 +3,7 @@ import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../utils/world_assets.dart';
 import '../shared/badge_asset_image.dart';
+import 'achievement_avatar_surface.dart';
 
 IconData achievementIconData(String iconName) {
   return switch (iconName) {
@@ -90,37 +91,37 @@ class AchievementBadgeAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     final imagePath =
         WorldAssets.badgeImageForId(achievement.id) ??
         WorldAssets.achievementCategoryImage(achievement.category.name);
     final icon = achievementIconData(achievement.icon);
+    final fill = achievementAvatarFill(accentColor, brightness);
+
+    Widget fallback() => Icon(icon, size: size * 0.45, color: accentColor);
 
     if (imagePath == null) {
       return Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: accentColor.withValues(alpha: 0.14),
-        ),
-        child: Icon(icon, size: size * 0.45, color: accentColor),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: fill),
+        child: Center(child: fallback()),
       );
     }
 
-    return SizedBox(
+    return Container(
       width: size,
       height: size,
-      child: BadgeAssetImage(
-        imagePath: imagePath,
-        size: size,
-        errorBuilder: (_, _, _) => Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: accentColor.withValues(alpha: 0.14),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: fill),
+      child: ClipOval(
+        child: Padding(
+          padding: EdgeInsets.all(size * 0.1),
+          child: BadgeAssetImage(
+            imagePath: imagePath,
+            size: size,
+            adaptDarkBackground: false,
+            errorBuilder: (_, _, _) => Center(child: fallback()),
           ),
-          child: Icon(icon, size: size * 0.45, color: accentColor),
         ),
       ),
     );

@@ -13,6 +13,7 @@ import '../../theme/v_tokens.dart';
 import '../../widgets/shared/badge_asset_image.dart';
 import '../../utils/world_assets.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
+import '../../widgets/achievements/achievement_avatar_surface.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/v_section_list.dart';
 
@@ -446,36 +447,45 @@ class _CategoryAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     final imagePath = WorldAssets.achievementCategoryImage(categoryName);
-    final ring = accentRing
-        ? BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: VColors.tertiary, width: 2),
-          )
+    final fill = achievementAvatarFill(color, brightness);
+    final border = accentRing
+        ? Border.all(color: VColors.tertiary, width: 2)
         : null;
+
+    Widget iconChild() => Icon(icon, color: color, size: 20);
 
     if (imagePath == null) {
       return Container(
         width: 40,
         height: 40,
-        decoration: ring ??
-            BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
-            ),
-        child: Icon(icon, color: color, size: 20),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: fill,
+          border: border,
+        ),
+        child: Center(child: iconChild()),
       );
     }
 
     return Container(
-      decoration: ring,
-      child: SizedBox(
-        width: 40,
-        height: 40,
-        child: BadgeAssetImage(
-          imagePath: imagePath,
-          size: 40,
-          errorBuilder: (_, _, _) => Icon(icon, color: color, size: 20),
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: fill,
+        border: border,
+      ),
+      child: ClipOval(
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: BadgeAssetImage(
+            imagePath: imagePath,
+            size: 30,
+            adaptDarkBackground: false,
+            errorBuilder: (_, _, _) => Center(child: iconChild()),
+          ),
         ),
       ),
     );
