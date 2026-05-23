@@ -1,6 +1,6 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/broken_media.dart';
 import '../core/shimmer.dart';
 
@@ -13,7 +13,7 @@ class ChatImage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (url.startsWith('https://')) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.card),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         child: Image.network(
           url,
           fit: BoxFit.cover,
@@ -26,7 +26,7 @@ class ChatImage extends StatelessWidget {
               child: Center(
                 child: Pulse(
                   height: 160,
-                  borderRadius: RadiusTokens.card,
+                  borderRadius: VRadius.lg,
                   opacity: 0.3,
                 ),
               ),
@@ -39,7 +39,7 @@ class ChatImage extends StatelessWidget {
     final file = File(url);
     if (file.existsSync()) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(RadiusTokens.card),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         child: Image.file(file, fit: BoxFit.cover),
       );
     }

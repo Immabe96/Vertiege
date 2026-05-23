@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import '../../ui/icons/v_icons.dart';
 
@@ -37,10 +37,10 @@ class ChatInputBar extends StatelessWidget {
         blur: 10,
         borderRadius: BorderRadius.zero,
         padding: EdgeInsets.fromLTRB(
-          Spacing.sm,
-          replyToName != null ? Spacing.xs : Spacing.xs,
-          Spacing.sm,
-          Spacing.sm,
+          VSpacing.sm,
+          replyToName != null ? VSpacing.xs : VSpacing.xs,
+          VSpacing.sm,
+          VSpacing.sm,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -48,12 +48,12 @@ class ChatInputBar extends StatelessWidget {
             if (replyToName != null)
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
-                  vertical: Spacing.xs,
+                  horizontal: VSpacing.sm,
+                  vertical: VSpacing.xs,
                 ),
                 decoration: BoxDecoration(
                   color: VColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  borderRadius: BorderRadius.circular(VRadius.md),
                   border: Border.all(
                     color: VColors.primary.withValues(alpha: 0.2),
                   ),
@@ -62,10 +62,10 @@ class ChatInputBar extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.reply_rounded,
-                      size: IconSizes.sm,
+                      size: VIconSize.sm,
                       color: VColors.primary,
                     ),
-                    const SizedBox(width: Spacing.xs),
+                    const SizedBox(width: VSpacing.xs),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,8 +73,8 @@ class ChatInputBar extends StatelessWidget {
                           Text(
                             'Replying to $replyToName',
                             style: TextStyle(
-                              fontSize: FontSizes.labelSm,
-                              fontWeight: FontWeights.semiBold,
+                              fontSize: VFontSize.labelSm,
+                              fontWeight: VFontWeight.semiBold,
                               color: VColors.primary,
                             ),
                           ),
@@ -82,7 +82,7 @@ class ChatInputBar extends StatelessWidget {
                             Text(
                               replyToContent!,
                               style: TextStyle(
-                                fontSize: FontSizes.labelXs,
+                                fontSize: VFontSize.labelSm,
                                 color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                               ),
                               maxLines: 1,
@@ -93,7 +93,7 @@ class ChatInputBar extends StatelessWidget {
                     ),
                     if (onCancelReply != null)
                       IconButton(
-                        icon: const Icon(VIcons.x, size: IconSizes.sm),
+                        icon: const Icon(VIcons.x, size: VIconSize.sm),
                         onPressed: onCancelReply,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -101,7 +101,7 @@ class ChatInputBar extends StatelessWidget {
                   ],
                 ),
               ),
-            if (replyToName != null) const SizedBox(height: Spacing.xs),
+            if (replyToName != null) const SizedBox(height: VSpacing.xs),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -111,7 +111,7 @@ class ChatInputBar extends StatelessWidget {
                     onPressed: onAttach,
                     tooltip: 'Attach image',
                     color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
-                    iconSize: IconSizes.lg,
+                    iconSize: VIconSize.lg,
                     padding: EdgeInsets.zero,
                   ),
                 Expanded(
@@ -134,8 +134,8 @@ class ChatInputBar extends StatelessWidget {
                       fillColor: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.md,
-                        vertical: Spacing.sm,
+                        horizontal: VSpacing.md,
+                        vertical: VSpacing.sm,
                       ),
                     ),
                     textInputAction: TextInputAction.send,
@@ -144,23 +144,23 @@ class ChatInputBar extends StatelessWidget {
                     maxLines: 5,
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 IconButton(
                   onPressed: onSend,
                   icon: const Icon(VIcons.send),
                   color: VColors.tertiary,
-                  iconSize: IconSizes.lg,
+                  iconSize: VIconSize.lg,
                   padding: EdgeInsets.zero,
                 ),
               ],
             ),
             if (typingIndicator != null && typingIndicator!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 2, left: Spacing.md),
+                padding: const EdgeInsets.only(top: 2, left: VSpacing.md),
                 child: Text(
                   typingIndicator!,
                   style: TextStyle(
-                    fontSize: FontSizes.labelXs,
+                    fontSize: VFontSize.labelSm,
                     color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                     fontStyle: FontStyle.italic,
                   ),

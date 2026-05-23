@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../config/tiers.dart';
 import '../models/rank.dart';
@@ -7,14 +8,15 @@ import '../services/rank_service.dart';
 import '../services/world_service.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_tokens.dart';
 import '../utils/tier_utils.dart';
 import '../services/crash_reporter.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
-import '../widgets/core/loading_state.dart';
+import '../widgets/core/screen_loading.dart';
 
 class WorldMembersScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -96,19 +98,17 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     final currentResidentId = ref.watch(residentProvider).resident?.id;
     final canManageRanks = currentResidentId == widget.sovereignId;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        title: Text('${widget.worldName} — Members'),
-        actions: [
-          IconButton(
-            icon: const Icon(VIcons.search),
-            onPressed: () => _showSearch(context),
-          ),
-        ],
-      ),
+    return VHubPage(
+      title: 'Members',
+      showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(VIcons.search),
+          onPress: () => _showSearch(context),
+        ),
+      ],
       body: _loading
-          ? const VLoadingList(itemCount: 6)
+          ? const ScreenLoading.list()
           : _error != null
           ? AppErrorState(message: _error, onRetry: _load)
           : filtered.isEmpty
@@ -127,7 +127,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                 await Future<void>.delayed(const Duration(milliseconds: 200));
               },
               child: ListView.builder(
-                padding: const EdgeInsets.all(Spacing.md),
+                padding: const EdgeInsets.all(VSpacing.md),
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final m = filtered[index];
@@ -141,23 +141,23 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
 
                   return Padding(
                     padding: EdgeInsets.only(
-                      bottom: index < filtered.length - 1 ? Spacing.sm : 0,
+                      bottom: index < filtered.length - 1 ? VSpacing.sm : 0,
                     ),
                     child: FadeIn(
                       delayMs: index * 40,
                       child: _Card(
-                        padding: const EdgeInsets.all(Spacing.md),
-                        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                        padding: const EdgeInsets.all(VSpacing.md),
+                        borderRadius: BorderRadius.circular(VRadius.xl),
                         child: InkWell(
                           onTap: () => context.push('/residents/$residentId'),
-                          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                          borderRadius: BorderRadius.circular(VRadius.xl),
                           child: Row(
                             children: [
                               // Avatar
                               CircleAvatar(
                                 child: Text(name.substring(0, 1).toUpperCase()),
                               ),
-                              const SizedBox(width: Spacing.md),
+                              const SizedBox(width: VSpacing.md),
 
                               // Name + badges
                               Expanded(
@@ -173,7 +173,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
                                                   fontWeight:
-                                                      FontWeights.semiBold,
+                                                      VFontWeight.semiBold,
                                                   color: isDark
                                                       ? VColors.onSurfaceDark
                                                       : VColors.onSurface,
@@ -181,17 +181,17 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                           ),
                                         ),
                                         if (isSovereign) ...[
-                                          const SizedBox(width: Spacing.sm),
+                                          const SizedBox(width: VSpacing.sm),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: Spacing.sm,
+                                              horizontal: VSpacing.sm,
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
                                               color: VColors.tertiary,
                                               borderRadius:
                                                   BorderRadius.circular(
-                                                    RadiusTokens.pill,
+                                                    VRadius.pill,
                                                   ),
                                             ),
                                             child: Text(
@@ -205,13 +205,13 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                         ],
                                       ],
                                     ),
-                                    const SizedBox(height: Spacing.xs),
+                                    const SizedBox(height: VSpacing.xs),
                                     Row(
                                       children: [
                                         // Tier badge
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: Spacing.sm,
+                                            horizontal: VSpacing.sm,
                                             vertical: 1,
                                           ),
                                           decoration: BoxDecoration(
@@ -219,7 +219,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                               alpha: 0.15,
                                             ),
                                             borderRadius: BorderRadius.circular(
-                                              RadiusTokens.pill,
+                                              VRadius.pill,
                                             ),
                                           ),
                                           child: Text(
@@ -228,7 +228,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                                 ?.copyWith(color: tierColor),
                                           ),
                                         ),
-                                        const SizedBox(width: Spacing.sm),
+                                        const SizedBox(width: VSpacing.sm),
                                         // Reputation
                                         Text(
                                           'Rep $rep',
@@ -240,10 +240,10 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                       ],
                                     ),
                                     if (memberRanks.isNotEmpty) ...[
-                                      const SizedBox(height: Spacing.xs),
+                                      const SizedBox(height: VSpacing.xs),
                                       Wrap(
-                                        spacing: Spacing.xs,
-                                        runSpacing: Spacing.xs,
+                                        spacing: VSpacing.xs,
+                                        runSpacing: VSpacing.xs,
                                         children: [
                                           for (final rank in memberRanks.take(
                                             3,
@@ -259,13 +259,13 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: Spacing.sm),
+                              const SizedBox(width: VSpacing.sm),
                               if (canManageRanks)
                                 IconButton(
                                   tooltip: 'Manage ranks',
                                   icon: const Icon(
                                     Icons.admin_panel_settings_outlined,
-                                    size: IconSizes.md,
+                                    size: VIconSize.md,
                                   ),
                                   color: VColors.tertiary,
                                   onPressed: () => _showRankManager(
@@ -279,7 +279,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                   color: isDark
                                       ? VColors.outlineVariantDark
                                       : VColors.outlineVariant,
-                                  size: IconSizes.lg,
+                                  size: VIconSize.lg,
                                 ),
                             ],
                           ),
@@ -325,10 +325,10 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
         builder: (context, setSheetState) => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
-              Spacing.lg,
-              Spacing.sm,
-              Spacing.lg,
-              Spacing.lg,
+              VSpacing.lg,
+              VSpacing.sm,
+              VSpacing.lg,
+              VSpacing.lg,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -338,10 +338,10 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                 'Ranks for $residentName',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                  fontWeight: FontWeights.bold,
+                  fontWeight: VFontWeight.bold,
                 ),
               ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 Flexible(
                   child: ListView(
                     shrinkWrap: true,
@@ -366,7 +366,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 Row(
                   children: [
                     VButton(
@@ -456,10 +456,10 @@ class _RankChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _parseRankColor(rank.colorHex);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
@@ -479,12 +479,12 @@ class _MoreRanksChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: isDark
             ? VColors.glassBackgroundDark
             : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(
           color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
         ),
@@ -536,10 +536,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

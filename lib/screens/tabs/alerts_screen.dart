@@ -11,10 +11,9 @@ import '../../widgets/core/fade_in.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
-import '../../theme/design_system.dart';
-import '../../utils/navigation.dart';
+import '../../forui/v_hub_page.dart';
+import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../theme/v_colors.dart';
 
 enum _DateGroup { today, thisWeek, earlier }
@@ -35,7 +34,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
   void initState() {
     super.initState();
     _markAllAnimController = AnimationController(
-      duration: AnimDurations.fast,
+      duration: VAnimation.fast,
       vsync: this,
     );
     _markAllScale =
@@ -102,30 +101,29 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     final hasUnread = notifications.any((n) => !n.read);
 
     if (notifState.isLoading) {
-      return const Scaffold(body: ScreenLoading.list());
+      return const VHubPage(
+        title: 'Alerts',
+        showBack: true,
+        body: ScreenLoading.list(),
+      );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(VIcons.arrowLeft),
-          onPressed: () => safeBack(context),
-        ),
-        title: const Text('Alerts'),
-        actions: [
-          if (hasUnread)
-            AnimatedBuilder(
-              animation: _markAllScale,
-              builder: (context, child) =>
-                  Transform.scale(scale: _markAllScale.value, child: child),
-              child: VButton(
-                label: 'Mark all read',
-                onPressed: _onMarkAllRead,
-                variant: ButtonVariant.text,
-              ),
+    return VHubPage(
+      title: 'Alerts',
+      showBack: true,
+      headerActions: [
+        if (hasUnread)
+          AnimatedBuilder(
+            animation: _markAllScale,
+            builder: (context, child) =>
+                Transform.scale(scale: _markAllScale.value, child: child),
+            child: VButton(
+              label: 'Mark all read',
+              onPressed: _onMarkAllRead,
+              variant: ButtonVariant.text,
             ),
-        ],
-      ),
+          ),
+      ],
       body: Column(
         children: [
           if (notifState.error != null)
@@ -293,16 +291,16 @@ class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
     return Container(
       color: backgroundColor,
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.sm,
       ),
       alignment: Alignment.centerLeft,
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: textColor,
-          fontWeight: FontWeights.semiBold,
-          letterSpacing: LetterSpacing.label,
+          fontWeight: VFontWeight.semiBold,
+          letterSpacing: 0,
         ),
       ),
     );
@@ -398,8 +396,8 @@ class _NotificationSliverList extends StatelessWidget {
           delayMs: index * 60,
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.md,
-              vertical: Spacing.xs,
+              horizontal: VSpacing.md,
+              vertical: VSpacing.xs,
             ),
             child: Dismissible(
               key: ValueKey(n.id),
@@ -421,13 +419,13 @@ class _NotificationSliverList extends StatelessWidget {
                 color: VColors.success,
                 icon: Icons.check,
                 alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: Spacing.lg),
+                padding: const EdgeInsets.only(left: VSpacing.lg),
               ),
               secondaryBackground: _SwipeBackground(
                 color: theme.colorScheme.outline.withValues(alpha: 0.45),
                 icon: Icons.archive,
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: Spacing.lg),
+                padding: const EdgeInsets.only(right: VSpacing.lg),
               ),
               child: _NotificationCard(
                 notification: n,
@@ -484,11 +482,11 @@ class _SwipeBackground extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: BorderRadius.circular(VRadius.xl),
       ),
       alignment: alignment,
       padding: padding,
-      child: Icon(icon, color: isDark ? VColors.onSurfaceDark : VColors.onSurface, size: IconSizes.lg),
+      child: Icon(icon, color: isDark ? VColors.onSurfaceDark : VColors.onSurface, size: VIconSize.lg),
     );
   }
 }
@@ -521,7 +519,7 @@ class _NotificationCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         child: VSurfacePanel(
           padding: EdgeInsets.zero,
           child: Column(
@@ -538,15 +536,15 @@ class _NotificationCard extends StatelessWidget {
                         decoration: const BoxDecoration(
                           color: VColors.primary,
                           borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(RadiusTokens.xl),
-                            bottomLeft: Radius.circular(RadiusTokens.xl),
+                            topLeft: Radius.circular(VRadius.xl),
+                            bottomLeft: Radius.circular(VRadius.xl),
                           ),
                         ),
                       ),
                     // ── Card body ──
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.all(Spacing.md),
+                        padding: const EdgeInsets.all(VSpacing.md),
                         child: Row(
                           children: [
                             // ── Type icon in tinted container ──
@@ -556,16 +554,16 @@ class _NotificationCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: typeColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(
-                                  RadiusTokens.input,
+                                  VRadius.md,
                                 ),
                               ),
                               child: Icon(
                                 _iconForTypeStatic(n.type),
                                 color: typeColor,
-                                size: IconSizes.md,
+                                size: VIconSize.md,
                               ),
                             ),
-                            const SizedBox(width: Spacing.md),
+                            const SizedBox(width: VSpacing.md),
                             // ── Message ──
                             Expanded(
                               child: Text(
@@ -574,8 +572,8 @@ class _NotificationCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: unread
-                                      ? FontWeights.bold
-                                      : FontWeights.regular,
+                                      ? VFontWeight.bold
+                                      : VFontWeight.regular,
                                   color: unread
                                       ? (isDark
                                           ? VColors.onSurfaceDark
@@ -583,11 +581,11 @@ class _NotificationCard extends StatelessWidget {
                                       : (isDark
                                           ? VColors.onSurfaceVariantDark
                                           : VColors.onSurfaceVariant),
-                                  height: LineHeight.body,
+                                  height: VLineHeight.body,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: Spacing.sm),
+                            const SizedBox(width: VSpacing.sm),
                             // ── Relative timestamp ──
                             TimeAgo(
                               DateTime.fromMillisecondsSinceEpoch(n.createdAt),
@@ -607,10 +605,10 @@ class _NotificationCard extends StatelessWidget {
               if (actions != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    Spacing.md,
+                    VSpacing.md,
                     0,
-                    Spacing.md,
-                    Spacing.sm,
+                    VSpacing.md,
+                    VSpacing.sm,
                   ),
                   child: actions!,
                 ),
@@ -677,7 +675,7 @@ class _AllegianceRequestActions extends ConsumerWidget {
             size: ButtonSize.small,
           ),
         ),
-        const SizedBox(width: Spacing.sm),
+        const SizedBox(width: VSpacing.sm),
         Expanded(
           child: VButton(
             label: 'ACCEPT',

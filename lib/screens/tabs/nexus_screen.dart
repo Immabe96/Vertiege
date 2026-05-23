@@ -10,6 +10,7 @@ import '../../models/post.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../widgets/feed/post_item.dart';
 import '../../widgets/nexus/bento_grid.dart';
 import '../../widgets/nexus/bento_cards/daily_quest_card.dart';
@@ -156,6 +157,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     );
     final postHasError = ref.watch(
       postProvider.select((s) => s.hasError),
+    );
+    final postIsLoading = ref.watch(
+      postProvider.select((s) => s.isLoading),
     );
 
     return Scaffold(
@@ -419,6 +423,10 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           onRetry: () =>
                               ref.read(postProvider.notifier).loadPosts(),
                         ),
+                      )
+                    else if (postIsLoading && posts.isEmpty)
+                      const SliverToBoxAdapter(
+                        child: ScreenLoading.feed(),
                       )
                     else if (posts.isEmpty)
                       SliverToBoxAdapter(

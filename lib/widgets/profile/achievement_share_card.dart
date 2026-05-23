@@ -2,7 +2,7 @@
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../shared/share_button.dart';
 import '../../ui/buttons/v_button.dart';
 
@@ -124,7 +124,7 @@ class AchievementShareCard extends StatelessWidget {
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(Spacing.lg),
+        insetPadding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -137,7 +137,7 @@ class AchievementShareCard extends StatelessWidget {
                 totalXp: totalXp,
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             VButton(
               label: 'Close',
               onPressed: () => Navigator.of(ctx).pop(),
@@ -173,8 +173,8 @@ class AchievementShareCard extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.xl,
-              vertical: Spacing.lg,
+              horizontal: VSpacing.xl,
+              vertical: VSpacing.lg,
             ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -188,7 +188,7 @@ class AchievementShareCard extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 // Category icon in circle
                 Container(
                   width: 56,
@@ -210,22 +210,22 @@ class AchievementShareCard extends StatelessWidget {
                   ),
                   child: Icon(
                     _categoryIcon,
-                    size: IconSizes.lg,
+                    size: VIconSize.lg,
                     color: _categoryColor,
                   ),
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 // Category label
                 Text(
                   _categoryLabel,
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.bold,
                     color: _categoryColor.withValues(alpha: 0.8),
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 // Achievement title
                 Text(
                   achievement.title,
@@ -233,13 +233,13 @@ class AchievementShareCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.headlineMd,
+                    fontWeight: VFontWeight.bold,
                     color: VColors.onSurface,
                     height: 1.2,
                   ),
                 ),
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: VSpacing.xs),
                 // Description
                 Text(
                   achievement.description,
@@ -247,7 +247,7 @@ class AchievementShareCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: FontSizes.bodyMd,
+                    fontSize: VFontSize.bodyMd,
                     color: VColors.onSurfaceVariant,
                     height: 1.4,
                   ),
@@ -267,8 +267,8 @@ class AchievementShareCard extends StatelessWidget {
                 ),
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.xl,
-                vertical: Spacing.lg,
+                horizontal: VSpacing.xl,
+                vertical: VSpacing.lg,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -276,12 +276,12 @@ class AchievementShareCard extends StatelessWidget {
                   // XP badge
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.lg,
-                      vertical: Spacing.xs + 2,
+                      horizontal: VSpacing.lg,
+                      vertical: VSpacing.xs + 2,
                     ),
                     decoration: BoxDecoration(
                       color: VColors.tertiary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                      borderRadius: BorderRadius.circular(VRadius.pill),
                       border: Border.all(
                         color: VColors.tertiary.withValues(alpha: 0.25),
                       ),
@@ -291,46 +291,46 @@ class AchievementShareCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.auto_awesome,
-                          size: IconSizes.sm,
+                          size: VIconSize.sm,
                           color: VColors.tertiary,
                         ),
-                        const SizedBox(width: Spacing.sm),
+                        const SizedBox(width: VSpacing.sm),
                         Text(
                           '+${achievement.xpValue} XP',
                           style: TextStyle(
-                            fontSize: FontSizes.labelSm,
-                            fontWeight: FontWeights.bold,
+                            fontSize: VFontSize.labelSm,
+                            fontWeight: VFontWeight.bold,
                             color: VColors.tertiary,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
                   // Earned by
                   Text(
                     'Earned by ${resident.name}',
                     style: TextStyle(
-                      fontSize: FontSizes.bodyMd,
+                      fontSize: VFontSize.bodyMd,
                       color: VColors.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   Text(
                     '${resident.tier.label}  •  $totalXp XP',
                     style: TextStyle(
-                      fontSize: FontSizes.labelSm,
+                      fontSize: VFontSize.labelSm,
                       color: VColors.outline,
-                      letterSpacing: LetterSpacing.label,
+                      letterSpacing: 0,
                     ),
                   ),
-                  const SizedBox(height: Spacing.lg),
+                  const SizedBox(height: VSpacing.lg),
                   // Tagline
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.lg,
-                      vertical: Spacing.sm,
+                      horizontal: VSpacing.lg,
+                      vertical: VSpacing.sm,
                     ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -340,7 +340,7 @@ class AchievementShareCard extends StatelessWidget {
                         ],
                       ),
                       borderRadius: BorderRadius.circular(
-                        RadiusTokens.cardFeatured,
+                        VRadius.md,
                       ),
                       border: Border.all(
                         color: _categoryColor.withValues(alpha: 0.15),
@@ -351,15 +351,15 @@ class AchievementShareCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.diamond,
-                          size: IconSizes.sm + 2,
+                          size: VIconSize.sm + 2,
                           color: _categoryColor.withValues(alpha: 0.8),
                         ),
-                        const SizedBox(width: Spacing.sm),
+                        const SizedBox(width: VSpacing.sm),
                         Text(
                           'Join me on Vertiege',
                           style: TextStyle(
-                            fontSize: FontSizes.bodyMd,
-                            fontWeight: FontWeights.semiBold,
+                            fontSize: VFontSize.bodyMd,
+                            fontWeight: VFontWeight.semiBold,
                             color: _categoryColor.withValues(alpha: 0.9),
                           ),
                         ),

@@ -64,3 +64,4 @@ flutter:
     - .env
     - assets/generated/
     - assets/images/
+    - assets/images/empty_states/

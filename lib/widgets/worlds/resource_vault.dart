@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/channel.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 
 class ResourceVault extends StatelessWidget {
@@ -23,9 +23,9 @@ class ResourceVault extends StatelessWidget {
     final guideChannels = _guideChannels;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
       child: VSurfacePanel(
-        padding: const EdgeInsets.all(Spacing.lg),
+        padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -36,17 +36,17 @@ class ResourceVault extends StatelessWidget {
                       ? Icons.folder_special_outlined
                       : Icons.menu_book_outlined,
                   color: vaultUnlocked ? VColors.tertiary : VColors.primary,
-                  size: IconSizes.md,
+                  size: VIconSize.md,
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 const Expanded(
                   child: Text(
                     'WORLD GUIDE',
                     style: TextStyle(
-                      fontSize: FontSizes.labelSm,
-                      fontWeight: FontWeights.semiBold,
+                      fontSize: VFontSize.labelSm,
+                      fontWeight: VFontWeight.semiBold,
                       color: VColors.onSurface,
-                      letterSpacing: LetterSpacing.label,
+                      letterSpacing: 0,
                     ),
                   ),
                 ),
@@ -56,17 +56,17 @@ class ResourceVault extends StatelessWidget {
                   const _VaultPill(label: 'STARTER'),
               ],
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             Text(
               vaultUnlocked
                   ? 'Official resources live here first. Use the starter channels to orient new residents.'
                   : 'A quick path through the world before residents jump into general chat.',
               style: const TextStyle(
-                fontSize: FontSizes.bodyMd,
+                fontSize: VFontSize.bodyMd,
                 color: VColors.outline,
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             if (guideChannels.isEmpty)
               const _VaultEmpty()
             else
@@ -111,15 +111,15 @@ class _GuideItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        borderRadius: BorderRadius.circular(VRadius.md),
         child: Container(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           decoration: BoxDecoration(
             color: VColors.surfaceContainer.withValues(alpha: 0.64),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            borderRadius: BorderRadius.circular(VRadius.md),
             border: Border.all(color: VColors.glassBorder),
           ),
           child: Row(
@@ -129,15 +129,15 @@ class _GuideItem extends StatelessWidget {
                 height: 36,
                 decoration: BoxDecoration(
                   color: VColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  borderRadius: BorderRadius.circular(VRadius.md),
                 ),
                 child: Icon(
                   _icon,
                   color: VColors.primary,
-                  size: IconSizes.md,
+                  size: VIconSize.md,
                 ),
               ),
-              const SizedBox(width: Spacing.md),
+              const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +148,7 @@ class _GuideItem extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: VColors.onSurface,
-                        fontWeight: FontWeights.semiBold,
+                        fontWeight: VFontWeight.semiBold,
                       ),
                     ),
                     if (channel.description != null)
@@ -158,7 +158,7 @@ class _GuideItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: VColors.outline,
-                          fontSize: FontSizes.labelSm,
+                          fontSize: VFontSize.labelSm,
                         ),
                       ),
                   ],
@@ -167,7 +167,7 @@ class _GuideItem extends StatelessWidget {
               const Icon(
                 Icons.chevron_right,
                 color: VColors.outline,
-                size: IconSizes.md,
+                size: VIconSize.md,
               ),
             ],
           ),
@@ -185,18 +185,18 @@ class _VaultPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: VColors.tertiary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(color: VColors.tertiary.withValues(alpha: 0.24)),
       ),
       child: Text(
         label,
         style: const TextStyle(
           color: VColors.tertiary,
-          fontSize: FontSizes.labelSm,
-          fontWeight: FontWeights.bold,
+          fontSize: VFontSize.labelSm,
+          fontWeight: VFontWeight.bold,
         ),
       ),
     );
@@ -210,10 +210,10 @@ class _VaultEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
         color: VColors.surfaceContainer.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        borderRadius: BorderRadius.circular(VRadius.md),
         border: Border.all(color: VColors.glassBorder),
       ),
       child: const Text(

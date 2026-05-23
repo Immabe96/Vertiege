@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../models/post.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../ui/inputs/v_input.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
@@ -206,15 +206,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         title: Text(
           'Vertiege',
           style: TextStyle(
-            fontFamily: AppFont.headline,
-            fontSize: FontSizes.headlineLg,
-            fontWeight: FontWeights.bold,
+            fontFamily: VFont.headline,
+            fontSize: VFontSize.headlineLg,
+            fontWeight: VFontWeight.bold,
             color: VColors.tertiary,
           ),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: Spacing.md),
+            padding: const EdgeInsets.only(right: VSpacing.md),
             child: VButton(
               label: 'PUBLISH',
               onPressed: worlds.isEmpty ? null : _publish,
@@ -223,17 +223,17 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(Spacing.marginMobile),
+        padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           children: [
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: VSpacing.xl),
 
             // World selector
             if (worlds.isNotEmpty)
               _Card(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.lg,
-                  vertical: Spacing.md,
+                  horizontal: VSpacing.lg,
+                  vertical: VSpacing.md,
                 ),
                 child: Row(
                   children: [
@@ -244,15 +244,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         color: isDark
                             ? VColors.secondaryContainerDark
                             : VColors.secondaryContainer,
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        borderRadius: BorderRadius.circular(VRadius.md),
                       ),
                       child: const Icon(
                         Icons.language,
                         color: VColors.tertiary,
-                        size: IconSizes.sm,
+                        size: VIconSize.sm,
                       ),
                     ),
-                    const SizedBox(width: Spacing.md),
+                    const SizedBox(width: VSpacing.md),
                         Expanded(
                       child: FSelect<String>.rich(
                         format: (value) => selectedWorld.name,
@@ -277,7 +277,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               )
             else
               _Card(
-                padding: EdgeInsets.all(Spacing.lg),
+                padding: EdgeInsets.all(VSpacing.lg),
                 child: Row(
                   children: [
                     Icon(
@@ -286,7 +286,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           ? VColors.onSurfaceVariantDark
                           : VColors.onSurfaceVariant,
                     ),
-                    SizedBox(width: Spacing.md),
+                    SizedBox(width: VSpacing.md),
                     Expanded(
                       child: Text(
                         'Join a world before publishing.',
@@ -294,7 +294,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           color: isDark
                               ? VColors.onSurfaceVariantDark
                               : VColors.onSurfaceVariant,
-                          fontSize: FontSizes.bodyMd,
+                          fontSize: VFontSize.bodyMd,
                         ),
                       ),
                     ),
@@ -302,7 +302,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 ),
               ),
 
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
 
             // Announcement toggle (Council+ only)
             Consumer(
@@ -318,7 +318,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 if (!isCouncil && !isSov) return const SizedBox.shrink();
 
                 return _Card(
-                  padding: const EdgeInsets.all(Spacing.lg),
+                  padding: const EdgeInsets.all(VSpacing.lg),
                   child: Row(
                     children: [
                         Container(
@@ -326,15 +326,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           height: 48,
                           decoration: BoxDecoration(
                             color: VColors.tertiary.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(RadiusTokens.md),
+                            borderRadius: BorderRadius.circular(VRadius.md),
                           ),
                           child: const Icon(
                             Icons.stars,
                             color: VColors.tertiary,
-                            size: IconSizes.lg,
+                            size: VIconSize.lg,
                           ),
                         ),
-                        const SizedBox(width: Spacing.md),
+                        const SizedBox(width: VSpacing.md),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,8 +342,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                               const Text(
                                 'Announcement',
                                 style: TextStyle(
-                                  fontSize: FontSizes.headlineMd,
-                                  fontWeight: FontWeights.semiBold,
+                                  fontSize: VFontSize.headlineMd,
+                                  fontWeight: VFontWeight.semiBold,
                                   color: VColors.tertiary,
                                 ),
                               ),
@@ -351,7 +351,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                               Text(
                                 'Pin to the priority feed of all members.',
                                 style: TextStyle(
-                                  fontSize: FontSizes.bodyMd,
+                                  fontSize: VFontSize.bodyMd,
                                   color: isDark
                                       ? VColors.onSurfaceVariantDark
                                       : VColors.onSurfaceVariant,
@@ -389,7 +389,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               },
             ),
 
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
 
             // Pin Post toggle (tier-gated)
             Consumer(
@@ -399,7 +399,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 if (pinLimit <= 0) return const SizedBox.shrink();
 
                 return _Card(
-                  padding: const EdgeInsets.all(Spacing.lg),
+                  padding: const EdgeInsets.all(VSpacing.lg),
                   child: Row(
                     children: [
                       Container(
@@ -407,15 +407,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: VColors.primary.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                          borderRadius: BorderRadius.circular(VRadius.md),
                         ),
                         child: const Icon(
                           Icons.push_pin,
                           color: VColors.primary,
-                          size: IconSizes.lg,
+                          size: VIconSize.lg,
                         ),
                       ),
-                      const SizedBox(width: Spacing.md),
+                      const SizedBox(width: VSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,8 +423,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             const Text(
                               'Pin Post',
                               style: TextStyle(
-                                fontSize: FontSizes.headlineMd,
-                                fontWeight: FontWeights.semiBold,
+                                fontSize: VFontSize.headlineMd,
+                                fontWeight: VFontWeight.semiBold,
                                 color: VColors.primary,
                               ),
                             ),
@@ -432,7 +432,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             Text(
                               'Pin to top of the feed.',
                               style: TextStyle(
-                                fontSize: FontSizes.bodyMd,
+                                fontSize: VFontSize.bodyMd,
                                 color: isDark
                                     ? VColors.onSurfaceVariantDark
                                     : VColors.onSurfaceVariant,
@@ -469,11 +469,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               },
             ),
 
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
 
             // Editor
             _Card(
-              padding: const EdgeInsets.all(Spacing.xl),
+              padding: const EdgeInsets.all(VSpacing.xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -481,7 +481,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     controller: _titleController,
                     hint: 'Title of your dispatch...',
                   ),
-                  const SizedBox(height: Spacing.lg),
+                  const SizedBox(height: VSpacing.lg),
                   // Formatting bar
                   Row(
                     children: [
@@ -490,7 +490,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         label: 'B',
                         onTap: () => _insertFormatting(_bodyController, '**'),
                       ),
-                      const SizedBox(width: Spacing.xs),
+                      const SizedBox(width: VSpacing.xs),
                       _FormatButton(
                         icon: Icons.format_italic,
                         label: 'I',
@@ -498,7 +498,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   VInput(
                     controller: _bodyController,
                     hint: 'Share your insights with the Nexus...',
@@ -508,11 +508,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               ),
             ),
 
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
 
             // Poll builder
             if (_showPollBuilder) ...[
-              const SizedBox(height: Spacing.lg),
+              const SizedBox(height: VSpacing.lg),
               _PollBuilder(
                 questionController: _pollQuestionController,
                 optionControllers: _pollOptionControllers,
@@ -534,7 +534,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   onTap: _pickImage,
                   selected: _imagePath != null,
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 _AttachChip(
                   icon: _showPollBuilder ? Icons.poll : Icons.poll_outlined,
                   label: _showPollBuilder ? 'EDIT POLL' : 'ADD POLL',
@@ -570,14 +570,14 @@ class _AttachChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.lg,
-          vertical: Spacing.sm + 2,
+          horizontal: VSpacing.lg,
+          vertical: VSpacing.sm + 2,
         ),
         decoration: BoxDecoration(
           color: selected
               ? VColors.tertiary.withValues(alpha: 0.15)
               : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
-          borderRadius: BorderRadius.circular(RadiusTokens.full),
+          borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
             color: selected
                 ? VColors.tertiary.withValues(alpha: 0.4)
@@ -589,25 +589,25 @@ class _AttachChip extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: IconSizes.sm,
+              size: VIconSize.sm,
               color: selected
                   ? VColors.tertiary
                   : (isDark
                       ? VColors.onSurfaceVariantDark
                       : VColors.onSurfaceVariant),
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Text(
               label,
               style: TextStyle(
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.labelSm,
+                fontWeight: VFontWeight.semiBold,
                 color: selected
                     ? VColors.tertiary
                     : (isDark
                         ? VColors.onSurfaceVariantDark
                         : VColors.onSurfaceVariant),
-                letterSpacing: LetterSpacing.label,
+                letterSpacing: 0,
               ),
             ),
           ],
@@ -641,7 +641,7 @@ class _PollBuilder extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return _Card(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -650,22 +650,22 @@ class _PollBuilder extends StatelessWidget {
             children: [
             const Icon(
               Icons.poll,
-              size: IconSizes.md,
+              size: VIconSize.md,
               color: VColors.tertiary,
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             const Expanded(
               child: Text(
                 'Poll',
                 style: TextStyle(
-                  fontSize: FontSizes.headlineMd,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.headlineMd,
+                  fontWeight: VFontWeight.semiBold,
                   color: VColors.onSurface,
                 ),
               ),
             ),
             IconButton(
-              icon: const Icon(VIcons.x, size: IconSizes.md),
+              icon: const Icon(VIcons.x, size: VIconSize.md),
               onPressed: onRemove,
               color: isDark
                   ? VColors.onSurfaceVariantDark
@@ -673,11 +673,11 @@ class _PollBuilder extends StatelessWidget {
             ),
             ],
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
 
           // Question field
           VInput(controller: questionController, hint: 'Poll question...'),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
 
           // Options
           ...optionControllers.asMap().entries.map((entry) {
@@ -685,7 +685,7 @@ class _PollBuilder extends StatelessWidget {
             final controller = entry.value;
             return Padding(
               padding: EdgeInsets.only(
-                bottom: index < optionControllers.length - 1 ? Spacing.sm : 0,
+                bottom: index < optionControllers.length - 1 ? VSpacing.sm : 0,
               ),
               child: Row(
                 children: [
@@ -699,7 +699,7 @@ class _PollBuilder extends StatelessWidget {
                       IconButton(
                         icon: const Icon(
                           Icons.remove_circle_outline,
-                          size: IconSizes.md,
+                          size: VIconSize.md,
                         ),
                         onPressed: () => onRemoveOption(index),
                         color: VColors.error,
@@ -709,41 +709,41 @@ class _PollBuilder extends StatelessWidget {
             );
           }),
 
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
 
           // Add Option button
           if (optionControllers.length < 5)
             TextButton.icon(
               onPressed: onAddOption,
-              icon: const Icon(VIcons.plus, size: IconSizes.sm),
+              icon: const Icon(VIcons.plus, size: VIconSize.sm),
               label: const Text(
                 'Add Option',
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.semiBold,
                 ),
               ),
               style: TextButton.styleFrom(foregroundColor: VColors.primary),
             ),
 
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
 
           // Multi-choice toggle
           Row(
             children: [
               Icon(
                 Icons.checklist,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: isDark
                     ? VColors.onSurfaceVariantDark
                     : VColors.onSurfaceVariant,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Expanded(
                 child: Text(
                   'Allow multiple choices',
                   style: TextStyle(
-                    fontSize: FontSizes.bodyMd,
+                    fontSize: VFontSize.bodyMd,
                     color: VColors.onSurface,
                   ),
                 ),
@@ -798,14 +798,14 @@ class _FormatButton extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           color: isDark ? VColors.surfaceContainerHighDark : VColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          borderRadius: BorderRadius.circular(VRadius.md),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
-              fontSize: FontSizes.bodyMd,
-              fontWeight: label == 'B' ? FontWeights.bold : FontWeights.regular,
+              fontSize: VFontSize.bodyMd,
+              fontWeight: label == 'B' ? VFontWeight.bold : VFontWeight.regular,
               fontStyle: label == 'I' ? FontStyle.italic : FontStyle.normal,
               color: isDark
                   ? VColors.onSurfaceVariantDark
@@ -832,7 +832,7 @@ class _Card extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

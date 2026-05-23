@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/notification_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class NotificationBell extends ConsumerStatefulWidget {
   final double size;
@@ -85,8 +85,8 @@ class _NotificationBellState extends ConsumerState<NotificationBell>
                   right: -widget.size * 0.25,
                   child: TweenAnimationBuilder<double>(
                     tween: Tween<double>(begin: 0.0, end: 1.0),
-                    duration: AnimDurations.normal,
-                    curve: AnimCurves.spring,
+                    duration: VAnimation.normal,
+                    curve: VAnimation.spring,
                     key: ValueKey(unread),
                     builder: (context, scale, child) {
                       return Transform.scale(scale: scale, child: child);

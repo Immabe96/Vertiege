@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
-import '../../utils/asset_image_decode.dart';
 import '../../utils/world_assets.dart';
+import '../shared/badge_asset_image.dart';
 
 IconData achievementIconData(String iconName) {
   return switch (iconName) {
@@ -108,14 +108,15 @@ class AchievementBadgeAvatar extends StatelessWidget {
     }
 
     // PNG badges are square with alpha; avoid circle fill + oval clip (shows as a halo).
+    final matte = Theme.of(context).colorScheme.surface;
+
     return SizedBox(
       width: size,
       height: size,
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-        cacheWidth: assetCachePx(context, size),
+      child: BadgeAssetImage(
+        imagePath: imagePath,
+        size: size,
+        darkMatteColor: matte,
         errorBuilder: (_, _, _) => Container(
           width: size,
           height: size,

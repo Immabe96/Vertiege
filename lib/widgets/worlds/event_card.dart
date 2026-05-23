@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../utils/date_format.dart';
@@ -24,7 +24,7 @@ class EventCard extends ConsumerWidget {
         : 'Date pending';
 
     return VSurfacePanel(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -35,15 +35,15 @@ class EventCard extends ConsumerWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: VColors.warning.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
                 child: const Icon(
                   Icons.event,
-                  size: IconSizes.md,
+                  size: VIconSize.md,
                   color: VColors.warning,
                 ),
               ),
-              const SizedBox(width: Spacing.md),
+              const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,8 +51,8 @@ class EventCard extends ConsumerWidget {
                     Text(
                       post.eventTitle ?? 'Event',
                       style: const TextStyle(
-                        fontSize: FontSizes.headlineMd,
-                        fontWeight: FontWeights.semiBold,
+                        fontSize: VFontSize.headlineMd,
+                        fontWeight: VFontWeight.semiBold,
                         color: VColors.onSurface,
                       ),
                     ),
@@ -60,7 +60,7 @@ class EventCard extends ConsumerWidget {
                     Text(
                       dateStr,
                       style: const TextStyle(
-                        fontSize: FontSizes.labelSm,
+                        fontSize: VFontSize.labelSm,
                         color: VColors.onSurfaceVariant,
                       ),
                     ),
@@ -70,25 +70,25 @@ class EventCard extends ConsumerWidget {
             ],
           ),
           if (post.content.isNotEmpty) ...[
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             Text(
               post.content,
               style: const TextStyle(
-                fontSize: FontSizes.bodyMd,
+                fontSize: VFontSize.bodyMd,
                 color: VColors.onSurfaceVariant,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           Row(
             children: [
               Expanded(
                 child: Text(
                   '$rsvpCount attending',
                   style: const TextStyle(
-                    fontSize: FontSizes.labelSm,
+                    fontSize: VFontSize.labelSm,
                     color: VColors.outline,
                   ),
                 ),
@@ -103,7 +103,7 @@ class EventCard extends ConsumerWidget {
                 },
                 icon: Icon(
                   hasRsvp ? Icons.event_available : Icons.event,
-                  size: IconSizes.sm,
+                  size: VIconSize.sm,
                 ),
                 label: Text(hasRsvp ? 'GOING' : 'ATTEND'),
                 style: FilledButton.styleFrom(

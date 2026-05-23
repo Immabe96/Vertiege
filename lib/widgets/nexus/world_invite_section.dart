@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import '../../ui/buttons/v_button.dart';
 
@@ -20,7 +20,7 @@ class WorldInviteSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md, vertical: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,29 +31,29 @@ class WorldInviteSection extends StatelessWidget {
                 height: 20,
                 decoration: BoxDecoration(
                         color: VColors.tertiary,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Text(
                 'WORLD INVITES',
                 style: TextStyle(
-                  fontSize: FontSizes.headlineMd,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.headlineMd,
+                  fontWeight: VFontWeight.semiBold,
                               color: VColors.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           ...invites.map((world) {
             final iconData = _iconForWorldType(world.type);
             final memberLabel = '${world.memberCount} members';
             return Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
               child: VSurfacePanel(
                 useBlur: false,
-                padding: const EdgeInsets.all(Spacing.md),
+                padding: const EdgeInsets.all(VSpacing.md),
                 child: Row(
                   children: [
                     Container(
@@ -61,15 +61,15 @@ class WorldInviteSection extends StatelessWidget {
                       height: 40,
                       decoration: BoxDecoration(
                         color: VColors.tertiary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                       child: Icon(
                         iconData,
-                        size: IconSizes.md,
+                        size: VIconSize.md,
                   color: VColors.tertiary,
                       ),
                     ),
-                    const SizedBox(width: Spacing.md),
+                    const SizedBox(width: VSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,8 +77,8 @@ class WorldInviteSection extends StatelessWidget {
                           Text(
                             world.name,
                             style: const TextStyle(
-                              fontSize: FontSizes.headlineMd,
-                              fontWeight: FontWeights.semiBold,
+                              fontSize: VFontSize.headlineMd,
+                              fontWeight: VFontWeight.semiBold,
                   color: VColors.onSurface,
                             ),
                             maxLines: 1,
@@ -88,7 +88,7 @@ class WorldInviteSection extends StatelessWidget {
                           Text(
                             memberLabel,
                             style: const TextStyle(
-                              fontSize: FontSizes.labelSm,
+                              fontSize: VFontSize.labelSm,
                               color: VColors.onSurfaceVariant,
                             ),
                           ),
@@ -103,7 +103,7 @@ class WorldInviteSection extends StatelessWidget {
                           onPressed: () => onAccept(world.id),
                           size: ButtonSize.small,
                         ),
-                        const SizedBox(width: Spacing.sm),
+                        const SizedBox(width: VSpacing.sm),
                         VButton(
                           label: 'Decline',
                           onPressed: () => onDecline(world.id),

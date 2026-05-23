@@ -12,6 +12,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
+import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../ui/icons/v_icons.dart';
@@ -185,7 +187,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               : chatState.roomsLoadError != null
                   ? _buildDmLoadError(theme, isDark, chatState.roomsLoadError!)
                   : chatState.isLoadingRooms
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const ScreenLoading.list()
                       : chatState.dmRooms.isEmpty
                           ? _buildEmptyDmState()
                           : _buildRoomList(
@@ -201,35 +203,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   Widget _buildWorldChats(List<World> joinedWorlds) {
     if (joinedWorlds.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.public_outlined,
-              size: 48,
-              color: VColors.onSurfaceVariant,
-            ),
-            const SizedBox(height: VSpacing.md),
-            const Text(
-              'No world chats yet',
-              style: TextStyle(fontWeight: VFontWeight.semiBold),
-            ),
-            const SizedBox(height: VSpacing.xs),
-            Text(
-              'Join a world to see its channels here.',
-              style: TextStyle(
-                color: VColors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-            FilledButton.icon(
-              onPressed: () => context.push('/explore'),
-              icon: const Icon(VIcons.globe),
-              label: const Text('Explore Worlds'),
-            ),
-          ],
-        ),
+      return AppEmptyState(
+        title: 'No world chats yet',
+        description: 'Join a world to see its channels here.',
+        icon: Icons.public_outlined,
+        actionLabel: 'Explore Worlds',
+        onAction: () => context.push('/explore'),
       );
     }
 
@@ -278,40 +257,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               const Divider(height: 1),
               Expanded(
                 child: channelLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const ScreenLoading.list()
                     : channelError != null
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.cloud_off,
-                                  size: 48,
-                                  color: VColors.onSurfaceVariant,
-                                ),
-                                const SizedBox(height: VSpacing.md),
-                                const Text(
-                                  'Failed to load channels',
-                                  style: TextStyle(
-                                      fontWeight: VFontWeight.semiBold),
-                                ),
-                                const SizedBox(height: VSpacing.xs),
-                                const Text(
-                                  'Tap to retry',
-                                  style: TextStyle(
-                                      color: VColors.onSurfaceVariant),
-                                ),
-                                const SizedBox(height: VSpacing.lg),
-                                OutlinedButton.icon(
-                                  onPressed: () => ref
-                                      .read(channelProvider.notifier)
-                                      .loadChannels(selectedWorld.id,
-                                          force: true),
-                                  icon: const Icon(Icons.refresh),
-                                  label: const Text('Retry'),
-                                ),
-                              ],
-                            ),
+                        ? AppErrorState(
+                            message: 'Failed to load channels',
+                            onRetry: () => ref
+                                .read(channelProvider.notifier)
+                                .loadChannels(selectedWorld.id, force: true),
                           )
                         : allChannels.isEmpty
                             ? _EmptyChannels(worldId: selectedWorld.id)
@@ -362,68 +314,24 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   Widget _buildDmLoadError(ThemeData theme, bool isDark, String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(VSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_off, size: 48, color: VColors.error),
-            const SizedBox(height: VSpacing.md),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-            FilledButton.icon(
-              onPressed: () {
-                final id = ref.read(residentProvider).resident?.id;
-                if (id != null) {
-                  ref.read(chatProvider.notifier).loadDmRooms(id);
-                }
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
+    return AppErrorState(
+      message: message,
+      onRetry: () {
+        final id = ref.read(residentProvider).resident?.id;
+        if (id != null) {
+          ref.read(chatProvider.notifier).loadDmRooms(id);
+        }
+      },
     );
   }
 
   Widget _buildEmptyDmState() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 48,
-            color: VColors.onSurfaceVariant,
-          ),
-          const SizedBox(height: VSpacing.md),
-          const Text(
-            'No direct messages yet',
-            style: TextStyle(fontWeight: VFontWeight.semiBold),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'Find residents and start a conversation.',
-            style: TextStyle(color: VColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: VSpacing.lg),
-          FilledButton.icon(
-            onPressed: () => context.push('/search'),
-            icon: const Icon(VIcons.search),
-            label: const Text('Find Residents'),
-          ),
-        ],
-      ),
+    return AppEmptyState(
+      title: 'No direct messages yet',
+      description: 'Find residents and start a conversation.',
+      icon: Icons.chat_bubble_outline,
+      actionLabel: 'Find Residents',
+      onAction: () => context.push('/search'),
     );
   }
 

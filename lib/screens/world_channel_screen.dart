@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -14,13 +16,18 @@ import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
+import '../utils/chat_new_since_visit.dart';
 import '../widgets/chat/chat_date_separator.dart';
+import '../widgets/chat/new_since_visit_divider.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
 import '../utils/date_format.dart';
 import '../utils/world_foundations.dart';
+import '../widgets/core/empty_state.dart';
+import '../utils/v_motion.dart';
+import '../widgets/core/screen_loading.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 
@@ -47,21 +54,35 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
 
   bool _showScrollFab = false;
   final Set<String> _animatedMessageIds = {};
+  DateTime? _visitDividerAnchor;
 
   @override
   void initState() {
     super.initState();
     final notifier = ref.read(chatProvider.notifier);
-    final resident = ref.read(residentProvider).resident;
+    _visitDividerAnchor =
+        ref.read(chatProvider).channelReads[widget.channelId];
     notifier.loadChannelMessages(widget.channelId, force: true);
     notifier.subscribeToChannel(widget.channelId);
-    if (resident != null) {
-      notifier.markChannelRead(
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final resident = ref.read(residentProvider).resident;
+      if (resident == null) return;
+      if (!ref.read(chatProvider).channelReads.containsKey(widget.channelId)) {
+        await notifier.loadChannelReads(resident.id);
+        if (mounted && _visitDividerAnchor == null) {
+          setState(() {
+            _visitDividerAnchor =
+                ref.read(chatProvider).channelReads[widget.channelId];
+          });
+        }
+      }
+      if (!mounted) return;
+      await notifier.markChannelRead(
         channelId: widget.channelId,
         residentId: resident.id,
       );
-    }
-    _scrollController.addListener(_onScroll);
+    });
   }
 
   @override
@@ -88,8 +109,8 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: VAnimation.normal,
-          curve: VAnimation.standard,
+          duration: context.motionDuration(VAnimation.normal),
+          curve: context.motionCurve,
         );
       }
     });
@@ -138,6 +159,12 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final pinnedMessages = messages.where((m) => m.isPinned).toList();
     final unpinnedMessages = messages.where((m) => !m.isPinned).toList();
     final displayItems = buildChatDisplayItems(unpinnedMessages);
+    final newSinceDividerIndex = newSinceVisitDividerDisplayIndex(
+      messages: unpinnedMessages,
+      lastVisitAt: _visitDividerAnchor,
+    );
+    final pinnedHeaderCount = pinnedMessages.isNotEmpty ? 1 : 0;
+    final hasNewSinceDivider = newSinceDividerIndex != null;
 
     final sovereignId = ref
         .watch(worldProvider)
@@ -168,7 +195,16 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
         backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
             .withValues(alpha: 0.86),
         elevation: 0,
-        title: Column(
+        leading: Semantics(
+          label: 'Back to world',
+          child: BackButton(
+            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+          ),
+        ),
+        title: Semantics(
+          header: true,
+          label: '${widget.channelName} channel, $activeMembers members',
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -189,13 +225,14 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
               ),
             ),
           ],
+          ),
         ),
       ),
       body: Column(
         children: [
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const ScreenLoading.list()
                 : messages.isEmpty
                 ? _buildEmpty(channel)
                 : Stack(
@@ -208,9 +245,10 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                         ),
                         itemCount:
                             displayItems.length +
-                            (pinnedMessages.isNotEmpty ? 1 : 0),
+                            pinnedHeaderCount +
+                            (hasNewSinceDivider ? 1 : 0),
                         itemBuilder: (context, index) {
-                          if (pinnedMessages.isNotEmpty && index == 0) {
+                          if (pinnedHeaderCount > 0 && index == 0) {
                             return _PinnedMessagesPanel(
                               pinnedMessages: pinnedMessages,
                               residentId: resident?.id ?? '',
@@ -228,10 +266,16 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                               },
                             );
                           }
-                          final itemIndex = pinnedMessages.isNotEmpty
-                              ? index - 1
-                              : index;
-                          final item = displayItems[itemIndex];
+                          var listIndex = index - pinnedHeaderCount;
+                          if (hasNewSinceDivider &&
+                              listIndex == newSinceDividerIndex) {
+                            return const NewSinceVisitDivider();
+                          }
+                          if (hasNewSinceDivider &&
+                              listIndex > newSinceDividerIndex) {
+                            listIndex -= 1;
+                          }
+                          final item = displayItems[listIndex];
                           return _buildItem(
                             item,
                             resident?.id ?? '',
@@ -306,25 +350,11 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       );
     }
 
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.chat, size: 48, color: VColors.onSurfaceVariant),
-          const SizedBox(height: VSpacing.md),
-          Text(
-            'No messages yet',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: VFontWeight.semiBold),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'Be the first to say something in #${widget.channelName}',
-            style: TextStyle(color: VColors.onSurfaceVariant),
-          ),
-        ],
-      ),
+    return AppEmptyState(
+      icon: Icons.chat_bubble_outline,
+      title: 'No messages yet',
+      description:
+          'Be the first to say something in #${widget.channelName}',
     );
   }
 

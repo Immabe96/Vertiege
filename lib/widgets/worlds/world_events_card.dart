@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../state/event_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../services/permission_service.dart';
@@ -40,28 +40,28 @@ class WorldEventsCard extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.md,
-            vertical: Spacing.xs,
+            horizontal: VSpacing.md,
+            vertical: VSpacing.xs,
           ),
           child: Row(
             children: [
               Icon(
                 Icons.event_note,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: VColors.primary,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Text(
                 'Upcoming Events',
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeights.bold,
+                  fontWeight: VFontWeight.bold,
                 ),
               ),
               const Spacer(),
               if (canCreate)
                 TextButton.icon(
                   onPressed: () => _showCreateEvent(context, ref),
-                  icon: const Icon(VIcons.plus, size: IconSizes.xs),
+                  icon: const Icon(VIcons.plus, size: VIconSize.xs),
                   label: const Text('Create'),
                 ),
             ],
@@ -70,8 +70,8 @@ class WorldEventsCard extends ConsumerWidget {
         if (events.isEmpty)
           Padding(
             padding: const EdgeInsets.only(
-              left: Spacing.md,
-              bottom: Spacing.xs,
+              left: VSpacing.md,
+              bottom: VSpacing.xs,
             ),
             child: Text(
               'No upcoming events',
@@ -86,7 +86,7 @@ class WorldEventsCard extends ConsumerWidget {
               dense: true,
               leading: Icon(
                 isRsvp ? Icons.event_available : Icons.event,
-                size: IconSizes.md,
+                size: VIconSize.md,
                 color: isRsvp ? VColors.primary : cs.onSurfaceVariant,
               ),
               title: Text(event.title, style: theme.textTheme.bodyMedium),

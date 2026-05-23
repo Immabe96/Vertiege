@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'empty_state.dart';
-import 'loading_state.dart';
+import 'screen_loading.dart';
 
 class SafeAsyncBuilder<T> extends StatelessWidget {
   final bool isLoading;
@@ -34,7 +34,7 @@ class SafeAsyncBuilder<T> extends StatelessWidget {
     }
 
     if (isLoading && (!showDataWhileLoading || data == null)) {
-      return loadingWidget ?? const VLoadingList(itemCount: 6);
+      return loadingWidget ?? const ScreenLoading.list();
     }
 
     if (data != null) {

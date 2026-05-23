@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../config/cosmetics.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class NameBanner extends StatelessWidget {
   final String? profession;
@@ -17,20 +17,20 @@ class NameBanner extends StatelessWidget {
       if (cosmetic != null) {
         return Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.lg,
-            vertical: Spacing.sm,
+            horizontal: VSpacing.lg,
+            vertical: VSpacing.sm,
           ),
           decoration: BoxDecoration(
             color: cosmetic.color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+            borderRadius: BorderRadius.circular(VRadius.md),
             border: Border.all(color: cosmetic.color.withValues(alpha: 0.3)),
           ),
           child: Text(
             name,
             style: TextStyle(
               color: cosmetic.color,
-              fontWeight: FontWeights.bold,
-              fontSize: FontSizes.headingCard,
+              fontWeight: VFontWeight.bold,
+              fontSize: VFontSize.headlineMd,
             ),
           ),
         );

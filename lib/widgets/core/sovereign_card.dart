@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'glow_border.dart';
 import 'glass_panel.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 enum CardTier { apex, elite, hustler }
 
@@ -37,23 +37,31 @@ class SovereignCard extends StatelessWidget {
     final content = glass
         ? VSurfacePanel(
             useBlur: useBlur,
-            padding: const EdgeInsets.all(Spacing.md),
+            padding: const EdgeInsets.all(VSpacing.md),
+            shadows: const [],
             child: child,
           )
-        : Padding(padding: const EdgeInsets.all(Spacing.md), child: child);
+        : Padding(padding: const EdgeInsets.all(VSpacing.md), child: child);
 
-    final wrapped = GlowBorder(
-      tier: _toGlowTier(),
-      padding: EdgeInsets.zero,
-      child: content,
-    );
+    final wrapped = glass
+        ? GlowBorder(
+            tier: _toGlowTier(),
+            borderOnly: true,
+            padding: EdgeInsets.zero,
+            child: content,
+          )
+        : GlowBorder(
+            tier: _toGlowTier(),
+            padding: EdgeInsets.zero,
+            child: content,
+          );
 
     if (onTap != null) {
       return Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          borderRadius: BorderRadius.circular(VRadius.xl),
           child: wrapped,
         ),
       );

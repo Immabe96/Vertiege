@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../state/league_provider.dart';
 import '../../../state/resident_provider.dart';
 import '../../../services/league_service.dart';
 import '../../../theme/v_colors.dart';
-import '../../../theme/design_system.dart';
+import '../../../theme/v_tokens.dart';
 import '../../../ui/buttons/v_button.dart';
 
 class LeagueCard extends ConsumerWidget {
@@ -29,26 +29,26 @@ class LeagueCard extends ConsumerWidget {
             children: [
               const Icon(
                 Icons.emoji_events,
-                size: IconSizes.md,
+                size: VIconSize.md,
                 color: VColors.secondary,
               ),
-              const SizedBox(width: Spacing.xs),
+              const SizedBox(width: VSpacing.xs),
               const Text(
                 'LEAGUES',
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.semiBold,
                   color: VColors.onSurfaceVariant,
-                  letterSpacing: LetterSpacing.label,
+                  letterSpacing: 0,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           const Text(
             'Loading...',
             style: TextStyle(
-              fontSize: FontSizes.bodyMd,
+              fontSize: VFontSize.bodyMd,
               color: VColors.outline,
             ),
           ),
@@ -64,27 +64,27 @@ class LeagueCard extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Icon(tierIcon, size: IconSizes.md, color: tierColor),
-            const SizedBox(width: Spacing.xs),
+            Icon(tierIcon, size: VIconSize.md, color: tierColor),
+            const SizedBox(width: VSpacing.xs),
             const Text(
               'LEAGUES',
               style: TextStyle(
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.labelSm,
+                fontWeight: VFontWeight.semiBold,
                 color: VColors.onSurfaceVariant,
-                letterSpacing: LetterSpacing.label,
+                letterSpacing: 0,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         Row(
           children: [
             Text(
               userLeague.tier.toUpperCase(),
               style: TextStyle(
-                fontSize: FontSizes.headlineSm,
-                fontWeight: FontWeights.bold,
+                fontSize: VFontSize.headlineSm,
+                fontWeight: VFontWeight.bold,
                 color: tierColor,
               ),
             ),
@@ -92,22 +92,22 @@ class LeagueCard extends ConsumerWidget {
             Text(
               '#${userLeague.rank}',
               style: TextStyle(
-                fontSize: FontSizes.headlineMd,
-                fontWeight: FontWeights.bold,
+                fontSize: VFontSize.headlineMd,
+                fontWeight: VFontWeight.bold,
                 color: VColors.onSurface,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.xs),
+        const SizedBox(height: VSpacing.xs),
         Text(
           '${userLeague.weeklyXp} XP this week',
           style: const TextStyle(
-            fontSize: FontSizes.bodySm,
+            fontSize: VFontSize.bodySm,
             color: VColors.outline,
           ),
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         VButton(
           label: 'View Standings',
           onPressed: () => context.push('/leagues'),

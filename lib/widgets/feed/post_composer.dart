@@ -8,7 +8,7 @@ import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
@@ -294,28 +294,28 @@ class _PostComposerState extends ConsumerState<PostComposer>
             Center(
               child: Container(
                 margin: const EdgeInsets.only(
-                  top: Spacing.sm,
-                  bottom: Spacing.xs,
+                  top: VSpacing.sm,
+                  bottom: VSpacing.xs,
                 ),
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
                   color: (isDark ? VColors.onSurfaceVariantDark : VColors.outline).withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(RadiusTokens.full),
+                  borderRadius: BorderRadius.circular(VRadius.pill),
                 ),
               ),
             ),
 
             // ── Header ────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: Row(
                 children: [
                   Text(
                     'Create Post',
                     style: TextStyle(
-                      fontSize: FontSizes.headingCard,
-                      fontWeight: FontWeights.bold,
+                      fontSize: VFontSize.headlineMd,
+                      fontWeight: VFontWeight.bold,
                       color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
                   ),
@@ -323,17 +323,17 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   // Draft indicator
                   if (_hasDraft)
                     Padding(
-                      padding: const EdgeInsets.only(right: Spacing.sm),
+                      padding: const EdgeInsets.only(right: VSpacing.sm),
                       child: TextButton.icon(
                         onPressed: _discardDraft,
                         icon: const Icon(
                           Icons.delete_outline,
-                          size: IconSizes.sm,
+                          size: VIconSize.sm,
                         ),
                         label: const Text(
                           'Discard',
                           style: TextStyle(
-                            fontSize: FontSizes.caption,
+                            fontSize: VFontSize.labelMd,
                             color: VColors.error,
                           ),
                         ),
@@ -342,15 +342,15 @@ class _PostComposerState extends ConsumerState<PostComposer>
                   // Close
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(VIcons.x, size: IconSizes.md),
+                    icon: const Icon(VIcons.x, size: VIconSize.md),
                     color: VColors.outline,
-                    splashRadius: TouchTargets.iconButton / 2,
+                    splashRadius: VTouchTarget.iconButton / 2,
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
 
             // ── World selector chips ─────────────────────
             if (worlds.length > 1)
@@ -358,9 +358,9 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 height: 36,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
                   itemCount: worlds.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: Spacing.sm),
+                  separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
                   itemBuilder: (context, i) {
                     final world = worlds[i];
                     final selected =
@@ -370,8 +370,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                       onTap: () => setState(() => _selectedWorldId = world.id),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: Spacing.md,
-                          vertical: Spacing.xs,
+                          horizontal: VSpacing.md,
+                          vertical: VSpacing.xs,
                         ),
                         decoration: BoxDecoration(
                           color: selected
@@ -380,7 +380,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                                 )
                               : VColors.surfaceBright,
                           borderRadius: BorderRadius.circular(
-                            RadiusTokens.pill,
+                            VRadius.pill,
                           ),
                           border: Border.all(
                             color: selected
@@ -395,19 +395,19 @@ class _PostComposerState extends ConsumerState<PostComposer>
                           children: [
                             Icon(
                               Icons.public,
-                              size: IconSizes.xs,
+                              size: VIconSize.xs,
                               color: selected
                                   ? VColors.primary
                                   : VColors.onSurfaceVariant,
                             ),
-                            const SizedBox(width: Spacing.xs),
+                            const SizedBox(width: VSpacing.xs),
                             Text(
                               world.name,
                               style: TextStyle(
-                                fontSize: FontSizes.caption,
+                                fontSize: VFontSize.labelMd,
                                 fontWeight: selected
-                                    ? FontWeights.bold
-                                    : FontWeights.regular,
+                                    ? VFontWeight.bold
+                                    : VFontWeight.regular,
                                 color: selected
                                     ? VColors.primary
                                     : VColors.onSurfaceVariant,
@@ -421,11 +421,11 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 ),
               ),
 
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
 
             // ── Main text area ────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
@@ -442,16 +442,16 @@ class _PostComposerState extends ConsumerState<PostComposer>
                       return null;
                     },
                 style: const TextStyle(
-                  fontSize: FontSizes.body,
-                  fontWeight: FontWeights.regular,
+                  fontSize: VFontSize.bodyMd,
+                  fontWeight: VFontWeight.regular,
                   color: VColors.onSurface,
-                  height: LineHeight.body,
+                  height: VLineHeight.body,
                 ),
                 decoration: InputDecoration(
                   hintText: "What's happening in your world?",
                   hintStyle: const TextStyle(
-                    fontSize: FontSizes.body,
-                    fontWeight: FontWeights.regular,
+                    fontSize: VFontSize.bodyMd,
+                    fontWeight: VFontWeight.regular,
                     color: VColors.outline,
                   ),
                   border: InputBorder.none,
@@ -468,13 +468,13 @@ class _PostComposerState extends ConsumerState<PostComposer>
             if (_imageUri != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  Spacing.lg,
+                  VSpacing.lg,
                   0,
-                  Spacing.lg,
-                  Spacing.sm,
+                  VSpacing.lg,
+                  VSpacing.sm,
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(RadiusTokens.card),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
                   child: Stack(
                     children: [
                       _ImagePreview(
@@ -483,20 +483,20 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         width: double.infinity,
                       ),
                       Positioned(
-                        top: Spacing.sm,
-                        right: Spacing.sm,
+                        top: VSpacing.sm,
+                        right: VSpacing.sm,
                         child: GestureDetector(
                           onTap: () => setState(() => _imageUri = null),
                           child: Container(
-                            width: TouchTargets.iconButton,
-                            height: TouchTargets.iconButton,
+                            width: VTouchTarget.iconButton,
+                            height: VTouchTarget.iconButton,
                             decoration: BoxDecoration(
                               color: VColors.surface.withValues(alpha: 0.8),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.close,
-                              size: IconSizes.md,
+                              size: VIconSize.md,
                               color: VColors.onSurface,
                             ),
                           ),
@@ -507,11 +507,11 @@ class _PostComposerState extends ConsumerState<PostComposer>
                 ),
               ),
 
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
 
             // ── Bottom toolbar ────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: Row(
                 children: [
                   // ── Image attach ──────────────────────
@@ -519,7 +519,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                     onImageSelected: (uri) => setState(() => _imageUri = uri),
                   ),
 
-                  const SizedBox(width: Spacing.xs),
+                  const SizedBox(width: VSpacing.xs),
 
                   // ── Save draft ────────────────────────
                   _CompactTool(
@@ -557,8 +557,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
                   // ── Character counter ─────────────────
                   SizedBox(
-                    width: TouchTargets.minimum,
-                    height: TouchTargets.minimum,
+                    width: VTouchTarget.minimum,
+                    height: VTouchTarget.minimum,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -571,8 +571,8 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         Text(
                           '${_maxChars - charLength}',
                           style: TextStyle(
-                            fontSize: FontSizes.micro,
-                            fontWeight: FontWeights.bold,
+                            fontSize: VFontSize.labelSm,
+                            fontWeight: VFontWeight.bold,
                             color: charColor,
                           ),
                         ),
@@ -580,7 +580,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                     ),
                   ),
 
-                  const SizedBox(width: Spacing.sm),
+                  const SizedBox(width: VSpacing.sm),
 
                   // ── Send button ────────────────────────
                   ScaleTransition(
@@ -591,7 +591,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                           ? null
                           : _submit,
                       child: AnimatedContainer(
-                        duration: AnimDurations.fast,
+                        duration: VAnimation.fast,
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
@@ -602,7 +602,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
                         ),
                         child: Icon(
                           _sent ? Icons.check : Icons.arrow_upward,
-                          size: IconSizes.md,
+                          size: VIconSize.md,
                           color: charLength > 0
                               ? VColors.onPrimary
                               : VColors.outline,
@@ -614,7 +614,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
               ),
             ),
 
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
           ],
         ),
       ),
@@ -644,8 +644,8 @@ class _CompactTool extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: TouchTargets.iconButton,
-          height: TouchTargets.iconButton,
+          width: VTouchTarget.iconButton,
+          height: VTouchTarget.iconButton,
           decoration: BoxDecoration(
             color: active
                 ? VColors.primary.withValues(alpha: 0.16)
@@ -654,7 +654,7 @@ class _CompactTool extends StatelessWidget {
           ),
           child: Icon(
             icon,
-            size: IconSizes.md,
+            size: VIconSize.md,
             color: active ? VColors.primary : VColors.onSurfaceVariant,
           ),
         ),

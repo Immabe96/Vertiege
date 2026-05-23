@@ -2,8 +2,9 @@
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/design_system.dart';
-import 'package:vertiege/theme/colors.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_colors.dart';
+import '../theme/v_tokens.dart';
 import '../config/tiers.dart';
 import '../models/channel.dart';
 import '../state/world_provider.dart';
@@ -13,8 +14,8 @@ import '../state/chat_provider.dart';
 import '../widgets/worlds/world_access_guard.dart';
 import '../widgets/worlds/world_channel_list.dart';
 
-import '../widgets/worlds/world_banner.dart';
 import '../widgets/worlds/world_member_row.dart';
+import '../widgets/worlds/world_hero_banner.dart';
 
 import '../widgets/worlds/world_feed_tab.dart';
 import '../widgets/v_section_list.dart';
@@ -26,10 +27,11 @@ import '../services/feature_flags.dart';
 import '../state/event_provider.dart';
 import '../utils/world_foundations.dart';
 import '../utils/navigation.dart';
+import '../utils/v_motion.dart';
 
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/error_banner.dart';
+import '../widgets/core/screen_loading.dart';
 
 import '../state/post_provider.dart';
 import '../models/resident.dart';
@@ -162,6 +164,21 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (_statsAnimated) return;
     _statsAnimated = true;
 
+    if (!mounted || !context.motionEnabled) {
+      final world = ref.read(worldProvider).worlds[widget.worldId];
+      final posts = ref
+          .read(postProvider.notifier)
+          .getPostsByWorld(widget.worldId);
+      final events =
+          ref.read(eventProvider).eventsByWorld[widget.worldId]?.length ?? 0;
+      setState(() {
+        _displayedMembers = world?.memberCount ?? 0;
+        _displayedPosts = posts.length;
+        _displayedEvents = events;
+      });
+      return;
+    }
+
     final world = ref.read(worldProvider).worlds[widget.worldId];
     final posts = ref
         .read(postProvider.notifier)
@@ -194,13 +211,23 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     super.didChangeDependencies();
     if (_appliedPostQuery) return;
     _appliedPostQuery = true;
-    final postId = GoRouterState.of(context).uri.queryParameters['post'];
+    final query = GoRouterState.of(context).uri.queryParameters;
+    final postId = query['post'] ?? query['highlight'];
     if (postId != null && postId.isNotEmpty) {
       _highlightPostId = postId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _tabController?.animateTo(0);
+        final duration = context.motionDuration(VAnimation.normal);
+        _tabController?.animateTo(0, duration: duration);
       });
     }
+  }
+
+  void _onHighlightPostMissing() {
+    if (!mounted) return;
+    setState(() => _highlightPostId = null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('That post is no longer available.')),
+    );
   }
 
   @override
@@ -341,42 +368,28 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
     // â”€â”€ Loading state â”€â”€
     if (worldState.isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('World')),
-        body: const Center(child: CircularProgressIndicator()),
+      return const VHubPage(
+        title: 'World',
+        showBack: true,
+        body: ScreenLoading.detail(),
       );
     }
 
-    // â”€â”€ Error state â”€â”€
     if (_hasError && world == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('World')),
-        body: ListView(
-          padding: const EdgeInsets.all(VSpacing.md),
-          children: [
-            SovereignErrorBanner(
-              message: _errorMessage ?? 'Failed to load world',
-              onRetry: _retryLoad,
-            ),
-            const SizedBox(height: VSpacing.md),
-            AppEmptyState(
-              title: 'Could not load this world',
-              description:
-                  'Check your connection and try again. If this keeps happening, the world may have been removed.',
-              icon: Icons.public_off,
-              variant: EmptyStateVariant.error,
-              actionLabel: 'Retry',
-              onAction: _retryLoad,
-            ),
-          ],
+      return VHubPage(
+        title: 'World',
+        showBack: true,
+        body: AppErrorState(
+          message: _errorMessage ?? 'Failed to load world',
+          onRetry: _retryLoad,
         ),
       );
     }
 
-    // â”€â”€ World not found â”€â”€
     if (world == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('World')),
+      return VHubPage(
+        title: 'World',
+        showBack: true,
         body: AppEmptyState(
           title: 'World not found',
           description: 'This world may have been removed.',
@@ -427,259 +440,27 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
           },
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              // â”€â”€ Hero â€” Reddit-style collapsible header (pull to stretch) â”€â”€
-              SliverAppBar(
+              WorldHeroBanner(
+                worldId: widget.worldId,
+                world: world,
                 expandedHeight: heroHeight,
-                pinned: true,
-                stretch: true,
-                backgroundColor:
-                    isDark ? VColors.surfaceDark : VColors.surface,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () =>
-                      safeBack(context, fallback: '/explore'),
-                ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.share_outlined, color: Colors.white),
-                    tooltip: 'Share world',
-                    onPressed: () => _showWorldShareSheet(world),
-                  ),
-                  if (onSettings != null)
-                    IconButton(
-                      icon: const Icon(Icons.settings, color: Colors.white),
-                      tooltip: 'World settings',
-                      onPressed: onSettings,
-                    ),
-                ],
-                flexibleSpace: FlexibleSpaceBar(
-                  stretchModes: const [
-                    StretchMode.zoomBackground,
-                    StretchMode.blurBackground,
-                  ],
-                  background: Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: prestigeTierColor.withValues(alpha: 0.25),
-                        width: 1,
-                      ),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: prestigeTierColor.withValues(alpha: 0.08),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      // Banner image
-                      SizedBox(
-                        height: heroHeight,
-                        width: double.infinity,
-                        child: Hero(
-                          tag: 'world-icon-${widget.worldId}',
-                          child: WorldBanner(
-                            worldId: world.id,
-                            assetKey: world.assetKey,
-                            width: double.infinity,
-                            height: heroHeight,
-                            worldType: world.type,
-                            prestige: world.prestige,
-                          ),
-                        ),
-                      ),
-                      // Scrim so title/description stay readable on any banner
-                      Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withValues(alpha: 0.15),
-                                Colors.black.withValues(alpha: 0.55),
-                                Colors.black.withValues(alpha: 0.82),
-                              ],
-                              stops: const [0.35, 0.72, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Content overlay at bottom
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(VSpacing.xl),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Tier badge â€” colored by prestige tier
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: VSpacing.md,
-                                  vertical: VSpacing.xs,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: prestigeTierColor.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    VRadius.md,
-                                  ),
-                                  border: Border.all(
-                                    color: prestigeTierColor.withValues(
-                                      alpha: 0.25,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  world.requiredProfession != null
-                                      ? tierLabel.toUpperCase()
-                                      : 'TIER $tierLabel'.toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: VFontSize.labelMd,
-                                    fontWeight: VFontWeight.semiBold,
-                                    color: prestigeTierColor,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: VSpacing.sm),
-                              // World name + sovereign crown
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      world.name,
-                                      style: const TextStyle(
-                                        fontSize: VFontSize.headlineLg,
-                                        fontWeight: VFontWeight.bold,
-                                        color: Colors.white,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black45,
-                                            blurRadius: 8,
-                                          ),
-                                        ],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: VSpacing.sm),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: VSpacing.sm,
-                                      vertical: VSpacing.xs,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: VColors.tertiary,
-                                      borderRadius: BorderRadius.circular(
-                                        VRadius.pill,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: VColors.tertiary.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                          blurRadius: 8,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                          Icon(
-                                            Icons.shield,
-                                            size: 12,
-                                            color: VColors.onTertiary,
-                                          ),
-                                          SizedBox(width: 3),
-                                          Text(
-                                            'SOVEREIGN',
-                                            style: TextStyle(
-                                              fontSize: VFontSize.labelMd,
-                                              fontWeight: VFontWeight.bold,
-                                              color: VColors.onTertiary,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (world.description.trim().isNotEmpty) ...[
-                                const SizedBox(height: VSpacing.xs),
-                                Text(
-                                  world.description.trim(),
-                                  style: TextStyle(
-                                    fontSize: VFontSize.bodyMd,
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    height: 1.3,
-                                    shadows: const [
-                                      Shadow(
-                                        color: Colors.black38,
-                                        blurRadius: 6,
-                                      ),
-                                    ],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                              const SizedBox(height: VSpacing.lg),
-                              // Action buttons â€” colored by prestige tier
-                              Row(
-                                children: [
-                                  ScaleTransition(
-                                    scale: scaleAnimation,
-                                    child: AnimatedBuilder(
-                                      animation: _joinAnimController,
-                                      builder: (context, _) {
-                                        // Determine foreground for tier button
-                                        final btnBg = isJoined
-                                            ? VColors.error
-                                            : prestigeTierColor;
-                                        final btnFg = isJoined
-                                            ? VColors.onError
-                                            : VColors.onPrimary;
-                                        return FilledButton(
-                                          key: _joinButtonKey,
-                                          onPressed: _handleJoin,
-                                          style: FilledButton.styleFrom(
-                                            backgroundColor: btnBg,
-                                            foregroundColor: btnFg,
-                                          ),
-                                          child: Text(
-                                            isJoined
-                                                ? 'LEAVE WORLD'
-                                                : 'JOIN WORLD',
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ),
+                isDark: isDark,
+                prestigeTierColor: prestigeTierColor,
+                tierLabel: tierLabel,
+                isJoined: isJoined,
+                innerBoxIsScrolled: innerBoxIsScrolled,
+                scaleAnimation: scaleAnimation,
+                joinAnimController: _joinAnimController,
+                joinButtonKey: _joinButtonKey,
+                onBack: () => safeBack(context, fallback: '/explore'),
+                onShare: () => _showWorldShareSheet(world),
+                onSettings: onSettings,
+                onJoin: _handleJoin,
               ),
 
               SliverToBoxAdapter(
                 child: FadeIn(
-                  delayMs: 60,
+                  delayMs: context.motionEnabled ? 60 : 0,
                   child: _WorldStatsStrip(
                     members: _displayedMembers,
                     posts: _displayedPosts,
@@ -719,6 +500,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     cs: cs,
                     primaryScroll: true,
                     highlightPostId: _highlightPostId,
+                    isJoined: isJoined,
+                    onJoin: _handleJoin,
+                    onHighlightMissing: _onHighlightPostMissing,
                   ),
                 ),
                 _WorldDetailTabScroll(
@@ -737,12 +521,16 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 ),
                 _WorldDetailTabScroll(
                   child: (!_membersLoading && _members.isEmpty)
-                      ? const AppEmptyState(
+                      ? AppEmptyState(
                           title: 'No residents yet',
-                          description:
-                              'No residents have joined this world yet.',
+                          description: isJoined
+                              ? 'Invite people who match this world\'s culture.'
+                              : 'Join to meet members and join the conversation.',
                           icon: Icons.people_outline,
-                          variant: EmptyStateVariant.default_,
+                          actionLabel: isJoined ? 'Invite residents' : 'Join world',
+                          onAction: isJoined
+                              ? () => context.push('/search')
+                              : _handleJoin,
                         )
                       : WorldDetailMembers(
                           worldId: widget.worldId,
@@ -882,7 +670,10 @@ class _StatChip extends StatelessWidget {
     return FCard.raw(
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
+        child: Semantics(
+          button: onTap != null,
+          label: onTap != null ? '$label, $value' : null,
+          child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(VRadius.lg),
           child: Padding(
@@ -914,6 +705,7 @@ class _StatChip extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );
@@ -1054,19 +846,9 @@ class _ManageTab extends ConsumerWidget {
         VSectionTile(
           icon: Icons.storefront,
           label: 'Marketplace',
-          onTap: () => context.push('/explore/$worldId/marketplace'),
-        ),
-      if (FeatureFlags.polls)
-        VSectionTile(
-          icon: Icons.how_to_vote,
-          label: 'Polls',
-          onTap: () => context.push('/explore/$worldId/polls'),
-        ),
-      if (FeatureFlags.challenges)
-        VSectionTile(
-          icon: Icons.emoji_events,
-          label: 'World challenges',
-          onTap: () => context.push('/explore/$worldId/challenges'),
+          onTap: () => context.push(
+            '/explore/$worldId/marketplace?member=${isJoined ? 'true' : 'false'}',
+          ),
         ),
     ];
 
@@ -1088,7 +870,7 @@ class _ManageTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        VSectionList(title: 'Economy & governance', children: links),
+        VSectionList(title: 'Core economy', children: links),
         const SizedBox(height: VSpacing.md),
         FCard.raw(
           child: Padding(
@@ -1099,7 +881,7 @@ class _ManageTab extends ConsumerWidget {
                 const SizedBox(width: VSpacing.sm),
                 Expanded(
                   child: Text(
-                    'Prestige ${world.prestige} Â· unlocks economy features',
+                    'Prestige ${world.prestige} · unlocks economy features',
                     style: TextStyle(
                       fontSize: VFontSize.bodySm,
                       color: isDark
@@ -1147,6 +929,20 @@ class _MoreTab extends ConsumerWidget {
     final settingsTap = onSettings; // local capture for null promotion
 
     final foundation = foundationForWorld(world);
+    final economyMoreLinks = <FTileMixin>[
+      if (isJoined && FeatureFlags.polls)
+        VSectionTile(
+          icon: Icons.how_to_vote,
+          label: 'Polls',
+          onTap: () => context.push('/explore/$worldId/polls'),
+        ),
+      if (isJoined && FeatureFlags.challenges)
+        VSectionTile(
+          icon: Icons.emoji_events,
+          label: 'World challenges',
+          onTap: () => context.push('/explore/$worldId/challenges'),
+        ),
+    ];
     final quickLinks = <FTileMixin>[
       VSectionTile(
         icon: Icons.share_outlined,
@@ -1220,6 +1016,13 @@ class _MoreTab extends ConsumerWidget {
               ),
             ),
           ),
+          if (economyMoreLinks.isNotEmpty) ...[
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Economy & activities',
+              children: economyMoreLinks,
+            ),
+          ],
           const SizedBox(height: VSpacing.md),
           VSectionList(title: 'Social & links', children: quickLinks),
           const SizedBox(height: VSpacing.md),

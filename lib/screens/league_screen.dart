@@ -10,6 +10,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/media/v_avatar.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/screen_loading.dart';
 
 class LeagueScreen extends ConsumerStatefulWidget {
   const LeagueScreen({super.key});
@@ -71,22 +73,11 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         ),
       ],
       body: leagueState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const ScreenLoading.list()
           : leagueState.error != null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48, color: VColors.error),
-                      const SizedBox(height: VSpacing.md),
-                      Text(leagueState.error!),
-                      const SizedBox(height: VSpacing.md),
-                      ElevatedButton(
-                        onPressed: () => ref.read(leagueProvider.notifier).loadLeague(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+              ? AppErrorState(
+                  message: leagueState.error,
+                  onRetry: () => ref.read(leagueProvider.notifier).loadLeague(),
                 )
               : RefreshIndicator(
                   onRefresh: () async {

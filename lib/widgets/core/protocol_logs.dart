@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import 'glass_panel.dart';
 
 class ProtocolLogs extends StatelessWidget {
@@ -10,7 +10,7 @@ class ProtocolLogs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return VSurfacePanel(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -21,29 +21,29 @@ class ProtocolLogs extends StatelessWidget {
                 height: 20,
                 decoration: BoxDecoration(
                   color: VColors.error,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Text(
                 'PROTOCOL LOGS',
                 style: TextStyle(
-                  fontSize: FontSizes.headlineMd,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.headlineMd,
+                  fontWeight: VFontWeight.semiBold,
                   color: VColors.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           ...logs.map(
             (log) => Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.xs),
+              padding: const EdgeInsets.only(bottom: VSpacing.xs),
               child: Text(
                 log,
                 style: const TextStyle(
                   fontFamily: 'JetBrains Mono',
-                  fontSize: FontSizes.labelSm,
+                  fontSize: VFontSize.labelSm,
                   color: VColors.onSurfaceVariant,
                   height: 1.6,
                 ),

@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../theme/v_colors.dart';
 import '../../models/world.dart';
 import '../../ui/icons/v_icons.dart';
@@ -48,12 +48,12 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
 
     return Container(
       margin: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: VColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+        borderRadius: BorderRadius.circular(VRadius.md),
         border: Border.all(color: VColors.glassBorder),
       ),
       clipBehavior: Clip.antiAlias,
@@ -64,15 +64,15 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
           // Description
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              Spacing.md,
-              Spacing.md,
-              Spacing.md,
-              Spacing.sm,
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.sm,
             ),
             child: Text(
               world.description,
               style: theme.textTheme.bodyLarge?.copyWith(
-                height: LineHeight.body,
+                height: VLineHeight.body,
                 color: cs.onSurface,
               ),
             ),
@@ -80,11 +80,11 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
 
           // Sovereign + Prestige row
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             child: Row(
               children: [
-                Icon(VIcons.sparkles, size: IconSizes.sm, color: cs.primary),
-                const SizedBox(width: Spacing.xs),
+                Icon(VIcons.sparkles, size: VIconSize.sm, color: cs.primary),
+                const SizedBox(width: VSpacing.xs),
                 Expanded(
                   child: Text(
                     'Sovereign: ${world.sovereignName}',
@@ -93,19 +93,19 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
                     ),
                   ),
                 ),
-                Icon(VIcons.sparkles, size: IconSizes.sm, color: VColors.tertiary),
-                const SizedBox(width: Spacing.xs),
+                Icon(VIcons.sparkles, size: VIconSize.sm, color: VColors.tertiary),
+                const SizedBox(width: VSpacing.xs),
                 Text(
                   'Prestige ${world.prestige}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: cs.onSurfaceVariant,
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
 
           // Divider
           Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.3)),
@@ -113,8 +113,8 @@ class _WorldInfoSheetState extends State<WorldInfoSheet> {
           // Stats row
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.md,
-              vertical: Spacing.sm + 4,
+              horizontal: VSpacing.md,
+              vertical: VSpacing.sm + 4,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -171,15 +171,15 @@ class StatItem extends StatelessWidget {
           height: 44,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(RadiusTokens.card),
+            borderRadius: BorderRadius.circular(VRadius.lg),
           ),
-          child: Icon(icon, size: IconSizes.md, color: color),
+          child: Icon(icon, size: VIconSize.md, color: color),
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         Text(
           value.toString(),
           style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeights.bold,
+            fontWeight: VFontWeight.bold,
             color: theme.colorScheme.onSurface,
           ),
         ),

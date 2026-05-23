@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../services/auth_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import 'package:forui/forui.dart';
+import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 
 class AuthCallbackScreen extends ConsumerStatefulWidget {
@@ -88,7 +89,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                             : VColors.glassBackground)
                         .withValues(alpha: 0.72),
                     borderRadius: BorderRadius.circular(
-                      RadiusTokens.cardFeatured,
+                      VRadius.md,
                     ),
                     border: Border.all(
                       color: isDark
@@ -97,7 +98,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(Spacing.xs),
+                    padding: const EdgeInsets.all(VSpacing.xs),
                     child: Image.asset(
                       'assets/images/splash-icon.png',
                       fit: BoxFit.contain,
@@ -105,29 +106,29 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 Text(
                   'Vertiege',
                   style: theme.textTheme.headlineLarge?.copyWith(
                     color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                    fontWeight: FontWeights.bold,
-                    letterSpacing: LetterSpacing.display,
+                    fontWeight: VFontWeight.bold,
+                    letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: Spacing.xl),
+                const SizedBox(height: VSpacing.xl),
                 if (_error == null)
                   const SizedBox(
-                    width: IconSizes.lg,
-                    height: IconSizes.lg,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                    width: VIconSize.lg,
+                    height: VIconSize.lg,
+                    child: FCircularProgress(),
                   )
                 else
                   Icon(
                     Icons.error_outline,
-                    size: IconSizes.xl,
+                    size: VIconSize.xl,
                     color: colorScheme.error,
                   ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 Text(
                   _error ?? 'Signing you in...',
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -136,7 +137,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   textAlign: TextAlign.center,
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: Spacing.lg),
+                  const SizedBox(height: VSpacing.lg),
                   VButton(
                     label: 'Back to Sign In',
                     onPressed: () => context.go('/login'),

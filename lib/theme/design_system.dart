@@ -1,7 +1,6 @@
 // @deprecated
-// This file is a compatibility shim. Migrate imports to 'v_tokens.dart' directly.
-// Spacing, RadiusTokens, IconSizes, etc. are re-exported from v_tokens.dart.
-// This file will be removed in a future version.
+// Compatibility shim — lib/ no longer imports this file (use v_tokens.dart).
+// Kept for external packages or docs until a major version removes it.
 import 'package:flutter/material.dart';
 import 'v_tokens.dart';
 export 'v_tokens.dart';

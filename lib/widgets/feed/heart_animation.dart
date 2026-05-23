@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vertiege/theme/colors.dart';
+import '../../theme/v_colors.dart';
 
 class HeartAnimation extends StatefulWidget {
   final Offset tapPosition;
@@ -71,7 +71,7 @@ class _HeartAnimationState extends State<HeartAnimation>
               child: const Icon(
                 Icons.favorite,
                 size: 60,
-                color: AppColors.tertiary,
+                color: VColors.tertiary,
               ),
             ),
           );

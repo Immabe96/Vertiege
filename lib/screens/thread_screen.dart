@@ -14,7 +14,7 @@ import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/loading_state.dart';
+import '../widgets/core/screen_loading.dart';
 import '../utils/date_format.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
@@ -155,7 +155,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
           ),
           Expanded(
             child: isLoading
-                ? const VLoadingList(itemCount: 5)
+                ? const ScreenLoading.list()
                 : messages.isEmpty
                     ? AppEmptyState(
                         title: 'No replies yet',

@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import 'world_banner.dart';
 
@@ -93,8 +93,8 @@ class WorldShareCard extends StatelessWidget {
                 ),
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.xl,
-                vertical: Spacing.lg,
+                horizontal: VSpacing.xl,
+                vertical: VSpacing.lg,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -102,12 +102,12 @@ class WorldShareCard extends StatelessWidget {
                   // Tier badge with glow
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.lg,
-                      vertical: Spacing.xs + 2,
+                      horizontal: VSpacing.lg,
+                      vertical: VSpacing.xs + 2,
                     ),
                     decoration: BoxDecoration(
                       color: _tierColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                      borderRadius: BorderRadius.circular(VRadius.pill),
                       border: Border.all(
                         color: _tierColor.withValues(alpha: 0.3),
                         width: 1.2,
@@ -125,24 +125,24 @@ class WorldShareCard extends StatelessWidget {
                       children: [
                         Icon(
                           _worldTypeIcon,
-                          size: IconSizes.sm,
+                          size: VIconSize.sm,
                           color: _tierColor,
                         ),
-                        const SizedBox(width: Spacing.sm),
+                        const SizedBox(width: VSpacing.sm),
                         Text(
                           _tierLabel,
                           style: TextStyle(
-                            fontSize: FontSizes.labelSm,
-                            fontWeight: FontWeights.bold,
+                            fontSize: VFontSize.labelSm,
+                            fontWeight: VFontWeight.bold,
                             color: _tierColor,
-                            letterSpacing: LetterSpacing.label,
+                            letterSpacing: 0,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.lg),
+                  const SizedBox(height: VSpacing.lg),
 
                   // World name
                   Text(
@@ -151,14 +151,14 @@ class WorldShareCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: FontSizes.headlineLg,
-                      fontWeight: FontWeights.bold,
+                      fontSize: VFontSize.headlineLg,
+                      fontWeight: VFontWeight.bold,
                       color: VColors.onSurface,
                       height: 1.2,
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
 
                   // Description
                   Text(
@@ -167,7 +167,7 @@ class WorldShareCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: FontSizes.bodyMd,
+                      fontSize: VFontSize.bodyMd,
                       color: VColors.onSurfaceVariant,
                       height: 1.4,
                     ),
@@ -210,13 +210,13 @@ class WorldShareCard extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: Spacing.xl),
+                  const SizedBox(height: VSpacing.xl),
 
                   // Tagline
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.xl,
-                      vertical: Spacing.md,
+                      horizontal: VSpacing.xl,
+                      vertical: VSpacing.md,
                     ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -226,7 +226,7 @@ class WorldShareCard extends StatelessWidget {
                         ],
                       ),
                       borderRadius: BorderRadius.circular(
-                        RadiusTokens.cardFeatured,
+                        VRadius.md,
                       ),
                       border: Border.all(
                         color: _tierColor.withValues(alpha: 0.15),
@@ -237,32 +237,32 @@ class WorldShareCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.diamond,
-                          size: IconSizes.sm + 2,
+                          size: VIconSize.sm + 2,
                           color: _tierColor.withValues(alpha: 0.8),
                         ),
-                        const SizedBox(width: Spacing.sm),
+                        const SizedBox(width: VSpacing.sm),
                         Text(
                           'Join me on Vertiege',
                           style: TextStyle(
-                            fontSize: FontSizes.bodyMd,
-                            fontWeight: FontWeights.semiBold,
+                            fontSize: VFontSize.bodyMd,
+                            fontWeight: VFontWeight.semiBold,
                             color: _tierColor.withValues(alpha: 0.9),
-                            letterSpacing: LetterSpacing.normal,
+                            letterSpacing: 0,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // Sovereign attribution
                   Text(
                     'Sovereign: ${world.sovereignName}',
                     style: TextStyle(
-                      fontSize: FontSizes.labelSm,
+                      fontSize: VFontSize.labelSm,
                       color: VColors.outline,
-                      letterSpacing: LetterSpacing.label,
+                      letterSpacing: 0,
                     ),
                   ),
                 ],
@@ -307,22 +307,22 @@ class _ShareStat extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: IconSizes.md, color: color.withValues(alpha: 0.7)),
-        const SizedBox(height: Spacing.xs),
+        Icon(icon, size: VIconSize.md, color: color.withValues(alpha: 0.7)),
+        const SizedBox(height: VSpacing.xs),
         Text(
           value,
           style: TextStyle(
-            fontSize: FontSizes.headlineMd,
-            fontWeight: FontWeights.bold,
+            fontSize: VFontSize.headlineMd,
+            fontWeight: VFontWeight.bold,
             color: VColors.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
-            fontSize: FontSizes.labelSm,
+            fontSize: VFontSize.labelSm,
             color: VColors.outline,
-            letterSpacing: LetterSpacing.label,
+            letterSpacing: 0,
           ),
         ),
       ],

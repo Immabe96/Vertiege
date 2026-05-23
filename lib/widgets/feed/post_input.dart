@@ -8,7 +8,7 @@ import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
 
@@ -222,7 +222,7 @@ class _PostInputState extends ConsumerState<PostInput>
           offset: const Offset(0, 48),
           child: Material(
             elevation: 8,
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            borderRadius: BorderRadius.circular(VRadius.md),
             color: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 180),
@@ -236,13 +236,13 @@ class _PostInputState extends ConsumerState<PostInput>
                     onTap: () => _insertSuggestion(suggestion),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.md,
-                        vertical: Spacing.sm + 4,
+                        horizontal: VSpacing.md,
+                        vertical: VSpacing.sm + 4,
                       ),
                       child: Text(
                         '$_suggestionType$suggestion',
                         style: TextStyle(
-                          fontSize: FontSizes.bodyMd,
+                          fontSize: VFontSize.bodyMd,
                           color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                         ),
                       ),
@@ -418,32 +418,32 @@ class _PostInputState extends ConsumerState<PostInput>
     final charColor = _charCountColor(charLength);
 
     return Card(
-      margin: const EdgeInsets.all(Spacing.md),
+      margin: const EdgeInsets.all(VSpacing.md),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Draft banner ─────────────────────────────────
             if (_hasDraft)
               Container(
-                margin: const EdgeInsets.only(bottom: Spacing.sm),
+                margin: const EdgeInsets.only(bottom: VSpacing.sm),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md,
-                  vertical: Spacing.sm,
+                  horizontal: VSpacing.md,
+                  vertical: VSpacing.sm,
                 ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.tertiaryContainer,
-                  borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.drafts,
-                      size: IconSizes.sm,
+                      size: VIconSize.sm,
                       color: theme.colorScheme.tertiary,
                     ),
-                    const SizedBox(width: Spacing.sm),
+                    const SizedBox(width: VSpacing.sm),
                     Expanded(
                       child: Text(
                         'You have a saved draft. Continue?',
@@ -458,7 +458,7 @@ class _PostInputState extends ConsumerState<PostInput>
                         'Discard',
                         style: TextStyle(
                           color: theme.colorScheme.error,
-                          fontSize: FontSizes.caption,
+                          fontSize: VFontSize.labelMd,
                         ),
                       ),
                     ),
@@ -467,8 +467,8 @@ class _PostInputState extends ConsumerState<PostInput>
                       child: Text(
                         'Continue',
                         style: TextStyle(
-                          fontSize: FontSizes.caption,
-                          fontWeight: FontWeights.bold,
+                          fontSize: VFontSize.labelMd,
+                          fontWeight: VFontWeight.bold,
                         ),
                       ),
                     ),
@@ -479,18 +479,18 @@ class _PostInputState extends ConsumerState<PostInput>
             // ── World selector (Nexus) ─────────────────────────
             if (widget.showWorldSelector && worlds.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.sm),
+                padding: const EdgeInsets.only(bottom: VSpacing.sm),
                 child: DropdownButtonFormField<String>(
                   initialValue: _selectedWorldId,
                   isDense: true,
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.md,
-                      vertical: Spacing.sm,
+                      horizontal: VSpacing.md,
+                      vertical: VSpacing.sm,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(RadiusTokens.input),
+                      borderRadius: BorderRadius.circular(VRadius.md),
                     ),
                     labelText: 'Post to (Nexus shows all joined worlds)',
                     labelStyle: theme.textTheme.labelSmall,
@@ -503,10 +503,10 @@ class _PostInputState extends ConsumerState<PostInput>
                         children: [
                           Icon(
                             Icons.public,
-                            size: IconSizes.sm,
+                            size: VIconSize.sm,
                             color: theme.colorScheme.outline,
                           ),
-                          const SizedBox(width: Spacing.xs),
+                          const SizedBox(width: VSpacing.xs),
                           Text(
                             'Default world',
                             style: theme.textTheme.labelMedium,
@@ -532,18 +532,18 @@ class _PostInputState extends ConsumerState<PostInput>
             // ── Announcement toggle ───────────────────────────
             if (canAnnounce)
               Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.sm),
+                padding: const EdgeInsets.only(bottom: VSpacing.sm),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                   onTap: () =>
                       setState(() => _isAnnouncement = !_isAnnouncement),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.md,
-                      vertical: Spacing.xs,
+                      horizontal: VSpacing.md,
+                      vertical: VSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                      borderRadius: BorderRadius.circular(VRadius.sm),
                       color: _isAnnouncement
                           ? theme.colorScheme.primaryContainer
                           : theme.colorScheme.surfaceContainerHighest,
@@ -553,19 +553,19 @@ class _PostInputState extends ConsumerState<PostInput>
                       children: [
                         Icon(
                           Icons.campaign,
-                          size: IconSizes.sm,
+                          size: VIconSize.sm,
                           color: _isAnnouncement
                               ? theme.colorScheme.primary
                               : theme.colorScheme.outline,
                         ),
-                        const SizedBox(width: Spacing.xs),
+                        const SizedBox(width: VSpacing.xs),
                         Text(
                           'Announcement',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: _isAnnouncement
                                 ? theme.colorScheme.primary
                                 : theme.colorScheme.outline,
-                            fontWeight: FontWeights.bold,
+                            fontWeight: VFontWeight.bold,
                           ),
                         ),
                       ],
@@ -602,8 +602,8 @@ class _PostInputState extends ConsumerState<PostInput>
                             border: OutlineInputBorder(),
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(
-                              horizontal: Spacing.md,
-                              vertical: Spacing.sm,
+                              horizontal: VSpacing.md,
+                              vertical: VSpacing.sm,
                             ),
                           ),
                           onChanged: _onTextChanged,
@@ -612,16 +612,16 @@ class _PostInputState extends ConsumerState<PostInput>
                       // Character count
                       Padding(
                         padding: const EdgeInsets.only(
-                          top: Spacing.xs,
-                          left: Spacing.xs,
+                          top: VSpacing.xs,
+                          left: VSpacing.xs,
                         ),
                         child: AnimatedDefaultTextStyle(
-                          duration: AnimDurations.fast,
+                          duration: VAnimation.fast,
                           style: theme.textTheme.labelSmall!.copyWith(
                             color: charColor,
                             fontWeight: charLength >= _warnChars
-                                ? FontWeights.bold
-                                : FontWeights.regular,
+                                ? VFontWeight.bold
+                                : VFontWeight.regular,
                           ),
                           child: Text('$charLength/$_maxChars'),
                         ),
@@ -629,7 +629,7 @@ class _PostInputState extends ConsumerState<PostInput>
                     ],
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 Column(
                   children: [
                     // Save draft button
@@ -641,7 +641,7 @@ class _PostInputState extends ConsumerState<PostInput>
                           ? _saveDraft
                           : null,
                       tooltip: 'Save draft',
-                      iconSize: IconSizes.md,
+                      iconSize: VIconSize.md,
                       color: theme.colorScheme.outline,
                     ),
                     // Send button
@@ -653,7 +653,7 @@ class _PostInputState extends ConsumerState<PostInput>
                             ? null
                             : _submit,
                         color: _sent ? VColors.success : theme.colorScheme.primary,
-                        iconSize: IconSizes.md,
+                        iconSize: VIconSize.md,
                       ),
                     ),
                     ImagePickerWidget(
@@ -666,11 +666,11 @@ class _PostInputState extends ConsumerState<PostInput>
 
             // ── Image preview ──────────────────────────────────
             if (_imageUri != null) ...[
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                    borderRadius: BorderRadius.circular(VRadius.sm),
                     child: _ImagePreview(
                       uri: _imageUri!,
                       height: 80,

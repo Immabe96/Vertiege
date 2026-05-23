@@ -17,6 +17,7 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
+import '../utils/chat_new_since_visit.dart';
 import '../utils/date_format.dart';
 import '../utils/presence_utils.dart';
 import '../services/supabase.dart';
@@ -24,6 +25,8 @@ import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
+import '../widgets/chat/new_since_visit_divider.dart';
+import '../widgets/core/v_accessible.dart';
 import '../widgets/chat/scroll_fab.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
@@ -32,11 +35,13 @@ import '../widgets/core/status_dot.dart';
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;
   final Presence? initialPresence;
+  final String? initialDraft;
 
   const ChatRoomScreen({
     super.key,
     required this.roomId,
     this.initialPresence,
+    this.initialDraft,
   });
 
   @override
@@ -56,6 +61,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   final Set<String> _animatedMessageIds = {};
   Presence? _headerPresence;
+  DateTime? _visitDividerAnchor;
 
   String? _replyToMessageId;
   String? _replyToSenderId;
@@ -67,6 +73,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     super.initState();
     final roomId = widget.roomId;
     final notifier = ref.read(chatProvider.notifier);
+    _visitDividerAnchor = ref.read(chatProvider).channelReads[roomId];
     notifier.loadDmMessages(roomId, force: true);
     notifier.subscribeToDm(roomId);
 
@@ -76,6 +83,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
         notifier.markChannelRead(channelId: roomId, residentId: resident.id);
+      }
+      final draft = widget.initialDraft?.trim();
+      if (draft != null && draft.isNotEmpty && _controller.text.isEmpty) {
+        _controller.text = draft;
       }
     });
     _headerPresence = widget.initialPresence;
@@ -287,24 +298,16 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
     final displayItems = buildChatDisplayItems(messages);
 
-    final lastReadAt = chatState.channelReads[widget.roomId];
-    int? unreadDividerIndex;
-    if (lastReadAt != null && messages.isNotEmpty) {
-      for (int i = 0; i < messages.length; i++) {
-        final msgTime = DateTime.fromMillisecondsSinceEpoch(
-          messages[i].createdAt,
-        );
-        if (msgTime.isAfter(lastReadAt)) {
-          unreadDividerIndex = i;
-          break;
-        }
-      }
-    }
+    final unreadDividerIndex = newSinceVisitDividerDisplayIndex(
+      messages: messages,
+      lastVisitAt: _visitDividerAnchor,
+    );
 
     return FScaffold(
       header: FHeader.nested(
         prefixes: [
-          FHeaderAction(
+          VAccessibleHeaderAction(
+            label: 'Back to messages',
             icon: const Icon(FIcons.chevronLeft),
             onPress: () {
               if (context.canPop()) context.pop();
@@ -339,7 +342,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                         itemBuilder: (context, index) {
                           if (unreadDividerIndex != null &&
                               index == unreadDividerIndex) {
-                            return const _UnreadDivider();
+                            return const NewSinceVisitDivider();
                           }
                           final adjustedIndex =
                               unreadDividerIndex != null &&
@@ -1369,35 +1372,3 @@ class _ReactionBar extends StatelessWidget {
   }
 }
 
-class _UnreadDivider extends StatelessWidget {
-  const _UnreadDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Divider(color: VColors.error, thickness: 1),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
-            child: Text(
-              'Unread',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontSize: VFontSize.labelSm,
-                fontWeight: VFontWeight.semiBold,
-                color: VColors.error,
-              ),
-            ),
-          ),
-          const Expanded(
-            child: Divider(color: VColors.error, thickness: 1),
-          ),
-        ],
-      ),
-    );
-  }
-}

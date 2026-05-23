@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 
 class SovereignStat extends StatelessWidget {
@@ -26,23 +26,23 @@ class SovereignStat extends StatelessWidget {
       child: VSurfacePanel(
         useBlur: false,
         padding: const EdgeInsets.symmetric(
-          vertical: Spacing.lg,
-          horizontal: Spacing.sm,
+          vertical: VSpacing.lg,
+          horizontal: VSpacing.sm,
         ),
-        borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+        borderRadius: BorderRadius.circular(VRadius.md),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: IconSizes.lg,
+              size: VIconSize.lg,
               color: VColors.tertiary.withValues(alpha: 0.7),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: 1),
-              duration: AnimDurations.entrance,
-              curve: AnimCurves.bouncy,
+              duration: VAnimation.entrance,
+              curve: Curves.elasticOut,
               builder: (context, progress, _) {
                 return Transform.scale(
                   scale: progress,
@@ -51,8 +51,8 @@ class SovereignStat extends StatelessWidget {
                     child: Text(
                       '$value',
                       style: TextStyle(
-                        fontSize: FontSizes.displayXl,
-                        fontWeight: FontWeights.bold,
+                        fontSize: VFontSize.displayXl,
+                        fontWeight: VFontWeight.bold,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -60,12 +60,12 @@ class SovereignStat extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: VSpacing.xs),
             Text(
               label.toUpperCase(),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.outline,
-                letterSpacing: LetterSpacing.label,
+                letterSpacing: 0,
               ),
             ),
           ],

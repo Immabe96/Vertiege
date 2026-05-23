@@ -6,6 +6,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/screen_loading.dart';
 
 class ChallengesScreen extends ConsumerStatefulWidget {
   const ChallengesScreen({super.key});
@@ -33,39 +35,12 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       title: 'Seasonal Challenges',
       showBack: true,
       body: challengeState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const ScreenLoading.list()
           : challengeState.activeChallenges.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.emoji_events_outlined,
-                        size: 64,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: VSpacing.md),
-                      Text(
-                        'No active challenges',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: VSpacing.xs),
-                      Text(
-                        'Check back when a new season starts!',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+              ? const AppEmptyState(
+                  title: 'No active challenges',
+                  description: 'Check back when a new season starts!',
+                  icon: Icons.emoji_events_outlined,
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(VSpacing.md),

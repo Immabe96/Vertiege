@@ -1,8 +1,8 @@
-import 'dart:ui' as ui;
+﻿import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../theme/v_colors.dart';
 import 'shimmer.dart';
 import '../../ui/icons/v_icons.dart';
@@ -121,7 +121,7 @@ class _ImageViewerState extends State<ImageViewer> {
     return const Pulse(
       width: 240,
       height: 180,
-      borderRadius: RadiusTokens.card,
+      borderRadius: VRadius.lg,
     );
   }
 
@@ -191,8 +191,8 @@ class _ImageViewerState extends State<ImageViewer> {
 
                 // Glass-morphism close button.
                 Positioned(
-                  top: Spacing.md,
-                  right: Spacing.md,
+                  top: VSpacing.md,
+                  right: VSpacing.md,
                   child: _buildCloseButton(),
                 ),
               ],

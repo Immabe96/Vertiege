@@ -329,6 +329,8 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share your aviation context, a safety lesson, or a technical question with enough detail to debrief.',
+    safetyDisclaimer:
+        'Aviation Heights is for peer learning and simulation-style discussion—not flight instruction, operator procedures, or authority requirements. Treat posts as conversation starters; confirm anything operational with your CFI, company manuals, and regulator.',
   ),
   'medical-nexus': WorldFoundation(
     premise:
@@ -345,6 +347,8 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share your healthcare lane, a systems observation, or a learning question without patient-identifying details.',
+    safetyDisclaimer:
+        'Medical Nexus is educational peer discussion, not diagnosis or treatment. Do not post identifiable patient details. For your own care, work with a licensed clinician; treat channel posts as a fictional learning space, not clinical guidance.',
   ),
   'financial-district': WorldFoundation(
     premise:
@@ -361,6 +365,8 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share a market, deal, or finance question with your assumptions and risk view.',
+    safetyDisclaimer:
+        'Financial District is for markets discussion and role-play analysis—not investment, tax, or personalized advice. Past results and hot takes are not guarantees. Verify assumptions yourself and use licensed professionals before real money or filings.',
   ),
   'tech-sprawl': WorldFoundation(
     premise:
@@ -393,6 +399,8 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share your legal context, jurisdiction if relevant, and the general principle you want to discuss.',
+    safetyDisclaimer:
+        'Legal Plaza covers general legal education and professional debate—not advice for your situation. Rules and ethics differ by jurisdiction. Treat posts as simulation; retain counsel before acting on anything discussed here.',
   ),
   'arts-pavilion': WorldFoundation(
     premise:
@@ -425,6 +433,8 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share the technical problem, your current model, and where the uncertainty lives.',
+    safetyDisclaimer:
+        'Quantum Core is technical discussion and thought experiments—not certified design review or safety approval. Validate models, codes, and test data with qualified engineers and applicable standards before building or deploying for real.',
   ),
   'silver-page': WorldFoundation(
     premise:

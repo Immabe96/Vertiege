@@ -1,9 +1,10 @@
 ﻿import 'package:flutter/material.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/date_format.dart';
 import '../profile/cosmetic_avatar.dart';
+import '../core/empty_state.dart';
 import '../core/tier_badge.dart';
 import '../../ui/icons/v_icons.dart';
 
@@ -137,24 +138,24 @@ class _CommentSheetState extends State<CommentSheet> {
           decoration: BoxDecoration(
             color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(RadiusTokens.cardFeatured),
+              top: Radius.circular(VRadius.md),
             ),
             border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
           ),
           child: Column(
             children: [
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
               ),
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
                 child: Row(
                   children: [
                     Text(
@@ -173,11 +174,10 @@ class _CommentSheetState extends State<CommentSheet> {
               const Divider(),
               Expanded(
                 child: tree.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No comments yet',
-                          style: theme.textTheme.bodyMedium,
-                        ),
+                    ? const AppEmptyState(
+                        title: 'No comments yet',
+                        description: 'Be the first to share your thoughts.',
+                        icon: Icons.chat_bubble_outline,
                       )
                     : ListView.builder(
                         controller: scrollController,
@@ -208,30 +208,30 @@ class _CommentSheetState extends State<CommentSheet> {
               if (_replyToId != null)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.md,
-                    vertical: Spacing.xs,
+                    horizontal: VSpacing.md,
+                    vertical: VSpacing.xs,
                   ),
                   color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.5),
                   child: Row(
                     children: [
                       Icon(
                         Icons.reply,
-                        size: IconSizes.sm,
+                        size: VIconSize.sm,
                         color: VColors.primary,
                       ),
-                      const SizedBox(width: Spacing.xs),
+                      const SizedBox(width: VSpacing.xs),
                       Expanded(
                         child: Text(
                           'Replying to $_replyToName',
                           style: TextStyle(
-                            fontSize: FontSizes.labelSm,
+                            fontSize: VFontSize.labelSm,
                             color: VColors.primary,
-                            fontWeight: FontWeights.semiBold,
+                            fontWeight: VFontWeight.semiBold,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(VIcons.x, size: IconSizes.sm),
+                        icon: const Icon(VIcons.x, size: VIconSize.sm),
                         onPressed: () => setState(() {
                           _replyToId = null;
                           _replyToName = null;
@@ -243,7 +243,7 @@ class _CommentSheetState extends State<CommentSheet> {
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.all(Spacing.sm),
+                padding: const EdgeInsets.all(VSpacing.sm),
                 child: Row(
                   children: [
                     Expanded(
@@ -255,7 +255,7 @@ class _CommentSheetState extends State<CommentSheet> {
                               : 'Add a comment...',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
-                              Radius.circular(RadiusTokens.input),
+                              Radius.circular(VRadius.md),
                             ),
                           ),
                           isDense: true,
@@ -301,15 +301,15 @@ class _SortDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<CommentSort>(
-      icon: Icon(Icons.sort, size: IconSizes.md, color: VColors.outline),
+      icon: Icon(Icons.sort, size: VIconSize.md, color: VColors.outline),
       tooltip: 'Sort comments',
       itemBuilder: (context) => [
         const PopupMenuItem(
           value: CommentSort.best,
           child: Row(
             children: [
-              Icon(VIcons.flame, size: IconSizes.sm),
-              SizedBox(width: Spacing.sm),
+              Icon(VIcons.flame, size: VIconSize.sm),
+              SizedBox(width: VSpacing.sm),
               Text('Best'),
             ],
           ),
@@ -318,8 +318,8 @@ class _SortDropdown extends StatelessWidget {
           value: CommentSort.newest,
           child: Row(
             children: [
-              Icon(Icons.new_releases, size: IconSizes.sm),
-              SizedBox(width: Spacing.sm),
+              Icon(Icons.new_releases, size: VIconSize.sm),
+              SizedBox(width: VSpacing.sm),
               Text('Newest'),
             ],
           ),
@@ -328,8 +328,8 @@ class _SortDropdown extends StatelessWidget {
           value: CommentSort.oldest,
           child: Row(
             children: [
-              Icon(Icons.history, size: IconSizes.sm),
-              SizedBox(width: Spacing.sm),
+              Icon(Icons.history, size: VIconSize.sm),
+              SizedBox(width: VSpacing.sm),
               Text('Oldest'),
             ],
           ),
@@ -381,7 +381,7 @@ class _CommentTileState extends State<_CommentTile> {
     final isDeeplyNested = widget.depth > 2;
 
     return Padding(
-      padding: EdgeInsets.only(left: indent, right: Spacing.md, top: Spacing.xs, bottom: Spacing.xs),
+      padding: EdgeInsets.only(left: indent, right: VSpacing.md, top: VSpacing.xs, bottom: VSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -410,9 +410,9 @@ class _CommentTileState extends State<_CommentTile> {
                 child: Text(
                   'show parent',
                   style: TextStyle(
-                    fontSize: FontSizes.labelXs,
+                    fontSize: VFontSize.labelSm,
                     color: VColors.primary,
-                    fontWeight: FontWeights.semiBold,
+                    fontWeight: VFontWeight.semiBold,
                   ),
                 ),
               ),
@@ -425,9 +425,9 @@ class _CommentTileState extends State<_CommentTile> {
                 child: Text(
                   'Show reply',
                   style: TextStyle(
-                    fontSize: FontSizes.labelXs,
+                    fontSize: VFontSize.labelSm,
                     color: VColors.primary,
-                    fontWeight: FontWeights.semiBold,
+                    fontWeight: VFontWeight.semiBold,
                   ),
                 ),
               ),
@@ -443,7 +443,7 @@ class _CommentTileState extends State<_CommentTile> {
                       size: 28,
                       seed: widget.comment.residentName,
                     ),
-                    const SizedBox(width: Spacing.sm),
+                    const SizedBox(width: VSpacing.sm),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,8 +453,8 @@ class _CommentTileState extends State<_CommentTile> {
                               Text(
                                 widget.comment.residentName,
                                 style: TextStyle(
-                                  fontSize: FontSizes.labelSm,
-                                  fontWeight: FontWeights.semiBold,
+                                  fontSize: VFontSize.labelSm,
+                                  fontWeight: VFontWeight.semiBold,
                                   color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                                 ),
                               ),
@@ -475,7 +475,7 @@ class _CommentTileState extends State<_CommentTile> {
                                     'OP',
                                     style: TextStyle(
                                       fontSize: VFontSize.labelSm,
-                                      fontWeight: FontWeights.bold,
+                                      fontWeight: VFontWeight.bold,
                                       color: VColors.primary,
                                     ),
                                   ),
@@ -484,7 +484,7 @@ class _CommentTileState extends State<_CommentTile> {
                               Text(
                                 formatTimestamp(widget.comment.timestamp),
                                 style: TextStyle(
-                                  fontSize: FontSizes.labelXs,
+                                  fontSize: VFontSize.labelSm,
                                   color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                                 ),
                               ),
@@ -494,12 +494,12 @@ class _CommentTileState extends State<_CommentTile> {
                           Text(
                             widget.comment.content,
                             style: TextStyle(
-                              fontSize: FontSizes.bodyMd,
+                              fontSize: VFontSize.bodyMd,
                               color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                              height: LineHeight.body,
+                              height: VLineHeight.body,
                             ),
                           ),
-                          const SizedBox(height: Spacing.xs),
+                          const SizedBox(height: VSpacing.xs),
                           Row(
                             children: [
                               GestureDetector(
@@ -507,20 +507,20 @@ class _CommentTileState extends State<_CommentTile> {
                                 child: Text(
                                   'Reply',
                                   style: TextStyle(
-                                    fontSize: FontSizes.labelXs,
-                                    fontWeight: FontWeights.semiBold,
+                                    fontSize: VFontSize.labelSm,
+                                    fontWeight: VFontWeight.semiBold,
                                     color: VColors.primary,
                                   ),
                                 ),
                               ),
                               if (widget.depth > 0) ...[
-                                const SizedBox(width: Spacing.sm),
+                                const SizedBox(width: VSpacing.sm),
                                 GestureDetector(
                                   onTap: () => setState(() => _collapsed = !_collapsed),
                                   child: Text(
                                     _collapsed ? 'Expand' : 'Collapse',
                                     style: TextStyle(
-                                      fontSize: FontSizes.labelXs,
+                                      fontSize: VFontSize.labelSm,
                                       color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                                     ),
                                   ),

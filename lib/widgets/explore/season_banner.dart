@@ -2,7 +2,7 @@
 import '../../models/world.dart';
 import '../../services/season_service.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class SeasonBanner extends StatelessWidget {
   final List<World> worlds;
@@ -17,14 +17,14 @@ class SeasonBanner extends StatelessWidget {
     final subtitle = SeasonService.bannerSubtitle(season.scores);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(Spacing.lg),
+          padding: const EdgeInsets.all(VSpacing.lg),
           decoration: BoxDecoration(
             color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-            borderRadius: BorderRadius.circular(RadiusTokens.card),
+            borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border.all(
               color: isDark ? VColors.glassBorderDark : VColors.tertiary.withValues(
                 alpha: 0.3 * 2,
@@ -45,10 +45,10 @@ class SeasonBanner extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   color: VColors.tertiary,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
               ),
-              const SizedBox(width: Spacing.md),
+              const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,8 +57,8 @@ class SeasonBanner extends StatelessWidget {
                     Text(
                       season.name.toUpperCase(),
                       style: TextStyle(
-                        fontSize: FontSizes.bodyMd,
-                        fontWeight: FontWeights.bold,
+                        fontSize: VFontSize.bodyMd,
+                        fontWeight: VFontWeight.bold,
                         color: VColors.tertiary,
                       ),
                     ),
@@ -66,7 +66,7 @@ class SeasonBanner extends StatelessWidget {
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: FontSizes.labelSm,
+                        fontSize: VFontSize.labelSm,
                         color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                       ),
                       maxLines: 1,
@@ -75,15 +75,15 @@ class SeasonBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md,
-                  vertical: Spacing.sm,
+                  horizontal: VSpacing.md,
+                  vertical: VSpacing.sm,
                 ),
                 decoration: BoxDecoration(
                   color: VColors.tertiary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
                   border: Border.all(
                     color: VColors.tertiary.withValues(alpha: 0.25),
                   ),
@@ -91,8 +91,8 @@ class SeasonBanner extends StatelessWidget {
                 child: Text(
                   'VIEW SEASON RANKINGS',
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.bold,
                     color: VColors.tertiary,
                   ),
                 ),

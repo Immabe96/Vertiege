@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/fade_in.dart';
 import '../core/loading_state.dart';
 import '../profile/cosmetic_avatar.dart';
@@ -87,26 +87,26 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: VColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+          borderRadius: BorderRadius.circular(VRadius.md),
           border: Border.all(color: VColors.glassBorder),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(Spacing.lg),
+          padding: const EdgeInsets.all(VSpacing.lg),
           child: Column(
             children: [
               Icon(
                 Icons.leaderboard_outlined,
-                size: IconSizes.xl,
+                size: VIconSize.xl,
                 color: theme.colorScheme.outline,
               ),
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               Text(
                 'Leaderboard',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeights.bold,
+                  fontWeight: VFontWeight.bold,
                 ),
               ),
-              const SizedBox(height: Spacing.xs),
+              const SizedBox(height: VSpacing.xs),
               Text(
                 'Be the first to earn reputation in this world',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -124,11 +124,11 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: VColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+        borderRadius: BorderRadius.circular(VRadius.md),
         border: Border.all(color: VColors.glassBorder),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -136,41 +136,41 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
               children: [
                 Icon(
                   Icons.leaderboard,
-                  size: IconSizes.md,
+                  size: VIconSize.md,
                   color: VColors.achievementFinance,
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 Text(
                   'Leaderboard',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             ..._residents.asMap().entries.map((entry) {
               final rank = entry.key + 1;
               final resident = entry.value;
               return FadeIn(
                 delayMs: rank * 50,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
                   child: Row(
                     children: [
                       _RankBadge(rank: rank),
-                      const SizedBox(width: Spacing.sm),
+                      const SizedBox(width: VSpacing.sm),
                       CosmeticAvatar(
                         imageUrl: resident.avatarUrl,
                         seed: resident.id,
                         size: 36,
                       ),
-                      const SizedBox(width: Spacing.sm),
+                      const SizedBox(width: VSpacing.sm),
                       Expanded(
                         child: Text(
                           resident.name,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeights.regular,
+                            fontWeight: VFontWeight.regular,
                           ),
                         ),
                       ),
@@ -235,8 +235,8 @@ class _RankBadge extends StatelessWidget {
           child: Text(
             '$rank',
             style: TextStyle(
-              fontSize: FontSizes.caption,
-              fontWeight: FontWeights.bold,
+              fontSize: VFontSize.labelMd,
+              fontWeight: VFontWeight.bold,
               color: Theme.of(context).colorScheme.outline,
             ),
           ),
@@ -250,7 +250,7 @@ class _RankBadge extends StatelessWidget {
         color: bg.withValues(alpha: 0.15),
         border: Border.all(color: bg, width: 1.5),
       ),
-      child: Icon(icon, size: IconSizes.sm, color: bg),
+      child: Icon(icon, size: VIconSize.sm, color: bg),
     );
   }
 }

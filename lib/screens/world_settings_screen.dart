@@ -3,8 +3,9 @@ import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
+import '../theme/v_tokens.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../models/quiet_hours.dart';
@@ -22,6 +23,7 @@ import '../ui/icons/v_icons.dart';
 import '../state/channel_provider.dart';
 import '../utils/tier_utils.dart';
 import '../widgets/core/loading_state.dart';
+import '../widgets/core/screen_loading.dart';
 import '../services/rank_service.dart';
 import '../models/rank.dart';
 import '../widgets/worlds/banner_generator.dart';
@@ -418,12 +420,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(Spacing.md),
+        insetPadding: const EdgeInsets.all(VSpacing.md),
         child: Container(
           constraints: const BoxConstraints(maxHeight: 600),
           decoration: BoxDecoration(
             color: isDark ? VColors.surfaceDark : VColors.surface,
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+            borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(
               color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
             ),
@@ -432,17 +434,17 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.all(Spacing.lg),
+                padding: const EdgeInsets.all(VSpacing.lg),
                 child: Row(
                   children: [
                     const Icon(VIcons.sparkles, color: VColors.tertiary),
-                    const SizedBox(width: Spacing.sm),
+                    const SizedBox(width: VSpacing.sm),
                     const Expanded(
                       child: Text(
                         'The Herald — Banner Generator',
                         style: TextStyle(
-                          fontSize: FontSizes.headlineMd,
-                          fontWeight: FontWeights.semiBold,
+                          fontSize: VFontSize.headlineMd,
+                          fontWeight: VFontWeight.semiBold,
                           color: VColors.onSurface,
                         ),
                       ),
@@ -462,10 +464,10 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(
-                    Spacing.lg,
+                    VSpacing.lg,
                     0,
-                    Spacing.lg,
-                    Spacing.lg,
+                    VSpacing.lg,
+                    VSpacing.lg,
                   ),
                   child: BannerGenerator(
                     worldId: world.id,
@@ -500,13 +502,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        Icon(icon, color: VColors.tertiary, size: IconSizes.md),
-        const SizedBox(width: Spacing.sm),
+        Icon(icon, color: VColors.tertiary, size: VIconSize.md),
+        const SizedBox(width: VSpacing.sm),
         Text(
           title,
           style: TextStyle(
-            fontSize: FontSizes.bodyMd,
-            fontWeight: FontWeights.bold,
+            fontSize: VFontSize.bodyMd,
+            fontWeight: VFontWeight.bold,
             color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
           ),
         ),
@@ -560,28 +562,28 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final world = ref.watch(worldProvider).worlds[widget.worldId];
     final resident = ref.watch(residentProvider).resident;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: const Text('World Settings')),
+    return VHubPage(
+      title: 'World Settings',
+      showBack: true,
       body: world == null
-          ? const VLoadingList()
+          ? const ScreenLoading.list()
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(Spacing.md),
+                padding: const EdgeInsets.all(VSpacing.md),
                 children: [
                   // ── Overview ──────────────────────────────────
                   _Card(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(Icons.info_outline, 'Overview'),
-                        const SizedBox(height: Spacing.lg),
+                        const SizedBox(height: VSpacing.lg),
 
                         // World Name
                         _fieldLabel('WORLD NAME'),
-                        const SizedBox(height: Spacing.xs),
+                        const SizedBox(height: VSpacing.xs),
                         TextFormField(
                           controller: _nameController,
                           decoration: _ghostInputDecoration(
@@ -600,11 +602,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: Spacing.lg),
+                        const SizedBox(height: VSpacing.lg),
 
                         // Description
                         _fieldLabel('DESCRIPTION'),
-                        const SizedBox(height: Spacing.xs),
+                        const SizedBox(height: VSpacing.xs),
                         TextFormField(
                           controller: _descController,
                           decoration: _ghostInputDecoration(
@@ -625,14 +627,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: Spacing.lg),
+                        const SizedBox(height: VSpacing.lg),
 
                         // Choose an Icon
                         _fieldLabel('CHOOSE AN ICON'),
-                        const SizedBox(height: Spacing.sm),
+                        const SizedBox(height: VSpacing.sm),
                         Wrap(
-                          spacing: Spacing.sm,
-                          runSpacing: Spacing.sm,
+                          spacing: VSpacing.sm,
+                          runSpacing: VSpacing.sm,
                           children: _iconChoices.map((choice) {
                             final isSelected = _selectedIcon == choice.id;
                             return ChoiceChip(
@@ -658,26 +660,23 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                   : null,
                               selectedColor: colorScheme.primaryContainer,
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.all(Spacing.sm),
+                              padding: const EdgeInsets.all(VSpacing.sm),
                             );
                           }).toList(),
                         ),
-                        const SizedBox(height: Spacing.xl),
+                        const SizedBox(height: VSpacing.xl),
 
                         // Publish button
                         SizedBox(
                           width: double.infinity,
-                          height: TouchTargets.minimum,
+                          height: VTouchTarget.minimum,
                             child: FilledButton.icon(
                             onPressed: _isSaving ? null : _saveSettings,
                             icon: _isSaving
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: VColors.onTertiary,
-                                    ),
+                                    child: FCircularProgress(),
                                   )
                                 : const Icon(Icons.save),
                             label: Text(
@@ -689,16 +688,16 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Banner Generator ──────────────────────
                   _Card(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(Icons.auto_awesome, 'The Herald'),
-                        const SizedBox(height: Spacing.sm),
+                        const SizedBox(height: VSpacing.sm),
                         Text(
                           'Generate AI-assisted banner variants for your world.',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -707,10 +706,10 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 : VColors.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: Spacing.md),
+                        const SizedBox(height: VSpacing.md),
                         SizedBox(
                           width: double.infinity,
-                          height: TouchTargets.minimum,
+                          height: VTouchTarget.minimum,
                           child: OutlinedButton.icon(
                             onPressed: () => _showBannerGenerator(),
                             icon: const Icon(VIcons.sparkles),
@@ -725,11 +724,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Channels ───────────────────────────────────
                   _Card(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: WorldSettingsChannels(
                       worldId: widget.worldId,
                       sovereignId: world.sovereignId,
@@ -740,19 +739,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Lounge Settings (tier-gated) ─────────────
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 3,
                       )))
                     _Card(
-                      padding: const EdgeInsets.all(Spacing.lg),
+                      padding: const EdgeInsets.all(VSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _sectionHeader(Icons.local_bar, 'Lounge'),
-                          const SizedBox(height: Spacing.sm),
+                          const SizedBox(height: VSpacing.sm),
                           Text(
                             'Configure lounge access and settings for this world.',
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -761,7 +760,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                   : VColors.onSurfaceVariant,
                             ),
                           ),
-                          const SizedBox(height: Spacing.md),
+                          const SizedBox(height: VSpacing.md),
                           Text(
                             'Lounge settings coming soon.',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -776,19 +775,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 3,
                       )))
-                    const SizedBox(height: Spacing.md),
+                    const SizedBox(height: VSpacing.md),
 
                   // ── Governance (tier-gated) ─────────────────
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 4,
                       )))
                     _Card(
-                      padding: const EdgeInsets.all(Spacing.lg),
+                      padding: const EdgeInsets.all(VSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _sectionHeader(Icons.how_to_vote, 'Governance'),
-                          const SizedBox(height: Spacing.sm),
+                          const SizedBox(height: VSpacing.sm),
                           Text(
                             'Participate in world governance and voting.',
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -797,7 +796,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                   : VColors.onSurfaceVariant,
                             ),
                           ),
-                          const SizedBox(height: Spacing.md),
+                          const SizedBox(height: VSpacing.md),
                           Text(
                             'Governance voting coming soon.',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -812,13 +811,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   if (ref.watch(residentProvider.select(
                         (s) => s.resident != null && s.resident!.tier.value >= 4,
                       )))
-                    const SizedBox(height: Spacing.md),
+                    const SizedBox(height: VSpacing.md),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Invites ────────────────────────────────────
                   _Card(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: WorldSettingsInvites(
                       sovereignId: world.sovereignId,
                       residentId: resident?.id,
@@ -831,16 +830,16 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Member Management ──────────────────────────
                   _Card(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(Icons.group, 'Members'),
-                        const SizedBox(height: Spacing.sm),
+                        const SizedBox(height: VSpacing.sm),
                         Text(
                           'Manage residents and their standing in this world.',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -849,7 +848,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 : VColors.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: Spacing.md),
+                        const SizedBox(height: VSpacing.md),
                         if (_isLoadingMembers)
                           const Center(child: VLoadingCard())
                         else if (_members.isEmpty)
@@ -876,12 +875,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 );
                             return Padding(
                               padding: const EdgeInsets.only(
-                                bottom: Spacing.sm,
+                                bottom: VSpacing.sm,
                               ),
                               child: _Card(
-                                padding: const EdgeInsets.all(Spacing.md),
+                                padding: const EdgeInsets.all(VSpacing.md),
                                 borderRadius: BorderRadius.circular(
-                                  RadiusTokens.xl,
+                                  VRadius.xl,
                                 ),
                                 child: Row(
                                   children: [
@@ -890,7 +889,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                         name.substring(0, 1).toUpperCase(),
                                       ),
                                     ),
-                                    const SizedBox(width: Spacing.md),
+                                    const SizedBox(width: VSpacing.md),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
@@ -907,8 +906,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                       .textTheme
                                                       .bodyMedium
                                                       ?.copyWith(
-                                                        fontWeight: FontWeights
-                                                            .semiBold,
+                                                        fontWeight:
+                                                            VFontWeight.semiBold,
                                                         color: isDark
                                                             ? VColors.onSurfaceDark
                                                             : VColors.onSurface,
@@ -917,19 +916,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                   ),
                                                 if (isSovereign) ...[
                                                   const SizedBox(
-                                                    width: Spacing.sm,
+                                                    width: VSpacing.sm,
                                                   ),
                                                   Container(
                                                     padding:
                                                         const EdgeInsets.symmetric(
-                                                          horizontal: Spacing.sm,
+                                                          horizontal: VSpacing.sm,
                                                           vertical: 2,
                                                         ),
                                                     decoration: BoxDecoration(
                                                       color: VColors.tertiary,
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                          RadiusTokens.pill,
+                                                          VRadius.pill,
                                                         ),
                                                   ),
                                                     child: Text(
@@ -946,13 +945,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                               ],
                                             ],
                                           ),
-                                          const SizedBox(height: Spacing.xs),
+                                          const SizedBox(height: VSpacing.xs),
                                           Row(
                                             children: [
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                      horizontal: Spacing.sm,
+                                                      horizontal: VSpacing.sm,
                                                       vertical: 1,
                                                     ),
                                                 decoration: BoxDecoration(
@@ -961,7 +960,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                   ).withValues(alpha: 0.15),
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                        RadiusTokens.pill,
+                                                        VRadius.pill,
                                                       ),
                                                 ),
                                                 child: Text(
@@ -977,7 +976,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                       ),
                                                 ),
                                               ),
-                                              const SizedBox(width: Spacing.sm),
+                                              const SizedBox(width: VSpacing.sm),
                                             Text(
                                               'Rep $rep',
                                               style: theme
@@ -1035,16 +1034,16 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Quiet Hours ──────────────────────────────────
                   _Card(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(Icons.do_not_disturb, 'Quiet Hours'),
-                        const SizedBox(height: Spacing.sm),
+                        const SizedBox(height: VSpacing.sm),
                         Text(
                           'Mute notifications during specific hours.',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -1053,7 +1052,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 : VColors.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: Spacing.md),
+                        const SizedBox(height: VSpacing.md),
                         if (_isLoadingQuietHours)
                           const Center(child: VLoadingCard())
                         else ...[
@@ -1077,7 +1076,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             ],
                           ),
                           if (_quietHours.enabled) ...[
-                            const SizedBox(height: Spacing.md),
+                            const SizedBox(height: VSpacing.md),
                             Row(
                               children: [
                                 Expanded(
@@ -1092,7 +1091,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                           color: VColors.tertiary,
                                         ),
                                       ),
-                                      const SizedBox(height: Spacing.xs),
+                                      const SizedBox(height: VSpacing.xs),
                                       FSelect<int>.rich(
                                         format: (value) => '${value.toString().padLeft(2, '0')}:00',
                                         control: FSelectControl.lifted(
@@ -1107,7 +1106,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: Spacing.md),
+                                const SizedBox(width: VSpacing.md),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -1120,7 +1119,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                           color: VColors.tertiary,
                                         ),
                                       ),
-                                      const SizedBox(height: Spacing.xs),
+                                      const SizedBox(height: VSpacing.xs),
                                       FSelect<int>.rich(
                                         format: (value) => '${value.toString().padLeft(2, '0')}:00',
                                         control: FSelectControl.lifted(
@@ -1143,12 +1142,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Boost World (dominion only) ─────────────────
                   if (world.type == WorldType.dominion) ...[
                     _BoostWorldCard(worldId: widget.worldId),
-                    const SizedBox(height: Spacing.md),
+                    const SizedBox(height: VSpacing.md),
                   ],
 
                   // ── Ranks ────────────────────────────────────────
@@ -1158,7 +1157,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       worldWorldId: widget.worldId,
                     ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Realm Audit ──────────────────────────────────
                   if (resident?.id == world.sovereignId)
@@ -1178,23 +1177,23 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             : VColors.outlineVariant,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                        borderRadius: BorderRadius.circular(VRadius.xl),
                       ),
                       onTap: () => context.push(
                         '/audit-log/${widget.worldId}?name=${Uri.encodeComponent(world.name)}',
                       ),
                     ),
 
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
 
                   // ── Danger Zone ──────────────────────────────────
                   Container(
-                    padding: const EdgeInsets.all(Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     decoration: BoxDecoration(
                       color: isDark
                           ? VColors.errorContainerDark
                           : VColors.errorContainer,
-                      borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                      borderRadius: BorderRadius.circular(VRadius.xl),
                       border: Border.all(
                         color: VColors.error.withValues(alpha: 0.3),
                       ),
@@ -1207,9 +1206,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             Icon(
                               Icons.warning_amber_rounded,
                               color: VColors.error,
-                              size: IconSizes.md,
+                              size: VIconSize.md,
                             ),
-                            const SizedBox(width: Spacing.sm),
+                            const SizedBox(width: VSpacing.sm),
                             Text(
                               'Danger Zone',
                               style: theme.textTheme.titleMedium?.copyWith(
@@ -1218,7 +1217,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: Spacing.sm),
+                        const SizedBox(height: VSpacing.sm),
                         Text(
                           'Permanently delete this world and all '
                           'associated data. This action cannot be undone.',
@@ -1228,10 +1227,10 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 : VColors.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: Spacing.md),
+                        const SizedBox(height: VSpacing.md),
                         SizedBox(
                           width: double.infinity,
-                          height: TouchTargets.minimum,
+                          height: VTouchTarget.minimum,
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: VColors.error,
@@ -1248,7 +1247,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: Spacing.xl),
+                  const SizedBox(height: VSpacing.xl),
                 ],
               ),
             ),
@@ -1288,7 +1287,7 @@ class _BoostWorldCard extends ConsumerWidget {
     final canBoost = enabled && world.boostsRemaining > 0 && !isMaxLevel;
 
     return _Card(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1297,13 +1296,13 @@ class _BoostWorldCard extends ConsumerWidget {
               Icon(
                 Icons.rocket_launch,
                 color: VColors.tertiary,
-                size: IconSizes.md,
+                size: VIconSize.md,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Text('Boost World', style: theme.textTheme.titleMedium),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           Text(
             'Accelerate your world\'s progression with a one-time boost.',
             style: theme.textTheme.bodySmall?.copyWith(
@@ -1312,29 +1311,29 @@ class _BoostWorldCard extends ConsumerWidget {
                   : VColors.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
 
           // Level display
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm + 4,
-                  vertical: Spacing.xs + 2,
+                  horizontal: VSpacing.sm + 4,
+                  vertical: VSpacing.xs + 2,
                 ),
                 decoration: BoxDecoration(
                   color: cs.primaryContainer,
-                  borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                  borderRadius: BorderRadius.circular(VRadius.pill),
                 ),
                 child: Text(
                   'Level $currentLevel',
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: cs.onPrimaryContainer,
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               if (isMaxLevel)
                 Text(
                   'Max level reached',
@@ -1355,12 +1354,12 @@ class _BoostWorldCard extends ConsumerWidget {
                 ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
 
           // Progress bar
           if (!isMaxLevel)
             ClipRRect(
-              borderRadius: BorderRadius.circular(RadiusTokens.input),
+              borderRadius: BorderRadius.circular(VRadius.md),
               child: LinearProgressIndicator(
                 value: progressFraction,
                 minHeight: 6,
@@ -1369,7 +1368,7 @@ class _BoostWorldCard extends ConsumerWidget {
               ),
             ),
 
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
 
           // Boost info row
           Row(
@@ -1393,17 +1392,17 @@ class _BoostWorldCard extends ConsumerWidget {
                           ? VColors.onSurfaceVariantDark
                           : VColors.onSurfaceVariant)
                       : VColors.error,
-                  fontWeight: FontWeights.regular,
+                  fontWeight: VFontWeight.regular,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
 
           // Boost button
           SizedBox(
             width: double.infinity,
-            height: TouchTargets.minimum,
+            height: VTouchTarget.minimum,
             child: FilledButton.icon(
               onPressed: canBoost
                   ? () => _handleBoost(context, ref, world)
@@ -1500,7 +1499,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
             ? VColors.surfaceContainerHighDark
             : VColors.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.full),
+          borderRadius: BorderRadius.circular(VRadius.pill),
         ),
         title: const Text('Create Rank'),
         content: TextField(
@@ -1534,7 +1533,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return _Card(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1543,26 +1542,26 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
               const Icon(
                 Icons.military_tech,
                 color: VColors.tertiary,
-                size: IconSizes.md,
+                size: VIconSize.md,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Expanded(
                 child: Text(
                   'Ranks',
                   style: TextStyle(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.headlineMd,
+                    fontWeight: VFontWeight.bold,
                   ),
                 ),
               ),
               TextButton.icon(
                 onPressed: _showCreateDialog,
-                icon: const Icon(VIcons.plus, size: IconSizes.sm),
+                icon: const Icon(VIcons.plus, size: VIconSize.sm),
                 label: const Text('Create'),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           if (_loading)
             const Center(child: VLoadingCard())
           else if (_ranks.isEmpty)
@@ -1588,7 +1587,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
                 ),
                 title: Text(r.name),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, size: IconSizes.sm),
+                  icon: const Icon(Icons.delete_outline, size: VIconSize.sm),
                   onPressed: () async {
                     await RankService.deleteRank(r.id);
                     _load();
@@ -1616,10 +1615,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

@@ -8,7 +8,7 @@ import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/empty_state.dart';
 
 class WorldChannelList extends ConsumerStatefulWidget {
@@ -108,7 +108,7 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
             'Channels',
             style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeights.bold,
+              fontWeight: VFontWeight.bold,
             ),
           ),
         ),
@@ -148,26 +148,26 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
           onTap: () => _toggleWard(wardId),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
-              Spacing.lg,
-              Spacing.sm,
-              Spacing.lg,
-              Spacing.xs,
+              VSpacing.lg,
+              VSpacing.sm,
+              VSpacing.lg,
+              VSpacing.xs,
             ),
             child: Row(
               children: [
                 Icon(
                   expanded ? Icons.arrow_drop_down : Icons.chevron_right,
-                  size: IconSizes.sm,
+                  size: VIconSize.sm,
                   color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                 ),
-                const SizedBox(width: Spacing.xs),
+                const SizedBox(width: VSpacing.xs),
                 Text(
                   wardName.toUpperCase(),
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.semiBold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.semiBold,
                     color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
               ],
@@ -230,8 +230,8 @@ class _ChannelTile extends StatelessWidget {
               '# ${channel.name}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: unreadCount > 0
-                    ? FontWeights.bold
-                    : FontWeights.regular,
+                    ? VFontWeight.bold
+                    : VFontWeight.regular,
               ),
             ),
           ),

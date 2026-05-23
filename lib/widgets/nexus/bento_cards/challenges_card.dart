@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../state/challenge_provider.dart';
 import '../../../theme/v_colors.dart';
-import '../../../theme/design_system.dart';
+import '../../../theme/v_tokens.dart';
 
 class ChallengesCard extends ConsumerWidget {
   const ChallengesCard({super.key});
@@ -30,36 +30,36 @@ class ChallengesCard extends ConsumerWidget {
           children: [
             const Icon(
               Icons.emoji_events,
-              size: IconSizes.md,
+              size: VIconSize.md,
               color: VColors.secondary,
             ),
-            const SizedBox(width: Spacing.xs),
+            const SizedBox(width: VSpacing.xs),
             const Text(
               'CHALLENGES',
               style: TextStyle(
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.labelSm,
+                fontWeight: VFontWeight.semiBold,
                 color: VColors.onSurfaceVariant,
-                letterSpacing: LetterSpacing.label,
+                letterSpacing: 0,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         Text(
           '$activeCount Active',
           style: const TextStyle(
-            fontSize: FontSizes.headlineMd,
-            fontWeight: FontWeights.bold,
+            fontSize: VFontSize.headlineMd,
+            fontWeight: VFontWeight.bold,
             color: VColors.onSurface,
           ),
         ),
-        const SizedBox(height: Spacing.xs),
+        const SizedBox(height: VSpacing.xs),
         if (inProgressCount > 0)
           Text(
             '$inProgressCount in progress',
             style: const TextStyle(
-              fontSize: FontSizes.labelSm,
+              fontSize: VFontSize.labelSm,
               color: VColors.outline,
             ),
           )
@@ -67,24 +67,24 @@ class ChallengesCard extends ConsumerWidget {
           const Text(
             'Tap to view challenges',
             style: TextStyle(
-              fontSize: FontSizes.labelSm,
+              fontSize: VFontSize.labelSm,
               color: VColors.outline,
             ),
           ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         const Row(
           children: [
             Text(
               'View All',
               style: TextStyle(
-                fontSize: FontSizes.labelSm,
+                fontSize: VFontSize.labelSm,
                 color: VColors.primary,
               ),
             ),
-            SizedBox(width: Spacing.xs),
+            SizedBox(width: VSpacing.xs),
             Icon(
               Icons.chevron_right,
-              size: IconSizes.sm,
+              size: VIconSize.sm,
               color: VColors.primary,
             ),
           ],

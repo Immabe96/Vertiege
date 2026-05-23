@@ -7,10 +7,11 @@ import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_tokens.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/loading_state.dart';
+import '../widgets/core/screen_loading.dart';
 import '../widgets/core/prestige_up_dialog.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
@@ -28,27 +29,27 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final canAscend = ref.watch(residentProvider.select(
       (s) => s.resident != null && s.resident!.tier.value >= 5 && s.resident!.prestigeStars == 0,
     ));
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        title: const Text('Hall of Ascension'),
-        actions: [
-          TextButton.icon(
-            onPressed: () => context.push('/ascension-path'),
-            icon: const Icon(Icons.map, size: IconSizes.sm),
-            label: const Text(
-              'View Your Journey',
-              style: TextStyle(fontSize: FontSizes.labelSm),
-            ),
+    return VHubPage(
+      title: 'Hall of Ascension',
+      showBack: true,
+      headerActions: [
+        FButton(
+          onPress: () => context.push('/ascension-path'),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.map, size: VIconSize.sm),
+              SizedBox(width: VSpacing.xs),
+              Text('Journey'),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
       body: Column(
         children: [
           if (resident != null) ...[
@@ -93,9 +94,9 @@ class _PrestigeHeader extends ConsumerWidget {
         : (prestigeStars == 1 ? 'Apex I' : 'Apex $prestigeStars');
 
     return Padding(
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
       child: _Card(
-        padding: const EdgeInsets.all(Spacing.lg),
+        padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         children: [
           Row(
@@ -113,7 +114,7 @@ class _PrestigeHeader extends ConsumerWidget {
                   color: VColors.tertiary,
                   size: 24,
                 ),
-              const SizedBox(width: Spacing.md),
+              const SizedBox(width: VSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,8 +122,8 @@ class _PrestigeHeader extends ConsumerWidget {
                     Text(
                       prestigeTitle,
                       style: TextStyle(
-                        fontSize: FontSizes.headlineLg,
-                        fontWeight: FontWeights.bold,
+                        fontSize: VFontSize.headlineLg,
+                        fontWeight: VFontWeight.bold,
                         color: VColors.tertiary,
                       ),
                     ),
@@ -131,7 +132,7 @@ class _PrestigeHeader extends ConsumerWidget {
                           ? 'Reach 50,000 XP to ascend'
                           : 'Prestige Level $prestigeStars',
                       style: TextStyle(
-                        fontSize: FontSizes.bodySm,
+                        fontSize: VFontSize.bodySm,
                         color: isDark
                             ? VColors.onSurfaceVariantDark
                             : VColors.onSurfaceVariant,
@@ -143,7 +144,7 @@ class _PrestigeHeader extends ConsumerWidget {
             ],
           ),
           if (canAscend) ...[
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -164,7 +165,7 @@ class _PrestigeHeader extends ConsumerWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: VColors.tertiary,
                   foregroundColor: VColors.onTertiary,
-                  padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
                 ),
               ),
             ),
@@ -231,7 +232,7 @@ class _XpLeaderboard extends ConsumerWidget {
     final resident = ref.watch(residentProvider).resident;
 
     if (resident == null) {
-      return const VLoadingList(itemCount: 4);
+      return const ScreenLoading.list();
     }
 
     final entries = <_LeaderEntry>[
@@ -342,7 +343,7 @@ Widget _buildLeaderboardList(
   }
 
   return ListView.builder(
-    padding: const EdgeInsets.all(Spacing.md),
+    padding: const EdgeInsets.all(VSpacing.md),
     itemCount: entries.length,
     itemBuilder: (context, index) {
       final entry = entries[index];
@@ -353,9 +354,9 @@ Widget _buildLeaderboardList(
       return FadeIn(
         delayMs: index * 50,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: Spacing.sm),
+          padding: const EdgeInsets.only(bottom: VSpacing.sm),
           child: _Card(
-            padding: const EdgeInsets.all(Spacing.md),
+            padding: const EdgeInsets.all(VSpacing.md),
             border: isTop3
                 ? Border.all(
                     color: glowColor.withValues(alpha: 0.4),
@@ -382,7 +383,7 @@ Widget _buildLeaderboardList(
                     decoration: BoxDecoration(
                       color: _rankColor(rank, isDark: isDark)
                           .withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      borderRadius: BorderRadius.circular(VRadius.sm),
                       border: isTop3
                           ? Border.all(
                               color: _rankColor(rank, isDark: isDark),
@@ -394,33 +395,33 @@ Widget _buildLeaderboardList(
                       child: Text(
                         '$rank',
                         style: TextStyle(
-                          fontSize: FontSizes.headlineMd,
-                          fontWeight: FontWeights.bold,
+                          fontSize: VFontSize.headlineMd,
+                          fontWeight: VFontWeight.bold,
                           color: _rankColor(rank, isDark: isDark),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: Spacing.md),
+                  const SizedBox(width: VSpacing.md),
                   // Avatar
                   CosmeticAvatar(imageUrl: entry.avatarUrl, size: 40),
-                  const SizedBox(width: Spacing.md),
+                  const SizedBox(width: VSpacing.md),
                   // Name + Title
                   Expanded(
                     child: LuminaryNameplate(
                       name: entry.name,
                       tier: entry.tier,
-                      fontSize: FontSizes.bodyMd,
+                      fontSize: VFontSize.bodyMd,
                       title: entry.title,
                     ),
                   ),
-                  const SizedBox(width: Spacing.sm),
+                  const SizedBox(width: VSpacing.sm),
                   // Score
                   Text(
                     '${entry.score}',
                     style: TextStyle(
-                      fontSize: FontSizes.headlineMd,
-                      fontWeight: FontWeights.bold,
+                      fontSize: VFontSize.headlineMd,
+                      fontWeight: VFontWeight.bold,
                       color: VColors.tertiary,
                     ),
                   ),
@@ -445,10 +446,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         border: border ?? Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_tokens.dart';
 import 'badge.dart' as badge_widget;
 
 class BadgeDisplay extends StatelessWidget {
@@ -14,8 +14,8 @@ class BadgeDisplay extends StatelessWidget {
     final uniqueProfessionBadges = earnedBadgeIds.toSet().toList();
 
     return Wrap(
-      spacing: Spacing.sm,
-      runSpacing: Spacing.xs,
+      spacing: VSpacing.sm,
+      runSpacing: VSpacing.xs,
       children: uniqueProfessionBadges
           .map((id) => badge_widget.Badge(decorationId: id))
           .toList(),

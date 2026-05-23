@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../theme/v_tokens.dart';
 import '../shared/tier_icon.dart';
 import '../../ui/buttons/v_button.dart';
@@ -210,29 +210,29 @@ class _CelebrationCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
             // Tier icon with pulsing glow
             _PulsingTierIcon(tier: tier),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             // Congratulations text
             Text(
               'Congratulations!',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeights.bold,
-                letterSpacing: LetterSpacing.section,
+                fontWeight: VFontWeight.bold,
+                letterSpacing: 0,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: VSpacing.xs),
             Text(
               'You\'ve reached ${tier.label}!',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.primary,
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
             // New perks list
             ...List.generate(perks.length, (i) {
               return _PerkItem(
@@ -241,17 +241,17 @@ class _CelebrationCard extends StatelessWidget {
                 index: i,
               );
             }),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
             // Dismiss button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: VButton(
                 label: 'Awesome!',
                 onPressed: onDismiss,
                 isFullWidth: true,
               ),
             ),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
           ],
         ),
       ),
@@ -349,8 +349,8 @@ class _PerkItem extends StatelessWidget {
             offset: Offset(20 * (1 - anim.value), 0),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.lg,
-                vertical: Spacing.xs,
+                horizontal: VSpacing.lg,
+                vertical: VSpacing.xs,
               ),
               child: Row(
                 children: [
@@ -362,7 +362,7 @@ class _PerkItem extends StatelessWidget {
                       color: VColors.primary.withValues(alpha: anim.value),
                     ),
                   ),
-                  const SizedBox(width: Spacing.sm),
+                  const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Text(
                       perk,

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class XpToast {
   static void show(BuildContext context, {required int amount}) {
@@ -42,21 +42,21 @@ class _XpToastWidgetState extends State<_XpToastWidget>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: AnimDurations.entrance,
+      duration: VAnimation.entrance,
       vsync: this,
     );
 
     _slide = Tween<double>(
       begin: -60,
       end: 0,
-    ).animate(CurvedAnimation(parent: _controller, curve: AnimCurves.easeOut));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: AnimCurves.easeInOut),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
     _scale = Tween<double>(
       begin: 0.8,
       end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: AnimCurves.easeOut));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
 
@@ -77,8 +77,8 @@ class _XpToastWidgetState extends State<_XpToastWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Positioned(
-      top: MediaQuery.of(context).padding.top + Spacing.md,
-      right: Spacing.md,
+      top: MediaQuery.of(context).padding.top + VSpacing.md,
+      right: VSpacing.md,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -91,15 +91,15 @@ class _XpToastWidgetState extends State<_XpToastWidget>
           );
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(RadiusTokens.pill),
+          borderRadius: BorderRadius.circular(VRadius.pill),
           child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.sm + 2,
+                horizontal: VSpacing.md,
+                vertical: VSpacing.sm + 2,
               ),
               decoration: BoxDecoration(
                 color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                borderRadius: BorderRadius.circular(VRadius.pill),
                 border: Border.all(color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant),
                 boxShadow: [
                   // Outer glow in gold
@@ -126,15 +126,15 @@ class _XpToastWidgetState extends State<_XpToastWidget>
                   const Icon(
                     Icons.bolt,
                     color: VColors.tertiary,
-                    size: IconSizes.md,
+                    size: VIconSize.md,
                   ),
-                  const SizedBox(width: Spacing.xs),
+                  const SizedBox(width: VSpacing.xs),
                   Text(
                     '+${widget.amount} XP',
                     style: const TextStyle(
                       color: VColors.tertiary,
-                      fontSize: FontSizes.body,
-                      fontWeight: FontWeights.bold,
+                      fontSize: VFontSize.bodyMd,
+                      fontWeight: VFontWeight.bold,
                     ),
                   ),
                 ],

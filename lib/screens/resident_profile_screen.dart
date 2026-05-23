@@ -16,6 +16,7 @@ import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/profile/badge_display.dart';
+import '../widgets/shared/profession_icon.dart';
 import '../widgets/shared/tier_icon.dart';
 
 class ResidentProfileScreen extends ConsumerStatefulWidget {
@@ -191,10 +192,10 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.work,
-                          size: VIconSize.xs,
-                          color: isDark
+                        ProfessionIcon(
+                          profession: resident.profession,
+                          size: VIconSize.sm,
+                          fallbackColor: isDark
                               ? VColors.onSurfaceVariantDark
                               : VColors.onSurfaceVariant,
                         ),

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 
 class CompletionHint extends StatefulWidget {
@@ -33,15 +33,15 @@ class _CompletionHintState extends State<CompletionHint> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.xs + 2,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.xs + 2,
       ),
       child: Dismissible(
         key: ValueKey('hint-${widget.title}'),
         direction: DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: Spacing.md),
+          padding: const EdgeInsets.only(right: VSpacing.md),
           child: Icon(VIcons.x, color: theme.colorScheme.outline),
         ),
         onDismissed: (_) => setState(() => _dismissed = true),
@@ -49,12 +49,12 @@ class _CompletionHintState extends State<CompletionHint> {
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(RadiusTokens.card),
+            borderRadius: BorderRadius.circular(VRadius.lg),
             child: Container(
-              padding: const EdgeInsets.all(Spacing.md - 4),
+              padding: const EdgeInsets.all(VSpacing.md - 4),
               decoration: BoxDecoration(
                 color: widget.color.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(RadiusTokens.card),
+                borderRadius: BorderRadius.circular(VRadius.lg),
                 border: Border.all(color: widget.color.withValues(alpha: 0.2)),
               ),
               child: Row(
@@ -64,15 +64,15 @@ class _CompletionHintState extends State<CompletionHint> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: widget.color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(RadiusTokens.input),
+                      borderRadius: BorderRadius.circular(VRadius.md),
                     ),
                     child: Icon(
                       widget.icon,
-                      size: IconSizes.md,
+                      size: VIconSize.md,
                       color: widget.color,
                     ),
                   ),
-                  const SizedBox(width: Spacing.md - 4),
+                  const SizedBox(width: VSpacing.md - 4),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +80,7 @@ class _CompletionHintState extends State<CompletionHint> {
                         Text(
                           widget.title,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeights.bold,
+                            fontWeight: VFontWeight.bold,
                           ),
                         ),
                         Text(
@@ -94,7 +94,7 @@ class _CompletionHintState extends State<CompletionHint> {
                   ),
                   Icon(
                     Icons.arrow_forward_ios,
-                    size: IconSizes.xs + 2,
+                    size: VIconSize.xs + 2,
                     color: theme.colorScheme.outline,
                   ),
                 ],

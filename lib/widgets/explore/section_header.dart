@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class ExploreSectionHeader extends StatelessWidget {
   final String title;
@@ -11,10 +11,10 @@ class ExploreSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.sm + 4,
-        Spacing.md,
-        Spacing.xs,
+        VSpacing.md,
+        VSpacing.sm + 4,
+        VSpacing.md,
+        VSpacing.xs,
       ),
       child: Row(
         children: [
@@ -23,16 +23,16 @@ class ExploreSectionHeader extends StatelessWidget {
             height: 20,
             decoration: BoxDecoration(
               color: VColors.tertiary,
-              borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              borderRadius: BorderRadius.circular(VRadius.sm),
             ),
           ),
-          const SizedBox(width: Spacing.sm),
+          const SizedBox(width: VSpacing.sm),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
-                fontSize: FontSizes.headlineLg,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.headlineLg,
+                fontWeight: VFontWeight.semiBold,
                 color: VColors.primary,
               ),
             ),

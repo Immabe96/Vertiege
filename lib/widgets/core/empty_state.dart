@@ -1,15 +1,15 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 
 import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
+import '../../utils/v_motion.dart';
 
 /// Variant determines the color tint applied to the empty state.
 enum EmptyStateVariant { default_, error, success }
 
-/// A compact, minimal "no data" widget for Vertiege.
-///
-/// Displays a subtle icon, short title, useful body text, and optional CTA button.
-/// No glass, no gradients, no heavy animations — clean and compact.
+/// Compact Forui-aligned empty state: muted icon, title, optional CTA.
 class AppEmptyState extends ConsumerStatefulWidget {
   final String title;
   final String? description;
@@ -37,16 +37,29 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
   late final AnimationController _controller;
   late final Animation<double> _fade;
 
+  bool _started = false;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: VAnimation.fast,
       vsync: this,
     );
     _fade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+      CurvedAnimation(parent: _controller, curve: VAnimation.standard),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    if (!context.motionEnabled) {
+      _controller.value = 1.0;
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _controller.forward();
     });
@@ -58,21 +71,21 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
     super.dispose();
   }
 
-  Color _variantColor() {
+  Color _variantColor(BuildContext context) {
     switch (widget.variant) {
       case EmptyStateVariant.error:
         return VColors.error;
       case EmptyStateVariant.success:
         return VColors.success;
       case EmptyStateVariant.default_:
-        return VColors.outline;
+        return Theme.of(context).colorScheme.onSurfaceVariant;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final variantColor = _variantColor();
+    final variantColor = _variantColor(context);
 
     return FadeTransition(
       opacity: _fade,
@@ -98,9 +111,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                   color: variantColor,
                 ),
               ),
-
               const SizedBox(height: 12),
-
               Text(
                 widget.title,
                 style: theme.textTheme.titleSmall?.copyWith(
@@ -109,7 +120,6 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 ),
                 textAlign: TextAlign.center,
               ),
-
               if (widget.description != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -121,22 +131,11 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                   textAlign: TextAlign.center,
                 ),
               ],
-
               if (widget.actionLabel != null && widget.onAction != null) ...[
                 const SizedBox(height: 16),
-                FilledButton.tonalIcon(
-                  onPressed: widget.onAction,
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: Text(widget.actionLabel!),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                FButton(
+                  onPress: widget.onAction,
+                  child: Text(widget.actionLabel!),
                 ),
               ],
             ],

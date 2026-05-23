@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/explore/shimmer_world_card.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -85,7 +86,23 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     if (isLoading) {
       return Scaffold(
         backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        body: const Center(child: CircularProgressIndicator()),
+        appBar: AppBar(
+          backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
+              .withValues(alpha: 0.86),
+          elevation: 0,
+          title: Text(
+            'Worlds',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: VFontWeight.semiBold,
+            ),
+          ),
+        ),
+        body: ListView.separated(
+          padding: const EdgeInsets.all(VSpacing.md),
+          itemCount: 6,
+          separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
+          itemBuilder: (_, _) => const ShimmerWorldCard(),
+        ),
       );
     }
 

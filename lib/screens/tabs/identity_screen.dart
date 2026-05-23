@@ -30,7 +30,12 @@ import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/referral_chip.dart';
 import '../../widgets/profile/subscription_badge.dart';
 import '../../widgets/profile/trophy_case.dart';
+import '../../widgets/core/screen_loading.dart';
+import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/tier_up_dialog.dart';
+import '../../widgets/shared/profession_icon.dart';
+import '../../widgets/shared/tier_icon.dart';
 import '../../config/achievements.dart';
 import '../../config/cosmetics.dart';
 
@@ -209,42 +214,16 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     if (residentState.isLoading) {
       return const VHubPage(
         title: 'Wall of Honour',
-        body: Center(child: CircularProgressIndicator()),
+        body: ScreenLoading.profile(),
       );
     }
 
     if (resident == null) {
       return VHubPage(
         title: 'Wall of Honour',
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(VSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.person_off,
-                  size: 48,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
-                ),
-                const SizedBox(height: VSpacing.md),
-                Text(
-                  residentState.loadError ??
-                      'Could not load your profile.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge,
-                ),
-                const SizedBox(height: VSpacing.lg),
-                FilledButton(
-                  onPressed: () =>
-                      ref.read(residentProvider.notifier).loadResident(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
+        body: AppErrorState(
+          message: residentState.loadError ?? 'Could not load your profile.',
+          onRetry: () => ref.read(residentProvider.notifier).loadResident(),
         ),
       );
     }
@@ -311,11 +290,13 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     return VHubPage(
       title: 'Wall of Honour',
       headerActions: [
-        FHeaderAction(
+        VAccessibleHeaderAction(
+          label: 'Refresh honour wall',
           icon: const Icon(FIcons.rotateCw),
           onPress: refreshHonourWall,
         ),
-        FHeaderAction(
+        VAccessibleHeaderAction(
+          label: 'Settings',
           icon: const Icon(FIcons.settings),
           onPress: () => context.push('/settings'),
         ),
@@ -380,12 +361,19 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           color: VColors.primary.withValues(alpha: 0.3),
                         ),
                       ),
-                      child: Text(
-                        resident.tier.label,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: VColors.primary,
-                          fontWeight: VFontWeight.bold,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TierIcon(tier: tierValue, size: 18),
+                          const SizedBox(width: VSpacing.xxs),
+                          Text(
+                            resident.tier.label,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: VColors.primary,
+                              fontWeight: VFontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -460,22 +448,22 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? VColors.glassBackgroundDark
-                          : VColors.glassBackground,
+                          ? VColors.surfaceContainerDark
+                          : VColors.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(VRadius.pill),
                       border: Border.all(
                         color: isDark
-                            ? VColors.glassBorderDark
-                            : VColors.glassBorder,
+                            ? VColors.outlineVariantDark.withValues(alpha: 0.4)
+                            : VColors.outlineVariant.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.work,
-                          size: VIconSize.xs,
-                          color: isDark
+                        ProfessionIcon(
+                          profession: resident.profession,
+                          size: VIconSize.sm,
+                          fallbackColor: isDark
                               ? VColors.onSurfaceVariantDark
                               : VColors.onSurfaceVariant,
                         ),
@@ -495,6 +483,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               ],
             ),
           ),
+
+          _SectionHeader(title: 'Standing', theme: theme),
+          const SizedBox(height: VSpacing.sm),
 
           // ── Honour stats (achievements · worlds · rep) ──
           Padding(
@@ -533,6 +524,44 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
           ),
           const SizedBox(height: VSpacing.lg),
+
+          _SectionHeader(title: 'Today', theme: theme),
+          const SizedBox(height: VSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: resident.streakCount > 0
+                ? StreakDisplay(
+                    streakCount: resident.streakCount,
+                    streakShields: resident.streakShields,
+                  )
+                : Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(VSpacing.md),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? VColors.surfaceContainerDark
+                          : VColors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(VRadius.lg),
+                      border: Border.all(
+                        color: isDark
+                            ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                            : VColors.outlineVariant.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'No active streak—complete daily quests to start one.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          _SectionHeader(title: 'Honours', theme: theme),
+          const SizedBox(height: VSpacing.sm),
 
           TrophyCase(
             resident: resident,
@@ -577,6 +606,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           ),
           const SizedBox(height: VSpacing.lg),
 
+          _SectionHeader(title: 'Progress', theme: theme),
+          const SizedBox(height: VSpacing.sm),
+
           // ── Progress (tier bar + XP + collapsible perks) ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
@@ -596,11 +628,17 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Progress',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: VFontWeight.semiBold,
-                    ),
+                  Row(
+                    children: [
+                      TierIcon(tier: tierValue, size: 28),
+                      const SizedBox(width: VSpacing.sm),
+                      Text(
+                        'Progress',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: VSpacing.sm),
                   SovereignProgressBar(
@@ -762,17 +800,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           if (_highPrestigeWorlds.isNotEmpty)
             const SizedBox(height: VSpacing.lg),
 
-          // ── Streak Display ──────────────────────────────
-          if (resident.streakCount > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: StreakDisplay(
-                streakCount: resident.streakCount,
-                streakShields: resident.streakShields,
-              ),
-            ),
-          if (resident.streakCount > 0) const SizedBox(height: VSpacing.lg),
-
           // ── Completion hints ────────────────────────────
           if (resident.bio.isEmpty)
             Padding(
@@ -807,7 +834,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             key: _exploreSectionKey,
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             child: VSectionList(
-              title: 'Explore',
+              title: 'Social',
               children: [
                 VSectionTile(
                   icon: Icons.people,
@@ -821,6 +848,20 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       : 'Allies ($allyCount)',
                   onTap: () => context.push('/allies'),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: VSpacing.md),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            child: VSectionList(
+              title: 'Explore',
+              children: [
+                VSectionTile(
+                  icon: Icons.explore,
+                  label: 'Daily quests',
+                  onTap: () => context.push('/daily-quests'),
+                ),
                 VSectionTile(
                   icon: Icons.leaderboard,
                   label: 'Hall of Ascension',
@@ -830,11 +871,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   icon: Icons.leaderboard_outlined,
                   label: 'Weekly league',
                   onTap: () => context.push('/leagues'),
-                ),
-                VSectionTile(
-                  icon: Icons.explore,
-                  label: 'Daily quests',
-                  onTap: () => context.push('/daily-quests'),
                 ),
               ],
             ),
@@ -865,7 +901,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             child: VSectionList(
-              title: 'Session',
+              title: 'Account',
               children: [
                 VSectionTile(
                   icon: Icons.logout,
@@ -879,6 +915,28 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
           const SizedBox(height: VSpacing.xxl),
         ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final ThemeData theme;
+
+  const _SectionHeader({required this.title, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(VSpacing.lg, VSpacing.md, VSpacing.lg, 0),
+      child: Text(
+        title.toUpperCase(),
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontWeight: VFontWeight.bold,
+          letterSpacing: 0.5,
+          color: VColors.onSurfaceVariant,
         ),
       ),
     );

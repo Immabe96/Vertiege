@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/resident.dart';
 import '../../theme/v_tokens.dart';
+import '../shared/profession_icon.dart';
 import '../../theme/v_colors.dart';
 import '../../utils/haptics.dart';
 import '../../ui/icons/v_icons.dart';
@@ -173,6 +174,15 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 children: _professions.map((p) {
                   final isSel = _selectedProfession == p;
                   return ChoiceChip(
+                    avatar: p.isEmpty
+                        ? null
+                        : ProfessionIcon(
+                            profession: p,
+                            size: 18,
+                            fallbackColor: isSel
+                                ? VColors.onPrimary
+                                : Theme.of(ctx).colorScheme.onSurfaceVariant,
+                          ),
                     label: Text(p.isEmpty ? 'None' : p),
                     selected: isSel,
                     onSelected: (_) => setState(() => _selectedProfession = p),

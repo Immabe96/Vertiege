@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_tokens.dart';
 import '../core/broken_media.dart';
 import '../core/shimmer.dart';
 
@@ -16,8 +16,8 @@ class MediaGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: Spacing.xs,
-        mainAxisSpacing: Spacing.xs,
+        crossAxisSpacing: VSpacing.xs,
+        mainAxisSpacing: VSpacing.xs,
         childAspectRatio: 1,
       ),
       itemCount: images.length,
@@ -27,7 +27,7 @@ class MediaGrid extends StatelessWidget {
               ? () => onImagePress!(images[index])
               : null,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusTokens.card),
+            borderRadius: BorderRadius.circular(VRadius.lg),
             child: Image.network(
               images[index],
               fit: BoxFit.cover,

@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 /// A tier-aware nameplate that renders resident names with progressive
 /// visual prestige based on their tier level.
@@ -23,7 +23,7 @@ class LuminaryNameplate extends StatelessWidget {
     super.key,
     required this.name,
     this.tier = 1,
-    this.fontSize = FontSizes.bodyLg,
+    this.fontSize = VFontSize.bodyLg,
     this.textAlign = TextAlign.left,
     this.maxLines = 1,
     this.overflow = TextOverflow.ellipsis,
@@ -100,7 +100,7 @@ class LuminaryNameplate extends StatelessWidget {
       case 5:
       case 4:
         return baseStyle.copyWith(
-          fontWeight: FontWeights.bold,
+          fontWeight: VFontWeight.bold,
           color: VColors.tertiary,
           shadows: [
             Shadow(
@@ -111,7 +111,7 @@ class LuminaryNameplate extends StatelessWidget {
         );
       case 3:
         return baseStyle.copyWith(
-          fontWeight: FontWeights.bold,
+          fontWeight: VFontWeight.bold,
           color: VColors.primary,
           shadows: [
             Shadow(
@@ -122,13 +122,13 @@ class LuminaryNameplate extends StatelessWidget {
         );
       case 2:
         return baseStyle.copyWith(
-          fontWeight: FontWeights.semiBold,
+          fontWeight: VFontWeight.semiBold,
           color: VColors.primary,
         );
       case 1:
       default:
         return baseStyle.copyWith(
-          fontWeight: FontWeights.regular,
+          fontWeight: VFontWeight.regular,
           color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
         );
     }

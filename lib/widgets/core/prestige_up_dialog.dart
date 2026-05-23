@@ -1,7 +1,7 @@
-import 'package:confetti/confetti.dart';
+﻿import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 
 class PrestigeUpDialog extends StatefulWidget {
@@ -68,22 +68,22 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
               ? VColors.surfaceContainerDark
               : VColors.surfaceContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+            borderRadius: BorderRadius.circular(VRadius.xl),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(Spacing.lg),
+            padding: const EdgeInsets.all(VSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(Spacing.sm),
+                  padding: const EdgeInsets.all(VSpacing.sm),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [VColors.tertiary, VColors.secondary],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    borderRadius: BorderRadius.circular(VRadius.md),
                   ),
                   child: const Icon(
                     Icons.auto_awesome,
@@ -91,24 +91,24 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                     color: VColors.onTertiary,
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 Text(
                   'ASCENSION COMPLETE',
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                     color: VColors.tertiary,
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.lg,
-                    vertical: Spacing.sm,
+                    horizontal: VSpacing.lg,
+                    vertical: VSpacing.sm,
                   ),
                   decoration: BoxDecoration(
                     color: VColors.tertiary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                    borderRadius: BorderRadius.circular(VRadius.pill),
                     border: Border.all(
                       color: VColors.tertiary.withValues(alpha: 0.4),
                     ),
@@ -132,22 +132,22 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 Text(
                   _prestigeTitle(widget.newPrestigeStars),
                   style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                     color: VColors.tertiary,
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 Container(
-                  padding: const EdgeInsets.all(Spacing.md),
+                  padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
                     color: isDark
                         ? VColors.surfaceDark
                         : VColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    borderRadius: BorderRadius.circular(VRadius.md),
                     border: Border.all(
                       color: VColors.tertiary.withValues(alpha: 0.3),
                     ),
@@ -158,11 +158,11 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                       Text(
                         'Prestige Rewards:',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeights.bold,
+                          fontWeight: VFontWeight.bold,
                           color: VColors.tertiary,
                         ),
                       ),
-                      const SizedBox(height: Spacing.xs),
+                      const SizedBox(height: VSpacing.xs),
                       _PrestigePerkRow(
                         icon: Icons.badge,
                         text: 'Exclusive prestige frame unlocked',
@@ -178,7 +178,7 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 VButton(
                   label: 'Continue',
                   onPressed: () => Navigator.of(context).pop(),
@@ -222,7 +222,7 @@ class _PrestigePerkRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, size: 16, color: VColors.tertiary),
-          const SizedBox(width: Spacing.xs),
+          const SizedBox(width: VSpacing.xs),
           Expanded(
             child: Text(
               text,

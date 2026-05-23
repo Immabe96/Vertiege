@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class Pulse extends StatefulWidget {
   final double width;
@@ -12,7 +12,7 @@ class Pulse extends StatefulWidget {
     super.key,
     this.width = double.infinity,
     this.height = 16,
-    this.borderRadius = RadiusTokens.sm,
+    this.borderRadius = VRadius.sm,
     this.opacity,
   });
 
@@ -69,7 +69,7 @@ class Shimmer extends StatelessWidget {
     super.key,
     this.width = double.infinity,
     this.height = 16,
-    this.borderRadius = RadiusTokens.sm,
+    this.borderRadius = VRadius.sm,
   });
 
   @override
@@ -89,31 +89,31 @@ class ShimmerPostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.sm,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Pulse(width: 48, height: 48, borderRadius: RadiusTokens.full),
-          const SizedBox(width: Spacing.md),
+          const Pulse(width: 48, height: 48, borderRadius: VRadius.pill),
+          const SizedBox(width: VSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: VSpacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.35,
-                  height: Spacing.md,
-                  borderRadius: RadiusTokens.chip,
+                  height: VSpacing.md,
+                  borderRadius: VRadius.sm,
                 ),
-                const SizedBox(height: Spacing.sm),
-                const Pulse(borderRadius: RadiusTokens.chip),
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: VSpacing.sm),
+                const Pulse(borderRadius: VRadius.sm),
+                const SizedBox(height: VSpacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.6,
-                  height: FontSizes.bodyMd,
-                  borderRadius: RadiusTokens.chip,
+                  height: VFontSize.bodyMd,
+                  borderRadius: VRadius.sm,
                 ),
               ],
             ),
@@ -135,27 +135,27 @@ class ShimmerChatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.sm,
       ),
       child: Row(
         children: [
-          const Pulse(width: 56, height: 56, borderRadius: RadiusTokens.full),
-          const SizedBox(width: Spacing.md),
+          const Pulse(width: 56, height: 56, borderRadius: VRadius.pill),
+          const SizedBox(width: VSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.3,
-                  height: Spacing.md,
-                  borderRadius: RadiusTokens.chip,
+                  height: VSpacing.md,
+                  borderRadius: VRadius.sm,
                 ),
-                const SizedBox(height: Spacing.xs),
+                const SizedBox(height: VSpacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.55,
-                  height: Spacing.md,
-                  borderRadius: RadiusTokens.chip,
+                  height: VSpacing.md,
+                  borderRadius: VRadius.sm,
                 ),
               ],
             ),

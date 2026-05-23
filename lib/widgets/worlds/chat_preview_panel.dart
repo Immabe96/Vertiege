@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/channel.dart';
@@ -6,7 +6,7 @@ import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
@@ -101,9 +101,9 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
         : allMessages;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
       child: VSurfacePanel(
-        padding: const EdgeInsets.all(Spacing.lg),
+        padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -115,38 +115,38 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   height: 16,
                   decoration: BoxDecoration(
                     color: VColors.tertiary,
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    borderRadius: BorderRadius.circular(VRadius.sm),
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 const Text(
                   'LIVE CHAT',
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.semiBold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.semiBold,
                     color: VColors.tertiary,
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
                 const Spacer(),
                 const Text(
                   '#general',
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
+                    fontSize: VFontSize.labelSm,
                     color: VColors.outline,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             // Messages
             if (messages.isEmpty)
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                padding: EdgeInsets.symmetric(vertical: VSpacing.md),
                 child: Text(
                   'No messages yet. Start the conversation!',
                   style: TextStyle(
-                    fontSize: FontSizes.bodyMd,
+                    fontSize: VFontSize.bodyMd,
                     color: VColors.outline,
                   ),
                 ),
@@ -154,7 +154,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
             else
               ...messages.map(
                 (msg) => Padding(
-                  padding: const EdgeInsets.only(bottom: Spacing.sm),
+                  padding: const EdgeInsets.only(bottom: VSpacing.sm),
                   child: RichText(
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -163,15 +163,15 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                         TextSpan(
                           text: msg.senderName,
                           style: const TextStyle(
-                            fontSize: FontSizes.labelSm,
-                            fontWeight: FontWeights.semiBold,
+                            fontSize: VFontSize.labelSm,
+                            fontWeight: VFontWeight.semiBold,
                             color: VColors.primary,
                           ),
                         ),
                         TextSpan(
                           text: '  ${msg.content}',
                           style: TextStyle(
-                            fontSize: FontSizes.bodyMd,
+                            fontSize: VFontSize.bodyMd,
                             color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                           ),
                         ),
@@ -180,13 +180,22 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   ),
                 ),
               ),
-            const SizedBox(height: Spacing.md),
-            // Input bar
-            VSurfacePanel(
-              blur: 8,
+            const SizedBox(height: VSpacing.md),
+            // Input bar (inset surface — no nested panel)
+            Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.xs,
+                horizontal: VSpacing.md,
+                vertical: VSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? VColors.surfaceDark : VColors.surface,
+                borderRadius: BorderRadius.circular(VRadius.md),
+                border: Border.all(
+                  color: isDark
+                      ? VColors.outlineVariantDark.withValues(alpha: 0.4)
+                      : VColors.outlineVariant.withValues(alpha: 0.5),
+                  width: 0.5,
+                ),
               ),
               child: Row(
                 children: [
@@ -194,13 +203,13 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                     child: TextField(
                       controller: _controller,
                       style: TextStyle(
-                        fontSize: FontSizes.bodyMd,
+                        fontSize: VFontSize.bodyMd,
                         color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                       ),
                       decoration: const InputDecoration(
                         hintText: 'Type a message...',
                         hintStyle: TextStyle(
-                          fontSize: FontSizes.bodyMd,
+                          fontSize: VFontSize.bodyMd,
                           color: VColors.outline,
                         ),
                         border: InputBorder.none,
@@ -212,7 +221,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                   ),
                   IconButton(
                     onPressed: _sendMessage,
-                    icon: const Icon(VIcons.send, size: IconSizes.sm),
+                    icon: const Icon(VIcons.send, size: VIconSize.sm),
                     color: VColors.tertiary,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
@@ -223,7 +232,7 @@ class _ChatPreviewPanelState extends ConsumerState<ChatPreviewPanel> {
                 ],
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             // View Channel button
             VButton(
               label: 'VIEW CHANNEL',

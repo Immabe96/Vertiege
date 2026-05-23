@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/moderation_service.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_tokens.dart';
 import '../utils/date_format.dart';
-import '../widgets/core/loading_state.dart';
+import '../widgets/core/screen_loading.dart';
 import '../widgets/core/empty_state.dart';
 
 class AuditLogScreen extends ConsumerStatefulWidget {
@@ -86,11 +87,11 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: Text('${widget.worldName} — Realm Audit')),
+    return VHubPage(
+      title: 'Realm Audit',
+      showBack: true,
       body: _loading
-          ? const VLoadingList(itemCount: 8)
+          ? const ScreenLoading.list()
           : _error != null
           ? AppErrorState(message: _error!, onRetry: _load)
           : _entries.isEmpty
@@ -105,7 +106,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                 await Future<void>.delayed(const Duration(milliseconds: 200));
               },
               child: ListView.builder(
-                padding: const EdgeInsets.all(Spacing.md),
+                padding: const EdgeInsets.all(VSpacing.md),
                 itemCount: _entries.length,
                 itemBuilder: (context, index) {
                   final entry = _entries[index];
@@ -118,10 +119,10 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
 
                   return Padding(
                     padding: EdgeInsets.only(
-                      bottom: index < _entries.length - 1 ? Spacing.sm : 0,
+                      bottom: index < _entries.length - 1 ? VSpacing.sm : 0,
                     ),
                     child: _Card(
-                      padding: const EdgeInsets.all(Spacing.md),
+                      padding: const EdgeInsets.all(VSpacing.md),
                       child: Row(
                         children: [
                           Container(
@@ -133,18 +134,18 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                       : VColors.surfaceContainerHighest)
                                   .withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(
-                                RadiusTokens.md,
+                                VRadius.md,
                               ),
                             ),
                             child: Icon(
                               _actionIcon(action),
-                              size: IconSizes.sm,
+                              size: VIconSize.sm,
                               color: isDark
                                   ? VColors.onSurfaceVariantDark
                                   : VColors.onSurfaceVariant,
                             ),
                           ),
-                          const SizedBox(width: Spacing.md),
+                          const SizedBox(width: VSpacing.md),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,8 +153,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                 Text(
                                   _formatAction(action),
                                   style: TextStyle(
-                                    fontSize: FontSizes.bodyMd,
-                                    fontWeight: FontWeights.semiBold,
+                                    fontSize: VFontSize.bodyMd,
+                                    fontWeight: VFontWeight.semiBold,
                                     color: isDark
                                         ? VColors.onSurfaceDark
                                         : VColors.onSurface,
@@ -164,7 +165,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                   Text(
                                     'by ${entry['actor_id']}',
                                     style: TextStyle(
-                                      fontSize: FontSizes.labelSm,
+                                      fontSize: VFontSize.labelSm,
                                       color: isDark
                                           ? VColors.onSurfaceVariantDark
                                           : VColors.onSurfaceVariant,
@@ -174,7 +175,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                   Text(
                                     '$count messages',
                                     style: TextStyle(
-                                      fontSize: FontSizes.labelSm,
+                                      fontSize: VFontSize.labelSm,
                                       color: isDark
                                           ? VColors.onSurfaceVariantDark
                                           : VColors.onSurfaceVariant,
@@ -187,7 +188,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                             Text(
                               formatTimestamp(createdAt.millisecondsSinceEpoch),
                               style: TextStyle(
-                                fontSize: FontSizes.labelSm,
+                                fontSize: VFontSize.labelSm,
                                 color: isDark
                                     ? VColors.onSurfaceVariantDark
                                     : VColors.onSurfaceVariant,
@@ -214,10 +215,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

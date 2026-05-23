@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../state/world_provider.dart';
 import '../../../theme/v_colors.dart';
-import '../../../theme/design_system.dart';
+import '../../../theme/v_tokens.dart';
 
 /// Large card with 3 trending world rows.
 class TrendingCard extends ConsumerWidget {
@@ -40,22 +40,22 @@ class TrendingCard extends ConsumerWidget {
           children: [
             const Icon(
               Icons.trending_up,
-              size: IconSizes.sm,
+              size: VIconSize.sm,
               color: VColors.primary,
             ),
-            const SizedBox(width: Spacing.xs),
+            const SizedBox(width: VSpacing.xs),
             const Text(
               'TRENDING WORLDS',
               style: TextStyle(
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.labelSm,
+                fontWeight: VFontWeight.semiBold,
                 color: VColors.onSurfaceVariant,
-                letterSpacing: LetterSpacing.label,
+                letterSpacing: 0,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         ...trending.asMap().entries.map((entry) {
           final index = entry.key;
           final world = entry.value;
@@ -63,13 +63,13 @@ class TrendingCard extends ConsumerWidget {
 
           return Padding(
             padding: EdgeInsets.only(
-              bottom: index < trending.length - 1 ? Spacing.sm : 0,
+              bottom: index < trending.length - 1 ? VSpacing.sm : 0,
             ),
             child: InkWell(
               onTap: () => context.push('/explore/${world.id}'),
-              borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              borderRadius: BorderRadius.circular(VRadius.sm),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+                padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
                 child: Row(
                   children: [
                     Container(
@@ -77,15 +77,15 @@ class TrendingCard extends ConsumerWidget {
                       height: 36,
                       decoration: BoxDecoration(
                         color: VColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                       child: Icon(
                         iconData,
-                        size: IconSizes.sm,
+                        size: VIconSize.sm,
                         color: VColors.primary,
                       ),
                     ),
-                    const SizedBox(width: Spacing.sm),
+                    const SizedBox(width: VSpacing.sm),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,8 +93,8 @@ class TrendingCard extends ConsumerWidget {
                           Text(
                             world.name,
                             style: const TextStyle(
-                              fontSize: FontSizes.bodyMd,
-                              fontWeight: FontWeights.bold,
+                              fontSize: VFontSize.bodyMd,
+                              fontWeight: VFontWeight.bold,
                               color: VColors.onSurface,
                             ),
                             maxLines: 1,
@@ -103,7 +103,7 @@ class TrendingCard extends ConsumerWidget {
                           Text(
                             'Prestige ${world.prestige}  •  ${world.memberCount} members',
                             style: const TextStyle(
-                              fontSize: FontSizes.labelSm,
+                              fontSize: VFontSize.labelSm,
                               color: VColors.outline,
                             ),
                           ),
@@ -112,18 +112,18 @@ class TrendingCard extends ConsumerWidget {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.sm,
+                        horizontal: VSpacing.sm,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: VColors.tertiary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                        borderRadius: BorderRadius.circular(VRadius.pill),
                       ),
                       child: Text(
                         '#${index + 1}',
                         style: const TextStyle(
-                          fontSize: FontSizes.labelSm,
-                          fontWeight: FontWeights.bold,
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.bold,
                           color: VColors.tertiary,
                         ),
                       ),

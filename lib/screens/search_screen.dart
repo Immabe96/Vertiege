@@ -752,7 +752,9 @@ class _PostTile extends StatelessWidget {
               : VColors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(VRadius.lg),
           child: InkWell(
-            onTap: () => context.push('/explore/${post.worldId}'),
+            onTap: () => context.push(
+              '/explore/${post.worldId}?post=${Uri.encodeComponent(post.id)}',
+            ),
             borderRadius: BorderRadius.circular(VRadius.lg),
             child: ListTile(
               leading: CosmeticAvatar(

@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 
 class _ExclusiveReaction {
@@ -141,28 +141,28 @@ class _ReactionBarState extends State<ReactionBar> {
           decoration: BoxDecoration(
             color: VColors.glassBackground,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(RadiusTokens.cardFeatured),
+              top: Radius.circular(VRadius.md),
             ),
             border: Border.all(color: VColors.glassBorder),
           ),
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: Spacing.sm),
+                margin: const EdgeInsets.only(bottom: VSpacing.sm),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
               ),
               Text('Choose a reaction', style: theme.textTheme.titleSmall),
-              const SizedBox(height: Spacing.md),
+              const SizedBox(height: VSpacing.md),
               Wrap(
-                spacing: Spacing.md,
-                runSpacing: Spacing.sm,
+                spacing: VSpacing.md,
+                runSpacing: VSpacing.sm,
                 children: [
                   ..._allEmojis.map((emoji) {
                     final isActive = _userReactions.contains(emoji);
@@ -172,13 +172,13 @@ class _ReactionBarState extends State<ReactionBar> {
                         _onReactionTap(emoji);
                       },
                       child: AnimatedContainer(
-                        duration: AnimDurations.fast,
-                        padding: const EdgeInsets.all(Spacing.md),
+                        duration: VAnimation.fast,
+                        padding: const EdgeInsets.all(VSpacing.md),
                         decoration: BoxDecoration(
                           color: isActive
                               ? theme.colorScheme.primaryContainer
                               : theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(RadiusTokens.card),
+                          borderRadius: BorderRadius.circular(VRadius.lg),
                           border: isActive
                               ? Border.all(
                                   color: theme.colorScheme.primary,
@@ -191,12 +191,12 @@ class _ReactionBarState extends State<ReactionBar> {
                           children: [
                             Icon(
                               _iconFor(emoji),
-                              size: IconSizes.xl,
+                              size: VIconSize.xl,
                               color: isActive
                                   ? theme.colorScheme.primary
                                   : theme.colorScheme.onSurface,
                             ),
-                            const SizedBox(height: Spacing.xs),
+                            const SizedBox(height: VSpacing.xs),
                             Text(
                               _labelFor(emoji),
                               style: theme.textTheme.labelSmall?.copyWith(
@@ -204,8 +204,8 @@ class _ReactionBarState extends State<ReactionBar> {
                                     ? theme.colorScheme.primary
                                     : theme.colorScheme.onSurface,
                                 fontWeight: isActive
-                                    ? FontWeights.bold
-                                    : FontWeights.regular,
+                                    ? VFontWeight.bold
+                                    : VFontWeight.regular,
                               ),
                             ),
                           ],
@@ -213,7 +213,7 @@ class _ReactionBarState extends State<ReactionBar> {
                       ),
                     );
                   }),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   ..._exclusiveReactions.map((reaction) {
                     final isUnlocked = widget.userTier >= reaction.requiredTier;
                     return GestureDetector(
@@ -226,13 +226,13 @@ class _ReactionBarState extends State<ReactionBar> {
                         }
                       },
                       child: AnimatedContainer(
-                        duration: AnimDurations.fast,
-                        padding: const EdgeInsets.all(Spacing.md),
+                        duration: VAnimation.fast,
+                        padding: const EdgeInsets.all(VSpacing.md),
                         decoration: BoxDecoration(
                           color: isUnlocked
                               ? VColors.tertiary.withValues(alpha: 0.15)
                               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(RadiusTokens.card),
+                          borderRadius: BorderRadius.circular(VRadius.lg),
                           border: isUnlocked
                               ? Border.all(color: VColors.tertiary.withValues(alpha: 0.4))
                               : null,
@@ -245,7 +245,7 @@ class _ReactionBarState extends State<ReactionBar> {
                               children: [
                                 Icon(
                                   reaction.icon,
-                                  size: IconSizes.xl,
+                                  size: VIconSize.xl,
                                   color: isUnlocked
                                       ? VColors.tertiary
                                       : theme.colorScheme.outline,
@@ -258,14 +258,14 @@ class _ReactionBarState extends State<ReactionBar> {
                                   ),
                               ],
                             ),
-                            const SizedBox(height: Spacing.xs),
+                            const SizedBox(height: VSpacing.xs),
                             Text(
                               reaction.label,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: isUnlocked
                                     ? VColors.tertiary
                                     : theme.colorScheme.outline,
-                                fontWeight: FontWeights.regular,
+                                fontWeight: VFontWeight.regular,
                               ),
                             ),
                           ],
@@ -275,7 +275,7 @@ class _ReactionBarState extends State<ReactionBar> {
                   }),
                 ],
               ),
-              const SizedBox(height: Spacing.md),
+              const SizedBox(height: VSpacing.md),
             ],
           ),
         );

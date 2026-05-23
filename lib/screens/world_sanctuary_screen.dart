@@ -26,6 +26,7 @@ class WorldSanctuaryScreen extends ConsumerStatefulWidget {
 class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
   List<WorldPoll> _polls = [];
   bool _loading = true;
+  String? _loadError;
   final bool _showActiveOnly = true;
 
   @override
@@ -35,7 +36,10 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
   }
 
   Future<void> _loadPolls() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final polls = await PollService.getPolls(
         widget.worldId,
@@ -43,12 +47,18 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
       );
       if (mounted) {
         setState(() {
-        _polls = polls;
-        _loading = false;
-      });
+          _polls = polls;
+          _loading = false;
+          _loadError = null;
+        });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = 'Could not load reflections. Please try again.';
+        });
+      }
     }
   }
 
@@ -151,6 +161,10 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
           );
         },
       );
+    }
+
+    if (_loadError != null) {
+      return AppErrorState(message: _loadError, onRetry: _loadPolls);
     }
 
     if (_polls.isEmpty) {

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 /// Discord-style presence indicator.
 /// Online=green, idle=yellow, dnd=red, offline=gray.
@@ -162,7 +162,7 @@ class AnimatedProgressBar extends StatelessWidget {
           },
         ),
         if (showLabel) ...[
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           Text(
             '${(value * 100).round()}%',
             style: theme.textTheme.labelSmall?.copyWith(

@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../theme/v_colors.dart';
 import '../../models/resident.dart';
 import '../../services/streak_service.dart';
@@ -42,14 +42,14 @@ class WorldMemberRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.xs,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.xs,
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+        borderRadius: BorderRadius.circular(VRadius.md),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+          padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
           child: Row(
             children: [
               if (isLoading) ...[
@@ -61,7 +61,7 @@ class WorldMemberRow extends StatelessWidget {
                       child: const Pulse(
                         width: 32,
                         height: 32,
-                        borderRadius: RadiusTokens.pill,
+                        borderRadius: VRadius.pill,
                       ),
                     ),
                   ),
@@ -136,26 +136,26 @@ class WorldMemberRow extends StatelessWidget {
                     }).toList(),
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 if (remaining > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.sm,
-                      vertical: Spacing.xs,
+                      horizontal: VSpacing.sm,
+                      vertical: VSpacing.xs,
                     ),
                     decoration: BoxDecoration(
                       color: cs.primaryContainer.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                      borderRadius: BorderRadius.circular(VRadius.pill),
                     ),
                     child: Text(
                       '+$remaining more',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: cs.primary,
-                        fontWeight: FontWeights.bold,
+                        fontWeight: VFontWeight.bold,
                       ),
                     ),
                   ),
-                if (remaining > 0) const SizedBox(width: Spacing.sm),
+                if (remaining > 0) const SizedBox(width: VSpacing.sm),
                 Container(
                   width: 8,
                   height: 8,
@@ -164,17 +164,17 @@ class WorldMemberRow extends StatelessWidget {
                     color: VColors.success,
                   ),
                 ),
-                const SizedBox(width: Spacing.xs),
+                const SizedBox(width: VSpacing.xs),
                 Text(
                   '$onlineCount online',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: VColors.success,
-                    fontWeight: FontWeights.regular,
+                    fontWeight: VFontWeight.regular,
                   ),
                 ),
               ],
               const Spacer(),
-              Icon(VIcons.chevronRight, size: IconSizes.md, color: cs.outline),
+              Icon(VIcons.chevronRight, size: VIconSize.md, color: cs.outline),
             ],
           ),
         ),

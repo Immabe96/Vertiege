@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../theme/design_system.dart';
+import '../../../theme/v_tokens.dart';
 import '../../../theme/v_colors.dart';
 import '../../../models/resident.dart';
 import '../../../services/spotlight_service.dart';
@@ -52,17 +52,17 @@ class _SpotlightCardState extends State<SpotlightCard> {
         Row(
           children: [
             Icon(VIcons.sparkles, color: VColors.tertiary, size: 16),
-            const SizedBox(width: Spacing.xs),
+            const SizedBox(width: VSpacing.xs),
             Text(
               'Resident Spotlight',
               style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
                 color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         if (_isLoading)
           const SizedBox(
             height: 60,
@@ -70,12 +70,12 @@ class _SpotlightCardState extends State<SpotlightCard> {
           )
         else if (_spotlightResident == null)
           Container(
-            padding: const EdgeInsets.all(Spacing.sm),
+            padding: const EdgeInsets.all(VSpacing.sm),
             decoration: BoxDecoration(
               color: isDark
                   ? VColors.surfaceContainerHighDark
                   : VColors.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
+              borderRadius: BorderRadius.circular(VRadius.md),
             ),
             child: Text(
               'No resident to spotlight today.',
@@ -92,13 +92,13 @@ class _SpotlightCardState extends State<SpotlightCard> {
               context.push('/residents/${_spotlightResident!.id}');
             },
             child: Container(
-              padding: const EdgeInsets.all(Spacing.sm),
+              padding: const EdgeInsets.all(VSpacing.sm),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: const Color(0xFFFFD700).withValues(alpha: 0.6),
                   width: 2,
                 ),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                borderRadius: BorderRadius.circular(VRadius.md),
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFFFFD700).withValues(alpha: 0.2),
@@ -115,7 +115,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
                     size: 40,
                     frameId: _spotlightResident!.avatarFrameId,
                   ),
-                  const SizedBox(width: Spacing.sm),
+                  const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +123,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
                         Text(
                           _spotlightResident!.name,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeights.bold,
+                            fontWeight: VFontWeight.bold,
                             color: isDark
                                 ? VColors.onSurfaceDark
                                 : VColors.onSurface,

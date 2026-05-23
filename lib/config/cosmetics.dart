@@ -100,6 +100,11 @@ const Map<String, ProfessionCosmetic> professionCosmetics = {
     color: Color(0xFF0277BD),
     iconAsset: 'assets/generated/prof-pilot.png',
   ),
+  'Technology': ProfessionCosmetic(
+    profession: 'Technology',
+    color: Color(0xFF1565C0),
+    iconAsset: 'assets/generated/prof-engineer.png',
+  ),
 };
 
 const Map<String, String> decorationLabels = {

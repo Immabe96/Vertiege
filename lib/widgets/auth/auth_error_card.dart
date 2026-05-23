@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class AuthErrorCard extends StatelessWidget {
   final String message;
@@ -9,10 +9,10 @@ class AuthErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
         color: VColors.errorContainer.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         border: Border.all(color: VColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -20,16 +20,16 @@ class AuthErrorCard extends StatelessWidget {
           const Icon(
             Icons.error_outline,
             color: VColors.error,
-            size: IconSizes.md,
+            size: VIconSize.md,
           ),
-          const SizedBox(width: Spacing.sm),
+          const SizedBox(width: VSpacing.sm),
           Expanded(
             child: Text(
               message,
               style: const TextStyle(
-                fontSize: FontSizes.labelSm,
+                fontSize: VFontSize.labelSm,
                 color: VColors.error,
-                fontWeight: FontWeights.regular,
+                fontWeight: VFontWeight.regular,
               ),
             ),
           ),

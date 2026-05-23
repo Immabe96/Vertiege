@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class ChatDateSeparator extends StatelessWidget {
   final String label;
@@ -13,17 +13,17 @@ class ChatDateSeparator extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final dividerColor = isDark ? VColors.glassBorderDark : VColors.glassBorder;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+      padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
       child: Row(
         children: [
           Expanded(child: Divider(color: dividerColor)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             child: Text(
               label,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
-                fontWeight: FontWeights.regular,
+                fontWeight: VFontWeight.regular,
               ),
             ),
           ),

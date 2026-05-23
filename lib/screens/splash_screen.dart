@@ -1,7 +1,7 @@
 ﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
+import '../theme/v_tokens.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -133,7 +133,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(Spacing.sm),
+                    padding: const EdgeInsets.all(VSpacing.sm),
                     child: Image.asset(
                       'assets/images/splash-icon.png',
                       fit: BoxFit.contain,
@@ -142,34 +142,34 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              const SizedBox(height: Spacing.xl),
+              const SizedBox(height: VSpacing.xl),
               // App name
               Opacity(
                 opacity: _textFade.value,
                 child: Text(
                   'Vertiege',
                   style: TextStyle(
-                    fontSize: FontSizes.displayHero,
+                    fontSize: VFontSize.displayXl,
                     fontWeight: FontWeight.bold,
                     color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                    letterSpacing: LetterSpacing.display,
+                    letterSpacing: 0,
                   ),
                 ),
               ),
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               // Tagline — gold tint
               Opacity(
                 opacity: _taglineFade.value,
               child: Text(
                 'Your tier-gated social universe',
                 style: TextStyle(
-                  fontSize: FontSizes.body,
+                  fontSize: VFontSize.bodyMd,
                   color: VColors.tertiary.withValues(alpha: 0.6),
-                  letterSpacing: LetterSpacing.micro,
+                  letterSpacing: 0,
                 ),
               ),
               ),
-              const SizedBox(height: Spacing.xxl + Spacing.lg),
+              const SizedBox(height: VSpacing.xxl + VSpacing.lg),
               // Loading indicator — gold accent
               Opacity(
                 opacity: _loaderFade.value,

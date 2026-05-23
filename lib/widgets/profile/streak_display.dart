@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class StreakDisplay extends StatelessWidget {
   final int streakCount;
@@ -30,9 +30,9 @@ class StreakDisplay extends StatelessWidget {
     final daysToNext = next != null ? next - streakCount : 0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
       child: Container(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -42,7 +42,7 @@ class StreakDisplay extends StatelessWidget {
               VColors.warning.withValues(alpha: 0.04),
             ],
           ),
-          borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+          borderRadius: BorderRadius.circular(VRadius.md),
           border: Border.all(color: VColors.warning.withValues(alpha: 0.15)),
         ),
         child: Row(
@@ -52,17 +52,17 @@ class StreakDisplay extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: VColors.warning.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(RadiusTokens.card),
+                borderRadius: BorderRadius.circular(VRadius.lg),
               ),
               child: Icon(
                 Icons.local_fire_department,
                 color: hasStreak
                     ? VColors.warning
                     : isDark ? VColors.outlineVariantDark : theme.colorScheme.outlineVariant,
-                size: IconSizes.lg,
+                size: VIconSize.lg,
               ),
             ),
-            const SizedBox(width: Spacing.md),
+            const SizedBox(width: VSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +75,7 @@ class StreakDisplay extends StatelessWidget {
                               ? '$streakCount Day Streak'
                               : 'No active streak',
                           style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeights.bold,
+                            fontWeight: VFontWeight.bold,
                             color: hasStreak
                                 ? VColors.warning
                                 : isDark ? VColors.onSurfaceVariantDark : theme.colorScheme.onSurfaceVariant,
@@ -85,13 +85,13 @@ class StreakDisplay extends StatelessWidget {
                       if (streakShields > 0)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: Spacing.sm,
+                            horizontal: VSpacing.sm,
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
                             color: VColors.primary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(
-                              RadiusTokens.pill,
+                              VRadius.pill,
                             ),
                           ),
                           child: Row(
@@ -106,8 +106,8 @@ class StreakDisplay extends StatelessWidget {
                               Text(
                                 '$streakShields',
                                 style: const TextStyle(
-                                  fontSize: FontSizes.labelSm,
-                                  fontWeight: FontWeights.bold,
+                                  fontSize: VFontSize.labelSm,
+                                  fontWeight: VFontWeight.bold,
                                   color: VColors.primary,
                                 ),
                               ),
@@ -116,7 +116,7 @@ class StreakDisplay extends StatelessWidget {
                         ),
                     ],
                   ),
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: VSpacing.xs),
                   Row(
                     children: List.generate(7, (i) {
                       final dayIndex = 7 - i;
@@ -153,13 +153,13 @@ class StreakDisplay extends StatelessWidget {
                       );
                     }),
                   ),
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: VSpacing.xs),
                   if (hasStreak && next != null)
                     Text(
                       '$daysToNext more day${daysToNext == 1 ? '' : 's'} to $next-day milestone!',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: VColors.warning.withValues(alpha: 0.8),
-                        fontWeight: FontWeights.semiBold,
+                        fontWeight: VFontWeight.semiBold,
                       ),
                     )
                   else if (!hasStreak)
@@ -174,7 +174,7 @@ class StreakDisplay extends StatelessWidget {
                       'Maximum streak achieved. You are legendary!',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: VColors.warning.withValues(alpha: 0.8),
-                        fontWeight: FontWeights.semiBold,
+                        fontWeight: VFontWeight.semiBold,
                       ),
                     ),
                 ],
@@ -186,7 +186,7 @@ class StreakDisplay extends StatelessWidget {
                   Text(
                     '$streakCount',
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeights.bold,
+                      fontWeight: VFontWeight.bold,
                       color: VColors.warning,
                     ),
                   ),

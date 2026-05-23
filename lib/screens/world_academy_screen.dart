@@ -28,6 +28,7 @@ class WorldAcademyScreen extends ConsumerStatefulWidget {
 class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
   List<WorldChallenge> _challenges = [];
   bool _loading = true;
+  String? _loadError;
   final bool _showActiveOnly = true;
 
   @override
@@ -37,7 +38,10 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
   }
 
   Future<void> _loadChallenges() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final challenges = await ChallengeService.getChallenges(
         widget.worldId,
@@ -45,12 +49,18 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
       );
       if (mounted) {
         setState(() {
-        _challenges = challenges;
-        _loading = false;
-      });
+          _challenges = challenges;
+          _loading = false;
+          _loadError = null;
+        });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = 'Could not load assignments. Please try again.';
+        });
+      }
     }
   }
 
@@ -197,6 +207,10 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
           );
         },
       );
+    }
+
+    if (_loadError != null) {
+      return AppErrorState(message: _loadError, onRetry: _loadChallenges);
     }
 
     if (_challenges.isEmpty) {

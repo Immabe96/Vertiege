@@ -1,8 +1,8 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 
 /// AI-assisted banner generator that creates 4 procedural variants
@@ -61,8 +61,8 @@ class _BannerGeneratorState extends State<BannerGenerator> {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 1.6,
-        crossAxisSpacing: Spacing.sm,
-        mainAxisSpacing: Spacing.sm,
+        crossAxisSpacing: VSpacing.sm,
+        mainAxisSpacing: VSpacing.sm,
       ),
       itemCount: variants.length,
       itemBuilder: (context, index) {
@@ -71,7 +71,7 @@ class _BannerGeneratorState extends State<BannerGenerator> {
           child: VSurfacePanel(
             padding: EdgeInsets.zero,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(RadiusTokens.xl),
+              borderRadius: BorderRadius.circular(VRadius.xl),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -85,21 +85,21 @@ class _BannerGeneratorState extends State<BannerGenerator> {
                   ),
                   // Variant label
                   Positioned(
-                    bottom: Spacing.xs,
-                    right: Spacing.sm,
+                    bottom: VSpacing.xs,
+                    right: VSpacing.sm,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.sm,
+                        horizontal: VSpacing.sm,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: VColors.surface.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                       child: Text(
                         'Variant ${index + 1}',
                         style: const TextStyle(
-                          fontSize: FontSizes.micro,
+                          fontSize: VFontSize.labelSm,
                           color: VColors.onSurfaceVariant,
                         ),
                       ),
@@ -123,31 +123,31 @@ class _GeneratingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return VSurfacePanel(
-      padding: const EdgeInsets.all(Spacing.xl),
+      padding: const EdgeInsets.all(VSpacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _PulseWidget(
             child: const Icon(
               Icons.auto_awesome,
-              size: IconSizes.hero,
+              size: VIconSize.xl,
               color: VColors.tertiary,
             ),
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
           const Text(
             'The Herald is generating banner variants...',
             style: TextStyle(
-              fontSize: FontSizes.bodyMd,
+              fontSize: VFontSize.bodyMd,
               color: VColors.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           const Text(
             'Analyzing world aesthetics and prestige patterns.',
             style: TextStyle(
-              fontSize: FontSizes.labelSm,
+              fontSize: VFontSize.labelSm,
               color: VColors.outline,
             ),
             textAlign: TextAlign.center,

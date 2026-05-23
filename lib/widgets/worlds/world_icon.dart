@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 
 /// Glass-styled world icon with deterministic icon selection.
@@ -35,7 +35,7 @@ class WorldIcon extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
         boxShadow: [
           BoxShadow(

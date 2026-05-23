@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class BrokenMediaTile extends StatelessWidget {
   final double? height;
@@ -22,7 +22,7 @@ class BrokenMediaTile extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 96),
       decoration: BoxDecoration(
         color: VColors.surfaceBright,
-        borderRadius: BorderRadius.circular(RadiusTokens.card),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(color: VColors.glassBorder),
       ),
       child: Column(
@@ -31,9 +31,9 @@ class BrokenMediaTile extends StatelessWidget {
           Icon(
             Icons.broken_image_outlined,
             color: theme.colorScheme.outline,
-            size: IconSizes.lg,
+            size: VIconSize.lg,
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(

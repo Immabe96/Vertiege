@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../forui/v_hub_page.dart';
 import '../../models/listing.dart';
+import '../../services/chat_service.dart';
 import '../../services/marketplace_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/worlds/listing_card.dart';
 import '../../widgets/worlds/create_listing_dialog.dart';
-import '../../widgets/core/shimmer.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/v_accessible.dart';
 import '../../ui/icons/v_icons.dart';
 
 class WorldMarketplaceScreen extends ConsumerStatefulWidget {
@@ -86,78 +90,36 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    return VHubPage(
+      title: 'Marketplace',
+      showBack: true,
+      headerActions: [
+        if (widget.isMember)
+          VAccessibleHeaderAction(
+            label: 'Create listing',
+            icon: const Icon(Icons.add),
+            onPress: _openCreateListing,
+          ),
+      ],
+      body: _buildBody(context),
+    );
+  }
 
+  Widget _buildBody(BuildContext context) {
     if (_loading) {
-      return GridView.builder(
-        padding: const EdgeInsets.all(VSpacing.md),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.78,
-          crossAxisSpacing: VSpacing.sm,
-          mainAxisSpacing: VSpacing.sm,
-        ),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          return Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(VRadius.lg),
-            ),
-            child: const Column(
-              children: [
-                Expanded(
-                  child: Pulse(
-                    borderRadius: 0,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(VSpacing.sm),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Pulse(height: 14, width: 80),
-                      SizedBox(height: VSpacing.xs),
-                      Pulse(height: 12, width: 50),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
+      return const ScreenLoading.grid();
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: VColors.error),
-            const SizedBox(height: VSpacing.md),
-            Text(_error!, style: const TextStyle(color: VColors.error)),
-            const SizedBox(height: VSpacing.md),
-            FilledButton.icon(
-              onPressed: _loadListings,
-              icon: const Icon(VIcons.arrowLeft),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
+      return AppErrorState(message: _error, onRetry: _loadListings);
     }
 
     if (_listings.isEmpty) {
       return AppEmptyState(
         title: 'No listings yet',
-        description:
-            widget.isMember
-                ? 'Be the first to create a listing!'
-                : 'This world has no active listings.',
+        description: widget.isMember
+            ? 'Be the first to create a listing!'
+            : 'This world has no active listings.',
         icon: Icons.storefront_outlined,
         actionLabel: widget.isMember ? 'Create Listing' : null,
         onAction: widget.isMember ? _openCreateListing : null,
@@ -255,12 +217,13 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return VMinTapTarget(
+      semanticsLabel: label,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: VSpacing.md,
-          vertical: VSpacing.xs,
+          vertical: VSpacing.sm,
         ),
         decoration: BoxDecoration(
           color: selected
@@ -268,7 +231,9 @@ class _Chip extends StatelessWidget {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
-            color: selected ? VColors.primary : VColors.outline.withValues(alpha: 0.3),
+            color: selected
+                ? VColors.primary
+                : VColors.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -284,18 +249,35 @@ class _Chip extends StatelessWidget {
   }
 }
 
-class _ListingDetailSheet extends StatelessWidget {
+class _ListingDetailSheet extends ConsumerWidget {
   final Listing listing;
 
   const _ListingDetailSheet({required this.listing});
 
+  Future<void> _contactSeller(BuildContext context, WidgetRef ref) async {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    Navigator.of(context).pop();
+
+    final room = await ChatService.getOrCreateRoom(
+      resident.id,
+      listing.sellerId,
+    );
+    if (!context.mounted || room == null) return;
+
+    final draft =
+        'Hi — I\'m interested in your listing "${listing.title}".';
+    context.push(
+      '/dm/${room['id']}?draft=${Uri.encodeComponent(draft)}',
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final resident = ProviderScope.containerOf(context)
-        .read(residentProvider)
-        .resident;
+    final resident = ref.watch(residentProvider).resident;
     final isOwner = resident?.id == listing.sellerId;
 
     return Container(
@@ -344,7 +326,7 @@ class _ListingDetailSheet extends StatelessWidget {
             if (listing.price != null)
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.sell,
                     size: VIconSize.sm,
                     color: VColors.tertiary,
@@ -413,18 +395,18 @@ class _ListingDetailSheet extends StatelessWidget {
             ),
             const SizedBox(height: VSpacing.xl),
             if (listing.status == ListingStatus.active && !isOwner)
-              FilledButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Contact the seller to arrange purchase'),
-                      backgroundColor: VColors.primary,
-                    ),
-                  );
-                },
-                icon: const Icon(VIcons.message),
-                label: const Text('Contact Seller'),
+              Semantics(
+                button: true,
+                label: 'Contact seller about ${listing.title}',
+                child: FilledButton.icon(
+                  onPressed: () => _contactSeller(context, ref),
+                  icon: const Icon(VIcons.message),
+                  label: const Text('Contact Seller'),
+                  style: FilledButton.styleFrom(
+                    foregroundColor: VColors.onPrimary,
+                    backgroundColor: VColors.primary,
+                  ),
+                ),
               ),
             if (isOwner && listing.status == ListingStatus.active)
               OutlinedButton.icon(

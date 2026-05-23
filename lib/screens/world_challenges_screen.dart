@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../forui/v_hub_page.dart';
 import '../../models/challenge.dart';
 import '../../services/challenge_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/core/shimmer.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
@@ -28,6 +29,7 @@ class WorldChallengesScreen extends ConsumerStatefulWidget {
 class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
   List<WorldChallenge> _challenges = [];
   bool _loading = true;
+  String? _loadError;
   bool _showActiveOnly = true;
 
   @override
@@ -37,18 +39,29 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
   }
 
   Future<void> _loadChallenges() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final challenges = await ChallengeService.getChallenges(
         widget.worldId,
         activeOnly: _showActiveOnly,
       );
-      if (mounted) setState(() {
-        _challenges = challenges;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _challenges = challenges;
+          _loading = false;
+          _loadError = null;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = 'Could not load challenges. Please try again.';
+        });
+      }
     }
   }
 
@@ -173,65 +186,63 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return VHubPage(
+      title: 'Challenges',
+      showBack: true,
+      headerActions: widget.isSovereignOrCouncil
+          ? [
+              FHeaderAction(
+                icon: const Icon(VIcons.plus),
+                onPress: _showCreateChallengeDialog,
+              ),
+            ]
+          : const [],
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (_loading) {
-      return ListView.builder(
-        padding: const EdgeInsets.all(VSpacing.md),
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: VSpacing.sm),
-            padding: const EdgeInsets.all(VSpacing.md),
-            decoration: BoxDecoration(
-              color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(VRadius.lg),
-            ),
-            child: const Column(
-              children: [
-                Pulse(height: 16, width: double.infinity),
-                SizedBox(height: VSpacing.sm),
-                Pulse(height: 8, width: double.infinity),
-              ],
-            ),
-          );
-        },
-      );
+      return const ScreenLoading.list();
+    }
+
+    if (_loadError != null) {
+      return AppErrorState(message: _loadError, onRetry: _loadChallenges);
     }
 
     if (_challenges.isEmpty) {
       return AppEmptyState(
-        title: 'No challenges',
+        title: 'No challenges yet',
         description: widget.isSovereignOrCouncil
-            ? 'Create the first challenge!'
-            : 'No active challenges in this world.',
+            ? 'Set a goal for residents—create the first world challenge.'
+            : 'No active challenges right now. Join in when council launches one.',
         icon: Icons.flag_outlined,
         actionLabel: widget.isSovereignOrCouncil ? 'Create Challenge' : null,
-        onAction: widget.isSovereignOrCouncil ? _showCreateChallengeDialog : null,
+        onAction:
+            widget.isSovereignOrCouncil ? _showCreateChallengeDialog : null,
       );
     }
 
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: Row(
-            children: [
-              Text(
-                '${_challenges.length} challenge${_challenges.length == 1 ? '' : 's'}',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
+          padding: const EdgeInsets.fromLTRB(
+            VSpacing.md,
+            VSpacing.md,
+            VSpacing.md,
+            VSpacing.sm,
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${_challenges.length} active challenge${_challenges.length == 1 ? '' : 's'}',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: VFontWeight.semiBold,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              const Spacer(),
-              if (widget.isSovereignOrCouncil)
-                FilledButton.icon(
-                  onPressed: _showCreateChallengeDialog,
-                  icon: const Icon(VIcons.plus),
-                  label: const Text('New Challenge'),
-                ),
-            ],
+            ),
           ),
         ),
         Expanded(

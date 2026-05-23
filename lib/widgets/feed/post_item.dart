@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,8 +9,8 @@ import '../../services/permission_service.dart';
 import '../../services/moderation_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
-import 'package:vertiege/theme/colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/date_format.dart';
 import '../core/fade_in.dart';
 import '../../ui/buttons/v_button.dart';
@@ -80,22 +80,22 @@ class PostItem extends ConsumerWidget {
         },
         child: Container(
           margin: const EdgeInsets.symmetric(
-            horizontal: Spacing.md,
-            vertical: Spacing.xs,
+            horizontal: VSpacing.md,
+            vertical: VSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: AppColors.glassBackground,
-            borderRadius: BorderRadius.circular(RadiusTokens.card),
+            color: VColors.glassBackground,
+            borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border(
               left: isCouncilPost
                   ? BorderSide(
-                      color: AppColors.tertiary.withValues(alpha: 0.5),
+                      color: VColors.tertiary.withValues(alpha: 0.5),
                       width: 3,
                     )
-                  : BorderSide(color: AppColors.glassBorder),
-              top: BorderSide(color: AppColors.glassBorder),
-              right: BorderSide(color: AppColors.glassBorder),
-              bottom: BorderSide(color: AppColors.glassBorder),
+                  : BorderSide(color: VColors.glassBorder),
+              top: BorderSide(color: VColors.glassBorder),
+              right: BorderSide(color: VColors.glassBorder),
+              bottom: BorderSide(color: VColors.glassBorder),
             ),
           ),
           child: Padding(
@@ -133,7 +133,7 @@ class PostItem extends ConsumerWidget {
                                 LuminaryNameplate(
                                   name: post.residentName,
                                   tier: post.tierAtPosting.value,
-                                  fontSize: FontSizes.bodyMd,
+                                  fontSize: VFontSize.bodyMd,
                                 ),
                                 const SizedBox(width: 4),
                                 TierBadge(tier: post.tierAtPosting.value),
@@ -216,7 +216,7 @@ class PostItem extends ConsumerWidget {
                           'Pinned',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.tertiary,
-                            fontWeight: FontWeights.bold,
+                            fontWeight: VFontWeight.bold,
                           ),
                         ),
                       ],
@@ -234,7 +234,7 @@ class PostItem extends ConsumerWidget {
                           'Announcement',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.primary,
-                            fontWeight: FontWeights.bold,
+                            fontWeight: VFontWeight.bold,
                           ),
                         ),
                       ],
@@ -281,18 +281,18 @@ class PostItem extends ConsumerWidget {
                         final meta = AwardType.all[awardTypeId];
                         if (meta == null) return const SizedBox.shrink();
                         return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                            border: Border.all(color: AppColors.borderSubtle),
+                            color: VColors.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(VRadius.pill),
+                            border: Border.all(color: VColors.outlineVariant),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(meta.icon, style: const TextStyle(fontSize: VFontSize.labelMd)),
                               const SizedBox(width: 3),
-                              Text(meta.label, style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary)),
+                              Text(meta.label, style: const TextStyle(fontSize: VFontSize.labelSm, color: VColors.onSurfaceVariant)),
                             ],
                           ),
                         );
@@ -417,41 +417,41 @@ class PostItem extends ConsumerWidget {
     showAppSheet(
       context,
       Padding(
-        padding: const EdgeInsets.all(Spacing.lg),
+        padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
             CosmeticAvatar(
               imageUrl: post.residentAvatar,
               seed: post.residentId,
               size: 72,
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 LuminaryNameplate(
                   name: post.residentName,
                   tier: post.tierAtPosting.value,
-                  fontSize: FontSizes.headlineMd,
+                  fontSize: VFontSize.headlineMd,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(width: Spacing.xs),
+                const SizedBox(width: VSpacing.xs),
                 TierBadge(tier: post.tierAtPosting.value, size: 20),
               ],
             ),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: VSpacing.xs),
             Text(
               tierLabel,
               style: const TextStyle(
-                fontSize: FontSizes.bodyMd,
-                fontWeight: FontWeights.semiBold,
-                color: AppColors.tertiary,
+                fontSize: VFontSize.bodyMd,
+                fontWeight: VFontWeight.semiBold,
+                color: VColors.tertiary,
               ),
             ),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
             if (!isOwn)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -477,26 +477,26 @@ class PostItem extends ConsumerWidget {
                     },
                     icon: Icon(
                       isFollowing ? Icons.person_remove : Icons.person_add,
-                      size: IconSizes.sm,
+                      size: VIconSize.sm,
                     ),
                     label: Text(isFollowing ? 'Unfollow' : 'Follow'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.tertiary,
-                      foregroundColor: AppColors.onTertiary,
+                      backgroundColor: VColors.tertiary,
+                      foregroundColor: VColors.onTertiary,
                     ),
                   ),
-                  const SizedBox(width: Spacing.md),
+                  const SizedBox(width: VSpacing.md),
                   OutlinedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
                       // Navigate to full profile on second tap
                       context.push('/residents/${post.residentId}');
                     },
-                    icon: const Icon(VIcons.user, size: IconSizes.sm),
+                    icon: const Icon(VIcons.user, size: VIconSize.sm),
                     label: const Text('View Profile'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.glassBorder),
+                      foregroundColor: VColors.primary,
+                      side: const BorderSide(color: VColors.glassBorder),
                     ),
                   ),
                 ],
@@ -507,14 +507,14 @@ class PostItem extends ConsumerWidget {
                   Navigator.pop(context);
                   context.push('/residents/${post.residentId}');
                 },
-                icon: const Icon(VIcons.user, size: IconSizes.sm),
+                icon: const Icon(VIcons.user, size: VIconSize.sm),
                 label: const Text('View My Profile'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.glassBorder),
+                  foregroundColor: VColors.primary,
+                  side: const BorderSide(color: VColors.glassBorder),
                 ),
               ),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
           ],
         ),
       ),
@@ -673,14 +673,14 @@ class _RichPostContentState extends State<_RichPostContent> {
   InlineSpan _buildRichText(String text) {
     final textStyle = widget.theme.textTheme.bodyMedium?.copyWith(height: 1.4);
     final mentionStyle = textStyle?.copyWith(
-      color: AppColors.tertiary,
-      fontWeight: FontWeights.semiBold,
+      color: VColors.tertiary,
+      fontWeight: VFontWeight.semiBold,
     );
     final hashtagStyle = textStyle?.copyWith(
-      color: AppColors.primary,
-      fontWeight: FontWeights.semiBold,
+      color: VColors.primary,
+      fontWeight: VFontWeight.semiBold,
     );
-    final boldStyle = textStyle?.copyWith(fontWeight: FontWeights.bold);
+    final boldStyle = textStyle?.copyWith(fontWeight: VFontWeight.bold);
     final italicStyle = textStyle?.copyWith(fontStyle: FontStyle.italic);
 
     // Unified pattern: bold (**...**), italic (*...*), @mention, #hashtag
@@ -748,22 +748,22 @@ class _RichPostContentState extends State<_RichPostContent> {
         : '${widget.content.substring(0, _truncateAt)}...';
 
     return AnimatedSize(
-      duration: AnimDurations.normal,
-      curve: AnimCurves.easeInOut,
+      duration: VAnimation.normal,
+      curve: Curves.easeInOutCubic,
       alignment: Alignment.topLeft,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           RichText(text: _buildRichText(displayText)),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           GestureDetector(
             onTap: () => setState(() => _expanded = !_expanded),
             child: Text(
               _expanded ? 'Show less' : 'See more...',
               style: widget.theme.textTheme.labelMedium?.copyWith(
                 color: widget.theme.colorScheme.primary,
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
               ),
             ),
           ),
@@ -789,11 +789,11 @@ class _PollDisplay extends ConsumerWidget {
     final totalVotes = poll.totalVotes;
 
     return Container(
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.glassBackground,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: AppColors.glassBorder),
+        color: VColors.glassBackground,
+        borderRadius: BorderRadius.circular(VRadius.md),
+        border: Border.all(color: VColors.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,24 +801,24 @@ class _PollDisplay extends ConsumerWidget {
           Text(
             poll.question,
             style: const TextStyle(
-              fontSize: FontSizes.headlineMd,
-              fontWeight: FontWeights.semiBold,
-              color: AppColors.ink,
+              fontSize: VFontSize.headlineMd,
+              fontWeight: VFontWeight.semiBold,
+              color: VColors.onSurface,
             ),
           ),
           if (poll.isMultiChoice)
             Padding(
-              padding: const EdgeInsets.only(top: Spacing.xs),
+              padding: const EdgeInsets.only(top: VSpacing.xs),
               child: Text(
                 'Choose as many as you like',
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  color: AppColors.inkMuted,
+                  fontSize: VFontSize.labelSm,
+                  color: VColors.outline,
                   fontStyle: FontStyle.italic,
                 ),
               ),
             ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           ...poll.options.map((option) {
             final percentage = totalVotes > 0
                 ? (option.voteCount / totalVotes)
@@ -827,7 +827,7 @@ class _PollDisplay extends ConsumerWidget {
             final showResults = hasVoted;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
               child: GestureDetector(
                 onTap: hasVoted
                     ? null
@@ -835,19 +835,19 @@ class _PollDisplay extends ConsumerWidget {
                           .read(postProvider.notifier)
                           .voteOnPoll(post.id, option.id),
                 child: AnimatedContainer(
-                  duration: AnimDurations.slow,
-                  curve: AnimCurves.easeInOut,
+                  duration: VAnimation.slow,
+                  curve: Curves.easeInOutCubic,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.md,
-                    vertical: Spacing.sm + 2,
+                    horizontal: VSpacing.md,
+                    vertical: VSpacing.sm + 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.glassBackground,
-                    borderRadius: BorderRadius.circular(RadiusTokens.chip),
+                    color: VColors.glassBackground,
+                    borderRadius: BorderRadius.circular(VRadius.sm),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.tertiary
-                          : AppColors.glassBorder,
+                          ? VColors.tertiary
+                          : VColors.glassBorder,
                     ),
                   ),
                   child: Stack(
@@ -860,16 +860,16 @@ class _PollDisplay extends ConsumerWidget {
                           top: 0,
                           bottom: 0,
                           child: AnimatedContainer(
-                            duration: AnimDurations.slow,
-                            curve: AnimCurves.easeInOut,
+                            duration: VAnimation.slow,
+                            curve: Curves.easeInOutCubic,
                             width: percentage > 0
                                 ? (MediaQuery.of(context).size.width - 120) *
                                       percentage
                                 : 0,
                             decoration: BoxDecoration(
-                              color: AppColors.tertiary.withValues(alpha: 0.15),
+                              color: VColors.tertiary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(
-                                RadiusTokens.chip,
+                                VRadius.sm,
                               ),
                             ),
                           ),
@@ -882,9 +882,9 @@ class _PollDisplay extends ConsumerWidget {
                               child: Text(
                                 option.text,
                                 style: TextStyle(
-                                  fontSize: FontSizes.bodyMd,
-                                  fontWeight: FontWeights.regular,
-                                  color: AppColors.ink,
+                                  fontSize: VFontSize.bodyMd,
+                                  fontWeight: VFontWeight.regular,
+                                  color: VColors.onSurface,
                                 ),
                               ),
                             ),
@@ -892,17 +892,17 @@ class _PollDisplay extends ConsumerWidget {
                               Text(
                                 '${option.voteCount} vote${option.voteCount != 1 ? 's' : ''}',
                                 style: const TextStyle(
-                                  fontSize: FontSizes.labelSm,
-                                  color: AppColors.inkSecondary,
+                                  fontSize: VFontSize.labelSm,
+                                  color: VColors.onSurfaceVariant,
                                 ),
                               ),
-                              const SizedBox(width: Spacing.xs),
+                              const SizedBox(width: VSpacing.xs),
                               Text(
                                 '${(percentage * 100).toStringAsFixed(0)}%',
                                 style: const TextStyle(
-                                  fontSize: FontSizes.labelSm,
-                                  fontWeight: FontWeights.semiBold,
-                                  color: AppColors.tertiary,
+                                  fontSize: VFontSize.labelSm,
+                                  fontWeight: VFontWeight.semiBold,
+                                  color: VColors.tertiary,
                                 ),
                               ),
                             ],
@@ -916,12 +916,12 @@ class _PollDisplay extends ConsumerWidget {
             );
           }),
           Padding(
-            padding: const EdgeInsets.only(top: Spacing.xs),
+            padding: const EdgeInsets.only(top: VSpacing.xs),
             child: Text(
               '$totalVotes vote${totalVotes != 1 ? 's' : ''}',
               style: const TextStyle(
-                fontSize: FontSizes.labelSm,
-                color: AppColors.inkMuted,
+                fontSize: VFontSize.labelSm,
+                color: VColors.outline,
               ),
             ),
           ),
@@ -963,20 +963,20 @@ class _DecreeLabelState extends State<_DecreeLabel>
       builder: (context, child) {
         return Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.sm,
+            horizontal: VSpacing.sm,
             vertical: 2,
           ),
           decoration: BoxDecoration(
-            color: AppColors.tertiary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(RadiusTokens.chip),
+            color: VColors.tertiary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(VRadius.sm),
             border: Border.all(
-              color: AppColors.tertiary.withValues(
+              color: VColors.tertiary.withValues(
                 alpha: 0.3 + (0.15 * _controller.value),
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.tertiary.withValues(
+                color: VColors.tertiary.withValues(
                   alpha: 0.15 + (0.2 * _controller.value),
                 ),
                 blurRadius: 8,
@@ -987,15 +987,15 @@ class _DecreeLabelState extends State<_DecreeLabel>
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(VIcons.sparkles, size: 14, color: AppColors.tertiary),
+              Icon(VIcons.sparkles, size: 14, color: VColors.tertiary),
               SizedBox(width: 4),
               Text(
                 'SOVEREIGN DECREE',
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.bold,
-                  color: AppColors.tertiary,
-                  letterSpacing: LetterSpacing.label,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.bold,
+                  color: VColors.tertiary,
+                  letterSpacing: 0,
                 ),
               ),
             ],
@@ -1045,15 +1045,15 @@ class _ImageCarouselState extends State<_ImageCarousel> {
             ),
           ),
         ),
-        const SizedBox(height: Spacing.xs),
+        const SizedBox(height: VSpacing.xs),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               '${_currentPage + 1}/${widget.imageUris.length}',
-              style: const TextStyle(fontSize: FontSizes.labelSm, color: AppColors.inkSecondary),
+              style: const TextStyle(fontSize: VFontSize.labelSm, color: VColors.onSurfaceVariant),
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             ...widget.imageUris.asMap().entries.map((entry) {
               return Container(
                 width: entry.key == _currentPage ? 8 : 6,
@@ -1061,7 +1061,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: entry.key == _currentPage ? AppColors.primary : AppColors.inkMuted.withValues(alpha: 0.3),
+                  color: entry.key == _currentPage ? VColors.primary : VColors.outline.withValues(alpha: 0.3),
                 ),
               );
             }),

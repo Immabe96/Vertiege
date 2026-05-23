@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 /// A glass-style filter pill used in horizontal chip rows.
 ///
@@ -24,16 +24,16 @@ class FilterPill extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: AnimDurations.fast,
+        duration: VAnimation.fast,
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.sm,
+          horizontal: VSpacing.md,
+          vertical: VSpacing.sm,
         ),
         decoration: BoxDecoration(
           color: selected
               ? VColors.primary.withValues(alpha: 0.12)
               : VColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(
             color: selected
                 ? VColors.primary.withValues(alpha: 0.3)
@@ -45,15 +45,15 @@ class FilterPill extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: IconSizes.sm,
+              size: VIconSize.sm,
               color: selected ? VColors.primary : VColors.outline,
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Text(
               label,
               style: TextStyle(
-                fontSize: FontSizes.body,
-                fontWeight: selected ? FontWeights.bold : FontWeights.regular,
+                fontSize: VFontSize.bodyMd,
+                fontWeight: selected ? VFontWeight.bold : VFontWeight.regular,
                 color: selected ? VColors.primary : VColors.outline,
               ),
             ),

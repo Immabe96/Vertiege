@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../theme/design_system.dart';
+﻿import 'package:flutter/material.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 
 class BentoGrid extends StatelessWidget {
@@ -9,10 +9,10 @@ class BentoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
       child: Wrap(
-        spacing: Spacing.sm,
-        runSpacing: Spacing.sm,
+        spacing: VSpacing.sm,
+        runSpacing: VSpacing.sm,
         children: cards.map((card) => _BentoCardTile(card: card)).toList(),
       ),
     );
@@ -42,12 +42,12 @@ class _BentoCardTile extends StatelessWidget {
     final double width;
     switch (card.size) {
       case BentoSize.small:
-        width = (screenWidth - (2 * Spacing.md) - Spacing.sm) / 2;
+        width = (screenWidth - (2 * VSpacing.md) - VSpacing.sm) / 2;
         break;
       case BentoSize.medium:
       case BentoSize.large:
       case BentoSize.full:
-        width = screenWidth - (2 * Spacing.md);
+        width = screenWidth - (2 * VSpacing.md);
         break;
     }
 
@@ -57,7 +57,7 @@ class _BentoCardTile extends StatelessWidget {
       height: minHeight,
       child: VSurfacePanel(
         useBlur: false,
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         child: card.child,
       ),
     );

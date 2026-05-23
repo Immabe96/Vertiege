@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../services/daily_reward_service.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 /// A celebratory glass-modal dialog shown once per day when the resident
 /// collects their daily resonance reward.
@@ -28,13 +28,13 @@ class DailyRewardDialog extends StatefulWidget {
       barrierDismissible: false,
       barrierLabel: 'Daily Reward',
       barrierColor: VColors.surface.withValues(alpha: 0.85),
-      transitionDuration: AnimDurations.normal,
+      transitionDuration: VAnimation.normal,
       pageBuilder: (context, animation, secondaryAnimation) {
         return DailyRewardDialog(reward: reward, onCollect: onCollect);
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return ScaleTransition(
-          scale: CurvedAnimation(parent: animation, curve: AnimCurves.bouncy),
+          scale: CurvedAnimation(parent: animation, curve: Curves.elasticOut),
           child: FadeTransition(opacity: animation, child: child),
         );
       },
@@ -90,11 +90,11 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
 
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: Spacing.xl),
-        padding: const EdgeInsets.all(Spacing.xl),
+        margin: const EdgeInsets.symmetric(horizontal: VSpacing.xl),
+        padding: const EdgeInsets.all(VSpacing.xl),
         decoration: BoxDecoration(
           color: VColors.glassBackground,
-          borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+          borderRadius: BorderRadius.circular(VRadius.md),
           border: Border.all(color: VColors.glassBorder),
           boxShadow: [
             BoxShadow(
@@ -111,13 +111,13 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             Text(
               'DAILY RESONANCE',
               style: TextStyle(
-                fontSize: FontSizes.headlineMd,
-                fontWeight: FontWeights.bold,
+                fontSize: VFontSize.headlineMd,
+                fontWeight: VFontWeight.bold,
                 color: VColors.tertiary,
                 letterSpacing: 2,
               ),
             ),
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: VSpacing.xl),
 
             // Animated reward icon
             ScaleTransition(
@@ -143,20 +143,20 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                 ),
               ),
             ),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
 
             // Reward text
             Text(
               widget.reward.label,
               style: TextStyle(
-                fontSize: FontSizes.displayXl,
-                fontWeight: FontWeights.bold,
+                fontSize: VFontSize.displayXl,
+                fontWeight: VFontWeight.bold,
                 color: widget.reward.isShield
                     ? VColors.tierHustler
                     : VColors.onSurface,
               ),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
 
             Text(
               widget.reward.isShield
@@ -167,7 +167,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: VSpacing.xl),
 
             // Collect button
             SizedBox(
@@ -177,16 +177,16 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                 style: FilledButton.styleFrom(
                   backgroundColor: VColors.tertiary,
                   foregroundColor: VColors.onTertiary,
-                  padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(RadiusTokens.card),
+                    borderRadius: BorderRadius.circular(VRadius.lg),
                   ),
                 ),
                 child: Text(
                   _collected ? 'COLLECTED!' : 'COLLECT',
                   style: TextStyle(
-                    fontSize: FontSizes.bodyLg,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.bodyLg,
+                    fontWeight: VFontWeight.bold,
                     letterSpacing: 2,
                   ),
                 ),

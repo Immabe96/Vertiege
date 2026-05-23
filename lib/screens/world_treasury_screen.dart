@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../forui/v_hub_page.dart';
 import '../../models/treasury.dart';
 import '../../services/treasury_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/core/shimmer.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 
@@ -27,6 +28,7 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
   WorldTreasury? _treasury;
   List<TreasuryTransaction> _transactions = [];
   bool _loading = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -35,17 +37,28 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final treasury = await TreasuryService.getTreasury(widget.worldId);
       final transactions = await TreasuryService.getTransactions(widget.worldId);
-      if (mounted) setState(() {
-        _treasury = treasury;
-        _transactions = transactions;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _treasury = treasury;
+          _transactions = transactions;
+          _loading = false;
+          _loadError = null;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = 'Could not load treasury. Please try again.';
+        });
+      }
     }
   }
 
@@ -165,26 +178,33 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return VHubPage(
+      title: 'Treasury',
+      showBack: true,
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
     final theme = Theme.of(context);
 
     if (_loading) {
-      return const Padding(
-        padding: EdgeInsets.all(VSpacing.md),
-        child: Column(
-          children: [
-            Pulse(height: 100, width: double.infinity),
-            SizedBox(height: VSpacing.md),
-            Expanded(child: Pulse()),
-          ],
-        ),
-      );
+      return const ScreenLoading.detail();
+    }
+
+    if (_loadError != null) {
+      return AppErrorState(message: _loadError, onRetry: _loadData);
     }
 
     if (_treasury == null) {
       return AppEmptyState(
-        title: 'No Treasury',
-        description: 'This world has not set up a treasury yet.',
+        title: 'No treasury yet',
+        description: widget.isSovereignOrCouncil
+            ? 'World treasury will appear here once funded. Residents can donate when it is active.'
+            : 'This world has not opened a treasury yet. Check back after the sovereign sets one up.',
         icon: Icons.account_balance_outlined,
+        actionLabel: widget.isSovereignOrCouncil ? 'Refresh' : null,
+        onAction: widget.isSovereignOrCouncil ? _loadData : null,
       );
     }
 
@@ -278,10 +298,12 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
         const SizedBox(height: VSpacing.sm),
         Expanded(
           child: _transactions.isEmpty
-              ? const AppEmptyState(
-                  title: 'No transactions',
-                  description: 'Transactions will appear here.',
+              ? AppEmptyState(
+                  title: 'No transactions yet',
+                  description: 'Donations, withdrawals, and rewards show up here.',
                   icon: Icons.receipt_long_outlined,
+                  actionLabel: 'Donate',
+                  onAction: _showDonateDialog,
                 )
               : ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),

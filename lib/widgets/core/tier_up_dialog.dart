@@ -1,7 +1,7 @@
-import 'package:confetti/confetti.dart';
+﻿import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 
 class TierUpDialog extends StatefulWidget {
@@ -112,21 +112,21 @@ class _TierUpDialogState extends State<TierUpDialog> {
               ? VColors.surfaceContainerDark
               : VColors.surfaceContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+            borderRadius: BorderRadius.circular(VRadius.xl),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(Spacing.lg),
+            padding: const EdgeInsets.all(VSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'TIER UP!',
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeights.bold,
+                    fontWeight: VFontWeight.bold,
                     color: VColors.tertiary,
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -137,13 +137,13 @@ class _TierUpDialogState extends State<TierUpDialog> {
                       icon: _tierIcon(widget.oldTier),
                       opacity: 0.5,
                     ),
-                    const SizedBox(width: Spacing.md),
+                    const SizedBox(width: VSpacing.md),
                     Icon(
                       Icons.arrow_forward,
                       size: 32,
                       color: VColors.success,
                     ),
-                    const SizedBox(width: Spacing.md),
+                    const SizedBox(width: VSpacing.md),
                     _TierBadgeDisplay(
                       tier: widget.newTier,
                       label: _tierName(widget.newTier),
@@ -153,14 +153,14 @@ class _TierUpDialogState extends State<TierUpDialog> {
                     ),
                   ],
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 Container(
-                  padding: const EdgeInsets.all(Spacing.md),
+                  padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
                     color: isDark
                         ? VColors.surfaceDark
                         : VColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    borderRadius: BorderRadius.circular(VRadius.md),
                     border: Border.all(
                       color: _tierColor(widget.newTier).withValues(alpha: 0.3),
                     ),
@@ -171,11 +171,11 @@ class _TierUpDialogState extends State<TierUpDialog> {
                       Text(
                         'You unlocked:',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeights.bold,
+                          fontWeight: VFontWeight.bold,
                           color: VColors.primary,
                         ),
                       ),
-                      const SizedBox(height: Spacing.xs),
+                      const SizedBox(height: VSpacing.xs),
                       ...widget.perks.map(
                         (perk) => Padding(
                           padding: const EdgeInsets.only(bottom: 4),
@@ -186,7 +186,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                                 size: 16,
                                 color: VColors.success,
                               ),
-                              const SizedBox(width: Spacing.xs),
+                              const SizedBox(width: VSpacing.xs),
                               Expanded(
                                 child: Text(
                                   perk,
@@ -204,7 +204,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 VButton(
                   label: 'Continue',
                   onPressed: () => Navigator.of(context).pop(),
@@ -257,10 +257,10 @@ class _TierBadgeDisplay extends StatelessWidget {
     return Opacity(
       opacity: opacity,
       child: Container(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(color: color.withValues(alpha: 0.4)),
           boxShadow: glow
               ? [
@@ -275,12 +275,12 @@ class _TierBadgeDisplay extends StatelessWidget {
         child: Column(
           children: [
             Icon(icon, size: 40, color: color),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: VSpacing.xs),
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: color,
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
               ),
             ),
           ],

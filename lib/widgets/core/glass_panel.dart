@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 /// Container card with surface-aware background.
 ///
@@ -35,10 +35,10 @@ class VSurfacePanel extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final container = Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.md),
+      padding: padding ?? const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.xl),
         border: border ?? Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
           width: 0.5,
@@ -58,13 +58,13 @@ class VSurfacePanel extends StatelessWidget {
 
     if (!useBlur) {
       return ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.xl),
         child: container,
       );
     }
 
     return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
+      borderRadius: borderRadius ?? BorderRadius.circular(VRadius.xl),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: container,
@@ -85,12 +85,12 @@ class VSurfaceModal extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(RadiusTokens.xl),
+      borderRadius: BorderRadius.circular(VRadius.xl),
       child: Container(
-        padding: padding ?? const EdgeInsets.all(Spacing.lg),
+        padding: padding ?? const EdgeInsets.all(VSpacing.lg),
         decoration: BoxDecoration(
           color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          borderRadius: BorderRadius.circular(VRadius.xl),
           border: Border.all(
             color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
             width: 0.5,

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../models/channel.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../state/channel_provider.dart';
@@ -38,23 +38,23 @@ class WorldSettingsChannels extends ConsumerWidget {
             const Icon(
               Icons.tag,
               color: VColors.tertiary,
-              size: IconSizes.sm,
+              size: VIconSize.sm,
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Text(
               'Channels',
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         Text(
           'Manage channels for this world.',
           style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         if (channels.isNotEmpty)
           ...channels.map(
             (ch) => _ChannelRow(
@@ -64,11 +64,11 @@ class WorldSettingsChannels extends ConsumerWidget {
               onDelete: () => onDelete(ch.id, ch.name),
             ),
           ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         if (residentId == sovereignId)
           SizedBox(
             width: double.infinity,
-            height: TouchTargets.minimum,
+            height: VTouchTarget.minimum,
             child: OutlinedButton.icon(
               onPressed: () => onCreate(context),
               icon: const Icon(VIcons.plus, size: 18),
@@ -97,13 +97,13 @@ class _ChannelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
       child: VSurfacePanel(
-        padding: const EdgeInsets.all(Spacing.md),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        padding: const EdgeInsets.all(VSpacing.md),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         child: InkWell(
           onTap: channel.isDefault ? null : onRename,
-          borderRadius: BorderRadius.circular(RadiusTokens.xl),
+          borderRadius: BorderRadius.circular(VRadius.xl),
           child: Row(
             children: [
               Icon(
@@ -112,10 +112,10 @@ class _ChannelRow extends StatelessWidget {
                     : channel.channelType == ChannelType.feed
                     ? Icons.dynamic_feed
                     : Icons.tag,
-                size: IconSizes.md,
+                size: VIconSize.md,
                 color: VColors.onSurfaceVariant,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +123,7 @@ class _ChannelRow extends StatelessWidget {
                     Text(
                       '# ${channel.name}',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeights.semiBold,
+                        fontWeight: VFontWeight.semiBold,
                         color: VColors.onSurface,
                       ),
                     ),

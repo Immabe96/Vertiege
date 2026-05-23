@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../services/subscription_service.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class SubscriptionBadge extends StatelessWidget {
   final SubscriptionTier tier;
@@ -18,8 +18,8 @@ class SubscriptionBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.xs,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -27,7 +27,7 @@ class SubscriptionBadge extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(RadiusTokens.pill),
+        borderRadius: BorderRadius.circular(VRadius.pill),
         boxShadow: [
           BoxShadow(
             color: VColors.tertiary.withValues(
@@ -46,14 +46,14 @@ class SubscriptionBadge extends StatelessWidget {
             size: 14,
             color: VColors.onTertiary,
           ),
-          const SizedBox(width: Spacing.xs),
+          const SizedBox(width: VSpacing.xs),
           Text(
             label,
             style: const TextStyle(
-              fontSize: FontSizes.labelSm,
-              fontWeight: FontWeights.bold,
+              fontSize: VFontSize.labelSm,
+              fontWeight: VFontWeight.bold,
               color: VColors.onTertiary,
-              letterSpacing: LetterSpacing.label,
+              letterSpacing: 0,
             ),
           ),
         ],

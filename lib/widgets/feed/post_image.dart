@@ -1,8 +1,8 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/broken_media.dart';
 import '../core/shimmer.dart';
 
@@ -19,7 +19,7 @@ class PostImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+      borderRadius: BorderRadius.circular(VRadius.md),
       child: _isNetwork ? _networkImage() : _localImage(),
     );
   }

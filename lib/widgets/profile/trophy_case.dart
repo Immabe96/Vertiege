@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/resident.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
+import '../shared/tier_icon.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 
@@ -182,21 +183,6 @@ class _TimelineItem extends StatelessWidget {
     }
   }
 
-  IconData _tierIcon(int value) {
-    switch (value) {
-      case 5:
-        return Icons.diamond;
-      case 4:
-        return Icons.rocket_launch;
-      case 3:
-        return Icons.star;
-      case 2:
-        return Icons.star_border;
-      default:
-        return Icons.circle_outlined;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final color = _tierColor(tier.value);
@@ -216,10 +202,8 @@ class _TimelineItem extends StatelessWidget {
                   width: isCurrent ? 2 : 1,
                 ),
               ),
-              child: Icon(
-                _tierIcon(tier.value),
-                size: 16,
-                color: color,
+              child: Center(
+                child: TierIcon(tier: tier.value, size: 22),
               ),
             ),
             if (!isLast)
@@ -371,7 +355,29 @@ class _RecentAchievementsSection extends StatelessWidget {
         .take(5)
         .toList();
 
-    if (verified.isEmpty) return const SizedBox.shrink();
+    if (verified.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Recent Achievements',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: VColors.primary,
+              fontWeight: VFontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Text(
+            'No verified achievements yet—submit proof from the achievements hub.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

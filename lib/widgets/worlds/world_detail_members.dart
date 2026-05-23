@@ -1,9 +1,9 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/world_provider.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import 'leaderboard.dart';
 import 'world_events_card.dart';
@@ -30,7 +30,7 @@ class WorldDetailMembers extends ConsumerWidget {
       children: [
         // Member avatars wrapped in GlassPanel
         VSurfacePanel(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           child: WorldMemberRow(
             members: members,
             isLoading: membersLoading,
@@ -42,13 +42,13 @@ class WorldDetailMembers extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         if (ref.read(worldProvider.notifier).featuresForWorld(worldId).events)
           WorldEventsCard(worldId: worldId, sovereignId: world.sovereignId),
         WorldLeaderboard(worldId: worldId),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         WorldResidents(world: world),
-        const SizedBox(height: Spacing.xxl),
+        const SizedBox(height: VSpacing.xxl),
       ],
     );
   }

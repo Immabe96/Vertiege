@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class FeedTabChip extends StatelessWidget {
   final String label;
@@ -23,14 +23,14 @@ class FeedTabChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: AnimDurations.fast,
-        curve: AnimCurves.easeOut,
+        duration: VAnimation.fast,
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
               ? VColors.primary.withValues(alpha: 0.18)
               : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
-          borderRadius: BorderRadius.circular(RadiusTokens.full),
+          borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
             color: selected
                 ? VColors.primary.withValues(alpha: 0.35)
@@ -54,7 +54,7 @@ class FeedTabChip extends StatelessWidget {
                 color: selected
                     ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
                     : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
-                fontWeight: selected ? FontWeights.semiBold : FontWeight.normal,
+                fontWeight: selected ? VFontWeight.semiBold : FontWeight.normal,
               ),
             ),
           ],

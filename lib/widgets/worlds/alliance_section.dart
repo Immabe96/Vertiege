@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import '../../ui/buttons/v_button.dart';
 
@@ -29,9 +29,9 @@ class AllianceSection extends ConsumerWidget {
     if (alliances.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
       child: VSurfacePanel(
-        padding: const EdgeInsets.all(Spacing.lg),
+        padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -42,22 +42,22 @@ class AllianceSection extends ConsumerWidget {
                   height: 16,
                   decoration: BoxDecoration(
                     color: VColors.tertiary,
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    borderRadius: BorderRadius.circular(VRadius.sm),
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
+                const SizedBox(width: VSpacing.sm),
                 const Text(
                   'ALLIANCES',
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.semiBold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.semiBold,
                     color: VColors.tertiary,
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
             ...alliances.map((alliance) {
               final allyName = alliance.allyName(worldId);
               final allyId = alliance.allieOf(worldId);
@@ -79,9 +79,15 @@ class AllianceSection extends ConsumerWidget {
               final iconData = iconMap[iconStr] ?? Icons.public;
 
               return Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.sm),
-                child: VSurfacePanel(
-                  padding: const EdgeInsets.all(Spacing.md),
+                padding: const EdgeInsets.only(bottom: VSpacing.sm),
+                child: Container(
+                  padding: const EdgeInsets.all(VSpacing.md),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? VColors.surfaceDark
+                        : VColors.surfaceContainer,
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -89,15 +95,15 @@ class AllianceSection extends ConsumerWidget {
                         height: 40,
                         decoration: BoxDecoration(
                           color: VColors.tertiary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                          borderRadius: BorderRadius.circular(VRadius.sm),
                         ),
                         child: Icon(
                           iconData,
-                          size: IconSizes.md,
+                          size: VIconSize.md,
                           color: VColors.tertiary,
                         ),
                       ),
-                      const SizedBox(width: Spacing.md),
+                      const SizedBox(width: VSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,15 +111,15 @@ class AllianceSection extends ConsumerWidget {
                             Text(
                               allyName,
                               style: TextStyle(
-                                fontSize: FontSizes.headlineMd,
-                                fontWeight: FontWeights.semiBold,
+                                fontSize: VFontSize.headlineMd,
+                                fontWeight: VFontWeight.semiBold,
                                 color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                               ),
                             ),
                             Text(
                               '$memberCount members',
                               style: TextStyle(
-                                fontSize: FontSizes.labelSm,
+                                fontSize: VFontSize.labelSm,
                                 color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                               ),
                             ),

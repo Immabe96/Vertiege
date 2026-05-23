@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../state/resident_provider.dart';
 import '../../../state/world_provider.dart';
 import '../../../theme/v_colors.dart';
-import '../../../theme/design_system.dart';
+import '../../../theme/v_tokens.dart';
 
 /// Small card with season name + user's worlds count.
 class SeasonSnapshotCard extends ConsumerWidget {
@@ -38,39 +38,39 @@ class SeasonSnapshotCard extends ConsumerWidget {
           children: [
             const Icon(
               Icons.auto_awesome,
-              size: IconSizes.md,
+              size: VIconSize.md,
               color: VColors.primary,
             ),
-            const SizedBox(width: Spacing.xs),
+            const SizedBox(width: VSpacing.xs),
             const Text(
               'SEASON',
               style: TextStyle(
-                fontSize: FontSizes.labelSm,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.labelSm,
+                fontWeight: VFontWeight.semiBold,
                 color: VColors.onSurfaceVariant,
-                letterSpacing: LetterSpacing.label,
+                letterSpacing: 0,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         Text(
           seasonLabel,
           style: const TextStyle(
-            fontSize: FontSizes.bodyMd,
-            fontWeight: FontWeights.bold,
+            fontSize: VFontSize.bodyMd,
+            fontWeight: VFontWeight.bold,
             color: VColors.onSurface,
           ),
         ),
-        const SizedBox(height: Spacing.xs),
+        const SizedBox(height: VSpacing.xs),
         Text(
           '$joinedCount of $totalWorlds worlds joined',
           style: const TextStyle(
-            fontSize: FontSizes.labelSm,
+            fontSize: VFontSize.labelSm,
             color: VColors.outline,
           ),
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         GestureDetector(
           onTap: () => context.push('/season'),
           child: const Row(
@@ -78,14 +78,14 @@ class SeasonSnapshotCard extends ConsumerWidget {
               Text(
                 'View Season',
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
+                  fontSize: VFontSize.labelSm,
                   color: VColors.primary,
                 ),
               ),
-              SizedBox(width: Spacing.xs),
+              SizedBox(width: VSpacing.xs),
               Icon(
                 Icons.chevron_right,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: VColors.primary,
               ),
             ],

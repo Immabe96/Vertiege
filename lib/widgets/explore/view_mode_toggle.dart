@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class ExploreViewToggle extends StatelessWidget {
   final IconData icon;
@@ -22,16 +22,16 @@ class ExploreViewToggle extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: AnimDurations.fast,
+          duration: VAnimation.fast,
           padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.sm,
-            vertical: Spacing.sm,
+            horizontal: VSpacing.sm,
+            vertical: VSpacing.sm,
           ),
           decoration: BoxDecoration(
             color: selected
                 ? VColors.primary.withValues(alpha: 0.12)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            borderRadius: BorderRadius.circular(VRadius.md),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -39,17 +39,17 @@ class ExploreViewToggle extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: selected ? VColors.primary : VColors.outline,
               ),
-              const SizedBox(width: Spacing.xs),
+              const SizedBox(width: VSpacing.xs),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
+                  fontSize: VFontSize.labelSm,
                   fontWeight: selected
-                      ? FontWeights.semiBold
-                      : FontWeights.regular,
+                      ? VFontWeight.semiBold
+                      : VFontWeight.regular,
                   color: selected ? VColors.primary : VColors.outline,
                 ),
               ),

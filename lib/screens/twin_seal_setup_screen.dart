@@ -1,8 +1,10 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import '../services/auth_service.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
 
@@ -91,14 +93,11 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Twin Seal (2FA)'),
-        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
-            .withValues(alpha: 0.8),
-      ),
+    return VHubPage(
+      title: 'Twin Seal (2FA)',
+      showBack: true,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(Spacing.lg),
+        padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -117,14 +116,14 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: Spacing.lg),
+            const SizedBox(height: VSpacing.lg),
             Text(
               'Secure your account',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
               ),
             ),
-            const SizedBox(height: Spacing.sm),
+            const SizedBox(height: VSpacing.sm),
             Text(
               'Twin Seal adds an extra layer of security. After setup, you\'ll need a 6-digit code from your authenticator app each time you sign in.',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -133,7 +132,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                     : VColors.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: VSpacing.xl),
             _buildContent(theme),
           ],
         ),
@@ -161,15 +160,15 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             size: 64,
             color: VColors.success,
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           Text(
             'Twin Seal Enabled!',
             style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeights.bold,
+              fontWeight: VFontWeight.bold,
               color: VColors.success,
             ),
           ),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           Text(
             'Your account is now protected with two-factor authentication.',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -179,7 +178,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: Spacing.xl),
+          const SizedBox(height: VSpacing.xl),
           FilledButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(VIcons.badgeCheck),
@@ -198,10 +197,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
         Text(
           'Step 2: Verify setup',
           style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeights.bold,
+            fontWeight: VFontWeight.bold,
           ),
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         Text(
           'Scan the QR code in your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code below.',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -210,14 +209,14 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                 : VColors.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: Spacing.lg),
+        const SizedBox(height: VSpacing.lg),
         if (_qrCodeUrl != null)
           Center(
             child: Container(
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               decoration: BoxDecoration(
                 color: isDark ? VColors.surfaceDark : VColors.surface,
-                borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
                   color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
                 ),
@@ -242,16 +241,16 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
                   Text(
                     'Secret: $_secret',
                     style: TextStyle(
-                      fontFamily: AppFont.mono,
-                      fontSize: FontSizes.bodyMd,
+                      fontFamily: VFont.mono,
+                      fontSize: VFontSize.bodyMd,
                       color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
                   ),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   TextButton.icon(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _secret!));
@@ -262,21 +261,21 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.copy, size: IconSizes.sm),
+                    icon: const Icon(Icons.copy, size: VIconSize.sm),
                     label: const Text('Copy secret'),
                   ),
                 ],
               ),
             ),
           ),
-        const SizedBox(height: Spacing.xl),
+        const SizedBox(height: VSpacing.xl),
         TextField(
           controller: _codeController,
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: FontSizes.headlineLg,
-            fontFamily: AppFont.mono,
+            fontSize: VFontSize.headlineLg,
+            fontFamily: VFont.mono,
             letterSpacing: 8,
           ),
           maxLength: 6,
@@ -284,7 +283,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
               hintText: '000000',
               counterText: '',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                borderRadius: BorderRadius.circular(VRadius.xl),
               ),
               filled: true,
               fillColor: isDark
@@ -292,10 +291,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                   : VColors.surfaceContainer,
             ),
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
           if (_error != null)
             Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.md),
+              padding: const EdgeInsets.only(bottom: VSpacing.md),
               child: Text(
                 _error!,
                 style: const TextStyle(color: VColors.error),
@@ -318,10 +317,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
         Text(
           'Step 1: Generate secret',
           style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeights.bold,
+            fontWeight: VFontWeight.bold,
           ),
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         Text(
           'Tap the button below to generate your unique Twin Seal secret. You\'ll need an authenticator app ready.',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -330,10 +329,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                 : VColors.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: Spacing.xl),
+        const SizedBox(height: VSpacing.xl),
         if (_error != null)
           Padding(
-            padding: const EdgeInsets.only(bottom: Spacing.md),
+            padding: const EdgeInsets.only(bottom: VSpacing.md),
             child: Text(
               _error!,
               style: const TextStyle(color: VColors.error),
@@ -345,7 +344,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: FCircularProgress(),
                 )
               : const Icon(VIcons.shield),
           label: const Text('Generate Secret'),

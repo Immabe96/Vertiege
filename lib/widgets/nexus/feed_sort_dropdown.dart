@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 enum FeedSort { latest, hot, top }
 
@@ -32,7 +32,7 @@ class FeedSortDropdown extends StatelessWidget {
       onSelected: onChanged,
       offset: const Offset(0, 36),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusTokens.card),
+        borderRadius: BorderRadius.circular(VRadius.lg),
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -67,12 +67,12 @@ class FeedSortDropdown extends StatelessWidget {
             children: [
               Icon(
                 Icons.access_time,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: currentSort == FeedSort.latest
                     ? theme.colorScheme.primary
                     : theme.colorScheme.outline,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Text('Latest'),
             ],
           ),
@@ -83,12 +83,12 @@ class FeedSortDropdown extends StatelessWidget {
             children: [
               Icon(
                 Icons.local_fire_department,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: currentSort == FeedSort.hot
                     ? VColors.warning
                     : theme.colorScheme.outline,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Text('Hot'),
             ],
           ),
@@ -99,12 +99,12 @@ class FeedSortDropdown extends StatelessWidget {
             children: [
               Icon(
                 Icons.trending_up,
-                size: IconSizes.sm,
+                size: VIconSize.sm,
                 color: currentSort == FeedSort.top
                     ? theme.colorScheme.primary
                     : theme.colorScheme.outline,
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               const Text('Top'),
             ],
           ),

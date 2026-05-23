@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
-import '../utils/navigation.dart';
-import '../widgets/core/loading_state.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_tokens.dart';
+import '../widgets/core/screen_loading.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
 
@@ -91,19 +92,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        title: const Text('The Vault'),
-        leading: IconButton(
-          icon: const Icon(VIcons.arrowLeft),
-          onPressed: () => safeBack(context),
-        ),
-      ),
+    return VHubPage(
+      title: 'The Vault',
+      showBack: true,
       body: _loading
-          ? const SafeArea(child: VLoadingList(itemCount: 3))
+          ? const ScreenLoading.list()
           : ListView(
-              padding: const EdgeInsets.all(Spacing.lg),
+              padding: const EdgeInsets.all(VSpacing.lg),
               children: [
                 // ── Header ────────────────────────────────────────
                 Center(
@@ -115,7 +110,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         decoration: BoxDecoration(
                           color: VColors.tertiary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(
-                            RadiusTokens.cardFeatured,
+                            VRadius.md,
                           ),
                         ),
                         child: const Icon(
@@ -124,16 +119,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                           color: VColors.tertiary,
                         ),
                       ),
-                      const SizedBox(height: Spacing.md),
+                      const SizedBox(height: VSpacing.md),
                       Text(
                         'The Vault',
                         style: TextStyle(
-                          fontSize: FontSizes.headlineLg,
-                          fontWeight: FontWeights.bold,
+                          fontSize: VFontSize.headlineLg,
+                          fontWeight: VFontWeight.bold,
                           color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                         ),
                       ),
-                      const SizedBox(height: Spacing.xs),
+                      const SizedBox(height: VSpacing.xs),
                       Text(
                         'Unlock sovereign privileges',
                         style: theme.textTheme.bodyLarge?.copyWith(
@@ -145,16 +140,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.xl),
+                const SizedBox(height: VSpacing.xl),
 
                 // ── Purchase confirmation message ────────────────
                 if (_purchaseMessage != null) ...[
                   Container(
-                    padding: const EdgeInsets.all(Spacing.md),
-                    margin: const EdgeInsets.only(bottom: Spacing.lg),
+                    padding: const EdgeInsets.all(VSpacing.md),
+                    margin: const EdgeInsets.only(bottom: VSpacing.lg),
                     decoration: BoxDecoration(
                       color: VColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(RadiusTokens.card),
+                      borderRadius: BorderRadius.circular(VRadius.lg),
                       border: Border.all(
                         color: VColors.success.withValues(alpha: 0.3),
                       ),
@@ -166,7 +161,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                           color: VColors.success,
                           size: 20,
                         ),
-                        const SizedBox(width: Spacing.sm),
+                        const SizedBox(width: VSpacing.sm),
                         Expanded(
                           child: Text(
                             _purchaseMessage!,
@@ -194,7 +189,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       : '/month';
 
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: Spacing.md),
+                    padding: const EdgeInsets.only(bottom: VSpacing.md),
                     child: _TierCard(
                       tierName: benefits['label'] as String,
                       tierColor:
@@ -214,7 +209,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   );
                 }),
 
-                const SizedBox(height: Spacing.xl),
+                const SizedBox(height: VSpacing.xl),
 
                 // ── Footer ────────────────────────────────────────
                 Center(
@@ -225,11 +220,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       color: isDark
                           ? VColors.onSurfaceVariantDark
                           : VColors.onSurfaceVariant,
-                      height: LineHeight.body,
+                      height: VLineHeight.body,
                     ),
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
 
                 // ── Restore purchases ────────────────────────────
                 Center(
@@ -251,7 +246,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     variant: ButtonVariant.text,
                   ),
                 ),
-                const SizedBox(height: Spacing.xxl),
+                const SizedBox(height: VSpacing.xxl),
               ],
             ),
     );
@@ -347,8 +342,8 @@ class _TierCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return _Card(
-      padding: const EdgeInsets.all(Spacing.xl),
-      borderRadius: BorderRadius.circular(RadiusTokens.cardFeatured),
+      padding: const EdgeInsets.all(VSpacing.xl),
+      borderRadius: BorderRadius.circular(VRadius.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -359,34 +354,34 @@ class _TierCard extends StatelessWidget {
               Text(
                 tierName,
                 style: TextStyle(
-                  fontSize: FontSizes.headlineMd,
-                  fontWeight: FontWeights.bold,
+                  fontSize: VFontSize.headlineMd,
+                  fontWeight: VFontWeight.bold,
                   color: tierColor,
                 ),
               ),
               if (isActive)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.md,
-                    vertical: Spacing.xs,
+                    horizontal: VSpacing.md,
+                    vertical: VSpacing.xs,
                   ),
                   decoration: BoxDecoration(
                     color: tierColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(RadiusTokens.pill),
+                    borderRadius: BorderRadius.circular(VRadius.pill),
                     border: Border.all(color: tierColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
                     'CURRENT',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: tierColor,
-                      fontWeight: FontWeights.bold,
-                      letterSpacing: LetterSpacing.label,
+                      fontWeight: VFontWeight.bold,
+                      letterSpacing: 0,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
 
           // ── Price ───────────────────────────────────────────
           Row(
@@ -395,13 +390,13 @@ class _TierCard extends StatelessWidget {
               Text(
                 price,
                 style: TextStyle(
-                  fontSize: FontSizes.displayXl,
-                  fontWeight: FontWeights.bold,
+                  fontSize: VFontSize.displayXl,
+                  fontWeight: VFontWeight.bold,
                   color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                 ),
               ),
               if (pricePeriod.isNotEmpty) ...[
-                const SizedBox(width: Spacing.xs),
+                const SizedBox(width: VSpacing.xs),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
@@ -417,19 +412,19 @@ class _TierCard extends StatelessWidget {
               ],
             ],
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
 
           // ── Divider ─────────────────────────────────────────
           Container(
             height: 1,
             color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
 
           // ── Features ────────────────────────────────────────
           ...features.map(
             (feature) => Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -444,7 +439,7 @@ class _TierCard extends StatelessWidget {
                             ? VColors.onSurfaceVariantDark
                             : VColors.onSurfaceVariant).withValues(alpha: 0.4),
                   ),
-                  const SizedBox(width: Spacing.sm),
+                  const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Text(
                       feature.label,
@@ -466,7 +461,7 @@ class _TierCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: VSpacing.lg),
 
           // ── Upgrade button ──────────────────────────────────
           if (onUpgrade != null)
@@ -478,10 +473,7 @@ class _TierCard extends StatelessWidget {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: VColors.onSurface,
-                        ),
+                        child: FCircularProgress(),
                       )
                     : const Icon(VIcons.sparkles),
                 label: Text(isLoading ? 'Activating...' : 'UPGRADE'),
@@ -489,7 +481,7 @@ class _TierCard extends StatelessWidget {
                   backgroundColor: VColors.tertiary,
                   foregroundColor: VColors.onTertiary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(RadiusTokens.card),
+                    borderRadius: BorderRadius.circular(VRadius.lg),
                   ),
                 ),
               ),
@@ -517,10 +509,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.xl),
+      padding: padding ?? const EdgeInsets.all(VSpacing.xl),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

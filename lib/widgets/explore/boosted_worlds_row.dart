@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
-import 'package:vertiege/theme/colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 

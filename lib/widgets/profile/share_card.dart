@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import 'cosmetic_avatar.dart';
 import 'name_banner.dart';
 
@@ -64,7 +64,7 @@ class _ShareCardState extends State<ShareCard> {
         key: _key,
         child: Container(
           padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.all(Spacing.lg),
+          margin: const EdgeInsets.all(VSpacing.lg),
           decoration: BoxDecoration(
             color: VColors.glassBackground,
             borderRadius: BorderRadius.circular(VRadius.xxxl),
@@ -74,29 +74,29 @@ class _ShareCardState extends State<ShareCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               CosmeticAvatar(totalXp: widget.totalXp, size: 60),
-              const SizedBox(height: Spacing.md),
+              const SizedBox(height: VSpacing.md),
               NameBanner(
                 profession: widget.resident.profession,
                 name: widget.resident.name,
               ),
-              const SizedBox(height: Spacing.xs),
+              const SizedBox(height: VSpacing.xs),
               Text(
                 widget.resident.tier.label,
                 style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _Stat(label: 'XP', value: '${widget.totalXp}'),
-                  const SizedBox(width: Spacing.xl),
+                  const SizedBox(width: VSpacing.xl),
                   _Stat(
                     label: 'Achievements',
                     value: '${widget.achievementCount}',
                   ),
                 ],
               ),
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: VSpacing.sm),
               Text('Tap to share', style: theme.textTheme.labelSmall),
             ],
           ),

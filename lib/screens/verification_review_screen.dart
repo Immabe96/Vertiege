@@ -6,9 +6,10 @@ import '../services/verification_service.dart';
 import '../services/achievement_review_service.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
+import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/loading_state.dart';
+import '../widgets/core/screen_loading.dart';
 
 class VerificationReviewScreen extends ConsumerStatefulWidget {
   const VerificationReviewScreen({super.key, this.onSignOut});
@@ -120,22 +121,16 @@ class _VerificationReviewScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        title: const Text('Staff review'),
-        automaticallyImplyLeading: widget.onSignOut == null,
-        actions: [
-          if (widget.onSignOut != null)
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Sign out',
-              onPressed: widget.onSignOut,
-            ),
-        ],
-      ),
+    return VHubPage(
+      title: 'Staff review',
+      showBack: widget.onSignOut == null,
+      headerActions: [
+        if (widget.onSignOut != null)
+          FHeaderAction(
+            icon: const Icon(Icons.logout),
+            onPress: widget.onSignOut,
+          ),
+      ],
       body: FTabs(
         expands: true,
         control: const FTabControl.managed(),
@@ -156,7 +151,7 @@ class _VerificationReviewScreenState
 
   Widget _buildVerificationsTab(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    if (_loading) return const VLoadingList();
+    if (_loading) return const ScreenLoading.list();
     if (_submissions.isEmpty) {
       return const AppEmptyState(
         title: 'No pending verifications',
@@ -168,18 +163,18 @@ class _VerificationReviewScreenState
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.builder(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         itemCount: _submissions.length,
         itemBuilder: (_, i) {
           final s = _submissions[i];
           return Padding(
             padding: EdgeInsets.only(
-              bottom: i < _submissions.length - 1 ? Spacing.sm : 0,
+              bottom: i < _submissions.length - 1 ? VSpacing.sm : 0,
             ),
             child: Padding(
               padding: EdgeInsets.zero,
               child: _Card(
-                padding: const EdgeInsets.all(Spacing.md),
+                padding: const EdgeInsets.all(VSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -194,16 +189,16 @@ class _VerificationReviewScreenState
                                     : VColors.primaryContainer)
                                 .withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(
-                              RadiusTokens.full,
+                              VRadius.pill,
                             ),
                           ),
                           child: Icon(
                             Icons.badge_outlined,
                             color: VColors.primary,
-                            size: IconSizes.md,
+                            size: VIconSize.md,
                           ),
                         ),
-                        const SizedBox(width: Spacing.md),
+                        const SizedBox(width: VSpacing.md),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +209,7 @@ class _VerificationReviewScreenState
                                   color: isDark
                                       ? VColors.onSurfaceDark
                                       : VColors.onSurface,
-                                  fontWeight: FontWeights.bold,
+                                  fontWeight: VFontWeight.bold,
                                 ),
                               ),
                               Text(
@@ -245,9 +240,9 @@ class _VerificationReviewScreenState
                       ],
                     ),
                     if (s.proofUrl.isNotEmpty) ...[
-                      const SizedBox(height: Spacing.md),
+                      const SizedBox(height: VSpacing.md),
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(RadiusTokens.full),
+                        borderRadius: BorderRadius.circular(VRadius.pill),
                         child: Image.network(
                           s.proofUrl,
                           height: 176,
@@ -262,7 +257,7 @@ class _VerificationReviewScreenState
                                       : VColors.surfaceContainerLow)
                                   .withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(
-                                RadiusTokens.full,
+                                VRadius.pill,
                               ),
                             ),
                             child: Icon(
@@ -334,7 +329,7 @@ class _VerificationReviewScreenState
 
   Widget _buildAchievementsTab(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    if (_achievementsLoading) return const VLoadingList();
+    if (_achievementsLoading) return const ScreenLoading.list();
     if (_achievementSubmissions.isEmpty) {
       return const AppEmptyState(
         title: 'No pending achievements',
@@ -346,23 +341,23 @@ class _VerificationReviewScreenState
     return RefreshIndicator(
       onRefresh: _loadAchievements,
       child: ListView.builder(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         itemCount: _achievementSubmissions.length,
         itemBuilder: (_, i) {
           final s = _achievementSubmissions[i];
           return Padding(
             padding: EdgeInsets.only(
-              bottom: i < _achievementSubmissions.length - 1 ? Spacing.sm : 0,
+              bottom: i < _achievementSubmissions.length - 1 ? VSpacing.sm : 0,
             ),
             child: _Card(
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Icon(Icons.emoji_events, color: VColors.primary),
-                      const SizedBox(width: Spacing.md),
+                      const SizedBox(width: VSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,7 +365,7 @@ class _VerificationReviewScreenState
                             Text(
                               s.residentName,
                               style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeights.bold,
+                                fontWeight: VFontWeight.bold,
                               ),
                             ),
                             Text(
@@ -404,15 +399,15 @@ class _VerificationReviewScreenState
                     ],
                   ),
                   if (s.aiNotes != null && s.aiNotes!.isNotEmpty) ...[
-                    const SizedBox(height: Spacing.sm),
+                    const SizedBox(height: VSpacing.sm),
                     Text(s.aiNotes!, style: theme.textTheme.bodySmall),
                   ],
                   if (s.proofUri != null &&
                       s.proofUri!.isNotEmpty &&
                       s.proofUri!.startsWith('http')) ...[
-                    const SizedBox(height: Spacing.md),
+                    const SizedBox(height: VSpacing.md),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(RadiusTokens.full),
+                      borderRadius: BorderRadius.circular(VRadius.pill),
                       child: Image.network(
                         s.proofUri!,
                         height: 176,
@@ -448,15 +443,15 @@ class _VerificationReviewScreenState
 
     return ListView.builder(
       itemCount: flaggedPosts.length,
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
       itemBuilder: (_, i) {
         final post = flaggedPosts[i];
         return Padding(
           padding: EdgeInsets.only(
-            bottom: i < flaggedPosts.length - 1 ? Spacing.sm : 0,
+            bottom: i < flaggedPosts.length - 1 ? VSpacing.sm : 0,
           ),
           child: _Card(
-            padding: const EdgeInsets.all(Spacing.md),
+            padding: const EdgeInsets.all(VSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -472,7 +467,7 @@ class _VerificationReviewScreenState
                           ? const Icon(Icons.person, size: 16)
                           : null,
                     ),
-                    const SizedBox(width: Spacing.sm),
+                    const SizedBox(width: VSpacing.sm),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -523,16 +518,16 @@ class _VerificationReviewScreenState
                       ),
                   ],
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 // Content preview
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(Spacing.sm),
+                  padding: const EdgeInsets.all(VSpacing.sm),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerHighest.withValues(
                       alpha: 0.3,
                     ),
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    borderRadius: BorderRadius.circular(VRadius.md),
                   ),
                   child: Text(
                     post.content,
@@ -546,7 +541,7 @@ class _VerificationReviewScreenState
                   ),
                 ),
                 if (post.hasImages) ...[
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   Text(
                     'Contains ${post.allImageUris.length} image(s)',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -573,10 +568,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

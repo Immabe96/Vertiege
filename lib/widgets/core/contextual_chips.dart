@@ -5,7 +5,7 @@ import '../../state/resident_provider.dart';
 import '../../state/quest_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 /// Dynamically renders contextual chips based on the resident's current state:
 /// - New resident (tier 1, no worlds joined, no streak)
@@ -87,14 +87,14 @@ class ContextualChips extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.xs,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.xs,
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: chips
-              .expand((chip) => [chip, const SizedBox(width: Spacing.sm)])
+              .expand((chip) => [chip, const SizedBox(width: VSpacing.sm)])
               .toList(),
         ),
       ),
@@ -122,26 +122,26 @@ class _ContextChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: AnimDurations.fast,
+        duration: VAnimation.fast,
         padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.sm,
+          horizontal: VSpacing.md,
+          vertical: VSpacing.sm,
         ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+          borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: IconSizes.sm, color: color),
-            const SizedBox(width: Spacing.sm),
+            Icon(icon, size: VIconSize.sm, color: color),
+            const SizedBox(width: VSpacing.sm),
             Text(
               label,
               style: TextStyle(
-                fontSize: FontSizes.body,
-                fontWeight: FontWeights.semiBold,
+                fontSize: VFontSize.bodyMd,
+                fontWeight: VFontWeight.semiBold,
                 color: color,
               ),
             ),

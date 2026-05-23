@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 enum GlowTier { apex, elite, hustler }
 
@@ -10,12 +10,17 @@ class GlowBorder extends StatelessWidget {
   final BorderRadius? borderRadius;
   final EdgeInsetsGeometry? padding;
 
+  /// When true, only draws the tier accent border — no fill or shadow.
+  /// Use with [VSurfacePanel] to avoid stacked glass layers.
+  final bool borderOnly;
+
   const GlowBorder({
     super.key,
     required this.child,
     this.tier = GlowTier.elite,
     this.borderRadius,
     this.padding,
+    this.borderOnly = false,
   });
 
   Color get _borderColor {
@@ -42,15 +47,28 @@ class GlowBorder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = borderRadius ?? BorderRadius.circular(VRadius.xl);
+
+    if (borderOnly) {
+      return Container(
+        padding: padding ?? EdgeInsets.zero,
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          border: Border.all(color: _borderColor, width: 1),
+        ),
+        child: child,
+      );
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.md),
+      padding: padding ?? const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-        borderRadius: borderRadius ?? BorderRadius.circular(RadiusTokens.xl),
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: radius,
         border: Border.all(color: _borderColor),
         boxShadow: [
-          BoxShadow(color: _glowColor, blurRadius: 15, spreadRadius: 0),
+          BoxShadow(color: _glowColor, blurRadius: 12, spreadRadius: 0),
         ],
       ),
       child: child,

@@ -303,6 +303,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       initialPresence: state.extra is Presence
                           ? state.extra! as Presence
                           : null,
+                      initialDraft: state.uri.queryParameters['draft'],
                     ),
                   ),
                 ],
@@ -344,6 +345,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           initialPresence: state.extra is Presence
               ? state.extra! as Presence
               : null,
+          initialDraft: state.uri.queryParameters['draft'],
         ),
       ),
       GoRoute(

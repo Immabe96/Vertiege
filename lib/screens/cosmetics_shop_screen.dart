@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/listing.dart';
 import '../services/marketplace_service.dart';
 import '../state/resident_provider.dart';
+import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/worlds/listing_card.dart';
@@ -27,57 +28,40 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
     final coins = resident?.sovereignCoins ?? 0;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor:
-            (isDark ? VColors.surfaceDark : VColors.surface).withValues(
-              alpha: 0.86,
-            ),
-        elevation: 0,
-        title: Text(
-          'Shop',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
+    return VHubPage(
+      title: 'Shop',
+      showBack: true,
+      headerActions: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.xs,
           ),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: VSpacing.md),
-            padding: const EdgeInsets.symmetric(
-              horizontal: VSpacing.md,
-              vertical: VSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: VColors.tertiary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(VRadius.pill),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.monetization_on,
-                  size: VIconSize.sm,
+          decoration: BoxDecoration(
+            color: VColors.tertiary.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(VRadius.pill),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.monetization_on,
+                size: VIconSize.sm,
+                color: VColors.tertiary,
+              ),
+              const SizedBox(width: VSpacing.xs),
+              Text(
+                '$coins',
+                style: const TextStyle(
+                  fontSize: VFontSize.bodyMd,
+                  fontWeight: VFontWeight.bold,
                   color: VColors.tertiary,
                 ),
-                const SizedBox(width: VSpacing.xs),
-                Text(
-                  '$coins',
-                  style: const TextStyle(
-                    fontSize: VFontSize.bodyMd,
-                    fontWeight: VFontWeight.bold,
-                    color: VColors.tertiary,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-
-      ),
+        ),
+      ],
       body: FTabs(
         expands: true,
         control: const FTabControl.managed(),

@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class ChatScrollFab extends StatelessWidget {
   final VoidCallback onTap;
@@ -19,11 +19,11 @@ class ChatScrollFab extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(Spacing.sm),
+          padding: const EdgeInsets.all(VSpacing.sm),
           child: Icon(
             Icons.keyboard_arrow_down,
             color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-            size: IconSizes.lg,
+            size: VIconSize.lg,
           ),
         ),
       ),

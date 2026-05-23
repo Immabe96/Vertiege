@@ -6,8 +6,9 @@ import '../models/world.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/admin_access_service.dart';
 import '../services/subscription_service.dart';
-import '../theme/design_system.dart';
+import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
+import '../theme/v_tokens.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
@@ -212,14 +213,14 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       _ => null,
     };
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: const Text('Create Dominion World')),
+    return VHubPage(
+      title: 'Create Dominion World',
+      showBack: true,
       body: ListView(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         children: [
           _Card(
-            padding: const EdgeInsets.all(Spacing.xl),
+            padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
                 Icon(
@@ -227,7 +228,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   size: 64,
                   color: VColors.tertiary,
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 Text(
                   'World Limit Reached',
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -235,7 +236,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 Text(
                   'You have created $limit world(s). Upgrade your tier to unlock more.',
                   textAlign: TextAlign.center,
@@ -245,7 +246,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                         : VColors.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: Spacing.xl),
+                const SizedBox(height: VSpacing.xl),
                 if (nextTierLimit != null) ...[
                   SizedBox(
                     height: 48,
@@ -259,7 +260,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   Text(
                     'Reach the next tier to create up to $nextTierLimit worlds.',
                     textAlign: TextAlign.center,
@@ -285,18 +286,18 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
     final progress = (totalXp / _requiredXp).clamp(0.0, 1.0);
     final remaining = _requiredXp - totalXp;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: const Text('Create Dominion World')),
+    return VHubPage(
+      title: 'Create Dominion World',
+      showBack: true,
       body: ListView(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.all(VSpacing.md),
         children: [
           _Card(
-            padding: const EdgeInsets.all(Spacing.xl),
+            padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
                 Icon(Icons.lock_outline, size: 64, color: VColors.tertiary),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: VSpacing.md),
                 Text(
                   'High Roller Required',
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -304,7 +305,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 Text(
                   'Only residents who have reached High Roller tier (500+ XP) can create custom dominion worlds.',
                   textAlign: TextAlign.center,
@@ -314,7 +315,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                         : VColors.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                const SizedBox(height: VSpacing.lg),
                 // ── Progress bar ──────────────────────────────
                 ClipRRect(
                   borderRadius: BorderRadius.circular(VRadius.md),
@@ -327,7 +328,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     valueColor: const AlwaysStoppedAnimation(VColors.tertiary),
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 Text(
                   '$totalXp / $_requiredXp XP',
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -336,7 +337,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   ),
                 ),
                 if (remaining > 0) ...[
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: VSpacing.xs),
                   Text(
                     '$remaining XP to go',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -346,7 +347,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: Spacing.xl),
+                const SizedBox(height: VSpacing.xl),
                 SizedBox(
                   height: 48,
                   child: FilledButton.icon(
@@ -359,7 +360,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: VSpacing.sm),
                 Text(
                   'Submit achievements and earn XP to unlock world creation.',
                   textAlign: TextAlign.center,
@@ -392,28 +393,28 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       return _buildWorldLimitReachedView(context);
     }
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(title: const Text('Create Dominion World')),
+    return VHubPage(
+      title: 'Create Dominion World',
+      showBack: true,
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(Spacing.md),
+          padding: const EdgeInsets.all(VSpacing.md),
           children: [
             // ── World Details ──────────────────────────────────────
             _Card(
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Icon(VIcons.globe, color: VColors.primary, size: 20),
-                      const SizedBox(width: Spacing.sm),
+                      const SizedBox(width: VSpacing.sm),
                       Text('World Details', style: theme.textTheme.titleMedium),
                     ],
                   ),
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
                   TextFormField(
                     controller: _nameController,
                     style: TextStyle(
@@ -454,7 +455,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
                   TextFormField(
                     controller: _descController,
                     style: TextStyle(
@@ -496,12 +497,12 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: VSpacing.md),
                   Text('Choose an Icon', style: theme.textTheme.labelLarge),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   Wrap(
-                    spacing: Spacing.sm,
-                    runSpacing: Spacing.sm,
+                    spacing: VSpacing.sm,
+                    runSpacing: VSpacing.sm,
                     children: _iconChoices.map((choice) {
                       final isSelected = _selectedIcon == choice.id;
                       return ChoiceChip(
@@ -541,7 +542,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                                   : VColors.glassBorder),
                         ),
                         visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.all(Spacing.sm),
+                        padding: const EdgeInsets.all(VSpacing.sm),
                       );
                     }).toList(),
                   ),
@@ -549,36 +550,36 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
               ),
             ),
 
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
 
             // ── Dominion Type ────────────────────────────────────────
             _Card(
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               child: DominionTypePicker(
                 selected: _selectedDominionType,
                 onSelected: (type) => setState(() => _selectedDominionType = type),
               ),
             ),
 
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: VSpacing.md),
 
             // ── Channels ───────────────────────────────────────────
             _Card(
-              padding: const EdgeInsets.all(Spacing.md),
+              padding: const EdgeInsets.all(VSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Icon(VIcons.tag, color: VColors.primary, size: 20),
-                      const SizedBox(width: Spacing.sm),
+                      const SizedBox(width: VSpacing.sm),
                       Text(
                         'Default Channels',
                         style: theme.textTheme.titleMedium,
                       ),
                     ],
                   ),
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: VSpacing.xs),
                   Text(
                     'These channels will be created for your world.',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -587,7 +588,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                           : VColors.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: VSpacing.sm),
                   ..._defaultChannels.map(
                     (channel) => SwitchListTile(
                       title: Text(channel.label),
@@ -606,7 +607,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
               ),
             ),
 
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: VSpacing.xl),
 
             // ── Submit — gold CTA ──────────────────────────────────
             FButton(
@@ -620,7 +621,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                           height: 20,
                           child: FCircularProgress(),
                         ),
-                        SizedBox(width: Spacing.sm),
+                        SizedBox(width: VSpacing.sm),
                         Text('Creating...'),
                       ],
                     )
@@ -628,13 +629,13 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(VIcons.plus, size: 20),
-                        SizedBox(width: Spacing.sm),
+                        SizedBox(width: VSpacing.sm),
                         Text('Create World'),
                       ],
                     ),
             ),
 
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: VSpacing.xl),
           ],
         ),
       ),
@@ -652,10 +653,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: padding ?? const EdgeInsets.all(Spacing.lg),
+      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),

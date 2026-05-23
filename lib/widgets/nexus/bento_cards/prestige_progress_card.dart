@@ -4,7 +4,8 @@ import '../../../config/achievements.dart';
 import '../../../state/resident_provider.dart';
 import '../../../state/achievement_provider.dart';
 import '../../../theme/v_colors.dart';
-import '../../../theme/design_system.dart';
+import '../../../theme/v_tokens.dart';
+import '../../shared/tier_icon.dart';
 
 /// Medium card with tier name + XP progress bar.
 class PrestigeProgressCard extends ConsumerWidget {
@@ -51,37 +52,29 @@ class PrestigeProgressCard extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Container(
+            SizedBox(
               width: 32,
               height: 32,
-              decoration: BoxDecoration(
-                color: tierColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              ),
-              child: Icon(
-                Icons.shield, // Will be overridden by switch below
-                size: IconSizes.sm,
-                color: tierColor,
-              ),
+              child: TierIcon(tier: tierNum, size: 32),
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   tierLabel.toUpperCase(),
                   style: const TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.semiBold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.semiBold,
                     color: VColors.onSurfaceVariant,
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
                 Text(
                   '$totalXp XP',
                   style: const TextStyle(
-                    fontSize: FontSizes.headlineMd,
-                    fontWeight: FontWeights.bold,
+                    fontSize: VFontSize.headlineMd,
+                    fontWeight: VFontWeight.bold,
                     color: VColors.onSurface,
                   ),
                 ),
@@ -89,7 +82,7 @@ class PrestigeProgressCard extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         if (tierNum < 5) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -97,23 +90,23 @@ class PrestigeProgressCard extends ConsumerWidget {
               Text(
                 'Next: $nextTierLabel',
                 style: const TextStyle(
-                  fontSize: FontSizes.labelSm,
+                  fontSize: VFontSize.labelSm,
                   color: VColors.outline,
                 ),
               ),
               Text(
                 '${tierRequired - tierProgress} XP',
                 style: TextStyle(
-                  fontSize: FontSizes.labelSm,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.semiBold,
                   color: tierColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
+            borderRadius: BorderRadius.circular(VRadius.sm),
             child: LinearProgressIndicator(
               value: progressFraction,
               minHeight: 4,
@@ -122,18 +115,18 @@ class PrestigeProgressCard extends ConsumerWidget {
             ),
           ),
         ] else ...[
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           Text(
             'SOVEREIGN MAX',
             style: TextStyle(
-              fontSize: FontSizes.labelSm,
-              fontWeight: FontWeights.bold,
+              fontSize: VFontSize.labelSm,
+              fontWeight: VFontWeight.bold,
               color: tierColor,
             ),
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
           ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
+            borderRadius: BorderRadius.circular(VRadius.sm),
             child: LinearProgressIndicator(
               value: 1.0,
               minHeight: 4,

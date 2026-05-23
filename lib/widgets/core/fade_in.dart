@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/v_motion.dart';
+
 class FadeIn extends StatefulWidget {
   final Widget child;
   final int delayMs;
@@ -25,6 +27,7 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
   late final Animation<double> _opacity;
   late final Animation<Offset> _slide;
   late final Animation<double> _scale;
+  bool _started = false;
 
   @override
   void initState() {
@@ -47,11 +50,26 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
         curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
       ),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+
+    if (!context.motionEnabled) {
+      _controller.value = 1.0;
+      return;
+    }
+    if (widget.delayMs <= 0) {
+      _controller.value = 1.0;
+      return;
+    }
 
     Future.delayed(Duration(milliseconds: widget.delayMs), () {
       if (mounted) _controller.forward();
     });
-    // Fallback: show content after 2s even if animation never triggers
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted && _controller.value < 0.99) _controller.value = 1.0;
     });
@@ -65,9 +83,6 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Show content immediately if delay is 0 (no point in animating instant content)
-    if (widget.delayMs <= 0) _controller.value = 1.0;
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {

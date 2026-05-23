@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../../models/invite.dart';
 import '../../utils/date_format.dart';
 import '../../widgets/core/glass_panel.dart';
@@ -40,27 +40,27 @@ class WorldSettingsInvites extends StatelessWidget {
             const Icon(
               Icons.person_add,
               color: VColors.tertiary,
-              size: IconSizes.sm,
+              size: VIconSize.sm,
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Text(
               'Invites',
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeights.bold,
+                fontWeight: VFontWeight.bold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: Spacing.sm),
+        const SizedBox(height: VSpacing.sm),
         Text(
           'Create and manage invitation codes for this world.',
           style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: VSpacing.md),
         if (residentId == sovereignId)
           SizedBox(
             width: double.infinity,
-            height: TouchTargets.minimum,
+            height: VTouchTarget.minimum,
             child: OutlinedButton.icon(
               onPressed: isGenerating ? null : onGenerate,
               icon: isGenerating
@@ -74,7 +74,7 @@ class WorldSettingsInvites extends StatelessWidget {
             ),
           ),
         if (generatedCode != null) ...[
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           Row(
             children: [
               Expanded(
@@ -90,11 +90,11 @@ class WorldSettingsInvites extends StatelessWidget {
                   ),
                   style: theme.textTheme.titleMedium?.copyWith(
                     letterSpacing: 2,
-                    fontFamily: AppFont.mono,
+                    fontFamily: VFont.mono,
                   ),
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               IconButton.filled(
                 onPressed: () => onCopy(generatedCode!),
                 icon: const Icon(Icons.copy),
@@ -104,14 +104,14 @@ class WorldSettingsInvites extends StatelessWidget {
           ),
         ],
         if (isLoadingInvites) ...[
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           const VLoadingCard(),
         ] else if (invites.isNotEmpty) ...[
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: VSpacing.md),
           const Divider(),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           Text('Existing Invites', style: theme.textTheme.labelLarge),
-          const SizedBox(height: Spacing.sm),
+          const SizedBox(height: VSpacing.sm),
           ...invites.map(
             (invite) => _InviteRow(invite: invite, onCopy: onCopy),
           ),
@@ -139,18 +139,18 @@ class _InviteRow extends StatelessWidget {
         : '${invite.uses} uses (unlimited)';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
       child: VSurfacePanel(
-        padding: const EdgeInsets.all(Spacing.md),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        padding: const EdgeInsets.all(VSpacing.md),
+        borderRadius: BorderRadius.circular(VRadius.xl),
         child: Row(
           children: [
             Icon(
               valid ? Icons.check_circle_outline : Icons.cancel_outlined,
               color: valid ? VColors.primary : VColors.error,
-              size: IconSizes.md,
+              size: VIconSize.md,
             ),
-            const SizedBox(width: Spacing.sm),
+            const SizedBox(width: VSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +158,7 @@ class _InviteRow extends StatelessWidget {
                   Text(
                     invite.code,
                     style: const TextStyle(
-                      fontFamily: AppFont.mono,
+                      fontFamily: VFont.mono,
                       letterSpacing: 1,
                       color: VColors.onSurface,
                     ),

@@ -1,10 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import '../../config/cosmetics.dart';
-import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
-import '../../utils/asset_image_decode.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../../ui/icons/v_icons.dart';
+import '../shared/badge_asset_image.dart';
 
 class Badge extends StatelessWidget {
   final String decorationId;
@@ -13,23 +12,23 @@ class Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final label = decorationLabels[decorationId] ?? 'Verified Professional';
     final imagePath = WorldAssets.badgeImageForId(decorationId);
+    final chipBg = theme.colorScheme.surfaceContainerHigh;
 
     return Chip(
       avatar: imagePath != null
-          ? Image.asset(
-              imagePath,
-              width: 22,
-              height: 22,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              cacheWidth: assetCachePx(context, 22),
-              errorBuilder: (_, _, _) => const Icon(VIcons.sparkles, size: 16),
+          ? BadgeAssetImage(
+              imagePath: imagePath,
+              size: 22,
+              darkMatteColor: chipBg,
+              errorBuilder: (_, _, _) =>
+                  const Icon(VIcons.sparkles, size: 16),
             )
           : const Icon(VIcons.sparkles, size: 16),
-      label: Text(label, style: const TextStyle(fontSize: FontSizes.micro)),
-      backgroundColor: VColors.surfaceContainerHighest,
+      label: Text(label, style: const TextStyle(fontSize: VFontSize.labelSm)),
+      backgroundColor: chipBg,
       side: BorderSide.none,
       padding: const EdgeInsets.all(4),
     );

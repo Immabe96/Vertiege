@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
+import '../../forui/v_hub_page.dart';
 import '../../models/poll.dart';
 import '../../services/poll_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/core/shimmer.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
@@ -26,6 +28,7 @@ class WorldPollsScreen extends ConsumerStatefulWidget {
 class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
   List<WorldPoll> _polls = [];
   bool _loading = true;
+  String? _loadError;
   bool _showActiveOnly = true;
 
   @override
@@ -35,18 +38,29 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
   }
 
   Future<void> _loadPolls() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final polls = await PollService.getPolls(
         widget.worldId,
         activeOnly: _showActiveOnly,
       );
-      if (mounted) setState(() {
-        _polls = polls;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _polls = polls;
+          _loading = false;
+          _loadError = null;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = 'Could not load polls. Please try again.';
+        });
+      }
     }
   }
 
@@ -132,39 +146,38 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return VHubPage(
+      title: 'Polls',
+      showBack: true,
+      headerActions: widget.isSovereignOrCouncil
+          ? [
+              FHeaderAction(
+                icon: const Icon(VIcons.plus),
+                onPress: _showCreatePollDialog,
+              ),
+            ]
+          : const [],
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (_loading) {
-      return ListView.builder(
-        padding: const EdgeInsets.all(VSpacing.md),
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: VSpacing.sm),
-            padding: const EdgeInsets.all(VSpacing.md),
-            decoration: BoxDecoration(
-              color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(VRadius.lg),
-            ),
-            child: const Column(
-              children: [
-                Pulse(height: 16, width: double.infinity),
-                SizedBox(height: VSpacing.sm),
-                Pulse(height: 12, width: 100),
-              ],
-            ),
-          );
-        },
-      );
+      return const ScreenLoading.list();
+    }
+
+    if (_loadError != null) {
+      return AppErrorState(message: _loadError, onRetry: _loadPolls);
     }
 
     if (_polls.isEmpty) {
       return AppEmptyState(
         title: 'No polls yet',
         description: widget.isSovereignOrCouncil
-            ? 'Create the first poll for your world!'
-            : 'No active polls in this world.',
+            ? 'Ask the world a question—create the first poll.'
+            : 'No active polls right now. Check back when council posts one.',
         icon: Icons.how_to_vote_outlined,
         actionLabel: widget.isSovereignOrCouncil ? 'Create Poll' : null,
         onAction: widget.isSovereignOrCouncil ? _showCreatePollDialog : null,
@@ -174,23 +187,21 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: Row(
-            children: [
-              Text(
-                '${_polls.length} poll${_polls.length == 1 ? '' : 's'}',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
+          padding: const EdgeInsets.fromLTRB(
+            VSpacing.md,
+            VSpacing.md,
+            VSpacing.md,
+            VSpacing.sm,
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${_polls.length} active poll${_polls.length == 1 ? '' : 's'}',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: VFontWeight.semiBold,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              const Spacer(),
-              if (widget.isSovereignOrCouncil)
-                FilledButton.icon(
-                  onPressed: _showCreatePollDialog,
-                  icon: const Icon(VIcons.plus),
-                  label: const Text('New Poll'),
-                ),
-            ],
+            ),
           ),
         ),
         Expanded(

@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class AppProgressBar extends StatelessWidget {
   final int current;
@@ -31,22 +31,22 @@ class AppProgressBar extends StatelessWidget {
               Text(
                 label!,
                 style: TextStyle(
-                  fontSize: FontSizes.caption,
-                  fontWeight: FontWeights.bold,
+                  fontSize: VFontSize.labelMd,
+                  fontWeight: VFontWeight.bold,
                   color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                 ),
               ),
               Text(
                 '$current/$max',
                 style: TextStyle(
-                  fontSize: FontSizes.micro,
-                  fontWeight: FontWeights.regular,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.regular,
                   color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
         ],
         ClipRRect(
           borderRadius: BorderRadius.circular(height / 2),
@@ -94,27 +94,27 @@ class SovereignProgressBar extends StatelessWidget {
                 Text(
                   label!.toUpperCase(),
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.regular,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.regular,
                     color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
-                    letterSpacing: LetterSpacing.label,
+                    letterSpacing: 0,
                   ),
                 ),
               if (trailing != null)
                 Text(
                   trailing!,
                   style: TextStyle(
-                    fontSize: FontSizes.labelSm,
-                    fontWeight: FontWeights.semiBold,
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.semiBold,
                     color: barColor,
                   ),
                 ),
             ],
           ),
         if (label != null || trailing != null)
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: VSpacing.xs),
         ClipRRect(
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          borderRadius: BorderRadius.circular(VRadius.sm),
           child: SizedBox(
             height: 4,
             child: LinearProgressIndicator(

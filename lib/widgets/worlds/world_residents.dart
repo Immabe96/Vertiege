@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
@@ -6,7 +6,7 @@ import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 import '../core/fade_in.dart';
 import '../core/loading_state.dart';
 import '../profile/cosmetic_avatar.dart';
@@ -105,8 +105,8 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
                         '${idx + 1}',
                         style: TextStyle(
                           color: medalColor,
-                          fontWeight: FontWeights.bold,
-                          fontSize: FontSizes.body,
+                          fontWeight: VFontWeight.bold,
+                          fontSize: VFontSize.bodyMd,
                         ),
                       ),
                   ],

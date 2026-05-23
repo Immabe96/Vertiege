@@ -10,7 +10,7 @@ import '../../models/resident.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../utils/asset_image_decode.dart';
+import '../../widgets/shared/badge_asset_image.dart';
 import '../../utils/world_assets.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
@@ -452,11 +452,10 @@ class _CategoryAvatar extends StatelessWidget {
     return SizedBox(
       width: 40,
       height: 40,
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-        cacheWidth: assetCachePx(context, 40),
+      child: BadgeAssetImage(
+        imagePath: imagePath,
+        size: 40,
+        darkMatteColor: Theme.of(context).colorScheme.surface,
         errorBuilder: (_, _, _) => Icon(icon, color: color, size: 20),
       ),
     );

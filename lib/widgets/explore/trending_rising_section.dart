@@ -2,7 +2,7 @@
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/design_system.dart';
+import '../../theme/v_tokens.dart';
 
 class TrendingRisingSection extends StatelessWidget {
   final String title;
@@ -28,10 +28,10 @@ class TrendingRisingSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            Spacing.md,
+            VSpacing.md,
             0,
-            Spacing.md,
-            Spacing.xs,
+            VSpacing.md,
+            VSpacing.xs,
           ),
           child: Row(
             children: [
@@ -40,15 +40,15 @@ class TrendingRisingSection extends StatelessWidget {
                 height: 20,
                 decoration: BoxDecoration(
                   color: badgeColor,
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  borderRadius: BorderRadius.circular(VRadius.sm),
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
+              const SizedBox(width: VSpacing.sm),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: FontSizes.headlineLg,
-                  fontWeight: FontWeights.semiBold,
+                  fontSize: VFontSize.headlineLg,
+                  fontWeight: VFontWeight.semiBold,
                   color: badgeColor,
                 ),
               ),
@@ -59,20 +59,20 @@ class TrendingRisingSection extends StatelessWidget {
           height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
             itemCount: worlds.length,
-            separatorBuilder: (_, _) => const SizedBox(width: Spacing.sm + 4),
+            separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm + 4),
             itemBuilder: (context, index) {
               final world = worlds[index];
               return GestureDetector(
                 onTap: () => context.push('/explore/${world.id}'),
                 child: Container(
                   width: 220,
-                  padding: const EdgeInsets.all(Spacing.md),
+                  padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
                     color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
                     borderRadius: BorderRadius.circular(
-                      RadiusTokens.cardFeatured,
+                      VRadius.md,
                     ),
                     border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
                   ),
@@ -83,17 +83,17 @@ class TrendingRisingSection extends StatelessWidget {
                         height: 44,
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                          borderRadius: BorderRadius.circular(VRadius.md),
                         ),
                         child: Icon(
                           title == 'Trending'
                               ? Icons.trending_up
                               : Icons.trending_flat,
                           color: badgeColor,
-                          size: IconSizes.md,
+                          size: VIconSize.md,
                         ),
                       ),
-                      const SizedBox(width: Spacing.sm),
+                      const SizedBox(width: VSpacing.sm),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +102,7 @@ class TrendingRisingSection extends StatelessWidget {
                             Text(
                               world.name,
                               style: theme.textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeights.bold,
+                                fontWeight: VFontWeight.bold,
                                 color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                               ),
                               maxLines: 1,
@@ -123,23 +123,23 @@ class TrendingRisingSection extends StatelessWidget {
                                     color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                                   ),
                                 ),
-                                const SizedBox(width: Spacing.sm),
+                                const SizedBox(width: VSpacing.sm),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: Spacing.sm,
+                                    horizontal: VSpacing.sm,
                                     vertical: 1,
                                   ),
                                   decoration: BoxDecoration(
                                     color: badgeColor.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(
-                                      RadiusTokens.chip,
+                                      VRadius.sm,
                                     ),
                                   ),
                                   child: Text(
                                     badgeLabel,
                                     style: TextStyle(
-                                      fontSize: FontSizes.labelSm,
-                                      fontWeight: FontWeights.bold,
+                                      fontSize: VFontSize.labelSm,
+                                      fontWeight: VFontWeight.bold,
                                       color: badgeColor,
                                     ),
                                   ),

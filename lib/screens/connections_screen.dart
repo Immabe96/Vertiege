@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:forui/forui.dart';
-
 import '../forui/v_hub_page.dart';
 import '../models/ally.dart';
 import '../models/resident.dart';
@@ -12,7 +10,9 @@ import '../state/world_provider.dart';
 import '../services/world_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/core/fade_in.dart';
+import '../widgets/core/screen_loading.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../ui/icons/v_icons.dart';
 
@@ -161,7 +161,6 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final allyState = ref.watch(allyProvider);
 
@@ -172,34 +171,20 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
         onRefresh: _load,
         child: _loading
             ? ListView(
-                children: const [
-                  SizedBox(height: 120),
-                  Center(child: CircularProgressIndicator()),
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [ScreenLoading.list()],
+              )
+            : _loadError != null && _rows.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(VSpacing.md),
+                children: [
+                  AppErrorState(message: _loadError, onRetry: _load),
                 ],
               )
             : ListView(
                 padding: const EdgeInsets.all(VSpacing.md),
                 children: [
-                  if (_loadError != null) ...[
-                    Material(
-                      color: isDark
-                          ? VColors.errorContainerDark
-                          : VColors.errorContainer,
-                      borderRadius: BorderRadius.circular(VRadius.lg),
-                      child: Padding(
-                        padding: const EdgeInsets.all(VSpacing.md),
-                        child: Text(
-                          _loadError!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark
-                                ? VColors.onErrorContainerDark
-                                : VColors.onErrorContainer,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: VSpacing.md),
-                  ],
                   if (widget.mode == ConnectionsMode.allies &&
                       allyState.pendingRequests.isNotEmpty) ...[
                     Text(
@@ -217,45 +202,22 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                     const SizedBox(height: VSpacing.lg),
                   ],
                   if (_rows.isEmpty && _loadError == null)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 48),
-                        child: Column(
-                          children: [
-                            Icon(
-                              widget.mode == ConnectionsMode.following
-                                  ? Icons.people_outline
-                                  : Icons.handshake_outlined,
-                              size: 48,
-                              color: VColors.outline,
-                            ),
-                            const SizedBox(height: VSpacing.md),
-                            Text(
-                              widget.mode == ConnectionsMode.following
-                                  ? 'Not following anyone yet'
-                                  : 'No allies yet',
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: VSpacing.sm),
-                            Text(
-                              widget.mode == ConnectionsMode.following
-                                  ? 'Find residents from world feeds or search.'
-                                  : 'Send allegiance requests from resident profiles.',
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: VColors.onSurfaceVariant,
-                              ),
-                            ),
-                            if (widget.mode == ConnectionsMode.allies) ...[
-                              const SizedBox(height: VSpacing.lg),
-                              FButton(
-                                onPress: () => context.push('/search'),
-                                child: const Text('Find residents'),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+                    AppEmptyState(
+                      icon: widget.mode == ConnectionsMode.following
+                          ? Icons.people_outline
+                          : Icons.handshake_outlined,
+                      title: widget.mode == ConnectionsMode.following
+                          ? 'Not following anyone yet'
+                          : 'No allies yet',
+                      description: widget.mode == ConnectionsMode.following
+                          ? 'Find residents from world feeds or search.'
+                          : 'Send allegiance requests from resident profiles.',
+                      actionLabel: widget.mode == ConnectionsMode.allies
+                          ? 'Find residents'
+                          : null,
+                      onAction: widget.mode == ConnectionsMode.allies
+                          ? () => context.push('/search')
+                          : null,
                     )
                   else
                     ..._rows.map((row) => _PersonTile(row: row)),
