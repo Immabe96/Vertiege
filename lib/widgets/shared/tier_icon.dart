@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
+import '../../utils/asset_image_decode.dart';
 import '../../utils/world_assets.dart';
 
 class TierIcon extends StatelessWidget {
@@ -17,9 +18,8 @@ class TierIcon extends StatelessWidget {
         width: size,
         height: size,
         fit: BoxFit.contain,
-        cacheWidth: (size * MediaQuery.devicePixelRatioOf(context))
-            .round()
-            .clamp(48, 256),
+        filterQuality: FilterQuality.high,
+        cacheWidth: assetCachePx(context, size),
         errorBuilder: (_, _, _) => _fallbackIcon(),
       );
     }

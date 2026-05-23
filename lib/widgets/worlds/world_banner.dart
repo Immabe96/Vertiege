@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
+import '../../utils/asset_image_decode.dart';
 import '../../utils/world_assets.dart';
 
 /// Procedural world banner that generates a unique, tier-themed visual
@@ -40,10 +41,7 @@ class WorldBanner extends StatelessWidget {
     final logicalCacheWidth = width.isFinite
         ? width
         : MediaQuery.sizeOf(context).width;
-    final cacheWidth =
-        (logicalCacheWidth * MediaQuery.devicePixelRatioOf(context))
-            .round()
-            .clamp(480, 1600);
+    final cacheWidth = assetCacheWidthForBanner(context, logicalCacheWidth);
     if (imagePath != null) {
       return SizedBox(
         width: width,
@@ -54,6 +52,7 @@ class WorldBanner extends StatelessWidget {
             Image.asset(
               imagePath,
               fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
               cacheWidth: cacheWidth,
               errorBuilder: (_, _, _) => CustomPaint(
                 painter: _WorldBannerPainter(

@@ -46,9 +46,26 @@ Copy approved files into the app bundle:
 .\scripts\image_gen.ps1 promote -Id world-golden-estate
 # or all generated at once:
 .\scripts\image_gen.ps1 promote -All
+.\scripts\image_gen.ps1 resize-assets
 ```
 
+`resize-assets` scales ChatGPT exports down to manifest sizes (512 icons, 1200x675 banners, 1080x1920 backgrounds) so the APK stays sharp and smaller.
+
 Then commit `assets/generated/` + manifest.
+
+## Resident tiers (5 named ranks)
+
+Match `lib/config/tiers.dart` / `ResidentTier` — **not** bronze/silver/gold:
+
+| Tier | Asset ID | Display name |
+|------|----------|----------------|
+| 1 | `tier-hustler.png` | Hustler |
+| 2 | `tier-high-roller.png` | High Roller |
+| 3 | `tier-elite.png` | Elite |
+| 4 | `tier-old-money.png` | Old Money |
+| 5 | `tier-apex.png` | Apex |
+
+Legacy `tier-bronze` / `tier-silver` / `tier-gold` / `tier-diamond` rows are skipped. Run `.\scripts\image_gen.ps1 sync-tiers` after pulling script updates.
 
 ## App launcher icons (not in batch queue)
 
@@ -80,3 +97,13 @@ Outputs under `android/app/src/main/res/mipmap-*`. Do not regenerate these via C
 ```powershell
 .\scripts\image_gen.ps1 export-chatgpt
 ```
+
+## ChatGPT Project (batch experiment)
+
+For OpenAI **Projects** (upload knowledge file + custom instructions):
+
+```powershell
+.\scripts\image_gen.ps1 export-chatgpt-project
+```
+
+Upload `docs/assets/chatgpt-project-batch.md` to the project, paste the **Custom instructions** section from that file into Project settings, then try: `Batch mode: generate assets #1 through #16 in order`.

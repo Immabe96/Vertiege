@@ -10,6 +10,7 @@ import '../../models/resident.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/asset_image_decode.dart';
 import '../../utils/world_assets.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
@@ -436,23 +437,28 @@ class _CategoryAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imagePath = WorldAssets.achievementCategoryImage(categoryName);
-    return Container(
+    if (imagePath == null) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.14),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      );
+    }
+
+    return SizedBox(
       width: 40,
       height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withValues(alpha: 0.14),
+      child: Image.asset(
+        imagePath,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        cacheWidth: assetCachePx(context, 40),
+        errorBuilder: (_, _, _) => Icon(icon, color: color, size: 20),
       ),
-      child: imagePath == null
-          ? Icon(icon, color: color, size: 20)
-          : ClipOval(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                cacheWidth: 80,
-                errorBuilder: (_, _, _) => Icon(icon, color: color, size: 20),
-              ),
-            ),
     );
   }
 }

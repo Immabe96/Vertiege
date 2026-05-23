@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
+import '../../utils/asset_image_decode.dart';
 import '../../utils/world_assets.dart';
 
 IconData achievementIconData(String iconName) {
@@ -94,24 +95,37 @@ class AchievementBadgeAvatar extends StatelessWidget {
         WorldAssets.achievementCategoryImage(achievement.category.name);
     final icon = achievementIconData(achievement.icon);
 
-    return Container(
+    if (imagePath == null) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: accentColor.withValues(alpha: 0.14),
+        ),
+        child: Icon(icon, size: size * 0.45, color: accentColor),
+      );
+    }
+
+    // PNG badges are square with alpha; avoid circle fill + oval clip (shows as a halo).
+    return SizedBox(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: accentColor.withValues(alpha: 0.14),
+      child: Image.asset(
+        imagePath,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        cacheWidth: assetCachePx(context, size),
+        errorBuilder: (_, _, _) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: accentColor.withValues(alpha: 0.14),
+          ),
+          child: Icon(icon, size: size * 0.45, color: accentColor),
+        ),
       ),
-      child: imagePath == null
-          ? Icon(icon, size: size * 0.45, color: accentColor)
-          : ClipOval(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                cacheWidth: (size * 2).round(),
-                errorBuilder: (_, _, _) =>
-                    Icon(icon, size: size * 0.45, color: accentColor),
-              ),
-            ),
     );
   }
 }

@@ -2,7 +2,7 @@
 # Usage: .\scripts\image_gen.ps1 next | status | mark | promote | init
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('init', 'next', 'status', 'mark', 'promote', 'list', 'reset', 'export-chatgpt', 'refresh-prompts', 'skip-category', 'pull')]
+    [ValidateSet('init', 'next', 'status', 'mark', 'promote', 'list', 'reset', 'export-chatgpt', 'export-chatgpt-project', 'refresh-prompts', 'skip-category', 'pull', 'sync-tiers', 'resize-assets')]
     [string] $Command = 'status',
 
     [string] $Id,
@@ -55,6 +55,74 @@ function Get-ChatGptFilename($item) {
         return [System.IO.Path]::ChangeExtension($item.filename, '.png')
     }
     return $item.filename
+}
+
+function Get-PixelSize($sizeString) {
+    $parts = $sizeString -split 'x'
+    if ($parts.Count -ne 2) {
+        throw "Invalid size: $sizeString (expected WxH)"
+    }
+    return @{
+        Width  = [int]$parts[0]
+        Height = [int]$parts[1]
+    }
+}
+
+function Resize-ImageAsset {
+    param(
+        [string] $SourcePath,
+        [string] $DestPath,
+        [int] $Width,
+        [int] $Height,
+        [string] $Format,
+        [int] $JpegQuality = 88
+    )
+    Add-Type -AssemblyName System.Drawing
+    $src = (Resolve-Path $SourcePath).Path
+    $image = [System.Drawing.Image]::FromFile($src)
+    $bmp = $null
+    try {
+        $destDir = Split-Path $DestPath -Parent
+        if (-not (Test-Path $destDir)) {
+            New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+        }
+        $bmp = New-Object System.Drawing.Bitmap(
+            $Width,
+            $Height,
+            ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb))
+        $graphics = [System.Drawing.Graphics]::FromImage($bmp)
+        try {
+            $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+            $graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+            $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+            $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+            if ($Format -eq 'jpg') {
+                $graphics.Clear([System.Drawing.Color]::FromArgb(255, 8, 6, 14))
+            } else {
+                $graphics.Clear([System.Drawing.Color]::Transparent)
+            }
+            $graphics.DrawImage($image, 0, 0, $Width, $Height)
+        } finally {
+            $graphics.Dispose()
+        }
+
+        $tempPath = "$DestPath.resize_tmp"
+        if ($Format -eq 'jpg') {
+            $encoder = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() |
+                Where-Object { $_.MimeType -eq 'image/jpeg' } |
+                Select-Object -First 1
+            $encoderParams = New-Object System.Drawing.Imaging.EncoderParameters(1)
+            $encoderParams.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter(
+                [System.Drawing.Imaging.Encoder]::Quality, $JpegQuality)
+            $bmp.Save($tempPath, $encoder, $encoderParams)
+        } else {
+            $bmp.Save($tempPath, [System.Drawing.Imaging.ImageFormat]::Png)
+        }
+    } finally {
+        $image.Dispose()
+        if ($bmp) { $bmp.Dispose() }
+    }
+    Move-Item -Path $tempPath -Destination $DestPath -Force
 }
 
 function Save-ImageAsJpeg {
@@ -262,10 +330,60 @@ function Sync-StatusFromDisk($manifest) {
     $manifest
 }
 
+function Get-AspectLine($item) {
+    if ($item.size -eq '1080x1920') { return 'Aspect: 9:16 portrait (phone wallpaper).' }
+    if ($item.category -eq 'world_banner') { return 'Aspect: 16:9 landscape.' }
+    if ($item.size -eq '512x512') { return 'Aspect: 1:1 square.' }
+    return "Aspect: match $($item.size) exactly."
+}
+
+function Get-FormatLine($item) {
+    if ($item.transparent) { return 'Format: PNG with transparent background (alpha).' }
+    if ($item.format -eq 'jpg') { return 'Format: PNG from ChatGPT; repo converts to JPG on import.' }
+    return "Format: $($item.format.ToUpper()) opaque, no transparency."
+}
+
+function Build-ChatGptPromptBlock($item) {
+    $chatgptFile = Get-ChatGptFilename $item
+    $lines = @(
+        'Vertiege premium mobile game asset.',
+        "Asset ID: $($item.id)",
+        "File name when saving: $chatgptFile"
+    )
+    if ($chatgptFile -ne $item.filename) {
+        $lines += "Final app file: $($item.filename)"
+    }
+    $lines += @(
+        "Dimensions: $($item.size) pixels (generate at this exact size).",
+        (Get-FormatLine $item),
+        (Get-AspectLine $item),
+        '',
+        $item.prompt.Trim(),
+        '',
+        "Avoid: $($item.negativePrompt)",
+        'No text, letters, numbers, logos, watermarks, or UI.'
+    )
+    $lines -join "`n"
+}
+
+function Sort-QueueItems($items) {
+    $tierOrder = @{
+        'tier-hustler'      = 1
+        'tier-high-roller'  = 2
+        'tier-elite'        = 3
+        'tier-old-money'    = 4
+        'tier-apex'         = 5
+    }
+    $items | Sort-Object {
+        if ($tierOrder.ContainsKey($_.id)) { 'tier-{0:D2}' -f $tierOrder[$_.id] }
+        else { $_.id }
+    }
+}
+
 function Get-NextItem($manifest) {
     $order = @('pending', 'failed', 'generated')
     foreach ($st in $order) {
-        $found = $manifest.items | Where-Object { $_.status -eq $st } | Sort-Object id | Select-Object -First 1
+        $found = Sort-QueueItems ($manifest.items | Where-Object { $_.status -eq $st }) | Select-Object -First 1
         if ($found) { return $found }
     }
     return $null
@@ -301,18 +419,20 @@ function Get-UniqueItemPrompts {
         'badge-polyglot'    = 'Game badge: abstract speech bubble shapes around a globe, multicolor enamel dots, no letters or words.'
     }
     $profs = @{
-        'prof-doctor'    = 'Profession icon: teal stethoscope on soft white circular badge, flat medical UI symbol.'
+        'prof-doctor'    = 'Profession icon medallion: elegant stethoscope arc on deep teal enamel disc with brushed silver rim and soft violet glow, premium mobile UI pin, subtle depth and polish, not a plain white hospital circle or flat clipart cross.'
         'prof-engineer'  = 'Profession icon: orange gear with graphite blueprint corner, engineering flat icon.'
         'prof-attorney'  = 'Profession icon: dark gavel on burgundy round seal, legal profession stamp style.'
-        'prof-finance'   = 'Profession icon: silver coin stack with green upward arrow, crisp fintech flat icon.'
+        'prof-finance'   = 'Profession icon medallion: emerald enamel shield with stylized ascending bars and silver chrome trim, premium fintech pin, subtle depth, cool green and graphite palette, no gold coins clipart or cheesy up-arrow sticker.'
         'prof-artist'    = 'Profession icon: painter palette with primary color dabs, playful creative flat icon.'
-        'prof-pilot'     = 'Profession icon: navy wings badge with gold star accent only, aviation flat insignia.'
+        'prof-pilot'     = 'Profession icon medallion: silver pilot wings arc over midnight navy enamel disc, subtle compass rose engraving, single small brass star accent, vintage aviation insignia pin with gentle depth, not flat clipart wings or oversized gold stars.'
     }
+    # Match lib/config/tiers.dart + ResidentTier: 1 Hustler, 2 High Roller, 3 Elite, 4 Old Money, 5 Apex
     $tiers = @{
-        'tier-bronze'  = 'Tier rank medallion: weathered bronze metal with patina green edges, humble rank badge, no text.'
-        'tier-silver'  = 'Tier rank medallion: polished silver chrome with cool blue reflections, mid rank badge, no text.'
-        'tier-gold'    = 'Tier rank medallion: true rich gold leaf sunburst, high rank badge, no text, distinct from silver and bronze.'
-        'tier-diamond' = 'Tier rank medallion: platinum frame with faceted diamond crystal center, prismatic rainbow refractions, apex rank, no text.'
+        'tier-hustler'      = 'Vertiege tier 1 Hustler medallion: copper and crimson street-grind emblem, gritty ambition energy, weathered metal with warm rust patina, humble starter rank pin, no text or numbers.'
+        'tier-high-roller'  = 'Vertiege tier 2 High Roller medallion: neon magenta and champagne gold casino flair, dice and chip motifs abstracted, flashy nightlife prestige pin, bold and playful, no text.'
+        'tier-elite'        = 'Vertiege tier 3 Elite medallion: hexagonal violet enamel crest with interlocking silver chevrons and a subtle crown silhouette, jewel-tone depth and brushed metal rim, prestigious but not police-badge clipart, no text.'
+        'tier-old-money'    = 'Vertiege tier 4 Old Money medallion: deep burgundy enamel disc with muted antique gold rim, small abstract legacy knot in center, quiet old-world prestige pin, flat front-facing game icon like tier 1-3 style, no text.'
+        'tier-apex'         = 'Vertiege tier 5 Apex medallion: platinum ring around faceted violet-white crystal core, soft prismatic edge glow, sovereign apex rank pin, flat front-facing game icon like tier 1-3 style, no text.'
     }
     $avatars = @{
         'avatar-1'        = 'Default player avatar: faceless bust silhouette in deep violet gradient, smooth organic shoulders, premium game UI, abstract citizen icon not a real person.'
@@ -492,6 +612,42 @@ If rate limited: mark -Status failed -Notes 'daily limit'
         Write-Host "Marked $Id as $Status"
     }
 
+    'sync-tiers' {
+        $m = Get-Manifest
+        if (-not $m) { Write-Host 'Run init first.'; exit 1 }
+        $unique = Get-UniqueItemPrompts
+        $legacy = @('tier-bronze', 'tier-silver', 'tier-gold', 'tier-diamond')
+        $named = @('tier-hustler', 'tier-high-roller', 'tier-elite', 'tier-old-money', 'tier-apex')
+        $list = [System.Collections.Generic.List[object]]::new()
+        foreach ($item in $m.items) {
+            if ($item.id -in $legacy) {
+                if ($item.status -eq 'pending') {
+                    $item.status = 'skipped'
+                    $item.notes = 'replaced by named tiers (Hustler..Apex)'
+                }
+                $list.Add($item)
+                continue
+            }
+            $list.Add($item)
+        }
+        foreach ($tierId in $named) {
+            $existing = $list | Where-Object { $_.id -eq $tierId } | Select-Object -First 1
+            if ($existing) {
+                $existing.prompt = $unique[$tierId]
+                $existing.negativePrompt = $EmblemNegative
+                continue
+            }
+            $list.Add((New-ItemDef -Id $tierId -Filename "$tierId.png" -Category 'tier' `
+                -Format 'png' -Transparent $true -Size '512x512' `
+                -Prompt $unique[$tierId] -Negative $EmblemNegative))
+        }
+        $m.items = @($list)
+        Save-Manifest $m
+        Write-Host 'Synced 5 named tier assets (Hustler, High Roller, Elite, Old Money, Apex).'
+        Write-Host 'Legacy tier-bronze/silver/gold/diamond pending rows marked skipped.'
+        Write-Host 'Update lib/utils/world_assets.dart _tierImagePaths if not already done.'
+    }
+
     'skip-category' {
         if (-not $Category) {
             Write-Error 'Usage: skip-category -Category avatar [-Notes "deferred"]'
@@ -610,6 +766,114 @@ If rate limited: mark -Status failed -Notes 'daily limit'
         }
         Set-Content -Path $outPath -Value $sb.ToString() -Encoding UTF8
         Write-Host "Wrote $outPath - $($pending.Count) items"
+    }
+
+    'export-chatgpt-project' {
+        $m = Get-Manifest
+        if (-not $m) { Write-Host 'Run: .\scripts\image_gen.ps1 init'; exit 1 }
+        $pending = Sort-QueueItems ($m.items | Where-Object { $_.status -in @('pending', 'failed') })
+        $outPath = Join-Path $Root 'docs\assets\chatgpt-project-batch.md'
+        $sb = [System.Text.StringBuilder]::new()
+        [void]$sb.AppendLine('# Vertiege - ChatGPT Project batch file')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine("Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm') | Pending assets: $($pending.Count)")
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('Upload this file to a **ChatGPT Project** (Project files / knowledge). Use the custom instructions block below in Project settings.')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('---')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('## Custom instructions (paste into ChatGPT Project)')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('```text')
+        [void]$sb.AppendLine('You generate Vertiege mobile game art from the batch manifest in this file.')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('Rules for every image:')
+        [void]$sb.AppendLine('- Follow each asset PROMPT block exactly; one asset per generation unless user asks for the next numbered item.')
+        [void]$sb.AppendLine('- Use the exact SAVE_AS filename (ChatGPT only exports PNG).')
+        [void]$sb.AppendLine('- Match DIMENSIONS and ASPECT; world banners are 1200x675 landscape 16:9.')
+        [void]$sb.AppendLine('- No text, letters, numbers, logos, signage, or watermarks in the image.')
+        [void]$sb.AppendLine('- After each image, tell the user: SAVE_AS filename and ASSET_ID for renaming in Downloads.')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('When user says "batch" or "run the list", generate assets in manifest order (1, 2, 3...), one image per message, and stop if rate-limited.')
+        [void]$sb.AppendLine('```')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('## Local workflow (after ChatGPT)')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('1. Download each image and rename to **SAVE_AS** (see each asset).')
+        [void]$sb.AppendLine('2. Put files in `%USERPROFILE%\\Downloads` with that exact name.')
+        [void]$sb.AppendLine('3. In repo: `.\scripts\image_gen.ps1 mark -Id <ASSET_ID> -Status generated` (pulls from Downloads, converts JPG if needed).')
+        [void]$sb.AppendLine('4. When all done: `.\scripts\image_gen.ps1 promote -All` then rebuild APK.')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('## Manifest index')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('| # | ASSET_ID | SAVE_AS | SIZE | NOTES |')
+        [void]$sb.AppendLine('|---|----------|---------|------|-------|')
+        $n = 0
+        foreach ($item in $pending) {
+            $n++
+            $saveAs = Get-ChatGptFilename $item
+            $notes = if ($saveAs -ne $item.filename) { "-> $($item.filename)" } else { '' }
+            [void]$sb.AppendLine("| $n | $($item.id) | $saveAs | $($item.size) | $notes |")
+        }
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('## Kickoff prompts (try in Project chat)')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('- `Generate asset #1 from the manifest. Use its PROMPT block exactly.`')
+        [void]$sb.AppendLine('- `Batch mode: generate assets #1 through #16 in order, one per reply. Confirm SAVE_AS after each.`')
+        [void]$sb.AppendLine('- `Continue from asset #5.`')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('---')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('## Asset prompts')
+        [void]$sb.AppendLine('')
+        $n = 0
+        foreach ($item in $pending) {
+            $n++
+            $saveAs = Get-ChatGptFilename $item
+            [void]$sb.AppendLine("### $n. $($item.id)")
+            [void]$sb.AppendLine('')
+            [void]$sb.AppendLine("| Field | Value |")
+            [void]$sb.AppendLine("|-------|-------|")
+            [void]$sb.AppendLine("| ASSET_ID | ``$($item.id)`` |")
+            [void]$sb.AppendLine("| SAVE_AS | ``$saveAs`` |")
+            if ($saveAs -ne $item.filename) {
+                [void]$sb.AppendLine("| FINAL_FILE | ``$($item.filename)`` |")
+            }
+            [void]$sb.AppendLine("| DIMENSIONS | $($item.size) |")
+            [void]$sb.AppendLine("| CATEGORY | $($item.category) |")
+            [void]$sb.AppendLine("| STAGING | ``$($item.stagingPath)`` |")
+            [void]$sb.AppendLine('')
+            [void]$sb.AppendLine('**PROMPT (copy for image generation):**')
+            [void]$sb.AppendLine('')
+            [void]$sb.AppendLine('```text')
+            [void]$sb.AppendLine((Build-ChatGptPromptBlock $item))
+            [void]$sb.AppendLine('```')
+            [void]$sb.AppendLine('')
+            [void]$sb.AppendLine('---')
+            [void]$sb.AppendLine('')
+        }
+        Set-Content -Path $outPath -Value $sb.ToString() -Encoding UTF8
+        Write-Host "Wrote $outPath - $($pending.Count) items for ChatGPT Project"
+    }
+
+    'resize-assets' {
+        $m = Get-Manifest
+        if (-not $m) { Write-Host 'Run init first.'; exit 1 }
+        $n = 0
+        foreach ($item in $m.items) {
+            $px = Get-PixelSize $item.size
+            foreach ($rel in @($item.stagingPath, $item.finalPath)) {
+                $path = Join-Path $Root ($rel -replace '/', '\')
+                if (-not (Test-Path $path)) { continue }
+                $before = (Get-Item $path).Length
+                Resize-ImageAsset -SourcePath $path -DestPath $path `
+                    -Width $px.Width -Height $px.Height -Format $item.format
+                $after = (Get-Item $path).Length
+                $n++
+                Write-Host "Resized $($item.id) -> $($item.size) ($([math]::Round($before/1KB))KB -> $([math]::Round($after/1KB))KB) [$rel]"
+            }
+        }
+        Write-Host "Resized $n file(s). Rebuild APK to see sharper, smaller assets."
     }
 
     'promote' {

@@ -61,11 +61,11 @@ class WorldAssets {
   };
 
   static const _tierImagePaths = <int, String>{
-    1: 'assets/generated/tier-bronze.png',
-    2: 'assets/generated/tier-silver.png',
-    3: 'assets/generated/tier-gold.png',
-    4: 'assets/generated/tier-diamond.png',
-    5: 'assets/generated/tier-diamond.png',
+    1: 'assets/generated/tier-hustler.png',
+    2: 'assets/generated/tier-high-roller.png',
+    3: 'assets/generated/tier-elite.png',
+    4: 'assets/generated/tier-old-money.png',
+    5: 'assets/generated/tier-apex.png',
   };
 
   static const _achievementCategoryPaths = <String, String>{

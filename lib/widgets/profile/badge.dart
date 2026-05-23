@@ -2,6 +2,7 @@
 import '../../config/cosmetics.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/design_system.dart';
+import '../../utils/asset_image_decode.dart';
 import '../../utils/world_assets.dart';
 import '../../ui/icons/v_icons.dart';
 
@@ -17,15 +18,14 @@ class Badge extends StatelessWidget {
 
     return Chip(
       avatar: imagePath != null
-          ? ClipOval(
-              child: Image.asset(
-                imagePath,
-                width: 22,
-                height: 22,
-                fit: BoxFit.contain,
-                cacheWidth: 64,
-                errorBuilder: (_, _, _) => const Icon(VIcons.sparkles, size: 16),
-              ),
+          ? Image.asset(
+              imagePath,
+              width: 22,
+              height: 22,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              cacheWidth: assetCachePx(context, 22),
+              errorBuilder: (_, _, _) => const Icon(VIcons.sparkles, size: 16),
             )
           : const Icon(VIcons.sparkles, size: 16),
       label: Text(label, style: const TextStyle(fontSize: FontSizes.micro)),

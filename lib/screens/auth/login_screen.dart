@@ -9,6 +9,7 @@ import '../../state/resident_provider.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/v_colors.dart';
+import '../../utils/asset_image_decode.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
@@ -175,6 +176,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final coverCache = assetCacheSizeForCover(context);
+
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
       body: Stack(
@@ -183,11 +186,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Image.asset(
             'assets/generated/bg-onboarding.jpg',
             fit: BoxFit.cover,
-            cacheWidth:
-                (MediaQuery.sizeOf(context).width *
-                        MediaQuery.devicePixelRatioOf(context))
-                    .round()
-                    .clamp(480, 1440),
+            filterQuality: FilterQuality.high,
+            cacheWidth: coverCache.width,
+            cacheHeight: coverCache.height,
           ),
           DecoratedBox(
             decoration: BoxDecoration(
