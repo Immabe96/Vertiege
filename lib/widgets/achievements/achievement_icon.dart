@@ -107,16 +107,12 @@ class AchievementBadgeAvatar extends StatelessWidget {
       );
     }
 
-    // PNG badges are square with alpha; avoid circle fill + oval clip (shows as a halo).
-    final matte = Theme.of(context).colorScheme.surface;
-
     return SizedBox(
       width: size,
       height: size,
       child: BadgeAssetImage(
         imagePath: imagePath,
         size: size,
-        darkMatteColor: matte,
         errorBuilder: (_, _, _) => Container(
           width: size,
           height: size,
@@ -135,6 +131,7 @@ String statusLabel(AchievementStatus status) {
   return switch (status) {
     AchievementStatus.verified => 'Verified',
     AchievementStatus.submitted => 'Pending',
+    AchievementStatus.rejected => 'Rejected',
     AchievementStatus.locked => 'Available',
   };
 }
@@ -143,6 +140,14 @@ Color statusColor(AchievementStatus status) {
   return switch (status) {
     AchievementStatus.verified => VColors.success,
     AchievementStatus.submitted => VColors.warning,
+    AchievementStatus.rejected => VColors.error,
     AchievementStatus.locked => VColors.tertiary,
   };
+}
+
+bool hasProofThumbnail(String? proofUri) {
+  if (proofUri == null || proofUri.isEmpty || proofUri == 'manual') {
+    return false;
+  }
+  return proofUri.startsWith('http') || proofUri.startsWith('file');
 }

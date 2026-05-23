@@ -22,7 +22,6 @@ class Badge extends StatelessWidget {
           ? BadgeAssetImage(
               imagePath: imagePath,
               size: 22,
-              darkMatteColor: chipBg,
               errorBuilder: (_, _, _) =>
                   const Icon(VIcons.sparkles, size: 16),
             )

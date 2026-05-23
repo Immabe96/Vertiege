@@ -34,6 +34,7 @@ import '../screens/settings_screen.dart';
 import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
 import '../screens/world_members_screen.dart';
+import 'world_route_redirects.dart';
 import '../screens/search_screen.dart';
 import '../screens/connections_screen.dart';
 import '../screens/cosmetics_shop_screen.dart';
@@ -233,14 +234,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     ),
                     routes: [
                       GoRoute(
-                        path: ':channelName',
-                        builder: (context, state) => WorldChannelScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          channelId: state.uri.queryParameters['id'] ?? '',
-                          channelName: state.pathParameters['channelName']!,
-                        ),
-                      ),
-                      GoRoute(
                         path: 'settings',
                         builder: (context, state) => WorldSettingsScreen(
                           worldId: state.pathParameters['worldId']!,
@@ -282,6 +275,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         builder: (context, state) => WorldChallengesScreen(
                           worldId: state.pathParameters['worldId']!,
                           isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
+                        ),
+                      ),
+                      GoRoute(
+                        path: ':channelName',
+                        redirect: (context, state) {
+                          final worldId = state.pathParameters['worldId']!;
+                          final segment = state.pathParameters['channelName']!;
+                          return redirectReservedWorldSubRoute(
+                            worldId: worldId,
+                            segment: segment,
+                            query: state.uri.query,
+                          );
+                        },
+                        builder: (context, state) => WorldChannelScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          channelId: state.uri.queryParameters['id'] ?? '',
+                          channelName: state.pathParameters['channelName']!,
                         ),
                       ),
                     ],

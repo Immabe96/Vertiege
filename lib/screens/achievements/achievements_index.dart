@@ -384,8 +384,16 @@ class _CategoryTile extends FTile {
            categoryName: category.name,
            icon: meta.icon,
            color: meta.color,
+           accentRing: category == AchievementCategory.funny ||
+               category == AchievementCategory.creative,
          ),
-         title: Text(meta.label),
+         title: Text(
+           meta.label,
+           style: category == AchievementCategory.funny ||
+                   category == AchievementCategory.creative
+               ? const TextStyle(color: VColors.tertiary)
+               : null,
+         ),
          subtitle: Text(
            '${progress.earned} of ${progress.total} verified · ${progress.xp} XP earned',
            maxLines: 1,
@@ -427,36 +435,48 @@ class _CategoryAvatar extends StatelessWidget {
   final String categoryName;
   final IconData icon;
   final Color color;
+  final bool accentRing;
 
   const _CategoryAvatar({
     required this.categoryName,
     required this.icon,
     required this.color,
+    this.accentRing = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final imagePath = WorldAssets.achievementCategoryImage(categoryName);
+    final ring = accentRing
+        ? BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: VColors.tertiary, width: 2),
+          )
+        : null;
+
     if (imagePath == null) {
       return Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color.withValues(alpha: 0.14),
-        ),
+        decoration: ring ??
+            BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.14),
+            ),
         child: Icon(icon, color: color, size: 20),
       );
     }
 
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: BadgeAssetImage(
-        imagePath: imagePath,
-        size: 40,
-        darkMatteColor: Theme.of(context).colorScheme.surface,
-        errorBuilder: (_, _, _) => Icon(icon, color: color, size: 20),
+    return Container(
+      decoration: ring,
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: BadgeAssetImage(
+          imagePath: imagePath,
+          size: 40,
+          errorBuilder: (_, _, _) => Icon(icon, color: color, size: 20),
+        ),
       ),
     );
   }

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/v_colors.dart';
 import '../../utils/asset_image_decode.dart';
 
-/// Renders badge/achievement PNGs; removes light matte on dark backgrounds.
+/// Renders badge/achievement PNGs with optional light-matte removal on dark UI.
 class BadgeAssetImage extends StatelessWidget {
   final String imagePath;
   final double size;
   final BoxFit fit;
-  /// Background behind the image in dark mode (for [BlendMode.multiply] matting).
-  final Color? darkMatteColor;
+
+  /// When true (default), light PNG mattes are softened on dark theme without crushing colors.
+  final bool adaptDarkBackground;
   final ImageErrorWidgetBuilder? errorBuilder;
 
   const BadgeAssetImage({
@@ -16,7 +18,7 @@ class BadgeAssetImage extends StatelessWidget {
     required this.imagePath,
     required this.size,
     this.fit = BoxFit.contain,
-    this.darkMatteColor,
+    this.adaptDarkBackground = true,
     this.errorBuilder,
   });
 
@@ -24,20 +26,50 @@ class BadgeAssetImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final matte = isDark
-        ? (darkMatteColor ?? theme.colorScheme.surface)
-        : null;
 
-    return Image.asset(
-      imagePath,
-      width: size,
-      height: size,
-      fit: fit,
-      filterQuality: FilterQuality.high,
-      cacheWidth: assetCachePx(context, size),
-      color: matte,
-      colorBlendMode: isDark ? BlendMode.multiply : null,
-      errorBuilder: errorBuilder,
+    // Multiply with a dark surface turns full-color badges into solid black blobs.
+    // Show assets at full color in dark mode; optional soft matte only on light UI.
+    if (!isDark) {
+      return Image.asset(
+        imagePath,
+        width: size,
+        height: size,
+        fit: fit,
+        filterQuality: FilterQuality.high,
+        cacheWidth: assetCachePx(context, size),
+        errorBuilder: errorBuilder,
+      );
+    }
+
+    if (!adaptDarkBackground) {
+      return Image.asset(
+        imagePath,
+        width: size,
+        height: size,
+        fit: fit,
+        filterQuality: FilterQuality.high,
+        cacheWidth: assetCachePx(context, size),
+        errorBuilder: errorBuilder,
+      );
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: VColors.surfaceContainerHighDark,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: Image.asset(
+          imagePath,
+          width: size,
+          height: size,
+          fit: fit,
+          filterQuality: FilterQuality.high,
+          cacheWidth: assetCachePx(context, size),
+          errorBuilder: errorBuilder,
+        ),
+      ),
     );
   }
 }

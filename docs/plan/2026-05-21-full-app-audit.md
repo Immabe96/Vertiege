@@ -258,7 +258,9 @@ No Crashlytics pull run (optional follow-up via `crashlytics_get_report`).
 
 | Finding | Severity | Pass 2 action |
 |---------|----------|---------------|
-| Following/Allies → generic Search | Medium | **Fix:** `/following`, `/allies` hub screens |
+| Following/Allies → generic Search | Medium | **Done:** `/following`, `/allies` hub screens |
+| Members stat → `#members` channel | High | **Done:** static routes before `:channelName` + redirect guard |
+| Achievement badges solid black (dark) | High | **Done:** removed multiply matting on dark theme |
 | Unused imports (4) | Low | **Fix:** removed |
 | `google_sign_in` unused (OAuth via Supabase) | Low | **Fix:** removed from pubspec |
 | ChallengesCard double tap | Low | **Fix:** bento `onTap` only |
