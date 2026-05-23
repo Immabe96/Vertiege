@@ -58,6 +58,12 @@ class WorldAssets {
     'badge-finance': 'assets/generated/badge-finance.png',
     'badge-artist': 'assets/generated/badge-artist.png',
     'badge-pilot': 'assets/generated/badge-pilot.png',
+    'prof-doctor': 'assets/generated/prof-doctor.png',
+    'prof-engineer': 'assets/generated/prof-engineer.png',
+    'prof-attorney': 'assets/generated/prof-attorney.png',
+    'prof-finance': 'assets/generated/prof-finance.png',
+    'prof-artist': 'assets/generated/prof-artist.png',
+    'prof-pilot': 'assets/generated/prof-pilot.png',
   };
 
   static const _tierImagePaths = <int, String>{

@@ -48,6 +48,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate assets
+        run: bash scripts/validate_assets.sh
+
       - name: Create CI .env from secrets
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

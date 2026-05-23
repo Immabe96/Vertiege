@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Vertiege empty state previews</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 24px;
+      background: #111;
+      color: #eee;
+    }
+    h1 { font-size: 1.25rem; font-weight: 600; }
+    p { color: #aaa; max-width: 640px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+    figure {
+      margin: 0;
+      padding: 16px;
+      border-radius: 12px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+    }
+    figcaption {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .meta { font-size: 0.75rem; color: #888; font-weight: 400; margin-top: 4px; }
+    img { width: 100%; height: auto; max-height: 200px; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <h1>Empty state illustrations (unDraw)</h1>
+  <p>Source: <a href="https://undraw.co/license">unDraw</a> via MIT mirror. Files live in <code>assets/images/empty_states/</code>.</p>
+  <div class="grid">
+    <figure>
+      <img src="empty-feed.svg" alt="Empty feed" />
+      <figcaption>empty-feed.svg<div class="meta">wall_post — Nexus / no posts</div></figcaption>
+    </figure>
+    <figure>
+      <img src="empty-chat.svg" alt="Empty chat" />
+      <figcaption>empty-chat.svg<div class="meta">conversation — Chat / DMs</div></figcaption>
+    </figure>
+    <figure>
+      <img src="empty-worlds.svg" alt="Empty worlds" />
+      <figcaption>empty-worlds.svg<div class="meta">online_world — Explore / worlds</div></figcaption>
+    </figure>
+    <figure>
+      <img src="empty-notifications.svg" alt="Empty notifications" />
+      <figcaption>empty-notifications.svg<div class="meta">inbox_cleanup — Alerts</div></figcaption>
+    </figure>
+  </div>
+</body>
+</html>

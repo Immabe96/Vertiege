@@ -1,13 +1,20 @@
-# Validates that every asset referenced in WorldAssets / cosmetics exists on disk.
+# Validates Dart-referenced assets and approved manifest entries exist on disk.
+# Usage: ./scripts/validate_assets.ps1 [-StrictUnreferenced]
+param(
+    [switch]$StrictUnreferenced
+)
+
 $ErrorActionPreference = "Stop"
-$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path (Join-Path $root "pubspec.yaml"))) {
-    $root = Split-Path -Parent $PSScriptRoot
+    Write-Error "Run from repo root (pubspec.yaml not found at $root)"
 }
 
 $generated = Join-Path $root "assets\generated"
-$missing = @()
+$missing = [System.Collections.Generic.List[string]]::new()
+$manifestMissing = [System.Collections.Generic.List[string]]::new()
 
+# ── Code references (world_assets.dart, cosmetics.dart) ─────────────────
 $patterns = @(
     (Join-Path $root "lib\utils\world_assets.dart"),
     (Join-Path $root "lib\config\cosmetics.dart")
@@ -25,22 +32,74 @@ foreach ($file in $patterns) {
 foreach ($rel in ($paths | Sort-Object)) {
     $full = Join-Path $root ($rel -replace "/", "\")
     if (-not (Test-Path $full)) {
-        $missing += $rel
+        $missing.Add($rel.Replace("\", "/"))
     }
 }
 
-$extra = Get-ChildItem $generated -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -notin ($paths | ForEach-Object { Split-Path $_ -Leaf }) }
+# ── Manifest approved → finalPath on disk ────────────────────────────────
+$manifestPath = Join-Path $root "docs\assets\image-manifest.json"
+$manifestApproved = 0
+if (Test-Path $manifestPath) {
+    $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+    foreach ($item in $manifest.items) {
+        if ($item.status -ne "approved") { continue }
+        if (-not $item.finalPath) { continue }
+        $manifestApproved++
+        $rel = ($item.finalPath -replace "/", "\")
+        $full = Join-Path $root $rel
+        if (-not (Test-Path $full)) {
+            $manifestMissing.Add($item.finalPath)
+        }
+    }
+}
 
-Write-Host "Referenced assets: $($paths.Count)"
+# ── Unreferenced files (warn; optional strict) ───────────────────────────
+$allowUnreferenced = @(
+    "bg-onboarding.jpg",
+    "bg-splash.jpg",
+    "empty-chat.jpg",
+    "empty-feed.jpg",
+    "empty-notifications.jpg",
+    "empty-worlds.jpg",
+    "tier-bronze.png",
+    "tier-diamond.png",
+    "tier-gold.png",
+    "tier-silver.png"
+)
+
+$referencedNames = $paths | ForEach-Object { Split-Path $_ -Leaf }
+$extra = Get-ChildItem $generated -File -ErrorAction SilentlyContinue |
+    Where-Object {
+        $_.Name -notin $referencedNames -and $_.Name -notin $allowUnreferenced
+    }
+
+Write-Host "Referenced in Dart: $($paths.Count)"
+Write-Host "Manifest approved entries: $manifestApproved"
+
+$failed = $false
+
 if ($missing.Count -gt 0) {
-    Write-Host "MISSING ($($missing.Count)):" -ForegroundColor Red
+    $failed = $true
+    Write-Host "MISSING — referenced in code ($($missing.Count)):" -ForegroundColor Red
     $missing | ForEach-Object { Write-Host "  $_" }
-    exit 1
 }
-Write-Host "All referenced assets present." -ForegroundColor Green
-if ($extra) {
-    Write-Host "Unreferenced files in assets/generated/ ($($extra.Count)):" -ForegroundColor Yellow
-    $extra | Select-Object -First 10 | ForEach-Object { Write-Host "  $($_.Name)" }
+
+if ($manifestMissing.Count -gt 0) {
+    $failed = $true
+    Write-Host "MISSING — manifest approved finalPath ($($manifestMissing.Count)):" -ForegroundColor Red
+    $manifestMissing | ForEach-Object { Write-Host "  $_" }
 }
+
+if (-not $failed) {
+    Write-Host "All referenced and manifest-approved assets present." -ForegroundColor Green
+}
+
+if ($extra.Count -gt 0) {
+    $color = if ($StrictUnreferenced) { "Red" } else { "Yellow" }
+    Write-Host "Unreferenced in assets/generated/ ($($extra.Count)):" -ForegroundColor $color
+    $extra | Select-Object -First 15 | ForEach-Object { Write-Host "  $($_.Name)" }
+    if ($StrictUnreferenced) { $failed = $true }
+}
+
+if ($failed) { exit 1 }
 exit 0

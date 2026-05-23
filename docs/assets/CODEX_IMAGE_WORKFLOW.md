@@ -70,6 +70,13 @@ When the daily limit hits: **stop after Step 3–4**. Next day, run `next` again
 .\scripts\validate_assets.ps1
 ```
 
+CI runs the same check on every PR (`bash scripts/validate_assets.sh` in `.github/workflows/ci.yml`). It fails if:
+
+- Any path in `world_assets.dart` / `cosmetics.dart` is missing on disk
+- Any **approved** row in `image-manifest.json` has a `finalPath` that is missing
+
+Unreferenced files in `assets/generated/` (deprecated empty JPGs, legacy tier PNGs) are allowed; use `-StrictUnreferenced` to fail on those locally.
+
 Then mark approved:
 
 ```powershell
