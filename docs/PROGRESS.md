@@ -1,6 +1,6 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-19 (all 13 phases complete — see remaining work below)
+**Updated:** 2026-05-21 (launch polish + asset CI)
 
 ## Vision
 
@@ -30,9 +30,15 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 - [x] **Phase 12 — Accessibility**: Audit complete (semantics, tap targets, keyboard, contrast, reduced motion)
 - [x] **Phase 13 — Testing & CI**: CI hardened (removed `|| true`), branch triggers updated
 
+### Launch polish (2026-05-21)
+- **Phase 1 UX:** `ScreenLoading`, `AppEmptyState` / `AppErrorState` on feed, chat, explore, identity, world economy screens
+- **Phase 2 hubs/tokens:** `VHubPage` on shop, connections, settings, vault, alerts, create world, staff review, etc.; full `lib/` migrated off `design_system.dart` → `v_tokens.dart`
+- **Phase 3 assets:** `scripts/validate_assets.ps1` checks Dart refs + approved `image-manifest.json` paths; runs in CI
+
 ### Verification
-- `flutter test` — 101 tests pass (unit tests only — no widget/integration tests)
-- `flutter analyze` — 0 errors, 0 warnings
+- `flutter test` — 108 tests pass
+- `flutter analyze lib` — 0 errors
+- `scripts/validate_assets.ps1` — Dart asset refs + manifest approved files on disk
 
 ### Key remaining work (see REPORT.md "Remaining Work" for full list)
 - **Content**: Safety disclaimers not populated for any world

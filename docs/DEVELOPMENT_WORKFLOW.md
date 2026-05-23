@@ -56,6 +56,7 @@ git checkout -b fix/short-description    # or feature/...
 flutter run
 
 # Quick checks (optional but recommended before push)
+powershell -ExecutionPolicy Bypass -File scripts/validate_assets.ps1
 flutter analyze --no-fatal-infos --no-fatal-warnings
 flutter test
 # Do NOT run: flutter build apk --release  (uses RAM; CI builds on GitHub)
