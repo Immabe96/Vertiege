@@ -11,6 +11,9 @@ import '../core/glass_panel.dart';
 import '../feed/post_input.dart';
 import '../feed/post_item.dart';
 import 'event_card.dart';
+import 'world_channel_shortcuts.dart';
+import 'world_feed_chat_teaser.dart';
+import '../../models/channel.dart';
 
 class WorldFeedTab extends ConsumerStatefulWidget {
   final String worldId;
@@ -25,6 +28,7 @@ class WorldFeedTab extends ConsumerStatefulWidget {
   final bool isJoined;
   final VoidCallback? onJoin;
   final VoidCallback? onHighlightMissing;
+  final List<WorldChannel> channels;
 
   const WorldFeedTab({
     super.key,
@@ -38,6 +42,7 @@ class WorldFeedTab extends ConsumerStatefulWidget {
     this.isJoined = true,
     this.onJoin,
     this.onHighlightMissing,
+    this.channels = const [],
   });
 
   @override
@@ -180,6 +185,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
     final highlightPostId = widget.highlightPostId;
     final isJoined = widget.isJoined;
     final onJoin = widget.onJoin;
+    final channels = widget.channels;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final eventPosts = posts
@@ -222,10 +228,17 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
             ),
           );
 
+    final feedExtras = <Widget>[
+      if (channels.isNotEmpty)
+        WorldChannelShortcuts(worldId: worldId, channels: channels),
+      if (isJoined) WorldFeedChatTeaser(worldId: worldId),
+    ];
+
     if (!primaryScroll) {
       return Column(
         children: [
           postHeader,
+          ...feedExtras,
           if (eventPosts.isNotEmpty)
             SizedBox(
               height: 200,
@@ -278,6 +291,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
       padding: const EdgeInsets.only(bottom: VSpacing.xxl + VSpacing.xxl),
       children: [
         postHeader,
+        ...feedExtras,
         if (eventPosts.isNotEmpty)
           SizedBox(
             height: 200,

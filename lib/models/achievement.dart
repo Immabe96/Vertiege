@@ -13,7 +13,7 @@ enum AchievementCategory {
   inApp,
 }
 
-enum AchievementStatus { locked, submitted, verified }
+enum AchievementStatus { locked, submitted, verified, rejected }
 
 class Achievement {
   final String id;

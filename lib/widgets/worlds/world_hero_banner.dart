@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
@@ -189,68 +190,86 @@ class WorldHeroBanner extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: VSpacing.sm),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              world.name,
-                              style: const TextStyle(
-                                fontSize: VFontSize.headlineLg,
-                                fontWeight: VFontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 8,
+                      Text(
+                        world.name,
+                        style: const TextStyle(
+                          fontSize: VFontSize.headlineLg,
+                          fontWeight: VFontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black45,
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (world.sovereignName.trim().isNotEmpty) ...[
+                        const SizedBox(height: VSpacing.xs),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: world.sovereignId.isNotEmpty
+                                ? () => context.push(
+                                    '/residents/${world.sovereignId}',
+                                  )
+                                : null,
+                            borderRadius: BorderRadius.circular(VRadius.sm),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 2,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 12,
+                                    backgroundColor: prestigeTierColor
+                                        .withValues(alpha: 0.35),
+                                    child: Icon(
+                                      Icons.shield_outlined,
+                                      size: 14,
+                                      color: prestigeTierColor,
+                                    ),
                                   ),
+                                  const SizedBox(width: VSpacing.sm),
+                                  Flexible(
+                                    child: Text(
+                                      'Founded by ${world.sovereignName}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: VFontSize.bodyMd,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.92,
+                                        ),
+                                        shadows: const [
+                                          Shadow(
+                                            color: Colors.black38,
+                                            blurRadius: 6,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  if (world.sovereignId.isNotEmpty) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.chevron_right,
+                                      size: 16,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: VSpacing.sm),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: VSpacing.sm,
-                              vertical: VSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: VColors.tertiary,
-                              borderRadius: BorderRadius.circular(VRadius.pill),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: VColors.tertiary.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.shield,
-                                  size: 12,
-                                  color: VColors.onTertiary,
-                                ),
-                                SizedBox(width: 3),
-                                Text(
-                                  'SOVEREIGN',
-                                  style: TextStyle(
-                                    fontSize: VFontSize.labelMd,
-                                    fontWeight: VFontWeight.bold,
-                                    color: VColors.onTertiary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                       if (world.description.trim().isNotEmpty) ...[
                         const SizedBox(height: VSpacing.xs),
                         Text(

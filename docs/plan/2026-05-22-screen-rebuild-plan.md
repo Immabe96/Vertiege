@@ -1,7 +1,7 @@
 # Screen rebuild plan — World, Identity, Achievements
 
 **Date:** 2026-05-22  
-**Status:** Phase A implemented on `develop` (awaiting manual UAT after install)  
+**Status:** Phases A–D implemented on `develop` (Waves 1–4 + screen depth pass; device UAT in `docs/uat/WAVE-4-DEVICE-CHECKLIST.md`)  
 **Reference UI:** `VHubPage` + `VSectionList` (More, Settings, Discover)
 
 ---

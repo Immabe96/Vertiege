@@ -54,7 +54,9 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
   bool _isUploading = false;
   String? _errorText;
 
-  bool get _canSubmit => widget.status == AchievementStatus.locked;
+  bool get _canSubmit =>
+      widget.status == AchievementStatus.locked ||
+      widget.status == AchievementStatus.rejected;
 
   Future<void> _pickImage() async {
     final path = await AchievementProofUpload.pickGalleryImage();

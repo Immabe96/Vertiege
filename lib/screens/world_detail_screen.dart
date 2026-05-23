@@ -40,7 +40,6 @@ import '../widgets/worlds/resource_vault.dart';
 import '../widgets/worlds/world_share_card.dart';
 import '../widgets/shared/share_button.dart';
 import '../widgets/worlds/alliance_section.dart';
-import '../widgets/worlds/chat_preview_panel.dart';
 
 class WorldDetailScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -503,6 +502,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     isJoined: isJoined,
                     onJoin: _handleJoin,
                     onHighlightMissing: _onHighlightPostMissing,
+                    channels: channels,
                   ),
                 ),
                 _WorldDetailTabScroll(
@@ -1031,8 +1031,6 @@ class _MoreTab extends ConsumerWidget {
             channels: channels,
             vaultUnlocked: features.vault,
           ),
-          const SizedBox(height: VSpacing.md),
-          ChatPreviewPanel(worldId: worldId),
           const SizedBox(height: VSpacing.md),
           AllianceSection(worldId: worldId, world: world),
         ],

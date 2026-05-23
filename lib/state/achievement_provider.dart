@@ -394,19 +394,27 @@ class AchievementNotifier extends Notifier<AchievementState> {
   }
 
   int _statusRank(AchievementStatus status) => switch (status) {
-    AchievementStatus.verified => 2,
-    AchievementStatus.submitted => 1,
+    AchievementStatus.verified => 3,
+    AchievementStatus.submitted => 2,
+    AchievementStatus.rejected => 1,
     AchievementStatus.locked => 0,
   };
+
+  static AchievementStatus _statusFromName(String? statusName) {
+    return switch (statusName) {
+      'verified' => AchievementStatus.verified,
+      'submitted' => AchievementStatus.submitted,
+      'rejected' => AchievementStatus.rejected,
+      'locked' => AchievementStatus.locked,
+      _ => AchievementStatus.locked,
+    };
+  }
 
   static UserAchievement _fromCloudRow(Map<String, dynamic> row) {
     final statusName = row['status'] as String? ?? 'locked';
     return UserAchievement(
       achievementId: row['achievement_id'] as String,
-      status: AchievementStatus.values.firstWhere(
-        (s) => s.name == statusName,
-        orElse: () => AchievementStatus.submitted,
-      ),
+      status: _statusFromName(statusName),
       proofUri: row['proof_uri'] as String?,
       submittedAt: _parseMillis(row['submitted_at']),
       verifiedAt: _parseMillis(row['verified_at']),
@@ -445,10 +453,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
   static UserAchievement _fromJson(Map<String, dynamic> json) =>
       UserAchievement(
         achievementId: json['achievementId'] as String,
-        status: AchievementStatus.values.firstWhere(
-          (s) => s.name == json['status'],
-          orElse: () => AchievementStatus.locked,
-        ),
+        status: _statusFromName(json['status'] as String?),
         proofUri: json['proofUri'] as String?,
         submittedAt: json['submittedAt'] as int?,
         verifiedAt: json['verifiedAt'] as int?,

@@ -28,9 +28,6 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
   @override
   Widget build(BuildContext context) {
     final challengeState = ref.watch(challengeProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return VHubPage(
       title: 'Seasonal Challenges',
       showBack: true,

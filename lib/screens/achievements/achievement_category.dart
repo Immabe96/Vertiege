@@ -13,7 +13,7 @@ import '../../widgets/achievements/achievement_list_tile.dart';
 import '../../widgets/achievements/achievement_proof_sheet.dart';
 import '../../widgets/core/empty_state.dart';
 
-enum _AchievementFilter { all, verified, pending, available }
+enum _AchievementFilter { all, verified, pending, rejected, available }
 
 class AchievementCategoryScreen extends ConsumerStatefulWidget {
   final String category;
@@ -63,6 +63,8 @@ class _AchievementCategoryScreenState
           status == AchievementStatus.verified,
         _AchievementFilter.pending =>
           status == AchievementStatus.submitted,
+        _AchievementFilter.rejected =>
+          status == AchievementStatus.rejected,
         _AchievementFilter.available => status == AchievementStatus.locked,
       };
     }).toList();
@@ -146,6 +148,7 @@ class _AchievementCategoryScreenState
                         child: AchievementListTile(
                           achievement: achievement,
                           status: status,
+                          proofUri: userAch?.proofUri,
                           aiConfidence: userAch?.aiConfidence,
                           aiNotes: userAch?.aiNotes,
                           onPress: () => showAchievementProofSheet(
@@ -170,6 +173,7 @@ class _AchievementCategoryScreenState
       _AchievementFilter.all => 'All',
       _AchievementFilter.verified => 'Verified',
       _AchievementFilter.pending => 'Pending',
+      _AchievementFilter.rejected => 'Rejected',
       _AchievementFilter.available => 'Available',
     };
   }
@@ -180,6 +184,8 @@ class _AchievementCategoryScreenState
       _AchievementFilter.verified =>
         'You have not verified any achievements in this category.',
       _AchievementFilter.pending => 'No submissions awaiting review.',
+      _AchievementFilter.rejected =>
+        'No rejected submissions in this category.',
       _AchievementFilter.available =>
         'You have submitted everything available here.',
     };

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../theme/v_tokens.dart';
 import '../shared/tier_icon.dart';
 import '../../ui/buttons/v_button.dart';
 

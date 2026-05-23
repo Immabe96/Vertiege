@@ -9,7 +9,6 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
 import '../../ui/icons/v_icons.dart';

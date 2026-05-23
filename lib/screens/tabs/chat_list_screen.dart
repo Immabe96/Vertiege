@@ -16,7 +16,6 @@ import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../utils/world_assets.dart';
 
 enum _ChatMode { worlds, dms }

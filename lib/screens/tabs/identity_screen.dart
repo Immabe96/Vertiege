@@ -8,10 +8,12 @@ import '../../widgets/v_section_list.dart';
 import '../../widgets/identity/honour_stat_chip.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
+import '../../models/world.dart';
 import '../../services/auth_service.dart';
 import '../../services/subscription_service.dart';
 import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../state/post_provider.dart';
 import '../../theme/v_colors.dart';
@@ -36,6 +38,7 @@ import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/tier_up_dialog.dart';
 import '../../widgets/shared/profession_icon.dart';
 import '../../widgets/shared/tier_icon.dart';
+import '../../widgets/identity/joined_worlds_row.dart';
 import '../../config/achievements.dart';
 import '../../config/cosmetics.dart';
 
@@ -349,31 +352,44 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       title: resident.title,
                     ),
                     const SizedBox(width: VSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: VSpacing.sm,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: VColors.primary.withValues(alpha: 0.15),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => context.push('/ascension-path'),
                         borderRadius: BorderRadius.circular(VRadius.pill),
-                        border: Border.all(
-                          color: VColors.primary.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TierIcon(tier: tierValue, size: 18),
-                          const SizedBox(width: VSpacing.xxs),
-                          Text(
-                            resident.tier.label,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: VColors.primary,
-                              fontWeight: VFontWeight.bold,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: VColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(VRadius.pill),
+                            border: Border.all(
+                              color: VColors.primary.withValues(alpha: 0.3),
                             ),
                           ),
-                        ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TierIcon(tier: tierValue, size: 18),
+                              const SizedBox(width: VSpacing.xxs),
+                              Text(
+                                resident.tier.label,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: VColors.primary,
+                                  fontWeight: VFontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(
+                                Icons.chevron_right,
+                                size: 14,
+                                color: VColors.primary.withValues(alpha: 0.8),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -522,6 +538,16 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: VSpacing.lg),
+
+          _SectionHeader(title: 'My worlds', theme: theme),
+          const SizedBox(height: VSpacing.sm),
+          JoinedWorldsRow(
+            worlds: resident.joinedWorldIds
+                .map((id) => ref.watch(worldProvider).worlds[id])
+                .whereType<World>()
+                .toList(),
           ),
           const SizedBox(height: VSpacing.lg),
 
