@@ -19,3 +19,11 @@ Without this file, you cannot sign updates to the same app. Store a copy securel
 | Key algorithm | RSA 2048 |
 
 Store passwords separately from the keystore file.
+
+Generate locally:
+
+```bash
+./scripts/setup-android-signing.sh
+```
+
+This creates `android/upload-keystore.jks` and `android/key.properties` (gitignored).

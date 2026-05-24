@@ -18,6 +18,8 @@ void main() {
     expect(row.containsKey('tier'), isFalse);
     expect(row.containsKey('sovereign_coins'), isFalse);
     expect(row.containsKey('streak_count'), isFalse);
+    expect(row.containsKey('last_check_in'), isFalse);
+    expect(row.containsKey('total_xp'), isFalse);
     expect(row['id'], 'u1');
     expect(row['gate_completed'], isTrue);
   });

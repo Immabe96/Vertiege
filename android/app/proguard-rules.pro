@@ -26,9 +26,26 @@
 -dontwarn retrofit2.KotlinExtensions
 -dontwarn retrofit2.KotlinExtensions$*
 
-# Keep model classes (used by reflection for JSON serialization)
--keep class com.vertiege.** { *; }
+# Gson / JSON (if used by plugins)
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepclassmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Firebase / Google Play Services
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+
+# Kotlin coroutines / serialization used by plugins
+-keepclassmembers class kotlinx.coroutines.** { volatile <fields>; }
+
+# LiveKit / WebRTC (reflection-heavy)
+-keep class org.webrtc.** { *; }
+-dontwarn org.webrtc.**
 
 # R8: suppress missing optional dependencies
 -dontwarn com.google.android.play.core.**
 -dontwarn com.tekartik.sqflite.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.conscrypt.**

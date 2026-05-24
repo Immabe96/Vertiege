@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,10 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import '../../ui/buttons/v_button.dart';
+
+@visibleForTesting
+String worldFeedChatExplorePath(String worldId, WorldChannel channel) =>
+    '/explore/$worldId/${channel.name}?id=${channel.id}';
 
 /// Compact general-channel preview — preview + open CTA (no composer).
 class WorldFeedChatTeaser extends ConsumerStatefulWidget {
@@ -39,9 +44,7 @@ class _WorldFeedChatTeaserState extends ConsumerState<WorldFeedChatTeaser> {
   }
 
   void _openChannel(WorldChannel channel) {
-    context.push(
-      '/explore/${widget.worldId}/${channel.name}?id=${channel.id}',
-    );
+    context.push(worldFeedChatExplorePath(widget.worldId, channel));
   }
 
   @override

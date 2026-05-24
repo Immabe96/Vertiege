@@ -23,7 +23,6 @@ class ProfileService {
     'avatar_url': r.avatarUrl,
     'profession': r.profession,
     'decorations': r.decorations,
-    'last_check_in': r.lastCheckIn,
     'following': r.following,
     'joined_world_ids': r.joinedWorldIds,
     if (r.referredBy != null) 'referred_by': r.referredBy,
@@ -31,6 +30,22 @@ class ProfileService {
     'gate_completed': r.gateCompleted,
     if (r.avatarFrameId != null) 'avatar_frame_id': r.avatarFrameId,
   };
+
+  /// Server-side daily check-in (F31). Returns null if already checked in today.
+  static Future<({int streak, int bonusXp, bool shieldUsed})?>
+  recordDailyCheckIn() async {
+    if (!isSupabaseConfigured()) return null;
+    final client = getSupabase();
+    final raw = await client.rpc('record_daily_check_in');
+    if (raw is! Map) return null;
+    final data = Map<String, dynamic>.from(raw);
+    if (data['already_checked_in'] == true) return null;
+    return (
+      streak: (data['streak'] as num?)?.toInt() ?? 0,
+      bonusXp: (data['bonus_xp'] as num?)?.toInt() ?? 0,
+      shieldUsed: data['shield_used'] == true,
+    );
+  }
 
   static Future<Resident?> getProfile(String userId) async {
     if (!isSupabaseConfigured()) return null;
@@ -103,27 +118,58 @@ class ProfileService {
     Map<String, dynamic> data, {
     List<String> verifiedRoles = const [],
     List<String>? joinedWorldIds,
-  }) => Resident(
-    id: data['id'] ?? '',
-    name: data['name'] ?? 'Member',
-    tier: ResidentTier.fromValue(data['tier'] ?? 1),
-    bio: data['bio'] ?? '',
-    avatarUrl: data['avatar_url'] ?? '',
-    profession: data['profession'],
-    verifiedRoles: verifiedRoles,
-    decorations: List<String>.from(data['decorations'] ?? []),
-    lastCheckIn: data['last_check_in'] as String?,
-    streakCount: (data['streak_count'] as int?) ?? 0,
-    streakShields: (data['streak_shields'] as int?) ?? 0,
-    following: List<String>.from(data['following'] ?? []),
-    joinedWorldIds:
-        joinedWorldIds ?? List<String>.from(data['joined_world_ids'] ?? []),
-    referredBy: data['referred_by'] as String?,
-    sovereignCoins: (data['sovereign_coins'] as int?) ?? 100,
-    onboardingCompleted: data['onboarding_completed'] ?? false,
-    gateCompleted: data['gate_completed'] ?? false,
-    avatarFrameId: data['avatar_frame_id'] as String?,
-  );
+  }) {
+    final totalXp = (data['total_xp'] as num?)?.toInt() ?? 0;
+    final tierLevel = (data['tier'] as num?)?.toInt();
+    return Resident(
+      id: data['id'] ?? '',
+      name: data['name'] ?? 'Member',
+      tier: tierLevel != null
+          ? ResidentTier.fromValue(tierLevel)
+          : ResidentTier.fromXp(totalXp),
+      bio: data['bio'] ?? '',
+      avatarUrl: data['avatar_url'] ?? '',
+      profession: data['profession'],
+      verifiedRoles: verifiedRoles,
+      decorations: List<String>.from(data['decorations'] ?? []),
+      lastCheckIn: data['last_check_in'] as String?,
+      streakCount: (data['streak_count'] as int?) ?? 0,
+      streakShields: (data['streak_shields'] as int?) ?? 0,
+      following: List<String>.from(data['following'] ?? []),
+      joinedWorldIds:
+          joinedWorldIds ?? List<String>.from(data['joined_world_ids'] ?? []),
+      worldStandings: _parseWorldStandings(data['world_standings']),
+      referredBy: data['referred_by'] as String?,
+      sovereignCoins: (data['sovereign_coins'] as int?) ?? 100,
+      onboardingCompleted: data['onboarding_completed'] ?? false,
+      gateCompleted: data['gate_completed'] ?? false,
+      avatarFrameId: data['avatar_frame_id'] as String?,
+      totalXp: totalXp,
+      prestigeLevel: (data['prestige_level'] as num?)?.toInt() ?? 0,
+      prestigeStars: (data['prestige_stars'] as num?)?.toInt() ?? 0,
+      referralXpMultiplier:
+          (data['referral_xp_multiplier'] as num?)?.toDouble() ?? 1.0,
+      successfulReferrals:
+          (data['successful_referrals'] as num?)?.toInt() ?? 0,
+      lastActivityAt: _parseLastActivityAt(data['last_activity_at']),
+    );
+  }
+
+  static Map<String, WorldStanding> _parseWorldStandings(dynamic value) {
+    if (value is! Map) return {};
+    return value.map((k, v) {
+      final rep = v is Map ? (v['rep'] as num?)?.toInt() ?? 0 : 0;
+      return MapEntry(k.toString(), WorldStanding(rep: rep));
+    });
+  }
+
+  static int _parseLastActivityAt(dynamic value) {
+    if (value is int) return value;
+    if (value is String) {
+      return DateTime.tryParse(value)?.millisecondsSinceEpoch ?? 0;
+    }
+    return 0;
+  }
 
   static Future<List<String>> _getVerifiedRoles(String userId) async {
     try {

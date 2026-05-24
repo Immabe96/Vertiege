@@ -23,18 +23,18 @@ Source: [2026-05-24-cursor-swarm-audit.md](./2026-05-24-cursor-swarm-audit.md)
 | F17 | Med | **done** | `redirectMissingChannelId` |
 | F18 | Med | **done** | Table tests for all reserved world segments |
 | F19 | Med | **done** | `firebase_bootstrap_test` (state accessors) |
-| F20 | Med | **open** | Full `resident_provider` notifier tests (optional) |
-| F21 | Med | **open** | Channel widget pump tests (optional) |
+| F20 | Med | **done** | Streak/gamification unit tests + `resident_provider` sign-out test |
+| F21 | Med | **done** | Channel/teaser explore path tests (`?id=` query) |
 | F22 | Med | **done** | `OfflineBanner.onRetry` + copy |
 | F23 | Med | **done** | Supabase failure `MaterialBanner` + retry |
 | F24 | Med | **done** | Gradle profile comment in `gradle.properties` |
-| F25 | Med | **open** | Release minify — defer until ProGuard QA |
+| F25 | Med | **done** | Release minify/shrink enabled + expanded ProGuard rules |
 | F26 | Med | **done** | Linux/Firebase note in linux-setup doc |
 | F27 | Low | **done** | Auth tokens no longer mirrored; legacy keys cleared on sign-out |
 | F28 | Low | **partial** | Signup min 8 chars; enable leaked-password in Supabase dashboard |
 | F29 | Low | **done** | `FeatureFlags.postOutboxEnabled` gates `_runOrQueue` |
 | F30 | Low | **done** | `minimum_build` + `maintenance_banner` in `app.dart` |
-| F31 | Low | **open** | Gamification server reconcile — larger change |
+| F31 | Low | **done** | `record_daily_check_in` RPC + server gamification reconcile |
 | F32 | Low | **done** | Removed benchmark placeholder test |
 | F33 | Low | **done** | Deleted unused `safe_async_builder.dart` |
 | F34 | Low | **done** | Dev Firebase status in Settings (debug only) |

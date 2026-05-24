@@ -16,7 +16,9 @@ import '../services/moderation_service.dart';
 import '../services/verification_service.dart';
 import '../services/supabase.dart';
 import '../repositories/world_repository.dart';
+import '../utils/gamification_reconcile.dart';
 import '../utils/haptics.dart';
+import '../utils/streak_check_in.dart';
 import 'achievement_provider.dart';
 import 'world_provider.dart';
 import 'post_provider.dart';
@@ -92,14 +94,19 @@ class ResidentNotifier extends Notifier<ResidentState> {
         const Duration(seconds: 8),
       );
       if (remote != null) {
-        final resident = remote;
+        final cached = await _cachedResidentFor(userId);
+        final resident = cached != null
+            ? applyServerGamification(cached, remote)
+            : remote;
+        _lastStreakCount = resident.streakCount;
+        _lastJoinedWorldsCount = resident.joinedWorldIds.length;
         state = ResidentState(resident: resident, isLoading: false);
         unawaited(_syncGatePrefsFromProfile(resident));
-        _persist(); // cache locally
+        _persist();
         unawaited(_worldRepository.replayOutbox());
         return;
       }
-      // Fallback to local cache
+      // Fallback to local cache (gamification may be stale until back online).
       final cached = await _cachedResidentFor(userId);
       if (cached != null) {
         state = ResidentState(resident: cached, isLoading: false);
@@ -207,66 +214,40 @@ class ResidentNotifier extends Notifier<ResidentState> {
     _persist();
   }
 
-  ({int streak, int bonusXp, bool shieldUsed})? checkInToday() {
+  Future<({int streak, int bonusXp, bool shieldUsed})?> checkInToday() async {
     final r = state.resident;
     if (r == null) return null;
 
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final yesterday = DateTime.now()
-        .subtract(const Duration(days: 1))
-        .toIso8601String()
-        .substring(0, 10);
+    final now = DateTime.now();
+    final today = dateYmd(now);
+    if (r.lastCheckIn?.substring(0, 10) == today) return null;
 
-    if (r.lastCheckIn == today) return null;
+    final serverResult = await ProfileService.recordDailyCheckIn();
+    if (serverResult == null) return null;
 
-    final lastDate = r.lastCheckIn?.substring(0, 10);
-    bool shieldUsed = false;
-
-    int newStreak;
-    if (lastDate == null) {
-      newStreak = 1;
-    } else if (lastDate == yesterday) {
-      newStreak = r.streakCount + 1;
-    } else {
-      final dayBeforeYesterday = DateTime.now()
-          .subtract(const Duration(days: 2))
-          .toIso8601String()
-          .substring(0, 10);
-      if (r.streakShields > 0 && lastDate == dayBeforeYesterday) {
-        newStreak = r.streakCount + 1;
-        shieldUsed = true;
-      } else {
-        newStreak = 1;
-      }
+    await refreshGamificationFromServer();
+    if (serverResult.bonusXp > 0) {
+      await awardActivityXp('check_in', serverResult.bonusXp);
     }
-
-    final bonusXp = _getStreakBonusXp(newStreak);
-
-    final updatedShields = shieldUsed ? r.streakShields - 1 : r.streakShields;
-
-    state = state.copyWith(
-      resident: r.copyWith(
-        lastCheckIn: today,
-        streakCount: newStreak,
-        streakShields: updatedShields,
-      ),
-    );
-    _persist();
-    return (streak: newStreak, bonusXp: bonusXp, shieldUsed: shieldUsed);
+    return serverResult;
   }
 
-  int _getStreakBonusXp(int streak) {
-    const milestones = {
-      3: 10,
-      7: 50,
-      14: 100,
-      30: 200,
-      60: 500,
-      90: 1000,
-      180: 2500,
-      365: 5000,
-    };
-    return milestones[streak] ?? 0;
+  /// Pulls XP, streak, coins, and standings from Supabase (server wins).
+  Future<void> refreshGamificationFromServer() async {
+    final r = state.resident;
+    if (r == null) return;
+    try {
+      final remote = await ProfileService.getProfile(r.id).timeout(
+        const Duration(seconds: 8),
+      );
+      if (remote == null) return;
+      final merged = applyServerGamification(r, remote);
+      state = state.copyWith(resident: merged);
+      _lastStreakCount = merged.streakCount;
+      _persist();
+    } catch (e) {
+      debugPrint('refreshGamificationFromServer failed: $e');
+    }
   }
 
   void follow(String residentId) {
@@ -388,21 +369,13 @@ class ResidentNotifier extends Notifier<ResidentState> {
       );
       final actualXp = (response is int) ? response : adjustedXp;
 
-      final newTotalXp = r.totalXp + actualXp;
-      final newTier = ResidentTier.fromXp(newTotalXp);
-
-      state = state.copyWith(
-        resident: r.copyWith(
-          totalXp: newTotalXp,
-          lastActivityAt: DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-      _persist();
-
       ref.read(leagueProvider.notifier).trackXP(actualXp);
 
-      if (newTier.value > r.tier.value) {
-        await _performTierUpgrade(r, newTier);
+      final previousTier = r.tier;
+      await refreshGamificationFromServer();
+      final refreshed = state.resident;
+      if (refreshed != null && refreshed.tier.value > previousTier.value) {
+        await _performTierUpgrade(r, refreshed.tier);
       }
 
       return actualXp;
@@ -433,19 +406,11 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
       final r = state.resident;
       if (r != null && r.id == userId) {
-        final newTotalXp = r.totalXp + actualXp;
-        final newTier = ResidentTier.fromXp(newTotalXp);
-
-        state = state.copyWith(
-          resident: r.copyWith(
-            totalXp: newTotalXp,
-            lastActivityAt: DateTime.now().millisecondsSinceEpoch,
-          ),
-        );
-        _persist();
-
-        if (newTier.value > r.tier.value) {
-          await _performTierUpgrade(r, newTier);
+        final previousTier = r.tier;
+        await refreshGamificationFromServer();
+        final refreshed = state.resident;
+        if (refreshed != null && refreshed.tier.value > previousTier.value) {
+          await _performTierUpgrade(r, refreshed.tier);
         }
       }
 
