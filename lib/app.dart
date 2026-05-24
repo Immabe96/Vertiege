@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:forui/forui.dart';
-import 'package:http/io_client.dart' as http_io;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/notification.dart';
 import 'state/theme_provider.dart';
@@ -35,6 +32,7 @@ import 'config/build_info.dart';
 import 'services/feature_flags.dart';
 import 'services/firebase_bootstrap.dart';
 import 'services/supabase.dart';
+import 'services/supabase_bootstrap.dart';
 import 'services/firebase_messaging_handlers.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/offline_banner.dart';
@@ -151,34 +149,13 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       }),
     );
 
-    final url = dotenv.env['SUPABASE_URL'] ?? '';
-    final anonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
-    if (url.isEmpty || anonKey.isEmpty) {
-      debugPrint('Missing Supabase credentials — running in offline mode');
-      if (mounted) setState(() => _supabaseBootstrapFailed = true);
-      return;
-    }
-
-    try {
-      final httpClient = http_io.IOClient(
-        HttpClient()
-          ..connectionTimeout = const Duration(seconds: 5)
-          ..idleTimeout = const Duration(seconds: 10),
-      );
-      await Supabase.initialize(
-        url: url,
-        anonKey: anonKey,
-        httpClient: httpClient,
-      ).timeout(const Duration(seconds: 8));
-    } catch (e, st) {
-      debugPrint('Supabase init failed: $e');
-      CrashReporter.instance.recordError(
-        e,
-        st,
-        hint: 'supabase bootstrap startup',
-      );
-      if (mounted) setState(() => _supabaseBootstrapFailed = true);
-      return;
+    if (!Supabase.instance.isInitialized) {
+      final result = await SupabaseBootstrap.initialize();
+      if (result != SupabaseBootstrapResult.ready) {
+        debugPrint('Supabase bootstrap not ready: $result');
+        if (mounted) setState(() => _supabaseBootstrapFailed = true);
+        return;
+      }
     }
 
     if (!mounted) return;

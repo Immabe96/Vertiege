@@ -8,6 +8,8 @@ import '../../services/auth_service.dart';
 import '../../services/verifier_session.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
+import '../../state/supabase_bootstrap_provider.dart';
+import '../../services/supabase_bootstrap.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/v_colors.dart';
@@ -33,21 +35,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    if (maybeSupabase() == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() {
-          _errorMessage =
-              'Cloud sign-in is unavailable in this build. '
-              'Supabase credentials may be missing.';
-        });
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -90,20 +77,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  String? _bootstrapMessage(SupabaseBootstrapResult bootstrap) {
+    return switch (bootstrap) {
+      SupabaseBootstrapResult.ready => null,
+      SupabaseBootstrapResult.missingConfig =>
+        'Cloud sign-in is not configured in this build (.env missing in APK).',
+      SupabaseBootstrapResult.failed =>
+        'Could not connect to cloud. Check network and tap Retry on the banner above.',
+      SupabaseBootstrapResult.pending => 'Connecting to cloud…',
+    };
+  }
+
+  Future<bool> _ensureSupabaseReady() async {
+    if (maybeSupabase() != null) return true;
+    final result = await SupabaseBootstrap.initialize();
+    return result == SupabaseBootstrapResult.ready;
+  }
+
   Future<void> _handleLogin() async {
     if (!_isValid || _isLoading) return;
-    if (maybeSupabase() == null) {
-      setState(() {
-        _errorMessage =
-            'Cloud sign-in is unavailable. Check network or reinstall a signed build.';
-      });
-      return;
-    }
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+
+    if (!await _ensureSupabaseReady()) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = _bootstrapMessage(ref.read(supabaseBootstrapProvider)) ??
+            'Cloud sign-in is unavailable.';
+      });
+      return;
+    }
 
     try {
       await AuthService.signInWithEmail(
@@ -137,17 +144,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleGoogleSignIn() async {
     if (_isLoading) return;
-    if (maybeSupabase() == null) {
-      setState(() {
-        _errorMessage = 'Cloud sign-in is unavailable in this build.';
-      });
-      return;
-    }
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+
+    if (!await _ensureSupabaseReady()) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = _bootstrapMessage(ref.read(supabaseBootstrapProvider)) ??
+            'Cloud sign-in is unavailable.';
+      });
+      return;
+    }
 
     try {
       final launched = await AuthService.signInWithGoogle();
@@ -171,17 +182,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleAppleSignIn() async {
     if (_isLoading) return;
-    if (maybeSupabase() == null) {
-      setState(() {
-        _errorMessage = 'Cloud sign-in is unavailable in this build.';
-      });
-      return;
-    }
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+
+    if (!await _ensureSupabaseReady()) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = _bootstrapMessage(ref.read(supabaseBootstrapProvider)) ??
+            'Cloud sign-in is unavailable.';
+      });
+      return;
+    }
 
     try {
       final launched = await AuthService.signInWithApple();
@@ -278,6 +293,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final bootstrap = ref.watch(supabaseBootstrapProvider);
+    final residentState = ref.watch(residentProvider);
+
+    ref.listen<ResidentState>(residentProvider, (previous, next) {
+      if (!mounted || _isLoading) return;
+      if (next.isLoading || next.resident == null) return;
+      if (maybeSupabase()?.auth.currentSession == null) return;
+      context.go('/');
+    });
+
+    final bootstrapHint = _bootstrapMessage(bootstrap);
+    final displayError = _errorMessage ?? bootstrapHint;
 
     final coverCache = assetCacheSizeForCover(context);
 
@@ -385,8 +412,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (_errorMessage != null) ...[
-                          AuthErrorCard(message: _errorMessage!),
+                        if (displayError != null) ...[
+                          AuthErrorCard(message: displayError),
                           const SizedBox(height: VSpacing.lg),
                         ],
 

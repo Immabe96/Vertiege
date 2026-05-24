@@ -84,56 +84,85 @@ class ResidentNotifier extends Notifier<ResidentState> {
   Future<void> loadResident() async {
     state = state.copyWith(isLoading: true, clearLoadError: true);
     try {
-      final userId = maybeSupabase()?.auth.currentUser?.id;
-      if (userId == null) {
-        state = const ResidentState(isLoading: false);
-        return;
-      }
-      // Fetch from Supabase first
-      final remote = await ProfileService.getProfile(userId).timeout(
-        const Duration(seconds: 8),
-      );
-      if (remote != null) {
-        final cached = await _cachedResidentFor(userId);
-        final resident = cached != null
-            ? applyServerGamification(cached, remote)
-            : remote;
-        _lastStreakCount = resident.streakCount;
-        _lastJoinedWorldsCount = resident.joinedWorldIds.length;
-        state = ResidentState(resident: resident, isLoading: false);
-        unawaited(_syncGatePrefsFromProfile(resident));
-        _persist();
-        unawaited(_worldRepository.replayOutbox());
-        return;
-      }
-      // Fallback to local cache (gamification may be stale until back online).
-      final cached = await _cachedResidentFor(userId);
-      if (cached != null) {
-        state = ResidentState(resident: cached, isLoading: false);
-        return;
-      }
-      state = const ResidentState(
-        isLoading: false,
-        loadError: 'Profile not found. Try signing in again.',
-      );
+      await _loadResidentCore().timeout(const Duration(seconds: 15));
+    } on TimeoutException {
+      await _loadResidentAfterTimeout();
     } catch (_) {
-      final fallbackId = maybeSupabase()?.auth.currentUser?.id;
-      if (fallbackId != null) {
-        final cached = await _cachedResidentFor(fallbackId);
-        if (cached != null) {
-          state = ResidentState(
-            resident: cached,
-            isLoading: false,
-            loadError: 'Showing cached profile (offline).',
-          );
-          return;
-        }
-      }
-      state = const ResidentState(
-        isLoading: false,
-        loadError: 'Could not load your profile. Pull to refresh.',
-      );
+      await _loadResidentAfterError();
     }
+  }
+
+  Future<void> _loadResidentCore() async {
+    final userId = maybeSupabase()?.auth.currentUser?.id;
+    if (userId == null) {
+      state = const ResidentState(isLoading: false);
+      return;
+    }
+    // Fetch from Supabase first
+    final remote = await ProfileService.getProfile(userId).timeout(
+      const Duration(seconds: 8),
+    );
+    if (remote != null) {
+      final cached = await _cachedResidentFor(userId);
+      final resident = cached != null
+          ? applyServerGamification(cached, remote)
+          : remote;
+      _lastStreakCount = resident.streakCount;
+      _lastJoinedWorldsCount = resident.joinedWorldIds.length;
+      state = ResidentState(resident: resident, isLoading: false);
+      unawaited(_syncGatePrefsFromProfile(resident));
+      _persist();
+      unawaited(_worldRepository.replayOutbox());
+      return;
+    }
+    // Fallback to local cache (gamification may be stale until back online).
+    final cached = await _cachedResidentFor(userId);
+    if (cached != null) {
+      state = ResidentState(resident: cached, isLoading: false);
+      return;
+    }
+    state = const ResidentState(
+      isLoading: false,
+      loadError: 'Profile not found. Try signing in again.',
+    );
+  }
+
+  Future<void> _loadResidentAfterTimeout() async {
+    final fallbackId = maybeSupabase()?.auth.currentUser?.id;
+    if (fallbackId != null) {
+      final cached = await _cachedResidentFor(fallbackId);
+      if (cached != null) {
+        state = ResidentState(
+          resident: cached,
+          isLoading: false,
+          loadError: 'Showing cached profile (connection slow).',
+        );
+        return;
+      }
+    }
+    state = const ResidentState(
+      isLoading: false,
+      loadError: 'Loading your profile timed out. Check connection and retry.',
+    );
+  }
+
+  Future<void> _loadResidentAfterError() async {
+    final fallbackId = maybeSupabase()?.auth.currentUser?.id;
+    if (fallbackId != null) {
+      final cached = await _cachedResidentFor(fallbackId);
+      if (cached != null) {
+        state = ResidentState(
+          resident: cached,
+          isLoading: false,
+          loadError: 'Showing cached profile (offline).',
+        );
+        return;
+      }
+    }
+    state = const ResidentState(
+      isLoading: false,
+      loadError: 'Could not load your profile. Pull to refresh.',
+    );
   }
 
   void setResident(Resident resident) {

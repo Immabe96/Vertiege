@@ -17,9 +17,8 @@ SupabaseClient? maybeSupabase() {
 /// (String.fromEnvironment), which would always be empty when
 /// credentials come from flutter_dotenv.
 ///
-/// [Supabase.initialize] is called in main() and throws if the URL
-/// or anon key is missing, so [Supabase.instance.isInitialized] is
-/// a reliable gate.
+/// [Supabase.initialize] is called from [SupabaseBootstrap.initialize]
+/// in main() before runApp when `.env` is present in the asset bundle.
 bool isSupabaseConfigured() {
   return maybeSupabase() != null;
 }
