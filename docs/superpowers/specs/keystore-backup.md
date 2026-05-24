@@ -27,3 +27,17 @@ Generate locally:
 ```
 
 This creates `android/upload-keystore.jks` and `android/key.properties` (gitignored).
+
+## GitHub Actions (CI release APK)
+
+Add these **repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|--------|--------|
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 android/upload-keystore.jks` (Linux) |
+| `ANDROID_KEYSTORE_PASSWORD` | Same as `storePassword` in `key.properties` |
+| `ANDROID_KEY_PASSWORD` | Same as `keyPassword` in `key.properties` |
+| `ANDROID_KEY_ALIAS` | `upload` (optional) |
+
+CI runs `scripts/ci-setup-android-signing.sh` before `flutter build apk --release`.
+If Android secrets are missing, the workflow warns and the APK is **debug-signed** (not interchangeable with release-signed installs).

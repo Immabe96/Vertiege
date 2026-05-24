@@ -1,6 +1,13 @@
 # Fast verify on every push/PR; release APK only on develop (or manual dispatch).
 # main is updated after this workflow succeeds (see promote-to-main.yml).
-# Android: applicationId com.vertiege — google-services.json must stay in android/app/ (no extra CI secret).
+# Android: applicationId com.vertiege — google-services.json must stay in android/app/.
+#
+# Repo secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL, SUPABASE_ANON_KEY — embedded in CI .env for the APK
+#   ANDROID_KEYSTORE_BASE64 — base64 -w0 android/upload-keystore.jks
+#   ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_PASSWORD
+#   ANDROID_KEY_ALIAS (optional, default upload)
+# Without Android signing secrets, build-apk falls back to debug signing.
 name: CI
 
 on:
@@ -116,6 +123,14 @@ jobs:
             touch .env
             echo "::warning::SUPABASE_URL / SUPABASE_ANON_KEY repo secrets missing; APK will launch in offline mode"
           fi
+
+      - name: Configure release signing from secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: bash scripts/ci-setup-android-signing.sh
 
       - name: Build release APK
         run: flutter build apk --release --no-tree-shake-icons

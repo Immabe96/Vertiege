@@ -16,6 +16,8 @@ adb install -r build/ci-artifacts/latest/app-release.apk
 
 Requires GitHub secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` in CI (APK embeds `.env`). Empty `.env` caused black screen on launch — fixed with `dotenv.load(isOptional: true)` + CI secrets.
 
+For **release-signed** CI APKs (same key as local `flutter build apk --release`), also set `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_PASSWORD` — see [keystore-backup.md](superpowers/specs/keystore-backup.md).
+
 ### “App already installed” / won’t install after uninstall
 
 **Clearing cache or storage in Settings does not remove the app.** You must **Uninstall** the app (or use `adb uninstall`). If the launcher still shows Vertiege, the package is still there.
@@ -42,7 +44,7 @@ adb install -r -d C:\path\to\app-release.apk   # allow version downgrade
 **Why the phone installer can still fail after “uninstall”:**
 
 1. **Package not fully removed** — work profile, second user, or installer UI glitch. `adb uninstall` is definitive.
-2. **Different signing key** — GitHub CI builds use the **debug** key (no `key.properties` on the runner). A local `flutter build apk --release` with your own keystore is a **different signature**. You cannot update one with the other; full uninstall then install is required.
+2. **Different signing key** — CI uses the **release** keystore when Android secrets are configured; otherwise it falls back to **debug** signing. A local release APK and a CI debug APK are **different signatures** — full uninstall then install is required when switching.
 3. **Same error text, different cause** — “conflicting with existing app” often means the old package is **still registered**, not that leftover data blocks install.
 
 **Your data:** uninstall **does** remove app data for that package. If channels/settings looked “stuck” after reinstall, that was usually an **old APK** (empty `.env` / missing `world_members`), not because Android kept old files. After `adb uninstall`, you get a clean install.
