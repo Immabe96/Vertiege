@@ -7,6 +7,7 @@ import '../../state/resident_provider.dart';
 import '../../state/voice_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/v_motion.dart';
 import '../../widgets/feed/post_input.dart';
 
 class ScrollToTopNotifier extends Notifier<int> {
@@ -53,7 +54,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
   void initState() {
     super.initState();
     _fabController = AnimationController(
-      duration: VAnimation.normal,
+      duration: context.motionDuration(VAnimation.normal),
       vsync: this,
     );
     _fabScale = Tween<double>(begin: 0.0, end: 1.0).animate(

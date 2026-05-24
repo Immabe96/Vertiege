@@ -10,6 +10,7 @@ import '../theme/v_tokens.dart';
 import '../widgets/core/screen_loading.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
+import '../widgets/core/v_feedback.dart';
 
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
@@ -77,12 +78,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           _purchasing = false;
           _purchaseMessage = null;
         });
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Purchase failed. Please try again.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        VFeedback.showMessage(context, 'Purchase failed. Please try again.');
       }
     }
   }
@@ -235,12 +231,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       await StoreService.restorePurchases();
                       await _loadTier();
                       if (mounted) {
-                        messenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Purchases restored'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        VFeedback.showMessage(context, 'Purchases restored');
                       }
                     },
                     variant: ButtonVariant.text,

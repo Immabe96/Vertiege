@@ -38,6 +38,8 @@ import 'services/supabase.dart';
 import 'services/firebase_messaging_handlers.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/offline_banner.dart';
+import 'widgets/core/v_app_banner.dart';
+import 'widgets/core/v_feedback.dart';
 
 class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
   const VirtualStatusWorldsApp({super.key});
@@ -118,7 +120,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(themeProvider.notifier).loadFromPrefs();
       Future<void>.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
         _startBackgroundLoads();
@@ -302,13 +303,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     if (!mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      VFeedback.showMessage(context, message);
     });
   }
 
@@ -361,20 +356,15 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     if (!mounted || !_markNotificationSnackShown(id)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final messenger = ScaffoldMessenger.maybeOf(context);
-      if (messenger == null) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('$title\n$body', maxLines: 3),
-          duration: const Duration(seconds: 5),
-          behavior: SnackBarBehavior.floating,
-          action: route == null
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () => ref.read(appRouterProvider).go(route),
-                ),
-        ),
+      if (route == null) {
+        VFeedback.showMessage(context, '$title\n$body');
+        return;
+      }
+      VFeedback.showWithAction(
+        context,
+        message: '$title\n$body',
+        actionLabel: 'Open',
+        onAction: () => ref.read(appRouterProvider).go(route),
       );
     });
   }
@@ -462,15 +452,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   @override
   Widget build(BuildContext context) {
-    if (_showSplash) {
-      return MaterialApp(
-        title: 'Vertiege',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        home: const SplashScreen(),
-      );
-    }
-
     ref.watch(residentMilestoneListenerProvider);
     ref.listen<ResidentState>(residentProvider, (previous, next) {
       final resident = next.resident;
@@ -511,50 +492,53 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       darkTheme: AppTheme.dark,
       themeMode: themeState.themeMode,
       routerConfig: router,
-      builder: (context, child) => _withForui(
-        context,
-        textScaler,
-        Column(
-          children: [
-            if (_buildBlocked)
-              MaterialBanner(
-                content: Text(
-                  'This build is outdated (v$kAppBuildNumber). '
-                  'Please update Vertiege from the store.',
-                ),
-                actions: const [SizedBox.shrink()],
-              )
-            else if (_maintenanceBanner != null)
-              MaterialBanner(
-                content: Text(_maintenanceBanner!),
-                actions: const [SizedBox.shrink()],
-              )
-            else if (_supabaseBootstrapFailed)
-              MaterialBanner(
-                content: const Text(
-                  'Cloud sync is unavailable. Check .env and network, then restart.',
-                ),
-                actions: [
-                  TextButton(
+      builder: (context, child) {
+        final shell = _withForui(
+          context,
+          textScaler,
+          Column(
+            children: [
+              if (_buildBlocked)
+                VAppBanner(
+                  variant: .destructive,
+                  message:
+                      'This build is outdated (v$kAppBuildNumber). '
+                      'Please update Vertiege from the store.',
+                )
+              else if (_maintenanceBanner != null)
+                VAppBanner(message: _maintenanceBanner!)
+              else if (_supabaseBootstrapFailed)
+                VAppBanner(
+                  message:
+                      'Cloud sync is unavailable. Check .env and network, then restart.',
+                  action: TextButton(
                     onPressed: () {
                       setState(() => _supabaseBootstrapFailed = false);
                       unawaited(_bootstrapServices());
                     },
                     child: const Text('Retry'),
                   ),
-                ],
+                ),
+              Expanded(
+                child: OfflineBanner(
+                  show: !_isOnline,
+                  onRetry: _retryAfterOffline,
+                  child: child!,
+                ),
               ),
-            Expanded(
-              child: OfflineBanner(
-                show: !_isOnline,
-                onRetry: _retryAfterOffline,
-                child: child!,
-              ),
-            ),
+            ],
+          ),
+          isDark: useDarkForui,
+        );
+        if (!_showSplash) return shell;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            shell,
+            const Positioned.fill(child: SplashScreen()),
           ],
-        ),
-        isDark: useDarkForui,
-      ),
+        );
+      },
     );
   }
 

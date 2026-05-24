@@ -24,6 +24,7 @@ import 'comment_sheet.dart';
 import 'reaction_bar.dart';
 import 'heart_animation.dart';
 import 'post_image.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class PostItem extends ConsumerWidget {
   final Post post;
@@ -465,15 +466,9 @@ class PostItem extends ConsumerWidget {
                         notifier.follow(post.residentId);
                       }
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isFollowing
+                      VFeedback.showMessage(context, isFollowing
                                 ? 'Unfollowed ${post.residentName}'
-                                : 'Following ${post.residentName}',
-                          ),
-                        ),
-                      );
+                                : 'Following ${post.residentName}',);
                     },
                     icon: Icon(
                       isFollowing ? Icons.person_remove : Icons.person_add,
@@ -541,9 +536,7 @@ class PostItem extends ConsumerWidget {
             reason: reason.name,
             details: details,
           );
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Report submitted. Thank you.')),
-          );
+          VFeedback.showMessage(context, 'Report submitted. Thank you.');
         },
       ),
     );

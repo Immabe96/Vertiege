@@ -21,6 +21,7 @@ import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
 import '../forui/v_hub_page.dart';
 import '../widgets/v_section_list.dart';
+import '../widgets/core/v_feedback.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -63,12 +64,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await MutationOutboxService.discardFailed();
     await _loadFailedOutboxCount();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Discarded failed sync items'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    VFeedback.showMessage(context, 'Discarded failed sync items');
   }
 
   Future<void> _loadPrefs() async {
@@ -110,12 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     PaintingBinding.instance.imageCache.clearLiveImages();
     setState(() => _cacheSizeBytes = 0);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Image cache cleared'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      VFeedback.showMessage(context, 'Image cache cleared');
     }
   }
 
@@ -218,25 +209,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 await client.auth.updateUser(UserAttributes(email: email));
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Check your new email to confirm the change',
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  VFeedback.showMessage(context, 'Check your new email to confirm the change',);
                 }
               } catch (e) {
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to update email: $e'),
-                      backgroundColor: VColors.error,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  VFeedback.showError(context, 'Failed to update email: $e');
                 }
               }
             },
@@ -366,23 +344,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Password changed successfully'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  VFeedback.showMessage(context, 'Password changed successfully');
                 }
               } catch (e) {
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to update password: $e'),
-                      backgroundColor: VColors.error,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  VFeedback.showError(context, 'Failed to update password: $e');
                 }
               }
             },
@@ -468,13 +435,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       } catch (e) {
                         if (ctx.mounted) Navigator.pop(ctx);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Failed to delete account: $e'),
-                              backgroundColor: VColors.error,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                          VFeedback.showError(context, 'Failed to delete account: $e');
                         }
                       }
                     }
@@ -730,16 +691,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 if (!ctx.mounted) return;
                 Navigator.pop(ctx);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success
+                  VFeedback.showMessage(context, success
                             ? 'Backup restored successfully'
-                            : 'Restore failed — data may be corrupted',
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                            : 'Restore failed — data may be corrupted',);
                 }
               },
             ),
@@ -1118,12 +1072,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: () async {
                     await BackupService.createBackup();
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Backup created successfully'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      VFeedback.showMessage(context, 'Backup created successfully');
                     }
                   },
                 ),

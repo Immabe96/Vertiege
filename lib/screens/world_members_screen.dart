@@ -17,6 +17,7 @@ import '../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/core/screen_loading.dart';
+import '../widgets/core/v_feedback.dart';
 
 class WorldMembersScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -304,9 +305,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     required String residentName,
   }) async {
     if (_ranks.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Create ranks in world settings first.')),
-      );
+      VFeedback.showMessage(context, 'Create ranks in world settings first.');
       return;
     }
 

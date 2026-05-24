@@ -10,6 +10,7 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/worlds/listing_card.dart';
 import '../widgets/core/shimmer.dart';
+import '../widgets/core/v_feedback.dart';
 
 enum _ShopCategory { passes, seeds, boosts, cosmetics }
 
@@ -507,12 +508,7 @@ class _ShopCard extends StatelessWidget {
     final success =
         notifier.addDecoration(item.name) && notifier.spendCoins(item.price);
     if (success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${item.name} purchased!'),
-          backgroundColor: VColors.success,
-        ),
-      );
+      VFeedback.showMessage(context, '${item.name} purchased!');
     }
   }
 }

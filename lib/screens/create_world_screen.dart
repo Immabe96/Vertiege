@@ -14,6 +14,7 @@ import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../widgets/worlds/dominion_type_picker.dart';
 import '../ui/icons/v_icons.dart';
+import '../widgets/core/v_feedback.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -100,32 +101,18 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
   Future<void> _submit() async {
     if (_selectedDominionType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Choose a dominion type before creating your world.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      VFeedback.showMessage(context, 'Choose a dominion type before creating your world.');
       return;
     }
 
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Check world name and description — fix any errors above.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      VFeedback.showMessage(context, 'Check world name and description — fix any errors above.');
       return;
     }
 
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No resident profile found. Please create one first.'),
-        ),
-      );
+      VFeedback.showMessage(context, 'No resident profile found. Please create one first.');
       return;
     }
 
@@ -166,12 +153,10 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
         final message = e is PostgrestException
             ? 'Failed: ${e.message} (${e.code})'
             : 'Failed to create world: $e';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            duration: const Duration(seconds: 8),
-            action: SnackBarAction(label: 'Dismiss', onPressed: () {}),
-          ),
+        VFeedback.showError(
+          context,
+          message,
+          duration: const Duration(seconds: 8),
         );
       }
     }

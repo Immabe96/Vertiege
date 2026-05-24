@@ -2,6 +2,7 @@
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class _ExclusiveReaction {
   final String emoji;
@@ -122,13 +123,7 @@ class _ReactionBarState extends State<ReactionBar> {
 
   void _onLockedReactionTap(_ExclusiveReaction reaction) {
     Haptics.light();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Unlock ${reaction.label} at Tier ${reaction.requiredTier}'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    VFeedback.showMessage(context, 'Unlock ${reaction.label} at Tier ${reaction.requiredTier}');
   }
 
   void _showLongPressMenu() {

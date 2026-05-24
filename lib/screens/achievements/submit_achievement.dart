@@ -14,6 +14,7 @@ import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class SubmitAchievementScreen extends ConsumerStatefulWidget {
   const SubmitAchievementScreen({super.key});
@@ -73,12 +74,7 @@ class _SubmitAchievementScreenState
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Achievement submitted for verification'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        VFeedback.showMessage(context, 'Achievement submitted for verification');
       }
     } catch (_) {
       if (!mounted) return;

@@ -12,6 +12,7 @@ import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class PostComposer extends ConsumerStatefulWidget {
   const PostComposer({super.key});
@@ -96,14 +97,10 @@ class _PostComposerState extends ConsumerState<PostComposer>
       jsonEncode({'text': text, 'imageUri': _imageUri}),
     );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Draft saved'),
-          duration: const Duration(seconds: 1),
-          behavior: SnackBarBehavior.floating,
-          width: 140,
-          backgroundColor: VColors.surfaceContainerHighest,
-        ),
+      VFeedback.showMessage(
+        context,
+        'Draft saved',
+        duration: const Duration(seconds: 1),
       );
     }
   }
@@ -144,26 +141,17 @@ class _PostComposerState extends ConsumerState<PostComposer>
 
     if (scheduled.isBefore(now)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Schedule time must be in the future'),
-          ),
-        );
+        VFeedback.showMessage(context, 'Schedule time must be in the future');
       }
       return;
     }
 
     setState(() => _scheduledFor = scheduled);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Scheduled for ${_formatScheduleDate(scheduled)}',
-          ),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: VColors.surfaceContainerHighest,
-        ),
+      VFeedback.showMessage(
+        context,
+        'Scheduled for ${_formatScheduleDate(scheduled)}',
+        duration: const Duration(seconds: 2),
       );
     }
   }
@@ -248,12 +236,7 @@ class _PostComposerState extends ConsumerState<PostComposer>
           _scheduledFor = savedScheduledFor;
           _sent = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to publish post. Please try again.'),
-            backgroundColor: VColors.error,
-          ),
-        );
+        VFeedback.showError(context, 'Failed to publish post. Please try again.');
       }
     }
   }

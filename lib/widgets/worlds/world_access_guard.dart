@@ -15,6 +15,7 @@ import '../../widgets/core/loading_state.dart';
 import 'access_icon.dart';
 import '../../ui/buttons/v_button.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class WorldAccessGuard extends ConsumerWidget {
   final String worldId;
@@ -107,13 +108,7 @@ class WorldAccessGuard extends ConsumerWidget {
       if (StoreService.isEnabled) {
         _showPurchaseSheet(context, ref, world);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Store access is disabled for this build. Try profession or open worlds for now.',
-            ),
-          ),
-        );
+        VFeedback.showMessage(context, 'Store access is disabled for this build. Try profession or open worlds for now.',);
       }
     } else if (world.type == WorldType.profession) {
       _showVerificationSheet(context, ref, world.requiredProfession ?? '');
@@ -176,15 +171,9 @@ class WorldAccessGuard extends ConsumerWidget {
                       ref
                           .read(residentProvider.notifier)
                           .unlockWealthWorld(world.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Welcome to ${world.name}!')),
-                      );
+                      VFeedback.showMessage(context, 'Welcome to ${world.name}!');
                     } else if (result == StorePurchaseState.error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Purchase failed. Please try again.'),
-                        ),
-                      );
+                      VFeedback.showMessage(context, 'Purchase failed. Please try again.');
                     }
                   }
                 },
@@ -221,13 +210,7 @@ class WorldAccessGuard extends ConsumerWidget {
           ref
               .read(residentProvider.notifier)
               .verifyProfession(profession, proofPath: proofPath);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Verification submitted. You will be notified when it is reviewed.',
-              ),
-            ),
-          );
+          VFeedback.showMessage(context, 'Verification submitted. You will be notified when it is reviewed.',);
         },
       ),
     );

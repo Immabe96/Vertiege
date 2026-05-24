@@ -24,7 +24,8 @@ function usage() {
 
 Usage:
   node scripts/swarm/swarm.mjs run --preset <research|dev|solo> "<mission>"
-  node scripts/swarm/swarm.mjs audit              # research preset + default audit mission
+  node scripts/swarm/swarm.mjs audit              # codebase audit (research preset)
+  node scripts/swarm/swarm.mjs audit-ui           # UI/UX + Forui + theming audit
 
 Options:
   --preset <id>     Preset (default: research)
@@ -80,6 +81,30 @@ findings table (severity/area/finding/fix/files), and prioritized next steps.
 Prioritize recent Linux port work: lib/main.dart, lib/app.dart, lib/router/app_router.dart,
 lib/state/resident_provider.dart, world channel routes, firebase_bootstrap, android/gradle.properties.
 Cross-check docs/audits/ when relevant.`;
+
+const DEFAULT_UI_AUDIT_MISSION = `Audit Vertiege UI/UX (read-only). Deliver markdown with:
+executive summary, design system inventory (VTheme, VColors, Forui VertiegeForuiTheme, theme_provider),
+Forui adoption vs Material/Cupertino, light/dark/system mode behavior and gaps,
+navigation/shell consistency (tab bar, VHubPage, FScaffold, AppBar),
+feedback patterns (SnackBar vs FToast/FDialog/FSheet),
+accessibility (text scale, contrast, touch targets),
+screen-by-screen migration tiers (Tier A/B/C),
+findings table (ID/severity/area/finding/fix/files),
+and prioritized implementation waves.
+
+MANDATORY — read and apply these project skills before auditing:
+- .cursor/skills/vertiege-forui-ui/SKILL.md (Forui + Vertiege conventions)
+- .cursor/skills/flutter-ai-ui-skill/SKILL.md (+ data/*.csv guidelines)
+- .cursor/skills/ui-design-brain/SKILL.md (+ components.md for patterns)
+
+Run if possible: python .cursor/skills/flutter-ai-ui-skill/scripts/analyse_flutter_project.py
+and incorporate analyzer output into findings.
+
+Cross-check prior audit: docs/audits/2026-05-24-cursor-swarm-ui-ux-audit.md (validate/update, do not duplicate blindly).
+
+Focus: lib/app.dart, lib/theme/*, lib/forui/*, lib/widgets/v_section_list.dart,
+lib/ui/*, lib/screens/tabs/*, auth/onboarding, world_channel_screen, settings appearance.
+Verify splash vs post-splash theme, FTheme sync with MaterialApp themeMode, hardcoded VColors.`;
 
 async function leadDecompose({ mission, preset, cwd, runPath, mode }) {
   const presetDef = PRESETS[preset];
@@ -232,7 +257,7 @@ async function runSolo({ mission, cwd, runPath, mode }) {
   return output;
 }
 
-async function runSwarm({ preset, mission, mode, out, runDir }) {
+async function runSwarm({ preset, mission, mode, out, runDir, auditKind = "codebase" }) {
   if (!PRESETS[preset]) {
     throw new Error(`Unknown preset "${preset}". Options: ${Object.keys(PRESETS).join(", ")}`);
   }
@@ -249,6 +274,7 @@ async function runSwarm({ preset, mission, mode, out, runDir }) {
     preset,
     mode,
     mission,
+    auditKind,
     startedAt: new Date().toISOString(),
     runPath,
   };
@@ -295,11 +321,17 @@ async function runSwarm({ preset, mission, mode, out, runDir }) {
   await writeFile(reportPath, finalReport, "utf8");
 
   const dated = new Date().toISOString().slice(0, 10);
-  const outPath =
-    out || join(cwd, "docs", "audits", `${dated}-cursor-swarm-audit.md`);
+  const defaultBasename = meta.auditKind === "ui-ux"
+    ? `${dated}-cursor-swarm-ui-ux-audit.md`
+    : `${dated}-cursor-swarm-audit.md`;
+  const outPath = out || join(cwd, "docs", "audits", defaultBasename);
   await mkdir(join(cwd, "docs", "audits"), { recursive: true });
 
-  const header = `# Vertiege swarm audit
+  const title =
+    meta.auditKind === "ui-ux"
+      ? "Vertiege UI/UX swarm audit"
+      : "Vertiege swarm audit";
+  const header = `# ${title}
 
 - **Date:** ${dated}
 - **Model:** \`${MODEL}\` (Cursor CLI)
@@ -315,6 +347,7 @@ async function runSwarm({ preset, mission, mode, out, runDir }) {
   meta.finishedAt = new Date().toISOString();
   meta.reportPath = outPath;
   await writeFile(join(runPath, "meta.json"), JSON.stringify(meta, null, 2));
+  return outPath;
 
   console.log(`\nDone.\n  Report: ${outPath}\n  Run dir: ${runPath}`);
 }
@@ -331,6 +364,16 @@ try {
       mode,
       out,
       runDir,
+      auditKind: "codebase",
+    });
+  } else if (cmd === "audit-ui") {
+    await runSwarm({
+      preset: "research",
+      mission: mission || DEFAULT_UI_AUDIT_MISSION,
+      mode,
+      out,
+      runDir,
+      auditKind: "ui-ux",
     });
   } else if (cmd === "run") {
     if (!mission) {

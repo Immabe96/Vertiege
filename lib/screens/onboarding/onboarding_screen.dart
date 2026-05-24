@@ -14,6 +14,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
 import 'the_gate_screen.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -116,12 +117,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (userId.isEmpty) {
       setState(() => _gateSubmitting = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Session expired. Please sign in again.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        VFeedback.showMessage(context, 'Session expired. Please sign in again.');
       }
       return;
     }

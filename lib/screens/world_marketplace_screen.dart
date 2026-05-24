@@ -13,6 +13,7 @@ import '../../widgets/worlds/create_listing_dialog.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
+import '../../widgets/core/v_feedback.dart';
 import '../../ui/icons/v_icons.dart';
 
 class WorldMarketplaceScreen extends ConsumerStatefulWidget {
@@ -416,17 +417,11 @@ class _ListingDetailSheet extends ConsumerWidget {
                   );
                   if (context.mounted) {
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success
-                              ? 'Listing cancelled'
-                              : 'Failed to cancel listing',
-                        ),
-                        backgroundColor:
-                            success ? VColors.success : VColors.error,
-                      ),
-                    );
+                    if (success) {
+                      VFeedback.showMessage(context, 'Listing cancelled');
+                    } else {
+                      VFeedback.showError(context, 'Failed to cancel listing');
+                    }
                   }
                 },
                 icon: const Icon(Icons.cancel_outlined),

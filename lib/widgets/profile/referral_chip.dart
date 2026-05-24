@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class ReferralChip extends StatelessWidget {
   final String referralCode;
@@ -59,9 +60,7 @@ class ReferralChip extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: referralCode));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Referral code copied!')),
-                    );
+                    VFeedback.showMessage(context, 'Referral code copied!');
                   },
                   child: Container(
                     padding: const EdgeInsets.all(4),

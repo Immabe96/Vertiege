@@ -18,6 +18,7 @@ import '../widgets/core/screen_loading.dart';
 import '../utils/date_format.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
+import '../widgets/core/v_feedback.dart';
 
 class ThreadScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -101,9 +102,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
         )
         .catchError((_) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to send reply.')),
-          );
+          VFeedback.showMessage(context, 'Failed to send reply.');
         });
     _controller.clear();
     _scrollToBottom();

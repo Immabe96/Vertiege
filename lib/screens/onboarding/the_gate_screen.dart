@@ -14,6 +14,7 @@ import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../utils/world_foundations.dart';
+import '../../widgets/core/v_feedback.dart';
 
 /// Key used to track whether the resident has completed The Gate.
 const gateCompletedKey = 'the_gate_completed';
@@ -270,13 +271,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
     if (mounted) {
       // Show welcome toast
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('The Realm welcomes you, $name'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: VColors.tertiary,
-          duration: const Duration(seconds: 3),
-        ),
+      VFeedback.showMessage(
+        context,
+        'The Realm welcomes you, $name',
+        duration: const Duration(seconds: 3),
       );
 
       context.go(
@@ -759,14 +757,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                             ?.joinedWorldIds
                             .contains(world.id);
                         if (joined != true) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'World entry is still syncing. Try again.',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                          VFeedback.showMessage(context, 'World entry is still syncing. Try again.',);
                           return;
                         }
                       }

@@ -40,6 +40,7 @@ import '../widgets/worlds/resource_vault.dart';
 import '../widgets/worlds/world_share_card.dart';
 import '../widgets/shared/share_button.dart';
 import '../widgets/worlds/alliance_section.dart';
+import '../widgets/core/v_feedback.dart';
 
 class WorldDetailScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -224,9 +225,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   void _onHighlightPostMissing() {
     if (!mounted) return;
     setState(() => _highlightPostId = null);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('That post is no longer available.')),
-    );
+    VFeedback.showMessage(context, 'That post is no longer available.');
   }
 
   @override

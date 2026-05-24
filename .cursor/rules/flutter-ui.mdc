@@ -1,0 +1,31 @@
+---
+description: Flutter UI/UX — Forui, theming, and design skills for Vertiege
+globs:
+  - lib/**/*.dart
+  - docs/audits/*ui-ux*
+  - lib/theme/**
+  - lib/forui/**
+  - lib/widgets/**
+  - lib/ui/**
+alwaysApply: false
+---
+
+# Flutter UI / UX (Vertiege)
+
+When building or reviewing **UI, screens, widgets, theme, Forui, light/dark mode, or UX**:
+
+1. Read **`.cursor/skills/vertiege-forui-ui/SKILL.md`** first (project-specific).
+2. Apply **`.cursor/skills/flutter-ai-ui-skill/SKILL.md`** for Flutter M3, a11y, animation, and analyzer scripts.
+3. Apply **`.cursor/skills/ui-design-brain/SKILL.md`** for component layout and anti-patterns (map web patterns to Flutter/Forui equivalents).
+
+## Quick rules
+
+- Prefer **Forui** (`FScaffold`, `FHeader`, `FTile`, `FButton`, `FTextField`) over raw Material on **new** code.
+- Keep **light and dark** in sync: `themeProvider` + `VertiegeForuiTheme` + `VTheme`.
+- Do not add new `isDark ? VColors.foo : VColors.bar` — use `colorScheme` or `context.theme.colors`.
+- Hub sub-pages: **`VHubPage`**. Tab roots are legacy Material until migrated (see UI audit Tier A).
+
+## Audits
+
+- `docs/audits/2026-05-24-cursor-swarm-ui-ux-audit.md`
+- `./scripts/audit-ui-ux.sh`

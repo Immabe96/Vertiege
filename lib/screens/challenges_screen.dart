@@ -8,6 +8,7 @@ import '../../utils/haptics.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class ChallengesScreen extends ConsumerStatefulWidget {
   const ChallengesScreen({super.key});
@@ -216,17 +217,9 @@ class _ChallengeCard extends ConsumerWidget {
                           ref
                               .read(challengeProvider.notifier)
                               .claimReward(challenge.id);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('Reward claimed!'),
-                              backgroundColor: VColors.success,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  VRadius.md,
-                                ),
-                              ),
-                            ),
+                          VFeedback.showMessage(
+                            context,
+                            'Reward claimed!',
                           );
                         }
                       : null,

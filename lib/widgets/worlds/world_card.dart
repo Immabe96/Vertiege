@@ -17,6 +17,7 @@ import '../core/sovereign_card.dart';
 import '../../ui/icons/v_icons.dart';
 import 'world_icon.dart';
 import 'world_banner.dart';
+import '../../widgets/core/v_feedback.dart';
 
 CardTier _getPrestigeTier(int prestige) {
   if (prestige >= 600) return CardTier.apex;
@@ -265,17 +266,9 @@ class _CardBody extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (result == StorePurchaseState.purchased) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${world.name} boosted! +${World.boostActivityPoints} activity pts — improved Discover ranking.',
-          ),
-        ),
-      );
+      VFeedback.showMessage(context, '${world.name} boosted! +${World.boostActivityPoints} activity pts — improved Discover ranking.',);
     } else if (result == StorePurchaseState.error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Boost failed. Please try again.')),
-      );
+      VFeedback.showMessage(context, 'Boost failed. Please try again.');
     }
   }
 }

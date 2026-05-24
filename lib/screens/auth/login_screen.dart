@@ -13,6 +13,7 @@ import '../../utils/asset_image_decode.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -149,22 +150,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (client != null) {
           await client.auth.resetPasswordForEmail(emailController.text.trim());
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Password reset link sent. Check your email.'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            VFeedback.showMessage(context, 'Password reset link sent. Check your email.');
           }
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to send reset link. Please try again.'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          VFeedback.showMessage(context, 'Failed to send reset link. Please try again.');
         }
       }
     }

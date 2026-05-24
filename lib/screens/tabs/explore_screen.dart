@@ -1,6 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../../forui/v_tab_page.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../services/access_control.dart';
@@ -11,6 +13,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/v_accessible.dart';
 import '../../widgets/explore/shimmer_world_card.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
@@ -83,68 +86,33 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final filteredAvailable = filter(available);
     final filteredLocked = filter(locked);
 
-    if (isLoading) {
-      return Scaffold(
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        appBar: AppBar(
-          backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
-              .withValues(alpha: 0.86),
-          elevation: 0,
-          title: Text(
-            'Worlds',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: VFontWeight.semiBold,
-            ),
-          ),
-        ),
-        body: ListView.separated(
-          padding: const EdgeInsets.all(VSpacing.md),
-          itemCount: 6,
-          separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
-          itemBuilder: (_, _) => const ShimmerWorldCard(),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
-            .withValues(alpha: 0.86),
-        elevation: 0,
-        title: Text(
-          'Worlds',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.explore_outlined,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-            ),
-            tooltip: 'Discover Worlds',
-            onPressed: () => context.push('/explore/discover'),
-          ),
-          if (AdminAccessService.canCreateWorld(
-            tierValue: resident?.tier.value ?? 0,
-          ))
-            IconButton(
-              icon: Icon(
-                Icons.add,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-              tooltip: 'Create World',
-              onPressed: () => context.push('/create-world'),
-            ),
-        ],
+    final headerActions = <Widget>[
+      VAccessibleHeaderAction(
+        label: 'Discover Worlds',
+        icon: const Icon(FIcons.compass),
+        onPress: () => context.push('/explore/discover'),
       ),
-      body: RefreshIndicator(
+      if (AdminAccessService.canCreateWorld(
+        tierValue: resident?.tier.value ?? 0,
+      ))
+        VAccessibleHeaderAction(
+          label: 'Create World',
+          icon: const Icon(FIcons.plus),
+          onPress: () => context.push('/create-world'),
+        ),
+    ];
+
+    return VTabPage(
+      title: 'Worlds',
+      headerActions: headerActions,
+      body: isLoading
+          ? ListView.separated(
+              padding: const EdgeInsets.all(VSpacing.md),
+              itemCount: 6,
+              separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
+              itemBuilder: (_, _) => const ShimmerWorldCard(),
+            )
+          : RefreshIndicator(
         onRefresh: () => ref.read(worldProvider.notifier).loadWorlds(),
         child: CustomScrollView(
           slivers: [

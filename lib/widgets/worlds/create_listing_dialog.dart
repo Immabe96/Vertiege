@@ -8,6 +8,7 @@ import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class CreateListingDialog extends ConsumerStatefulWidget {
   final String worldId;
@@ -80,21 +81,11 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
 
       if (mounted) {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Listing created!'),
-            backgroundColor: VColors.success,
-          ),
-        );
+        VFeedback.showMessage(context, 'Listing created!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to create listing: $e'),
-            backgroundColor: VColors.error,
-          ),
-        );
+        VFeedback.showError(context, 'Failed to create listing: $e');
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

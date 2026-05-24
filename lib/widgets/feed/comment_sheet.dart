@@ -7,6 +7,7 @@ import '../profile/cosmetic_avatar.dart';
 import '../core/empty_state.dart';
 import '../core/tier_badge.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../widgets/core/v_feedback.dart';
 
 enum CommentSort { best, newest, oldest }
 
@@ -399,12 +400,7 @@ class _CommentTileState extends State<_CommentTile> {
                 onTap: () {
                   final parent = _findParent(widget.comment.parentId);
                   if (parent != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Replying to: ${parent.residentName}'),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
+                    VFeedback.showMessage(context, 'Replying to: ${parent.residentName}');
                   }
                 },
                 child: Text(

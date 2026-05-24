@@ -1,6 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../../forui/v_tab_page.dart';
 
 import '../../models/channel.dart';
 import '../../models/world.dart';
@@ -13,6 +15,7 @@ import '../../theme/v_tokens.dart';
 import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
@@ -67,33 +70,15 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
     _ensureSelectedWorld(joinedWorlds);
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor:
-            (isDark ? VColors.surfaceDark : VColors.surface).withValues(
-              alpha: 0.86,
-            ),
-        elevation: 0,
-        title: Text(
-          'Messages',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: VFontWeight.semiBold,
-          ),
+    return VTabPage(
+      title: 'Messages',
+      headerActions: [
+        VAccessibleHeaderAction(
+          label: 'New DM',
+          icon: const Icon(FIcons.userPlus),
+          onPress: () => context.push('/search'),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.person_add_outlined,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-            ),
-            tooltip: 'New DM',
-            onPressed: () => context.push('/search'),
-          ),
-        ],
-      ),
+      ],
       body: RefreshIndicator(
         onRefresh: () async {
           final id = ref.read(residentProvider.select((s) => s.resident?.id));

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
+import 'theme/theme_prefs.dart';
 import 'services/crash_reporter.dart';
 import 'services/firebase_messaging_handlers.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -31,6 +32,7 @@ void main() async {
   };
 
   await dotenv.load(isOptional: true);
+  await ThemePrefs.warmCache();
 
   // Show Flutter UI immediately — Firebase/Supabase init runs after first frame.
   runApp(const ProviderScope(child: VirtualStatusWorldsApp()));

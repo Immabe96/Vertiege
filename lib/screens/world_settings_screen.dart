@@ -29,6 +29,7 @@ import '../models/rank.dart';
 import '../widgets/worlds/banner_generator.dart';
 import '../widgets/worlds/world_settings_channels.dart';
 import '../widgets/worlds/world_settings_invites.dart';
+import '../widgets/core/v_feedback.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -126,16 +127,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('World settings updated.')),
-        );
+        VFeedback.showMessage(context, 'World settings updated.');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to save settings: $e')));
+        VFeedback.showMessage(context, 'Failed to save settings: $e');
       }
     }
   }
@@ -194,9 +191,10 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         .read(residentProvider.notifier)
         .muteResident(widget.worldId, residentId, durationHours: hours);
     if (mounted) {
-      ScaffoldMessenger.of(
+      VFeedback.showMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('$name muted for $hours hour(s)')));
+        '$name muted for $hours hour(s)',
+      );
     }
   }
 
@@ -226,9 +224,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           .read(residentProvider.notifier)
           .banResident(widget.worldId, residentId);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$name banned')));
+        VFeedback.showMessage(context, '$name banned');
         _loadMembers();
       }
     }
@@ -236,9 +232,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
   void _deleteChannel(String channelId, String name) {
     ref.read(channelProvider.notifier).deleteChannel(widget.worldId, channelId);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Channel "$name" deleted')));
+    VFeedback.showMessage(context, 'Channel "$name" deleted');
   }
 
   void _renameChannel(String channelId, String currentName) {
@@ -320,9 +314,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           : descController.text.trim(),
                     );
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Channel "$name" created')),
-                );
+                VFeedback.showMessage(context, 'Channel "$name" created');
               }
             },
           ),
@@ -334,9 +326,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   Future<void> _generateInvite() async {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No resident profile found.')),
-      );
+      VFeedback.showMessage(context, 'No resident profile found.');
       return;
     }
 
@@ -360,18 +350,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isGeneratingInvite = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate invite: $e')),
-        );
+        VFeedback.showMessage(context, 'Failed to generate invite: $e');
       }
     }
   }
 
   void _copyInviteCode(String code) {
     Clipboard.setData(ClipboardData(text: code));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invite code copied to clipboard.')),
-    );
+    VFeedback.showMessage(context, 'Invite code copied to clipboard.');
   }
 
   Future<void> _deleteWorld() async {
@@ -405,9 +391,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
       context.go('/explore');
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('World has been deleted.')));
+      VFeedback.showMessage(context, 'World has been deleted.');
     }
   }
 
@@ -477,13 +461,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     description: world.description,
                     onSelect: (variant) {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Banner Variant ${variant + 1} selected!',
-                          ),
-                          backgroundColor: VColors.success,
-                        ),
+                      VFeedback.showMessage(
+                        context,
+                        'Banner Variant ${variant + 1} selected!',
                       );
                     },
                   ),
@@ -1439,21 +1419,14 @@ class _BoostWorldCard extends ConsumerWidget {
         final newLevel = updated != null
             ? getWorldLevel(updated.activityScore)
             : null;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              newLevel != null && newLevel > getWorldLevel(world.activityScore)
-                  ? 'Boost applied! World advanced to Level $newLevel!'
-                  : 'Boost applied! +${World.boostActivityPoints} activity points.',
-            ),
-          ),
+        VFeedback.showMessage(
+          context,
+          newLevel != null && newLevel > getWorldLevel(world.activityScore)
+              ? 'Boost applied! World advanced to Level $newLevel!'
+              : 'Boost applied! +${World.boostActivityPoints} activity points.',
         );
       case StorePurchaseState.error:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Boost purchase failed. Please try again.'),
-          ),
-        );
+        VFeedback.showMessage(context, 'Boost purchase failed. Please try again.');
       case StorePurchaseState.disabled:
         break;
       default:

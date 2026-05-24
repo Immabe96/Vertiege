@@ -7,6 +7,7 @@ import '../forui/v_hub_page.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
+import '../widgets/core/v_feedback.dart';
 
 class TwinSealSetupScreen extends StatefulWidget {
   const TwinSealSetupScreen({super.key});
@@ -254,11 +255,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                   TextButton.icon(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _secret!));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Secret copied to clipboard'),
-                          duration: Duration(seconds: 2),
-                        ),
+                      VFeedback.showMessage(
+                        context,
+                        'Secret copied to clipboard',
+                        duration: const Duration(seconds: 2),
                       );
                     },
                     icon: const Icon(Icons.copy, size: VIconSize.sm),

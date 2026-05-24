@@ -1,7 +1,8 @@
-﻿import 'dart:ui';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../../forui/v_tab_page.dart';
 import '../../state/resident_provider.dart';
 import '../../services/world_service.dart';
 import '../../state/post_provider.dart';
@@ -9,7 +10,9 @@ import '../../state/notification_provider.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/v_motion.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/feed/post_item.dart';
 import '../../widgets/nexus/bento_grid.dart';
@@ -162,127 +165,89 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
       postProvider.select((s) => s.isLoading),
     );
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: AppBar(
-              toolbarHeight: 56,
-              elevation: 0,
-              backgroundColor: isDark
-                  ? VColors.surfaceDark.withValues(alpha: 0.92)
-                  : VColors.surface.withValues(alpha: 0.92),
-              title: _searchExpanded
-                  ? TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceDark
-                            : VColors.onSurface,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Search posts, residents...',
-                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      onChanged: (v) => setState(() => _searchQuery = v),
-                    )
-                  : Text(
-                      'Vertiege',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: VFontWeight.semiBold,
-                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                      ),
-                    ),
-              actions: [
-                if (!_searchExpanded)
-                  IconButton(
-                    icon: Icon(
-                      Icons.search,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
-                    ),
-                    tooltip: 'Search',
-                    onPressed: _toggleSearch,
-                  )
-                else
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
-                    ),
-                    tooltip: 'Close search',
-                    onPressed: _toggleSearch,
-                  ),
-                IconButton(
-                  icon: Consumer(
-                    builder: (context, ref, _) {
-                      final unread = ref.watch(
-                        notificationProvider.select(
-                          (s) => s.notifications.where((n) => !n.read).length,
-                        ),
-                      );
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Icon(
-                            Icons.notifications_outlined,
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
-                          ),
-                          if (unread > 0)
-                            Positioned(
-                              right: -4,
-                              top: -4,
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                decoration: const BoxDecoration(
-                                  color: VColors.error,
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  unread > 9 ? '9+' : '$unread',
-                                  style: const TextStyle(
-                                    color: VColors.onError,
-                                    fontSize: VFontSize.labelSm,
-                                    fontWeight: VFontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                  tooltip: 'Notifications',
-                  onPressed: _showNotifications,
-                ),
-              ],
-            ),
+    final headerActions = <Widget>[
+      VAccessibleHeaderAction(
+        label: _searchExpanded ? 'Close search' : 'Search',
+        icon: Icon(_searchExpanded ? FIcons.x : FIcons.search),
+        onPress: _toggleSearch,
       ),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceDark : VColors.surface,
+      VAccessibleHeaderAction(
+        label: 'Notifications',
+        icon: Consumer(
+          builder: (context, ref, _) {
+            final unread = ref.watch(
+              notificationProvider.select(
+                (s) => s.notifications.where((n) => !n.read).length,
+              ),
+            );
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(FIcons.bell),
+                if (unread > 0)
+                  Positioned(
+                    right: -4,
+                    top: -4,
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: const BoxDecoration(
+                        color: VColors.error,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        unread > 9 ? '9+' : '$unread',
+                        style: const TextStyle(
+                          color: VColors.onError,
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
-        child: SafeArea(
-          child: RefreshIndicator(
+        onPress: _showNotifications,
+      ),
+    ];
+
+    return VTabPage(
+      header: FHeader(
+        title: _searchExpanded
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Search posts, residents...',
+                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                onChanged: (v) => setState(() => _searchQuery = v),
+              )
+            : Text(
+                'Vertiege',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                ),
+              ),
+        suffixes: headerActions,
+      ),
+      body: RefreshIndicator(
             onRefresh: () async {
               await ref.read(postProvider.notifier).loadPosts();
               await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -449,8 +414,8 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                     bottom: VSpacing.md,
                     child: AnimatedScale(
                       scale: _showScrollFab ? 1.0 : 0.0,
-                      duration: VAnimation.fast,
-                      curve: VAnimation.standard,
+                      duration: context.motionDuration(VAnimation.fast),
+                      curve: context.motionCurve,
                       child: FloatingActionButton.small(
                         onPressed: _scrollToTop,
                         tooltip: 'Scroll to top',
@@ -464,8 +429,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
               ],
             ),
           ),
-        ),
-      ),
     );
   }
 

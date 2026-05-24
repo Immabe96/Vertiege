@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class PostInput extends ConsumerStatefulWidget {
   final String worldId;
@@ -312,11 +313,10 @@ class _PostInputState extends ConsumerState<PostInput>
     final data = jsonEncode({'text': text, 'imageUri': _imageUri});
     await StorageService.setString(_draftKey, data);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Draft saved'),
-          duration: Duration(seconds: 1),
-        ),
+      VFeedback.showMessage(
+        context,
+        'Draft saved',
+        duration: const Duration(seconds: 1),
       );
     }
   }
@@ -374,11 +374,7 @@ class _PostInputState extends ConsumerState<PostInput>
     } catch (_) {
       if (mounted) {
         setState(() => _sent = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to publish post. Please try again.'),
-          ),
-        );
+        VFeedback.showMessage(context, 'Failed to publish post. Please try again.');
       }
       return;
     }

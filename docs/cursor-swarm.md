@@ -22,10 +22,23 @@ This repo runs a **local replica** of [Agent Swarm](https://github.com/desplega-
 ```bash
 cd ~/Vertiege
 ./scripts/swarm/swarm.sh audit
+# or
+./scripts/audit-codebase.sh
 ```
 
 Report: `docs/audits/YYYY-MM-DD-cursor-swarm-audit.md`  
 Run state: `.swarm/runs/<timestamp>/` (`plan.json`, worker logs, `report.md`)
+
+## Quick start — UI/UX audit (Forui, light/dark, theming)
+
+```bash
+./scripts/audit-ui-ux.sh
+# equivalent: ./scripts/swarm/swarm.sh audit-ui
+```
+
+Report: `docs/audits/YYYY-MM-DD-cursor-swarm-ui-ux-audit.md`
+
+Static baseline (2026-05-24): [2026-05-24-cursor-swarm-ui-ux-audit.md](audits/2026-05-24-cursor-swarm-ui-ux-audit.md)
 
 ## Presets (mirrors upstream)
 

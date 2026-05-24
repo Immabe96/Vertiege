@@ -31,6 +31,7 @@ import '../widgets/chat/scroll_fab.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/core/status_dot.dart';
+import '../widgets/core/v_feedback.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;
@@ -178,11 +179,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to pick image. Please try again.'),
-            backgroundColor: VColors.error,
-          ),
+        VFeedback.showError(
+          context,
+          'Failed to pick image. Please try again.',
         );
       }
     }
@@ -261,11 +260,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to send message. Please try again.'),
-            backgroundColor: VColors.error,
-          ),
+        VFeedback.showError(
+          context,
+          'Failed to send message. Please try again.',
         );
       }
     }

@@ -41,6 +41,7 @@ import '../../widgets/shared/tier_icon.dart';
 import '../../widgets/identity/joined_worlds_row.dart';
 import '../../config/achievements.dart';
 import '../../config/cosmetics.dart';
+import '../../widgets/core/v_feedback.dart';
 
 class IdentityScreen extends ConsumerStatefulWidget {
   const IdentityScreen({super.key});
@@ -273,20 +274,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
         await ref.read(postProvider.notifier).loadPosts();
         await _loadHighPrestigeWorlds();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Honour wall refreshed'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        VFeedback.showMessage(context, 'Honour wall refreshed');
       } catch (_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Refresh failed'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        VFeedback.showMessage(context, 'Refresh failed');
       }
     }
 

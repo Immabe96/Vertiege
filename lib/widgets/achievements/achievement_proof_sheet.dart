@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import 'achievement_icon.dart';
+import '../../widgets/core/v_feedback.dart';
 
 /// Bottom sheet: achievement detail, proof upload, submit.
 Future<void> showAchievementProofSheet({
@@ -96,12 +97,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
 
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Achievement submitted for verification'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      VFeedback.showMessage(context, 'Achievement submitted for verification');
     } catch (_) {
       if (!mounted) return;
       setState(() {

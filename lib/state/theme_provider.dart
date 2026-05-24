@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme/theme_prefs.dart';
+
 enum ThemeScheme { system, light, dark }
 
 enum TextSize { small, medium, large, xlarge }
@@ -10,7 +12,7 @@ class ThemeState {
   final ThemeScheme scheme;
   final TextSize textSize;
   const ThemeState({
-    this.scheme = ThemeScheme.light,
+    this.scheme = ThemeScheme.system,
     this.textSize = TextSize.medium,
   });
 
@@ -27,6 +29,12 @@ class ThemeState {
 
   bool get isDark => scheme == ThemeScheme.dark;
   bool get isLight => scheme == ThemeScheme.light;
+
+  bool resolveIsDark(Brightness platformBrightness) => switch (scheme) {
+        ThemeScheme.light => false,
+        ThemeScheme.dark => true,
+        ThemeScheme.system => platformBrightness == Brightness.dark,
+      };
 
   double get textScale => switch (textSize) {
     TextSize.small => 0.85,
@@ -46,29 +54,12 @@ class ThemeNotifier extends Notifier<ThemeState> {
   static const _textSizeKey = 'settings_text_size';
 
   @override
-  ThemeState build() {
-    loadFromPrefs();
-    return const ThemeState();
-  }
+  ThemeState build() => ThemePrefs.cached ?? const ThemeState();
 
   Future<void> loadFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeValue = prefs.getString(_themeKey);
-    if (themeValue != null) {
-      final scheme = ThemeScheme.values.firstWhere(
-        (s) => s.name == themeValue,
-        orElse: () => ThemeScheme.light,
-      );
-      state = state.copyWith(scheme: scheme);
-    }
-    final textSizeValue = prefs.getString(_textSizeKey);
-    if (textSizeValue != null) {
-      final textSize = TextSize.values.firstWhere(
-        (s) => s.name == textSizeValue,
-        orElse: () => TextSize.medium,
-      );
-      state = state.copyWith(textSize: textSize);
-    }
+    await ThemePrefs.warmCache();
+    final cached = ThemePrefs.cached;
+    if (cached != null) state = cached;
   }
 
   Future<void> setScheme(ThemeScheme scheme) async {
