@@ -43,7 +43,6 @@ class ChannelNotifier extends Notifier<ChannelState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        channelsByWorld: {...state.channelsByWorld, worldId: const []},
         error: e.toString(),
       );
     }

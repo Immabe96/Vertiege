@@ -34,6 +34,7 @@ import '../screens/settings_screen.dart';
 import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
 import '../screens/world_members_screen.dart';
+import 'deep_link_redirects.dart';
 import 'world_route_redirects.dart';
 import '../screens/search_screen.dart';
 import '../screens/connections_screen.dart';
@@ -94,6 +95,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: refreshListenable,
     observers: AnalyticsService.navigatorObservers,
+    errorBuilder: (context, state) => Scaffold(
+      body: AppEmptyState(
+        title: 'Page not found',
+        description: state.uri.path,
+        icon: Icons.error_outline,
+        variant: EmptyStateVariant.error,
+        actionLabel: 'Go to Nexus',
+        onAction: () => context.go('/'),
+      ),
+    ),
     redirect: (context, state) {
       final residentState = ref.read(residentProvider);
       final resident = residentState.resident;
@@ -101,13 +112,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final uri = state.uri;
       var location = uri.path;
 
-      // Android deep link: vertiege://verifier/login → host=verifier, path=/login
-      if (uri.host == 'verifier' && !location.startsWith('/verifier')) {
-        if (location == '/login' || location.isEmpty || location == '/') {
-          return '/verifier/login';
-        }
-        return '/verifier$location';
-      }
+      final verifierRedirect = redirectVerifierHostDeepLink(uri, location);
+      if (verifierRedirect != null) return verifierRedirect;
+
+      final authRedirect = redirectAuthHostDeepLink(uri, location);
+      if (authRedirect != null) return authRedirect;
 
       // Never interrupt deep-link auth callbacks or splash
       if (location == '/auth/callback' || location == '/splash') return null;
@@ -282,10 +291,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         redirect: (context, state) {
                           final worldId = state.pathParameters['worldId']!;
                           final segment = state.pathParameters['channelName']!;
-                          return redirectReservedWorldSubRoute(
+                          final reserved = redirectReservedWorldSubRoute(
                             worldId: worldId,
                             segment: segment,
                             query: state.uri.query,
+                          );
+                          if (reserved != null) return reserved;
+                          return redirectMissingChannelId(
+                            worldId: worldId,
+                            channelName: segment,
+                            queryParams: state.uri.queryParameters,
                           );
                         },
                         builder: (context, state) => WorldChannelScreen(

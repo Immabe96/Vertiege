@@ -47,14 +47,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final confirm = _confirmPasswordController.text;
 
     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) &&
-        password.length >= 6 &&
+        password.length >= 8 &&
         confirm == password;
   }
 
   String? _passwordError() {
     final password = _passwordController.text;
-    if (password.isNotEmpty && password.length < 6) {
-      return 'Password must be at least 6 characters';
+    if (password.isNotEmpty && password.length < 8) {
+      return 'Password must be at least 8 characters';
     }
     return null;
   }

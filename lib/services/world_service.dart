@@ -74,7 +74,24 @@ class WorldService {
     }
 
     final client = getSupabase();
-    await client.from('worlds').insert(world);
+    final result = await client.rpc(
+      'create_world_full',
+      params: {
+        'p_name': name,
+        'p_description': description,
+        'p_sovereign_id': sovereignId,
+        'p_sovereign_name': sovereignName,
+        'p_icon': icon,
+        if (dominionType != null && dominionType.isNotEmpty)
+          'p_dominion_type': dominionType,
+        if (worldCurrencyName != null && worldCurrencyName.isNotEmpty)
+          'p_world_currency_name': worldCurrencyName,
+        if (tags != null && tags.isNotEmpty) 'p_tags': tags,
+      },
+    );
+    if (result is Map) {
+      return Map<String, dynamic>.from(result);
+    }
     return world;
   }
 

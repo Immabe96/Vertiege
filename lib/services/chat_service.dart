@@ -8,13 +8,19 @@ import 'supabase.dart';
 import '../utils/presence_utils.dart';
 
 class ChatService {
+  /// Canonical DM participant key order (testable).
+  static List<String> sortedParticipantIds(String a, String b) {
+    final ids = [a, b]..sort();
+    return ids;
+  }
+
   static Future<Map<String, dynamic>?> getOrCreateRoom(
     String residentId,
     String otherResidentId,
   ) async {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
-    final ids = [residentId, otherResidentId]..sort();
+    final ids = sortedParticipantIds(residentId, otherResidentId);
     final existing = await client
         .from('dm_rooms')
         .select()

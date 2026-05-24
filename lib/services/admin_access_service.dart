@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,8 +20,10 @@ class AdminAccessService {
     final email = user.email?.trim().toLowerCase();
     if (email == null || email.isEmpty) return false;
 
-    for (final allowed in _verifierEmailsFromEnv()) {
-      if (email == allowed) return true;
+    if (kDebugMode) {
+      for (final allowed in _verifierEmailsFromEnv()) {
+        if (email == allowed) return true;
+      }
     }
 
     return false;
@@ -45,8 +48,10 @@ class AdminAccessService {
     final email = user.email?.trim().toLowerCase();
     if (email == null || email.isEmpty) return false;
 
-    for (final allowed in _superuserEmailsFromEnv()) {
-      if (email == allowed) return true;
+    if (kDebugMode) {
+      for (final allowed in _superuserEmailsFromEnv()) {
+        if (email == allowed) return true;
+      }
     }
 
     return false;

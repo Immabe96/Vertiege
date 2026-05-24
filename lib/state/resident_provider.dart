@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../screens/onboarding/the_gate_screen.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
 import '../models/notification.dart';
@@ -29,7 +31,7 @@ class ResidentState {
 
   const ResidentState({
     this.resident,
-    this.isLoading = true,
+    this.isLoading = false,
     this.loadError,
     this.verificationStatus = VerificationStatus.idle,
   });
@@ -60,23 +62,21 @@ class ResidentNotifier extends Notifier<ResidentState> {
   double _cachedWorldPrestigeBonus = 0.0;
 
   @override
-  ResidentState build() {
-    ref.listen<ResidentState>(residentProvider, (prev, next) {
-      final r = next.resident;
-      if (r == null) return;
+  ResidentState build() => const ResidentState();
 
-      if (r.streakCount > _lastStreakCount) {
-        _lastStreakCount = r.streakCount;
-        _checkStreakMilestones(r.streakCount);
-      }
+  void handleResidentMilestones(ResidentState? previous, ResidentState next) {
+    final r = next.resident;
+    if (r == null) return;
 
-      if (r.joinedWorldIds.length > _lastJoinedWorldsCount) {
-        _lastJoinedWorldsCount = r.joinedWorldIds.length;
-        _checkWorldJoinMilestones();
-      }
-    });
+    if (r.streakCount > _lastStreakCount) {
+      _lastStreakCount = r.streakCount;
+      _checkStreakMilestones(r.streakCount);
+    }
 
-    return const ResidentState();
+    if (r.joinedWorldIds.length > _lastJoinedWorldsCount) {
+      _lastJoinedWorldsCount = r.joinedWorldIds.length;
+      _checkWorldJoinMilestones();
+    }
   }
 
   Future<void> loadResident() async {
@@ -88,15 +88,13 @@ class ResidentNotifier extends Notifier<ResidentState> {
         return;
       }
       // Fetch from Supabase first
-      final remote = await ProfileService.getProfile(userId);
+      final remote = await ProfileService.getProfile(userId).timeout(
+        const Duration(seconds: 8),
+      );
       if (remote != null) {
-        final cached = await _cachedResidentFor(userId);
-        final mergedWorldIds = {
-          ...remote.joinedWorldIds,
-          ...?cached?.joinedWorldIds,
-        }.toList();
-        final resident = remote.copyWith(joinedWorldIds: mergedWorldIds);
+        final resident = remote;
         state = ResidentState(resident: resident, isLoading: false);
+        unawaited(_syncGatePrefsFromProfile(resident));
         _persist(); // cache locally
         unawaited(_worldRepository.replayOutbox());
         return;
@@ -834,46 +832,14 @@ class ResidentNotifier extends Notifier<ResidentState> {
       }
     }
 
-    state = state.copyWith(verificationStatus: VerificationStatus.verifying);
+    // Without proof, do not grant verified roles locally — server must verify.
+    state = state.copyWith(verificationStatus: VerificationStatus.idle);
+  }
 
-    final updated = state.resident;
-    if (updated == null) {
-      state = state.copyWith(verificationStatus: VerificationStatus.idle);
-      return;
-    }
-
-    final roles = [...updated.verifiedRoles];
-    if (!roles.contains(profession)) roles.add(profession);
-
-    final decorations = [...updated.decorations];
-    final badgeId = '${profession}_badge';
-    if (!decorations.contains(badgeId)) decorations.add(badgeId);
-
-    state = state.copyWith(
-      resident: updated.copyWith(
-        verifiedRoles: roles,
-        decorations: decorations,
-      ),
-      verificationStatus: VerificationStatus.success,
-    );
-    _persist();
-    Haptics.light();
-
-    const professionToAchievement = {
-      'Medical': 'prof-doctor',
-      'Aviation': 'prof-pilot',
-      'Finance': 'prof-finance',
-      'Legal': 'prof-attorney',
-      'Engineering': 'prof-engineer',
-      'Technology': 'prof-engineer',
-      'Arts': 'prof-artist',
-    };
-    final achievementId = professionToAchievement[profession];
-    if (achievementId != null) {
-      ref
-          .read(achievementProvider.notifier)
-          .submitAchievement(achievementId, 'submitted');
-    }
+  Future<void> _syncGatePrefsFromProfile(Resident resident) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(gateCompletedKey, resident.gateCompleted);
+    gateCompletedCache = resident.gateCompleted;
   }
 
   void setVerificationStatus(VerificationStatus status) {
@@ -1154,3 +1120,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
 final residentProvider = NotifierProvider<ResidentNotifier, ResidentState>(
   ResidentNotifier.new,
 );
+
+/// Side-effect listener — must not run inside [ResidentNotifier.build] (self-dependency).
+final residentMilestoneListenerProvider = Provider<void>((ref) {
+  ref.listen<ResidentState>(residentProvider, (previous, next) {
+    ref.read(residentProvider.notifier).handleResidentMilestones(previous, next);
+  });
+});

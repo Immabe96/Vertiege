@@ -17,6 +17,33 @@ class StorageService {
   static const String membershipsKey = '@memberships_data';
   static const String userWorldsKey = '@user_worlds_data';
 
+  /// Disk keys cleared on sign-out so the next session cannot leak prior user data.
+  static const List<String> userSessionStorageKeys = [
+    residentKey,
+    postsKey,
+    notificationsKey,
+    chatMessagesKey,
+    achievementsKey,
+    channelsKey,
+    membershipsKey,
+    userWorldsKey,
+    '@worlds_cache',
+    '@events_data',
+    '@quests_data',
+    '@alliances_data',
+    '@scheduled_posts',
+    '@bookmarked_posts',
+    '@cache_feed',
+    '@cache_worlds',
+  ];
+
+  static Future<void> clearUserSessionData() async {
+    flush();
+    for (final key in userSessionStorageKeys) {
+      await remove(key);
+    }
+  }
+
   static Future<SharedPreferences> get _prefs =>
       SharedPreferences.getInstance();
 

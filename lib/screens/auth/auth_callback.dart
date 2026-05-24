@@ -46,7 +46,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
       if (resident == null) {
         context.go('/onboarding');
       } else if (!resident.gateCompleted) {
-        context.go('/the-gate');
+        context.go('/onboarding');
       } else {
         context.go('/');
       }

@@ -2,6 +2,9 @@
 -- keeping read access for known object paths (avatars, post-media).
 
 drop policy if exists "Public can read app public media" on storage.objects;
+drop policy if exists "Read avatars by resident path" on storage.objects;
+drop policy if exists "Read post media by uploader path" on storage.objects;
+drop policy if exists "Read other public app media by bucket" on storage.objects;
 
 create policy "Read avatars by resident path"
   on storage.objects

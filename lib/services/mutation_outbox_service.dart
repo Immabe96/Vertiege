@@ -86,6 +86,17 @@ class MutationOutboxService {
     await StorageService.remove(_key);
   }
 
+  static Future<List<MutationOutboxItem>> getFailed() async {
+    final items = await getAll();
+    return items.where((item) => item.retryCount >= maxRetries).toList();
+  }
+
+  static Future<void> discardFailed() async {
+    final items = await getAll();
+    final kept = items.where((item) => item.retryCount < maxRetries).toList();
+    await _save(kept);
+  }
+
   static Future<void> _save(List<MutationOutboxItem> items) async {
     final json = jsonEncode(items.map((item) => item.toJson()).toList());
     await StorageService.setString(_key, json);

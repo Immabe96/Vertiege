@@ -1,21 +1,21 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Secure storage wrapper for sensitive data (auth tokens, user ID, etc.).
-/// Uses platform-native secure storage (Keychain on iOS, EncryptedSharedPrefs on Android).
+/// Platform secure key-value store (Keychain / EncryptedSharedPreferences).
+///
+/// Auth sessions are owned by [Supabase] — do not duplicate access/refresh
+/// tokens here. Use this for app-specific secrets (e.g. TOTP) when needed.
 class SecureStorageService {
   SecureStorageService._();
 
   static const _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
-  // ── Keys ──────────────────────────────────────────────────
-  static const String userIdKey = '@secure_user_id';
-  static const String sessionTokenKey = '@secure_session_token';
-  static const String refreshTokenKey = '@secure_refresh_token';
-
-  // ── Read / Write ──────────────────────────────────────────
+  // Legacy keys from pre-F27 auth mirroring (cleared on sign-out).
+  static const String _legacyUserIdKey = '@secure_user_id';
+  static const String _legacySessionTokenKey = '@secure_session_token';
+  static const String _legacyRefreshTokenKey = '@secure_refresh_token';
 
   static Future<String?> read(String key) async {
     try {
@@ -29,7 +29,7 @@ class SecureStorageService {
     try {
       await _storage.write(key: key, value: value);
     } catch (_) {
-      // Silently fail — secure storage may not be available on all platforms
+      // Secure storage may be unavailable on some platforms.
     }
   }
 
@@ -39,29 +39,10 @@ class SecureStorageService {
     } catch (_) {}
   }
 
-  // ── Convenience methods ───────────────────────────────────
-
-  /// Store the current user's ID after successful auth.
-  static Future<void> saveUserId(String userId) => write(userIdKey, userId);
-
-  /// Retrieve stored user ID (for offline session restore).
-  static Future<String?> getUserId() => read(userIdKey);
-
-  /// Store session tokens after auth.
-  static Future<void> saveTokens({
-    required String accessToken,
-    String? refreshToken,
-  }) async {
-    await write(sessionTokenKey, accessToken);
-    if (refreshToken != null) {
-      await write(refreshTokenKey, refreshToken);
-    }
-  }
-
-  /// Clear all secure data on sign-out.
-  static Future<void> clearAll() async {
-    await delete(userIdKey);
-    await delete(sessionTokenKey);
-    await delete(refreshTokenKey);
+  /// Removes duplicated auth credentials written before F27.
+  static Future<void> clearLegacyAuthCredentials() async {
+    await delete(_legacyUserIdKey);
+    await delete(_legacySessionTokenKey);
+    await delete(_legacyRefreshTokenKey);
   }
 }

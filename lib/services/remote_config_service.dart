@@ -41,7 +41,10 @@ class RemoteConfigService {
       'minimum_build': 1,
       'maintenance_banner': '',
     });
-    await _remoteConfig?.fetchAndActivate();
+    await _remoteConfig?.fetchAndActivate().timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => false,
+    );
   }
 
   static bool getBool(String key, {bool fallback = false}) {

@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:forui/forui.dart';
+import 'package:http/io_client.dart' as http_io;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/notification.dart';
 import 'state/theme_provider.dart';
 import 'state/resident_provider.dart';
@@ -27,7 +31,10 @@ import 'services/push_service.dart';
 import 'services/push_token_service.dart';
 import 'services/analytics_service.dart';
 import 'services/crash_reporter.dart';
+import 'config/build_info.dart';
+import 'services/feature_flags.dart';
 import 'services/firebase_bootstrap.dart';
+import 'services/supabase.dart';
 import 'services/firebase_messaging_handlers.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/offline_banner.dart';
@@ -44,6 +51,10 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     with WidgetsBindingObserver {
   bool _showSplash = true;
   bool _isOnline = true;
+  bool _supabaseBootstrapFailed = false;
+  String? _maintenanceBanner;
+  bool _buildBlocked = false;
+  String? _pendingNotificationRoute;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   StreamSubscription<String>? _notificationRouteSubscription;
   StreamSubscription<RemoteMessage>? _foregroundPushSubscription;
@@ -60,35 +71,122 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       final offline = results.every((r) => r == ConnectivityResult.none);
       if (mounted) setState(() => _isOnline = !offline);
     });
-    _notificationRouteSubscription = PushTokenService.notificationRoutes.listen(
-      (route) {
-        if (!mounted) return;
-        ref.read(appRouterProvider).go(route);
-      },
-    );
-    _foregroundPushSubscription = PushTokenService.foregroundMessages.listen(
-      _showForegroundPush,
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startBackgroundLoads();
-      _waitForCriticalLoads();
+      unawaited(_startup());
     });
   }
 
-  Future<void> _waitForCriticalLoads() async {
-    try {
-      await Future.wait([
-        ref.read(residentProvider.notifier).loadResident(),
-        ref.read(worldProvider.notifier).loadWorlds(),
-      ]).timeout(const Duration(seconds: 3));
-    } catch (_) {}
-    if (mounted) setState(() => _showSplash = false);
+  void _attachRuntimeListeners() {
+    _flushPendingNotificationRoute();
+    _notificationRouteSubscription ??=
+        PushTokenService.notificationRoutes.listen((route) {
+      if (!mounted) return;
+      if (_showSplash) {
+        _pendingNotificationRoute = route;
+        return;
+      }
+      ref.read(appRouterProvider).go(route);
+    });
+    _foregroundPushSubscription ??=
+        PushTokenService.foregroundMessages.listen(_showForegroundPush);
   }
 
-  /// Fire-and-forget all data loads independently. No provider blocks another.
+  Future<void> _startup() async {
+    // Never block the splash on network — bootstrap runs in parallel.
+    unawaited(_bootstrapServices());
+
+    await Future<void>.delayed(const Duration(milliseconds: 1800));
+
+    final hasSession = maybeSupabase()?.auth.currentSession != null;
+    if (hasSession && mounted) {
+      final waitStart = DateTime.now();
+      while (mounted && ref.read(residentProvider).isLoading) {
+        if (DateTime.now().difference(waitStart) >
+            const Duration(seconds: 6)) {
+          break;
+        }
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    _refreshRemoteGates();
+
+    if (!mounted) return;
+    setState(() => _showSplash = false);
+    _attachRuntimeListeners();
+    _flushPendingNotificationRoute();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(themeProvider.notifier).loadFromPrefs();
+      Future<void>.delayed(const Duration(milliseconds: 800), () {
+        if (!mounted) return;
+        _startBackgroundLoads();
+      });
+    });
+  }
+
+  Future<void> _bootstrapServices() async {
+    try {
+      await FirebaseBootstrap.initializeCore().timeout(
+        const Duration(seconds: 6),
+      );
+    } catch (e, st) {
+      debugPrint('Firebase core bootstrap skipped: $e');
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'firebase bootstrap startup',
+      );
+    }
+
+    unawaited(
+      FirebaseBootstrap.initializeDeferred().catchError((Object e, StackTrace st) {
+        CrashReporter.instance.recordError(
+          e,
+          st,
+          hint: 'firebase deferred startup',
+        );
+      }),
+    );
+
+    final url = dotenv.env['SUPABASE_URL'] ?? '';
+    final anonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+    if (url.isEmpty || anonKey.isEmpty) {
+      debugPrint('Missing Supabase credentials — running in offline mode');
+      if (mounted) setState(() => _supabaseBootstrapFailed = true);
+      return;
+    }
+
+    try {
+      final httpClient = http_io.IOClient(
+        HttpClient()
+          ..connectionTimeout = const Duration(seconds: 5)
+          ..idleTimeout = const Duration(seconds: 10),
+      );
+      await Supabase.initialize(
+        url: url,
+        anonKey: anonKey,
+        httpClient: httpClient,
+      ).timeout(const Duration(seconds: 8));
+    } catch (e, st) {
+      debugPrint('Supabase init failed: $e');
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'supabase bootstrap startup',
+      );
+      if (mounted) setState(() => _supabaseBootstrapFailed = true);
+      return;
+    }
+
+    if (!mounted) return;
+    unawaited(ref.read(residentProvider.notifier).loadResident());
+    unawaited(ref.read(worldProvider.notifier).loadWorlds());
+  }
+
+  /// Fire-and-forget secondary loads after login/home is visible.
   void _startBackgroundLoads() {
-    // Resident/worlds load in _waitForCriticalLoads; notifications load with push init.
-    ref.read(themeProvider.notifier).loadFromPrefs();
     unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
     unawaited(
       _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
@@ -131,7 +229,11 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         resident.id,
       );
       if (initialRoute != null && mounted) {
-        ref.read(appRouterProvider).go(initialRoute);
+        if (_showSplash) {
+          _pendingNotificationRoute = initialRoute;
+        } else {
+          ref.read(appRouterProvider).go(initialRoute);
+        }
       }
       await PushService.initialize(userId: resident.id);
       unawaited(ref.read(allyProvider.notifier).loadAll(resident.id));
@@ -174,6 +276,26 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         hint: 'splash background load: $name',
       );
     }
+  }
+
+  void _refreshRemoteGates() {
+    final banner = FeatureFlags.maintenanceBanner.trim();
+    final minBuild = FeatureFlags.minimumBuild;
+    _maintenanceBanner = banner.isEmpty ? null : banner;
+    _buildBlocked = kAppBuildNumber < minBuild;
+  }
+
+  void _flushPendingNotificationRoute() {
+    final route = _pendingNotificationRoute;
+    if (route == null || !mounted || _showSplash) return;
+    _pendingNotificationRoute = null;
+    ref.read(appRouterProvider).go(route);
+  }
+
+  void _retryAfterOffline() {
+    if (!_isOnline) return;
+    unawaited(ref.read(residentProvider.notifier).loadResident());
+    unawaited(ref.read(worldProvider.notifier).loadWorlds());
   }
 
   void _showStatusSnackbar(String message) {
@@ -340,6 +462,16 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   @override
   Widget build(BuildContext context) {
+    if (_showSplash) {
+      return MaterialApp(
+        title: 'Vertiege',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: const SplashScreen(),
+      );
+    }
+
+    ref.watch(residentMilestoneListenerProvider);
     ref.listen<ResidentState>(residentProvider, (previous, next) {
       final resident = next.resident;
       if (resident == null) return;
@@ -357,25 +489,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     final router = ref.watch(appRouterProvider);
     final themeState = ref.watch(themeProvider);
     final textScaler = TextScaler.linear(themeState.textScale);
-
-    if (_showSplash) {
-      return MaterialApp(
-        title: 'Vertiege',
-        debugShowCheckedModeBanner: false,
-        supportedLocales: FLocalizations.supportedLocales,
-        localizationsDelegates: const [
-          ...FLocalizations.localizationsDelegates,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        home: const SplashScreen(),
-        builder: (context, child) =>
-            _withForui(context, textScaler, child!, isDark: false),
-      );
-    }
 
     final platformBrightness = MediaQuery.platformBrightnessOf(context);
     final useDarkForui = switch (themeState.scheme) {
@@ -401,7 +514,45 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       builder: (context, child) => _withForui(
         context,
         textScaler,
-        OfflineBanner(show: !_isOnline, child: child!),
+        Column(
+          children: [
+            if (_buildBlocked)
+              MaterialBanner(
+                content: Text(
+                  'This build is outdated (v$kAppBuildNumber). '
+                  'Please update Vertiege from the store.',
+                ),
+                actions: const [SizedBox.shrink()],
+              )
+            else if (_maintenanceBanner != null)
+              MaterialBanner(
+                content: Text(_maintenanceBanner!),
+                actions: const [SizedBox.shrink()],
+              )
+            else if (_supabaseBootstrapFailed)
+              MaterialBanner(
+                content: const Text(
+                  'Cloud sync is unavailable. Check .env and network, then restart.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() => _supabaseBootstrapFailed = false);
+                      unawaited(_bootstrapServices());
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            Expanded(
+              child: OfflineBanner(
+                show: !_isOnline,
+                onRetry: _retryAfterOffline,
+                child: child!,
+              ),
+            ),
+          ],
+        ),
         isDark: useDarkForui,
       ),
     );

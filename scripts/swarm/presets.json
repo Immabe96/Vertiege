@@ -1,0 +1,25 @@
+{
+  "research": {
+    "name": "Research Team",
+    "description": "Lead + researcher + reviewer (matches agent-swarm official/research preset).",
+    "agents": [
+      { "id": "lead", "role": "lead", "isLead": true },
+      { "id": "researcher", "role": "researcher" },
+      { "id": "reviewer", "role": "reviewer" }
+    ]
+  },
+  "dev": {
+    "name": "Development Team",
+    "description": "Lead + two coders (matches agent-swarm official/dev preset).",
+    "agents": [
+      { "id": "lead", "role": "lead", "isLead": true },
+      { "id": "coder-1", "role": "coder" },
+      { "id": "coder-2", "role": "coder" }
+    ]
+  },
+  "solo": {
+    "name": "Solo Agent",
+    "description": "Single coder, no lead (matches agent-swarm solo preset).",
+    "agents": [{ "id": "coder", "role": "coder" }]
+  }
+}

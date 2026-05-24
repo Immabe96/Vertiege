@@ -19,7 +19,9 @@ class OfflineBanner extends StatelessWidget {
       children: [
         if (show)
           SovereignErrorBanner(
-            message: 'Connection issue. Pull to retry.',
+            message: onRetry != null
+                ? 'Connection issue. Tap to retry.'
+                : 'Connection issue. Check your network.',
             onRetry: onRetry,
           ),
         Expanded(child: child),

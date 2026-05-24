@@ -27,9 +27,6 @@ class AuthService {
       email: email,
       password: password,
     );
-    if (response.session != null) {
-      await _persistSession(response.session!);
-    }
     return response;
   }
 
@@ -39,9 +36,6 @@ class AuthService {
   ) async {
     final client = _requireClient();
     final response = await client.auth.signUp(email: email, password: password);
-    if (response.session != null) {
-      await _persistSession(response.session!);
-    }
     return response;
   }
 
@@ -120,21 +114,14 @@ class AuthService {
 
   // ── Session utilities ────────────────────────────────────
 
-  static Future<void> _persistSession(Session session) async {
-    await SecureStorageService.saveUserId(session.user.id);
-    await SecureStorageService.saveTokens(
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-    );
-  }
-
   static Future<void> signOut({WidgetRef? ref}) async {
     VerifierSession.exit();
     final client = maybeSupabase();
     if (client != null) {
       await client.auth.signOut();
     }
-    await SecureStorageService.clearAll();
+    await SecureStorageService.clearLegacyAuthCredentials();
+    await clearUserPersistedSessionData();
     if (ref != null) {
       resetUserSessionState(ref);
     }

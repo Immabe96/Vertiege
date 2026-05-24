@@ -71,7 +71,7 @@ class PushTokenService {
   }
 
   static Future<void> _debugLog(String tag, String message) async {
-    if (!isSupabaseConfigured()) return;
+    if (!kDebugMode || !isSupabaseConfigured()) return;
     try {
       await getSupabase().from('debug_logs').insert({
         'tag': tag,

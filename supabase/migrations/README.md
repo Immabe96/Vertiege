@@ -33,3 +33,14 @@ for each remote-only version listed in [docs/audits/2026-05-21-migration-reconci
 2. Add **corrective** migrations with new timestamps for fixes.
 3. Do **not** run `db push` when `migration list` shows local/remote mismatch.
 4. Prefer `npx supabase db pull` or recovering SQL from git when remote has a version the repo lacks.
+
+## 2026-05-24 push (linked `wjaphoaxalvgjnrwqjwe`)
+
+Remote-only history entries (May 12–13 + May 21–22 ad-hoc) were **reverted** in `supabase_migrations.schema_migrations` (schema unchanged) so local files could push:
+
+```bash
+supabase migration repair --status reverted --linked --yes <remote-only-versions>
+supabase db push --linked --yes
+```
+
+Applied locally: `20260521120000` … `20260524150000` (including `profiles_privilege_guard`).

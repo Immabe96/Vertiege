@@ -2,7 +2,7 @@
 
 Social world app — join realms, chat in channels, post, earn prestige, and climb tiers. Built with Flutter, Supabase, and Firebase (FCM).
 
-**Version:** 1.0.0-beta.4
+**Version:** 1.1.0-beta.1
 
 ## Download
 

@@ -18,3 +18,14 @@ String? redirectReservedWorldSubRoute({
   final q = query.isEmpty ? '' : '?$query';
   return '/explore/$worldId/$segment$q';
 }
+
+/// Channel routes require a channel id query param.
+String? redirectMissingChannelId({
+  required String worldId,
+  required String channelName,
+  required Map<String, String> queryParams,
+}) {
+  final id = queryParams['id']?.trim() ?? '';
+  if (id.isNotEmpty) return null;
+  return '/explore/$worldId';
+}

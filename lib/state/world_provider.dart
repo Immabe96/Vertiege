@@ -426,6 +426,10 @@ class WorldNotifier extends Notifier<WorldState> {
       return null;
     }
   }
+
+  void clearForSignOut() {
+    state = const WorldState();
+  }
 }
 
 final worldProvider = NotifierProvider<WorldNotifier, WorldState>(

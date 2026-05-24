@@ -1,15 +1,19 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/build_info.dart';
 import '../state/theme_provider.dart';
 import '../state/resident_provider.dart';
 import '../services/storage_service.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
+import '../services/firebase_bootstrap.dart';
+import '../services/mutation_outbox_service.dart';
 import '../services/supabase.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -38,6 +42,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _worldInvitesEnabled = true;
   bool _tierUpgradesEnabled = true;
   int _cacheSizeBytes = 0;
+  int _failedOutboxCount = 0;
   bool _prefsLoaded = false;
 
   @override
@@ -45,6 +50,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.initState();
     _loadPrefs();
     _estimateCacheSize();
+    _loadFailedOutboxCount();
+  }
+
+  Future<void> _loadFailedOutboxCount() async {
+    final failed = await MutationOutboxService.getFailed();
+    if (!mounted) return;
+    setState(() => _failedOutboxCount = failed.length);
+  }
+
+  Future<void> _discardFailedOutbox() async {
+    await MutationOutboxService.discardFailed();
+    await _loadFailedOutboxCount();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Discarded failed sync items'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   Future<void> _loadPrefs() async {
@@ -871,7 +895,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 FTile(
                   title: Text(
-                    'Version 1.0.0-beta.4',
+                    'Version $kAppVersionLabel',
                     style: TextStyle(
                       fontSize: VFontSize.bodySm,
                       color: variantColor,
@@ -1078,7 +1102,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: 'Vertiege',
-                    applicationVersion: '1.0.0-beta.4',
+                    applicationVersion: kAppVersionLabel,
                     applicationLegalese: 'Copyright 2025 Vertiege',
                   ),
                 ),
@@ -1114,8 +1138,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: _cacheSizeBytes > 0 ? _clearCache : null,
                   enabled: _cacheSizeBytes > 0,
                 ),
+                if (_failedOutboxCount > 0)
+                  VSectionTile(
+                    icon: Icons.sync_problem,
+                    label: 'Discard failed sync ($_failedOutboxCount)',
+                    onTap: _discardFailedOutbox,
+                  ),
               ],
             ),
+            if (kDebugMode) ...[
+              const SizedBox(height: VSpacing.md),
+              VSectionList(
+                title: 'Developer',
+                children: [
+                  VSectionTile(
+                    icon: Icons.cloud_outlined,
+                    label: FirebaseBootstrap.isInitialized
+                        ? 'Firebase: connected'
+                        : 'Firebase: ${FirebaseBootstrap.lastError ?? "offline"}',
+                    enabled: false,
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: VSpacing.md),
             VSectionList(
               title: 'Danger Zone',

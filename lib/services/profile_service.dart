@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/resident.dart';
 import 'supabase.dart';
 import 'crash_reporter.dart';
@@ -6,8 +8,29 @@ class ProfileService {
   static Future<void> upsertProfile(Resident resident) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    await client.from('profiles').upsert(_toProfileRow(resident));
+    await client.from('profiles').upsert(_toClientWritableProfileRow(resident));
   }
+
+  @visibleForTesting
+  static Map<String, dynamic> clientWritableProfileRow(Resident r) =>
+      _toClientWritableProfileRow(r);
+
+  /// Fields the mobile client may write; tier/coins/streak are server/RPC managed.
+  static Map<String, dynamic> _toClientWritableProfileRow(Resident r) => {
+    'id': r.id,
+    'name': r.name,
+    'bio': r.bio,
+    'avatar_url': r.avatarUrl,
+    'profession': r.profession,
+    'decorations': r.decorations,
+    'last_check_in': r.lastCheckIn,
+    'following': r.following,
+    'joined_world_ids': r.joinedWorldIds,
+    if (r.referredBy != null) 'referred_by': r.referredBy,
+    'onboarding_completed': r.onboardingCompleted,
+    'gate_completed': r.gateCompleted,
+    if (r.avatarFrameId != null) 'avatar_frame_id': r.avatarFrameId,
+  };
 
   static Future<Resident?> getProfile(String userId) async {
     if (!isSupabaseConfigured()) return null;

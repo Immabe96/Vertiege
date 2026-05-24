@@ -4,6 +4,7 @@ import '../models/paginated_result.dart';
 import '../models/post.dart';
 import '../models/repository_result.dart';
 import '../models/sync_status.dart';
+import '../services/feature_flags.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/supabase.dart';
 import '../services/world_service.dart';
@@ -323,7 +324,15 @@ class PostRepository {
     Future<T> Function() run, {
     T? data,
   }) async {
+    final queueOnFailure = FeatureFlags.postOutboxEnabled;
+
     if (!isSupabaseConfigured()) {
+      if (!queueOnFailure) {
+        return RepositoryResult<T>.failure(
+          StateError('Supabase unavailable'),
+          StackTrace.current,
+        );
+      }
       await MutationOutboxService.enqueue(mutationType, payload);
       return RepositoryResult<T>.queued(data: data);
     }
@@ -332,6 +341,9 @@ class PostRepository {
       final result = await run();
       return RepositoryResult<T>.success(result);
     } catch (error, stackTrace) {
+      if (!queueOnFailure) {
+        return RepositoryResult<T>.failure(error, stackTrace);
+      }
       await MutationOutboxService.enqueue(mutationType, payload);
       return RepositoryResult<T>.failure(error, stackTrace);
     }

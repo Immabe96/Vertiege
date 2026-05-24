@@ -39,10 +39,9 @@ class _WorldFeedChatTeaserState extends ConsumerState<WorldFeedChatTeaser> {
   }
 
   void _openChannel(WorldChannel channel) {
-    final path = channel.name == 'general'
-        ? '/explore/${widget.worldId}/general?id=${channel.id}'
-        : '/explore/${widget.worldId}/channel/${channel.id}';
-    context.push(path);
+    context.push(
+      '/explore/${widget.worldId}/${channel.name}?id=${channel.id}',
+    );
   }
 
   @override
