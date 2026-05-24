@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../state/session_reset.dart';
 import 'crash_reporter.dart';
@@ -18,15 +19,19 @@ class AuthService {
     return client;
   }
 
+  static const _oauthRedirect = 'vertiege://auth/callback';
+
   static Future<AuthResponse> signInWithEmail(
     String email,
     String password,
   ) async {
     final client = _requireClient();
-    final response = await client.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+    final response = await client.auth
+        .signInWithPassword(
+          email: email,
+          password: password,
+        )
+        .timeout(const Duration(seconds: 20));
     return response;
   }
 
@@ -47,30 +52,28 @@ class AuthService {
   // ── OAuth ────────────────────────────────────────────────
 
   static Future<bool> signInWithGoogle() async {
-    try {
-      final client = _requireClient();
-      await client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'vertiege://auth/callback',
-      );
-      return true;
-    } catch (e, st) {
-      CrashReporter.instance.recordError(e, st, hint: 'Google OAuth signIn');
-      return false;
-    }
+    return _signInWithOAuth(OAuthProvider.google, hint: 'Google OAuth signIn');
   }
 
   static Future<bool> signInWithApple() async {
+    return _signInWithOAuth(OAuthProvider.apple, hint: 'Apple OAuth signIn');
+  }
+
+  static Future<bool> _signInWithOAuth(
+    OAuthProvider provider, {
+    required String hint,
+  }) async {
     try {
       final client = _requireClient();
-      await client.auth.signInWithOAuth(
-        OAuthProvider.apple,
-        redirectTo: 'vertiege://auth/callback',
+      final launched = await client.auth.signInWithOAuth(
+        provider,
+        redirectTo: _oauthRedirect,
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
-      return true;
+      return launched;
     } catch (e, st) {
-      CrashReporter.instance.recordError(e, st, hint: 'Apple OAuth signIn');
-      return false;
+      CrashReporter.instance.recordError(e, st, hint: hint);
+      rethrow;
     }
   }
 

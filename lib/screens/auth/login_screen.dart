@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,6 +35,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    if (maybeSupabase() == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              'Cloud sign-in is unavailable in this build. '
+              'Supabase credentials may be missing.';
+        });
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -47,8 +64,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _passwordController.text.length >= 6;
   }
 
+  Future<void> _finishSignInAfterAuth() async {
+    VerifierSession.exit();
+
+    await ref
+        .read(residentProvider.notifier)
+        .loadResident()
+        .timeout(const Duration(seconds: 12));
+    if (!mounted) return;
+
+    final residentState = ref.read(residentProvider);
+    if (residentState.loadError != null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = residentState.loadError;
+      });
+      return;
+    }
+
+    final resident = residentState.resident;
+    if (resident != null) {
+      context.go('/');
+    } else {
+      context.go('/onboarding');
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (!_isValid || _isLoading) return;
+    if (maybeSupabase() == null) {
+      setState(() {
+        _errorMessage =
+            'Cloud sign-in is unavailable. Check network or reinstall a signed build.';
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -62,18 +112,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
 
       if (!mounted) return;
-
-      VerifierSession.exit();
-
-      await ref.read(residentProvider.notifier).loadResident();
+      await _finishSignInAfterAuth();
+    } on TimeoutException {
       if (!mounted) return;
-
-      final resident = ref.read(residentProvider).resident;
-      if (resident != null) {
-        context.go('/');
-      } else {
-        context.go('/onboarding');
-      }
+      setState(() {
+        _isLoading = false;
+        _errorMessage =
+            'Sign-in timed out. Check your connection and try again.';
+      });
     } on AuthException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -85,6 +131,72 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       setState(() {
         _isLoading = false;
         _errorMessage = 'Something went wrong. Please try again.';
+      });
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    if (_isLoading) return;
+    if (maybeSupabase() == null) {
+      setState(() {
+        _errorMessage = 'Cloud sign-in is unavailable in this build.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final launched = await AuthService.signInWithGoogle();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (!launched) {
+        setState(() {
+          _errorMessage =
+              'Could not open Google sign-in. Check that a browser is installed.';
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage =
+            'Google sign-in failed. Use email/password or try again later.';
+      });
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    if (_isLoading) return;
+    if (maybeSupabase() == null) {
+      setState(() {
+        _errorMessage = 'Cloud sign-in is unavailable in this build.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final launched = await AuthService.signInWithApple();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (!launched) {
+        setState(() {
+          _errorMessage = 'Could not open Apple sign-in.';
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Apple sign-in failed. Try email/password instead.';
       });
     }
   }
@@ -475,7 +587,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(height: VSpacing.md),
                         OutlinedButton.icon(
-                          onPressed: AuthService.signInWithGoogle,
+                          onPressed: _isLoading ? null : _handleGoogleSignIn,
                           icon: const Icon(Icons.g_mobiledata, size: VIconSize.lg),
                           label: const Text('Continue with Google'),
                           style: OutlinedButton.styleFrom(
@@ -487,7 +599,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(height: VSpacing.sm),
                         OutlinedButton.icon(
-                          onPressed: AuthService.signInWithApple,
+                          onPressed: _isLoading ? null : _handleAppleSignIn,
                           icon: const Icon(Icons.apple, size: VIconSize.lg),
                           label: const Text('Continue with Apple'),
                           style: OutlinedButton.styleFrom(
