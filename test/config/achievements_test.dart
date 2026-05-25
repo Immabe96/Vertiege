@@ -6,7 +6,7 @@ import 'package:vertiege/models/resident.dart';
 void main() {
   group('ACHIEVEMENTS', () {
     test('catalog stays within product limit', () {
-      expect(achievements.length, greaterThanOrEqualTo(400));
+      expect(achievements.length, greaterThanOrEqualTo(580));
       expect(achievements.length, lessThanOrEqualTo(achievementCatalogLimit));
     });
 
@@ -14,7 +14,7 @@ void main() {
       final proofBased = achievements.where(
         (a) => a.category != AchievementCategory.inApp,
       );
-      expect(proofBased.length, greaterThan(350));
+      expect(proofBased.length, greaterThan(550));
       for (final a in proofBased) {
         expect(
           a.proofHint,
@@ -65,8 +65,15 @@ void main() {
 
     test('profession verification maps to catalog id', () {
       expect(achievementIdForVerifiedProfession('Medical'), 'prof-doctor');
+      expect(achievementIdForVerifiedProfession('Nursing'), 'prof-nurse');
       expect(achievementIdForVerifiedProfession('Technology'), 'prof-engineer');
       expect(achievementIdForVerifiedProfession('Unknown'), isNull);
+    });
+
+    test('selectable professions include expanded list', () {
+      expect(selectableProfessions.length, greaterThanOrEqualTo(14));
+      expect(selectableProfessions, contains('Nursing'));
+      expect(selectableProfessions, contains('Journalism'));
     });
   });
 

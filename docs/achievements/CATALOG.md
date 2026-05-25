@@ -1,6 +1,6 @@
 # Achievement catalog
 
-**Updated:** 2026-05-25
+**Updated:** 2026-05-26 — ~590 catalog entries
 
 ## Sources
 
@@ -9,6 +9,8 @@
 | Core | `lib/config/achievements.dart` (`_achievementCatalogRaw`) | Hand-authored milestones (~110) |
 | Bulk v1 | `lib/config/achievements_bulk_seeds.dart` | First expansion (~200) |
 | Bulk v2 | `lib/config/achievements_bulk_seeds_v2.dart` | Extended milestones (`*-ext-*` ids) |
+| Bulk v3 | `lib/config/achievements_bulk_seeds_v3.dart` | Third wave (`*-seed-v3-*` ids) |
+| Professions | `lib/config/professions.dart` | Picker list, achievement map, gate worlds |
 | Proof | `lib/config/achievement_proof_policy.dart` | Category defaults + per-id overrides |
 
 Resolved list: `achievements` = `resolveAchievementCatalog([...])`  

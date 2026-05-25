@@ -3,6 +3,15 @@ import '../models/resident.dart';
 import 'achievement_proof_policy.dart';
 import 'achievements_bulk_seeds.dart';
 import 'achievements_bulk_seeds_v2.dart';
+import 'achievements_bulk_seeds_v3.dart';
+export 'professions.dart'
+    show
+        achievementIdForVerifiedProfession,
+        gateWorldSlugForProfession,
+        professionGateWorldSlug,
+        professionPickerOptions,
+        professionToAchievementId,
+        selectableProfessions;
 
 const achievementPioneerPoster = 'pioneer-poster';
 const achievementVoiceOfRealm = 'voice-of-realm';
@@ -1006,29 +1015,15 @@ final List<Achievement> achievements = resolveAchievementCatalog([
   ..._achievementCatalogRaw,
   ...bulkAchievementSeeds,
   ...bulkAchievementSeedsV2,
+  ...bulkAchievementSeedsV3,
 ]);
 
 Map<String, Achievement>? _achievementByIdCache;
 
-/// O(1) lookup for UI and services (310+ entries).
+/// O(1) lookup for UI and services (600+ entry catalog).
 Map<String, Achievement> get achievementById {
   _achievementByIdCache ??= {for (final a in achievements) a.id: a};
   return _achievementByIdCache!;
 }
 
 Achievement? achievementForId(String id) => achievementById[id];
-
-/// Profile profession string → catalog achievement id (verified profession flow).
-const Map<String, String> professionToAchievementId = {
-  'Medical': 'prof-doctor',
-  'Aviation': 'prof-pilot',
-  'Finance': 'prof-finance',
-  'Legal': 'prof-attorney',
-  'Engineering': 'prof-engineer',
-  'Technology': 'prof-engineer',
-  'Arts': 'prof-artist',
-};
-
-/// Achievement id granted when staff approves profession verification.
-String? achievementIdForVerifiedProfession(String profession) =>
-    professionToAchievementId[profession];

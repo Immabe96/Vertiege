@@ -2,14 +2,35 @@ import '../models/resident.dart';
 import '../models/world.dart';
 
 const Map<String, List<String>> professionAliases = {
-  'Medical': ['Doctor', 'Surgeon', 'Nurse'],
-  'Engineering': ['Engineer', 'Developer'],
-  'Finance': ['Banker', 'Accountant', 'Trader'],
+  'Medical': ['Doctor', 'Surgeon', 'Nurse', 'Nursing', 'Counseling'],
+  'Engineering': [
+    'Engineer',
+    'Developer',
+    'Architecture',
+    'Science',
+  ],
+  'Finance': ['Banker', 'Accountant', 'Trader', 'Real Estate'],
   'Legal': ['Lawyer', 'Attorney', 'Judge'],
-  'Arts': ['Artist', 'Designer', 'Musician'],
+  'Arts': ['Artist', 'Designer', 'Musician', 'Culinary', 'Journalism'],
   'Aviation': ['Pilot', 'Flight Attendant'],
   'Technology': ['Developer', 'Programmer', 'Software Engineer'],
+  'Education': ['Teacher', 'Education'],
 };
+
+/// Whether [residentProfession] or [verifiedRoles] satisfy a profession-gated world.
+bool residentMatchesProfessionGate({
+  required String? residentProfession,
+  required List<String> verifiedRoles,
+  required String requiredProfession,
+}) {
+  if (verifiedRoles.contains(requiredProfession)) return true;
+  if (residentProfession == requiredProfession) return true;
+  final aliases = professionAliases[requiredProfession] ?? [];
+  if (residentProfession != null && aliases.contains(residentProfession)) {
+    return true;
+  }
+  return verifiedRoles.any(aliases.contains);
+}
 
 bool canAccessWorld(Resident resident, World world) {
   // Default worlds are always accessible
@@ -26,9 +47,11 @@ bool canAccessWorld(Resident resident, World world) {
     case WorldType.profession:
       final required = world.requiredProfession;
       if (required == null) return true;
-      if (resident.verifiedRoles.contains(required)) return true;
-      final aliases = professionAliases[required] ?? [];
-      return resident.verifiedRoles.any((role) => aliases.contains(role));
+      return residentMatchesProfessionGate(
+        residentProfession: resident.profession,
+        verifiedRoles: resident.verifiedRoles,
+        requiredProfession: required,
+      );
 
     case WorldType.dominion:
       return true; // Dominion worlds are open to all

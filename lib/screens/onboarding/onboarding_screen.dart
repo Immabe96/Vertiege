@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../config/professions.dart';
 import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/supabase.dart';
@@ -33,16 +34,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   File? _avatarFile;
   String _selectedProfession = '';
 
-  static const _professions = [
-    '',
-    'Aviation',
-    'Medical',
-    'Finance',
-    'Legal',
-    'Technology',
-    'Engineering',
-    'Arts',
-  ];
+  static final _professions = professionPickerOptions();
 
   // Gate state
   final Map<_GateInterest, int> _gateScores = {};

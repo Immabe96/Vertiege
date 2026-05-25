@@ -42,6 +42,16 @@ void main() {
       expect(canAccessWorld(doctor, worldMed), true);
     });
 
+    test('nursing profession aliases medical gate', () {
+      final nurse = const Resident(
+        id: '6',
+        name: 'Nurse',
+        profession: 'Nursing',
+        verifiedRoles: ['Nursing'],
+      );
+      expect(canAccessWorld(nurse, worldMed), true);
+    });
+
     test('explicitly unlocked wealth world grants access regardless of tier', () {
       final poorButUnlocked = const Resident(
         id: '5', name: 'Unlocked',

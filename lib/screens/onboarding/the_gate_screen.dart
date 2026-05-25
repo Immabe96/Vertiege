@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../config/professions.dart';
 import '../../router/world_navigation.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
@@ -936,15 +937,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   }
 
   World _recommendedWorldFor(_GateInterest interest, Resident? resident) {
-    final professionWorlds = <String, String>{
-      'Aviation': 'aviation-heights',
-      'Medical': 'medical-nexus',
-      'Finance': 'financial-district',
-      'Legal': 'legal-plaza',
-      'Technology': 'tech-sprawl',
-      'Engineering': 'quantum-core',
-      'Arts': 'arts-pavilion',
-    };
+    final professionWorlds = professionGateWorldSlug;
 
     String slug;
     switch (interest) {

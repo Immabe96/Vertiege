@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../config/professions.dart';
 import '../../models/resident.dart';
 import '../../theme/v_tokens.dart';
 import '../shared/profession_icon.dart';
@@ -29,16 +30,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
   late String _selectedProfession;
   bool _saving = false;
 
-  static const _professions = [
-    '',
-    'Aviation',
-    'Medical',
-    'Finance',
-    'Legal',
-    'Technology',
-    'Engineering',
-    'Arts',
-  ];
+  static final _professions = professionPickerOptions();
 
   @override
   void initState() {

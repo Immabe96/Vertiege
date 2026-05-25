@@ -12,6 +12,7 @@ CATALOG_FILES = [
     ROOT / "lib/config/achievements.dart",
     ROOT / "lib/config/achievements_bulk_seeds.dart",
     ROOT / "lib/config/achievements_bulk_seeds_v2.dart",
+    ROOT / "lib/config/achievements_bulk_seeds_v3.dart",
 ]
 MIGRATIONS = ROOT / "supabase/migrations"
 

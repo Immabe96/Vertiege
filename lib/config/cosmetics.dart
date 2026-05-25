@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'professions.dart';
 import '../theme/v_colors.dart';
 
 class CosmeticFrame {
@@ -105,6 +106,46 @@ const Map<String, ProfessionCosmetic> professionCosmetics = {
     color: Color(0xFF1565C0),
     iconAsset: 'assets/generated/prof-engineer.png',
   ),
+  'Nursing': ProfessionCosmetic(
+    profession: 'Nursing',
+    color: Color(0xFF00897B),
+    iconAsset: 'assets/generated/prof-doctor.png',
+  ),
+  'Counseling': ProfessionCosmetic(
+    profession: 'Counseling',
+    color: Color(0xFF6A1B9A),
+    iconAsset: 'assets/generated/prof-doctor.png',
+  ),
+  'Education': ProfessionCosmetic(
+    profession: 'Education',
+    color: Color(0xFF5C6BC0),
+    iconAsset: 'assets/generated/badge-author.png',
+  ),
+  'Architecture': ProfessionCosmetic(
+    profession: 'Architecture',
+    color: Color(0xFF455A64),
+    iconAsset: 'assets/generated/prof-engineer.png',
+  ),
+  'Science': ProfessionCosmetic(
+    profession: 'Science',
+    color: Color(0xFF00838F),
+    iconAsset: 'assets/generated/prof-engineer.png',
+  ),
+  'Culinary': ProfessionCosmetic(
+    profession: 'Culinary',
+    color: Color(0xFFE65100),
+    iconAsset: 'assets/generated/prof-artist.png',
+  ),
+  'Real Estate': ProfessionCosmetic(
+    profession: 'Real Estate',
+    color: Color(0xFF6D4C41),
+    iconAsset: 'assets/generated/prof-finance.png',
+  ),
+  'Journalism': ProfessionCosmetic(
+    profession: 'Journalism',
+    color: Color(0xFF37474F),
+    iconAsset: 'assets/generated/badge-author.png',
+  ),
 };
 
 const Map<String, String> decorationLabels = {
@@ -115,15 +156,31 @@ const Map<String, String> decorationLabels = {
   'Arts_badge': 'Verified Artist',
   'Aviation_badge': 'Verified Pilot',
   'Technology_badge': 'Verified Technologist',
+  'prof-nurse': 'Verified Nurse',
+  'prof-teacher': 'Verified Teacher',
+  'prof-architect': 'Verified Architect',
+  'prof-scientist': 'Verified Scientist',
+  'prof-chef': 'Verified Chef',
+  'prof-realtor': 'Verified Realtor',
+  'prof-therapist': 'Verified Therapist',
+  'prof-journalist': 'Verified Journalist',
 };
 
 /// Profession badges earned via verification (not shop cosmetics).
 List<String> professionBadgeIdsFor(Iterable<String> verifiedRoles) {
-  return verifiedRoles
-      .map((role) => '${role}_badge')
-      .where(decorationLabels.containsKey)
-      .toSet()
-      .toList();
+  final ids = <String>[];
+  for (final role in verifiedRoles) {
+    final legacy = '${role}_badge';
+    if (decorationLabels.containsKey(legacy)) {
+      ids.add(legacy);
+      continue;
+    }
+    final achievementId = professionToAchievementId[role];
+    if (achievementId != null && decorationLabels.containsKey(achievementId)) {
+      ids.add(achievementId);
+    }
+  }
+  return ids.toSet().toList();
 }
 
 enum DecorationType {

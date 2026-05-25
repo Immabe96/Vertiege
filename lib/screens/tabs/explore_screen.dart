@@ -67,7 +67,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 (w.requiredTier == null ||
                     resident.tier.value >= w.requiredTier!) &&
                 (w.requiredProfession == null ||
-                    resident.profession == w.requiredProfession))
+                    residentMatchesProfessionGate(
+                      residentProfession: resident.profession,
+                      verifiedRoles: resident.verifiedRoles,
+                      requiredProfession: w.requiredProfession!,
+                    )))
             .toList()
         : <World>[];
 
