@@ -14,7 +14,9 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
+import '../config/world_capability_matrix.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/worlds/world_capability_hint.dart';
 import '../ui/icons/v_icons.dart';
 
 class WorldJobsScreen extends ConsumerStatefulWidget {
@@ -192,7 +194,17 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
               ),
             ]
           : const [],
-      body: _buildBody(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          WorldCapabilityHint(
+            message:
+                'Roles respect world standing and tier. Council and sovereign can post openings.',
+            icon: Icons.work_outline,
+          ),
+          Expanded(child: _buildBody()),
+        ],
+      ),
     );
   }
 

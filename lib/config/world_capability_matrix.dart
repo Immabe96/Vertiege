@@ -99,6 +99,16 @@ class WorldCapabilityMatrix {
     return null;
   }
 
+  /// Shown on marketplace / treasury screens (G3 tooltips).
+  static String marketplaceRepHint() =>
+      'Creating a listing: +2 rep. Buying: +3 rep for you, +5 for the seller.';
+
+  static String createListingGateHint() =>
+      'Requires ${tierNames[minTierCreateListing] ?? 'High Roller'}+ tier and '
+      '${standingLevels[minStandingCreateListing - 1].title} standing '
+      '(${standingLevels[minStandingCreateListing - 1].minRep} rep). World prestige '
+      '$minWorldPrestigeMarketplace+ for marketplace.';
+
   static String? blockReasonTreasuryDonate(
     Resident? resident,
     World world, {

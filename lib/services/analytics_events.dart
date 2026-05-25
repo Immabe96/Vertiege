@@ -49,6 +49,11 @@ class AnalyticsEvents {
   // Marketplace
   static const marketplaceViewed = 'marketplace_viewed';
   static const marketplaceAction = 'marketplace_action';
+  static const marketplacePurchase = 'marketplace_purchase';
+
+  // Achievements
+  static const achievementSubmitted = 'achievement_submitted';
+  static const achievementResubmitted = 'achievement_resubmitted';
 
   // Quests
   static const questAction = 'quest_action';

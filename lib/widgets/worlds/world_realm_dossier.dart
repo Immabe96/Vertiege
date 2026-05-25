@@ -146,6 +146,14 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
               widget.onJoin();
             },
           ),
+          if (foundation.safetyDisclaimer != null &&
+              foundation.safetyDisclaimer!.trim().isNotEmpty) ...[
+            const SizedBox(height: VSpacing.md),
+            _SafetyDisclaimerSection(
+              disclaimer: foundation.safetyDisclaimer!.trim(),
+              isDark: isDark,
+            ),
+          ],
           const SizedBox(height: VSpacing.md),
           _StandingSection(
             world: widget.world,
@@ -398,6 +406,61 @@ class _CharterSection extends StatelessWidget {
         : foundation.premise;
     if (raw.length <= 220) return raw;
     return '${raw.substring(0, 217).trim()}…';
+  }
+}
+
+class _SafetyDisclaimerSection extends StatelessWidget {
+  final String disclaimer;
+  final bool isDark;
+
+  const _SafetyDisclaimerSection({
+    required this.disclaimer,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FCard.raw(
+      child: Padding(
+        padding: const EdgeInsets.all(VSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.health_and_safety_outlined,
+              color: VColors.warning,
+              size: VIconSize.md,
+            ),
+            const SizedBox(width: VSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Safety disclaimer',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
+                      color: VColors.warning,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.xs),
+                  Text(
+                    disclaimer,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

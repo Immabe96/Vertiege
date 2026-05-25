@@ -6,6 +6,8 @@ import '../../models/listing.dart';
 import '../../router/world_navigation.dart';
 import '../../services/chat_service.dart';
 import '../../config/world_capability_matrix.dart';
+import '../../services/analytics_events.dart';
+import '../../services/analytics_service.dart';
 import '../../services/marketplace_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
@@ -17,6 +19,7 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../widgets/worlds/world_capability_hint.dart';
 import '../../ui/icons/v_icons.dart';
 
 class WorldMarketplaceScreen extends ConsumerStatefulWidget {
@@ -44,6 +47,12 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
   void initState() {
     super.initState();
     _loadListings();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AnalyticsService.logEvent(
+        AnalyticsEvents.marketplaceViewed,
+        parameters: {'world_id': widget.worldId},
+      );
+    });
   }
 
   Future<void> _loadListings() async {
@@ -133,7 +142,26 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
             onPress: _openCreateListing,
           ),
       ],
-      body: _buildBody(context),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          WorldCapabilityHint(
+            message: WorldCapabilityMatrix.marketplaceRepHint(),
+          ),
+          if (world != null &&
+              WorldCapabilityMatrix.blockReasonCreateListing(
+                    resident,
+                    world,
+                    isJoined: widget.isMember,
+                  ) !=
+                  null)
+            WorldCapabilityHint(
+              message: WorldCapabilityMatrix.createListingGateHint(),
+              icon: Icons.lock_outline,
+            ),
+          Expanded(child: _buildBody(context)),
+        ],
+      ),
     );
   }
 
@@ -333,10 +361,19 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
         await ref.read(residentProvider.notifier).loadResident();
         widget.onPurchased();
         Navigator.of(context).pop();
-        VFeedback.showMessage(
-          context,
-          'Purchased for ${listing.coinPrice} coins',
+        AnalyticsService.logEvent(
+          AnalyticsEvents.marketplacePurchase,
+          parameters: {
+            'world_id': widget.worldId,
+            'listing_id': listing.id,
+            'coin_price': listing.coinPrice ?? 0,
+          },
         );
+        final buyerRep = result['buyer_rep_delta'];
+        final msg = buyerRep is num
+            ? 'Purchased for ${listing.coinPrice} coins · +${buyerRep.toInt()} rep'
+            : 'Purchased for ${listing.coinPrice} coins';
+        VFeedback.showMessage(context, msg);
       } else {
         VFeedback.showError(
           context,

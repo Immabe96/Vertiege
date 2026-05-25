@@ -85,6 +85,9 @@ class WorldAssets {
     'community': 'assets/generated/ach-community.png',
     'funny': 'assets/generated/ach-funny.png',
     'creative': 'assets/generated/ach-creative.png',
+    'life': 'assets/generated/ach-life.png',
+    'profession': 'assets/generated/ach-profession.png',
+    'inApp': 'assets/generated/ach-community.png',
   };
 
   /// Pool of pre-approved accent colors drawn from AppColors.

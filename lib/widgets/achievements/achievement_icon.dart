@@ -73,6 +73,15 @@ IconData achievementIconData(String iconName) {
     'hiking' => Icons.hiking,
     'terrain' => Icons.terrain,
     'local_fire_department' => Icons.local_fire_department_outlined,
+    'spa' => Icons.spa_outlined,
+    'nightlife' => Icons.nightlife_outlined,
+    'yard' => Icons.yard_outlined,
+    'psychology' => Icons.psychology_outlined,
+    'bolt' => Icons.bolt_outlined,
+    'auto_awesome' => Icons.auto_awesome_outlined,
+    'coffee' => Icons.coffee_outlined,
+    'mood' => Icons.mood_outlined,
+    'movie' => Icons.movie_outlined,
     _ => Icons.workspace_premium_outlined,
   };
 }

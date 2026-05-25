@@ -11,6 +11,7 @@ import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
+import '../widgets/worlds/world_capability_hint.dart';
 
 class WorldTreasuryScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -195,10 +196,31 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final world = ref.watch(worldProvider).worlds[widget.worldId];
+    final donateBlock = world != null
+        ? WorldCapabilityMatrix.blockReasonTreasuryDonate(
+            ref.watch(residentProvider).resident,
+            world,
+            isJoined: true,
+          )
+        : null;
+
     return VHubPage(
       title: 'Treasury',
       showBack: true,
-      body: _buildBody(context),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          WorldCapabilityHint(
+            message: donateBlock ??
+                'Treasury unlocks at world prestige '
+                '${WorldCapabilityMatrix.minWorldPrestigeTreasury}. '
+                'Marketplace sales feed tax here.',
+            icon: Icons.account_balance_outlined,
+          ),
+          Expanded(child: _buildBody(context)),
+        ],
+      ),
     );
   }
 

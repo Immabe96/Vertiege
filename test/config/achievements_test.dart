@@ -5,15 +5,16 @@ import 'package:vertiege/models/resident.dart';
 
 void main() {
   group('ACHIEVEMENTS', () {
-    test('has 100 achievements', () {
-      expect(achievements.length, 100);
+    test('catalog stays within product limit', () {
+      expect(achievements.length, greaterThanOrEqualTo(100));
+      expect(achievements.length, lessThanOrEqualTo(achievementCatalogLimit));
     });
 
-    test('life category has seed entries', () {
+    test('life category has expanded seed entries', () {
       final life = achievements
           .where((a) => a.category == AchievementCategory.life)
           .toList();
-      expect(life.length, greaterThanOrEqualTo(10));
+      expect(life.length, greaterThanOrEqualTo(20));
     });
 
     test('each has valid data', () {

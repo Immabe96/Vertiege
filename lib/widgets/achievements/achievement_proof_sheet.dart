@@ -13,6 +13,8 @@ import '../../ui/icons/v_icons.dart';
 import 'achievement_icon.dart';
 import 'achievement_resubmit_banner.dart';
 import 'proof_requirements_banner.dart';
+import '../../services/analytics_events.dart';
+import '../../services/analytics_service.dart';
 import '../../widgets/core/v_feedback.dart';
 
 /// Bottom sheet: achievement detail, proof upload, submit.
@@ -123,6 +125,16 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
           .submitAchievement(_ach.id, proofUrls);
 
       if (!mounted) return;
+      AnalyticsService.logEvent(
+        widget.status == AchievementStatus.rejected
+            ? AnalyticsEvents.achievementResubmitted
+            : AnalyticsEvents.achievementSubmitted,
+        parameters: {
+          'achievement_id': _ach.id,
+          'category': _ach.category.name,
+          'proof_count': proofUrls.length,
+        },
+      );
       Navigator.pop(context);
       VFeedback.showMessage(
         context,

@@ -75,7 +75,7 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 - 3 world types (wealth/profession/dominion), 15 hardcoded worlds
 - NexusScreen (Realm Feed) with All/Following/Announcements + sort
 - World detail with feed, channels (Supabase Realtime), events, members
-- 100 achievements across 13 categories (incl. life), XP/tier system (5 tiers); server-backed grant + public profile showcase (G0–G2, 2026-05-25)
+- Achievement catalog: **110** in config today, **`achievementCatalogLimit` = 1000** (grow over time); 13 categories incl. life; server-backed grant + public profile showcase (G0–G2, 2026-05-25)
 - Custom world creation gated by resident tier
 - Council standing in schema (rep 5000), sovereign_id on worlds
 - Moderation service + logs (mute/ban)

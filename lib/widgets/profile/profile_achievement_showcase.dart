@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/achievement.dart';
 import '../../services/profile_achievements_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../achievements/achievement_icon.dart';
+import 'achievement_trophy_wall.dart';
 
-/// Grid of verified achievements on a resident's public profile.
+/// Public verified achievements on a resident profile (featured + trophy grid).
 class ProfileAchievementShowcase extends StatelessWidget {
   final List<PublicAchievementEntry> entries;
   final bool compact;
@@ -29,9 +31,16 @@ class ProfileAchievementShowcase extends StatelessWidget {
         .where((e) => e.featuredOrder != null && e.featuredOrder! <= 3)
         .take(3)
         .toList();
-    final rest = entries
-        .where((e) => !featured.contains(e))
-        .take(compact ? 6 : 12)
+    final rest = entries.where((e) => !featured.contains(e)).toList();
+    final wallAchievements = rest
+        .map(
+          (e) => UserAchievement(
+            achievementId: e.achievement.id,
+            status: AchievementStatus.verified,
+            isProfileVisible: e.isProfileVisible,
+            featuredOrder: e.featuredOrder,
+          ),
+        )
         .toList();
 
     return Column(
@@ -67,24 +76,24 @@ class ProfileAchievementShowcase extends StatelessWidget {
             ),
           ),
           const SizedBox(height: VSpacing.sm),
-          _AchievementRow(
+          _FeaturedRow(
             entries: featured,
             highlightAchievementId: highlightAchievementId,
           ),
         ],
-        if (rest.isNotEmpty) ...[
+        if (wallAchievements.isNotEmpty) ...[
           const SizedBox(height: VSpacing.md),
           if (featured.isNotEmpty)
             Text(
-              'More',
+              'All verified',
               style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: VFontWeight.semiBold,
               ),
             ),
           if (featured.isNotEmpty) const SizedBox(height: VSpacing.sm),
-          _AchievementRow(
-            entries: rest,
-            highlightAchievementId: highlightAchievementId,
+          AchievementTrophyWall(
+            achievements: wallAchievements,
+            maxVisible: compact ? 9 : 15,
           ),
         ],
       ],
@@ -92,101 +101,76 @@ class ProfileAchievementShowcase extends StatelessWidget {
   }
 }
 
-class _AchievementRow extends StatelessWidget {
+class _FeaturedRow extends StatelessWidget {
   final List<PublicAchievementEntry> entries;
   final String? highlightAchievementId;
 
-  const _AchievementRow({
+  const _FeaturedRow({
     required this.entries,
     this.highlightAchievementId,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Wrap(
       spacing: VSpacing.sm,
       runSpacing: VSpacing.sm,
-      children: entries
-          .map(
-            (e) => _Chip(
-              entry: e,
-              highlighted: highlightAchievementId != null &&
-                  e.achievement.id == highlightAchievementId,
-            ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final PublicAchievementEntry entry;
-  final bool highlighted;
-
-  const _Chip({required this.entry, this.highlighted = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: () => context.push(
-        '/achievements/${entry.achievement.category.name}',
-      ),
-      borderRadius: BorderRadius.circular(VRadius.lg),
-      child: Container(
-        width: 148,
-        padding: const EdgeInsets.all(VSpacing.sm),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          border: Border.all(
-            color: highlighted
-                ? VColors.tertiary
-                : VColors.primary.withValues(alpha: 0.2),
-            width: highlighted ? 2 : 1,
+      children: entries.map((e) {
+        final highlighted = highlightAchievementId != null &&
+            e.achievement.id == highlightAchievementId;
+        return InkWell(
+          onTap: () => context.push(
+            '/achievements/${e.achievement.category.name}',
           ),
-          boxShadow: highlighted
-              ? [
-                  BoxShadow(
-                    color: VColors.tertiary.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            AchievementBadgeAvatar(
-              achievement: entry.achievement,
-              accentColor: VColors.tertiary,
-              size: VBadgeSize.avatarCompact,
-            ),
-            const SizedBox(width: VSpacing.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.achievement.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: VFontWeight.semiBold,
-                    ),
-                  ),
-                  Text(
-                    '+${entry.achievement.xpValue} XP',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.warning,
-                    ),
-                  ),
-                ],
+          borderRadius: BorderRadius.circular(VRadius.lg),
+          child: Container(
+            width: 160,
+            padding: const EdgeInsets.all(VSpacing.sm),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(VRadius.lg),
+              border: Border.all(
+                color: highlighted
+                    ? VColors.tertiary
+                    : VColors.primary.withValues(alpha: 0.25),
+                width: highlighted ? 2 : 1,
               ),
             ),
-          ],
-        ),
-      ),
+            child: Row(
+              children: [
+                AchievementBadgeAvatar(
+                  achievement: e.achievement,
+                  accentColor: VColors.tertiary,
+                  size: VBadgeSize.avatarCompact,
+                ),
+                const SizedBox(width: VSpacing.xs),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.achievement.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      ),
+                      Text(
+                        '+${e.achievement.xpValue} XP',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: VColors.warning,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

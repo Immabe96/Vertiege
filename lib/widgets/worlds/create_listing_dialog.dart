@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/core/v_feedback.dart';
+import 'world_capability_hint.dart';
 
 class CreateListingDialog extends ConsumerStatefulWidget {
   final String worldId;
@@ -112,8 +113,12 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
       );
 
       if (mounted) {
+        await ref.read(residentProvider.notifier).loadResident();
         Navigator.of(context).pop(true);
-        VFeedback.showMessage(context, 'Listing created!');
+        VFeedback.showMessage(
+          context,
+          'Listing created · +2 rep in this world',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -162,6 +167,11 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
+                ),
+                const SizedBox(height: VSpacing.md),
+                WorldCapabilityHint(
+                  message: WorldCapabilityMatrix.createListingGateHint(),
+                  icon: Icons.storefront_outlined,
                 ),
                 const SizedBox(height: VSpacing.lg),
                 TextFormField(
