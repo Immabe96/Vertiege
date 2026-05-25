@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import '../../models/achievement.dart';
-import '../../services/ai_verification_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'achievement_icon.dart';
@@ -14,18 +13,18 @@ class AchievementListTile extends StatelessWidget {
   final Achievement achievement;
   final AchievementStatus status;
   final VoidCallback? onPress;
-  final double? aiConfidence;
   final String? aiNotes;
   final String? proofUri;
+  final bool isInApp;
 
   const AchievementListTile({
     super.key,
     required this.achievement,
     required this.status,
     this.onPress,
-    this.aiConfidence,
     this.aiNotes,
     this.proofUri,
+    this.isInApp = false,
   });
 
   @override
@@ -103,16 +102,24 @@ class AchievementListTile extends StatelessWidget {
                   fontWeight: VFontWeight.semiBold,
                 ),
               ),
-              if (AiVerificationService.autoVerificationEnabled &&
-                  aiConfidence != null &&
-                  status == AchievementStatus.submitted) ...[
+              if (isInApp) ...[
                 const SizedBox(width: VSpacing.sm),
-                Text(
-                  'Check ${(aiConfidence! * 100).round()}%',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: VColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(VRadius.pill),
+                  ),
+                  child: Text(
+                    'Auto',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: VColors.primary,
+                      fontWeight: VFontWeight.semiBold,
+                      fontSize: VFontSize.labelSm,
+                    ),
                   ),
                 ),
               ],
@@ -130,23 +137,6 @@ class AchievementListTile extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: VColors.error,
                   fontSize: VFontSize.labelSm,
-                ),
-              ),
-            )
-          else if (aiNotes != null &&
-              aiNotes!.isNotEmpty &&
-              status == AchievementStatus.submitted)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                aiNotes!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: VFontSize.labelSm,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
                 ),
               ),
             ),

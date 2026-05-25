@@ -17,6 +17,14 @@ class AnalyticsEvents {
   static const worldJoined = 'world_joined';
   static const worldCreated = 'world_created';
   static const worldLeft = 'world_left';
+  static const worldDossierViewed = 'world_dossier_viewed';
+  static const worldDossierCharterCta = 'world_dossier_charter_cta';
+  static const worldDossierEconomyTile = 'world_dossier_economy_tile';
+  static const worldDossierKnowledgeLink = 'world_dossier_knowledge_link';
+  static const worldDossierGovernanceTap = 'world_dossier_governance_tap';
+  static const worldDossierNewsOpen = 'world_dossier_news_open';
+  static const worldDossierOrientationStep = 'world_dossier_orientation_step';
+  static const worldDossierCouncilTap = 'world_dossier_council_tap';
 
   // Channels
   static const channelOpened = 'channel_opened';

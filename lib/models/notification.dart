@@ -10,6 +10,8 @@ enum NotificationType {
   reactionMilestone,
   mention,
   allegianceRequest,
+  achievementApproved,
+  achievementRejected,
 }
 
 class AppNotification {
@@ -66,6 +68,8 @@ class AppNotification {
       'reactionMilestone' => NotificationType.reactionMilestone,
       'mention' => NotificationType.mention,
       'allegianceRequest' => NotificationType.allegianceRequest,
+      'achievementApproved' => NotificationType.achievementApproved,
+      'achievementRejected' => NotificationType.achievementRejected,
       _ => NotificationType.like,
     };
   }

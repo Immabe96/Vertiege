@@ -16,19 +16,24 @@ class Badge extends StatelessWidget {
     final label = decorationLabels[decorationId] ?? 'Verified Professional';
     final imagePath = WorldAssets.badgeImageForId(decorationId);
     final chipBg = theme.colorScheme.surfaceContainerHigh;
+    final hasRaster = imagePath != null;
 
     return Chip(
-      avatar: imagePath != null
+      avatar: hasRaster
           ? BadgeAssetImage(
               imagePath: imagePath,
-              size: 22,
+              size: VBadgeSize.decorationChip,
               errorBuilder: (_, _, _) =>
                   const Icon(VIcons.sparkles, size: 16),
             )
           : const Icon(VIcons.sparkles, size: 16),
       label: Text(label, style: const TextStyle(fontSize: VFontSize.labelSm)),
-      backgroundColor: chipBg,
-      side: BorderSide.none,
+      backgroundColor: hasRaster ? Colors.transparent : chipBg,
+      side: hasRaster
+          ? BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
+            )
+          : BorderSide.none,
       padding: const EdgeInsets.all(4),
     );
   }

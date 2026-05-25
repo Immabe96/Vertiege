@@ -49,7 +49,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   }
 
   Future<void> _purchase(SubscriptionTier tier) async {
-    final messenger = ScaffoldMessenger.of(context);
     setState(() {
       _purchasing = true;
       _purchaseMessage = null;
@@ -227,7 +226,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   child: VButton(
                     label: 'Restore Purchases',
                     onPressed: () async {
-                      final messenger = ScaffoldMessenger.of(context);
                       await StoreService.restorePurchases();
                       await _loadTier();
                       if (mounted) {

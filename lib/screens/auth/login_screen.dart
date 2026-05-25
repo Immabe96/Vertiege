@@ -12,6 +12,7 @@ import '../../state/supabase_bootstrap_provider.dart';
 import '../../services/supabase_bootstrap.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
+import '../../widgets/auth/auth_fields.dart';
 import '../../theme/v_colors.dart';
 import '../../utils/asset_image_decode.dart';
 import '../../theme/v_tokens.dart';
@@ -32,7 +33,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
-  bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -294,7 +294,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final bootstrap = ref.watch(supabaseBootstrapProvider);
-    final residentState = ref.watch(residentProvider);
 
     ref.listen<ResidentState>(residentProvider, (previous, next) {
       if (!mounted || _isLoading) return;
@@ -419,126 +418,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                         FadeIn(
                           delayMs: 200,
-                          child: TextField(
+                          child: AuthEmailField(
                             controller: _emailController,
                             focusNode: _emailFocus,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            autocorrect: false,
                             enabled: !_isLoading,
-                            style: TextStyle(
-                              color: isDark
-                                  ? VColors.onSurfaceDark
-                                  : VColors.onSurface,
-                            ),
-                            onSubmitted: (_) => _passwordFocus.requestFocus(),
-                            onChanged: (_) =>
+                            onChanged: () =>
                                 setState(() => _errorMessage = null),
-                            decoration: InputDecoration(
-                              labelText: 'Email',
-                              hintText: 'you@example.com',
-                              hintStyle: TextStyle(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                                    : VColors.onSurfaceVariant.withValues(alpha: 0.6),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(VRadius.md),
-                                borderSide: BorderSide(
-                                  color: isDark
-                                      ? VColors.outlineDark
-                                      : VColors.outline,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(VRadius.md),
-                                borderSide: BorderSide(
-                                  color: isDark
-                                      ? VColors.outlineVariantDark
-                                      : VColors.outlineVariant,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(VRadius.md),
-                                borderSide: const BorderSide(
-                                  color: VColors.primary,
-                                  width: 2,
-                                ),
-                              ),
-                              prefixIcon: const Icon(Icons.email_outlined),
-                              filled: true,
-                              fillColor: isDark
-                                  ? VColors.surfaceContainerHighDark
-                                  : VColors.surfaceContainerHigh,
-                            ),
+                            onSubmit: (_) => _passwordFocus.requestFocus(),
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
 
                         FadeIn(
                           delayMs: 250,
-                          child: TextField(
+                          child: AuthPasswordField(
                             controller: _passwordController,
                             focusNode: _passwordFocus,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.done,
                             enabled: !_isLoading,
-                            style: TextStyle(
-                              color: isDark
-                                  ? VColors.onSurfaceDark
-                                  : VColors.onSurface,
-                            ),
-                            onSubmitted: _isValid
-                                ? (_) => _handleLogin()
-                                : null,
-                            onChanged: (_) =>
+                            onChanged: () =>
                                 setState(() => _errorMessage = null),
-                            decoration: InputDecoration(
-                              labelText: 'Password',
-                              hintStyle: TextStyle(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                                    : VColors.onSurfaceVariant.withValues(alpha: 0.6),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(VRadius.md),
-                                borderSide: BorderSide(
-                                  color: isDark
-                                      ? VColors.outlineDark
-                                      : VColors.outline,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(VRadius.md),
-                                borderSide: BorderSide(
-                                  color: isDark
-                                      ? VColors.outlineVariantDark
-                                      : VColors.outlineVariant,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(VRadius.md),
-                                borderSide: const BorderSide(
-                                  color: VColors.primary,
-                                  width: 2,
-                                ),
-                              ),
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                ),
-                                onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor: isDark
-                                  ? VColors.surfaceContainerHighDark
-                                  : VColors.surfaceContainerHigh,
-                            ),
+                            onSubmit:
+                                _isValid ? (_) => _handleLogin() : null,
                           ),
                         ),
                         const SizedBox(height: VSpacing.xl),

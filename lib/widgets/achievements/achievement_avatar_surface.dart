@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../theme/v_colors.dart';
 
-/// Fill behind achievement/category badge art — readable on AMOLED dark UI.
+/// Circle behind badge art. Transparent PNGs use no fill; icon fallbacks keep a tint.
+Color achievementBadgeContainerColor({
+  required bool hasRasterAsset,
+  required Color accent,
+  required Brightness brightness,
+}) {
+  if (hasRasterAsset) return Colors.transparent;
+  return achievementAvatarFill(accent, brightness);
+}
+
+/// Fill behind achievement/category icon fallback — readable on AMOLED dark UI.
 Color achievementAvatarFill(Color accent, Brightness brightness) {
   return accent.withValues(
     alpha: brightness == Brightness.dark ? 0.28 : 0.14,

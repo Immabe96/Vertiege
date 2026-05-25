@@ -9,22 +9,16 @@ import '../../state/post_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/feed/post_item.dart';
-import '../../widgets/nexus/bento_grid.dart';
-import '../../widgets/nexus/bento_cards/daily_quest_card.dart';
-import '../../widgets/nexus/bento_cards/prestige_progress_card.dart';
-import '../../widgets/nexus/bento_cards/season_snapshot_card.dart';
-import '../../widgets/nexus/bento_cards/trending_card.dart';
-import '../../widgets/nexus/bento_cards/spotlight_card.dart';
-import '../../widgets/nexus/bento_cards/challenges_card.dart';
-import '../../widgets/nexus/bento_cards/league_card.dart';
-import '../../widgets/nexus/feed_tab_chip.dart';
 import '../../widgets/nexus/feed_sort_dropdown.dart';
+import '../../widgets/nexus/nexus_feed_header.dart';
+import '../../widgets/nexus/nexus_shortcuts_section.dart';
 import '../tabs/tab_layout.dart';
 import 'nexus_notifications_sheet.dart';
 
@@ -43,6 +37,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   late final ScrollController _scrollController;
   bool _showScrollFab = false;
   bool _searchExpanded = false;
+  bool _shortcutsExpanded = false;
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -223,16 +218,10 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                ),
+                style: context.vBodyTextStyle,
                 decoration: InputDecoration(
                   hintText: 'Search posts, residents...',
-                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
-                  ),
+                  hintStyle: context.vHintTextStyle,
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -258,125 +247,29 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                   controller: _scrollController,
                   slivers: [
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(VSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Nexus',
-                              style: theme.textTheme.headlineLarge?.copyWith(
-                                fontWeight: VFontWeight.semiBold,
-                                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: VSpacing.xs),
-                            Text(
-                              'Progress and shortcuts — your feed is below.',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: NexusShortcutsSection(
+                        expanded: _shortcutsExpanded,
+                        onExpandedChanged: (v) =>
+                            setState(() => _shortcutsExpanded = v),
                       ),
                     ),
-
-                    SliverToBoxAdapter(
-                      child: BentoGrid(
-                        cards: [
-                          const BentoCard(
-                            child: PrestigeProgressCard(),
-                            size: BentoSize.medium,
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: NexusFeedHeaderDelegate(
+                        header: NexusFeedHeader(
+                          isDark: isDark,
+                          allSelected: _tab == _FeedTab.all,
+                          followingSelected: _tab == _FeedTab.following,
+                          announcementsSelected:
+                              _tab == _FeedTab.announcements,
+                          currentSort: _sort,
+                          onSortChanged: (s) => setState(() => _sort = s),
+                          onAllTap: () => setState(() => _tab = _FeedTab.all),
+                          onFollowingTap: () =>
+                              setState(() => _tab = _FeedTab.following),
+                          onAnnouncementsTap: () => setState(
+                            () => _tab = _FeedTab.announcements,
                           ),
-                          BentoCard(
-                            child: const DailyQuestCard(),
-                            size: BentoSize.small,
-                            onTap: () => context.push('/daily-quests'),
-                          ),
-                          const BentoCard(
-                            child: SeasonSnapshotCard(),
-                            size: BentoSize.small,
-                          ),
-                          const BentoCard(
-                            child: SpotlightCard(),
-                            size: BentoSize.medium,
-                          ),
-                          BentoCard(
-                            child: const ChallengesCard(),
-                            size: BentoSize.small,
-                            onTap: () => context.push('/challenges'),
-                          ),
-                          const BentoCard(
-                            child: LeagueCard(),
-                            size: BentoSize.small,
-                          ),
-                          const BentoCard(
-                            child: TrendingCard(),
-                            size: BentoSize.large,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: [
-                                        FeedTabChip(
-                                          label: 'All',
-                                          selected: _tab == _FeedTab.all,
-                                          onTap: () => setState(
-                                            () => _tab = _FeedTab.all,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        FeedTabChip(
-                                          label: 'Following',
-                                          selected:
-                                              _tab == _FeedTab.following,
-                                          onTap: () => setState(
-                                            () => _tab = _FeedTab.following,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        FeedTabChip(
-                                          label: 'Announcements',
-                                          selected:
-                                              _tab == _FeedTab.announcements,
-                                          icon: Icons.campaign,
-                                          onTap: () => setState(
-                                            () =>
-                                                _tab = _FeedTab.announcements,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: VSpacing.sm),
-                                FeedSortDropdown(
-                                  currentSort: _sort,
-                                  onChanged: (s) => setState(() => _sort = s),
-                                ),
-                              ],
-                            ),
-                          ],
                         ),
                       ),
                     ),

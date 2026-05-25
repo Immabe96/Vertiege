@@ -1,0 +1,3537 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "a2d1c93bafa628b2912fb062f2c2e2f616371b01",
+  "generatedAt": "2026-05-25T00:33:48.990Z",
+  "files": {
+    "lib/app.dart": {
+      "filePath": "lib/app.dart",
+      "contentHash": "0fea8e11a2d899e668be206f6912898f5135cfc22f57873f06869350b58f68fa",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 547,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/achievement_reject_reasons.dart": {
+      "filePath": "lib/config/achievement_reject_reasons.dart",
+      "contentHash": "294a490d75e7e36cf44d411a04b70fbbd533295f31eb35185ab1e492643e7190",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/achievements.dart": {
+      "filePath": "lib/config/achievements.dart",
+      "contentHash": "4e5aa69cee04d6373c83dff60e376916841dfde4ab79bae822c0f2ac989f2f8b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 898,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/awards.dart": {
+      "filePath": "lib/config/awards.dart",
+      "contentHash": "c9b419b908b5d2e65470201d2b3b492e3ada3aaa6cc0edcf7cf9b0ee376a734c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 27,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/build_info.dart": {
+      "filePath": "lib/config/build_info.dart",
+      "contentHash": "40dcac74994dd5ee453c9dad08897e62ee001cc5f8fd24d3cd20c313e7fc6782",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/cosmetics.dart": {
+      "filePath": "lib/config/cosmetics.dart",
+      "contentHash": "43d252d5198a6ecf9dbc0d9c2ed3a4ad7fa03fe3965ae3c37bad0c418cf5b82a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 152,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/tiers.dart": {
+      "filePath": "lib/config/tiers.dart",
+      "contentHash": "ba4dcd6c76b968c89fa9e76f4dd8a9314ca4f44a79fee9686f886ee90d749053",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 363,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/titles.dart": {
+      "filePath": "lib/config/titles.dart",
+      "contentHash": "9b491e4c1de37fe3f886746f0b0e19c41c8cdc7bd6e660291dbb5b6b5993866a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "lib/config/world_capability_matrix.dart": {
+      "filePath": "lib/config/world_capability_matrix.dart",
+      "contentHash": "d2a76e8956e84a62c05450467be7e21068ffb250bd58b1454f7a17ef90344df9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 148,
+      "hasStructuralAnalysis": false
+    },
+    "lib/firebase_options.dart": {
+      "filePath": "lib/firebase_options.dart",
+      "contentHash": "06ed67698a4fab2300a031d41b2f59ffef4f8a802c98e15674899cf0aef049af",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": false
+    },
+    "lib/forui/README.md": {
+      "filePath": "lib/forui/README.md",
+      "contentHash": "6adccb6f0c0ac2b16109691ca80e95017b985656e0dade29cbde0d9125635dfa",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "lib/forui/v_hub_page.dart": {
+      "filePath": "lib/forui/v_hub_page.dart",
+      "contentHash": "0eaba55a5047f512bd316ccf153c60c101997955ec832e62c9645b44a388b552",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": false
+    },
+    "lib/forui/v_tab_page.dart": {
+      "filePath": "lib/forui/v_tab_page.dart",
+      "contentHash": "b86d56bfc870e107a2206406546e06d64e8aae6e8152e120049bd4b78da06799",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "lib/main.dart": {
+      "filePath": "lib/main.dart",
+      "contentHash": "027168791f2765ac3c36a157792f01a591fdf708d0c67f9ee8e602285df072fe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 42,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/academy.dart": {
+      "filePath": "lib/models/academy.dart",
+      "contentHash": "78dbc163b800c3f87e2bc63fb7cef58cd66d6450d98b3426c6ff849e3cb308d0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 128,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/achievement.dart": {
+      "filePath": "lib/models/achievement.dart",
+      "contentHash": "d12dc759232014398ba442c2bfb4ea6a59b49e8287597647a2f2466de00ec303",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 129,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/alliance.dart": {
+      "filePath": "lib/models/alliance.dart",
+      "contentHash": "aa9024a516764e1207ded80ffba51f83ec207f1ded245f38149fd49498c69c35",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/ally.dart": {
+      "filePath": "lib/models/ally.dart",
+      "contentHash": "581df48968bcae980b149851521d18d4d1d1acde2b266c3b8cc7f30e8dece158",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/announcement.dart": {
+      "filePath": "lib/models/announcement.dart",
+      "contentHash": "a681477e4c33c41b920796495519cedbc77a5d4af8a94b00a402a204e7478096",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/app_failure.dart": {
+      "filePath": "lib/models/app_failure.dart",
+      "contentHash": "124efc4d3df33c92786bf7676181a82373c996279ed10c94f0e6dac7e74fba20",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/archive.dart": {
+      "filePath": "lib/models/archive.dart",
+      "contentHash": "d47c989ec62c405ab616bb44246bcef6c653f71cced084d2b14d7e18ca283fc0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/avatar_frame.dart": {
+      "filePath": "lib/models/avatar_frame.dart",
+      "contentHash": "2b45e9ac04e4bf60e84393e23a30ead96e14291245231ab2557a8c180a252255",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/challenge.dart": {
+      "filePath": "lib/models/challenge.dart",
+      "contentHash": "55a145a19b4dcfc185c34386129f360cf4be01cfce1540013e90d15585ce6661",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 129,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/channel.dart": {
+      "filePath": "lib/models/channel.dart",
+      "contentHash": "f83898630c733cc9604cd5c0d3b5fd52515342d4b05d9084d0628f6ad16d5707",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 182,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/conflict_resolution.dart": {
+      "filePath": "lib/models/conflict_resolution.dart",
+      "contentHash": "4b8cf80a1ef4bd263ff8dfc24df27491d0c0ea0abc6fa83d416c0e393c03b254",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/event.dart": {
+      "filePath": "lib/models/event.dart",
+      "contentHash": "bce5eeaeccf3ac1c00b9f5a0ce7f36612cb6dc71d5b2a8221f5b2b7a5d6fd7dd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/invite.dart": {
+      "filePath": "lib/models/invite.dart",
+      "contentHash": "6b52bff3e623ceb1b7df778482f5dbd2c4e9173ad62436be0563b0881220b29f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/listing.dart": {
+      "filePath": "lib/models/listing.dart",
+      "contentHash": "727dace6a4b6aa15fbb3bea87d1e964ecaed3aefaea3a9d1e4564b32067e8a95",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/load_state.dart": {
+      "filePath": "lib/models/load_state.dart",
+      "contentHash": "4994d31cbaa81449a0bbaab6a182e957b7914af02e07514f11c41764470bd961",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 74,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/message.dart": {
+      "filePath": "lib/models/message.dart",
+      "contentHash": "49a2d4615939fda3795d92e015b91c3ff9fb6959c2b041bbbcd58ef86b03d6ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 154,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/mutation_outbox_item.dart": {
+      "filePath": "lib/models/mutation_outbox_item.dart",
+      "contentHash": "90ddf99bc4b4392132c20a5da16f6ba7a59340ca925271e520a349ee0c7f33f1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 61,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/notification.dart": {
+      "filePath": "lib/models/notification.dart",
+      "contentHash": "cb8cf78efb570976e0c32e94630850e7aabc16aec48eb57812174655de2a3f2c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 105,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/paginated_result.dart": {
+      "filePath": "lib/models/paginated_result.dart",
+      "contentHash": "04308b459f5e51d0df6e40fe80cb31bc363067f8c1c4b5985fafcffbf70490c9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/poll.dart": {
+      "filePath": "lib/models/poll.dart",
+      "contentHash": "3c13ed5559b9c07126fddcbba994b3ec842bc9fec5b0db2bb005fe246ec3a1e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/post.dart": {
+      "filePath": "lib/models/post.dart",
+      "contentHash": "71ca863dd1460f3ed9821e4d499f0bf9a93fa666bc074bec80984f1e192fccb7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 280,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/quiet_hours.dart": {
+      "filePath": "lib/models/quiet_hours.dart",
+      "contentHash": "6f030224f8907cd90d5102e6161572cf48e3e895a79b3b7272a3039eea716aac",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/rank.dart": {
+      "filePath": "lib/models/rank.dart",
+      "contentHash": "f4c5c1eaa3d5686d2fad6d952a11db40be7135be601c08f80fbac998248dcbda",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/report.dart": {
+      "filePath": "lib/models/report.dart",
+      "contentHash": "4122052027971ba7d783bd69eca525fd61d6696dfc5d87655c2a41344a33dad7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/repository_result.dart": {
+      "filePath": "lib/models/repository_result.dart",
+      "contentHash": "a17487397b12e0de6d7cf6cf2648c1c6ac122ae19c71c3fb6fda320815bd9930",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/resident.dart": {
+      "filePath": "lib/models/resident.dart",
+      "contentHash": "a041c2a65971e7ab3dfaace12607c4d90b09901c42ef683f22525330ba0c4881",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 200,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/retry_policy.dart": {
+      "filePath": "lib/models/retry_policy.dart",
+      "contentHash": "b7b1badb360a0544c85b14d839730c2c28bc94865d479d5b700cee9f6a4ef9ca",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/rivalry.dart": {
+      "filePath": "lib/models/rivalry.dart",
+      "contentHash": "33440f63d9d3a96622edee2469eed01cbad58be3c7f37aa2f66983bcafa9eda7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/sanctuary.dart": {
+      "filePath": "lib/models/sanctuary.dart",
+      "contentHash": "9b573b2965388546f6014bfc50082a5d734def3a0fd5ca4d0d151411da22c802",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/season.dart": {
+      "filePath": "lib/models/season.dart",
+      "contentHash": "db5fa729727bbe7ab2ad7eef1f774907b12884ad8ee8bead11d98a2cca2a0b1d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/sync_status.dart": {
+      "filePath": "lib/models/sync_status.dart",
+      "contentHash": "a93bbb529de530a5e308693329f7505bfd7cf12f74f8a0aabb1737d32cce312d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/treasury.dart": {
+      "filePath": "lib/models/treasury.dart",
+      "contentHash": "f8b9a078c79780cd0ce172f950a6d025bb6ae8665ae360ab6b8f890144ab1c12",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/world_job.dart": {
+      "filePath": "lib/models/world_job.dart",
+      "contentHash": "550e580aa2b749d4f5e50fe619a16c510bd6b696f2337f6c30a63aea760bf512",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 57,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/world_streak.dart": {
+      "filePath": "lib/models/world_streak.dart",
+      "contentHash": "6b93165ec7f3431b750ce78c6314d536b8ae0ba5a58d7fb41b9c3fa053c770df",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 54,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/world_template.dart": {
+      "filePath": "lib/models/world_template.dart",
+      "contentHash": "5a7315d6aff23a5a8f3adde7db583b91e954ffbc15946cd893b362fea8f61477",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 42,
+      "hasStructuralAnalysis": false
+    },
+    "lib/models/world.dart": {
+      "filePath": "lib/models/world.dart",
+      "contentHash": "4d1f282ae99b436b6f97b551f87ffd71d768f1f383abf9d94c18e661ff8a97ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 489,
+      "hasStructuralAnalysis": false
+    },
+    "lib/repositories/notification_repository.dart": {
+      "filePath": "lib/repositories/notification_repository.dart",
+      "contentHash": "caa17f81a2be4e1e0b7eb293479108e1540f3aaecf400a2bbeadfe0d86630dc6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "lib/repositories/post_repository.dart": {
+      "filePath": "lib/repositories/post_repository.dart",
+      "contentHash": "c7c1d086cb8f2b1948a3c0597d539b579521e675043e14e5755d597b6c5fc1c1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 392,
+      "hasStructuralAnalysis": false
+    },
+    "lib/repositories/profile_repository.dart": {
+      "filePath": "lib/repositories/profile_repository.dart",
+      "contentHash": "441855fcf46a0a491d604454a8f78dddc2542c99bc815a8268b310055b6ae92f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "lib/repositories/world_repository.dart": {
+      "filePath": "lib/repositories/world_repository.dart",
+      "contentHash": "7bf9748109dc1a967b6ff66bce54fead516a96fb1addd7803fe2ba81d91526f7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 148,
+      "hasStructuralAnalysis": false
+    },
+    "lib/router/app_router.dart": {
+      "filePath": "lib/router/app_router.dart",
+      "contentHash": "525f6cb2b92cd6fff3833100523930883a924bbff6603c1be87ca8e98272b73b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 800,
+      "hasStructuralAnalysis": false
+    },
+    "lib/router/deep_link_redirects.dart": {
+      "filePath": "lib/router/deep_link_redirects.dart",
+      "contentHash": "a629da8c308aa1a2da8b91d5461744ac17c55246b370aed4a4ff5235f36b8ccc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "lib/router/go_router_refresh.dart": {
+      "filePath": "lib/router/go_router_refresh.dart",
+      "contentHash": "dd2caa894e0d5ece0b0f9d3cd2a59edb401510bd9ace683c656e97116764230e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "lib/router/world_route_redirects.dart": {
+      "filePath": "lib/router/world_route_redirects.dart",
+      "contentHash": "58f9e0215060107d072a32874a4b3818d2c8e1bb1299c6624836ef9cea99d84a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/achievements/achievement_category.dart": {
+      "filePath": "lib/screens/achievements/achievement_category.dart",
+      "contentHash": "91982daba4cfafbff843f034a02971c2d384d70cb11208c28e3f20de5ed86752",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 195,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/achievements/achievements_index.dart": {
+      "filePath": "lib/screens/achievements/achievements_index.dart",
+      "contentHash": "dbc92b2c1e5aff77cc380f46bf239e29734519eea1536b74977ff03abaa9b209",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 537,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/achievements/submit_achievement.dart": {
+      "filePath": "lib/screens/achievements/submit_achievement.dart",
+      "contentHash": "f62bb44012b0419a6204b42effc26d808fa07893701fea3b23bfd173da75d116",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 289,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/audit_log_screen.dart": {
+      "filePath": "lib/screens/audit_log_screen.dart",
+      "contentHash": "be03395411d625c2cdb4c3b1019d4afb600382160faad512a3ca1f5791acc5e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 230,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/auth/auth_callback.dart": {
+      "filePath": "lib/screens/auth/auth_callback.dart",
+      "contentHash": "2cd92f81d1779cb4da33000344fcba7dcd56854104485ff39c080a5f9c762762",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 154,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/auth/login_screen.dart": {
+      "filePath": "lib/screens/auth/login_screen.dart",
+      "contentHash": "d27e6ef6d9306b3743fe6d6ff47087cd297b96fdec7abda1a7e12a31bd4ab9e6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 606,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/auth/signup_screen.dart": {
+      "filePath": "lib/screens/auth/signup_screen.dart",
+      "contentHash": "bc73e2f21a8ccca07cbbc80e7a293202b7249e502b8833239a65c721bfff2dd0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 298,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/auth/verifier_login_screen.dart": {
+      "filePath": "lib/screens/auth/verifier_login_screen.dart",
+      "contentHash": "7534bbe692e77ad2f4e1a631430e45d94c2ca10b850df179094f644456225804",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 172,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/campfire_screen.dart": {
+      "filePath": "lib/screens/campfire_screen.dart",
+      "contentHash": "bcbf41be7c0938ad5ccb779ed960b46975827dcacb73943caefb8cb098a1c8c2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 388,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/challenges_screen.dart": {
+      "filePath": "lib/screens/challenges_screen.dart",
+      "contentHash": "53b92d8164b922b2223e050b3e17e956e8a9a61792113ba55ce9958cf7c26d37",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 237,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/chat_room_screen.dart": {
+      "filePath": "lib/screens/chat_room_screen.dart",
+      "contentHash": "ecb75b46a69663d7acfda623930a0ef30c4c789e92442d373d35a9329fd761c9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1372,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/connections_screen.dart": {
+      "filePath": "lib/screens/connections_screen.dart",
+      "contentHash": "9cbfcf938a1aa0060f6ddcdef9ad462765f4d1b778c694dbc32e5f3275e7ebb9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 324,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/cosmetics_shop_screen.dart": {
+      "filePath": "lib/screens/cosmetics_shop_screen.dart",
+      "contentHash": "4b651d81c8c8d8a40a04372cc7c79df4677188351bb3b75ba5d8645be2ab1991",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 825,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/create_world_screen.dart": {
+      "filePath": "lib/screens/create_world_screen.dart",
+      "contentHash": "18f0c672d9da0b50cfe9102d34c7128be07856579d24dd20ce6d522ac5605926",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 653,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/daily_quests_screen.dart": {
+      "filePath": "lib/screens/daily_quests_screen.dart",
+      "contentHash": "e09c191725b59d1060baf407d1c284988fff69b93331eacbfc07014108475bb5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/hall_of_ascension_screen.dart": {
+      "filePath": "lib/screens/hall_of_ascension_screen.dart",
+      "contentHash": "e945b3dba3d598e77cde13272b93477250c4b2bdec4f61123201e766e2da4646",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 461,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/journey/ascension_path_screen.dart": {
+      "filePath": "lib/screens/journey/ascension_path_screen.dart",
+      "contentHash": "1904d529cc085d44896b86651d690b2b9a498f0868be1b0a2420bff2fe0261c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 222,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/league_screen.dart": {
+      "filePath": "lib/screens/league_screen.dart",
+      "contentHash": "d2b394341e758a4e15407cda13663f375277974b2e33838e6b7572c80dc67a85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 411,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/onboarding/onboarding_screen.dart": {
+      "filePath": "lib/screens/onboarding/onboarding_screen.dart",
+      "contentHash": "171b0229852d9629947a3ed1fa3274af3191d94c6f7b2626d3442543ffefd846",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 849,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/onboarding/the_gate_screen.dart": {
+      "filePath": "lib/screens/onboarding/the_gate_screen.dart",
+      "contentHash": "fde9d85849c2d153d244e032e6b77824074753a80f82b1c1a9ad99fcb915d98b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1270,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/resident_profile_screen.dart": {
+      "filePath": "lib/screens/resident_profile_screen.dart",
+      "contentHash": "c22482bc57c53551dc4ceb241d87c4b6d62c04fc6023349fa3531782689e89b3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 480,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/search_screen.dart": {
+      "filePath": "lib/screens/search_screen.dart",
+      "contentHash": "e9595833effa78aa8d9106b6fa5cb8e281a80c84b7866a244896440b1c3ef808",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 808,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/season_screen.dart": {
+      "filePath": "lib/screens/season_screen.dart",
+      "contentHash": "3a6d3c94e2775f8e7677a22631b19f8abb3b147ef19021f5d6d683fa74640f1b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 618,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/settings_screen.dart": {
+      "filePath": "lib/screens/settings_screen.dart",
+      "contentHash": "4ea327d4c1728a7ba48fba2c66206c9950bdc20757d77b02a3d20422789cb9b1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1280,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/splash_screen.dart": {
+      "filePath": "lib/screens/splash_screen.dart",
+      "contentHash": "89b3087844fba16703404c6365a3d558bdedb8c2c9a8e889f4b05ef9b4f2c2a6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 278,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/subscription_screen.dart": {
+      "filePath": "lib/screens/subscription_screen.dart",
+      "contentHash": "795a35440c87ae336d16d56e5348bb19700441e9745bfbd8a90a74ea2798c83d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 513,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/alerts_screen.dart": {
+      "filePath": "lib/screens/tabs/alerts_screen.dart",
+      "contentHash": "68dc9ab9f46b4df624b8b97f451c60f5076d14a0619df2c3ecae658ff341f67e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 705,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/chat_list_screen.dart": {
+      "filePath": "lib/screens/tabs/chat_list_screen.dart",
+      "contentHash": "4c502145d61d1358b7926e963c767e75f3e09840b671a86c810bd75c869412d1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 961,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/create_post_screen.dart": {
+      "filePath": "lib/screens/tabs/create_post_screen.dart",
+      "contentHash": "7358f66580469a75fe8959fef6062e72d3b0d3e2f777c3aeeacf3e5696b68cc8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 844,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/explore_screen.dart": {
+      "filePath": "lib/screens/tabs/explore_screen.dart",
+      "contentHash": "0790b0cd97b092566de470f0e1d45c0b48bd363e10d8797ae0f20e054074f293",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 885,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/identity_screen.dart": {
+      "filePath": "lib/screens/tabs/identity_screen.dart",
+      "contentHash": "fd272a9012147e927583b4e96097258e5c06f3c2ccca5d9a49ac47007818eee9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1112,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/more_screen.dart": {
+      "filePath": "lib/screens/tabs/more_screen.dart",
+      "contentHash": "4f21dd74a6b72d9f1c47d4d9a85ff64b1432492f2d944702c1e8493546773f6e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/nexus_notifications_sheet.dart": {
+      "filePath": "lib/screens/tabs/nexus_notifications_sheet.dart",
+      "contentHash": "c82b2be314eef6132cc25f44cbd86ccb0580e2fb90de4b6d1cb7aea2b70879e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 351,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/nexus_screen.dart": {
+      "filePath": "lib/screens/tabs/nexus_screen.dart",
+      "contentHash": "c91fc0f480769d617166f5396fadb9fed7decceefcc991012680a3555ca8c70d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 388,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/tabs/tab_layout.dart": {
+      "filePath": "lib/screens/tabs/tab_layout.dart",
+      "contentHash": "a09622b4f4d52f0131643c691672aa5faa1b9cce64f2c159f8efc5f53e8e3c7a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 462,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/thread_screen.dart": {
+      "filePath": "lib/screens/thread_screen.dart",
+      "contentHash": "6ec739e2e7ca8a142bd45d87d4dbc60411b5f7072afdc489952e9bfa2c3e2e31",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 443,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/twin_seal_setup_screen.dart": {
+      "filePath": "lib/screens/twin_seal_setup_screen.dart",
+      "contentHash": "4c8dc18af23ad2eab89e7f95c6f4647313823bf806814daefb011326a708ccdd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 356,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/verification_review_screen.dart": {
+      "filePath": "lib/screens/verification_review_screen.dart",
+      "contentHash": "8b93c95853d0ec40a2998d2dc0bd6a30a7304f725e32dbac463d73b862604a69",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 660,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/verifier_portal_screen.dart": {
+      "filePath": "lib/screens/verifier_portal_screen.dart",
+      "contentHash": "fece111fb70b5b592a2c1b59a88df1abc1e538904b3717156171b71b1709feac",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 44,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_academy_screen.dart": {
+      "filePath": "lib/screens/world_academy_screen.dart",
+      "contentHash": "85aa4ad87050356a6940cb039d8c62d256e9f946915ef171b59d5663445463d0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 380,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_archive_screen.dart": {
+      "filePath": "lib/screens/world_archive_screen.dart",
+      "contentHash": "5d287743fc6498944bd769c2d476ee6d21626f3e070718fc0f885d8f3c5a603b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 172,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_challenges_screen.dart": {
+      "filePath": "lib/screens/world_challenges_screen.dart",
+      "contentHash": "ba865affd1a88a020366ad4c73f9f45cf536487d125a53ffb52d8188178a59e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 393,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_channel_screen.dart": {
+      "filePath": "lib/screens/world_channel_screen.dart",
+      "contentHash": "83431529668d792bb320a909988217cfd2ef4ed825c6d68fbf1a3cf06dad0c07",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1045,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_detail_screen.dart": {
+      "filePath": "lib/screens/world_detail_screen.dart",
+      "contentHash": "edd4e310f9122d1073926a92e69f4c2205f7866492be6b39b1039af0a59f7716",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 956,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_discovery_screen.dart": {
+      "filePath": "lib/screens/world_discovery_screen.dart",
+      "contentHash": "ec2a8cb99067e9943e619e09e573cb3f4e7ff524264f0cc7f47f483b3a0bd08d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 338,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_jobs_screen.dart": {
+      "filePath": "lib/screens/world_jobs_screen.dart",
+      "contentHash": "2f57764f5ed25e115619ebb27a300fc47937779c3fa6eb8dca677c9cd96cf5b6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 353,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_marketplace_screen.dart": {
+      "filePath": "lib/screens/world_marketplace_screen.dart",
+      "contentHash": "a50213bf3384adc46d6061afeaa7fb911c9202dad4ce8860697f809de9b9820e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 601,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_members_screen.dart": {
+      "filePath": "lib/screens/world_members_screen.dart",
+      "contentHash": "c711f9d7c3900d9b0ce54a9fc2d02dbeba885f13faeafa647ab4fb02d6cf9759",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 550,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_polls_screen.dart": {
+      "filePath": "lib/screens/world_polls_screen.dart",
+      "contentHash": "1e46d81fcdd1583d8e5e7fea0fc510e32e0f27d3407eb45db3edee40ae262f7d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 386,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_sanctuary_screen.dart": {
+      "filePath": "lib/screens/world_sanctuary_screen.dart",
+      "contentHash": "73aa3f8644d068dad714916080e2c7f5c73050ebe4ea16425bf69725bea7dfe5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 375,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_settings_screen.dart": {
+      "filePath": "lib/screens/world_settings_screen.dart",
+      "contentHash": "713b5f5ef706b163fa8bab1473a6b7db87c60d1d9358ced4c1292feccc9a8654",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1603,
+      "hasStructuralAnalysis": false
+    },
+    "lib/screens/world_treasury_screen.dart": {
+      "filePath": "lib/screens/world_treasury_screen.dart",
+      "contentHash": "be80842008f1921000013a76dd33aa89ab8536b3cac903f3b02a9bd7c186c4cc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 488,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/access_control.dart": {
+      "filePath": "lib/services/access_control.dart",
+      "contentHash": "520c5608cda46a034ade0a8b6a564f0f0f72663df87662c9f27ce81289fb92c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/achievement_proof_upload.dart": {
+      "filePath": "lib/services/achievement_proof_upload.dart",
+      "contentHash": "4aca7ec55e64a9a3e8e071d772256c4e9015c1f5380286c6d78c31b933f72ade",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/achievement_review_service.dart": {
+      "filePath": "lib/services/achievement_review_service.dart",
+      "contentHash": "7a70ff77aab84dc7c1e2bf08784d747c01c9f9ab324a576b32df1f62a0119e7a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/admin_access_service.dart": {
+      "filePath": "lib/services/admin_access_service.dart",
+      "contentHash": "c4fd576b1d7421a13daf50a081975cfa7535cd653fa6fff496ea012e34eda4aa",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 92,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/ally_service.dart": {
+      "filePath": "lib/services/ally_service.dart",
+      "contentHash": "c7b3f2221cc93406526bc8ed8c3639e9984adfde525f05a6ca697f5f4b950d8c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/analytics_events.dart": {
+      "filePath": "lib/services/analytics_events.dart",
+      "contentHash": "693e3920a9dbf87fbc32c73b5b32a9c62b541ef97226d936d18916549fc1dda5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 68,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/analytics_service.dart": {
+      "filePath": "lib/services/analytics_service.dart",
+      "contentHash": "f12dff597f797ef52d4984d1aafb2ed957147211bd04f06fa3f8c4473318de72",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/announcement_service.dart": {
+      "filePath": "lib/services/announcement_service.dart",
+      "contentHash": "143b7137654c75c907e6d2fcb835dae31a385def572ff341dc1c66a5616799ed",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/app_check_service.dart": {
+      "filePath": "lib/services/app_check_service.dart",
+      "contentHash": "b097ae02588370cdb155c9ed9af4e9eb2fcc9da855807d317a36a7f573e1ed29",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/archive_service.dart": {
+      "filePath": "lib/services/archive_service.dart",
+      "contentHash": "154aba961c7d8976b1b2b33ba4e148b5896b916681fdb4f4b5d5a4377ea9e53d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 128,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/auth_service.dart": {
+      "filePath": "lib/services/auth_service.dart",
+      "contentHash": "66a3711c3b0ff4afa978afa6447a43334a5169d24a7e224c00f594247f2a5871",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 146,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/backup_service.dart": {
+      "filePath": "lib/services/backup_service.dart",
+      "contentHash": "e72bc8002d9a4d89daa605606fd007866e779437b258838800440b383a2f7205",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/cache_service.dart": {
+      "filePath": "lib/services/cache_service.dart",
+      "contentHash": "3fcfe1b1285d8a11ba87dca2cadc107f4fc1882affa159dbe37a70f8659b798d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 93,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/challenge_service.dart": {
+      "filePath": "lib/services/challenge_service.dart",
+      "contentHash": "e30945b3ccdc055887729f493f8a5de29ff84715d393f2eb8b972a88298d7f25",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 101,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/chat_service.dart": {
+      "filePath": "lib/services/chat_service.dart",
+      "contentHash": "30f9bcb8ee265dc90d79f829f1b682366863ce1bfb1bef19c65f829d398a9339",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 687,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/council_service.dart": {
+      "filePath": "lib/services/council_service.dart",
+      "contentHash": "46dcc6c7e893ad35b610a2bc9ba3c9b74397bc5520e7146801dd91cc3ac72f91",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 245,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/crash_reporter.dart": {
+      "filePath": "lib/services/crash_reporter.dart",
+      "contentHash": "2ac9e0d2e91999691f21f08b783308104383af3cda0aecd2e74eaf8b6ed7224c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 113,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/daily_reward_service.dart": {
+      "filePath": "lib/services/daily_reward_service.dart",
+      "contentHash": "1af14f654cb472f1a9110e45b54e92bcc69eb63b5fc0711ead634f07f4c70fa6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/feature_flags.dart": {
+      "filePath": "lib/services/feature_flags.dart",
+      "contentHash": "d093448102338e26e0ff53992f3e7f2d9544768975b6845ab6aef528c005c8a5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/firebase_bootstrap.dart": {
+      "filePath": "lib/services/firebase_bootstrap.dart",
+      "contentHash": "d9c63c2f73c909428e41e2d9b232e43fd2bc9f4a7dbe2928b7d4456e6e3ee712",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/firebase_messaging_handlers.dart": {
+      "filePath": "lib/services/firebase_messaging_handlers.dart",
+      "contentHash": "19ec6e4fc0629588095fed382501ca8a7421680e70d0cd5fc28145f0b57f8852",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/gamification_service.dart": {
+      "filePath": "lib/services/gamification_service.dart",
+      "contentHash": "17f271c2302df53642e52dcc355506652f4d24287fc54364014dfa1ab5935ff3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/invite_service.dart": {
+      "filePath": "lib/services/invite_service.dart",
+      "contentHash": "ce07604b0048674bd08c35a847ebc51ad6b3664c3890bd002bd9177d5a90dc21",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 119,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/league_service.dart": {
+      "filePath": "lib/services/league_service.dart",
+      "contentHash": "61fb21f70514491668b4f0d2bbbcb9d12936fbe39e8407ffdeb67746fb0328a9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 157,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/legacy_service.dart": {
+      "filePath": "lib/services/legacy_service.dart",
+      "contentHash": "135472916ecaa3be33c023d1ba09b4c3b4597d29bfb9eef457b30704fce90338",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/marketplace_service.dart": {
+      "filePath": "lib/services/marketplace_service.dart",
+      "contentHash": "1b50799525300dac9e4d50c852837063679c166e312f23a22e6e08dcb6d9bd8e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 146,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/media_service.dart": {
+      "filePath": "lib/services/media_service.dart",
+      "contentHash": "7a802cdf50bc6202b68c852d0345dda6dab5f54e3a682aa2b0da9cb7a3d6110c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 92,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/moderation_filter.dart": {
+      "filePath": "lib/services/moderation_filter.dart",
+      "contentHash": "44d9835c37d043a3c3ea6d358585f6e886001d240409cf75141c1c38fa1a1326",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 120,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/moderation_service.dart": {
+      "filePath": "lib/services/moderation_service.dart",
+      "contentHash": "51a53b3ca1f27bd0b2ef1215bb6d33a59a162e8fe789e8a30338335ee0b9aba7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 247,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/mutation_outbox_service.dart": {
+      "filePath": "lib/services/mutation_outbox_service.dart",
+      "contentHash": "212ffe42680dc10dcbc91c028734718fd368fb39197f097935dae00580ad26a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/notification_service.dart": {
+      "filePath": "lib/services/notification_service.dart",
+      "contentHash": "c7d0eb15607f7d492cd75e9a8773742022ca2c26355fcad70959c5cb2427f48d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 91,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/offline_queue.dart": {
+      "filePath": "lib/services/offline_queue.dart",
+      "contentHash": "00022cb09de84491c0aa30c4a3435bfff6a78ed9a174c4b9e31ee79efb74adcc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 113,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/performance_service.dart": {
+      "filePath": "lib/services/performance_service.dart",
+      "contentHash": "bb0b38b9288daf1d60ebf6d9938cdcb1761bc5e8118e6a817e25d7d4c478b5a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/permission_service.dart": {
+      "filePath": "lib/services/permission_service.dart",
+      "contentHash": "91c2ff4a95b9cd28610bf193fc6030fa8f283aa57c936221c2c79e02c33f72b8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 111,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/poll_service.dart": {
+      "filePath": "lib/services/poll_service.dart",
+      "contentHash": "e939f0bd40a249772281beff3572c41342981ffca50e32edca3be17246817423",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 105,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/post_service.dart": {
+      "filePath": "lib/services/post_service.dart",
+      "contentHash": "62685c80d82112b3fe24479e95b476605c55af5f7adb8798a294b0eda4186661",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/prestige_service.dart": {
+      "filePath": "lib/services/prestige_service.dart",
+      "contentHash": "6736dbf0d4fb3581ab9eafcff8bd950ff2a5c8495be02311f563cc0a5ee816fe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/profile_achievements_service.dart": {
+      "filePath": "lib/services/profile_achievements_service.dart",
+      "contentHash": "f8ded6f5de19337c84c344af06231ca4ff3db2dec335b83a7640e7092a2fc42f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 101,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/profile_service.dart": {
+      "filePath": "lib/services/profile_service.dart",
+      "contentHash": "c9db254a0413f216e561ae5990044f4d0988126a61f7433f869b2278b63dbc6f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 205,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/push_service.dart": {
+      "filePath": "lib/services/push_service.dart",
+      "contentHash": "4b16aeff58939b4010ccb9b74a90890d73220fa6f83a4f798e46aef07b18eb8a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 96,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/push_token_service.dart": {
+      "filePath": "lib/services/push_token_service.dart",
+      "contentHash": "11a6816c75795a565b00e36858c6cce710c2df5fe94c918d15975939f9f7f73d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 188,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/quiet_hours_service.dart": {
+      "filePath": "lib/services/quiet_hours_service.dart",
+      "contentHash": "ad2a21fc5c1fb8439c1b1d4325d2c59c97ee2dd46117a59661307ebc1b06f59b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/rank_service.dart": {
+      "filePath": "lib/services/rank_service.dart",
+      "contentHash": "3a932872d73fc556990425929f479bba053b86aef2822e6c795f3c12e863b395",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 127,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/remote_config_service.dart": {
+      "filePath": "lib/services/remote_config_service.dart",
+      "contentHash": "2b9315ad68693b983a3a3c6e21477079f1c76054ca1526586558f816b07c0e82",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/sanctuary_service.dart": {
+      "filePath": "lib/services/sanctuary_service.dart",
+      "contentHash": "7a9b205fbfe7976a4fd74f51208f1fcbe3b578b9304850c5c0ff05b6f68e45fe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/season_service.dart": {
+      "filePath": "lib/services/season_service.dart",
+      "contentHash": "9d435b6bb5d7c8b497a0055e3b55a0e80422f93fe5aaeaf8324abc4cb44f4acb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 82,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/secure_storage_service.dart": {
+      "filePath": "lib/services/secure_storage_service.dart",
+      "contentHash": "463f33da29f5fdc5be39d889abb05d39b887da7eb3a86946d91f209579b99f49",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 49,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/spotlight_service.dart": {
+      "filePath": "lib/services/spotlight_service.dart",
+      "contentHash": "877f9312f1309f7c5ad9f06eefc6e37bba029e41203dc929f5e3f7bd6e6c405e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 159,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/storage_service.dart": {
+      "filePath": "lib/services/storage_service.dart",
+      "contentHash": "aac23871606d56e252b344d0c5cf335cc734c6353ad2377e2970f380ff4f7c40",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 146,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/store_service.dart": {
+      "filePath": "lib/services/store_service.dart",
+      "contentHash": "d9dbc0b977553149886fd318e91fe0439d30f1c63b1b3ba9bf0e9ec2a1676f52",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 203,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/streak_service.dart": {
+      "filePath": "lib/services/streak_service.dart",
+      "contentHash": "fdc1e6bfc9aa38b89855b4c579649274f73e27bed8efd6aeeabb58d49486d66c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 93,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/subscription_service.dart": {
+      "filePath": "lib/services/subscription_service.dart",
+      "contentHash": "77da66af66cc2959bbd5e04c88cb7387bbcf9069ed09b60c0bc7c38185c1641b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 121,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/supabase_bootstrap.dart": {
+      "filePath": "lib/services/supabase_bootstrap.dart",
+      "contentHash": "ca6e9a3d6c019c0cf97ab92297df915ee11bb63fdabebcb432eb16df5c002e49",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 70,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/supabase.dart": {
+      "filePath": "lib/services/supabase.dart",
+      "contentHash": "9bd479e7fb67f37b65d2bfa54c5ab328f5d2b5d7f0ca1ee156dd858618d0b525",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/treasury_service.dart": {
+      "filePath": "lib/services/treasury_service.dart",
+      "contentHash": "ce0e05a6d7371a76eaa5437a000411071cd92632be7cbde6c35b5c1b1170fc25",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/typing_service.dart": {
+      "filePath": "lib/services/typing_service.dart",
+      "contentHash": "9ab5eca1016633e5195987fe756cdca993f54daa6a74732f6a75bad54332d024",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 85,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/verification_service.dart": {
+      "filePath": "lib/services/verification_service.dart",
+      "contentHash": "8c6dc8f9bf41c42b111546c2c27fe1e59d54cc544f643bebbceb5b7d86932275",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 161,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/verifier_session.dart": {
+      "filePath": "lib/services/verifier_session.dart",
+      "contentHash": "fe52d2b05951918739a6107b80343e2cb49654ccf15c0015f05e2fe895206bd2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/voice_service.dart": {
+      "filePath": "lib/services/voice_service.dart",
+      "contentHash": "5dcd33d698b1511ea7e57f9d3bd52ea399f6b4b602a9622aa84f3f0dbc4caada",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 130,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/world_job_service.dart": {
+      "filePath": "lib/services/world_job_service.dart",
+      "contentHash": "8f2bf0d03db5c6aa52f8e1541d7ffbbe1b519edf63c21344728f7dbdf3003100",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": false
+    },
+    "lib/services/world_service.dart": {
+      "filePath": "lib/services/world_service.dart",
+      "contentHash": "61a2deb26964393258f888e9acedca9e523342d1bf6741d6ab545ccd26830b13",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 477,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/achievement_provider.dart": {
+      "filePath": "lib/state/achievement_provider.dart",
+      "contentHash": "523d499464bc863728e865c850d965c12ffea0b748d18f193fcd3f311a2d54e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 515,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/ally_provider.dart": {
+      "filePath": "lib/state/ally_provider.dart",
+      "contentHash": "08a5fbceb7969b7406ba41cfec1e1236e16172350998acc9411f5e43f86d70cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 114,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/challenge_provider.dart": {
+      "filePath": "lib/state/challenge_provider.dart",
+      "contentHash": "000010ffc905a135dcefeeb42938b833ee88655b357a07e8ce23a11e73db65f8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 222,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/channel_provider.dart": {
+      "filePath": "lib/state/channel_provider.dart",
+      "contentHash": "dc7a99620a9f08456fc166d99cedf77aeb713d551e637e0f0b4fe91ea0ce83f2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 127,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/chat_provider.dart": {
+      "filePath": "lib/state/chat_provider.dart",
+      "contentHash": "8dd2c9218e814facfaced2c456aba40249865047265a2e83141df82a7fd2ec31",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1024,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/event_provider.dart": {
+      "filePath": "lib/state/event_provider.dart",
+      "contentHash": "50532c501905b7fda2c33a711aa8b888ed0072b12888b321ad4355429e3f8c62",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 119,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/league_provider.dart": {
+      "filePath": "lib/state/league_provider.dart",
+      "contentHash": "818b541bdb2997240d87f715c51133246accc8c591cb2d5517286abaa2eb7135",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 206,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/notification_provider.dart": {
+      "filePath": "lib/state/notification_provider.dart",
+      "contentHash": "f60f909be788620170aa1c6942aa8c200f6ad6e3003ed5e33ab55d83fd69d819",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 317,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/post_provider.dart": {
+      "filePath": "lib/state/post_provider.dart",
+      "contentHash": "86ecd85dba81406d3ece46a3557f192ff1f7cc3d362c9b8f147732fcb57c3dde",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1166,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/quest_provider.dart": {
+      "filePath": "lib/state/quest_provider.dart",
+      "contentHash": "5cfd98d1f428f33649f0d33761d65a849f90aa5199aa63089f4f73cab9d0ee85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 275,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/resident_provider.dart": {
+      "filePath": "lib/state/resident_provider.dart",
+      "contentHash": "27a96acbc5ee278363deb6dd4e00be7a2886e05e5ec9ddad8cf25e6e0515eb49",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1124,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/session_reset.dart": {
+      "filePath": "lib/state/session_reset.dart",
+      "contentHash": "e873e178a8fdb093f2128c3c711da633cbe01b8b766e1f85782004325d13557e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/supabase_bootstrap_provider.dart": {
+      "filePath": "lib/state/supabase_bootstrap_provider.dart",
+      "contentHash": "ae98a9d54ccc3e6c643b55ee953c9fe7af09b392e047a621e4130f055088c8cc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/theme_provider.dart": {
+      "filePath": "lib/state/theme_provider.dart",
+      "contentHash": "f190b9ba5386cb89868c0b44eda0a31027305a3a764a476ac5dd36b4e37cf8ea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/voice_provider.dart": {
+      "filePath": "lib/state/voice_provider.dart",
+      "contentHash": "9ffd78e07024952eee35f6dbaaf94675cdd5ea4d2566cc7af5552b55d49632d1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 107,
+      "hasStructuralAnalysis": false
+    },
+    "lib/state/world_provider.dart": {
+      "filePath": "lib/state/world_provider.dart",
+      "contentHash": "86a51486dbb934851f820b41527184447b6f43a88d195f44910c393434f99a3f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 438,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/app_theme.dart": {
+      "filePath": "lib/theme/app_theme.dart",
+      "contentHash": "f0cf8239de9f13a16a7b42c78f494620f7a1e37cf6029d95be692529ff8957a8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/colors.dart": {
+      "filePath": "lib/theme/colors.dart",
+      "contentHash": "806ba464e5f0ef44376ac15a88e194e73392a2e3349a914cfa2a64dc8759e869",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 194,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/design_system.dart": {
+      "filePath": "lib/theme/design_system.dart",
+      "contentHash": "bdcf3bfd981d41b36356a5410f4cde4ce1b391d9764d59b2966a50723ba7d2f0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 126,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/forui_theme.dart": {
+      "filePath": "lib/theme/forui_theme.dart",
+      "contentHash": "012f7d2853fd6435f4a17fe3f118ef5475d42caee0d0bc0d207f046fefbb3f95",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 65,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/theme_prefs.dart": {
+      "filePath": "lib/theme/theme_prefs.dart",
+      "contentHash": "9d37fd7d5abc38300b6612ce36c60eb8a6745e94ed71ab49eca0d62dfc2836a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/v_colors.dart": {
+      "filePath": "lib/theme/v_colors.dart",
+      "contentHash": "573fd0d381acdc8116cc2df2dfb1b2583a928582a2c671dd8dbea88db68b8c3a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 160,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/v_context_colors.dart": {
+      "filePath": "lib/theme/v_context_colors.dart",
+      "contentHash": "f66852b818d88ff3b4e6332ce30d911c9f02a5503e1dcb0793adb9bc71df0448",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/v_theme.dart": {
+      "filePath": "lib/theme/v_theme.dart",
+      "contentHash": "ad498661f12fd13cfe560f886579758c0951626e5fea362ddda10dd5d11892ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 517,
+      "hasStructuralAnalysis": false
+    },
+    "lib/theme/v_tokens.dart": {
+      "filePath": "lib/theme/v_tokens.dart",
+      "contentHash": "99db8d799e10b759b096530387c9eed11f93aa737a838e9c1167949bd8a0df3b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 158,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/buttons/v_button.dart": {
+      "filePath": "lib/ui/buttons/v_button.dart",
+      "contentHash": "0a6d25ad13f9fbb299fa2ba94cbd84c78cd258d2105eb40a23dfe34e90cad2ed",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/cards/v_card.dart": {
+      "filePath": "lib/ui/cards/v_card.dart",
+      "contentHash": "192b4badd452f3d3fd6a15246072986c48ac49657b277d80e1712f2886ad746d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/feedback/v_badge.dart": {
+      "filePath": "lib/ui/feedback/v_badge.dart",
+      "contentHash": "81d64dd02cd0d64bbb0ce221e657c425ce1a2aba919bb9d8a10beb77c0236c12",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/feedback/v_states.dart": {
+      "filePath": "lib/ui/feedback/v_states.dart",
+      "contentHash": "016c87113f3c1dec0f6b79ac44d17192306b2bb690f65561ff64d8addfa78371",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 161,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/feedback/v_sync_badge.dart": {
+      "filePath": "lib/ui/feedback/v_sync_badge.dart",
+      "contentHash": "e903490858981792b7fd968e514f9032c5f23170e077b3a734cc6e1d6a6c6b15",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/feedback/v_world_badge.dart": {
+      "filePath": "lib/ui/feedback/v_world_badge.dart",
+      "contentHash": "7bcdc80c44247434d94e7e68388b940498756b4683dd979b49cb1b36724421b3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/icons/v_icons.dart": {
+      "filePath": "lib/ui/icons/v_icons.dart",
+      "contentHash": "a7952307ce14d87c3fe84ebf3290ad48f731c320ce0c436f7306f64b215db044",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 272,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/inputs/v_input.dart": {
+      "filePath": "lib/ui/inputs/v_input.dart",
+      "contentHash": "b85c1c426b7bb5e2afbf94e78ba9414d592cd9015c2816873496c958e1eda57a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 117,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/media/v_avatar.dart": {
+      "filePath": "lib/ui/media/v_avatar.dart",
+      "contentHash": "568639141c546d765c7c91ad44f6b808fd5590aa65411dc3d31a24c2161056fe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/media/v_image.dart": {
+      "filePath": "lib/ui/media/v_image.dart",
+      "contentHash": "da71c6b1087cb2d0f259acbdd462731bb1f868866cd9eff4057a9e902a0e3e6f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 107,
+      "hasStructuralAnalysis": false
+    },
+    "lib/ui/ui.dart": {
+      "filePath": "lib/ui/ui.dart",
+      "contentHash": "008a3276e617b6fa074ee60e50d8f7209ab26cdee1a87c169f55f448cd1f2961",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/achievement_proof_utils.dart": {
+      "filePath": "lib/utils/achievement_proof_utils.dart",
+      "contentHash": "33ace52f4eb4656f8992071a4c903b959fe7173a46b091f132a77e7c37bc1bfc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/asset_image_decode.dart": {
+      "filePath": "lib/utils/asset_image_decode.dart",
+      "contentHash": "690cee89480320ab1408dfb3cde52710f161679abaa28c376163fce6e9b11f68",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/chat_new_since_visit.dart": {
+      "filePath": "lib/utils/chat_new_since_visit.dart",
+      "contentHash": "2577c2c3679a3e016ff578ab6734a6c2339603bfa1be3572ebf2c66980832376",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 27,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/chat_unread.dart": {
+      "filePath": "lib/utils/chat_unread.dart",
+      "contentHash": "11354364df7c6fd02db24babdbe4aff53ac69dfbbee90c6c285dc9c6be54f1ce",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/date_format.dart": {
+      "filePath": "lib/utils/date_format.dart",
+      "contentHash": "4ac3414a46bb3ae99d3de4ca38af55e1b9f917f1baf6ee759a4f97186ee52a18",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/gamification_reconcile.dart": {
+      "filePath": "lib/utils/gamification_reconcile.dart",
+      "contentHash": "4109770f42ce69bd63da20532b4ac7c85d82ceb34b7da50f2d4e25aef5f58d48",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/haptics.dart": {
+      "filePath": "lib/utils/haptics.dart",
+      "contentHash": "abe18a49832c38d50e37e80a525127167f15a0b2d231056b1a312713b018b6a0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/id_generator.dart": {
+      "filePath": "lib/utils/id_generator.dart",
+      "contentHash": "af136b149476718b6ec78c2f8a46de953b85824dd306f69eef941491aa6c0dd0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/navigation.dart": {
+      "filePath": "lib/utils/navigation.dart",
+      "contentHash": "1a4e8e791e6d35d224e80623ae7bc84315407e2a17e38740220c09e1727048bb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/presence_utils.dart": {
+      "filePath": "lib/utils/presence_utils.dart",
+      "contentHash": "add2e258a06e22f6dfdbf4700f9de96f24b6093b16269b641e59062b5e0588cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/rate_limiter.dart": {
+      "filePath": "lib/utils/rate_limiter.dart",
+      "contentHash": "9c4a2c7c167cdf5a7ad58a7137065a20ad9884a90a5de85223547e408225071f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/streak_check_in.dart": {
+      "filePath": "lib/utils/streak_check_in.dart",
+      "contentHash": "064997993f53c77c9315d88ebf7b411a77a10d3703f789f7adcaa810d15f1f08",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 61,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/string_utils.dart": {
+      "filePath": "lib/utils/string_utils.dart",
+      "contentHash": "72b618ad6a22fde8b985087302391d47c7ea9faf284fdc9730428e090fdbc46a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/text_parser.dart": {
+      "filePath": "lib/utils/text_parser.dart",
+      "contentHash": "13494ea2e65d5ad7c67fc75ea5a96875b3a7c7c06e6b6df1923ab8cac863b9c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/tier_utils.dart": {
+      "filePath": "lib/utils/tier_utils.dart",
+      "contentHash": "6bbe50f03dab4c1dc7d9e5287946f05402466699a534c5c202b91dc4a366c86f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/time_ago.dart": {
+      "filePath": "lib/utils/time_ago.dart",
+      "contentHash": "90bb787498089b341e290bcaa40e3f1e2e384c7901367daf5282af08f9212f94",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 140,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/v_motion.dart": {
+      "filePath": "lib/utils/v_motion.dart",
+      "contentHash": "bfa70327c2c86fa2ea5616f47c47290c0c24982d17f41508b79167de4c3abc00",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 19,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/validators.dart": {
+      "filePath": "lib/utils/validators.dart",
+      "contentHash": "134d579b4d94c6da68293a488dad4c48e025e410e535003060fa2a9aef2e4d7d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/world_assets.dart": {
+      "filePath": "lib/utils/world_assets.dart",
+      "contentHash": "64cae98acacd9652e9048fb4e6e940b2c8499556dffb44448611f2d0d7256188",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 205,
+      "hasStructuralAnalysis": false
+    },
+    "lib/utils/world_foundations.dart": {
+      "filePath": "lib/utils/world_foundations.dart",
+      "contentHash": "26690093a44416412de67c2ba51fd957b088df484f1beaf7fa1f9aad70c55c41",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 480,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/achievement_avatar_surface.dart": {
+      "filePath": "lib/widgets/achievements/achievement_avatar_surface.dart",
+      "contentHash": "22d6da5bd7ba0280b5a2589995a216058aae016c9839f6d2d1f02f13d3a010be",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/achievement_category_meta.dart": {
+      "filePath": "lib/widgets/achievements/achievement_category_meta.dart",
+      "contentHash": "a635c3ff8e268395a92e632ff283f80a843cdfc0b5592994e728d02568b9b42e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 99,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/achievement_icon.dart": {
+      "filePath": "lib/widgets/achievements/achievement_icon.dart",
+      "contentHash": "6e18036a009b011a7a00d56d065ea4571640070cd5523acc654887e2624b7b8b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 155,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/achievement_list_tile.dart": {
+      "filePath": "lib/widgets/achievements/achievement_list_tile.dart",
+      "contentHash": "064c7b5705aa402add73ae291c5f288b8656eac47f76208adde72cbe02ff18ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 264,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/achievement_proof_sheet.dart": {
+      "filePath": "lib/widgets/achievements/achievement_proof_sheet.dart",
+      "contentHash": "a8e2ece7f4c44cad264e8683225349db496c15825853d338b572bfc1da54439e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 467,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/proof_image_gallery.dart": {
+      "filePath": "lib/widgets/achievements/proof_image_gallery.dart",
+      "contentHash": "5fb93b866e2aa4312b8c355983335095233f2235d1e4e012ee58c56b9ea0c37b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 90,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/proof_requirements_banner.dart": {
+      "filePath": "lib/widgets/achievements/proof_requirements_banner.dart",
+      "contentHash": "f1e7c6224dc808abb6a4788fd825f2b4bddd4c961ae90686e31e72bf7eba019d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 77,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/achievements/tier_celebration.dart": {
+      "filePath": "lib/widgets/achievements/tier_celebration.dart",
+      "contentHash": "ad9248ce8bfa933194bbc2385bd43059f021760421b0a6e06f066f88c439b1cc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 536,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/auth/auth_error_card.dart": {
+      "filePath": "lib/widgets/auth/auth_error_card.dart",
+      "contentHash": "60866fe11f707442c0e2e561cc43eff14551d8d0125c38b767efa745988b8ac7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/auth/auth_fields.dart": {
+      "filePath": "lib/widgets/auth/auth_fields.dart",
+      "contentHash": "986cc43a7e43eb9ff59651a91a3231a0e0c435e6c4469b5f7fa2b211801a8f5e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/chat/chat_date_separator.dart": {
+      "filePath": "lib/widgets/chat/chat_date_separator.dart",
+      "contentHash": "dfc4982f95595c3695c553dd564a0600176d3b980e61ac9ae6c48120026ca97d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/chat/chat_image.dart": {
+      "filePath": "lib/widgets/chat/chat_image.dart",
+      "contentHash": "1f5e1e357bc728d252d63d24f706e3affbec72ed547bffb4cbea24d41ebdeb0c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 49,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/chat/chat_input_bar.dart": {
+      "filePath": "lib/widgets/chat/chat_input_bar.dart",
+      "contentHash": "80aefcdacb07f7af070ee36d4ad060b36d490967b8651cac30eac7d998d5705b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 175,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/chat/chat_message_grouper.dart": {
+      "filePath": "lib/widgets/chat/chat_message_grouper.dart",
+      "contentHash": "be98ad0d26e7911bc2754fc2906050fc3a9b996ff78b789736c78f2393e04677",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 111,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/chat/new_since_visit_divider.dart": {
+      "filePath": "lib/widgets/chat/new_since_visit_divider.dart",
+      "contentHash": "8acbed4e9404abba1e33e268079870631fef5a0cdb784fd3e28f6072f4ce9199",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 39,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/chat/scroll_fab.dart": {
+      "filePath": "lib/widgets/chat/scroll_fab.dart",
+      "contentHash": "7c9374bd67864b8fb7c75e97239f3b8ba470d3a79478ba570ea9fc827e4ecc7a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/broken_media.dart": {
+      "filePath": "lib/widgets/core/broken_media.dart",
+      "contentHash": "606d078a5a556771f081d075adca7216698b3a96ad9d1e8ace60ff8c59f8d826",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/contextual_chips.dart": {
+      "filePath": "lib/widgets/core/contextual_chips.dart",
+      "contentHash": "cf63f3efbb6207cf4a9bc43143ceda6a1e88ba94085de48b69c803ccc262ef34",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 154,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/daily_reward_dialog.dart": {
+      "filePath": "lib/widgets/core/daily_reward_dialog.dart",
+      "contentHash": "9cf551046e7b92789281b7bdb172e07cc3efae5d28eb136c7e0c83c4690aeb6d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 201,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/empty_state.dart": {
+      "filePath": "lib/widgets/core/empty_state.dart",
+      "contentHash": "925cd11a3e5ee9e50ba8179332188d4615e1104d1841ffc7c89f6f69d05cd1b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/error_banner.dart": {
+      "filePath": "lib/widgets/core/error_banner.dart",
+      "contentHash": "2cec4e2e7723992d0a0e691f0e717f55391e366ae35e839537a537f3ab061dbc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/fade_in.dart": {
+      "filePath": "lib/widgets/core/fade_in.dart",
+      "contentHash": "dffcbaf69dba3011b7ab7e7d1c37a7598509df7822fdb9be3986e76a2dfdb0fb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 103,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/glass_panel.dart": {
+      "filePath": "lib/widgets/core/glass_panel.dart",
+      "contentHash": "dd70a3776a014575b70287f3425ad501fb87464e13de133ef7cf5f191eef9eaf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 117,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/glass_sheet.dart": {
+      "filePath": "lib/widgets/core/glass_sheet.dart",
+      "contentHash": "7377c86d5cc0c9c70950a77aa84af2d59259c7eaba394c16b7971ee4e5dea092",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/glow_border.dart": {
+      "filePath": "lib/widgets/core/glow_border.dart",
+      "contentHash": "616b94ac03a99c77efbddbbeea42f39d404aaccf9a3892f2d6d3e812cf0b552e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/image_viewer.dart": {
+      "filePath": "lib/widgets/core/image_viewer.dart",
+      "contentHash": "e18ef2a9420fba278e7442e349711530e52f497a85fef3184860a507a466aec5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 206,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/loading_state.dart": {
+      "filePath": "lib/widgets/core/loading_state.dart",
+      "contentHash": "a2514465c391c8dd1da0ad40edb3189e2eb0c71b8b5501beeb086837f128ae77",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/notification_bell.dart": {
+      "filePath": "lib/widgets/core/notification_bell.dart",
+      "contentHash": "41ac9f16f5c76c4e0f515fb7960a9b8e2a7c407499584e1b7d7bb1d817abb67f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 136,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/offline_banner.dart": {
+      "filePath": "lib/widgets/core/offline_banner.dart",
+      "contentHash": "d303519baff6f97ccb8f754e36eb9ef929b50204f6ab9f38311e8f0a8555a5d4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/prestige_up_dialog.dart": {
+      "filePath": "lib/widgets/core/prestige_up_dialog.dart",
+      "contentHash": "6a901bce86d6167321cd6d1ab51a3752a9e605e6187bce55d4ef1b928c8f906e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 235,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/protocol_logs.dart": {
+      "filePath": "lib/widgets/core/protocol_logs.dart",
+      "contentHash": "ac86ea8b86db1701f9f2015322d61f0f6fe30753c908772bc3351b2567aaac44",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 58,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/screen_loading.dart": {
+      "filePath": "lib/widgets/core/screen_loading.dart",
+      "contentHash": "1cc9306dfa305f0065478e41c145d2e87e2ce633ee696e7c8c5c3bcaf8c9f525",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 284,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/shimmer.dart": {
+      "filePath": "lib/widgets/core/shimmer.dart",
+      "contentHash": "1f1331f94138776c163f6d876e67c08a1625b0f3d658ea1457dfd44428395a66",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/sovereign_card.dart": {
+      "filePath": "lib/widgets/core/sovereign_card.dart",
+      "contentHash": "62bd5681b3cf40cc928d7c3d6f70a92cc6bbc753a19303e27590346fd9ad995c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/sovereign_stat.dart": {
+      "filePath": "lib/widgets/core/sovereign_stat.dart",
+      "contentHash": "7231c28c90a50a0576d0c7ff7fd8cab90eb1d10217aad4df464c130059d533d9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 77,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/status_dot.dart": {
+      "filePath": "lib/widgets/core/status_dot.dart",
+      "contentHash": "9b37d34d02c7e4ff0120d580170187f0e6f6fca106d89c312eb61727dcb2ab60",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 177,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/tier_badge.dart": {
+      "filePath": "lib/widgets/core/tier_badge.dart",
+      "contentHash": "ff7bf2e852124482aad228bebdacda75009b98cc16ee89a54ffdde1cabdca1ba",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 53,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/tier_up_dialog.dart": {
+      "filePath": "lib/widgets/core/tier_up_dialog.dart",
+      "contentHash": "0ee7a4a2080dc5d2832ca849cf1b97ce074adf0081c49c9039a9a010d31b5dc4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 288,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/v_accessible.dart": {
+      "filePath": "lib/widgets/core/v_accessible.dart",
+      "contentHash": "9c3312d35e92a04f18c12617aff4847681ada9c10d9c90df13ffd25a2005b225",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 75,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/v_app_banner.dart": {
+      "filePath": "lib/widgets/core/v_app_banner.dart",
+      "contentHash": "627586e5feeae5f1428cb7073771d8c539c9665a69ad9632911f0e87e69e4964",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 44,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/v_feedback.dart": {
+      "filePath": "lib/widgets/core/v_feedback.dart",
+      "contentHash": "5ea45f8125f340f363a66836e6c6d530c67d3cfdc6678fb190363cab6a84140f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 54,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/core/xp_toast.dart": {
+      "filePath": "lib/widgets/core/xp_toast.dart",
+      "contentHash": "1f95f26126df7252f968e7352111fe069bf617f7b8b883f49dee3b9fe94e4ca3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 148,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/boosted_worlds_row.dart": {
+      "filePath": "lib/widgets/explore/boosted_worlds_row.dart",
+      "contentHash": "8c3472db6115b23777f1237a5a222e1b3da566d10df150fe6f3ac3efd5920c33",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 104,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/featured_worlds_row.dart": {
+      "filePath": "lib/widgets/explore/featured_worlds_row.dart",
+      "contentHash": "bad626ea7f0f3a9ff5b1564b2dcd1dde703258f53b2963e359242f4b2261092c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/season_banner.dart": {
+      "filePath": "lib/widgets/explore/season_banner.dart",
+      "contentHash": "3c1e56542b085ce80b878acdc1193c0ee51607a67f76de3764dc539c11e4da58",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 107,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/section_header.dart": {
+      "filePath": "lib/widgets/explore/section_header.dart",
+      "contentHash": "32b3bd8b9ab1b8c367437eb6289a57a419691e1996d24aa57cc517ac1f2fb2da",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/shimmer_world_card.dart": {
+      "filePath": "lib/widgets/explore/shimmer_world_card.dart",
+      "contentHash": "fd6718c22c67df7043149ee10a78783caf9a3977d213ed5516408a2fa70c0cff",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/tier_section.dart": {
+      "filePath": "lib/widgets/explore/tier_section.dart",
+      "contentHash": "45c40dc6702bcac13dde2baec60678f02925fc67e8c6ada8a3f0e8ab1dc59c97",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/trending_rising_section.dart": {
+      "filePath": "lib/widgets/explore/trending_rising_section.dart",
+      "contentHash": "5e4db3d3107a1f15f22eceb730552cf94d13bd99ddb6ea30e57fab174df1259f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 163,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/explore/view_mode_toggle.dart": {
+      "filePath": "lib/widgets/explore/view_mode_toggle.dart",
+      "contentHash": "22df224481b8291536fe9d359fce1b019c91528328952e30bcc2c5d3a7978abd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/comment_sheet.dart": {
+      "filePath": "lib/widgets/feed/comment_sheet.dart",
+      "contentHash": "fbffb2000bd58d7cca12a77980c1522c2be5c1e9c553303bee3830dab609154a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 539,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/heart_animation.dart": {
+      "filePath": "lib/widgets/feed/heart_animation.dart",
+      "contentHash": "d6105bbb05ead4c2effb6254cbe431b31e35d66de9d9561835985654984e1dfc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 110,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/media_grid.dart": {
+      "filePath": "lib/widgets/feed/media_grid.dart",
+      "contentHash": "5f39bdbcbec8a615934d5caae71ee7518329ba1faf4ac2b7aa5b69147d4c5952",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/post_composer.dart": {
+      "filePath": "lib/widgets/feed/post_composer.dart",
+      "contentHash": "b05494b2d81bea5919559fd2f1393ce5d3cdac452ccdbbe557c123103c881fdf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 684,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/post_image.dart": {
+      "filePath": "lib/widgets/feed/post_image.dart",
+      "contentHash": "d0fceefd47a598637acebba1e95d8dd81b7347aa009ba4b98acfb30d91153ae7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 53,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/post_input.dart": {
+      "filePath": "lib/widgets/feed/post_input.dart",
+      "contentHash": "b8cb842fca70d961dc1225a3725f4d8fa2b1c6255a4b4319a11c266169ab5100",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 696,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/post_item.dart": {
+      "filePath": "lib/widgets/feed/post_item.dart",
+      "contentHash": "57bee8022179004ab87f8ae63a9566f2f1db3e5815de11f65685e072e9764ce4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1067,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/feed/reaction_bar.dart": {
+      "filePath": "lib/widgets/feed/reaction_bar.dart",
+      "contentHash": "00785abc4e8748e42eb7b70c8a6ba528f6a22c5fa5d39e018f9775bb143e26a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 378,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/identity/honour_stat_chip.dart": {
+      "filePath": "lib/widgets/identity/honour_stat_chip.dart",
+      "contentHash": "17437848769436b1581760489bf50a590d715d40c431542aa8c08f37490a9588",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/identity/joined_worlds_row.dart": {
+      "filePath": "lib/widgets/identity/joined_worlds_row.dart",
+      "contentHash": "7c5999a689980eaf3e7bf61e8c9a36c925c952106c34f994ca66760472e4455e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 82,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/journey/progress_trail.dart": {
+      "filePath": "lib/widgets/journey/progress_trail.dart",
+      "contentHash": "17aabd003c9b6b621c9751109f601043f120f7ba57a4bae3bc754e798183d55d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 232,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/challenges_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/challenges_card.dart",
+      "contentHash": "ce603f76c19f12dbb8c233158a664de5be3a865c45d4f6eed2b85f15c9628e22",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 96,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/daily_quest_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/daily_quest_card.dart",
+      "contentHash": "b52aa8706cca292579db009dcbfee7a50e56d891098b30406bd402b5c2227bcd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 110,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/league_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/league_card.dart",
+      "contentHash": "028d5399931c7ca44595f46a3bccce96604a56ecdd1c7bde1c817c5a50c3eb79",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 121,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/prestige_progress_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/prestige_progress_card.dart",
+      "contentHash": "c3373e2d682ea2886412d5d2f09dff5a2e2028bbb9d4b84218e6b91a42143e2b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 142,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/season_snapshot_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/season_snapshot_card.dart",
+      "contentHash": "58d3e42e38d89d98d3e254af2d5d38f2defc03001ea293dde18bd02bb3e10350",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 98,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/spotlight_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/spotlight_card.dart",
+      "contentHash": "af716d60c063e2a701a4feefaf83cb8bce2dd15b93fe9ce69412bd5defdd6d18",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 156,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_cards/trending_card.dart": {
+      "filePath": "lib/widgets/nexus/bento_cards/trending_card.dart",
+      "contentHash": "afa434e164ce98bdd09fe6ddef3b03de4db749d93a4da5df42eae2750e9ad88f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 141,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/bento_grid.dart": {
+      "filePath": "lib/widgets/nexus/bento_grid.dart",
+      "contentHash": "9152cc8adaf90e63b1299a33ec8f1a77c77e10aab4fd990e7a853323d44233e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/feed_sort_dropdown.dart": {
+      "filePath": "lib/widgets/nexus/feed_sort_dropdown.dart",
+      "contentHash": "abd47a5dbbb044a58dc68d512a0dd6a42b328c8ae5ed260b4898b7f895276b0a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 116,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/feed_tab_chip.dart": {
+      "filePath": "lib/widgets/nexus/feed_tab_chip.dart",
+      "contentHash": "4cb28ea945fe2239d57e41fd3299ef5df9e5a7dcb8e513bf7ea57f58d83abfb6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/nexus_feed_header.dart": {
+      "filePath": "lib/widgets/nexus/nexus_feed_header.dart",
+      "contentHash": "418f1705dc1065efb43800701557f3218b8f8942163c63e5ad244fc6db1d9d88",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 113,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/nexus_shortcuts_section.dart": {
+      "filePath": "lib/widgets/nexus/nexus_shortcuts_section.dart",
+      "contentHash": "886cbe8d317f41b542ce50aa4abd27394ee7ba5fda35e43a3ea91c4cea9767b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 218,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/nexus/world_invite_section.dart": {
+      "filePath": "lib/widgets/nexus/world_invite_section.dart",
+      "contentHash": "95acebe5dd937a8364485c0a90717ebd0e38b68f5cc36215c6c4a745ada93a58",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/achievement_share_card.dart": {
+      "filePath": "lib/widgets/profile/achievement_share_card.dart",
+      "contentHash": "e54e99a4cf8cfdf41b822b9ff2f07d57beec7154242e48f41957c697eae9a77b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 415,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/badge_display.dart": {
+      "filePath": "lib/widgets/profile/badge_display.dart",
+      "contentHash": "8d47e4cb2a4b95b5bb1b87f5c607f85b4ae9f44451546b0ea4283589c1a1fe71",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/badge.dart": {
+      "filePath": "lib/widgets/profile/badge.dart",
+      "contentHash": "e075166fd05c2da6cce0f8b304801085afb50010268f3cc6a1620fe058bbef1d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/completion_hint.dart": {
+      "filePath": "lib/widgets/profile/completion_hint.dart",
+      "contentHash": "63d2f55846d92ea9341fd285f30c99bf95b19ea1beb3bb3cd1c1cabbde1b27b9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/cosmetic_avatar.dart": {
+      "filePath": "lib/widgets/profile/cosmetic_avatar.dart",
+      "contentHash": "d440a1c9971619e813c23ecc1f90cc7f7d3a309fc6bbd1d560f386bef930d4ec",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 154,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/edit_profile_sheet.dart": {
+      "filePath": "lib/widgets/profile/edit_profile_sheet.dart",
+      "contentHash": "7b1d178edc57e6e0a46c11850b0048b02410d2b8b8e02b298b1867cdf945b0b8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 356,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/luminary_nameplate.dart": {
+      "filePath": "lib/widgets/profile/luminary_nameplate.dart",
+      "contentHash": "51d5f10edb0ec10471cc3d0ed2ea3ff7146f94a7eb0f8c44c71a7fae059d6965",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 220,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/name_banner.dart": {
+      "filePath": "lib/widgets/profile/name_banner.dart",
+      "contentHash": "8da1ffcefc98c255e2857a15ca32992b3796625209341885421518eb19704080",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/profile_achievement_showcase.dart": {
+      "filePath": "lib/widgets/profile/profile_achievement_showcase.dart",
+      "contentHash": "503a39c081edfe427e7e735f48d0e81e8d173dfe4acde76864d70de617eb737b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 195,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/referral_chip.dart": {
+      "filePath": "lib/widgets/profile/referral_chip.dart",
+      "contentHash": "779b6050775d107166ddec368ed9685cec2b9a49718da10e3cd5ebcbb41e3582",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 96,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/share_card.dart": {
+      "filePath": "lib/widgets/profile/share_card.dart",
+      "contentHash": "c744c1d40fcda90a9931d469d8ee9a3d5ecfec79eca395603747e593f2d02ac2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 124,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/streak_display.dart": {
+      "filePath": "lib/widgets/profile/streak_display.dart",
+      "contentHash": "4d57e208dc6d7d2963ec67ef4bb5ef1954d659679b7d49014fd9373f79aa223a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 207,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/subscription_badge.dart": {
+      "filePath": "lib/widgets/profile/subscription_badge.dart",
+      "contentHash": "59420af532a098947660cde0946eff3784fa6a44b0aba2508fe73a914f1919f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/profile/trophy_case.dart": {
+      "filePath": "lib/widgets/profile/trophy_case.dart",
+      "contentHash": "8e70c9d632fb9ef015e43d8ef4eb3a75c0a93396da3598efd8105de1a7fae325",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 531,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/badge_asset_image.dart": {
+      "filePath": "lib/widgets/shared/badge_asset_image.dart",
+      "contentHash": "bf1ec5760e3c41d72c11fce3694dbc039687f2e6ee96a426ff4edcd01f1e66b5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 38,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/filter_pill.dart": {
+      "filePath": "lib/widgets/shared/filter_pill.dart",
+      "contentHash": "d34cec3f1a7a3efb7e8073e9e85f63529c9b724cc4606ec0c501ad7b1f4c98b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/image_picker_widget.dart": {
+      "filePath": "lib/widgets/shared/image_picker_widget.dart",
+      "contentHash": "33106540c37adee86477ea583bc6249a8276ec9bdc0ed60dd378f4d5403a8869",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/profession_icon.dart": {
+      "filePath": "lib/widgets/shared/profession_icon.dart",
+      "contentHash": "8ad9472e20acf1e82f5da8a20b294998c1685556979c1f3e401649c14957e606",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/progress_bar.dart": {
+      "filePath": "lib/widgets/shared/progress_bar.dart",
+      "contentHash": "bcd933af40ac2edf029d89dfe1d6fa8928b9030c4c11bd96c627fb337f8acf1f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/share_button.dart": {
+      "filePath": "lib/widgets/shared/share_button.dart",
+      "contentHash": "3faf72acaeefb1706f531fffaa7d902fc2f7df33bd969106ed819317f320f3c3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 119,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/shared/tier_icon.dart": {
+      "filePath": "lib/widgets/shared/tier_icon.dart",
+      "contentHash": "5cc9831c1d2e73f4265dc8ab10fa78e1db2f8c5800915b6781e12997756c8cf0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 49,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/v_section_list.dart": {
+      "filePath": "lib/widgets/v_section_list.dart",
+      "contentHash": "5a65442fc896cfb7456ddd169c1aed9060b0750f7708d5963bc35c1c6bb45370",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 100,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/access_icon.dart": {
+      "filePath": "lib/widgets/worlds/access_icon.dart",
+      "contentHash": "6fda9637ed56849f90be6063ee11a8fcd61d5b64732c27b853d69cf93b0fa0c8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 27,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/alliance_section.dart": {
+      "filePath": "lib/widgets/worlds/alliance_section.dart",
+      "contentHash": "d79b8ecd16b52a47568b2d02f1bb4315a57e0bb2f1d39260ac2a0ea3d175bf95",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 145,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/banner_generator.dart": {
+      "filePath": "lib/widgets/worlds/banner_generator.dart",
+      "contentHash": "4422d6839d6a4595cc561be06eaef070e6318bb9bb31b658405af31a90f8ddad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 365,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/constitution_editor.dart": {
+      "filePath": "lib/widgets/worlds/constitution_editor.dart",
+      "contentHash": "c078f56b64423088202eedf93f50e98ec4559feb9a2d378001450722972130bd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 462,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/create_listing_dialog.dart": {
+      "filePath": "lib/widgets/worlds/create_listing_dialog.dart",
+      "contentHash": "9a332c93e56254294e231bd7de8c03817531eb615f891381cce55ed28b3efdd5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 289,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/dominion_type_picker.dart": {
+      "filePath": "lib/widgets/worlds/dominion_type_picker.dart",
+      "contentHash": "7a363bbafd6aefef642d9285566cbae85e62d5a7da88f48561dead956f686810",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 158,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/event_card.dart": {
+      "filePath": "lib/widgets/worlds/event_card.dart",
+      "contentHash": "6c96bb15a1436426fd5d1a53eb278c375ff9be7feca365ae605ed0ad3054913a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 125,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/leaderboard.dart": {
+      "filePath": "lib/widgets/worlds/leaderboard.dart",
+      "contentHash": "12485b8fce60a3f6079e91b601c5f13c003a8d788785538bde9691b917caf358",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 257,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/listing_card.dart": {
+      "filePath": "lib/widgets/worlds/listing_card.dart",
+      "contentHash": "96e81193754af8f30325d189057b061a36c45be0de22e24210c510c3d6438c05",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 208,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/resource_vault.dart": {
+      "filePath": "lib/widgets/worlds/resource_vault.dart",
+      "contentHash": "ff4c27db745bd539c9e87a28d5580e793c6615cd999501b55cae68588878db88",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 226,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_access_guard.dart": {
+      "filePath": "lib/widgets/worlds/world_access_guard.dart",
+      "contentHash": "1ca06fb733d039324f1ff89117f71e0a940da990791f8c8c1d01a6209e668256",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 301,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_banner.dart": {
+      "filePath": "lib/widgets/worlds/world_banner.dart",
+      "contentHash": "25f4edfc8366f55f95446d2278edf991f493df3109c96a6d663a32eb97674c9b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 313,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_card.dart": {
+      "filePath": "lib/widgets/worlds/world_card.dart",
+      "contentHash": "e48ad63a1bffb55c6b28f46ba4d4e4267032ec6c5e433d18e5e1a9f1c30560c2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 391,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_channel_list.dart": {
+      "filePath": "lib/widgets/worlds/world_channel_list.dart",
+      "contentHash": "aa8f5acf32ff705ee5f353b67e909c8cb393a24161609b736e6febc0e88da90a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 267,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_channel_shortcuts.dart": {
+      "filePath": "lib/widgets/worlds/world_channel_shortcuts.dart",
+      "contentHash": "7458469f2c71fcd0839cbd165287abf0a246e18c859738e2e269287a935cb284",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 89,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_detail_members.dart": {
+      "filePath": "lib/widgets/worlds/world_detail_members.dart",
+      "contentHash": "89054a68b853d8ed5130c696d526b064fd8de43cac737b9d4aa76df0c6d2dfde",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 56,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_events_card.dart": {
+      "filePath": "lib/widgets/worlds/world_events_card.dart",
+      "contentHash": "3164d2616874590f0429f8d7a4c50e23896f7a08f40626f4a280d9d7d1e1a8bb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 180,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_feed_chat_teaser.dart": {
+      "filePath": "lib/widgets/worlds/world_feed_chat_teaser.dart",
+      "contentHash": "4df7c11c9b338dc6505e58116fa213c9633abbce6f9312fd19eb73a0466ca423",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 126,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_feed_tab.dart": {
+      "filePath": "lib/widgets/worlds/world_feed_tab.dart",
+      "contentHash": "073a92b7f4be2ae1ede7c689870074c4dd8bb22c5059b88e86e99177f91d5e2a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 340,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_growth_card.dart": {
+      "filePath": "lib/widgets/worlds/world_growth_card.dart",
+      "contentHash": "63c1c6cddee714e293c15571dc7ebc3086414d77e433402eb82b20f634fa3ab1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 170,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_hero_banner.dart": {
+      "filePath": "lib/widgets/worlds/world_hero_banner.dart",
+      "contentHash": "e8a820656f6edf8ff2996f08e1692c864c7423b1452fc89abb45fd0b0e1b3546",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 374,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_icon.dart": {
+      "filePath": "lib/widgets/worlds/world_icon.dart",
+      "contentHash": "87a894df38f8559591f915e50aa1000665643622c34cc04e6bb043ac718567f7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 54,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_member_row.dart": {
+      "filePath": "lib/widgets/worlds/world_member_row.dart",
+      "contentHash": "954e9473d32ab050c5cf1e3e343cc1697701ec72c143c1ab76d38d13b4af87bb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 185,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_pulse_indicator.dart": {
+      "filePath": "lib/widgets/worlds/world_pulse_indicator.dart",
+      "contentHash": "b6dbf0f60959cde3c672f4924feeb6e4f659fcd85d4a4c38d6bd19339c24ec4e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 75,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_realm_dossier.dart": {
+      "filePath": "lib/widgets/worlds/world_realm_dossier.dart",
+      "contentHash": "710141eb94a95cfb6e6363f5dcf6b6fd0981c105d7ddc52c6308ade7200580ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1264,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_residents.dart": {
+      "filePath": "lib/widgets/worlds/world_residents.dart",
+      "contentHash": "b8623f3ca7eba6b7b2131145f3b1e7116765b680cc531db696415b2dda89869f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 164,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_settings_channels.dart": {
+      "filePath": "lib/widgets/worlds/world_settings_channels.dart",
+      "contentHash": "d619a736a32962c4161af3be3d0dc07bb21db9f8a3542e569100758cad451e2e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 166,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_settings_invites.dart": {
+      "filePath": "lib/widgets/worlds/world_settings_invites.dart",
+      "contentHash": "828256893795d4b73b8b1ce1eb14654aee981bc0317d165187808b5b0fdfecb2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 188,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_share_card.dart": {
+      "filePath": "lib/widgets/worlds/world_share_card.dart",
+      "contentHash": "d55020b5a9a2771bc53f5c5f4513e4443f3c8d60829a1e630db1ef2da28f5199",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 332,
+      "hasStructuralAnalysis": false
+    },
+    "lib/widgets/worlds/world_welcome_flow.dart": {
+      "filePath": "lib/widgets/worlds/world_welcome_flow.dart",
+      "contentHash": "0262a2aedcbd647464419b7046674b3c0580fe5bbd13d4a067f0f590088ba1e7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 462,
+      "hasStructuralAnalysis": false
+    }
+  }
+}

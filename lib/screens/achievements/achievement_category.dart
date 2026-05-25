@@ -149,8 +149,9 @@ class _AchievementCategoryScreenState
                           achievement: achievement,
                           status: status,
                           proofUri: userAch?.proofUri,
-                          aiConfidence: userAch?.aiConfidence,
                           aiNotes: userAch?.aiNotes,
+                          isInApp:
+                              achievement.category == AchievementCategory.inApp,
                           onPress: () => showAchievementProofSheet(
                             context: context,
                             ref: ref,

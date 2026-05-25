@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,9 +6,11 @@ import '../models/achievement.dart';
 import '../models/resident.dart';
 import '../config/achievements.dart' as config;
 import '../config/titles.dart';
-import '../services/ai_verification_service.dart';
+import '../services/gamification_service.dart';
+import '../services/profile_achievements_service.dart';
 import '../services/supabase.dart';
 import '../services/storage_service.dart';
+import '../utils/achievement_proof_utils.dart';
 import '../utils/haptics.dart';
 import 'resident_provider.dart';
 
@@ -52,22 +55,23 @@ class AchievementState {
 class AchievementNotifier extends Notifier<AchievementState> {
   void Function(List<String> verifiedIds, ResidentTier? newTier)?
   onAchievementsVerified;
-  int _lastTotalXp = 0;
 
   @override
   AchievementState build() {
     ref.listen<AchievementState>(achievementProvider, (prev, next) {
-      if (next.totalXp > _lastTotalXp) {
-        _lastTotalXp = next.totalXp;
-        final newTier = config.getTierForXp(next.totalXp);
-        ref.read(residentProvider.notifier).updateTier(newTier);
+      if (next.recentlyUnlockedIds.isNotEmpty &&
+          next.recentlyUnlockedIds != (prev?.recentlyUnlockedIds ?? const [])) {
+        ref.read(residentProvider.notifier).refreshGamificationFromServer();
       }
     });
 
     return const AchievementState();
   }
 
-  Future<void> submitAchievement(String achievementId, String proofUri) async {
+  Future<void> submitAchievement(
+    String achievementId,
+    List<String> proofUris,
+  ) async {
     final existing = state.userAchievements
         .where((a) => a.achievementId == achievementId)
         .firstOrNull;
@@ -77,24 +81,10 @@ class AchievementNotifier extends Notifier<AchievementState> {
       return;
     }
 
-    final achDef = config.achievements
-        .where((a) => a.id == achievementId)
-        .firstOrNull;
-    final aiResult = await AiVerificationService.analyzeProof(
-      proofUrl: proofUri,
-      achievementId: achievementId,
-      category: achDef?.category.name ?? '',
-    );
-
-    final shouldAutoVerify = AiVerificationService.autoVerificationEnabled &&
-        aiResult.autoApproved &&
-        (aiResult.confidence ?? 0) >= 0.75;
     await _persistCloudSubmission(
       achievementId: achievementId,
-      proofUri: proofUri,
-      status: shouldAutoVerify
-          ? AchievementStatus.verified
-          : AchievementStatus.submitted,
+      proofUris: proofUris,
+      status: AchievementStatus.submitted,
     );
 
     state = state.copyWith(
@@ -102,73 +92,31 @@ class AchievementNotifier extends Notifier<AchievementState> {
         ...state.userAchievements,
         UserAchievement(
           achievementId: achievementId,
-          status: shouldAutoVerify
-              ? AchievementStatus.verified
-              : AchievementStatus.submitted,
-          proofUri: proofUri,
+          status: AchievementStatus.submitted,
+          proofUris: proofUris,
           submittedAt: DateTime.now().millisecondsSinceEpoch,
-          verifiedAt: shouldAutoVerify
-              ? DateTime.now().millisecondsSinceEpoch
-              : null,
-          aiConfidence: aiResult.confidence,
-          aiNotes: aiResult.notes,
         ),
       ],
     );
     _persist();
-
-    if (shouldAutoVerify) {
-      final oldTier = config.getTierForXp(state.totalXp);
-      final newTotalXp = _calculateTotalXp(
-        state.userAchievements
-            .map(
-              (a) => a.achievementId == achievementId
-                  ? a.copyWith(
-                      status: AchievementStatus.verified,
-                      verifiedAt: DateTime.now().millisecondsSinceEpoch,
-                      aiConfidence: aiResult.confidence,
-                      aiNotes: aiResult.notes,
-                    )
-                  : a,
-            )
-            .toList(),
-      );
-      final newTier = config.getTierForXp(newTotalXp);
-      final tierChanged = newTier.value > oldTier.value;
-
-      final newIds = [
-        ...state.recentlyUnlockedIds,
-        if (!state.recentlyUnlockedIds.contains(achievementId)) achievementId,
-      ];
-
-      state = state.copyWith(
-        totalXp: newTotalXp,
-        recentlyUnlockedIds: newIds,
-        celebrationTier: tierChanged ? newTier : state.celebrationTier,
-      );
-      _persist();
-
-      if (tierChanged) {
-        onAchievementsVerified?.call([achievementId], tierChanged ? newTier : null);
-      }
-      Haptics.success();
-    }
   }
 
   Future<void> _persistCloudSubmission({
     required String achievementId,
-    required String proofUri,
+    required List<String> proofUris,
     required AchievementStatus status,
   }) async {
     final userId =
         ref.read(residentProvider).resident?.id ??
         maybeSupabase()?.auth.currentUser?.id;
     if (userId == null || userId.isEmpty || !isSupabaseConfigured()) return;
+    final primary = proofUris.isEmpty ? 'manual' : proofUris.first;
     await getSupabase().from('user_achievements').upsert({
       'user_id': userId,
       'achievement_id': achievementId,
       'status': status == AchievementStatus.verified ? 'verified' : 'submitted',
-      'proof_uri': proofUri,
+      'proof_uri': primary,
+      'proof_uris': proofUris,
       'submitted_at': DateTime.now().toIso8601String(),
       if (status == AchievementStatus.verified)
         'verified_at': DateTime.now().toIso8601String(),
@@ -219,9 +167,65 @@ class AchievementNotifier extends Notifier<AchievementState> {
       return;
     }
 
-    final oldTier = config.getTierForXp(state.totalXp);
+    final userId =
+        ref.read(residentProvider).resident?.id ??
+        maybeSupabase()?.auth.currentUser?.id;
+    if (userId == null || userId.isEmpty) return;
 
-    List<UserAchievement> achievements;
+    final oldTier = ref.read(residentProvider).resident?.tier ??
+        config.getTierForXp(state.totalXp);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await GamificationService.grantVerifiedAchievement(
+          userId: userId,
+          achievementId: achievementId,
+        );
+        await loadAchievements();
+        await ref.read(residentProvider.notifier).refreshGamificationFromServer();
+      } catch (e) {
+        debugPrint('autoAwardAchievement server grant failed: $e');
+        return;
+      }
+    } else {
+      await _applyLocalVerifiedUnlock(achievementId, existing);
+      return;
+    }
+
+    final refreshed = ref.read(residentProvider).resident;
+    final newTier = refreshed?.tier ?? oldTier;
+    final tierChanged = newTier.value > oldTier.value;
+
+    final newIds = [
+      ...state.recentlyUnlockedIds,
+      if (!state.recentlyUnlockedIds.contains(achievementId)) achievementId,
+    ];
+
+    if (tierChanged) {
+      state = state.copyWith(
+        recentlyUnlockedIds: newIds,
+        celebrationTier: newTier,
+      );
+    } else if (newIds.length != state.recentlyUnlockedIds.length) {
+      state = state.copyWith(recentlyUnlockedIds: newIds);
+    }
+
+    onAchievementsVerified?.call([achievementId], tierChanged ? newTier : null);
+
+    final earnedTitle = titleForAchievement(achievementId);
+    if (earnedTitle != null) {
+      ref.read(residentProvider.notifier).setTitle(earnedTitle);
+    }
+
+    Haptics.success();
+  }
+
+  Future<void> _applyLocalVerifiedUnlock(
+    String achievementId,
+    UserAchievement? existing,
+  ) async {
+    final oldTier = config.getTierForXp(state.totalXp);
+    final List<UserAchievement> achievements;
     if (existing != null) {
       achievements = state.userAchievements.map((a) {
         if (a.achievementId == achievementId) {
@@ -238,37 +242,21 @@ class AchievementNotifier extends Notifier<AchievementState> {
         UserAchievement(
           achievementId: achievementId,
           status: AchievementStatus.verified,
-          proofUri: 'auto',
+          proofUris: const ['auto'],
           submittedAt: DateTime.now().millisecondsSinceEpoch,
           verifiedAt: DateTime.now().millisecondsSinceEpoch,
         ),
       ];
     }
-
     final newTotalXp = _calculateTotalXp(achievements);
     final newTier = config.getTierForXp(newTotalXp);
-    final tierChanged = newTier.value > oldTier.value;
-
-    final newIds = [
-      ...state.recentlyUnlockedIds,
-      if (!state.recentlyUnlockedIds.contains(achievementId)) achievementId,
-    ];
-
     state = state.copyWith(
       userAchievements: achievements,
       totalXp: newTotalXp,
-      recentlyUnlockedIds: newIds,
-      celebrationTier: tierChanged ? newTier : state.celebrationTier,
+      celebrationTier:
+          newTier.value > oldTier.value ? newTier : state.celebrationTier,
     );
     _persist();
-
-    onAchievementsVerified?.call([achievementId], tierChanged ? newTier : null);
-
-    final earnedTitle = titleForAchievement(achievementId);
-    if (earnedTitle != null) {
-      ref.read(residentProvider.notifier).setTitle(earnedTitle);
-    }
-
     Haptics.success();
   }
 
@@ -415,12 +403,41 @@ class AchievementNotifier extends Notifier<AchievementState> {
     return UserAchievement(
       achievementId: row['achievement_id'] as String,
       status: _statusFromName(statusName),
-      proofUri: row['proof_uri'] as String?,
+      proofUris: parseProofUris(
+        proofUri: row['proof_uri'] as String?,
+        proofUrisRaw: row['proof_uris'],
+      ),
       submittedAt: _parseMillis(row['submitted_at']),
       verifiedAt: _parseMillis(row['verified_at']),
       aiConfidence: (row['ai_confidence'] as num?)?.toDouble(),
       aiNotes: row['ai_notes'] as String?,
+      isProfileVisible: row['is_profile_visible'] as bool? ?? true,
+      featuredOrder: (row['featured_order'] as num?)?.toInt(),
     );
+  }
+
+  Future<void> setAchievementProfileVisibility({
+    required String achievementId,
+    required bool visible,
+    int? featuredOrder,
+    bool clearFeatured = false,
+  }) async {
+    await ProfileAchievementsService.setProfileVisibility(
+      achievementId: achievementId,
+      visible: visible,
+      featuredOrder: featuredOrder,
+      clearFeaturedOrder: clearFeatured,
+    );
+    final updated = state.userAchievements.map((a) {
+      if (a.achievementId != achievementId) return a;
+      return a.copyWith(
+        isProfileVisible: visible,
+        featuredOrder: featuredOrder,
+        clearFeaturedOrder: clearFeatured,
+      );
+    }).toList();
+    state = state.copyWith(userAchievements: updated);
+    _persist();
   }
 
   static int? _parseMillis(dynamic value) {
@@ -454,7 +471,9 @@ class AchievementNotifier extends Notifier<AchievementState> {
       UserAchievement(
         achievementId: json['achievementId'] as String,
         status: _statusFromName(json['status'] as String?),
-        proofUri: json['proofUri'] as String?,
+        proofUris: _proofUrisFromJson(json['proofUris'] ?? json['proofUri']),
+        isProfileVisible: json['isProfileVisible'] as bool? ?? true,
+        featuredOrder: json['featuredOrder'] as int?,
         submittedAt: json['submittedAt'] as int?,
         verifiedAt: json['verifiedAt'] as int?,
         aiConfidence: (json['aiConfidence'] as num?)?.toDouble(),
@@ -462,14 +481,26 @@ class AchievementNotifier extends Notifier<AchievementState> {
       );
 
   void clearForSignOut() {
-    _lastTotalXp = 0;
     state = const AchievementState();
+  }
+
+  static List<String> _proofUrisFromJson(dynamic raw) {
+    if (raw is List) {
+      return raw.whereType<String>().toList();
+    }
+    if (raw is String && raw.isNotEmpty && raw != 'manual') {
+      return [raw];
+    }
+    return const [];
   }
 
   static Map<String, dynamic> _toJson(UserAchievement a) => {
     'achievementId': a.achievementId,
     'status': a.status.name,
-    'proofUri': a.proofUri,
+    'proofUris': a.proofUris,
+    'isProfileVisible': a.isProfileVisible,
+    if (a.featuredOrder != null) 'featuredOrder': a.featuredOrder,
+    if (a.proofUri != null) 'proofUri': a.proofUri,
     'submittedAt': a.submittedAt,
     'verifiedAt': a.verifiedAt,
     'aiConfidence': a.aiConfidence,

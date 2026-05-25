@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
+import '../config/achievement_reject_reasons.dart';
 import '../services/verification_service.dart';
 import '../services/achievement_review_service.dart';
+import '../widgets/achievements/proof_image_gallery.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
 import '../forui/v_hub_page.dart';
@@ -281,26 +283,18 @@ class _VerificationReviewScreenState
   }
 
   Future<void> _approveAchievement(PendingAchievementSubmission s) async {
-    await AchievementReviewService.approve(
-      userId: s.userId,
-      achievementId: s.achievementId,
-    );
-    _loadAchievements();
-  }
-
-  Future<void> _rejectAchievement(PendingAchievementSubmission s) async {
     final notesController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reject achievement?'),
+        title: const Text('Approve achievement?'),
         content: TextField(
           controller: notesController,
           decoration: const InputDecoration(
-            hintText: 'Reason (optional)',
+            hintText: 'Message for the resident (optional)',
             border: OutlineInputBorder(),
           ),
-          maxLines: 2,
+          maxLines: 3,
         ),
         actions: [
           TextButton(
@@ -309,22 +303,95 @@ class _VerificationReviewScreenState
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            child: const Text('Reject'),
+            child: const Text('Approve'),
           ),
         ],
       ),
     );
+    if (confirmed != true) return;
+    await AchievementReviewService.approve(
+      userId: s.userId,
+      achievementId: s.achievementId,
+      reviewerNotes: notesController.text.trim().isEmpty
+          ? null
+          : notesController.text.trim(),
+    );
+    notesController.dispose();
+    _loadAchievements();
+  }
+
+  Future<void> _rejectAchievement(PendingAchievementSubmission s) async {
+    var reasonCode = achievementRejectReasons.first.code;
+    final notesController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: const Text('Reject achievement?'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: reasonCode,
+                  decoration: const InputDecoration(
+                    labelText: 'Reason',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: achievementRejectReasons
+                      .map(
+                        (r) => DropdownMenuItem(
+                          value: r.code,
+                          child: Text(r.label),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setLocal(() => reasonCode = v ?? reasonCode),
+                ),
+                const SizedBox(height: VSpacing.md),
+                TextField(
+                  controller: notesController,
+                  decoration: InputDecoration(
+                    hintText: reasonCode == 'custom'
+                        ? 'Your message to the resident'
+                        : 'Extra note (optional)',
+                    border: const OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(ctx).colorScheme.error,
+              ),
+              child: const Text('Reject'),
+            ),
+          ],
+        ),
+      ),
+    );
     if (confirmed == true) {
+      final note = buildRejectNote(
+        reasonCode: reasonCode,
+        customNote: notesController.text,
+      );
       await AchievementReviewService.reject(
         userId: s.userId,
         achievementId: s.achievementId,
-        notes: notesController.text.trim(),
+        notes: note,
       );
       _loadAchievements();
     }
+    notesController.dispose();
   }
 
   Widget _buildAchievementsTab(ThemeData theme) {
@@ -374,6 +441,16 @@ class _VerificationReviewScreenState
                                 color: VColors.primary,
                               ),
                             ),
+                            if (s.achievementDescription != null &&
+                                s.achievementDescription!.isNotEmpty)
+                              Text(
+                                s.achievementDescription!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                ),
+                              ),
                             if (s.submittedAt != null)
                               Text(
                                 s.submittedAt!.toLocal().toString(),
@@ -402,18 +479,18 @@ class _VerificationReviewScreenState
                     const SizedBox(height: VSpacing.sm),
                     Text(s.aiNotes!, style: theme.textTheme.bodySmall),
                   ],
-                  if (s.proofUri != null &&
-                      s.proofUri!.isNotEmpty &&
-                      s.proofUri!.startsWith('http')) ...[
+                  if (s.proofUris.isNotEmpty) ...[
                     const SizedBox(height: VSpacing.md),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(VRadius.pill),
-                      child: Image.network(
-                        s.proofUri!,
-                        height: 176,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                    ProofImageGallery(imageUrls: s.proofUris),
+                  ] else ...[
+                    const SizedBox(height: VSpacing.sm),
+                    Text(
+                      'No image proof (manual / text-only submission).',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                     ),
                   ],

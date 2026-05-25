@@ -232,7 +232,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       );
     }
 
-    final currentXp = achievements.totalXp;
+    final currentXp = resident.totalXp;
     if (currentXp != _previousXp && _previousXp != 0) {
       Haptics.light();
     }
@@ -454,9 +454,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.surfaceContainerDark
-                          : VColors.surfaceContainerLow,
+                      color: Colors.transparent,
                       borderRadius: BorderRadius.circular(VRadius.pill),
                       border: Border.all(
                         color: isDark
@@ -469,7 +467,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       children: [
                         ProfessionIcon(
                           profession: resident.profession,
-                          size: VIconSize.sm,
+                          size: VBadgeSize.professionInline,
                           fallbackColor: isDark
                               ? VColors.onSurfaceVariantDark
                               : VColors.onSurfaceVariant,

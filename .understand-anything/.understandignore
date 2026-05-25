@@ -1,0 +1,17 @@
+# Vertiege — exclude generated / platform noise from graph analysis
+.dart_tool/
+build/
+**/node_modules/
+.git/
+android/.gradle/
+android/build/
+ios/Pods/
+ios/.symlinks/
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+releases/
+coverage/
+supabase/.temp/
+.codegraph/
+.understand-anything/intermediate/

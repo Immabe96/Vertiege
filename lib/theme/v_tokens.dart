@@ -35,6 +35,18 @@ class VIconSize {
   static const double xl = 32;
 }
 
+/// Raster profession / achievement badge display sizes (~10% above legacy defaults).
+class VBadgeSize {
+  VBadgeSize._();
+  static const double avatar = 44;
+  static const double avatarCompact = 40;
+  static const double avatarSheet = 57;
+  static const double categoryAvatar = 44;
+  static const double profession = 22;
+  static const double professionInline = 18;
+  static const double decorationChip = 24;
+}
+
 class VAnimation {
   VAnimation._();
   static const Duration fast = Duration(milliseconds: 150);

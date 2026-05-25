@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../config/world_capability_matrix.dart';
 import '../../models/listing.dart';
 import '../../services/marketplace_service.dart';
+import '../../state/world_provider.dart';
 import '../../services/media_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
@@ -26,6 +28,7 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _priceNoteController = TextEditingController();
+  final _coinPriceController = TextEditingController();
   ListingCategory _selectedCategory = ListingCategory.general;
   String? _imagePath;
   bool _isSubmitting = false;
@@ -36,6 +39,7 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
     _descriptionController.dispose();
     _priceController.dispose();
     _priceNoteController.dispose();
+    _coinPriceController.dispose();
     super.dispose();
   }
 
@@ -55,6 +59,22 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final resident = ref.read(residentProvider).resident;
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    if (world == null) {
+      VFeedback.showError(context, 'World not found');
+      return;
+    }
+    final block = WorldCapabilityMatrix.blockReasonCreateListing(
+      resident,
+      world,
+      isJoined: resident?.joinedWorldIds.contains(widget.worldId) ?? false,
+    );
+    if (block != null) {
+      VFeedback.showError(context, block);
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -69,6 +89,17 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
         }
       }
 
+      int? coinPrice;
+      final coinRaw = _coinPriceController.text.trim();
+      if (coinRaw.isNotEmpty) {
+        coinPrice = int.tryParse(coinRaw);
+        if (coinPrice == null || coinPrice <= 0) {
+          VFeedback.showError(context, 'Coin price must be a positive number');
+          setState(() => _isSubmitting = false);
+          return;
+        }
+      }
+
       await MarketplaceService.createListing(
         widget.worldId,
         _titleController.text.trim(),
@@ -77,6 +108,7 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
         _priceNoteController.text.trim().isEmpty ? null : _priceNoteController.text.trim(),
         _selectedCategory,
         imageUrl,
+        coinPrice: coinPrice,
       );
 
       if (mounted) {
@@ -182,6 +214,17 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 1,
+                ),
+                const SizedBox(height: VSpacing.md),
+                TextFormField(
+                  controller: _coinPriceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Coin price (optional)',
+                    hintText: 'Enables in-app purchase with sovereign coins',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.monetization_on_outlined),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: VSpacing.md),
                 DropdownButtonFormField<ListingCategory>(

@@ -9,8 +9,24 @@ enum AchievementCategory {
   community,
   funny,
   creative,
+  life,
   profession,
   inApp,
+}
+
+/// How residents should submit proof for an achievement.
+enum AchievementProofType {
+  /// Proof optional (text-only submit allowed).
+  optional,
+
+  /// At least one image required.
+  required,
+
+  /// Multiple images (see min/max on [Achievement]).
+  multi,
+
+  /// Emphasizes place/object in frame (still image-based).
+  location,
 }
 
 enum AchievementStatus { locked, submitted, verified, rejected }
@@ -23,6 +39,10 @@ class Achievement {
   final int xpValue;
   final bool isFunny;
   final String icon;
+  final AchievementProofType proofType;
+  final int minProofImages;
+  final int maxProofImages;
+  final String? proofHint;
 
   const Achievement({
     required this.id,
@@ -32,47 +52,77 @@ class Achievement {
     required this.xpValue,
     this.isFunny = false,
     this.icon = 'star',
+    this.proofType = AchievementProofType.optional,
+    this.minProofImages = 0,
+    this.maxProofImages = 1,
+    this.proofHint,
   });
+
+  int get effectiveMinImages => switch (proofType) {
+    AchievementProofType.optional => 0,
+    AchievementProofType.required => 1,
+    AchievementProofType.location => 1,
+    AchievementProofType.multi => minProofImages < 1 ? 1 : minProofImages,
+  };
+
+  int get effectiveMaxImages => switch (proofType) {
+    AchievementProofType.multi => maxProofImages < 2 ? 4 : maxProofImages,
+    _ => 1,
+  };
+
+  bool get proofRequired => effectiveMinImages > 0;
 }
 
 class UserAchievement {
   final String achievementId;
   final AchievementStatus status;
-  final String? proofUri;
+  final List<String> proofUris;
   final int? submittedAt;
   final int? verifiedAt;
 
-  /// AI confidence score from The Archivist (0.0–1.0).
+  /// Optional reviewer confidence (legacy column; unused for manual-only review).
   final double? aiConfidence;
 
-  /// AI verifier notes.
+  /// Reviewer notes from staff (e.g. rejection reason).
   final String? aiNotes;
+  final bool isProfileVisible;
+  final int? featuredOrder;
 
   const UserAchievement({
     required this.achievementId,
     this.status = AchievementStatus.submitted,
-    this.proofUri,
+    this.proofUris = const [],
     this.submittedAt,
     this.verifiedAt,
     this.aiConfidence,
     this.aiNotes,
+    this.isProfileVisible = true,
+    this.featuredOrder,
   });
+
+  /// First proof URL (legacy / compact display).
+  String? get proofUri => proofUris.isNotEmpty ? proofUris.first : null;
 
   UserAchievement copyWith({
     String? achievementId,
     AchievementStatus? status,
-    String? proofUri,
+    List<String>? proofUris,
     int? submittedAt,
     int? verifiedAt,
     double? aiConfidence,
     String? aiNotes,
+    bool? isProfileVisible,
+    int? featuredOrder,
+    bool clearFeaturedOrder = false,
   }) => UserAchievement(
     achievementId: achievementId ?? this.achievementId,
     status: status ?? this.status,
-    proofUri: proofUri ?? this.proofUri,
+    proofUris: proofUris ?? this.proofUris,
     submittedAt: submittedAt ?? this.submittedAt,
     verifiedAt: verifiedAt ?? this.verifiedAt,
     aiConfidence: aiConfidence ?? this.aiConfidence,
     aiNotes: aiNotes ?? this.aiNotes,
+    isProfileVisible: isProfileVisible ?? this.isProfileVisible,
+    featuredOrder: clearFeaturedOrder ? null : (featuredOrder ?? this.featuredOrder),
   );
 }

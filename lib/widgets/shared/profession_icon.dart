@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/cosmetics.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/asset_image_decode.dart';
 
 /// Profession emblem from generated assets, with icon fallback.
@@ -13,7 +14,7 @@ class ProfessionIcon extends StatelessWidget {
   const ProfessionIcon({
     super.key,
     required this.profession,
-    this.size = 20,
+    this.size = VBadgeSize.profession,
     this.fallbackColor,
   });
 

@@ -54,8 +54,9 @@ class MarketplaceService {
     String? price,
     String? priceNote,
     ListingCategory category,
-    String? imageUrl,
-  ) async {
+    String? imageUrl, {
+    int? coinPrice,
+  }) async {
     if (!isSupabaseConfigured()) {
       throw StateError('Supabase is required to create listings.');
     }
@@ -71,10 +72,34 @@ class MarketplaceService {
       'p_price_note': priceNote ?? '',
       'p_category': category.name,
       'p_image_url': imageUrl ?? '',
+      if (coinPrice != null) 'p_coin_price': coinPrice,
     });
 
     if (result == null) return null;
+    if (result is String) {
+      final row = await client
+          .from('world_listings')
+          .select()
+          .eq('id', result)
+          .maybeSingle();
+      if (row == null) return null;
+      return Listing.fromSupabase(row);
+    }
     return Listing.fromSupabase(result as Map<String, dynamic>);
+  }
+
+  static Future<Map<String, dynamic>> purchaseListing(String listingId) async {
+    if (!isSupabaseConfigured()) {
+      throw StateError('Supabase is required to purchase listings.');
+    }
+    final client = getSupabase();
+    final result = await client.rpc('purchase_listing', params: {
+      'p_listing_id': listingId,
+    });
+    if (result is! Map) {
+      return {'success': false, 'error': 'Unexpected response'};
+    }
+    return Map<String, dynamic>.from(result);
   }
 
   static Future<bool> cancelListing(String listingId) async {

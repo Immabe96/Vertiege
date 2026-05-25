@@ -17,6 +17,18 @@ class AchievementProofUpload {
     return result?.path;
   }
 
+  static Future<List<String>> pickGalleryImages({
+    int maxWidth = 1200,
+    int limit = 4,
+  }) async {
+    final picker = ImagePicker();
+    final results = await picker.pickMultiImage(
+      maxWidth: maxWidth.toDouble(),
+      limit: limit,
+    );
+    return results.map((x) => x.path).toList();
+  }
+
   static Future<String?> uploadProofFile({
     required String achievementId,
     required String filePath,
@@ -40,5 +52,20 @@ class AchievementProofUpload {
     } catch (_) {
       return null;
     }
+  }
+
+  static Future<List<String>> uploadProofFiles({
+    required String achievementId,
+    required List<String> filePaths,
+  }) async {
+    final urls = <String>[];
+    for (final path in filePaths) {
+      final url = await uploadProofFile(
+        achievementId: achievementId,
+        filePath: path,
+      );
+      if (url != null) urls.add(url);
+    }
+    return urls;
   }
 }

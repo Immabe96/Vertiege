@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import 'achievement_icon.dart';
+import 'proof_requirements_banner.dart';
 import '../../widgets/core/v_feedback.dart';
 
 /// Bottom sheet: achievement detail, proof upload, submit.
@@ -51,7 +52,7 @@ class _AchievementProofSheet extends ConsumerStatefulWidget {
 }
 
 class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> {
-  String? _proofImagePath;
+  final List<String> _proofImagePaths = [];
   bool _isUploading = false;
   String? _errorText;
 
@@ -59,41 +60,66 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
       widget.status == AchievementStatus.locked ||
       widget.status == AchievementStatus.rejected;
 
-  Future<void> _pickImage() async {
-    final path = await AchievementProofUpload.pickGalleryImage();
-    if (!mounted || path == null) return;
-    setState(() => _proofImagePath = path);
+  Achievement get _ach => widget.achievement;
+
+  Future<void> _pickImages() async {
+    final max = _ach.effectiveMaxImages - _proofImagePaths.length;
+    if (max <= 0) return;
+    final paths = await AchievementProofUpload.pickGalleryImages(limit: max);
+    if (!mounted || paths.isEmpty) return;
+    setState(() {
+      _proofImagePaths.addAll(paths);
+      if (_proofImagePaths.length > _ach.effectiveMaxImages) {
+        _proofImagePaths.removeRange(
+          _ach.effectiveMaxImages,
+          _proofImagePaths.length,
+        );
+      }
+    });
   }
 
   Future<void> _submit() async {
     if (!_canSubmit) return;
+    final min = _ach.effectiveMinImages;
+    if (min > 0 && _proofImagePaths.length < min) {
+      setState(() {
+        _errorText = 'Add at least $min photo${min > 1 ? 's' : ''} for this achievement.';
+      });
+      return;
+    }
+
     setState(() {
       _isUploading = true;
       _errorText = null;
     });
 
     try {
-      var proofUrl = 'manual';
-      if (_proofImagePath != null) {
-        final uploaded = await AchievementProofUpload.uploadProofFile(
-          achievementId: widget.achievement.id,
-          filePath: _proofImagePath!,
-        );
-        if (!mounted) return;
-        if (uploaded == null) {
-          setState(() {
-            _isUploading = false;
-            _errorText =
-                'Proof upload failed. Try again or submit without an image.';
-          });
-          return;
-        }
-        proofUrl = uploaded;
+      final proofUrls = _proofImagePaths.isEmpty
+          ? <String>[]
+          : await AchievementProofUpload.uploadProofFiles(
+              achievementId: _ach.id,
+              filePaths: _proofImagePaths,
+            );
+      if (!mounted) return;
+      if (_proofImagePaths.isNotEmpty && proofUrls.isEmpty) {
+        setState(() {
+          _isUploading = false;
+          _errorText =
+              'Proof upload failed. Try again or submit without images if allowed.';
+        });
+        return;
+      }
+      if (min > 0 && proofUrls.length < min) {
+        setState(() {
+          _isUploading = false;
+          _errorText = 'Upload at least $min photo${min > 1 ? 's' : ''}.';
+        });
+        return;
       }
 
       await ref
           .read(achievementProvider.notifier)
-          .submitAchievement(widget.achievement.id, proofUrl);
+          .submitAchievement(_ach.id, proofUrls);
 
       if (!mounted) return;
       Navigator.pop(context);
@@ -113,6 +139,14 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
     final isDark = theme.brightness == Brightness.dark;
     final accent = statusColor(widget.status);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    final profileVisible = ref
+            .watch(achievementProvider)
+            .userAchievements
+            .where((a) => a.achievementId == widget.achievement.id)
+            .map((a) => a.isProfileVisible)
+            .firstOrNull ??
+        widget.userAchievement?.isProfileVisible ??
+        true;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
@@ -156,7 +190,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                     AchievementBadgeAvatar(
                       achievement: widget.achievement,
                       accentColor: accent,
-                      size: 52,
+                      size: VBadgeSize.avatarSheet,
                     ),
                     const SizedBox(width: VSpacing.md),
                     Expanded(
@@ -205,18 +239,47 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                   FCard.raw(
                     child: Padding(
                       padding: const EdgeInsets.all(VSpacing.md),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.check_circle,
-                            color: VColors.success,
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle,
+                                color: VColors.success,
+                              ),
+                              const SizedBox(width: VSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  'Verified — XP counted toward your tier.',
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: VSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              'This achievement is verified on your profile.',
-                              style: theme.textTheme.bodyMedium,
+                          const SizedBox(height: VSpacing.md),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Show on public profile'),
+                            subtitle: Text(
+                              profileVisible
+                                  ? 'Other residents can see this badge.'
+                                  : 'Hidden from your profile wall.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
+                              ),
                             ),
+                            value: profileVisible,
+                            onChanged: (visible) {
+                              ref
+                                  .read(achievementProvider.notifier)
+                                  .setAchievementProfileVisibility(
+                                    achievementId: widget.achievement.id,
+                                    visible: visible,
+                                  );
+                            },
                           ),
                         ],
                       ),
@@ -229,45 +292,78 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                     child: Padding(
                       padding: const EdgeInsets.all(VSpacing.md),
                       child: Text(
-                        widget.userAchievement?.aiNotes?.isNotEmpty == true
-                            ? widget.userAchievement!.aiNotes!
-                            : 'Your proof is in review. You will earn XP once verified.',
+                        'Your proof is in the manual review queue. You will earn XP once a verifier approves it.',
                         style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+                ],
+                if (widget.status == AchievementStatus.rejected &&
+                    widget.userAchievement?.aiNotes?.isNotEmpty == true) ...[
+                  const SizedBox(height: VSpacing.lg),
+                  FCard.raw(
+                    child: Padding(
+                      padding: const EdgeInsets.all(VSpacing.md),
+                      child: Text(
+                        widget.userAchievement!.aiNotes!,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: VColors.error,
+                        ),
                       ),
                     ),
                   ),
                 ],
                 if (_canSubmit) ...[
                   const SizedBox(height: VSpacing.lg),
-                  Text(
-                    'Photo proof',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: VFontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: VSpacing.xs),
-                  Text(
-                    'Optional but recommended — helps reviews approve faster.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
-                    ),
-                  ),
+                  ProofRequirementsBanner(achievement: _ach),
                   const SizedBox(height: VSpacing.md),
-                  if (_proofImagePath != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(VRadius.xl),
-                      child: Image.file(
-                        File(_proofImagePath!),
-                        height: 160,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                  if (_proofImagePaths.isNotEmpty)
+                    SizedBox(
+                      height: 120,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _proofImagePaths.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(width: VSpacing.sm),
+                        itemBuilder: (_, i) => Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(VRadius.lg),
+                              child: Image.file(
+                                File(_proofImagePaths[i]),
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: Material(
+                                color: Colors.black54,
+                                shape: const CircleBorder(),
+                                child: InkWell(
+                                  onTap: () => setState(
+                                    () => _proofImagePaths.removeAt(i),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   else
                     Container(
-                      height: 120,
+                      height: 100,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: isDark
@@ -289,22 +385,16 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                       ),
                     ),
                   const SizedBox(height: VSpacing.md),
-                  Row(
-                    children: [
-                      OutlinedButton(
-                        onPressed: _pickImage,
-                        child: Text(
-                          _proofImagePath != null ? 'Change photo' : 'Add photo',
-                        ),
-                      ),
-                      if (_proofImagePath != null) ...[
-                        const SizedBox(width: VSpacing.sm),
-                        OutlinedButton(
-                          onPressed: () => setState(() => _proofImagePath = null),
-                          child: const Text('Remove'),
-                        ),
-                      ],
-                    ],
+                  OutlinedButton.icon(
+                    onPressed: _proofImagePaths.length >= _ach.effectiveMaxImages
+                        ? null
+                        : _pickImages,
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    label: Text(
+                      _proofImagePaths.isEmpty
+                          ? 'Add photos'
+                          : 'Add more (${_proofImagePaths.length}/${_ach.effectiveMaxImages})',
+                    ),
                   ),
                   if (_errorText != null) ...[
                     const SizedBox(height: VSpacing.sm),

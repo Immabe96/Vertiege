@@ -67,7 +67,11 @@ Ensure `.env` has `VERIFIER_ADMIN_EMAILS=your@email.com` if you rely on email al
 - **Pending Review** on Identity → **Achievements** is `user_achievements` → use **Achievements** tab here.
 - Profession badge verification uses **Professions** tab (`verification_submissions`).
 
-AI auto-approval for achievements is not implemented; staff approval is the path until that ships.
+Achievement proofs are **manual-only** (no AI auto-approval). In the **Achievements** tab:
+
+- **Proof gallery** — multiple images when the resident uploaded more than one.
+- **Approve** — optional congratulations message (stored for the resident).
+- **Reject** — reason code + optional note (mapped to friendly text for the resident).
 
 ## Grant another verifier
 

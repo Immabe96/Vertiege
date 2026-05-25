@@ -59,9 +59,11 @@ class DailyQuestsScreen extends ConsumerWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: VSpacing.sm),
                             child: FButton(
-                              onPress: () => ref
-                                  .read(questProvider.notifier)
-                                  .claimQuest(q.id),
+                              onPress: () async {
+                                await ref
+                                    .read(questProvider.notifier)
+                                    .claimQuest(q.id);
+                              },
                               child: const Text('Claim reward'),
                             ),
                           ),

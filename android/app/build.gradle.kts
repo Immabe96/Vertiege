@@ -57,8 +57,9 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
-            isMinifyEnabled = true
-            // Shrink can trigger R8 NPE with some plugin JARs; minify still enabled (F25).
+            // Minify disabled locally: R8 repackaging was producing CRC-invalid libapp.so
+            // on low-RAM builds (install fails with "package appears to be invalid").
+            isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android.txt"),

@@ -204,9 +204,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.glassBackgroundDark
-                          : VColors.glassBackground,
+                      color: Colors.transparent,
                       borderRadius: BorderRadius.circular(VRadius.pill),
                       border: Border.all(
                         color: isDark
@@ -219,7 +217,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       children: [
                         ProfessionIcon(
                           profession: resident.profession,
-                          size: VIconSize.sm,
+                          size: VBadgeSize.professionInline,
                           fallbackColor: isDark
                               ? VColors.onSurfaceVariantDark
                               : VColors.onSurfaceVariant,

@@ -1,0 +1,46 @@
+---
+description: Use Understand-Anything knowledge graph instead of CodeGraph for codebase structure
+alwaysApply: true
+---
+
+<!-- UNDERSTAND_ANYTHING_START -->
+## Understand Anything (codebase map)
+
+This project uses **[Understand-Anything](https://github.com/Lum1104/Understand-Anything)** for architecture maps — interactive knowledge graphs with summaries, layers, and guided tours. It replaces the former **CodeGraph** MCP setup.
+
+### Setup (once per machine)
+
+```bash
+./scripts/setup-understand-anything.sh
+```
+
+Restart Cursor after setup. Plugin auto-discovery uses `.cursor-plugin/plugin.json` at the repo root.
+
+### When exploring structure
+
+| Goal | What to do |
+|------|------------|
+| Build / refresh the graph | Agent: run **`/understand lib`** (Flutter app code only) or **`/understand`** (full repo) |
+| Open visual dashboard | **`/understand-dashboard`** |
+| Ask how something works | **`/understand-chat`** or read `.understand-anything/knowledge-graph.json` |
+| Explain one file | **`/understand-explain lib/path/to/file.dart`** |
+| Impact of local changes | **`/understand-diff`** |
+| Business flows | **`/understand-domain`** |
+
+### Agent rules
+
+- **Prefer the committed graph** when `.understand-anything/knowledge-graph.json` exists — search nodes by `filePath`, `summary`, or `tags` before grepping the whole tree.
+- **Do not use `codegraph_*` MCP tools** — CodeGraph is retired for this repo.
+- **Scope large scans** to `lib/` (and `test/` if needed); skip `build/`, `.dart_tool/`, `*.g.dart`.
+- After major refactors, suggest the user re-run `/understand lib` (incremental by default).
+- For routing/UI audits, combine the graph with `docs/audits/` and manual navigation tests.
+
+### Graph artifacts
+
+- **Commit** `.understand-anything/knowledge-graph.json` (+ `meta.json`, `config.json`) for team onboarding; gitignore `intermediate/` and `diff-overlay.json`.
+- See `docs/UNDERSTAND_ANYTHING.md` for full workflow.
+
+### If plugin/skills missing
+
+Run `./scripts/setup-understand-anything.sh` or add the plugin in **Cursor Settings → Plugins** → `https://github.com/Lum1104/Understand-Anything`.
+<!-- UNDERSTAND_ANYTHING_END -->

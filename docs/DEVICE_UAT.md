@@ -121,6 +121,11 @@ adb install -r path\to\app-release.apk
 | 8 | Subscription (tier 1) | | Tier 1 users: expect upgrade gate, not silent bounce |
 | 9 | Clear app data → relaunch | | Posts/chat recover from Supabase |
 | 10 | Push token | | Row in `device_tokens` after allow + login |
+| 11 | World About (visitor) | | Not joined → lands **ABOUT**; charter teaser; locked economy tiles show reason |
+| 12 | World About (member) | | Joined → lands **FEED**; ABOUT shows full charter, rep, economy unlocks |
+| 13 | World About — orientation | | Get started steps open #info / #rules / #roles / #general |
+| 14 | World About — news | | Tap decree/announcement → Feed highlights post |
+| 15 | World About — leadership | | Sovereign + council rows; tap → resident profile |
 
 ---
 

@@ -1,5 +1,6 @@
 ﻿import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
@@ -19,10 +20,10 @@ class PrestigeUpDialog extends StatefulWidget {
     required int prestigeLevel,
     required int newPrestigeStars,
   }) {
-    return showDialog(
+    return showFDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => PrestigeUpDialog(
+      builder: (context, style, animation) => PrestigeUpDialog(
         prestigeLevel: prestigeLevel,
         newPrestigeStars: newPrestigeStars,
       ),
@@ -62,15 +63,10 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Stack(
+      clipBehavior: Clip.none,
       children: [
-        Dialog(
-          backgroundColor: isDark
-              ? VColors.surfaceContainerDark
-              : VColors.surfaceContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(VRadius.xl),
-          ),
-          child: Padding(
+        FDialog.raw(
+          builder: (context, dialogStyle) => Padding(
             padding: const EdgeInsets.all(VSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,

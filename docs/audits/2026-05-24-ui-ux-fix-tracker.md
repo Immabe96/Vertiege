@@ -8,15 +8,15 @@ Source: [2026-05-24-cursor-swarm-ui-ux-audit.md](./2026-05-24-cursor-swarm-ui-ux
 |----|-----|--------|-------|
 | U01 | High | **done** | Single `MaterialApp` + splash overlay; prefs warmed in `main` |
 | U02 | Med | **done** | Default `ThemeScheme.system` |
-| U03 | Med | **partial** | `v_context_colors.dart`; screen migration ongoing |
+| U03 | Med | **done** | `v_context_colors.dart` + tab/auth field migration (ongoing elsewhere) |
 | U04 | Med | **done** | Explore / Nexus / Chat → `VTabPage` + `FHeader` |
 | U05 | Med | **done** | `VButton` wraps `FButton` |
 | U06 | Med | **done** | `VFeedback` + `showFToast`; SnackBars removed from `lib/` |
 | U07 | Med | **done** | Tab shell aligned with `VHubPage` via `VTabPage` |
-| U08 | Med | **open** | Auth still Material `TextField` (buttons use `VButton`/`FButton`) |
-| U09 | Low | **open** | Tier/prestige dialogs still `AlertDialog` |
+| U08 | Med | **done** | Login/signup → `AuthEmailField` / `AuthPasswordField` (`FTextField`) |
+| U09 | Low | **done** | Tier/prestige dialogs → `showFDialog` + `FDialog.raw` |
 | U10 | Low | **done** | `VAppBanner` / `FAlert` in `app.dart` |
-| U11 | Low | **partial** | `VAccessibleHeaderAction` on tab headers |
+| U11 | Low | **done** | `VAccessibleHeaderAction` on Explore / Chat / Nexus headers |
 | U12 | Low | **done** | Explore loading uses same `VTabPage` shell |
 
 ## Waves
@@ -27,3 +27,9 @@ Source: [2026-05-24-cursor-swarm-ui-ux-audit.md](./2026-05-24-cursor-swarm-ui-ux
 | 2 | Shell unification | U04, U07 |
 | 3 | Forui controls & feedback | U05, U06, U08 |
 | 4 | Polish & a11y | U09–U12 |
+
+## Remaining (non-blocking)
+
+- Incremental `v_context_colors` adoption on hub/sub-screens (world settings, feed widgets).
+- Sign-up primary CTA still `FilledButton` (could use `VButton` later).
+- ANA analyzer backlog in `docs/audits/` (theming false positives in `v_colors.dart`).

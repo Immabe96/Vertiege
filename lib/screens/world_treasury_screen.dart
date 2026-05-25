@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../forui/v_hub_page.dart';
+import '../../config/world_capability_matrix.dart';
 import '../../models/treasury.dart';
 import '../../services/treasury_service.dart';
+import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
@@ -63,6 +66,20 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
   }
 
   void _showDonateDialog() {
+    final resident = ref.read(residentProvider).resident;
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    if (world != null) {
+      final block = WorldCapabilityMatrix.blockReasonTreasuryDonate(
+        resident,
+        world,
+        isJoined: true,
+      );
+      if (block != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(block)));
+        return;
+      }
+    }
+
     final amountController = TextEditingController();
     final descController = TextEditingController();
 
@@ -187,6 +204,8 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
 
   Widget _buildBody(BuildContext context) {
     final theme = Theme.of(context);
+    final world = ref.watch(worldProvider).worlds[widget.worldId];
+    final taxRate = world?.taxRate ?? 0;
 
     if (_loading) {
       return const ScreenLoading.detail();
@@ -239,6 +258,16 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
                   color: VColors.tertiary,
                 ),
               ),
+              if (taxRate > 0) ...[
+                const SizedBox(height: VSpacing.sm),
+                Text(
+                  'Marketplace purchases route $taxRate% to this treasury',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: VColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
               const SizedBox(height: VSpacing.md),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

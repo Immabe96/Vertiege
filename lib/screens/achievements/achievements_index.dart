@@ -449,17 +449,23 @@ class _CategoryAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final imagePath = WorldAssets.achievementCategoryImage(categoryName);
-    final fill = achievementAvatarFill(color, brightness);
+    final hasRaster = imagePath != null;
+    final fill = achievementBadgeContainerColor(
+      hasRasterAsset: hasRaster,
+      accent: color,
+      brightness: brightness,
+    );
     final border = accentRing
         ? Border.all(color: VColors.tertiary, width: 2)
         : null;
+    const avatarSize = VBadgeSize.categoryAvatar;
 
-    Widget iconChild() => Icon(icon, color: color, size: 20);
+    Widget iconChild() => Icon(icon, color: color, size: 22);
 
-    if (imagePath == null) {
+    if (!hasRaster) {
       return Container(
-        width: 40,
-        height: 40,
+        width: avatarSize,
+        height: avatarSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: fill,
@@ -470,23 +476,18 @@ class _CategoryAvatar extends StatelessWidget {
     }
 
     return Container(
-      width: 40,
-      height: 40,
+      width: avatarSize,
+      height: avatarSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: fill,
         border: border,
       ),
-      child: ClipOval(
-        child: Padding(
-          padding: const EdgeInsets.all(5),
-          child: BadgeAssetImage(
-            imagePath: imagePath,
-            size: 30,
-            adaptDarkBackground: false,
-            errorBuilder: (_, _, _) => Center(child: iconChild()),
-          ),
-        ),
+      child: BadgeAssetImage(
+        imagePath: imagePath,
+        size: avatarSize,
+        adaptDarkBackground: false,
+        errorBuilder: (_, _, _) => Center(child: iconChild()),
       ),
     );
   }
@@ -512,7 +513,7 @@ class _RecentVerifiedChip extends StatelessWidget {
               AchievementBadgeAvatar(
                 achievement: achievement,
                 accentColor: VColors.success,
-                size: 36,
+                size: VBadgeSize.avatarCompact,
               ),
               const SizedBox(height: VSpacing.xs),
               Text(

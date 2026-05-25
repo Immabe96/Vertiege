@@ -10,6 +10,7 @@ class Listing {
   final String description;
   final String? price;
   final String? priceNote;
+  final int? coinPrice;
   final ListingCategory category;
   final String? imageUrl;
   final ListingStatus status;
@@ -24,6 +25,7 @@ class Listing {
     required this.description,
     this.price,
     this.priceNote,
+    this.coinPrice,
     required this.category,
     this.imageUrl,
     this.status = ListingStatus.active,
@@ -39,6 +41,7 @@ class Listing {
     'description': description,
     if (price != null) 'price': price,
     if (priceNote != null) 'price_note': priceNote,
+    if (coinPrice != null) 'coin_price': coinPrice,
     'category': category.name,
     if (imageUrl != null) 'image_url': imageUrl,
     'status': status.name,
@@ -54,6 +57,7 @@ class Listing {
     description: json['description'] ?? '',
     price: json['price'],
     priceNote: json['price_note'],
+    coinPrice: (json['coin_price'] as num?)?.toInt(),
     category: _parseCategory(json['category']),
     imageUrl: json['image_url'],
     status: _parseStatus(json['status']),
@@ -69,6 +73,7 @@ class Listing {
     description: data['description'] ?? '',
     price: data['price'],
     priceNote: data['price_note'],
+    coinPrice: (data['coin_price'] as num?)?.toInt(),
     category: _parseCategory(data['category']),
     imageUrl: data['image_url'],
     status: _parseStatus(data['status']),
@@ -84,6 +89,7 @@ class Listing {
     String? description,
     String? price,
     String? priceNote,
+    int? coinPrice,
     ListingCategory? category,
     String? imageUrl,
     ListingStatus? status,
@@ -97,6 +103,7 @@ class Listing {
     description: description ?? this.description,
     price: price ?? this.price,
     priceNote: priceNote ?? this.priceNote,
+    coinPrice: coinPrice ?? this.coinPrice,
     category: category ?? this.category,
     imageUrl: imageUrl ?? this.imageUrl,
     status: status ?? this.status,

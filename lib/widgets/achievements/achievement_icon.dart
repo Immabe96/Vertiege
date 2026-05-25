@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../shared/badge_asset_image.dart';
 import 'achievement_avatar_surface.dart';
@@ -86,7 +87,7 @@ class AchievementBadgeAvatar extends StatelessWidget {
     super.key,
     required this.achievement,
     required this.accentColor,
-    this.size = 40,
+    this.size = VBadgeSize.avatar,
   });
 
   @override
@@ -96,11 +97,16 @@ class AchievementBadgeAvatar extends StatelessWidget {
         WorldAssets.badgeImageForId(achievement.id) ??
         WorldAssets.achievementCategoryImage(achievement.category.name);
     final icon = achievementIconData(achievement.icon);
-    final fill = achievementAvatarFill(accentColor, brightness);
+    final hasRaster = imagePath != null;
+    final fill = achievementBadgeContainerColor(
+      hasRasterAsset: hasRaster,
+      accent: accentColor,
+      brightness: brightness,
+    );
 
     Widget fallback() => Icon(icon, size: size * 0.45, color: accentColor);
 
-    if (imagePath == null) {
+    if (!hasRaster) {
       return Container(
         width: size,
         height: size,
@@ -109,19 +115,21 @@ class AchievementBadgeAvatar extends StatelessWidget {
       );
     }
 
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: fill),
-      child: ClipOval(
-        child: Padding(
-          padding: EdgeInsets.all(size * 0.1),
-          child: BadgeAssetImage(
-            imagePath: imagePath,
-            size: size,
-            adaptDarkBackground: false,
-            errorBuilder: (_, _, _) => Center(child: fallback()),
+      child: BadgeAssetImage(
+        imagePath: imagePath,
+        size: size,
+        adaptDarkBackground: false,
+        errorBuilder: (_, _, _) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: achievementAvatarFill(accentColor, brightness),
           ),
+          child: Center(child: fallback()),
         ),
       ),
     );

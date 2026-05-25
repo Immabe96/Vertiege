@@ -66,26 +66,22 @@ Walk through `docs/plan/2026-05-21-full-app-audit.md` → **Manual UAT checklist
 
 ## Recommended (not blocking dev builds)
 
-### 4. Firebase AI / Gemini (only if you want real proof AI soon)
+### 4. Firebase AI / Gemini (optional — not used for achievements)
 
-**Where:** Firebase Console → AI Logic / Gemini.
-
-**Do:** Accept Terms of Service; enable billing if you use paid vision models.
-
-**Why:** `AiVerificationService.autoVerificationEnabled` is `false` until you wire an API.
+Skip unless you add a **non-achievement** feature (e.g. content moderation, banner generation). Achievement proofs are **manual-only** (see §5).
 
 ---
 
-### 5. Achievement proof AI + moderation API (product decision)
+### 5. Achievement proof review (manual only)
 
-**Not automatable without API keys and backend design.**
+**Product decision:** All proof-based achievements use **manual verifier review** — no AI auto-approve path.
 
-| Feature | Options |
-|--------|---------|
-| Proof vision | Firebase AI Logic (Gemini) from Flutter, or Supabase Edge Function + storage signed URL |
-| Chat/post moderation | OpenAI Moderation, Perspective API, or Edge Function |
+| Feature | What to do |
+|--------|------------|
+| Achievement proofs | Staff use **verifier portal** (`docs/VERIFIER_PORTAL.md`); add verifier emails in Supabase / `VERIFIER_ADMIN_EMAILS` |
+| Chat/post moderation | Optional later (OpenAI Moderation, Perspective, Edge Function) — separate from achievements |
 
-**In app today:** Heuristic `ModerationFilter`; proofs go to **human review** copy.
+**In app today:** Submissions stay `submitted` until a verifier approves or rejects; in-app auto-unlocks apply only to configured in-app achievements (posts, streaks, etc.).
 
 ---
 
@@ -118,7 +114,7 @@ Walk through `docs/plan/2026-05-21-full-app-audit.md` → **Manual UAT checklist
 - Phase 0–2 navigation, Identity/Nexus/More, Forui hubs, session reset, deep links
 - Phase 1 RPC hardening + notifications policy (remote)
 - Storage listing policies + legacy policy drops (remote)
-- Achievement AI copy / auto-verify flag off
+- Achievement proof: manual review only (`AiVerificationService` removed)
 - Dead widgets removed (`achievement_grid`, `world_hub_tab`, `feed_preview_card`, `achievement_card`)
 - Provider errors: resident, achievements, chat DMs, post feed banner on Nexus, alerts retry banner
 - RPC: write functions revoked from `PUBLIC`/`anon`; only RLS helper + trigger functions remain for anon (expected)

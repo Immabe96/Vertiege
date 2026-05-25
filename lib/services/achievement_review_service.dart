@@ -1,5 +1,7 @@
 import '../config/achievements.dart' as ach_config;
 import '../models/achievement.dart';
+import '../utils/achievement_proof_utils.dart';
+import 'gamification_service.dart';
 import 'supabase.dart';
 
 class PendingAchievementSubmission {
@@ -7,7 +9,8 @@ class PendingAchievementSubmission {
   final String residentName;
   final String achievementId;
   final String achievementTitle;
-  final String? proofUri;
+  final String? achievementDescription;
+  final List<String> proofUris;
   final String? aiNotes;
   final double? aiConfidence;
   final DateTime? submittedAt;
@@ -17,7 +20,8 @@ class PendingAchievementSubmission {
     required this.residentName,
     required this.achievementId,
     required this.achievementTitle,
-    this.proofUri,
+    this.achievementDescription,
+    this.proofUris = const [],
     this.aiNotes,
     this.aiConfidence,
     this.submittedAt,
@@ -36,7 +40,9 @@ class AchievementReviewService {
     final client = getSupabase();
     final data = await client
         .from('user_achievements')
-        .select('user_id, achievement_id, proof_uri, ai_notes, ai_confidence, submitted_at, profiles(name)')
+        .select(
+          'user_id, achievement_id, proof_uri, proof_uris, ai_notes, ai_confidence, submitted_at, profiles(name)',
+        )
         .eq('status', 'submitted')
         .order('submitted_at', ascending: false);
 
@@ -50,7 +56,11 @@ class AchievementReviewService {
         residentName: profile?['name'] as String? ?? 'Member',
         achievementId: achievementId,
         achievementTitle: def?.title ?? achievementId,
-        proofUri: map['proof_uri'] as String?,
+        achievementDescription: def?.description,
+        proofUris: parseProofUris(
+          proofUri: map['proof_uri'] as String?,
+          proofUrisRaw: map['proof_uris'],
+        ),
         aiNotes: map['ai_notes'] as String?,
         aiConfidence: (map['ai_confidence'] as num?)?.toDouble(),
         submittedAt: DateTime.tryParse(map['submitted_at']?.toString() ?? ''),
@@ -61,19 +71,13 @@ class AchievementReviewService {
   static Future<void> approve({
     required String userId,
     required String achievementId,
+    String? reviewerNotes,
   }) async {
-    if (!isSupabaseConfigured()) {
-      throw StateError('Supabase is required to approve achievements.');
-    }
-    final now = DateTime.now().toIso8601String();
-    await getSupabase()
-        .from('user_achievements')
-        .update({
-          'status': 'verified',
-          'verified_at': now,
-        })
-        .eq('user_id', userId)
-        .eq('achievement_id', achievementId);
+    await GamificationService.grantVerifiedAchievement(
+      userId: userId,
+      achievementId: achievementId,
+      reviewerNotes: reviewerNotes,
+    );
   }
 
   static Future<void> reject({
@@ -81,16 +85,10 @@ class AchievementReviewService {
     required String achievementId,
     String? notes,
   }) async {
-    if (!isSupabaseConfigured()) {
-      throw StateError('Supabase is required to reject achievements.');
-    }
-    await getSupabase()
-        .from('user_achievements')
-        .update({
-          'status': 'rejected',
-          if (notes != null && notes.isNotEmpty) 'ai_notes': notes,
-        })
-        .eq('user_id', userId)
-        .eq('achievement_id', achievementId);
+    await GamificationService.rejectAchievementSubmission(
+      userId: userId,
+      achievementId: achievementId,
+      reviewerNotes: notes,
+    );
   }
 }

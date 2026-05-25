@@ -60,6 +60,15 @@ android/build/
 /android/upload-keystore.jks
 /android/key.properties
 
+# withoutbg batch backups (regenerable; originals before matte removal)
+/assets/staging/withoutbg-backup/
+
+# Understand-Anything (commit knowledge-graph.json if sharing with team)
+.understand-anything/intermediate/
+.understand-anything/diff-overlay.json
+/understand-anything-plugin
+/.cursor-plugin
+
 # Local AI-agent/tooling state
 /.agents/
 /.claude/

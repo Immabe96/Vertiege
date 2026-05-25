@@ -1,11 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vertiege/config/achievements.dart';
+import 'package:vertiege/models/achievement.dart';
 import 'package:vertiege/models/resident.dart';
 
 void main() {
   group('ACHIEVEMENTS', () {
-    test('has 90 achievements', () {
-      expect(achievements.length, 90);
+    test('has 100 achievements', () {
+      expect(achievements.length, 100);
+    });
+
+    test('life category has seed entries', () {
+      final life = achievements
+          .where((a) => a.category == AchievementCategory.life)
+          .toList();
+      expect(life.length, greaterThanOrEqualTo(10));
     });
 
     test('each has valid data', () {

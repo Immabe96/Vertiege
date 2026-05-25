@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
+import '../../widgets/auth/auth_fields.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
@@ -25,8 +26,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
 
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -193,192 +192,40 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
                     FadeIn(
                       delayMs: 200,
-                      child: TextField(
+                      child: AuthEmailField(
                         controller: _emailController,
                         focusNode: _emailFocus,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autocorrect: false,
                         enabled: !_isLoading,
-                        style: TextStyle(
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
-                        ),
-                        onSubmitted: (_) => _passwordFocus.requestFocus(),
-                        onChanged: (_) => setState(() => _errorMessage = null),
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'you@example.com',
-                          hintStyle: TextStyle(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.outlineDark
-                                  : VColors.outline,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.outlineVariantDark
-                                  : VColors.outlineVariant,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: const BorderSide(
-                              color: VColors.primary,
-                              width: 2,
-                            ),
-                          ),
-                          prefixIcon: const Icon(Icons.email_outlined),
-                          filled: true,
-                          fillColor: isDark
-                              ? VColors.surfaceContainerHighDark
-                              : VColors.surfaceContainerHigh,
-                        ),
+                        onChanged: () => setState(() => _errorMessage = null),
+                        onSubmit: (_) => _passwordFocus.requestFocus(),
                       ),
                     ),
                     const SizedBox(height: VSpacing.md),
 
                     FadeIn(
                       delayMs: 250,
-                      child: TextField(
+                      child: AuthPasswordField(
                         controller: _passwordController,
                         focusNode: _passwordFocus,
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.next,
                         enabled: !_isLoading,
-                        style: TextStyle(
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
-                        ),
-                        onSubmitted: (_) =>
-                            _confirmPasswordFocus.requestFocus(),
-                        onChanged: (_) => setState(() => _errorMessage = null),
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          hintText: 'At least 6 characters',
-                          hintStyle: TextStyle(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.outlineDark
-                                  : VColors.outline,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.outlineVariantDark
-                                  : VColors.outlineVariant,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: const BorderSide(
-                              color: VColors.primary,
-                              width: 2,
-                            ),
-                          ),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                            ),
-                            onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: isDark
-                              ? VColors.surfaceContainerHighDark
-                              : VColors.surfaceContainerHigh,
-                          errorText: _passwordError(),
-                        ),
+                        textInputAction: TextInputAction.next,
+                        hint: 'At least 8 characters',
+                        error: _passwordError(),
+                        onChanged: () => setState(() => _errorMessage = null),
+                        onSubmit: (_) => _confirmPasswordFocus.requestFocus(),
                       ),
                     ),
                     const SizedBox(height: VSpacing.md),
 
                     FadeIn(
                       delayMs: 300,
-                      child: TextField(
+                      child: AuthPasswordField(
                         controller: _confirmPasswordController,
                         focusNode: _confirmPasswordFocus,
-                        obscureText: _obscureConfirmPassword,
-                        textInputAction: TextInputAction.done,
                         enabled: !_isLoading,
-                        style: TextStyle(
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
-                        ),
-                        onSubmitted: _isValid ? (_) => _handleSignUp() : null,
-                        onChanged: (_) => setState(() => _errorMessage = null),
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintStyle: TextStyle(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.outlineDark
-                                  : VColors.outline,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.outlineVariantDark
-                                  : VColors.outlineVariant,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                            borderSide: const BorderSide(
-                              color: VColors.primary,
-                              width: 2,
-                            ),
-                          ),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirmPassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                            ),
-                            onPressed: () => setState(
-                              () => _obscureConfirmPassword =
-                                  !_obscureConfirmPassword,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: isDark
-                              ? VColors.surfaceContainerHighDark
-                              : VColors.surfaceContainerHigh,
-                          errorText: _confirmPasswordError(),
-                        ),
+                        error: _confirmPasswordError(),
+                        onChanged: () => setState(() => _errorMessage = null),
+                        onSubmit: _isValid ? (_) => _handleSignUp() : null,
                       ),
                     ),
                     const SizedBox(height: VSpacing.xl),

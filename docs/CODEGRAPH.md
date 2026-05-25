@@ -1,6 +1,12 @@
-# CodeGraph (local code intelligence)
+# CodeGraph (deprecated)
 
-[CodeGraph](https://github.com/colbymchenry/codegraph) builds a **local SQLite knowledge graph** of this repo (symbols, call edges, imports) and exposes it to Cursor via MCP. No API keys; data stays on your machine.
+> **Replaced by [Understand-Anything](UNDERSTAND_ANYTHING.md).** Run `./scripts/setup-understand-anything.sh` and use `/understand lib` in Cursor Agent. CodeGraph MCP was removed from `.cursor/mcp.json`.
+
+---
+
+# CodeGraph (legacy — local code intelligence)
+
+[CodeGraph](https://github.com/colbymchenry/codegraph) builds a **local SQLite knowledge graph** of this repo (symbols, call edges, imports) and exposed it to Cursor via MCP. No API keys; data stays on your machine.
 
 Vertiege is indexed as **Dart** (`lib/`, `test/`; ~330 files). Generated code (`*.g.dart`, platform trees, `build/`, `.dart_tool/`) is excluded — see `.codegraph/config.json`. (Dart is parsed via tree-sitter; the config `languages` field only filters TS/JS/Python/etc. — leave it empty and rely on `include` globs.)
 

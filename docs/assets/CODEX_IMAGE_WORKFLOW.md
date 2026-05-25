@@ -60,6 +60,22 @@ git commit -m "assets(staging): generated world-neon-district"
 
 When the daily limit hits: **stop after Step 3–4**. Next day, run `next` again — it continues automatically.
 
+### Step 4b — Fix matte backgrounds on transparent PNGs (local, no API key)
+
+ChatGPT exports often ship with a light gray/white matte instead of true transparency. Before or after promote, run the local [withoutbg](https://github.com/withoutbg/withoutbg) batch (first run downloads ~320MB of models):
+
+```bash
+chmod +x scripts/process-transparent-assets.sh
+./scripts/process-transparent-assets.sh --dry-run    # preview list
+./scripts/process-transparent-assets.sh              # assets/generated/
+# or on staging only:
+./scripts/process-transparent-assets.sh --staging
+```
+
+Requires **Python 3** and **uv** (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Uses `uvx withoutbg` with the open-source Focus model — no API key.
+
+Originals are backed up under `assets/staging/withoutbg-backup/<timestamp>/`. Review badges on dark UI before committing.
+
 ### Step 5 — When all items are `generated` (batch review)
 
 ```powershell
@@ -67,6 +83,7 @@ When the daily limit hits: **stop after Step 3–4**. Next day, run `next` again
 .\scripts\image_gen.ps1 promote -Id world-neon-district   # one file
 # or
 .\scripts\image_gen.ps1 promote -All                    # copy all generated → assets/generated
+./scripts/process-transparent-assets.sh                 # Linux: fix PNG mattes (optional)
 .\scripts\validate_assets.ps1
 ```
 

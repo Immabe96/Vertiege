@@ -127,7 +127,7 @@ Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE
 |-----|---------|
 | [plan/MANUAL_REMAINING.md](plan/MANUAL_REMAINING.md) | Dashboard steps (auth, Firebase, Free plan limits) |
 | [plan/PACKAGE_ID_COM_VERTIEGE.md](plan/PACKAGE_ID_COM_VERTIEGE.md) | `com.vertiege`, SHA-1, OAuth redirects |
-| [CODEGRAPH.md](CODEGRAPH.md) | Local code map for Cursor (optional; not in CI) |
+| [UNDERSTAND_ANYTHING.md](UNDERSTAND_ANYTHING.md) | Codebase knowledge graph for Cursor (`/understand`; not in CI) |
 | [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) | Staff-only verification login |
 | [DEVICE_UAT.md](DEVICE_UAT.md) | Device test checklist + adb install notes |
 

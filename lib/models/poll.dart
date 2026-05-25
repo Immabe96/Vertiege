@@ -67,10 +67,22 @@ class WorldPoll {
   );
 
   static Map<int, int> _parseResults(dynamic raw) {
-    if (raw is Map) {
-      return raw.map((k, v) => MapEntry(int.tryParse(k.toString()) ?? 0, (v as num?)?.toInt() ?? 0));
+    if (raw is! Map) return {};
+    final out = <int, int>{};
+    for (final entry in raw.entries) {
+      final idx = int.tryParse(entry.key.toString());
+      if (idx == null) continue;
+      final value = entry.value;
+      if (value is num) {
+        out[idx] = value.toInt();
+      } else if (value is Map) {
+        final count = value['count'];
+        if (count is num) {
+          out[idx] = count.toInt();
+        }
+      }
     }
-    return {};
+    return out;
   }
 
   static DateTime _parseDate(dynamic raw) {

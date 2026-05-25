@@ -2,7 +2,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../config/achievements.dart';
 import '../../../state/resident_provider.dart';
-import '../../../state/achievement_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
 import '../../shared/tier_icon.dart';
@@ -14,10 +13,9 @@ class PrestigeProgressCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resident = ref.watch(residentProvider).resident;
-    final achievementState = ref.watch(achievementProvider);
-    final totalXp = achievementState.totalXp;
-
     if (resident == null) return const SizedBox.shrink();
+
+    final totalXp = resident.totalXp;
 
     final tier = resident.tier;
     final tierLabel = tier.label;

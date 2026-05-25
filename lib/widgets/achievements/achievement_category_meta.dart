@@ -67,6 +67,11 @@ const achievementCategoryMeta =
         icon: Icons.palette,
         color: VColors.achievementCreative,
       ),
+      AchievementCategory.life: AchievementCategoryMeta(
+        label: 'Life',
+        icon: Icons.auto_stories,
+        color: VColors.tertiary,
+      ),
       AchievementCategory.profession: AchievementCategoryMeta(
         label: 'Profession',
         icon: Icons.verified_user,

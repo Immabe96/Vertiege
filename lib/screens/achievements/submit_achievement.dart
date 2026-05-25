@@ -14,6 +14,7 @@ import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
+import '../../widgets/achievements/proof_requirements_banner.dart';
 import '../../widgets/core/v_feedback.dart';
 
 class SubmitAchievementScreen extends ConsumerStatefulWidget {
@@ -27,20 +28,42 @@ class SubmitAchievementScreen extends ConsumerStatefulWidget {
 class _SubmitAchievementScreenState
     extends ConsumerState<SubmitAchievementScreen> {
   String? _selectedId;
-  String? _proofImagePath;
+  final List<String> _proofImagePaths = [];
   bool _isUploading = false;
   AchievementCategory? _categoryFilter;
   String? _errorText;
 
-  Future<void> _pickProofImage() async {
-    final path = await AchievementProofUpload.pickGalleryImage();
-    if (!mounted || path == null) return;
-    setState(() => _proofImagePath = path);
+  Future<void> _pickProofImages() async {
+    final ach = achievements
+        .where((a) => a.id == _selectedId)
+        .firstOrNull;
+    if (ach == null) return;
+    final max = ach.effectiveMaxImages - _proofImagePaths.length;
+    if (max <= 0) return;
+    final paths = await AchievementProofUpload.pickGalleryImages(limit: max);
+    if (!mounted || paths.isEmpty) return;
+    setState(() {
+      _proofImagePaths.addAll(paths);
+      if (_proofImagePaths.length > ach.effectiveMaxImages) {
+        _proofImagePaths.removeRange(
+          ach.effectiveMaxImages,
+          _proofImagePaths.length,
+        );
+      }
+    });
   }
 
   Future<void> _submit() async {
     if (_selectedId == null) {
       setState(() => _errorText = 'Choose an achievement first.');
+      return;
+    }
+    final ach = achievements.where((a) => a.id == _selectedId).firstOrNull!;
+    final min = ach.effectiveMinImages;
+    if (min > 0 && _proofImagePaths.length < min) {
+      setState(() {
+        _errorText = 'Add at least $min photo${min > 1 ? 's' : ''}.';
+      });
       return;
     }
 
@@ -50,27 +73,24 @@ class _SubmitAchievementScreenState
     });
 
     try {
-      var proofUrl = 'manual';
-      if (_proofImagePath != null) {
-        final uploaded = await AchievementProofUpload.uploadProofFile(
-          achievementId: _selectedId!,
-          filePath: _proofImagePath!,
-        );
-        if (!mounted) return;
-        if (uploaded == null) {
-          setState(() {
-            _isUploading = false;
-            _errorText =
-                'Proof upload failed. Please try again or remove the image.';
-          });
-          return;
-        }
-        proofUrl = uploaded;
+      final proofUrls = _proofImagePaths.isEmpty
+          ? <String>[]
+          : await AchievementProofUpload.uploadProofFiles(
+              achievementId: _selectedId!,
+              filePaths: _proofImagePaths,
+            );
+      if (!mounted) return;
+      if (_proofImagePaths.isNotEmpty && proofUrls.isEmpty) {
+        setState(() {
+          _isUploading = false;
+          _errorText = 'Proof upload failed. Try again.';
+        });
+        return;
       }
 
       await ref
           .read(achievementProvider.notifier)
-          .submitAchievement(_selectedId!, proofUrl);
+          .submitAchievement(_selectedId!, proofUrls);
 
       if (mounted) {
         Navigator.pop(context);
@@ -200,7 +220,7 @@ class _SubmitAchievementScreenState
                     prefix: AchievementBadgeAvatar(
                       achievement: achievement,
                       accentColor: meta.color,
-                      size: 40,
+                      size: VBadgeSize.avatar,
                     ),
                     title: Text(achievement.title),
                     subtitle: Text(
@@ -215,65 +235,42 @@ class _SubmitAchievementScreenState
               }).toList(),
             ),
           ),
-          const SizedBox(height: VSpacing.lg),
-          Text(
-            'Photo proof',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: VFontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: VSpacing.sm),
-          if (_proofImagePath != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(VRadius.xl),
-              child: Image.file(
-                File(_proofImagePath!),
-                height: 176,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            )
-          else
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerHighDark
-                    : VColors.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(VRadius.xl),
-                border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark
-                      : VColors.outlineVariant,
+          if (selectedAchievement != null) ...[
+            const SizedBox(height: VSpacing.lg),
+            ProofRequirementsBanner(achievement: selectedAchievement),
+            const SizedBox(height: VSpacing.md),
+            if (_proofImagePaths.isNotEmpty)
+              SizedBox(
+                height: 120,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _proofImagePaths.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
+                  itemBuilder: (_, i) => ClipRRect(
+                    borderRadius: BorderRadius.circular(VRadius.lg),
+                    child: Image.file(
+                      File(_proofImagePaths[i]),
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.add_photo_alternate_outlined,
-                  color: VColors.onSurfaceVariant,
-                  size: VIconSize.xl,
-                ),
+            OutlinedButton.icon(
+              onPressed: _selectedId == null ||
+                      _proofImagePaths.length >=
+                          selectedAchievement.effectiveMaxImages
+                  ? null
+                  : _pickProofImages,
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              label: Text(
+                _proofImagePaths.isEmpty
+                    ? 'Add photos'
+                    : 'Photos (${_proofImagePaths.length}/${selectedAchievement.effectiveMaxImages})',
               ),
             ),
-          const SizedBox(height: VSpacing.md),
-          Row(
-            children: [
-              OutlinedButton(
-                onPressed: _pickProofImage,
-                child: Text(
-                  _proofImagePath != null ? 'Change image' : 'Add image',
-                ),
-              ),
-              if (_proofImagePath != null) ...[
-                const SizedBox(width: VSpacing.sm),
-                OutlinedButton(
-                  onPressed: () => setState(() => _proofImagePath = null),
-                  child: const Text('Remove'),
-                ),
-              ],
-            ],
-          ),
+          ],
           if (_errorText != null) ...[
             const SizedBox(height: VSpacing.md),
             Text(

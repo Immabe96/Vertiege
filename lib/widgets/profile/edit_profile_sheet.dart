@@ -178,7 +178,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                         ? null
                         : ProfessionIcon(
                             profession: p,
-                            size: 18,
+                            size: VBadgeSize.professionInline,
                             fallbackColor: isSel
                                 ? VColors.onPrimary
                                 : Theme.of(ctx).colorScheme.onSurfaceVariant,

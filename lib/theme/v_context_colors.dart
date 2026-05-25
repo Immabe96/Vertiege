@@ -17,4 +17,12 @@ extension VContextColors on BuildContext {
       vIsDark ? VColors.outlineVariantDark : VColors.outlineVariant;
   Color get vPrimary => vIsDark ? VColors.primaryLight : VColors.primary;
   Color get vError => VColors.error;
+
+  /// Input text style aligned with Material theme + Vertiege palette.
+  TextStyle? get vBodyTextStyle =>
+      Theme.of(this).textTheme.bodyMedium?.copyWith(color: vOnSurface);
+
+  /// Muted hint / variant text for fields and captions.
+  TextStyle? get vHintTextStyle =>
+      Theme.of(this).textTheme.bodyMedium?.copyWith(color: vOnSurfaceVariant);
 }

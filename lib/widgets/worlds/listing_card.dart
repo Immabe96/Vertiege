@@ -73,14 +73,18 @@ class ListingCard extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              Icons.sell,
+                              listing.coinPrice != null && listing.coinPrice! > 0
+                                  ? Icons.monetization_on
+                                  : Icons.sell,
                               size: VIconSize.xs,
                               color: VColors.tertiary,
                             ),
                             const SizedBox(width: 2),
                             Expanded(
                               child: Text(
-                                listing.price ?? 'Free',
+                                listing.coinPrice != null && listing.coinPrice! > 0
+                                    ? '${listing.coinPrice} coins'
+                                    : (listing.price ?? 'Free'),
                                 style: const TextStyle(
                                   fontSize: VFontSize.labelSm,
                                   fontWeight: VFontWeight.bold,
