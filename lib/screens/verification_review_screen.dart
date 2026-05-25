@@ -3,6 +3,8 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../config/achievement_reject_reasons.dart';
+import '../config/achievements.dart';
+import '../services/gamification_service.dart';
 import '../services/verification_service.dart';
 import '../services/achievement_review_service.dart';
 import '../widgets/achievements/achievement_verifier_review_card.dart';
@@ -67,6 +69,18 @@ class _VerificationReviewScreenState
 
   Future<void> _approve(VerificationSubmission s) async {
     await VerificationService.approve(s.id, s.residentId, s.profession);
+    final achievementId = achievementIdForVerifiedProfession(s.profession);
+    if (achievementId != null) {
+      try {
+        await GamificationService.grantVerifiedAchievement(
+          userId: s.residentId,
+          achievementId: achievementId,
+          reviewerNotes: 'Profession verified: ${s.profession}',
+        );
+      } catch (e) {
+        debugPrint('Profession achievement grant failed: $e');
+      }
+    }
     _load();
   }
 

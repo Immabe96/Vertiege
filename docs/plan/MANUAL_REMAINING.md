@@ -128,7 +128,11 @@ Skip unless you add a **non-achievement** feature (e.g. content moderation, bann
 dart analyze lib
 
 # Push any new migrations if you work offline first
+# Includes 20260525222625_achievement_catalog_sync.sql (438 achievement_definitions)
 supabase db push
+
+# After editing lib/config/achievements*.dart, regenerate server rows:
+python3 scripts/sync_achievement_definitions.py
 ```
 
 Project ref: **wjaphoaxalvgjnrwqjwe**

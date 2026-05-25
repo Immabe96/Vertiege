@@ -58,7 +58,7 @@ class _SubmitAchievementScreenState
       setState(() => _errorText = 'Choose an achievement first.');
       return;
     }
-    final ach = achievements.where((a) => a.id == _selectedId).firstOrNull!;
+    final ach = achievementForId(_selectedId)!;
     final min = ach.effectiveMinImages;
     if (min > 0 && _proofImagePaths.length < min) {
       setState(() {

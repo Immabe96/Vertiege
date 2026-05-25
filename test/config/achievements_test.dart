@@ -6,8 +6,33 @@ import 'package:vertiege/models/resident.dart';
 void main() {
   group('ACHIEVEMENTS', () {
     test('catalog stays within product limit', () {
-      expect(achievements.length, greaterThanOrEqualTo(100));
+      expect(achievements.length, greaterThanOrEqualTo(400));
       expect(achievements.length, lessThanOrEqualTo(achievementCatalogLimit));
+    });
+
+    test('non-inApp achievements have verifier proof hints', () {
+      final proofBased = achievements.where(
+        (a) => a.category != AchievementCategory.inApp,
+      );
+      expect(proofBased.length, greaterThan(350));
+      for (final a in proofBased) {
+        expect(
+          a.proofHint,
+          isNotNull,
+          reason: '${a.id} missing proofHint',
+        );
+        expect(a.proofHint!.trim().isNotEmpty, true);
+      }
+    });
+
+    test('inApp achievements do not require proof', () {
+      final inAppEntries = achievements.where(
+        (a) => a.category == AchievementCategory.inApp,
+      );
+      for (final a in inAppEntries) {
+        expect(a.proofRequired, false);
+        expect(a.effectiveMinImages, 0);
+      }
     });
 
     test('life category has expanded seed entries', () {
@@ -28,6 +53,20 @@ void main() {
     test('no duplicate IDs', () {
       final ids = achievements.map((a) => a.id).toSet();
       expect(ids.length, achievements.length);
+    });
+
+    test('achievementForId lookup', () {
+      expect(achievementForId('edu-hs')?.title, 'High School Graduate');
+      expect(achievementForId('edu-seed-honors-roll')?.category,
+          AchievementCategory.education);
+      expect(achievementForId('not-in-catalog'), isNull);
+      expect(achievementById.length, achievements.length);
+    });
+
+    test('profession verification maps to catalog id', () {
+      expect(achievementIdForVerifiedProfession('Medical'), 'prof-doctor');
+      expect(achievementIdForVerifiedProfession('Technology'), 'prof-engineer');
+      expect(achievementIdForVerifiedProfession('Unknown'), isNull);
     });
   });
 

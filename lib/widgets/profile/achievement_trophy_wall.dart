@@ -80,9 +80,8 @@ class AchievementTrophyWall extends StatelessWidget {
               spacing: spacing,
               runSpacing: spacing,
               children: visible.map((ua) {
-                final def = ach_config.achievements
-                    .where((a) => a.id == ua.achievementId)
-                    .firstOrNull;
+                final def =
+                    ach_config.achievementForId(ua.achievementId);
                 if (def == null) return const SizedBox.shrink();
                 return _TrophyCell(
                   width: cellWidth,

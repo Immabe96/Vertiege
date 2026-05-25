@@ -36,7 +36,7 @@ class ProfileAchievementsService {
     for (final row in rows as List) {
       final map = row as Map<String, dynamic>;
       final id = map['achievement_id'] as String? ?? '';
-      final def = ach_config.achievements.where((a) => a.id == id).firstOrNull;
+      final def = ach_config.achievementForId(id);
       if (def == null) continue;
       entries.add(
         PublicAchievementEntry(

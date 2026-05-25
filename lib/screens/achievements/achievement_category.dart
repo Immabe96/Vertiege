@@ -28,6 +28,7 @@ class AchievementCategoryScreen extends ConsumerStatefulWidget {
 class _AchievementCategoryScreenState
     extends ConsumerState<AchievementCategoryScreen> {
   _AchievementFilter _filter = _AchievementFilter.all;
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +56,14 @@ class _AchievementCategoryScreenState
     final allInCategory =
         achievements.where((a) => a.category == cat).toList();
 
+    final query = _searchQuery.trim().toLowerCase();
     final filtered = allInCategory.where((achievement) {
+      if (query.isNotEmpty) {
+        final haystack =
+            '${achievement.title} ${achievement.description} ${achievement.id}'
+                .toLowerCase();
+        if (!haystack.contains(query)) return false;
+      }
       final status = notifier.getAchievementStatus(achievement.id);
       return switch (_filter) {
         _AchievementFilter.all => true,
@@ -96,7 +104,28 @@ class _AchievementCategoryScreenState
               ),
             ),
           ),
-          const SizedBox(height: VSpacing.sm),
+          if (allInCategory.length > 12) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.md,
+                VSpacing.sm,
+                VSpacing.md,
+                0,
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search ${meta.label.toLowerCase()} achievements',
+                  prefixIcon: const Icon(Icons.search),
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
+                ),
+                onChanged: (v) => setState(() => _searchQuery = v),
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+          ],
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),

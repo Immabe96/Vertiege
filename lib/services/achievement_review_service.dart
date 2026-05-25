@@ -60,11 +60,8 @@ class ResidentReviewHistory {
 }
 
 class AchievementReviewService {
-  static Achievement? _definition(String achievementId) {
-    return ach_config.achievements
-        .where((a) => a.id == achievementId)
-        .firstOrNull;
-  }
+  static Achievement? _definition(String achievementId) =>
+      ach_config.achievementForId(achievementId);
 
   static Future<List<PendingAchievementSubmission>> getPending() async {
     if (!isSupabaseConfigured()) return [];

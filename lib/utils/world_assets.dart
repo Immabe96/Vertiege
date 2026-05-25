@@ -64,6 +64,14 @@ class WorldAssets {
     'prof-finance': 'assets/generated/prof-finance.png',
     'prof-artist': 'assets/generated/prof-artist.png',
     'prof-pilot': 'assets/generated/prof-pilot.png',
+    'prof-nurse': 'assets/generated/prof-doctor.png',
+    'prof-teacher': 'assets/generated/badge-author.png',
+    'prof-architect': 'assets/generated/prof-engineer.png',
+    'prof-scientist': 'assets/generated/prof-engineer.png',
+    'prof-chef': 'assets/generated/prof-artist.png',
+    'prof-realtor': 'assets/generated/prof-finance.png',
+    'prof-therapist': 'assets/generated/prof-doctor.png',
+    'prof-journalist': 'assets/generated/prof-artist.png',
   };
 
   static const _tierImagePaths = <int, String>{

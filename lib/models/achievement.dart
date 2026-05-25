@@ -71,6 +71,33 @@ class Achievement {
   };
 
   bool get proofRequired => effectiveMinImages > 0;
+
+  Achievement copyWith({
+    String? id,
+    AchievementCategory? category,
+    String? title,
+    String? description,
+    int? xpValue,
+    bool? isFunny,
+    String? icon,
+    AchievementProofType? proofType,
+    int? minProofImages,
+    int? maxProofImages,
+    String? proofHint,
+  }) =>
+      Achievement(
+        id: id ?? this.id,
+        category: category ?? this.category,
+        title: title ?? this.title,
+        description: description ?? this.description,
+        xpValue: xpValue ?? this.xpValue,
+        isFunny: isFunny ?? this.isFunny,
+        icon: icon ?? this.icon,
+        proofType: proofType ?? this.proofType,
+        minProofImages: minProofImages ?? this.minProofImages,
+        maxProofImages: maxProofImages ?? this.maxProofImages,
+        proofHint: proofHint ?? this.proofHint,
+      );
 }
 
 class UserAchievement {
