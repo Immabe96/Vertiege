@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../forui/v_tab_page.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
@@ -90,7 +91,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       VAccessibleHeaderAction(
         label: 'Discover Worlds',
         icon: const Icon(FIcons.compass),
-        onPress: () => context.push('/explore/discover'),
+        onPress: () => context.push(exploreDiscoverPath()),
       ),
       if (AdminAccessService.canCreateWorld(
         tierValue: resident?.tier.value ?? 0,
@@ -467,7 +468,7 @@ class _WorldListCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isLocked ? null : () => context.push('/explore/${world.id}'),
+        onTap: isLocked ? null : () => context.push(exploreWorldPath(world.id)),
         borderRadius: BorderRadius.circular(VRadius.lg),
         child: Container(
           decoration: BoxDecoration(
@@ -695,7 +696,7 @@ class _WorldListCard extends StatelessWidget {
                           width: double.infinity,
                           child: FilledButton.icon(
                             onPressed: () =>
-                                context.push('/explore/${world.id}'),
+                                context.push(exploreWorldPath(world.id)),
                             icon: const Icon(VIcons.arrowLeft),
                             label: const Text('Enter World'),
                           ),
@@ -822,7 +823,7 @@ class _TrendingWorldCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
-      onTap: () => context.push('/explore/${world.id}'),
+      onTap: () => context.push(exploreWorldPath(world.id)),
       child: Container(
         width: 160,
         decoration: BoxDecoration(

@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -128,7 +129,7 @@ class AllianceSection extends ConsumerWidget {
                       ),
                       VButton(
                         label: 'VISIT',
-                        onPressed: () => context.push('/explore/$allyId'),
+                        onPressed: () => context.push(exploreWorldPath(allyId)),
                         size: ButtonSize.small,
                       ),
                     ],

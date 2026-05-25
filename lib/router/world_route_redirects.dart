@@ -6,6 +6,8 @@ const kReservedWorldSubRoutes = <String>{
   'polls',
   'treasury',
   'challenges',
+  'jobs',
+  'archive',
 };
 
 /// When `:channelName` incorrectly matches a reserved segment, redirect to the real screen.

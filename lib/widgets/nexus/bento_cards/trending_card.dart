@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../router/world_navigation.dart';
 import '../../../state/world_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
@@ -66,7 +67,7 @@ class TrendingCard extends ConsumerWidget {
               bottom: index < trending.length - 1 ? VSpacing.sm : 0,
             ),
             child: InkWell(
-              onTap: () => context.push('/explore/${world.id}'),
+              onTap: () => context.push(exploreWorldPath(world.id)),
               borderRadius: BorderRadius.circular(VRadius.sm),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),

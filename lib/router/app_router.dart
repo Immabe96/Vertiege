@@ -55,6 +55,9 @@ import '../screens/world_marketplace_screen.dart';
 import '../screens/world_polls_screen.dart';
 import '../screens/world_treasury_screen.dart';
 import '../screens/world_challenges_screen.dart';
+import '../screens/world_jobs_screen.dart';
+import '../screens/world_archive_screen.dart';
+import '../router/world_navigation.dart';
 import '../screens/league_screen.dart';
 import '../screens/world_discovery_screen.dart';
 import '../screens/twin_seal_setup_screen.dart';
@@ -287,6 +290,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         ),
                       ),
                       GoRoute(
+                        path: 'jobs',
+                        builder: (context, state) => WorldJobsScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          canManage: state.uri.queryParameters['admin'] == 'true',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'archive',
+                        builder: (context, state) => WorldArchiveScreen(
+                          worldId: state.pathParameters['worldId']!,
+                        ),
+                      ),
+                      GoRoute(
                         path: ':channelName',
                         redirect: (context, state) {
                           final worldId = state.pathParameters['worldId']!;
@@ -359,8 +375,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/residents/:id',
-        builder: (context, state) =>
-            ResidentProfileScreen(residentId: state.pathParameters['id']!),
+        builder: (context, state) => ResidentProfileScreen(
+          residentId: state.pathParameters['id']!,
+          highlightAchievementId: state.uri.queryParameters['achievement'],
+        ),
       ),
       // Full-screen DM from search/profile (outside shell — avoids white screen).
       GoRoute(
@@ -549,7 +567,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     await InviteService.acceptInvite(invite.id, invite.worldId, resident.id);
     await ref.read(residentProvider.notifier).joinWorld(invite.worldId);
 
-    if (mounted) context.go('/explore/${invite.worldId}');
+    if (mounted) context.go(exploreWorldPath(invite.worldId));
   }
 
   @override
@@ -695,11 +713,11 @@ class _NotificationDeepLinkState extends ConsumerState<_NotificationDeepLink> {
     final postId = notif?.postId;
     final worldId = notif?.worldId;
     if (worldId != null && postId != null && postId.isNotEmpty) {
-      context.go('/explore/$worldId?post=$postId');
+      context.go(exploreWorldPath(worldId, postId: postId));
     } else if (worldId != null) {
-      context.go('/explore/$worldId');
+      context.go(exploreWorldPath(worldId));
     } else {
-      context.go('/');
+      context.go('/notifications');
     }
   }
 
@@ -753,15 +771,15 @@ class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
             .maybeSingle();
         final worldId = row?['world_id'] as String?;
         if (worldId != null && mounted) {
-          context.go('/explore/$worldId?post=${widget.postId}');
+          context.go(exploreWorldPath(worldId, postId: widget.postId));
           return;
         }
       }
       if (post != null && mounted) {
-        context.go('/explore/${post.worldId}?post=${widget.postId}');
+        context.go(exploreWorldPath(post.worldId, postId: widget.postId));
         return;
       }
-      if (mounted) context.go('/');
+      if (mounted) context.go('/notifications');
     } catch (_) {
       if (mounted) {
         setState(() { _loading = false; _error = 'Post not found'; });

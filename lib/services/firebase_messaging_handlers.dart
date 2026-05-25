@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 import '../firebase_options.dart';
+import '../router/notification_navigation.dart';
+import '../router/world_navigation.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -39,7 +41,7 @@ String? routeFromRemoteMessage(RemoteMessage message) {
 
   final notificationId = data['notification_id'] ?? data['notificationId'];
   if (notificationId is String && notificationId.isNotEmpty) {
-    return '/notifications/$notificationId';
+    return notificationDeepLinkPath(notificationId);
   }
 
   final postId = data['post_id'] ?? data['postId'];
@@ -49,17 +51,17 @@ String? routeFromRemoteMessage(RemoteMessage message) {
 
   final roomId = data['room_id'] ?? data['roomId'] ?? data['dm_room_id'];
   if (roomId is String && roomId.isNotEmpty) {
-    return '/dm/$roomId';
+    return dmPath(roomId);
   }
 
   final channelId = data['channel_id'] ?? data['channelId'];
   if (channelId is String && channelId.isNotEmpty) {
-    return '/campfire/$channelId';
+    return campfirePath(channelId: channelId);
   }
 
   final worldId = data['world_id'] ?? data['worldId'];
   if (worldId is String && worldId.isNotEmpty) {
-    return '/explore/$worldId';
+    return exploreWorldPath(worldId);
   }
 
   return null;

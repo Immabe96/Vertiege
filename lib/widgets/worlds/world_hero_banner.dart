@@ -2,6 +2,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../models/world.dart';
+import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'world_banner.dart';
@@ -213,7 +214,7 @@ class WorldHeroBanner extends StatelessWidget {
                           child: InkWell(
                             onTap: world.sovereignId.isNotEmpty
                                 ? () => context.push(
-                                    '/residents/${world.sovereignId}',
+                                    residentProfilePath(world.sovereignId),
                                   )
                                 : null,
                             borderRadius: BorderRadius.circular(VRadius.sm),

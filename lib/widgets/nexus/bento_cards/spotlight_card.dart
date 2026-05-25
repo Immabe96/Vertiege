@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../router/world_navigation.dart';
 import '../../../theme/v_tokens.dart';
 import '../../../theme/v_colors.dart';
 import '../../../models/resident.dart';
@@ -89,7 +90,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
         else
           GestureDetector(
             onTap: () {
-              context.push('/residents/${_spotlightResident!.id}');
+              context.push(residentProfilePath(_spotlightResident!.id));
             },
             child: Container(
               padding: const EdgeInsets.all(VSpacing.sm),

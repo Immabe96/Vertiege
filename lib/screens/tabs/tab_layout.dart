@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../state/notification_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/voice_provider.dart';
@@ -337,8 +338,14 @@ class _FloatingCampfireBar extends ConsumerWidget {
               final campfireId = voice.activeCampfireId;
               final campfireName = voice.activeCampfireName ?? 'Campfire';
               if (campfireId != null) {
-                final encodedName = Uri.encodeComponent(campfireName);
-                context.push('/campfire/$campfireId?name=$encodedName');
+                context.push(
+                  campfirePath(
+                    channelId: campfireId,
+                    name: campfireName,
+                    worldId: voice.activeWorldId,
+                    worldName: voice.activeWorldName,
+                  ),
+                );
               }
             },
             child: Container(

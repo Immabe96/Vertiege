@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../state/ally_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../models/notification.dart';
+import '../../router/notification_navigation.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/core/empty_state.dart';
@@ -349,47 +350,8 @@ class _NotificationSliverList extends StatelessWidget {
         // Tapping the card navigates based on notification type.
         void onTap() {
           ref.read(notificationProvider.notifier).markRead(n.id);
-          switch (n.type) {
-            case NotificationType.like:
-            case NotificationType.comment:
-              if (n.postId != null && n.worldId != null) {
-                context.push('/explore/${n.worldId}?post=${n.postId}');
-              } else if (n.worldId != null) {
-                context.push('/explore/${n.worldId}');
-              }
-              break;
-            case NotificationType.worldUnlocked:
-            case NotificationType.mention:
-              if (n.worldId != null) {
-                context.push('/explore/${n.worldId}');
-              }
-              break;
-            case NotificationType.tierUpgrade:
-              context.push('/identity');
-              break;
-            case NotificationType.allegianceRequest:
-              context.push('/allies');
-              break;
-            case NotificationType.welcome:
-              context.push('/explore');
-              break;
-            case NotificationType.modAction:
-              context.push('/settings');
-              break;
-            case NotificationType.ranking:
-              context.push('/season');
-              break;
-            case NotificationType.streakReminder:
-              context.push('/identity');
-              break;
-            case NotificationType.reactionMilestone:
-              if (n.postId != null && n.worldId != null) {
-                context.push('/explore/${n.worldId}?post=${n.postId}');
-              } else {
-                context.push('/identity');
-              }
-              break;
-          }
+          final route = routeForNotification(n);
+          if (route != null) context.push(route);
         }
 
         return FadeIn(
@@ -455,6 +417,8 @@ class _NotificationSliverList extends StatelessWidget {
       NotificationType.reactionMilestone => VColors.tertiary,
       NotificationType.mention => VColors.primary,
       NotificationType.allegianceRequest => VColors.tertiary,
+      NotificationType.achievementApproved => VColors.success,
+      NotificationType.achievementRejected => VColors.error,
     };
   }
 }
@@ -632,6 +596,8 @@ class _NotificationCard extends StatelessWidget {
       NotificationType.reactionMilestone => Icons.favorite_border,
       NotificationType.mention => Icons.alternate_email,
       NotificationType.allegianceRequest => Icons.handshake,
+      NotificationType.achievementApproved => Icons.verified,
+      NotificationType.achievementRejected => Icons.cancel_outlined,
     };
   }
 }

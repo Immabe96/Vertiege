@@ -1,14 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/channel.dart';
+import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-
-@visibleForTesting
-String worldChannelExplorePath(String worldId, WorldChannel channel) =>
-    '/explore/$worldId/${channel.name}?id=${channel.id}';
 
 /// Quick links to General and Announcements on the world feed.
 class WorldChannelShortcuts extends StatelessWidget {
@@ -41,7 +37,7 @@ class WorldChannelShortcuts extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     void open(WorldChannel channel) {
-      context.push(worldChannelExplorePath(worldId, channel));
+      context.push(worldChannelPath(worldId, channel));
     }
 
     return Padding(

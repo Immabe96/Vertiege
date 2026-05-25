@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
@@ -36,9 +37,11 @@ class WorldDetailMembers extends ConsumerWidget {
             isLoading: membersLoading,
             onlineCount: math.min(8, (members.length * 0.4).round()),
             onTap: () => context.push(
-              '/explore/$worldId/members'
-              '?name=${Uri.encodeComponent(world.name)}'
-              '&sovereign=${Uri.encodeComponent(world.sovereignId)}',
+              worldMembersPath(
+                worldId,
+                worldName: world.name,
+                sovereignId: world.sovereignId,
+              ),
             ),
           ),
         ),

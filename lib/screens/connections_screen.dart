@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../models/ally.dart';
 import '../models/resident.dart';
@@ -249,7 +250,7 @@ class _PersonTile extends StatelessWidget {
               : VColors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(VRadius.lg),
           child: InkWell(
-            onTap: () => context.push('/residents/${resident.id}'),
+            onTap: () => context.push(residentProfilePath(resident.id)),
             borderRadius: BorderRadius.circular(VRadius.lg),
             child: ListTile(
               leading: CosmeticAvatar(

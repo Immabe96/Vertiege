@@ -20,6 +20,7 @@ import 'state/ally_provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
+import 'router/notification_navigation.dart';
 import 'screens/splash_screen.dart';
 import 'services/daily_reward_service.dart';
 import 'services/storage_service.dart';
@@ -367,13 +368,12 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     NotificationType.reactionMilestone => 'Reaction milestone',
     NotificationType.mention => 'Mention',
     NotificationType.allegianceRequest => 'Allegiance request',
+    NotificationType.achievementApproved => 'Achievement verified',
+    NotificationType.achievementRejected => 'Achievement review',
   };
 
-  String _routeForNotification(AppNotification notification) {
-    if (notification.postId != null) return '/post/${notification.postId}';
-    if (notification.worldId != null) return '/explore/${notification.worldId}';
-    return '/notifications/${notification.id}';
-  }
+  String? _routeForNotification(AppNotification notification) =>
+      routeForNotification(notification);
 
   void _checkDailyReward() {
     final resident = ref.read(residentProvider).resident;

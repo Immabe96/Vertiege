@@ -6,6 +6,7 @@ import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../config/tiers.dart';
+import '../config/world_capability_matrix.dart';
 import '../models/channel.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
@@ -16,16 +17,16 @@ import '../widgets/worlds/world_channel_list.dart';
 
 import '../widgets/worlds/world_member_row.dart';
 import '../widgets/worlds/world_hero_banner.dart';
+import '../widgets/worlds/world_realm_dossier.dart';
 
 import '../widgets/worlds/world_feed_tab.dart';
 import '../widgets/v_section_list.dart';
 import '../widgets/worlds/world_detail_members.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
-import '../services/legacy_service.dart';
 import '../services/feature_flags.dart';
 import '../state/event_provider.dart';
-import '../utils/world_foundations.dart';
+import '../router/world_navigation.dart';
 import '../utils/navigation.dart';
 import '../utils/v_motion.dart';
 
@@ -36,10 +37,8 @@ import '../widgets/core/screen_loading.dart';
 import '../state/post_provider.dart';
 import '../models/resident.dart';
 import '../models/world.dart' show World;
-import '../widgets/worlds/resource_vault.dart';
 import '../widgets/worlds/world_share_card.dart';
 import '../widgets/shared/share_button.dart';
-import '../widgets/worlds/alliance_section.dart';
 import '../widgets/core/v_feedback.dart';
 
 class WorldDetailScreen extends ConsumerStatefulWidget {
@@ -68,6 +67,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   bool _statsAnimated = false;
   String? _highlightPostId;
   bool _appliedPostQuery = false;
+  bool _defaultTabApplied = false;
 
   bool _isSovereignOrCouncil(Resident? resident, World world) {
     if (resident == null) return false;
@@ -207,6 +207,14 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   }
 
   @override
+  void didUpdateWidget(WorldDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.worldId != widget.worldId) {
+      _defaultTabApplied = false;
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_appliedPostQuery) return;
@@ -220,6 +228,23 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         _tabController?.animateTo(0, duration: duration);
       });
     }
+  }
+
+  void _applyDefaultTabIfNeeded(bool isJoined) {
+    if (_defaultTabApplied || _tabController == null) return;
+    final hasPost =
+        _highlightPostId != null && _highlightPostId!.isNotEmpty;
+    if (hasPost) {
+      _defaultTabApplied = true;
+      return;
+    }
+    final index = isJoined ? 0 : 4;
+    _defaultTabApplied = true;
+    if (_tabController!.index == index) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _tabController == null) return;
+      _tabController!.animateTo(index);
+    });
   }
 
   void _onHighlightPostMissing() {
@@ -300,10 +325,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       ref.read(channelProvider.notifier).ensureDefaultChannels(widget.worldId);
       return;
     }
-    context.push(
-      '/explore/${widget.worldId}/${Uri.encodeComponent(channel.name)}'
-      '?id=${Uri.encodeComponent(channel.id)}',
-    );
+    context.push(worldChannelPath(widget.worldId, channel));
   }
 
   void _showWorldShareSheet(World world) {
@@ -350,7 +372,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final cs = theme.colorScheme;
     final isJoined = resident?.joinedWorldIds.contains(widget.worldId) ?? false;
 
-    _ensureTabController(5); // Feed, Channels, People, Manage, More
+    _ensureTabController(5); // Feed, Channels, People, Manage, About
+    _applyDefaultTabIfNeeded(isJoined);
 
     final scaleAnimation =
         TweenSequence<double>([
@@ -420,7 +443,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 .read(worldProvider.notifier)
                 .featuresForWorld(widget.worldId)
                 .governance
-        ? () => context.push('/explore/${widget.worldId}/settings')
+        ? () => context.push(worldSettingsPath(widget.worldId))
         : null;
 
     return WorldAccessGuard(
@@ -465,9 +488,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     events: _displayedEvents,
                     onVisible: _startStatAnimation,
                     onMembersTap: () => context.push(
-                      '/explore/${widget.worldId}/members'
-                      '?name=${Uri.encodeComponent(world.name)}'
-                      '&sovereign=${Uri.encodeComponent(world.sovereignId)}',
+                      worldMembersPath(
+                        widget.worldId,
+                        worldName: world.name,
+                        sovereignId: world.sovereignId,
+                      ),
                     ),
                   ),
                 ),
@@ -546,18 +571,22 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                   ),
                 ),
                 _WorldDetailTabScroll(
-                  child: _MoreTab(
+                  child: WorldRealmDossier(
                     world: world,
                     worldId: widget.worldId,
                     channels: channels,
+                    worldPosts: posts,
                     resident: resident,
                     isJoined: isJoined,
                     isSovereignOrCouncil:
                         _isSovereignOrCouncil(resident, world),
-                    onOpenChannel: (name) =>
-                        _openChannelByName(name, channels),
+                    onJoin: _handleJoin,
                     onSettings: onSettings,
                     onShare: () => _showWorldShareSheet(world),
+                    onOpenChannel: (name) =>
+                        _openChannelByName(name, channels),
+                    members: _members,
+                    membersLoading: _membersLoading,
                   ),
                 ),
               ],
@@ -794,7 +823,7 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
             Tab(text: 'CHANNELS'),
             Tab(text: 'PEOPLE'),
             Tab(text: 'MANAGE'),
-            Tab(text: 'MORE'),
+            Tab(text: 'ABOUT'),
           ],
         ),
       ),
@@ -822,8 +851,18 @@ class _ManageTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final showMarket = world.type.name == 'dominion' || world.prestige >= 30;
-    final showTreasury = world.prestige >= 25;
+    final resident = ref.watch(residentProvider).resident;
+    final showMarket = WorldCapabilityMatrix.worldHasMarketplace(world);
+    final showTreasury = WorldCapabilityMatrix.worldHasTreasury(world);
+    final canList = WorldCapabilityMatrix.canCreateListing(
+      resident,
+      world,
+      isJoined: isJoined,
+    );
+    final canTreasuryAdmin = WorldCapabilityMatrix.canManageTreasury(
+      resident,
+      world,
+    );
 
     if (!isJoined) {
       return const AppEmptyState(
@@ -834,31 +873,46 @@ class _ManageTab extends ConsumerWidget {
       );
     }
 
+    final isCouncilOrSovereign = canTreasuryAdmin;
+
     final links = <FTileMixin>[
       if (FeatureFlags.treasury && showTreasury)
         VSectionTile(
           icon: Icons.account_balance_wallet,
           label: 'Treasury',
-          onTap: () => context.push('/explore/$worldId/treasury'),
+          onTap: () => context.push(
+            worldTreasuryPath(worldId, admin: canTreasuryAdmin),
+          ),
         ),
       if (FeatureFlags.marketplace && showMarket)
         VSectionTile(
           icon: Icons.storefront,
           label: 'Marketplace',
           onTap: () => context.push(
-            '/explore/$worldId/marketplace?member=${isJoined ? 'true' : 'false'}',
+            worldMarketplacePath(worldId, member: isJoined),
           ),
         ),
+      if (FeatureFlags.polls)
+        VSectionTile(
+          icon: Icons.how_to_vote,
+          label: 'Polls',
+          onTap: () => context.push(
+            worldPollsPath(worldId, admin: isCouncilOrSovereign),
+          ),
+        ),
+      VSectionTile(
+        icon: Icons.work_outline,
+        label: 'Role board',
+        onTap: () => context.push(
+          worldJobsPath(worldId, admin: isCouncilOrSovereign),
+        ),
+      ),
+      VSectionTile(
+        icon: Icons.menu_book_outlined,
+        label: 'World archive',
+        onTap: () => context.push(worldArchivePath(worldId)),
+      ),
     ];
-
-    if (links.isEmpty) {
-      return const AppEmptyState(
-        title: 'Economy not available',
-        description: 'No economy modules are enabled for this world yet.',
-        icon: Icons.savings_outlined,
-        variant: EmptyStateVariant.default_,
-      );
-    }
 
     final prestigeColor = world.prestige >= 40
         ? VColors.tierApex
@@ -869,7 +923,7 @@ class _ManageTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        VSectionList(title: 'Core economy', children: links),
+        VSectionList(title: 'World tools', children: links),
         const SizedBox(height: VSpacing.md),
         FCard.raw(
           child: Padding(
@@ -880,7 +934,14 @@ class _ManageTab extends ConsumerWidget {
                 const SizedBox(width: VSpacing.sm),
                 Expanded(
                   child: Text(
-                    'Prestige ${world.prestige} · unlocks economy features',
+                    canList
+                        ? 'Prestige ${world.prestige} · you can list on the marketplace'
+                        : (WorldCapabilityMatrix.blockReasonCreateListing(
+                              resident,
+                              world,
+                              isJoined: isJoined,
+                            ) ??
+                            'Prestige ${world.prestige} · economy modules'),
                     style: TextStyle(
                       fontSize: VFontSize.bodySm,
                       color: isDark
@@ -894,146 +955,6 @@ class _ManageTab extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MoreTab extends ConsumerWidget {
-  final World world;
-  final String worldId;
-  final List<WorldChannel> channels;
-  final Resident? resident;
-  final bool isJoined;
-  final bool isSovereignOrCouncil;
-  final ValueChanged<String> onOpenChannel;
-  final VoidCallback? onSettings;
-  final VoidCallback onShare;
-
-  const _MoreTab({
-    required this.world,
-    required this.worldId,
-    required this.channels,
-    required this.resident,
-    required this.isJoined,
-    required this.isSovereignOrCouncil,
-    required this.onOpenChannel,
-    required this.onSettings,
-    required this.onShare,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final features = ref.read(worldProvider.notifier).featuresForWorld(worldId);
-    final settingsTap = onSettings; // local capture for null promotion
-
-    final foundation = foundationForWorld(world);
-    final economyMoreLinks = <FTileMixin>[
-      if (isJoined && FeatureFlags.polls)
-        VSectionTile(
-          icon: Icons.how_to_vote,
-          label: 'Polls',
-          onTap: () => context.push('/explore/$worldId/polls'),
-        ),
-      if (isJoined && FeatureFlags.challenges)
-        VSectionTile(
-          icon: Icons.emoji_events,
-          label: 'World challenges',
-          onTap: () => context.push('/explore/$worldId/challenges'),
-        ),
-    ];
-    final quickLinks = <FTileMixin>[
-      VSectionTile(
-        icon: Icons.share_outlined,
-        label: 'Share world',
-        onTap: onShare,
-      ),
-      if (isJoined)
-        VSectionTile(
-          icon: Icons.people_outline,
-          label: 'Full resident roster',
-          onTap: () => context.push(
-            '/explore/$worldId/members'
-            '?name=${Uri.encodeComponent(world.name)}'
-            '&sovereign=${Uri.encodeComponent(world.sovereignId)}',
-          ),
-        ),
-      if (settingsTap != null && features.governance)
-        VSectionTile(
-          icon: Icons.settings,
-          label: 'World settings',
-          onTap: settingsTap,
-        ),
-    ];
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: VSpacing.xxl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FCard.raw(
-            child: Padding(
-              padding: const EdgeInsets.all(VSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'About',
-                    style: TextStyle(
-                      fontWeight: VFontWeight.bold,
-                      fontSize: VFontSize.bodyLg,
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: VSpacing.sm),
-                  Text(
-                    foundation.premise,
-                    style: TextStyle(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
-                      fontSize: VFontSize.bodyMd,
-                      height: 1.35,
-                    ),
-                  ),
-                  if (world.createdAt > 0) ...[
-                    const SizedBox(height: VSpacing.sm),
-                    Text(
-                      LegacyService.formatFoundedDate(
-                        DateTime.fromMillisecondsSinceEpoch(world.createdAt),
-                      ),
-                      style: TextStyle(
-                        fontSize: VFontSize.labelMd,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          if (economyMoreLinks.isNotEmpty) ...[
-            const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Economy & activities',
-              children: economyMoreLinks,
-            ),
-          ],
-          const SizedBox(height: VSpacing.md),
-          VSectionList(title: 'Social & links', children: quickLinks),
-          const SizedBox(height: VSpacing.md),
-          ResourceVault(
-            worldId: worldId,
-            channels: channels,
-            vaultUnlocked: features.vault,
-          ),
-          const SizedBox(height: VSpacing.md),
-          AllianceSection(worldId: worldId, world: world),
-        ],
-      ),
     );
   }
 }

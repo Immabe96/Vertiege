@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
+import '../../router/world_navigation.dart';
 import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/world_service.dart';
@@ -134,7 +135,7 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
                   'Rep ${member.rep}',
                   style: theme.textTheme.labelSmall,
                 ),
-                onTap: () => context.push('/residents/${resident.id}'),
+                onTap: () => context.push(residentProfilePath(resident.id)),
               ),
             );
           }),
@@ -144,9 +145,11 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
             child: VButton(
               label: 'See all ${_residents.length} members',
               onPressed: () => context.push(
-                '/explore/${widget.world.id}/members'
-                '?name=${Uri.encodeComponent(widget.world.name)}'
-                '&sovereign=${Uri.encodeComponent(widget.world.sovereignId)}',
+                worldMembersPath(
+                  widget.world.id,
+                  worldName: widget.world.name,
+                  sovereignId: widget.world.sovereignId,
+                ),
               ),
               variant: ButtonVariant.text,
             ),

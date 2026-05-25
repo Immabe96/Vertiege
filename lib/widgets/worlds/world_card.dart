@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../models/world.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
@@ -57,7 +58,7 @@ class WorldCard extends ConsumerWidget {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => context.push('/explore/${world.id}'),
+              onTap: () => context.push(exploreWorldPath(world.id)),
               borderRadius: BorderRadius.circular(VRadius.lg),
               child: layout,
             ),
@@ -70,7 +71,7 @@ class WorldCard extends ConsumerWidget {
       delayMs: index * 60,
       child: SovereignCard(
         tier: tier,
-        onTap: () => context.push('/explore/${world.id}'),
+        onTap: () => context.push(exploreWorldPath(world.id)),
         child: layout,
       ),
     );

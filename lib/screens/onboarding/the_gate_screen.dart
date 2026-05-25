@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../router/world_navigation.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../state/resident_provider.dart';
@@ -261,7 +262,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
         if (goalAchievementId.isNotEmpty) {
           ref
               .read(achievementProvider.notifier)
-              .submitAchievement(goalAchievementId, 'submitted');
+              .submitAchievement(goalAchievementId, const []);
         }
       }
     }
@@ -278,7 +279,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
       );
 
       context.go(
-        _joinedStarterWorldId == null ? '/' : '/explore/$_joinedStarterWorldId',
+        _joinedStarterWorldId == null
+            ? '/'
+            : exploreWorldPath(_joinedStarterWorldId!),
       );
     }
   }

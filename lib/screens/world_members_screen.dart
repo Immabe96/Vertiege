@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../config/tiers.dart';
 import '../models/rank.dart';
 import '../services/rank_service.dart';
@@ -150,7 +151,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                         padding: const EdgeInsets.all(VSpacing.md),
                         borderRadius: BorderRadius.circular(VRadius.xl),
                         child: InkWell(
-                          onTap: () => context.push('/residents/$residentId'),
+                          onTap: () => context.push(residentProfilePath(residentId)),
                           borderRadius: BorderRadius.circular(VRadius.xl),
                           child: Row(
                             children: [

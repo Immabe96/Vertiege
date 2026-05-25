@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../models/season.dart';
 import '../services/season_service.dart';
@@ -371,7 +372,7 @@ class _PodiumCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
       child: GestureDetector(
-        onTap: () => context.push('/explore/${score.worldId}'),
+        onTap: () => context.push(exploreWorldPath(score.worldId)),
         child: Container(
           height: height,
           decoration: BoxDecoration(
@@ -504,7 +505,7 @@ class _RankingRow extends StatelessWidget {
         vertical: VSpacing.xs,
       ),
       child: GestureDetector(
-        onTap: () => context.push('/explore/${score.worldId}'),
+        onTap: () => context.push(exploreWorldPath(score.worldId)),
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.lg,

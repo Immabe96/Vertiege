@@ -2,6 +2,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../models/channel.dart';
+import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
@@ -73,10 +74,7 @@ class ResourceVault extends StatelessWidget {
               for (final channel in guideChannels)
                 _GuideItem(
                   channel: channel,
-                  onTap: () => context.push(
-                    '/explore/$worldId/${Uri.encodeComponent(channel.name)}'
-                    '?id=${Uri.encodeComponent(channel.id)}',
-                  ),
+                  onTap: () => context.push(worldChannelPath(worldId, channel)),
                 ),
           ],
         ),

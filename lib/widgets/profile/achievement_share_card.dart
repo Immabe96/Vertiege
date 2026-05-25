@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
+import '../../router/world_navigation.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -44,6 +45,8 @@ class AchievementShareCard extends StatelessWidget {
         return VColors.achievementCreative;
       case AchievementCategory.creative:
         return VColors.achievementCreative;
+      case AchievementCategory.life:
+        return VColors.tertiary;
       case AchievementCategory.profession:
         return VColors.achievementCareer;
       case AchievementCategory.inApp:
@@ -73,6 +76,8 @@ class AchievementShareCard extends StatelessWidget {
         return 'FUNNY';
       case AchievementCategory.creative:
         return 'CREATIVE';
+      case AchievementCategory.life:
+        return 'LIFE';
       case AchievementCategory.profession:
         return 'PROFESSION';
       case AchievementCategory.inApp:
@@ -102,12 +107,20 @@ class AchievementShareCard extends StatelessWidget {
         return Icons.mood;
       case AchievementCategory.creative:
         return Icons.palette;
+      case AchievementCategory.life:
+        return Icons.auto_stories;
       case AchievementCategory.profession:
         return Icons.badge;
       case AchievementCategory.inApp:
         return Icons.diamond;
     }
   }
+
+  /// Deep link slug for this achievement on the resident profile.
+  String profileSharePath() => residentProfilePath(
+        resident.id,
+        achievementId: achievement.id,
+      );
 
   /// Shows the achievement share dialog.
   ///
@@ -129,7 +142,9 @@ class AchievementShareCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ShareButton(
-              shareText: 'I just earned ${achievement.title} on Vertiege!',
+              shareText:
+                  'I just earned ${achievement.title} on Vertiege! '
+                  'See it on my profile: ${AchievementShareCard(achievement: achievement, resident: resident, totalXp: totalXp).profileSharePath()}',
               onShared: () => Navigator.of(ctx).pop(),
               child: AchievementShareCard(
                 achievement: achievement,
@@ -323,6 +338,17 @@ class AchievementShareCard extends StatelessWidget {
                       fontSize: VFontSize.labelSm,
                       color: VColors.outline,
                       letterSpacing: 0,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.md),
+                  Text(
+                    profileSharePath(),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: VFontSize.labelSm,
+                      color: VColors.outline,
                     ),
                   ),
                   const SizedBox(height: VSpacing.lg),

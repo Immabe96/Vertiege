@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -24,7 +25,7 @@ class BoostedWorldsRow extends StatelessWidget {
         itemBuilder: (context, index) {
           final world = worlds[index];
           return GestureDetector(
-            onTap: () => context.push('/explore/${world.id}'),
+            onTap: () => context.push(exploreWorldPath(world.id)),
             child: Container(
               width: 200,
               padding: const EdgeInsets.all(VSpacing.md),

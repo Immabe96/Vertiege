@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../forui/v_hub_page.dart';
 import '../../models/listing.dart';
+import '../../router/world_navigation.dart';
 import '../../services/chat_service.dart';
+import '../../config/world_capability_matrix.dart';
 import '../../services/marketplace_service.dart';
 import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/worlds/listing_card.dart';
@@ -70,14 +73,28 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
     }
   }
 
-  void _openCreateListing() async {
-    final result = await showDialog<bool>(
+  void _openCreateListing() {
+    final resident = ref.read(residentProvider).resident;
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    if (world == null) {
+      VFeedback.showError(context, 'World not found');
+      return;
+    }
+    final block = WorldCapabilityMatrix.blockReasonCreateListing(
+      resident,
+      world,
+      isJoined: widget.isMember,
+    );
+    if (block != null) {
+      VFeedback.showMessage(context, block);
+      return;
+    }
+    showDialog<bool>(
       context: context,
       builder: (ctx) => CreateListingDialog(worldId: widget.worldId),
-    );
-    if (result == true) {
-      _loadListings();
-    }
+    ).then((result) {
+      if (result == true) _loadListings();
+    });
   }
 
   void _openListingDetail(Listing listing) {
@@ -85,17 +102,31 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _ListingDetailSheet(listing: listing),
+      builder: (ctx) => _ListingDetailSheet(
+        listing: listing,
+        worldId: widget.worldId,
+        isMember: widget.isMember,
+        onPurchased: _loadListings,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final resident = ref.watch(residentProvider).resident;
+    final world = ref.watch(worldProvider).worlds[widget.worldId];
+    final canList = world != null &&
+        WorldCapabilityMatrix.canCreateListing(
+          resident,
+          world,
+          isJoined: widget.isMember,
+        );
+
     return VHubPage(
       title: 'Marketplace',
       showBack: true,
       headerActions: [
-        if (widget.isMember)
+        if (widget.isMember && canList)
           VAccessibleHeaderAction(
             label: 'Create listing',
             icon: const Icon(Icons.add),
@@ -250,12 +281,30 @@ class _Chip extends StatelessWidget {
   }
 }
 
-class _ListingDetailSheet extends ConsumerWidget {
+class _ListingDetailSheet extends ConsumerStatefulWidget {
   final Listing listing;
+  final String worldId;
+  final bool isMember;
+  final VoidCallback onPurchased;
 
-  const _ListingDetailSheet({required this.listing});
+  const _ListingDetailSheet({
+    required this.listing,
+    required this.worldId,
+    required this.isMember,
+    required this.onPurchased,
+  });
 
-  Future<void> _contactSeller(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<_ListingDetailSheet> createState() =>
+      _ListingDetailSheetState();
+}
+
+class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
+  bool _purchasing = false;
+
+  Listing get listing => widget.listing;
+
+  Future<void> _contactSeller() async {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
@@ -270,16 +319,54 @@ class _ListingDetailSheet extends ConsumerWidget {
     final draft =
         'Hi — I\'m interested in your listing "${listing.title}".';
     context.push(
-      '/dm/${room['id']}?draft=${Uri.encodeComponent(draft)}',
+      dmPath(room['id'] as String, draft: draft),
     );
   }
 
+  Future<void> _purchase() async {
+    if (listing.coinPrice == null) return;
+    setState(() => _purchasing = true);
+    try {
+      final result = await MarketplaceService.purchaseListing(listing.id);
+      if (!mounted) return;
+      if (result['success'] == true) {
+        await ref.read(residentProvider.notifier).loadResident();
+        widget.onPurchased();
+        Navigator.of(context).pop();
+        VFeedback.showMessage(
+          context,
+          'Purchased for ${listing.coinPrice} coins',
+        );
+      } else {
+        VFeedback.showError(
+          context,
+          result['error']?.toString() ?? 'Purchase failed',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        VFeedback.showError(context, 'Purchase failed: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _purchasing = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
+    final world = ref.watch(worldProvider).worlds[widget.worldId];
     final isOwner = resident?.id == listing.sellerId;
+    final canBuy = widget.isMember &&
+        !isOwner &&
+        listing.status == ListingStatus.active &&
+        listing.coinPrice != null &&
+        listing.coinPrice! > 0;
+    final balance = resident?.sovereignCoins ?? 0;
+    final taxRate = world?.taxRate ?? 0;
+    final tax = canBuy ? (listing.coinPrice! * taxRate / 100).floor() : 0;
 
     return Container(
       decoration: BoxDecoration(
@@ -356,6 +443,36 @@ class _ListingDetailSheet extends ConsumerWidget {
                 ),
               ),
             ],
+            if (listing.coinPrice != null && listing.coinPrice! > 0) ...[
+              const SizedBox(height: VSpacing.sm),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.monetization_on,
+                    size: VIconSize.sm,
+                    color: VColors.warning,
+                  ),
+                  const SizedBox(width: VSpacing.xs),
+                  Text(
+                    '${listing.coinPrice} sovereign coins',
+                    style: const TextStyle(
+                      fontSize: VFontSize.bodyMd,
+                      fontWeight: VFontWeight.bold,
+                      color: VColors.warning,
+                    ),
+                  ),
+                ],
+              ),
+              if (taxRate > 0)
+                Text(
+                  'Includes $tax coin tax to world treasury ($taxRate%)',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                  ),
+                ),
+            ],
             const SizedBox(height: VSpacing.sm),
             Text(
               'Seller: ${listing.sellerName}',
@@ -395,12 +512,33 @@ class _ListingDetailSheet extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: VSpacing.xl),
+            if (canBuy) ...[
+              Text(
+                'Your balance: $balance coins',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: VSpacing.sm),
+              FilledButton.icon(
+                onPressed: _purchasing || balance < listing.coinPrice!
+                    ? null
+                    : _purchase,
+                icon: _purchasing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.shopping_cart_checkout),
+                label: Text('Buy for ${listing.coinPrice} coins'),
+              ),
+              const SizedBox(height: VSpacing.sm),
+            ],
             if (listing.status == ListingStatus.active && !isOwner)
               Semantics(
                 button: true,
                 label: 'Contact seller about ${listing.title}',
                 child: FilledButton.icon(
-                  onPressed: () => _contactSeller(context, ref),
+                  onPressed: _contactSeller,
                   icon: const Icon(VIcons.message),
                   label: const Text('Contact Seller'),
                   style: FilledButton.styleFrom(

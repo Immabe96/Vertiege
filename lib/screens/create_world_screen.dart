@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../models/world.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/admin_access_service.dart';
@@ -145,7 +146,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
           }
           _isCreating = false;
         });
-        context.go('/explore/$worldId');
+        context.go(exploreWorldPath(worldId));
       }
     } catch (e) {
       if (mounted) {

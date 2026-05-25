@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
@@ -47,7 +48,7 @@ class JoinedWorldsRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(VRadius.lg),
             child: InkWell(
               borderRadius: BorderRadius.circular(VRadius.lg),
-              onTap: () => context.push('/explore/${world.id}'),
+              onTap: () => context.push(exploreWorldPath(world.id)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: VSpacing.md,

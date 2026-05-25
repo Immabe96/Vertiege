@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../forui/v_tab_page.dart';
 
 import '../../models/channel.dart';
+import '../../router/world_navigation.dart';
 import '../../models/world.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
@@ -520,14 +521,10 @@ class _ChannelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final channelName = Uri.encodeComponent(channel.name);
-    final channelId = Uri.encodeComponent(channel.id);
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () =>
-            context.push('/explore/${world.id}/$channelName?id=$channelId'),
+        onTap: () => context.push(worldChannelPath(world.id, channel)),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.md,

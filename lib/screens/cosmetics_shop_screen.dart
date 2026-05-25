@@ -2,6 +2,7 @@
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../models/listing.dart';
 import '../services/marketplace_service.dart';
 import '../state/resident_provider.dart';
@@ -809,7 +810,7 @@ class _DominionListingDetailSheet extends StatelessWidget {
             const SizedBox(height: VSpacing.xl),
             FilledButton.icon(
               onPressed: () {
-                context.push('/explore/${listing.worldId}');
+                context.push(exploreWorldPath(listing.worldId));
                 Navigator.of(context).pop();
               },
               icon: const Icon(Icons.open_in_new),

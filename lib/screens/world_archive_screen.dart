@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/channel.dart';
+import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
@@ -70,9 +71,7 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
           ),
           ...archiveChannels.map((channel) => _ArchiveItem(
                 channel: channel,
-                onTap: () => context.push(
-                  '/explore/${widget.worldId}/${Uri.encodeComponent(channel.name)}?id=${Uri.encodeComponent(channel.id)}',
-                ),
+                onTap: () => context.push(worldChannelPath(widget.worldId, channel)),
               )),
         ],
       ),

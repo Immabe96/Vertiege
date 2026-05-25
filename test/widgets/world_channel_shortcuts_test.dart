@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vertiege/models/channel.dart';
-import 'package:vertiege/widgets/worlds/world_channel_shortcuts.dart';
+import 'package:vertiege/router/world_navigation.dart';
 
 void main() {
   test('worldChannelExplorePath includes channel id query param', () {

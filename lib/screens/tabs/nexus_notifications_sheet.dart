@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../state/ally_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../models/notification.dart';
+import '../../router/notification_navigation.dart';
 import '../../utils/time_ago.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -247,26 +248,8 @@ class NotificationList extends ConsumerWidget {
   }
 
   void _handleNavigation(BuildContext context, AppNotification n) {
-    switch (n.type) {
-      case NotificationType.like:
-      case NotificationType.comment:
-      case NotificationType.worldUnlocked:
-      case NotificationType.mention:
-        if (n.worldId != null) {
-          context.push('/explore/${n.worldId}');
-        }
-        break;
-      case NotificationType.tierUpgrade:
-      case NotificationType.allegianceRequest:
-        context.push('/identity');
-        break;
-      case NotificationType.welcome:
-      case NotificationType.modAction:
-      case NotificationType.ranking:
-      case NotificationType.streakReminder:
-      case NotificationType.reactionMilestone:
-        break;
-    }
+    final route = routeForNotification(n);
+    if (route != null) context.push(route);
   }
 
   static Color _colorForType(NotificationType type) {
@@ -282,6 +265,8 @@ class NotificationList extends ConsumerWidget {
       NotificationType.reactionMilestone => VColors.error,
       NotificationType.mention => VColors.primary,
       NotificationType.allegianceRequest => VColors.tertiary,
+      NotificationType.achievementApproved => VColors.success,
+      NotificationType.achievementRejected => VColors.error,
     };
   }
 
@@ -298,6 +283,8 @@ class NotificationList extends ConsumerWidget {
       NotificationType.reactionMilestone => Icons.favorite_border,
       NotificationType.mention => Icons.alternate_email,
       NotificationType.allegianceRequest => Icons.handshake,
+      NotificationType.achievementApproved => Icons.verified,
+      NotificationType.achievementRejected => Icons.cancel_outlined,
     };
   }
 }

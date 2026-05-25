@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -1160,8 +1161,31 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         borderRadius: BorderRadius.circular(VRadius.xl),
                       ),
                       onTap: () => context.push(
-                        '/audit-log/${widget.worldId}?name=${Uri.encodeComponent(world.name)}',
+                        auditLogPath(
+                          widget.worldId,
+                          worldName: world.name,
+                        ),
                       ),
+                    ),
+                  ListTile(
+                      leading: const Icon(
+                        Icons.menu_book_outlined,
+                        color: VColors.primary,
+                      ),
+                      title: const Text('World archive'),
+                      subtitle: const Text(
+                        'Lore, rules, and recorded history channels',
+                      ),
+                      trailing: Icon(
+                        Icons.chevron_right,
+                        color: isDark
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(VRadius.xl),
+                      ),
+                      onTap: () => context.push(worldArchivePath(widget.worldId)),
                     ),
 
                   const SizedBox(height: VSpacing.md),

@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../models/resident.dart';
 import '../state/resident_provider.dart';
@@ -16,13 +17,20 @@ import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/profile/badge_display.dart';
+import '../widgets/profile/profile_achievement_showcase.dart';
+import '../services/profile_achievements_service.dart';
 import '../widgets/shared/profession_icon.dart';
 import '../widgets/shared/tier_icon.dart';
 
 class ResidentProfileScreen extends ConsumerStatefulWidget {
   final String residentId;
+  final String? highlightAchievementId;
 
-  const ResidentProfileScreen({super.key, required this.residentId});
+  const ResidentProfileScreen({
+    super.key,
+    required this.residentId,
+    this.highlightAchievementId,
+  });
 
   @override
   ConsumerState<ResidentProfileScreen> createState() =>
@@ -31,6 +39,7 @@ class ResidentProfileScreen extends ConsumerStatefulWidget {
 
 class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
   Resident? _profile;
+  List<PublicAchievementEntry> _publicAchievements = [];
   bool _loading = true;
   String? _error;
 
@@ -41,29 +50,45 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     final currentResident = ref.read(residentProvider).resident;
+    Resident? profile;
     if (currentResident?.id == widget.residentId) {
-      setState(() {
-        _profile = currentResident;
-        _loading = false;
-      });
-      return;
+      profile = currentResident;
+    } else {
+      try {
+        profile = await ProfileService.getProfile(widget.residentId);
+      } catch (_) {
+        if (!mounted) return;
+        setState(() {
+          _loading = false;
+          _error = 'Failed to load profile';
+        });
+        return;
+      }
     }
-    try {
-      final fetched = await ProfileService.getProfile(widget.residentId);
-      if (!mounted) return;
-      setState(() {
-        _profile = fetched;
-        _loading = false;
-        _error = fetched == null ? 'Resident not found' : null;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _error = 'Failed to load profile';
-      });
+
+    List<PublicAchievementEntry> achievements = [];
+    if (profile != null) {
+      try {
+        achievements = await ProfileAchievementsService.fetchPublicProfile(
+          widget.residentId,
+        );
+      } catch (_) {
+        achievements = [];
+      }
     }
+
+    if (!mounted) return;
+    setState(() {
+      _profile = profile;
+      _publicAchievements = achievements;
+      _loading = false;
+      _error = profile == null ? 'Resident not found' : null;
+    });
   }
 
   @override
@@ -119,7 +144,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     final resident = _profile!;
     final isOwnProfile =
         resident.id == ref.read(residentProvider).resident?.id;
-    final totalXp = isOwnProfile ? achievements.totalXp : 0;
+    final totalXp = resident.totalXp;
 
     return ListView(
       padding: const EdgeInsets.all(VSpacing.lg),
@@ -279,7 +304,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     );
                     if (room != null) {
                       if (!mounted) return;
-                      context.push('/dm/${room['id']}');
+                      context.push(dmPath(room['id'] as String));
                     }
                   },
                   icon: const Icon(VIcons.message),
@@ -381,10 +406,35 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           ),
         ],
 
+        if (_publicAchievements.isNotEmpty) ...[
+          const SizedBox(height: VSpacing.lg),
+          FadeIn(
+            delayMs: 140,
+            child: Container(
+              padding: const EdgeInsets.all(VSpacing.lg),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(VRadius.xl),
+                border: Border.all(
+                  color: isDark
+                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                      : VColors.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: ProfileAchievementShowcase(
+                entries: _publicAchievements,
+                highlightAchievementId: widget.highlightAchievementId,
+              ),
+            ),
+          ),
+        ],
+
         if (resident.decorations.isNotEmpty) ...[
           const SizedBox(height: VSpacing.lg),
           FadeIn(
-            delayMs: 160,
+            delayMs: 180,
             child: Container(
               padding: const EdgeInsets.all(VSpacing.lg),
               decoration: BoxDecoration(

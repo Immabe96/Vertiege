@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import '../../models/post.dart';
 import '../../models/report.dart';
 import '../../config/awards.dart';
@@ -109,7 +110,7 @@ class PostItem extends ConsumerWidget {
                     GestureDetector(
                       onTap: () => _showResidentPreview(context, ref),
                       onLongPress: () =>
-                          context.push('/residents/${post.residentId}'),
+                          context.push(residentProfilePath(post.residentId)),
                       child: Hero(
                         tag: 'avatar-${post.residentId}',
                         child: CosmeticAvatar(
@@ -127,7 +128,7 @@ class PostItem extends ConsumerWidget {
                           GestureDetector(
                             onTap: () => _showResidentPreview(context, ref),
                             onLongPress: () =>
-                                context.push('/residents/${post.residentId}'),
+                                context.push(residentProfilePath(post.residentId)),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -252,7 +253,7 @@ class PostItem extends ConsumerWidget {
                     onMentionTap: (name) {
                       final id = nameToId[name];
                       if (id != null) {
-                        context.push('/residents/$id');
+                        context.push(residentProfilePath(id));
                       }
                     },
                     onHashtagTap: (tag) => context.push('/search?q=%23$tag'),
@@ -485,7 +486,7 @@ class PostItem extends ConsumerWidget {
                     onPressed: () {
                       Navigator.pop(context);
                       // Navigate to full profile on second tap
-                      context.push('/residents/${post.residentId}');
+                      context.push(residentProfilePath(post.residentId));
                     },
                     icon: const Icon(VIcons.user, size: VIconSize.sm),
                     label: const Text('View Profile'),
@@ -500,7 +501,7 @@ class PostItem extends ConsumerWidget {
               OutlinedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);
-                  context.push('/residents/${post.residentId}');
+                  context.push(residentProfilePath(post.residentId));
                 },
                 icon: const Icon(VIcons.user, size: VIconSize.sm),
                 label: const Text('View My Profile'),
