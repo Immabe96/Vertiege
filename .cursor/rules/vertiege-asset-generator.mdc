@@ -1,0 +1,18 @@
+---
+description: >-
+  When generating Vertiege achievement, profession, badge, or world images, use the
+  image manifest queue and vertiege-asset-generator skill with GenerateImage.
+globs:
+  - docs/assets/**
+  - assets/generated/**
+  - assets/staging/**
+  - scripts/image_gen.py
+  - scripts/sync_image_manifest.py
+alwaysApply: false
+---
+
+Use skill **vertiege-asset-generator** (`/.cursor/skills/vertiege-asset-generator/SKILL.md`).
+
+- Queue: `docs/assets/image-manifest.json` + `python3 scripts/image_gen.py next --json`
+- One image per turn; category `ach-*` covers bulk achievements (not 590 unique files)
+- Transparent PNG for badges; no text in pixels

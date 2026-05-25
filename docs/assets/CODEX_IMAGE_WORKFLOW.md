@@ -11,6 +11,30 @@ Use this when your **daily image limit** resets. Work **one file per session**; 
 | `assets/generated/` | Production assets the app loads (promote when happy) |
 | `docs/assets/generation-log.md` | Optional human notes per session |
 
+## Cursor agent (GenerateImage)
+
+For Linux/macOS and **Cursor agents** with image generation:
+
+| Piece | Path |
+|-------|------|
+| Agent definition | `.cursor/agents/vertiege-asset-generator.md` |
+| Skill (workflow) | `.cursor/skills/vertiege-asset-generator/SKILL.md` |
+| Queue CLI | `python3 scripts/image_gen.py` |
+| Enqueue missing `ach-life` / `prof-*` | `python3 scripts/sync_image_manifest.py` |
+
+Example session:
+
+```bash
+python3 scripts/sync_image_manifest.py
+python3 scripts/image_gen.py next --json
+# → use imageDescription with GenerateImage → copy to stagingPath
+python3 scripts/image_gen.py mark --id ach-life --status generated
+./scripts/process-transparent-assets.sh --staging   # if needed
+python3 scripts/image_gen.py promote --id ach-life
+```
+
+Invoke in chat: *“Run the Vertiege asset generator agent”* or delegate to subagent **Vertiege Asset Generator**.
+
 ## Before you start (once)
 
 1. Open this repo in Codex with the same root as Vertiege.

@@ -27,6 +27,12 @@ Lookup: `achievementForId(id)` / `achievementById`.
 
 `optional`, `required`, `multi`, `location` — see `AchievementProofType` in `lib/models/achievement.dart`.
 
+## Images (not one PNG per achievement)
+
+The **590** catalog entries share **13 category icons** (`ach-education.png`, `ach-life.png`, …) via `WorldAssets.achievementCategoryImage`. Dedicated `prof-*` medallions are generated separately.
+
+Asset queue: `python3 scripts/sync_image_manifest.py` → Cursor agent **Vertiege Asset Generator** (see `docs/assets/CODEX_IMAGE_WORKFLOW.md`).
+
 ## Server sync
 
 Postgres `achievement_definitions` must include every catalog id or `grant_verified_achievement` fails.
