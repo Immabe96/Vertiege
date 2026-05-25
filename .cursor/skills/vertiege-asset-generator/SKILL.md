@@ -117,6 +117,16 @@ Same finesse as `badge-marathon` / `badge-doctor`: bespoke prompt per title+desc
 
 When dedicated PNGs exist, point `WorldAssets._badgeImagePaths` in `lib/utils/world_assets.dart` to the new files (not `prof-doctor.png` reuse).
 
+## When all 110 core badges are on disk
+
+```bash
+python3 scripts/check_core_achievement_assets.py
+./scripts/build_release_apk.sh
+```
+
+Output: `build/app/outputs/flutter-apk/app-release.apk`  
+CI alternative: GitHub Actions → **Release APK (core assets gate)** (manual).
+
 ## Windows
 
 `scripts/image_gen.ps1` remains valid; prefer `scripts/image_gen.py` on Linux/CI.

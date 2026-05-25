@@ -4,6 +4,20 @@
 
 Manual checks on **CI APK** before promoting `develop` → `main`. Owner-run; update this file as you test.
 
+## Release APK after core achievement badges (110/110)
+
+When every core catalog achievement has PNG art (`assets/generated/achievements/<id>.png` or legacy `prof-*` / `badge-*` maps):
+
+```bash
+python3 scripts/check_core_achievement_assets.py
+./scripts/build_release_apk.sh
+```
+
+APK path: `build/app/outputs/flutter-apk/app-release.apk`  
+GitHub: **Actions → Release APK (core assets gate)** (manual; fails until assets are committed).
+
+Use `--force` on the script only for interim QA without full badge art.
+
 ## Install latest develop APK
 
 ```powershell

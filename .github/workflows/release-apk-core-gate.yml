@@ -1,0 +1,69 @@
+# Manual release APK — only when all 110 core achievement badge PNGs exist on disk.
+name: Release APK (core assets gate)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: release-apk-core-gate
+  cancel-in-progress: true
+
+jobs:
+  gate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Core achievement assets complete
+        run: python3 scripts/check_core_achievement_assets.py --list-missing
+
+      - name: Create CI .env from secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+            printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env
+          else
+            touch .env
+            echo "::warning::SUPABASE secrets missing; APK may run offline"
+          fi
+
+      - name: Configure release signing from secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: bash scripts/ci-setup-android-signing.sh
+
+      - name: flutter test
+        run: flutter test
+
+      - name: Build release APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertiege-release-core-badges
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: core-badges-${{ github.run_number }}
+          name: Vertiege core badges release (${{ github.sha }})
+          body: |
+            Release APK built after **110/110** core achievement badge assets passed
+            `scripts/check_core_achievement_assets.py`.
+
+            Workflow: **Release APK (core assets gate)** (manual dispatch).
+          files: build/app/outputs/flutter-apk/app-release.apk
+          make_latest: false
