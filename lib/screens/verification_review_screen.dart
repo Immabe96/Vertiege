@@ -5,7 +5,7 @@ import '../models/post.dart';
 import '../config/achievement_reject_reasons.dart';
 import '../services/verification_service.dart';
 import '../services/achievement_review_service.dart';
-import '../widgets/achievements/proof_image_gallery.dart';
+import '../widgets/achievements/achievement_verifier_review_card.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
 import '../forui/v_hub_page.dart';
@@ -395,7 +395,6 @@ class _VerificationReviewScreenState
   }
 
   Widget _buildAchievementsTab(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
     if (_achievementsLoading) return const ScreenLoading.list();
     if (_achievementSubmissions.isEmpty) {
       return const AppEmptyState(
@@ -418,83 +417,10 @@ class _VerificationReviewScreenState
             ),
             child: _Card(
               padding: const EdgeInsets.all(VSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.emoji_events, color: VColors.primary),
-                      const SizedBox(width: VSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              s.residentName,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: VFontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              s.achievementTitle,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: VColors.primary,
-                              ),
-                            ),
-                            if (s.achievementDescription != null &&
-                                s.achievementDescription!.isNotEmpty)
-                              Text(
-                                s.achievementDescription!,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
-                                ),
-                              ),
-                            if (s.submittedAt != null)
-                              Text(
-                                s.submittedAt!.toLocal().toString(),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: VColors.error),
-                        tooltip: 'Reject',
-                        onPressed: () => _rejectAchievement(s),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.check, color: VColors.success),
-                        tooltip: 'Approve',
-                        onPressed: () => _approveAchievement(s),
-                      ),
-                    ],
-                  ),
-                  if (s.aiNotes != null && s.aiNotes!.isNotEmpty) ...[
-                    const SizedBox(height: VSpacing.sm),
-                    Text(s.aiNotes!, style: theme.textTheme.bodySmall),
-                  ],
-                  if (s.proofUris.isNotEmpty) ...[
-                    const SizedBox(height: VSpacing.md),
-                    ProofImageGallery(imageUrls: s.proofUris),
-                  ] else ...[
-                    const SizedBox(height: VSpacing.sm),
-                    Text(
-                      'No image proof (manual / text-only submission).',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
+              child: AchievementVerifierReviewCard(
+                submission: s,
+                onApprove: () => _approveAchievement(s),
+                onReject: () => _rejectAchievement(s),
               ),
             ),
           );
