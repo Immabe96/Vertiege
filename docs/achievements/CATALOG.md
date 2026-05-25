@@ -27,11 +27,16 @@ Lookup: `achievementForId(id)` / `achievementById`.
 
 `optional`, `required`, `multi`, `location` — see `AchievementProofType` in `lib/models/achievement.dart`.
 
-## Images (not one PNG per achievement)
+## Images
 
-The **590** catalog entries share **13 category icons** (`ach-education.png`, `ach-life.png`, …) via `WorldAssets.achievementCategoryImage`. Dedicated `prof-*` medallions are generated separately.
+| Tier | Count | Asset path | Look |
+|------|------:|------------|------|
+| **Core** | ~110 | `assets/generated/achievements/<id>.png` | Unique badge per milestone (same finesse as `badge-marathon`) |
+| **Bulk seeds** | ~480 | `assets/generated/ach-<category>.png` | Shared category emblem |
+| **Profession** | 14 | `assets/generated/prof-*.png` | Verified profession medallions |
 
-Asset queue: `python3 scripts/sync_image_manifest.py` → Cursor agent **Vertiege Asset Generator** (see `docs/assets/CODEX_IMAGE_WORKFLOW.md`).
+Enqueue core badges: `python3 scripts/enqueue_core_achievement_badges.py`  
+Generate: Cursor agent **Vertiege Asset Generator** (`docs/assets/CODEX_IMAGE_WORKFLOW.md`).
 
 ## Server sync
 

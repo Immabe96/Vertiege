@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vertiege/config/achievements.dart';
+import 'package:vertiege/config/core_achievement_badge_ids.dart';
 import 'package:vertiege/models/achievement.dart';
 import 'package:vertiege/models/resident.dart';
+import 'package:vertiege/utils/world_assets.dart';
 
 void main() {
   group('ACHIEVEMENTS', () {
@@ -74,6 +76,16 @@ void main() {
       expect(selectableProfessions.length, greaterThanOrEqualTo(14));
       expect(selectableProfessions, contains('Nursing'));
       expect(selectableProfessions, contains('Journalism'));
+    });
+
+    test('core achievements resolve per-id badge asset path', () {
+      expect(coreAchievementBadgeIds.length, greaterThanOrEqualTo(100));
+      expect(coreAchievementBadgeIds, contains('edu-hs'));
+      expect(
+        WorldAssets.coreAchievementBadgeImage('edu-hs'),
+        'assets/generated/achievements/edu-hs.png',
+      );
+      expect(WorldAssets.coreAchievementBadgeImage('edu-seed-honors-roll'), isNull);
     });
   });
 

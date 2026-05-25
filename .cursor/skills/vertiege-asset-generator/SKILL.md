@@ -86,10 +86,32 @@ git commit -m "assets: generated <id>"
 
 ## What to generate (priority)
 
-1. **Missing category icons** — `ach-life`, `ach-profession` (590 catalog uses these)
-2. **New profession medallions** — `prof-nurse` … `prof-journalist` (replace placeholder reuse in `world_assets.dart`)
-3. **Skipped / failed** manifest rows — `python3 scripts/image_gen.py list --status failed`
-4. **Do not** enqueue 590 unique achievement PNGs unless product explicitly requests per-id art
+### Phase 1 — Core catalog (do this first) ~104 images
+
+Each **original** achievement in `_achievementCatalogRaw` gets a **unique** badge at:
+
+`assets/generated/achievements/<achievement-id>.png`
+
+Enqueue / refresh prompts:
+
+```bash
+python3 scripts/enqueue_core_achievement_badges.py
+```
+
+Runtime: `WorldAssets.achievementBadgeImage(id)` → per-id PNG, else category icon, else Material icon.  
+`image_gen.py next` prioritizes `achievement_badge` rows before `ach-life` / `prof-*`.
+
+Same finesse as `badge-marathon` / `badge-doctor`: bespoke prompt per title+description, transparent PNG, `process-transparent-assets.sh`.
+
+### Phase 2 — Shared category + profession icons
+
+1. **Missing category icons** — `ach-life`, `ach-profession`
+2. **New profession medallions** — `prof-nurse` … `prof-journalist`
+3. **Skipped / failed** rows
+
+### Phase 3 — Bulk seeds (later)
+
+**Do not** auto-enqueue 480 bulk seed ids unless product asks; they keep shared `ach-{category}.png` fallbacks.
 
 ## Wire-up after new `prof-*` files
 

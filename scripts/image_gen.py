@@ -70,6 +70,15 @@ def sync_status_from_disk(manifest: dict) -> None:
 
 def get_next_item(manifest: dict) -> dict | None:
     order = {"failed": 0, "pending": 1}
+
+    def priority(item: dict) -> int:
+        # Core per-achievement badges before category icons / misc.
+        if item.get("category") == "achievement_badge":
+            return 0
+        if item.get("category") == "achievement_category":
+            return 1
+        return 2
+
     candidates = [
         i
         for i in manifest["items"]
@@ -77,7 +86,13 @@ def get_next_item(manifest: dict) -> dict | None:
     ]
     if not candidates:
         return None
-    candidates.sort(key=lambda i: (order.get(i["status"], 9), i["id"]))
+    candidates.sort(
+        key=lambda i: (
+            priority(i),
+            order.get(i["status"], 9),
+            i["id"],
+        )
+    )
     return candidates[0]
 
 

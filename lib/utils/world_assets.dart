@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import '../config/core_achievement_badge_ids.dart';
 import '../models/world.dart';
 import '../theme/v_colors.dart';
 
@@ -168,6 +169,16 @@ class WorldAssets {
   }
 
   static String? badgeImageForId(String badgeId) => _badgeImagePaths[badgeId];
+
+  /// Core catalog achievement badge (bespoke PNG per id when generated).
+  static String? coreAchievementBadgeImage(String achievementId) {
+    if (!coreAchievementBadgeIds.contains(achievementId)) return null;
+    return 'assets/generated/achievements/$achievementId.png';
+  }
+
+  /// Legacy badges, then core per-id art, then null (caller uses category fallback).
+  static String? achievementBadgeImage(String achievementId) =>
+      badgeImageForId(achievementId) ?? coreAchievementBadgeImage(achievementId);
 
   static String? tierImageForValue(int tier) => _tierImagePaths[tier];
 
