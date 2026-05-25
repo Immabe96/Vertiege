@@ -31,6 +31,7 @@ import '../../widgets/profile/streak_display.dart';
 import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/referral_chip.dart';
 import '../../widgets/profile/subscription_badge.dart';
+import '../../widgets/achievements/achievement_queue_summary.dart';
 import '../../widgets/profile/trophy_case.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
@@ -577,6 +578,10 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
           _SectionHeader(title: 'Honours', theme: theme),
           const SizedBox(height: VSpacing.sm),
+
+          AchievementQueueSummary(
+            userAchievements: achievements.userAchievements,
+          ),
 
           TrophyCase(
             resident: resident,

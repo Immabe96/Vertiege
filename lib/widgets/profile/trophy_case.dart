@@ -5,8 +5,7 @@ import '../../theme/v_colors.dart';
 import '../shared/tier_icon.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
-import '../../config/achievements.dart' as ach_config;
-import '../achievements/achievement_avatar_surface.dart';
+import 'achievement_trophy_wall.dart';
 
 class TrophyCase extends StatelessWidget {
   final Resident resident;
@@ -62,11 +61,20 @@ class TrophyCase extends StatelessWidget {
           if (resident.prestigeStars > 0)
             const SizedBox(height: VSpacing.md),
 
-          // Top achievements
-          _RecentAchievementsSection(
-            achievements: achievements,
-            isDark: isDark,
-            theme: theme,
+          // Verified achievement wall
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Achievement wall',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: VColors.primary,
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              AchievementTrophyWall(achievements: achievements),
+            ],
           ),
           const SizedBox(height: VSpacing.md),
 
@@ -333,102 +341,6 @@ class _PrestigeStarsSection extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RecentAchievementsSection extends StatelessWidget {
-  final List<UserAchievement> achievements;
-  final bool isDark;
-  final ThemeData theme;
-
-  const _RecentAchievementsSection({
-    required this.achievements,
-    required this.isDark,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final verified = achievements
-        .where((a) => a.status == AchievementStatus.verified)
-        .take(5)
-        .toList();
-
-    if (verified.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Recent Achievements',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: VColors.primary,
-              fontWeight: VFontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: VSpacing.sm),
-          Text(
-            'No verified achievements yet—submit proof from the achievements hub.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recent Achievements',
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: VColors.primary,
-            fontWeight: VFontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: VSpacing.sm),
-        Wrap(
-          spacing: VSpacing.sm,
-          runSpacing: VSpacing.sm,
-          children: verified.map((a) {
-            final def = ach_config.achievements
-                .where((ach) => ach.id == a.achievementId)
-                .firstOrNull;
-            final label = def?.title ?? a.achievementId;
-            final brightness = theme.brightness;
-            return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: VSpacing.sm,
-                vertical: VSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: achievementChipBackground(brightness),
-                borderRadius: BorderRadius.circular(VRadius.pill),
-                border: Border.all(
-                  color: achievementChipBorder(brightness),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(VIcons.trophy, size: 14, color: VColors.tertiary),
-                  const SizedBox(width: VSpacing.xxs),
-                  Text(
-                    label,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.tertiary,
-                      fontWeight: VFontWeight.semiBold,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
         ),
       ],
     );

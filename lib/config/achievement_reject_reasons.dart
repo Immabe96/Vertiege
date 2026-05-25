@@ -57,6 +57,9 @@ AchievementRejectReason? rejectReasonByCode(String? code) {
   return null;
 }
 
+/// Machine-readable prefix in [ai_notes] for resubmit UX (stripped when shown).
+String rejectNoteStoragePrefix(String reasonCode) => '[code:$reasonCode]';
+
 /// Builds the note stored for the resident (ai_notes / reviewer message).
 String buildRejectNote({String? reasonCode, String? customNote}) {
   final trimmed = customNote?.trim() ?? '';
@@ -65,6 +68,42 @@ String buildRejectNote({String? reasonCode, String? customNote}) {
   }
   final preset = rejectReasonByCode(reasonCode);
   if (preset == null) return trimmed;
-  if (trimmed.isEmpty) return preset.residentMessage;
-  return '${preset.residentMessage}\n\nNote from reviewer: $trimmed';
+  final prefix = rejectNoteStoragePrefix(reasonCode);
+  if (trimmed.isEmpty) return '$prefix${preset.residentMessage}';
+  return '$prefix${preset.residentMessage}\n\nNote from reviewer: $trimmed';
+}
+
+/// Staff-facing resubmit guidance shown after a rejection.
+List<String> resubmitStepsForCode(String? code) {
+  return switch (code) {
+    'blurry' => [
+      'Retake photos in bright, even light',
+      'Wipe the lens and hold the phone steady',
+      'Make sure text and faces are in focus',
+    ],
+    'wrong_subject' => [
+      'Show the exact thing this achievement describes',
+      'Compare your photo to the achievement description',
+      'Remove unrelated screenshots or stock images',
+    ],
+    'incomplete' => [
+      'Add any missing photos the requirements ask for',
+      'Include dates, names, or credentials if relevant',
+      'Submit every angle the proof banner requests',
+    ],
+    'not_verifiable' => [
+      'Use official documents or unmistakable evidence',
+      'Avoid heavily edited or cropped images',
+      'Add context if the proof needs explanation',
+    ],
+    'duplicate' => [
+      'Submit new photos from a fresh attempt',
+      'Do not reuse the same files as your last try',
+    ],
+    _ => [
+      'Read the reviewer message below carefully',
+      'Follow the proof requirements for this achievement',
+      'Upload new photos before resubmitting',
+    ],
+  };
 }

@@ -6,6 +6,7 @@ import 'package:forui/forui.dart';
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/achievement_reject_feedback.dart';
 import 'achievement_icon.dart';
 
 /// Compact achievement row (Forui tile style) for category lists.
@@ -125,18 +126,19 @@ class AchievementListTile extends StatelessWidget {
               ],
             ],
           ),
-          if (status == AchievementStatus.rejected &&
-              aiNotes != null &&
-              aiNotes!.trim().isNotEmpty)
+          if (status == AchievementStatus.rejected)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                aiNotes!.trim(),
+                aiNotes != null && aiNotes!.trim().isNotEmpty
+                    ? rejectSummaryForList(aiNotes)
+                    : 'Rejected — tap to review feedback and resubmit',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: VColors.error,
                   fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.semiBold,
                 ),
               ),
             ),

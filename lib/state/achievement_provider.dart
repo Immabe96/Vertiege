@@ -85,19 +85,33 @@ class AchievementNotifier extends Notifier<AchievementState> {
       achievementId: achievementId,
       proofUris: proofUris,
       status: AchievementStatus.submitted,
+      clearReviewerNotes: existing?.status == AchievementStatus.rejected,
     );
 
-    state = state.copyWith(
-      userAchievements: [
-        ...state.userAchievements,
-        UserAchievement(
-          achievementId: achievementId,
-          status: AchievementStatus.submitted,
-          proofUris: proofUris,
-          submittedAt: DateTime.now().millisecondsSinceEpoch,
-        ),
-      ],
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final entry = UserAchievement(
+      achievementId: achievementId,
+      status: AchievementStatus.submitted,
+      proofUris: proofUris,
+      submittedAt: now,
+      isProfileVisible: existing?.isProfileVisible ?? true,
+      featuredOrder: existing?.featuredOrder,
     );
+
+    final List<UserAchievement> updated;
+    if (existing != null) {
+      updated = state.userAchievements
+          .map(
+            (a) => a.achievementId == achievementId
+                ? entry.copyWith(aiNotes: null)
+                : a,
+          )
+          .toList();
+    } else {
+      updated = [...state.userAchievements, entry];
+    }
+
+    state = state.copyWith(userAchievements: updated);
     _persist();
   }
 
@@ -105,6 +119,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
     required String achievementId,
     required List<String> proofUris,
     required AchievementStatus status,
+    bool clearReviewerNotes = false,
   }) async {
     final userId =
         ref.read(residentProvider).resident?.id ??
@@ -120,6 +135,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
       'submitted_at': DateTime.now().toIso8601String(),
       if (status == AchievementStatus.verified)
         'verified_at': DateTime.now().toIso8601String(),
+      if (clearReviewerNotes) 'ai_notes': null,
     }, onConflict: 'user_id,achievement_id');
   }
 

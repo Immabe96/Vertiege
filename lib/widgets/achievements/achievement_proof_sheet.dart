@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import 'achievement_icon.dart';
+import 'achievement_resubmit_banner.dart';
 import 'proof_requirements_banner.dart';
 import '../../widgets/core/v_feedback.dart';
 
@@ -123,7 +124,12 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
 
       if (!mounted) return;
       Navigator.pop(context);
-      VFeedback.showMessage(context, 'Achievement submitted for verification');
+      VFeedback.showMessage(
+        context,
+        widget.status == AchievementStatus.rejected
+            ? 'Resubmitted for review — we will notify you when verified'
+            : 'Achievement submitted for verification',
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -298,19 +304,10 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                     ),
                   ),
                 ],
-                if (widget.status == AchievementStatus.rejected &&
-                    widget.userAchievement?.aiNotes?.isNotEmpty == true) ...[
+                if (widget.status == AchievementStatus.rejected) ...[
                   const SizedBox(height: VSpacing.lg),
-                  FCard.raw(
-                    child: Padding(
-                      padding: const EdgeInsets.all(VSpacing.md),
-                      child: Text(
-                        widget.userAchievement!.aiNotes!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: VColors.error,
-                        ),
-                      ),
-                    ),
+                  AchievementResubmitBanner(
+                    reviewerNotes: widget.userAchievement?.aiNotes,
                   ),
                 ],
                 if (_canSubmit) ...[
