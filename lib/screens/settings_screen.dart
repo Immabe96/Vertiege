@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,9 @@ import '../state/resident_provider.dart';
 import '../services/storage_service.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
+import '../services/device_permission_service.dart';
 import '../services/firebase_bootstrap.dart';
+import '../services/push_token_service.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/supabase.dart';
 import '../services/world_nav_prefs.dart';
@@ -23,6 +26,7 @@ import '../ui/buttons/v_button.dart';
 import '../forui/v_hub_page.dart';
 import '../widgets/v_section_list.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/core/v_dialog.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -86,6 +90,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _setNotificationPref(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
+    if (key == _kPrefPushEnabled) {
+      await StorageService.setString(_kPrefPushEnabled, value ? 'true' : 'false');
+    }
+  }
+
+  Future<void> _onPushToggleChanged(bool enabled) async {
+    if (enabled && FirebaseBootstrap.isInitialized) {
+      final granted = await DevicePermissionService.requestNotifications();
+      if (!granted) {
+        if (!mounted) return;
+        await DevicePermissionService.showPermissionDeniedSheet(
+          context,
+          title: 'Enable notifications',
+          message:
+              'Push alerts are turned off at the OS level. Open Settings to allow Vertiege notifications.',
+        );
+        return;
+      }
+      final resident = ref.read(residentProvider).resident;
+      if (granted && resident != null) {
+        unawaited(PushTokenService.registerForResident(resident.id));
+      }
+    }
+    if (!mounted) return;
+    setState(() => _pushEnabled = enabled);
+    await _setNotificationPref(_kPrefPushEnabled, enabled);
   }
 
   void _estimateCacheSize() {
@@ -116,54 +146,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showCreditsDialog() {
     final theme = Theme.of(context);
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Credits'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Vertiege',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.sm),
-              const Text('A tier-gated social network built with love.'),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'Design & Development',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text('The Vertiege Team'),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'Special Thanks',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text('Flutter Community'),
-              const Text('Supabase Team'),
-              const Text('All our beta testers'),
-            ],
+      title: 'Credits',
+      scrollContent: true,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Vertiege',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
           ),
-        ),
-        actions: [
-          VButton(
-            label: 'Close',
-            onPressed: () => Navigator.pop(ctx),
-            variant: ButtonVariant.text,
+          const SizedBox(height: VSpacing.sm),
+          const Text('A tier-gated social network built with love.'),
+          const SizedBox(height: VSpacing.md),
+          Text(
+            'Design & Development',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
           ),
+          const SizedBox(height: VSpacing.xs),
+          const Text('The Vertiege Team'),
+          const SizedBox(height: VSpacing.md),
+          Text(
+            'Special Thanks',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          const Text('Flutter Community'),
+          const Text('Supabase Team'),
+          const Text('All our beta testers'),
         ],
       ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Close',
+            onPressed: () => Navigator.pop(context),
+            variant: ButtonVariant.text,
+          ),
+        ]),
+      ],
     );
   }
 
@@ -171,36 +200,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final controller = TextEditingController();
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Change Email'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.emailAddress,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: 'New email address',
-            prefixIcon: const Icon(Icons.email_outlined),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(VRadius.md),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(VRadius.md),
-              borderSide: BorderSide(
-                color: isDark ? VColors.outlineDark : VColors.outline,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(VRadius.md),
-              borderSide: const BorderSide(color: VColors.primary, width: 2),
+      title: 'Change Email',
+      content: TextField(
+        controller: controller,
+        keyboardType: TextInputType.emailAddress,
+        autofocus: true,
+        decoration: InputDecoration(
+          labelText: 'New email address',
+          prefixIcon: const Icon(Icons.email_outlined),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(VRadius.md),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(VRadius.md),
+            borderSide: BorderSide(
+              color: isDark ? VColors.outlineDark : VColors.outline,
             ),
           ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(VRadius.md),
+            borderSide: const BorderSide(color: VColors.primary, width: 2),
+          ),
         ),
-        actions: [
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             variant: ButtonVariant.text,
           ),
           VButton(
@@ -211,20 +240,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               try {
                 final client = getSupabase();
                 await client.auth.updateUser(UserAttributes(email: email));
-                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
-                  VFeedback.showMessage(context, 'Check your new email to confirm the change',);
+                  VFeedback.showMessage(
+                    context,
+                    'Check your new email to confirm the change',
+                  );
                 }
               } catch (e) {
-                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
                   VFeedback.showError(context, 'Failed to update email: $e');
                 }
               }
             },
           ),
-        ],
-      ),
+        ]),
+      ],
     );
   }
 
@@ -235,11 +267,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final formKey = GlobalKey<FormState>();
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Change Password'),
-        content: Form(
+      title: 'Change Password',
+      content: Form(
           key: formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -331,10 +362,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
         ),
-        actions: [
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             variant: ButtonVariant.text,
           ),
           VButton(
@@ -346,20 +378,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 await client.auth.updateUser(
                   UserAttributes(password: newController.text),
                 );
-                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
                   VFeedback.showMessage(context, 'Password changed successfully');
                 }
               } catch (e) {
-                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
                   VFeedback.showError(context, 'Failed to update password: $e');
                 }
               }
             },
           ),
-        ],
-      ),
+        ]),
+      ],
     );
   }
 
@@ -368,83 +400,89 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String confirmText = '';
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text('Delete Account', style: TextStyle(color: VColors.error)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'This action is permanent and cannot be undone. All your data, posts, and memberships will be permanently removed.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'Type DELETE to confirm',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.sm),
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: 'Type DELETE here',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.error,
-                      width: 2,
-                    ),
-                  ),
-                ),
-                onChanged: (v) => setDialogState(() => confirmText = v),
-              ),
-            ],
+      title: 'Delete Account',
+      titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: VFontWeight.bold,
+            color: VColors.error,
           ),
-          actions: [
-            VButton(
-              label: 'Cancel',
-              onPressed: () => Navigator.pop(ctx),
-              variant: ButtonVariant.text,
+      content: StatefulBuilder(
+        builder: (ctx, setDialogState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This action is permanent and cannot be undone. All your data, posts, and memberships will be permanently removed.',
             ),
-            VButton(
-              label: 'Delete My Account',
-              onPressed: confirmText.trim() == 'DELETE'
-                  ? () async {
-                      try {
-                        final client = getSupabase();
-                        final user = client.auth.currentUser;
-                        if (user != null) {
-                          await client.functions.invoke('delete-account');
-                        }
-                        if (ctx.mounted) Navigator.pop(ctx);
-                        if (context.mounted) {
-                          await AuthService.signOut(ref: ref);
+            const SizedBox(height: VSpacing.md),
+            Text(
+              'Type DELETE to confirm',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: VFontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Type DELETE here',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.error,
+                    width: 2,
+                  ),
+                ),
+              ),
+              onChanged: (v) => setDialogState(() => confirmText = v),
+            ),
+            const SizedBox(height: VSpacing.lg),
+            vDialogActionsRow([
+              VButton(
+                label: 'Cancel',
+                onPressed: () => Navigator.pop(context),
+                variant: ButtonVariant.text,
+              ),
+              VButton(
+                label: 'Delete My Account',
+                onPressed: confirmText.trim() == 'DELETE'
+                    ? () async {
+                        try {
+                          final client = getSupabase();
+                          final user = client.auth.currentUser;
+                          if (user != null) {
+                            await client.functions.invoke('delete-account');
+                          }
+                          if (context.mounted) Navigator.pop(context);
                           if (context.mounted) {
-                            context.go('/login');
+                            await AuthService.signOut(ref: ref);
+                            if (context.mounted) {
+                              context.go('/login');
+                            }
+                          }
+                        } catch (e) {
+                          if (context.mounted) Navigator.pop(context);
+                          if (context.mounted) {
+                            VFeedback.showError(
+                              context,
+                              'Failed to delete account: $e',
+                            );
                           }
                         }
-                      } catch (e) {
-                        if (ctx.mounted) Navigator.pop(ctx);
-                        if (context.mounted) {
-                          VFeedback.showError(context, 'Failed to delete account: $e');
-                        }
                       }
-                    }
-                  : null,
-            ),
+                    : null,
+              ),
+            ]),
           ],
         ),
       ),
@@ -453,12 +491,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showPrivacyPolicyDialog() {
     final theme = Theme.of(context);
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Privacy Policy'),
-        content: SingleChildScrollView(
-          child: Column(
+      title: 'Privacy Policy',
+      scrollContent: true,
+      content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -508,26 +545,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const Text('privacy@vertiege.app'),
             ],
           ),
-        ),
-        actions: [
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Close',
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             variant: ButtonVariant.text,
           ),
-        ],
-      ),
+        ]),
+      ],
     );
   }
 
   void _showTermsDialog() {
     final theme = Theme.of(context);
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Terms of Service'),
-        content: SingleChildScrollView(
-          child: Column(
+      title: 'Terms of Service',
+      scrollContent: true,
+      content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -581,15 +617,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ],
           ),
-        ),
-        actions: [
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Close',
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             variant: ButtonVariant.text,
           ),
-        ],
-      ),
+        ]),
+      ],
     );
   }
 
@@ -598,109 +634,111 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String? validationError;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Restore Backup'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Paste your backup JSON below, then tap Validate & Restore.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              TextField(
-                controller: controller,
-                maxLines: 8,
-                decoration: InputDecoration(
-                  hintText: 'Paste JSON here...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
-                  ),
-                  errorText: validationError,
-                  contentPadding: const EdgeInsets.all(VSpacing.md),
-                ),
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: VFontSize.bodyMd,
-                ),
-                onChanged: (_) {
-                  if (validationError != null) {
-                    setDialogState(() => validationError = null);
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            VButton(
-              label: 'Cancel',
-              onPressed: () => Navigator.pop(ctx),
-              variant: ButtonVariant.text,
+      title: 'Restore Backup',
+      content: StatefulBuilder(
+        builder: (ctx, setDialogState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Paste your backup JSON below, then tap Validate & Restore.',
             ),
-            VButton(
-              label: 'Validate & Restore',
-              onPressed: () async {
-                final raw = controller.text.trim();
-                if (raw.isEmpty) {
-                  setDialogState(
-                    () => validationError = 'Please paste backup JSON',
-                  );
-                  return;
-                }
-                try {
-                  final parsed = jsonDecode(raw);
-                  if (parsed is! Map<String, dynamic>) {
-                    setDialogState(
-                      () =>
-                          validationError = 'Invalid JSON: expected an object',
-                    );
-                    return;
-                  }
-                  if (!parsed.containsKey('backup')) {
-                    setDialogState(
-                      () => validationError =
-                          'Missing "backup" key — not a valid backup file',
-                    );
-                    return;
-                  }
-                  if (parsed['backup'] is! Map<String, dynamic>) {
-                    setDialogState(
-                      () => validationError = '"backup" must be an object',
-                    );
-                    return;
-                  }
-                } catch (e) {
-                  setDialogState(
-                    () => validationError = 'Invalid JSON: ${e.toString()}',
-                  );
-                  return;
-                }
-                final success = await BackupService.restoreBackup(raw);
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                if (mounted) {
-                  VFeedback.showMessage(context, success
-                            ? 'Backup restored successfully'
-                            : 'Restore failed — data may be corrupted',);
+            const SizedBox(height: VSpacing.md),
+            TextField(
+              controller: controller,
+              maxLines: 8,
+              decoration: InputDecoration(
+                hintText: 'Paste JSON here...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
+                  ),
+                ),
+                errorText: validationError,
+                contentPadding: const EdgeInsets.all(VSpacing.md),
+              ),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: VFontSize.bodyMd,
+              ),
+              onChanged: (_) {
+                if (validationError != null) {
+                  setDialogState(() => validationError = null);
                 }
               },
             ),
+            const SizedBox(height: VSpacing.lg),
+            vDialogActionsRow([
+              VButton(
+                label: 'Cancel',
+                onPressed: () => Navigator.pop(context),
+                variant: ButtonVariant.text,
+              ),
+              VButton(
+                label: 'Validate & Restore',
+                onPressed: () async {
+                  final raw = controller.text.trim();
+                  if (raw.isEmpty) {
+                    setDialogState(
+                      () => validationError = 'Please paste backup JSON',
+                    );
+                    return;
+                  }
+                  try {
+                    final parsed = jsonDecode(raw);
+                    if (parsed is! Map<String, dynamic>) {
+                      setDialogState(
+                        () =>
+                            validationError = 'Invalid JSON: expected an object',
+                      );
+                      return;
+                    }
+                    if (!parsed.containsKey('backup')) {
+                      setDialogState(
+                        () => validationError =
+                            'Missing "backup" key — not a valid backup file',
+                      );
+                      return;
+                    }
+                    if (parsed['backup'] is! Map<String, dynamic>) {
+                      setDialogState(
+                        () => validationError = '"backup" must be an object',
+                      );
+                      return;
+                    }
+                  } catch (e) {
+                    setDialogState(
+                      () => validationError = 'Invalid JSON: ${e.toString()}',
+                    );
+                    return;
+                  }
+                  final success = await BackupService.restoreBackup(raw);
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                  if (mounted) {
+                    VFeedback.showMessage(
+                      context,
+                      success
+                          ? 'Backup restored successfully'
+                          : 'Restore failed — data may be corrupted',
+                    );
+                  }
+                },
+              ),
+            ]),
           ],
         ),
       ),
@@ -708,19 +746,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showResetDataDialog() {
-    showDialog(
+    final router = GoRouter.of(context);
+    showFDialog(
       context: context,
-      builder: (ctx) {
-        final router = GoRouter.of(context);
-        return _ResetDataConfirmationDialog(
+      builder: (ctx, style, animation) => FDialog.raw(
+        builder: (context, dialogStyle) => _ResetDataConfirmationDialog(
           onConfirmed: () async {
             await StorageService.clearAll();
             if (ctx.mounted) Navigator.pop(ctx);
             ref.read(themeProvider.notifier).setScheme(ThemeScheme.system);
             router.go('/onboarding');
           },
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -904,12 +942,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.notifications_active,
                   label: 'Push Notifications',
                   value: _pushEnabled,
-                  onChanged: _prefsLoaded
-                      ? (v) {
-                          setState(() => _pushEnabled = v);
-                          _setNotificationPref(_kPrefPushEnabled, v);
-                        }
-                      : null,
+                  onChanged: _prefsLoaded ? _onPushToggleChanged : null,
                 ),
                 VSectionSwitchTile(
                   icon: Icons.favorite_border,
@@ -1220,21 +1253,34 @@ class _ResetDataConfirmationDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return AlertDialog(
-      title: const Row(
+    return Padding(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.warning_amber_rounded, color: VColors.error),
-          SizedBox(width: VSpacing.sm),
-          Text('Reset all data?', style: TextStyle(color: VColors.error)),
-        ],
-      ),
-      content: _step == 0
-          ? const Text(
+          Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: VColors.error),
+              const SizedBox(width: VSpacing.sm),
+              Text(
+                'Reset all data?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: VColors.error,
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: VSpacing.sm),
+          if (_step == 0)
+            const Text(
               'This will permanently delete all local data including posts, notifications, '
               'achievements, and preferences. Your account will not be deleted, but all cached data will be gone.\n\n'
               'This action cannot be undone.',
             )
-          : Column(
+          else
+            Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1273,28 +1319,33 @@ class _ResetDataConfirmationDialogState
                 ),
               ],
             ),
-      actions: _step == 0
-          ? [
-              VButton(
-                label: 'Cancel',
-                onPressed: () => Navigator.pop(context),
-                variant: ButtonVariant.text,
-              ),
-              VButton(label: 'Continue', onPressed: _goToStep2),
-            ]
-          : [
-              VButton(
-                label: 'Back',
-                onPressed: _goBack,
-                variant: ButtonVariant.text,
-              ),
-              VButton(
-                label: 'Reset Everything',
-                onPressed: _typedText.trim() == 'RESET'
-                    ? widget.onConfirmed
-                    : null,
-              ),
-            ],
+          const SizedBox(height: VSpacing.lg),
+          vDialogActionsRow(
+            _step == 0
+                ? [
+                    VButton(
+                      label: 'Cancel',
+                      onPressed: () => Navigator.pop(context),
+                      variant: ButtonVariant.text,
+                    ),
+                    VButton(label: 'Continue', onPressed: _goToStep2),
+                  ]
+                : [
+                    VButton(
+                      label: 'Back',
+                      onPressed: _goBack,
+                      variant: ButtonVariant.text,
+                    ),
+                    VButton(
+                      label: 'Reset Everything',
+                      onPressed: _typedText.trim() == 'RESET'
+                          ? widget.onConfirmed
+                          : null,
+                    ),
+                  ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -19,6 +19,10 @@ String? routeForNotification(AppNotification notification) {
       }
       if (worldId != null) return exploreWorldPath(worldId);
       return '/notifications';
+    case NotificationType.dmMessage:
+      final roomId = notification.roomId;
+      if (roomId != null && roomId.isNotEmpty) return chatShellPath(roomId);
+      return '/chat';
     case NotificationType.mention:
     case NotificationType.worldUnlocked:
       if (worldId != null) return exploreWorldPath(worldId);

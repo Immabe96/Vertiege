@@ -19,6 +19,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_foundations.dart';
+import '../../widgets/core/v_feedback.dart';
 import '../../widgets/v_section_list.dart';
 import 'alliance_section.dart';
 import 'resource_vault.dart';
@@ -746,17 +747,13 @@ class _EconomySection extends StatelessWidget {
       onTap: enabled
           ? () {
               if (showLock && lockReason != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(lockReason)),
-                );
+                VFeedback.showMessage(context, lockReason);
               }
               onTap();
             }
           : () {
               if (lockReason != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(lockReason)),
-                );
+                VFeedback.showMessage(context, lockReason);
               }
             },
     );

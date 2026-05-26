@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/storage_service.dart';
+import '../services/analytics_events.dart';
+import '../services/analytics_service.dart';
 import '../services/supabase.dart';
 import 'resident_provider.dart';
 
@@ -241,6 +244,12 @@ class QuestNotifier extends Notifier<QuestState> {
     _persist();
     final updated = quests.where((q) => q.id == questId).firstOrNull;
     if (updated != null) await _syncQuestToCloud(updated.copyWith(claimed: true));
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.questCompleted,
+        parameters: {'quest_id': questId},
+      ),
+    );
   }
 
   void _increment(String questId) {

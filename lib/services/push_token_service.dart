@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import 'analytics_events.dart';
+import 'device_permission_service.dart';
 import 'analytics_service.dart';
 import 'crash_reporter.dart';
 import 'firebase_bootstrap.dart';
 import 'firebase_messaging_handlers.dart';
+import 'local_notification_service.dart';
 import 'storage_service.dart';
 import 'supabase.dart';
 
@@ -80,28 +80,11 @@ class PushTokenService {
     } catch (_) {}
   }
 
-  static Future<void> _ensureAndroidPostNotifications() async {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
-    final status = await Permission.notification.status;
-    if (!status.isGranted) {
-      await Permission.notification.request();
-    }
-  }
-
   static Future<NotificationSettings> _ensurePermission(
     FirebaseMessaging messaging,
   ) async {
-    await _ensureAndroidPostNotifications();
-    var settings = await messaging.getNotificationSettings();
-    if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
-      settings = await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-      );
-    }
-
+    await DevicePermissionService.requestNotifications();
+    final settings = await messaging.getNotificationSettings();
     final status = settings.authorizationStatus.name;
     await StorageService.setString('push_permission_status', status);
     await _debugLog('push_permission_status', status);
@@ -141,6 +124,7 @@ class PushTokenService {
     FirebaseMessaging.onMessage.listen((message) {
       unawaited(_recordMessageEvent('notification_foreground', message));
       _foregroundMessages.add(message);
+      unawaited(LocalNotificationService.showFromRemoteMessage(message));
       CrashReporter.instance.addBreadcrumb(
         message.messageId ?? 'foreground message',
         category: 'fcm',

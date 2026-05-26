@@ -1,24 +1,17 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../models/world.dart';
-import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import 'world_banner.dart';
 
-/// Collapsible world hero for [NestedScrollView] — pinned bar with name + actions on scroll.
+/// Pinned toolbar for world detail — no edge-to-edge banner or text-on-image.
 class WorldHeroBanner extends StatelessWidget {
-  final String worldId;
   final World world;
-  final double expandedHeight;
   final bool isDark;
   final Color prestigeTierColor;
-  final String tierLabel;
   final bool isJoined;
   final bool innerBoxIsScrolled;
   final Animation<double> scaleAnimation;
-  final AnimationController joinAnimController;
   final GlobalKey joinButtonKey;
   final VoidCallback onBack;
   final VoidCallback onShare;
@@ -28,16 +21,12 @@ class WorldHeroBanner extends StatelessWidget {
 
   const WorldHeroBanner({
     super.key,
-    required this.worldId,
     required this.world,
-    required this.expandedHeight,
     required this.isDark,
     required this.prestigeTierColor,
-    required this.tierLabel,
     required this.isJoined,
     required this.innerBoxIsScrolled,
     required this.scaleAnimation,
-    required this.joinAnimController,
     required this.joinButtonKey,
     required this.onBack,
     required this.onShare,
@@ -46,25 +35,24 @@ class WorldHeroBanner extends StatelessWidget {
     required this.onJoin,
   });
 
-  Color get _collapsedFg =>
-      isDark ? VColors.onSurfaceDark : VColors.onSurface;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final collapsed = innerBoxIsScrolled;
-    final toolbarFg = collapsed ? _collapsedFg : Colors.white;
+    final fg = isDark ? VColors.onSurfaceDark : VColors.onSurface;
+    final bg = isDark ? VColors.surfaceDark : VColors.surface;
+    final divider = isDark ? VColors.outlineDark : VColors.outline;
 
     return SliverAppBar(
-      expandedHeight: expandedHeight,
       pinned: true,
-      stretch: true,
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      foregroundColor: toolbarFg,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: bg,
+      foregroundColor: fg,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         tooltip: 'Back',
-        color: toolbarFg,
         onPressed: onBack,
       ),
       title: collapsed
@@ -73,30 +61,35 @@ class WorldHeroBanner extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: VFontWeight.bold,
-                color: _collapsedFg,
+                fontWeight: VFontWeight.semiBold,
+                color: fg,
               ),
             )
-          : null,
+          : Text(
+              'World',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: VFontWeight.medium,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
       actions: [
         if (onOpenTools != null)
           IconButton(
             icon: const Icon(Icons.more_horiz),
             tooltip: 'World tools',
-            color: toolbarFg,
             onPressed: onOpenTools,
           ),
         IconButton(
           icon: const Icon(Icons.share_outlined),
           tooltip: 'Share world',
-          color: toolbarFg,
           onPressed: onShare,
         ),
         if (onSettings != null)
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings_outlined),
             tooltip: 'World settings',
-            color: toolbarFg,
             onPressed: onSettings,
           ),
         if (collapsed)
@@ -113,241 +106,9 @@ class WorldHeroBanner extends StatelessWidget {
             ),
           ),
       ],
-      flexibleSpace: FlexibleSpaceBar(
-        stretchModes: const [
-          StretchMode.zoomBackground,
-          StretchMode.blurBackground,
-        ],
-        background: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: prestigeTierColor.withValues(alpha: 0.25),
-                width: 1,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: prestigeTierColor.withValues(alpha: 0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              SizedBox(
-                height: expandedHeight,
-                width: double.infinity,
-                child: Hero(
-                  tag: 'world-icon-$worldId',
-                  child: WorldBanner(
-                    worldId: world.id,
-                    assetKey: world.assetKey,
-                    width: double.infinity,
-                    height: expandedHeight,
-                    worldType: world.type,
-                    prestige: world.prestige,
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.15),
-                        Colors.black.withValues(alpha: 0.55),
-                        Colors.black.withValues(alpha: 0.82),
-                      ],
-                      stops: const [0.35, 0.72, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Padding(
-                  padding: const EdgeInsets.all(VSpacing.xl),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: VSpacing.md,
-                          vertical: VSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: prestigeTierColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(VRadius.md),
-                          border: Border.all(
-                            color: prestigeTierColor.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Text(
-                          world.requiredProfession != null
-                              ? tierLabel.toUpperCase()
-                              : 'TIER $tierLabel'.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: VFontSize.labelMd,
-                            fontWeight: VFontWeight.semiBold,
-                            color: prestigeTierColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: VSpacing.sm),
-                      Text(
-                        world.name,
-                        style: const TextStyle(
-                          fontSize: VFontSize.headlineLg,
-                          fontWeight: VFontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black45,
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (world.hasSovereign || world.isUnclaimed) ...[
-                        const SizedBox(height: VSpacing.xs),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: world.sovereignId.isNotEmpty
-                                ? () => context.push(
-                                    residentProfilePath(world.sovereignId),
-                                  )
-                                : null,
-                            borderRadius: BorderRadius.circular(VRadius.sm),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 2,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 12,
-                                    backgroundColor: prestigeTierColor
-                                        .withValues(alpha: 0.35),
-                                    child: Icon(
-                                      Icons.shield_outlined,
-                                      size: 14,
-                                      color: prestigeTierColor,
-                                    ),
-                                  ),
-                                  const SizedBox(width: VSpacing.sm),
-                                  Flexible(
-                                    child: Text(
-                                      world.hasSovereign
-                                          ? 'Founded by ${world.sovereignName}'
-                                          : world.sovereignStatusLabel,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: VFontSize.bodyMd,
-                                        color: Colors.white.withValues(
-                                          alpha: 0.92,
-                                        ),
-                                        shadows: const [
-                                          Shadow(
-                                            color: Colors.black38,
-                                            blurRadius: 6,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  if (world.sovereignId.isNotEmpty) ...[
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      Icons.chevron_right,
-                                      size: 16,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (world.description.trim().isNotEmpty) ...[
-                        const SizedBox(height: VSpacing.xs),
-                        Text(
-                          world.description.trim(),
-                          style: TextStyle(
-                            fontSize: VFontSize.bodyMd,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            height: 1.3,
-                            shadows: const [
-                              Shadow(
-                                color: Colors.black38,
-                                blurRadius: 6,
-                              ),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      const SizedBox(height: VSpacing.lg),
-                      Row(
-                        children: [
-                          ScaleTransition(
-                            scale: scaleAnimation,
-                            child: AnimatedBuilder(
-                              animation: joinAnimController,
-                              builder: (context, _) {
-                                final btnBg = isJoined
-                                    ? VColors.error
-                                    : prestigeTierColor;
-                                final btnFg = isJoined
-                                    ? VColors.onError
-                                    : VColors.onPrimary;
-                                return Semantics(
-                                  button: true,
-                                  label: isJoined
-                                      ? 'Leave world'
-                                      : 'Join world',
-                                  child: FilledButton(
-                                    key: joinButtonKey,
-                                    onPressed: onJoin,
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: btnBg,
-                                      foregroundColor: btnFg,
-                                      minimumSize: const Size(
-                                        VTouchTarget.minimum,
-                                        VTouchTarget.minimum,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      isJoined ? 'LEAVE WORLD' : 'JOIN WORLD',
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Divider(height: 1, thickness: 1, color: divider),
       ),
     );
   }

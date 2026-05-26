@@ -245,7 +245,7 @@ featured_order SMALLINT NULL,
 | Gap | Notes | Severity |
 |-----|-------|----------|
 | **World info / dossier** | ~~Thin~~ **About tab dossier** (G4) | ✅ |
-| **Jobs / roles** | ~~No board~~ `world_jobs` + `WorldJobsScreen` + Manage/About tiles | ✅ |
+| **Jobs / roles** | `world_jobs` + apply/accept (`world_job_applications`, RPCs) + `WorldJobsScreen` | ✅ |
 | **Economy loop** | ~~Weak~~ coin-priced listings, `purchase_listing` tax → treasury, donate RPC | ⚠️ (XP/rep rewards still partial) |
 | **World grows with people** | Activity score increments exist; not clearly shown on world home | Medium |
 | **Governance voting** | ~~Coming soon~~ poll preview on About + `WorldPollsScreen` + `vote_on_poll_v2` | ✅ |

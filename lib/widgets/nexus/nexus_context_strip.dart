@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../core/progression_help_button.dart';
 
 /// Achievement-first context line at the top of Nexus.
 class NexusContextStrip extends StatelessWidget {
@@ -42,6 +43,13 @@ class NexusContextStrip extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               color: context.vOnSurfaceVariant,
               height: 1.4,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: ProgressionHelpLink(
+              label: 'How XP, tier & rep work',
             ),
           ),
           if (showJoinWorldsCta) ...[

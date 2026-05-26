@@ -18,12 +18,12 @@ class RemoteConfigService {
     );
     await _remoteConfig?.setDefaults(const {
       // Feature flags
-      'marketplace_enabled': false,
-      'treasury_enabled': false,
+      'marketplace_enabled': true,
+      'treasury_enabled': true,
       'quests_enabled': true,
       'events_enabled': true,
-      'polls_enabled': false,
-      'challenges_enabled': false,
+      'polls_enabled': true,
+      'challenges_enabled': true,
       // UI
       'forui_strict_mode': true,
       'post_outbox_enabled': true,

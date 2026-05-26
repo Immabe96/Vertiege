@@ -124,7 +124,7 @@ adb install -r path\to\app-release.apk
 ## Local release APK (2026-05-26)
 
 ```bash
-# Build (requires 110/110 core achievement PNGs unless --force)
+# Build (requires 110/110 core achievement badge PNGs; full catalog is ~619 entries using category art)
 ./scripts/build_release_apk.sh
 # Or:
 flutter build apk --release
@@ -181,12 +181,25 @@ Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-p
 
 | # | Area | Pass? | Notes |
 |---|------|-------|-------|
-| 26 | Submit proof screen | | Search, category chips, manual-review banner, remove photos |
-| 27 | Submit proof flow | | Upload → “submitted for verification” toast; appears pending |
-| 28 | Achievement badges | | Category PNG on wall / list (not generic Material icon) |
-| 29 | Nexus post actions | | Like, reactions, comment, repost, share on posts |
-| 30 | Identity worlds row | | Larger bare icons (no chip box) |
-| 31 | Funny vs Life icons | | Distinct category colors / assets |
+| 26 | Achievements hub count | | Hero shows **~619** achievements (not “110 only”) |
+| 27 | Submit proof screen | | Search, category chips, manual-review banner, remove photos |
+| 28 | Submit proof flow | | Upload → “submitted for verification” toast; appears pending |
+| 29 | Achievement badges | | Category PNG on wall / list (not generic Material icon) |
+| 30 | Nexus post actions | | Like, reactions, comment, repost, share on posts |
+| 31 | Identity worlds row | | Larger bare icons (no chip box) |
+| 32 | Funny vs Life icons | | Distinct category colors / assets |
+
+## Checklist — DM push (after migration deploy)
+
+| # | Area | Pass? | Notes |
+|---|------|-------|-------|
+| 33 | DM background notify | | App backgrounded; other user sends DM → system banner |
+| 34 | Tap DM notification | | Opens correct `/dm/{roomId}` |
+| 35 | Android inline reply | | Reply action sends message without opening app |
+| 36 | Active room suppress | | No banner while viewing that DM thread |
+| 37 | Settings toggle | | Push off → no FCM delivery |
+
+See [NOTIFICATIONS.md](NOTIFICATIONS.md) for deploy steps (`20260527140000_dm_push_notifications.sql` + `send-push`).
 
 ---
 

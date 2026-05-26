@@ -6,6 +6,7 @@ import '../config/tiers.dart';
 import '../forui/v_hub_page.dart';
 import '../models/resident.dart';
 import '../models/world_job.dart';
+import '../models/world_job_application.dart';
 import '../models/world.dart';
 import '../services/world_job_service.dart';
 import '../state/resident_provider.dart';
@@ -14,7 +15,7 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
-import '../config/world_capability_matrix.dart';
+import '../widgets/core/v_dialog.dart';
 import '../widgets/core/v_feedback.dart';
 import '../widgets/worlds/world_capability_hint.dart';
 import '../ui/icons/v_icons.dart';
@@ -35,6 +36,7 @@ class WorldJobsScreen extends ConsumerStatefulWidget {
 
 class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
   List<WorldJob> _jobs = [];
+  Map<String, WorldJobApplicationStatus> _myApplicationByJob = {};
   bool _loading = true;
   String? _error;
 
@@ -54,9 +56,13 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
         widget.worldId,
         openOnly: false,
       );
+      final statuses = await WorldJobService.fetchMyApplicationStatuses(
+        jobs.map((j) => j.id).toList(),
+      );
       if (!mounted) return;
       setState(() {
         _jobs = jobs;
+        _myApplicationByJob = statuses;
         _loading = false;
       });
     } catch (_) {
@@ -75,85 +81,109 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
     var minStanding = 3;
     var minTier = 2;
 
-    final ok = await showDialog<bool>(
+    final ok = await showFDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setLocal) => AlertDialog(
-          title: const Text('Post a role'),
-          content: SingleChildScrollView(
+      builder: (ctx, style, animation) => FDialog.raw(
+        builder: (context, dialogStyle) => StatefulBuilder(
+          builder: (ctx, setLocal) => Padding(
+            padding: const EdgeInsets.all(VSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(
-                  controller: title,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
-                  ),
+                Text(
+                  'Post a role',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: VSpacing.sm),
-                TextField(
-                  controller: desc,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: VSpacing.sm),
-                TextField(
-                  controller: role,
-                  decoration: const InputDecoration(
-                    labelText: 'Role label',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: VSpacing.sm),
-                DropdownButtonFormField<int>(
-                  value: minStanding,
-                  decoration: const InputDecoration(
-                    labelText: 'Min standing',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: standingLevels
-                      .map(
-                        (s) => DropdownMenuItem(
-                          value: s.level,
-                          child: Text(s.title),
+                const SizedBox(height: VSpacing.md),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 360),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: title,
+                          decoration: const InputDecoration(
+                            labelText: 'Title',
+                            border: OutlineInputBorder(),
+                          ),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (v) => setLocal(() => minStanding = v ?? 3),
-                ),
-                DropdownButtonFormField<int>(
-                  value: minTier,
-                  decoration: const InputDecoration(
-                    labelText: 'Min global tier',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: tierNames.entries
-                      .map(
-                        (e) => DropdownMenuItem(
-                          value: e.key,
-                          child: Text(e.value),
+                        const SizedBox(height: VSpacing.sm),
+                        TextField(
+                          controller: desc,
+                          decoration: const InputDecoration(
+                            labelText: 'Description',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 3,
                         ),
-                      )
-                      .toList(),
-                  onChanged: (v) => setLocal(() => minTier = v ?? 2),
+                        const SizedBox(height: VSpacing.sm),
+                        TextField(
+                          controller: role,
+                          decoration: const InputDecoration(
+                            labelText: 'Role label',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: VSpacing.sm),
+                        DropdownButtonFormField<int>(
+                          value: minStanding,
+                          decoration: const InputDecoration(
+                            labelText: 'Min standing',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: standingLevels
+                              .map(
+                                (s) => DropdownMenuItem(
+                                  value: s.level,
+                                  child: Text(s.title),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) =>
+                              setLocal(() => minStanding = v ?? 3),
+                        ),
+                        DropdownButtonFormField<int>(
+                          value: minTier,
+                          decoration: const InputDecoration(
+                            labelText: 'Min global tier',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: tierNames.entries
+                              .map(
+                                (e) => DropdownMenuItem(
+                                  value: e.key,
+                                  child: Text(e.value),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) => setLocal(() => minTier = v ?? 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: VSpacing.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: VSpacing.sm),
+                    FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Post'),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Post'),
-            ),
-          ],
         ),
       ),
     );
@@ -181,6 +211,123 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
     }
   }
 
+  Future<void> _showApplyDialog(WorldJob job) async {
+    final message = TextEditingController();
+
+    final ok = await showVDialog<bool>(
+      context: context,
+      title: 'Apply for ${job.title}',
+      content: TextField(
+        controller: message,
+        maxLines: 4,
+        decoration: const InputDecoration(
+          labelText: 'Why you\'re a fit (optional)',
+          border: OutlineInputBorder(),
+          alignLabelWithHint: true,
+        ),
+      ),
+      actions: [
+        vDialogActionsRow([
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Submit application'),
+          ),
+        ]),
+      ],
+    );
+
+    if (ok != true) return;
+
+    try {
+      await WorldJobService.applyToJob(
+        jobId: job.id,
+        message: message.text.trim(),
+      );
+      if (mounted) {
+        VFeedback.showMessage(context, 'Application submitted');
+        _load();
+      }
+    } catch (e) {
+      if (mounted) {
+        VFeedback.showError(context, '$e');
+      }
+    }
+  }
+
+  Future<void> _showApplicants(WorldJob job) async {
+    final apps = await WorldJobService.fetchApplications(job.id);
+    if (!mounted) return;
+
+    final pending = apps.where((a) => a.isPending).toList();
+    if (pending.isEmpty) {
+      VFeedback.showMessage(context, 'No pending applications');
+      return;
+    }
+
+    await showVDialog<void>(
+      context: context,
+      title: 'Applications',
+      scrollContent: true,
+      maxContentHeight: 400,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final app in pending) ...[
+            Text(
+              app.applicantId,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: VFontWeight.bold,
+                  ),
+            ),
+            if (app.message.isNotEmpty) ...[
+              const SizedBox(height: VSpacing.xs),
+              Text(app.message),
+            ],
+            const SizedBox(height: VSpacing.sm),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () async {
+                  final accepted =
+                      await WorldJobService.acceptApplication(app.id);
+                  if (!context.mounted) return;
+                  if (accepted) {
+                    Navigator.pop(context);
+                    VFeedback.showMessage(
+                      context,
+                      'Application accepted — role marked filled',
+                    );
+                    _load();
+                  } else {
+                    VFeedback.showError(
+                      context,
+                      'Could not accept application',
+                    );
+                  }
+                },
+                child: const Text('Accept'),
+              ),
+            ),
+            const Divider(height: VSpacing.lg),
+          ],
+        ],
+      ),
+      actions: [
+        vDialogActionsRow([
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ]),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return VHubPage(
@@ -199,7 +346,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
         children: [
           WorldCapabilityHint(
             message:
-                'Roles respect world standing and tier. Council and sovereign can post openings.',
+                'Roles respect world standing and tier. Apply when you qualify; council can review applicants.',
             icon: Icons.work_outline,
           ),
           Expanded(child: _buildBody()),
@@ -244,6 +391,8 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
         itemBuilder: (_, i) {
           final job = _jobs[i];
           final eligible = _isEligible(resident, world, job);
+          final myStatus = _myApplicationByJob[job.id];
+          final hasApplied = myStatus != null;
           return FCard.raw(
             child: Padding(
               padding: const EdgeInsets.all(VSpacing.md),
@@ -289,10 +438,38 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                         ),
                       ),
                     ),
+                  if (job.isOpen && hasApplied)
+                    Padding(
+                      padding: const EdgeInsets.only(top: VSpacing.sm),
+                      child: Text(
+                        myStatus == WorldJobApplicationStatus.accepted
+                            ? 'You were accepted for this role.'
+                            : 'Application pending review.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: VColors.primary,
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      ),
+                    ),
+                  if (job.isOpen && eligible && !hasApplied) ...[
+                    const SizedBox(height: VSpacing.sm),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilledButton(
+                        onPressed: () => _showApplyDialog(job),
+                        child: const Text('Apply'),
+                      ),
+                    ),
+                  ],
                   if (widget.canManage && job.isOpen) ...[
                     const SizedBox(height: VSpacing.sm),
-                    Row(
+                    Wrap(
+                      spacing: VSpacing.sm,
                       children: [
+                        TextButton(
+                          onPressed: () => _showApplicants(job),
+                          child: const Text('Applicants'),
+                        ),
                         TextButton(
                           onPressed: () async {
                             await WorldJobService.updateStatus(

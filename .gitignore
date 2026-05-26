@@ -63,6 +63,12 @@ android/build/
 # withoutbg batch backups (regenerable; originals before matte removal)
 /assets/staging/withoutbg-backup/
 
+# One-off badge generation scratch (use scripts/image_gen.py + check_core_achievement_assets.py)
+scripts/core_badge_chunk_*.json
+scripts/core_badge_jobs.json
+scripts/missing_badges.json
+scripts/missing_core_ids.json
+
 # Understand-Anything (commit knowledge-graph.json if sharing with team)
 .understand-anything/intermediate/
 .understand-anything/diff-overlay.json

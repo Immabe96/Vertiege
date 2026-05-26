@@ -50,6 +50,28 @@ void main() {
       expect(routeForNotification(n), '/allies');
     });
 
+    test('dm message routes to chat shell room', () {
+      const n = AppNotification(
+        id: 'n-dm',
+        type: NotificationType.dmMessage,
+        message: 'Alice: hi',
+        roomId: 'room-1',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), chatShellPath('room-1'));
+    });
+
+    test('dm message without roomId routes to /chat not /chats', () {
+      const n = AppNotification(
+        id: 'n-dm-list',
+        type: NotificationType.dmMessage,
+        message: 'Alice: hi',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/chat');
+      expect(routeForNotification(n), isNot('/chats'));
+    });
+
     test('mention with world uses exploreWorldPath', () {
       const n = AppNotification(
         id: 'n5',

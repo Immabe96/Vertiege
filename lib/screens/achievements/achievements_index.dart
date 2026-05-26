@@ -8,6 +8,8 @@ import '../../forui/v_hub_page.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../state/achievement_provider.dart';
+import '../../state/resident_provider.dart';
+import '../../widgets/core/screen_loading.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/shared/badge_asset_image.dart';
@@ -23,6 +25,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(achievementProvider);
+    final resident = ref.watch(residentProvider).resident;
+    final totalXp = resident?.totalXp ?? 0;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final notifier = ref.read(achievementProvider.notifier);
@@ -33,8 +37,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
     final pendingCount = state.userAchievements
         .where((a) => a.status == AchievementStatus.submitted)
         .length;
-    final currentTier = config.getTierForXp(state.totalXp);
-    final nextTierInfo = _computeNextTier(state.totalXp, currentTier);
+    final currentTier = config.getTierForXp(totalXp);
+    final nextTierInfo = _computeNextTier(totalXp, currentTier);
 
     final recentVerified = state.userAchievements
         .where((a) => a.status == AchievementStatus.verified)
@@ -67,11 +71,17 @@ class AchievementsIndexScreen extends ConsumerWidget {
             VSpacing.xxl,
           ),
           children: [
+            if (state.isLoading)
+              const Padding(
+                padding: EdgeInsets.only(bottom: VSpacing.md),
+                child: ScreenLoading.list(),
+              ),
             _StatsHeroCard(
-              totalXp: state.totalXp,
+              totalXp: totalXp,
               verifiedCount: verifiedCount,
               pendingCount: pendingCount,
               tierLabel: currentTier.label,
+              catalogSize: config.achievementCatalogSize,
               isDark: isDark,
             ),
             if (state.error != null) ...[
@@ -197,6 +207,7 @@ class _StatsHeroCard extends StatelessWidget {
   final int verifiedCount;
   final int pendingCount;
   final String tierLabel;
+  final int catalogSize;
   final bool isDark;
 
   const _StatsHeroCard({
@@ -204,6 +215,7 @@ class _StatsHeroCard extends StatelessWidget {
     required this.verifiedCount,
     required this.pendingCount,
     required this.tierLabel,
+    required this.catalogSize,
     required this.isDark,
   });
 
@@ -238,6 +250,13 @@ class _StatsHeroCard extends StatelessWidget {
                       color: VColors.warning,
                       fontWeight: VFontWeight.bold,
                     ),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '$catalogSize achievements',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

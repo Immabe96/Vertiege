@@ -4,6 +4,7 @@ import 'achievement_proof_policy.dart';
 import 'achievements_bulk_seeds.dart';
 import 'achievements_bulk_seeds_v2.dart';
 import 'achievements_bulk_seeds_v3.dart';
+import 'achievements_bulk_seeds_v4.dart';
 export 'professions.dart'
     show
         achievementIdForVerifiedProfession,
@@ -1010,13 +1011,20 @@ const List<Achievement> _achievementCatalogRaw = [
   ),
 ];
 
+/// Hand-authored entries in [_achievementCatalogRaw] (each has a core badge PNG).
+const int coreAchievementCount = 110;
+
 /// Resolved catalog: core + bulk seeds, with verifier proof requirements applied.
 final List<Achievement> achievements = resolveAchievementCatalog([
   ..._achievementCatalogRaw,
   ...bulkAchievementSeeds,
   ...bulkAchievementSeedsV2,
   ...bulkAchievementSeedsV3,
+  ...bulkAchievementSeedsV4,
 ]);
+
+/// Total milestones available in-app (core + bulk seeds, deduped).
+int get achievementCatalogSize => achievements.length;
 
 Map<String, Achievement>? _achievementByIdCache;
 

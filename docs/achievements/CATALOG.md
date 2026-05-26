@@ -1,6 +1,6 @@
 # Achievement catalog
 
-**Updated:** 2026-05-26 — ~590 catalog entries
+**Updated:** 2026-05-25 — **~619** catalog entries (`110` core + bulk v1–v4)
 
 ## Sources
 
@@ -10,6 +10,7 @@
 | Bulk v1 | `lib/config/achievements_bulk_seeds.dart` | First expansion (~200) |
 | Bulk v2 | `lib/config/achievements_bulk_seeds_v2.dart` | Extended milestones (`*-ext-*` ids) |
 | Bulk v3 | `lib/config/achievements_bulk_seeds_v3.dart` | Third wave (`*-seed-v3-*` ids) |
+| Bulk v4 | `lib/config/achievements_bulk_seeds_v4.dart` | Fourth wave (life, travel, funny, community, …) |
 | Professions | `lib/config/professions.dart` | Picker list, achievement map, gate worlds |
 | Proof | `lib/config/achievement_proof_policy.dart` | Category defaults + per-id overrides |
 
@@ -32,7 +33,7 @@ Lookup: `achievementForId(id)` / `achievementById`.
 | Tier | Count | Asset path | Look |
 |------|------:|------------|------|
 | **Core** | ~110 | `assets/generated/achievements/<id>.png` | Unique badge per milestone (same finesse as `badge-marathon`) |
-| **Bulk seeds** | ~480 | `assets/generated/ach-<category>.png` | Shared category emblem |
+| **Bulk seeds** | ~509 | `assets/generated/ach-<category>.png` | Shared category emblem |
 | **Profession** | 14 | `assets/generated/prof-*.png` | Verified profession medallions |
 
 Enqueue core badges: `python3 scripts/enqueue_core_achievement_badges.py`  

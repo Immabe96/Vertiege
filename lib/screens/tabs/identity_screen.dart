@@ -43,6 +43,8 @@ import '../../config/onboarding_funnel.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../widgets/onboarding/first_steps_card.dart';
 import '../../config/achievements.dart';
+import '../../config/progression_glossary.dart';
+import '../../widgets/core/progression_help_button.dart';
 import '../../config/cosmetics.dart';
 import '../../widgets/core/v_feedback.dart';
 
@@ -533,7 +535,29 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             const SizedBox(height: VSpacing.md),
           ],
 
-          _SectionHeader(title: 'Standing', theme: theme),
+          _SectionHeader(
+            title: 'Honours & rep',
+            theme: theme,
+            trailing: const ProgressionHelpButton(
+              focus: ProgressionFocus.repAndStanding,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.lg,
+              VSpacing.xs,
+              VSpacing.lg,
+              0,
+            ),
+            child: Text(
+              'Achievements and worlds you joined. Rep is earned inside each world.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
           const SizedBox(height: VSpacing.sm),
 
           // ── Honour stats (achievements · worlds · rep) ──
@@ -565,7 +589,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   child: HonourStatChip(
                     icon: Icons.military_tech,
                     value: '$totalRep',
-                    label: 'REP',
+                    label: 'World rep',
                     accent: VColors.secondary,
                   ),
                 ),
@@ -659,7 +683,29 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             const SizedBox(height: VSpacing.lg),
           ],
 
-          _SectionHeader(title: 'Progress', theme: theme),
+          _SectionHeader(
+            title: 'Your tier & XP',
+            theme: theme,
+            trailing: const ProgressionHelpButton(
+              focus: ProgressionFocus.xpAndTier,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.lg,
+              VSpacing.xs,
+              VSpacing.lg,
+              0,
+            ),
+            child: Text(
+              'Global rank from activity XP and verified achievements — separate from reputation in worlds.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
           const SizedBox(height: VSpacing.sm),
 
           // ── Progress (tier bar + XP + collapsible perks) ──
@@ -686,7 +732,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       TierIcon(tier: tierValue, size: 28),
                       const SizedBox(width: VSpacing.sm),
                       Text(
-                        'Progress',
+                        resident.tier.label,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: VFontWeight.semiBold,
                         ),
@@ -702,9 +748,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   ),
                   const SizedBox(height: VSpacing.xs),
                   Text(
-                    nextThreshold != null
-                        ? '$currentXp XP total · ${(nextThreshold - currentXp).clamp(0, 1 << 30)} XP to $nextTierName'
-                        : '$currentXp XP · max tier reached',
+                    ProgressionGlossary.xpToNextTier(currentXp, tierValue),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: isDark
                           ? VColors.onSurfaceVariantDark
@@ -977,20 +1021,32 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 class _SectionHeader extends StatelessWidget {
   final String title;
   final ThemeData theme;
+  final Widget? trailing;
 
-  const _SectionHeader({required this.title, required this.theme});
+  const _SectionHeader({
+    required this.title,
+    required this.theme,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(VSpacing.lg, VSpacing.md, VSpacing.lg, 0),
-      child: Text(
-        title.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          fontWeight: VFontWeight.bold,
-          letterSpacing: 0.5,
-          color: VColors.onSurfaceVariant,
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: VFontWeight.bold,
+                letterSpacing: 0.5,
+                color: VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          if (trailing != null) trailing!,
+        ],
       ),
     );
   }

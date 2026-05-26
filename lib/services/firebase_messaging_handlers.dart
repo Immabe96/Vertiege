@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../firebase_options.dart';
 import '../router/notification_navigation.dart';
 import '../router/world_navigation.dart';
+import 'local_notification_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -19,6 +20,11 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     FirebaseCrashlytics.instance.log(
       'background_fcm:${message.messageId ?? "unknown"}',
     );
+    await LocalNotificationService.ensureInitialized();
+    final type = message.data['type']?.toString() ?? '';
+    if (type == 'dmMessage' || message.notification == null) {
+      await LocalNotificationService.showFromRemoteMessage(message);
+    }
   } catch (error, stackTrace) {
     debugPrint('Background FCM handler failed: $error');
     try {
@@ -39,19 +45,41 @@ String? routeFromRemoteMessage(RemoteMessage message) {
     return explicitRoute;
   }
 
+  final type = data['type']?.toString() ?? '';
+  final worldId = data['world_id'] ?? data['worldId'];
+  final postId = data['post_id'] ?? data['postId'];
+  final roomId = data['room_id'] ?? data['roomId'] ?? data['dm_room_id'];
+
+  if (type == 'dmMessage') {
+    if (roomId is String && roomId.isNotEmpty) {
+      return chatShellPath(roomId);
+    }
+    return '/chat';
+  }
+
+  if (type == 'achievementApproved' || type == 'achievementRejected') {
+    return '/achievements';
+  }
+
+  if ((type == 'like' || type == 'comment') &&
+      worldId is String &&
+      worldId.isNotEmpty &&
+      postId is String &&
+      postId.isNotEmpty) {
+    return exploreWorldPath(worldId, postId: postId);
+  }
+
   final notificationId = data['notification_id'] ?? data['notificationId'];
   if (notificationId is String && notificationId.isNotEmpty) {
     return notificationDeepLinkPath(notificationId);
   }
 
-  final postId = data['post_id'] ?? data['postId'];
   if (postId is String && postId.isNotEmpty) {
     return '/post/$postId';
   }
 
-  final roomId = data['room_id'] ?? data['roomId'] ?? data['dm_room_id'];
   if (roomId is String && roomId.isNotEmpty) {
-    return dmPath(roomId);
+    return chatShellPath(roomId);
   }
 
   final channelId = data['channel_id'] ?? data['channelId'];
@@ -59,7 +87,6 @@ String? routeFromRemoteMessage(RemoteMessage message) {
     return campfirePath(channelId: channelId);
   }
 
-  final worldId = data['world_id'] ?? data['worldId'];
   if (worldId is String && worldId.isNotEmpty) {
     return exploreWorldPath(worldId);
   }

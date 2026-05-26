@@ -778,13 +778,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             ),
                           ),
                           const SizedBox(height: VSpacing.md),
-                          Text(
-                            'Governance voting coming soon.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                          FButton(
+                            onPress: () => context.push(
+                              worldPollsPath(widget.worldId, admin: true),
                             ),
+                            child: const Text('Manage polls'),
                           ),
                         ],
                       ),
@@ -1330,7 +1328,7 @@ class _BoostWorldCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(VRadius.pill),
                 ),
                 child: Text(
-                  'Level $currentLevel',
+                  'Growth level $currentLevel',
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: cs.onPrimaryContainer,
                     fontWeight: VFontWeight.bold,
@@ -1348,7 +1346,7 @@ class _BoostWorldCard extends ConsumerWidget {
               else
                 Expanded(
                   child: Text(
-                    '$progress / $range to Level $nextLevel',
+                    '$progress / $range to growth level $nextLevel',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark
                           ? VColors.outlineVariantDark

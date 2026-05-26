@@ -30,9 +30,10 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
-    final canAscend = ref.watch(residentProvider.select(
-      (s) => s.resident != null && s.resident!.tier.value >= 5 && s.resident!.prestigeStars == 0,
-    ));
+    final canAscend = ref.watch(residentProvider.select((s) {
+      final r = s.resident;
+      return r != null && r.tier.value >= 5 && r.totalXp >= 50000;
+    }));
 
     return VHubPage(
       title: 'Hall of Ascension',

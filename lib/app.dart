@@ -35,6 +35,8 @@ import 'services/firebase_bootstrap.dart';
 import 'services/supabase.dart';
 import 'services/supabase_bootstrap.dart';
 import 'services/firebase_messaging_handlers.dart';
+import 'services/local_notification_service.dart';
+import 'services/chat_notification_scope.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/offline_banner.dart';
 import 'widgets/core/v_app_banner.dart';
@@ -78,6 +80,14 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   }
 
   void _attachRuntimeListeners() {
+    unawaited(
+      LocalNotificationService.initialize(
+        onNavigate: (route) {
+          if (!mounted) return;
+          ref.read(appRouterProvider).go(route);
+        },
+      ),
+    );
     _flushPendingNotificationRoute();
     _notificationRouteSubscription ??=
         PushTokenService.notificationRoutes.listen((route) {
@@ -286,6 +296,10 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   }
 
   void _showForegroundPush(RemoteMessage message) {
+    final type = message.data['type']?.toString() ?? '';
+    if (type == 'dmMessage') {
+      return;
+    }
     final id =
         message.data['notification_id'] ??
         message.data['notificationId'] ??
@@ -317,6 +331,13 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     if (fresh.isEmpty) return;
 
     final notification = fresh.first;
+    if (notification.type == NotificationType.dmMessage) {
+      final roomId = notification.roomId;
+      if (roomId != null &&
+          ChatNotificationScope.shouldSuppressDm(roomId)) {
+        return;
+      }
+    }
     _showInAppNotification(
       id: notification.id,
       title: _notificationTitle(notification.type),
@@ -367,6 +388,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     NotificationType.streakReminder => 'Streak reminder',
     NotificationType.reactionMilestone => 'Reaction milestone',
     NotificationType.mention => 'Mention',
+    NotificationType.dmMessage => 'New message',
     NotificationType.allegianceRequest => 'Allegiance request',
     NotificationType.achievementApproved => 'Achievement verified',
     NotificationType.achievementRejected => 'Achievement review',

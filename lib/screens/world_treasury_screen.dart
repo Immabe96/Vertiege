@@ -9,6 +9,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
+import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 import '../widgets/worlds/world_capability_hint.dart';
@@ -76,7 +77,7 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
         isJoined: true,
       );
       if (block != null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(block)));
+        VFeedback.showMessage(context, block);
         return;
       }
     }

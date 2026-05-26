@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
+import '../../config/progression_glossary.dart';
 import '../../config/world_page_ia.dart';
 import '../../models/post.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/empty_state.dart';
-import 'world_icon.dart';
+import '../core/progression_help_button.dart';
+import 'world_growth_card.dart';
 
 /// Visitor-first Home tab — Facebook Group/Page style landing.
 class WorldHomeTab extends StatelessWidget {
@@ -15,7 +17,6 @@ class WorldHomeTab extends StatelessWidget {
   final String worldId;
   final List<Post> worldPosts;
   final bool isJoined;
-  final VoidCallback onJoin;
   final VoidCallback onOpenRealmGuide;
   final VoidCallback onOpenFeed;
 
@@ -25,7 +26,6 @@ class WorldHomeTab extends StatelessWidget {
     required this.worldId,
     required this.worldPosts,
     required this.isJoined,
-    required this.onJoin,
     required this.onOpenRealmGuide,
     required this.onOpenFeed,
   });
@@ -58,7 +58,6 @@ class WorldHomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
     final announcement = _adminAnnouncement;
     final previews = _discussionPreviews;
 
@@ -66,26 +65,13 @@ class WorldHomeTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: VSpacing.sm),
-        _AboutGroupCard(world: world, isDark: isDark),
+        _GroupMetaCard(world: world, isDark: isDark),
+        WorldGrowthCard(world: world),
         if (announcement != null) ...[
           const SizedBox(height: VSpacing.md),
           _AdminAnnouncementCard(post: announcement, isDark: isDark),
         ],
-        if (!isJoined) ...[
-          const SizedBox(height: VSpacing.md),
-          FButton(
-            onPress: onJoin,
-            child: Text(
-              world.isUnclaimed ? 'Join & claim admin' : 'Join world',
-            ),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'Prove achievements, earn reputation, and post in this world after you join.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-          ),
-        ] else ...[
+        if (isJoined) ...[
           const SizedBox(height: VSpacing.md),
           FButton(
             onPress: onOpenFeed,
@@ -129,18 +115,23 @@ class WorldHomeTab extends StatelessWidget {
           onPressed: onOpenRealmGuide,
           child: const Text('Realm guide, alliances & vault'),
         ),
+        ProgressionHelpLink(
+          focus: world.type == WorldType.dominion
+              ? ProgressionFocus.worldLevel
+              : ProgressionFocus.worldPrestige,
+        ),
         const SizedBox(height: VSpacing.xl),
       ],
     );
   }
 }
 
-/// Facebook-style “About this group” summary.
-class _AboutGroupCard extends StatelessWidget {
+/// Group facts — identity lives in [WorldProfileHeader] above the tabs.
+class _GroupMetaCard extends StatelessWidget {
   final World world;
   final bool isDark;
 
-  const _AboutGroupCard({
+  const _GroupMetaCard({
     required this.world,
     required this.isDark,
   });
@@ -157,33 +148,11 @@ class _AboutGroupCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                WorldIcon(
-                  worldId: world.assetKey,
-                  size: 48,
-                  useGlassContainer: false,
-                ),
-                const SizedBox(width: VSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'About this group',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: VFontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        WorldPageIa.worldKindLabel(world),
-                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            Text(
+              'About this group',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: VFontWeight.bold,
+              ),
             ),
             const SizedBox(height: VSpacing.md),
             Wrap(
@@ -203,7 +172,7 @@ class _AboutGroupCard extends StatelessWidget {
                 if (world.prestige > 0)
                   _MetaChip(
                     icon: Icons.auto_awesome,
-                    label: 'Level ${world.prestige}',
+                    label: ProgressionGlossary.worldPrestigeShort(world.prestige),
                   ),
               ],
             ),
@@ -225,14 +194,6 @@ class _AboutGroupCard extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: muted,
                 height: 1.45,
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            Text(
-              WorldPageIa.adminStatusLabel(world),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: VColors.primary,
-                fontWeight: VFontWeight.semiBold,
               ),
             ),
             if (world.welcomeMessage.trim().isNotEmpty) ...[

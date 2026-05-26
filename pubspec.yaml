@@ -48,6 +48,7 @@ dependencies:
   forui_assets: 0.21.0
   firebase_performance: ^0.11.4+1
   firebase_app_check: ^0.4.4+1
+  flutter_local_notifications: ^19.4.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

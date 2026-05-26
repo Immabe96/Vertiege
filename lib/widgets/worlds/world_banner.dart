@@ -22,6 +22,9 @@ class WorldBanner extends StatelessWidget {
   final WorldType worldType;
   final int prestige;
 
+  /// When true, skips heavy vignette (for in-card thumbnails).
+  final bool contained;
+
   const WorldBanner({
     super.key,
     required this.worldId,
@@ -30,6 +33,7 @@ class WorldBanner extends StatelessWidget {
     this.height = 200,
     this.worldType = WorldType.wealth,
     this.prestige = 0,
+    this.contained = false,
   });
 
   Color get tierColor => WorldAssets.colorForPrestige(prestige);
@@ -60,6 +64,7 @@ class WorldBanner extends StatelessWidget {
                   worldType: worldType,
                   tierColor: tierColor,
                   prestige: prestige,
+                  contained: contained,
                 ),
               ),
             ),
@@ -77,6 +82,7 @@ class WorldBanner extends StatelessWidget {
           worldType: worldType,
           tierColor: tierColor,
           prestige: prestige,
+          contained: contained,
         ),
       ),
     );
@@ -90,12 +96,14 @@ class _WorldBannerPainter extends CustomPainter {
   final WorldType worldType;
   final Color tierColor;
   final int prestige;
+  final bool contained;
 
   _WorldBannerPainter({
     required this.worldId,
     required this.worldType,
     required this.tierColor,
     required this.prestige,
+    this.contained = false,
   });
 
   // Deterministic variation derived from worldId
@@ -108,8 +116,8 @@ class _WorldBannerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawBackground(canvas, size);
     _drawPatterns(canvas, size);
-    _drawIconSilhouette(canvas, size);
-    _drawVignette(canvas, size);
+    if (!contained) _drawIconSilhouette(canvas, size);
+    if (!contained) _drawVignette(canvas, size);
     _drawBottomGlow(canvas, size);
   }
 
@@ -117,7 +125,8 @@ class _WorldBannerPainter extends CustomPainter {
   bool shouldRepaint(covariant _WorldBannerPainter oldDelegate) =>
       oldDelegate.worldId != worldId ||
       oldDelegate.worldType != worldType ||
-      oldDelegate.prestige != prestige;
+      oldDelegate.prestige != prestige ||
+      oldDelegate.contained != contained;
 
   // ── Layers ──────────────────────────────────────────────────
 

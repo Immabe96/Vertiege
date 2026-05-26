@@ -1,6 +1,6 @@
 # Vertiege — Project State
 
-**Updated:** 2026-05-23 (waves 1–4 + screen rebuild + audit pass 2)
+**Updated:** 2026-05-27 (Forui shell/dialogs, world job applications, audit fixes deployed)
 
 ## Vision
 
@@ -35,15 +35,22 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 - **Screen rebuild (A–D):** hub parity, feed shortcuts, sovereign row, chat teaser, joined worlds, achievement proof/rejected UX
 - **Audit pass 2:** members route fix, dark badge fix, following/allies hubs
 
+### 2026-05-27 — Forui + world jobs apply (deployed)
+- **Supabase:** `20260527160000_world_job_applications.sql` applied (`apply_to_world_job`, `accept_world_job_application`)
+- **UI:** Settings dialogs → `showVDialog` / `FDialog`; tab shell → `FScaffold` + `FBottomNavigationBar`
+- **World roles:** Residents **Apply** when eligible; council/sovereign review **Applicants** and accept (marks role filled)
+- **Helper:** `lib/widgets/core/v_dialog.dart`
+
 ### Verification
-- `flutter test` — 110 tests pass
+- `flutter test` — **182** tests pass
 - `flutter analyze lib` — 0 errors
 - `scripts/validate_assets.ps1` — Dart asset refs + manifest approved files on disk
+- Release APK: `./scripts/build_release_apk.sh --split-per-abi`
 
 ### Key remaining work (see REPORT.md "Remaining Work" for full list)
-- **Content**: Safety disclaimers not populated for any world
+- **Content**: Safety disclaimers populated for all 15 preset worlds + custom fallback (2026-05-26)
 - **Adoption**: VImage, LoadState, AppFailure not adopted by existing code
-- **Firebase**: Crashlytics not wired to real Firebase (ConsoleCrashReporter still default), analytics never fired
+- **Firebase**: Crashlytics via `FirebaseBootstrap` on mobile; key analytics events wired (sign-in, worlds, posts, quests, onboarding)
 - **Tests**: No widget, integration, RLS, or performance tests
 - **Feature completion**: Marketplace, treasury, polls, challenges are infrastructure-only — no real data flows
 - **Visual review**: All Codex visual reviews pending (need human with image-reading capability)
@@ -75,7 +82,7 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 - 3 world types (wealth/profession/dominion), 15 hardcoded worlds
 - NexusScreen (Realm Feed) with All/Following/Announcements + sort
 - World detail with feed, channels (Supabase Realtime), events, members
-- Achievement catalog: **110** in config today, **`achievementCatalogLimit` = 1000** (grow over time); 13 categories incl. life; server-backed grant + public profile showcase (G0–G2, 2026-05-25)
+- Achievement catalog: **~619** resolved entries (`110` core badges + bulk seeds v1–v4), **`achievementCatalogLimit` = 1000**; 13 categories incl. life; server-backed grant + public profile showcase (G0–G2, 2026-05-25)
 - Custom world creation gated by resident tier
 - Council standing in schema (rep 5000), sovereign_id on worlds
 - Moderation service + logs (mute/ban)
@@ -145,8 +152,8 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 
 ## Build commands
 ```bash
-flutter build apk --release
-adb install -r build\app\outputs\flutter-apk\app-release.apk
+./scripts/build_release_apk.sh --split-per-abi
+adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 ```
 
 ## Supabase

@@ -16,6 +16,8 @@ import '../services/moderation_service.dart';
 import '../services/verification_service.dart';
 import '../services/supabase.dart';
 import '../repositories/world_repository.dart';
+import '../services/analytics_events.dart';
+import '../services/analytics_service.dart';
 import '../utils/gamification_reconcile.dart';
 import '../utils/haptics.dart';
 import '../utils/streak_check_in.dart';
@@ -333,7 +335,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
     null => 1,
     1 => 1,
     2 => 2,
-    3 => 1,
+    3 => 3,
     4 => 3,
     5 => 999,
     _ => 1,
@@ -461,7 +463,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
         .addNotification(
           type: NotificationType.tierUpgrade,
           message:
-              'Congratulations! You\'ve ascended to ${newTier.label} tier!',
+              'Congratulations! You\'ve been promoted to ${newTier.label} tier!',
         );
 
     Haptics.heavy();
@@ -474,7 +476,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
           residentName: oldResident.name,
           residentAvatar: oldResident.avatarUrl,
           content:
-              'Just ascended to ${newTier.label} tier! ${oldResident.tier.label} -> ${newTier.label}',
+              'Just promoted to ${newTier.label} tier! ${oldResident.tier.label} -> ${newTier.label}',
           tierValue: newTier.value,
           isAnnouncement: true,
         );
@@ -771,6 +773,12 @@ class ResidentNotifier extends Notifier<ResidentState> {
       recentPosts: ref.read(postProvider).posts,
     );
     worldNotifier.addActivityScore(worldId, 10);
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.worldJoined,
+        parameters: {'world_id': worldId},
+      ),
+    );
   }
 
   void leaveWorld(String worldId) {
@@ -902,14 +910,31 @@ class ResidentNotifier extends Notifier<ResidentState> {
     if (count >= 5) notifier.autoAwardAchievement('realm-wanderer');
   }
 
-  bool get canAscend =>
-      state.resident != null &&
-      state.resident!.tier.value >= 5 &&
-      state.resident!.prestigeStars == 0;
+  bool get canAscend {
+    final r = state.resident;
+    return r != null && r.tier.value >= 5 && r.totalXp >= 50000;
+  }
 
   Future<bool> ascendToPrestige() async {
     final r = state.resident;
-    if (r == null || r.totalXp < 50000 || r.tier.value < 5) return false;
+    if (r == null || !canAscend) return false;
+
+    final client = maybeSupabase();
+    if (client != null) {
+      try {
+        final response = await client.rpc('ascend_prestige');
+        final newStars = response is int
+            ? response
+            : (response is num ? response.toInt() : null);
+        if (newStars != null && newStars > 0) {
+          await refreshGamificationFromServer();
+          await _notifyPrestigeAscension(r, newStars);
+          return true;
+        }
+      } catch (e) {
+        debugPrint('ascend_prestige failed: $e');
+      }
+    }
 
     final newStars = r.prestigeStars + 1;
     final prestigeFrameId = 'prestige_$newStars';
@@ -923,6 +948,13 @@ class ResidentNotifier extends Notifier<ResidentState> {
       ),
     );
     _persist();
+
+    await _notifyPrestigeAscension(r, newStars);
+    return true;
+  }
+
+  Future<void> _notifyPrestigeAscension(Resident r, int newStars) async {
+    final prestigeFrameId = 'prestige_$newStars';
 
     ref
         .read(notificationProvider.notifier)
@@ -945,8 +977,6 @@ class ResidentNotifier extends Notifier<ResidentState> {
           tierValue: 5,
           isAnnouncement: true,
         );
-
-    return true;
   }
 
   void setTitle(String? title) {

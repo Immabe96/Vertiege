@@ -3,10 +3,9 @@ import 'package:flutter/foundation.dart';
 
 /// Crash reporting abstraction.
 ///
-/// Currently logs to console. To enable Crashlytics:
-///   1. Add firebase_core + firebase_crashlytics to pubspec.yaml
-///   2. Add google-services.json / GoogleService-Info.plist
-///   3. Replace [ConsoleCrashReporter] with [FirebaseCrashReporter] in main()
+/// [FirebaseCrashReporter] is installed from [FirebaseBootstrap.initializeCore]
+/// on mobile when Firebase initializes. [ConsoleCrashReporter] is the fallback
+/// when Firebase is unavailable (e.g. desktop `flutter run` on Linux).
 ///
 /// Usage in catch blocks:
 ///   ```dart

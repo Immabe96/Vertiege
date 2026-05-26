@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/tiers.dart';
@@ -239,6 +240,7 @@ class WorldNotifier extends Notifier<WorldState> {
 
     final updated = world.copyWith(activityScore: world.activityScore + points);
     state = state.copyWith(worlds: {...state.worlds, worldId: updated});
+    unawaited(WorldService.bumpActivityScore(worldId, points));
   }
 
   int worldLevelFor(String worldId) {

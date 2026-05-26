@@ -1,5 +1,6 @@
 /// Reserved world sub-routes — must not be handled as [WorldChannelScreen] channel names.
 const kReservedWorldSubRoutes = <String>{
+  'discover',
   'members',
   'settings',
   'marketplace',

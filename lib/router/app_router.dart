@@ -34,6 +34,8 @@ import '../screens/settings_screen.dart';
 import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
 import '../screens/world_members_screen.dart';
+import 'app_auth_redirect.dart';
+import 'notification_navigation.dart';
 import 'deep_link_redirects.dart';
 import 'world_route_redirects.dart';
 import '../screens/search_screen.dart';
@@ -158,34 +160,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Auth pages are always accessible (they handle their own state)
       final isAuthPage = location == '/login' || location == '/signup';
 
-      if (!hasSession) {
-        if (!isAuthPage) return '/login';
-        return null;
-      }
+      final unauthRedirect = resolveUnauthenticatedRedirect(
+        hasSession: hasSession,
+        location: location,
+        isAuthPage: isAuthPage,
+      );
+      if (unauthRedirect != null) return unauthRedirect;
 
-      if (isLoading) return null;
+      final onboardingRedirect = resolveResidentOnboardingRedirect(
+        hasSession: hasSession,
+        isLoading: isLoading,
+        hasResident: resident != null,
+        gateCompleted: resident?.gateCompleted ?? false,
+        location: location,
+        isAuthPage: isAuthPage,
+      );
+      if (onboardingRedirect != null) return onboardingRedirect;
 
-      if (resident == null) {
-        if (location != '/onboarding') return '/onboarding';
-        return null;
-      }
-
-      final gateDone = resident.gateCompleted;
-      if (!gateDone) {
-        if (location != '/onboarding') {
-          return '/onboarding';
-        }
-        return null;
-      }
+      if (resident == null) return null;
 
       final tier = resident.tier.value;
       if (location == '/create-world' &&
           !AdminAccessService.canCreateWorld(tierValue: tier)) {
-        return '/';
-      }
-      // Subscription is the upgrade path — tier-1 users must reach it from More.
-
-      if (isAuthPage || location == '/onboarding' || location == '/the-gate') {
         return '/';
       }
 
@@ -710,15 +706,14 @@ class _NotificationDeepLinkState extends ConsumerState<_NotificationDeepLink> {
     }
 
     if (!context.mounted) return;
-    final postId = notif?.postId;
-    final worldId = notif?.worldId;
-    if (worldId != null && postId != null && postId.isNotEmpty) {
-      context.go(exploreWorldPath(worldId, postId: postId));
-    } else if (worldId != null) {
-      context.go(exploreWorldPath(worldId));
-    } else {
-      context.go('/notifications');
+    if (notif != null) {
+      final route = routeForNotification(notif);
+      if (route != null && route.isNotEmpty) {
+        context.go(route);
+        return;
+      }
     }
+    context.go('/notifications');
   }
 
   @override

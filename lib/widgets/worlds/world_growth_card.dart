@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../config/progression_glossary.dart';
 import '../../config/tiers.dart';
 import '../../config/world_capability_matrix.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../core/progression_help_button.dart';
 
 /// Level / growth narrative on world detail (dominion activity or prestige).
 class WorldGrowthCard extends StatelessWidget {
@@ -52,13 +54,21 @@ class WorldGrowthCard extends StatelessWidget {
                 color: VColors.tertiary,
               ),
               const SizedBox(width: VSpacing.xs),
-              Text(
-                isDominion ? 'World growth' : 'World prestige',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: VFontWeight.semiBold,
+              Expanded(
+                child: Text(
+                  isDominion ? 'World growth level' : 'World prestige',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                  ),
                 ),
               ),
-              const Spacer(),
+              ProgressionHelpButton(
+                focus: isDominion
+                    ? ProgressionFocus.worldLevel
+                    : ProgressionFocus.worldPrestige,
+                iconSize: VIconSize.sm,
+              ),
+              const SizedBox(width: VSpacing.xs),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: VSpacing.sm,
@@ -69,7 +79,9 @@ class WorldGrowthCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(VRadius.pill),
                 ),
                 child: Text(
-                  isDominion ? 'Level ${growth.level}' : 'Prestige ${world.prestige}',
+                  isDominion
+                      ? ProgressionGlossary.worldGrowthLevelShort(growth.level)
+                      : ProgressionGlossary.worldPrestigeShort(world.prestige),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: VColors.primary,
                     fontWeight: VFontWeight.bold,
@@ -93,8 +105,8 @@ class WorldGrowthCard extends StatelessWidget {
             const SizedBox(height: VSpacing.xs),
             Text(
               growth.isMax
-                  ? '${growth.activityScore} activity · max level'
-                  : '${growth.activityScore} activity · ${growth.progress}/${growth.range} to level ${growth.level + 1}',
+                  ? '${growth.activityScore} activity points · max growth level'
+                  : '${growth.activityScore} activity · ${growth.progress}/${growth.range} to growth level ${growth.level + 1}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: isDark
                     ? VColors.onSurfaceVariantDark
@@ -113,7 +125,7 @@ class WorldGrowthCard extends StatelessWidget {
             ],
           ] else
             Text(
-              'Prestige ${world.prestige}/50 unlocks lounge, marketplace, treasury, and governance.',
+              ProgressionGlossary.worldPrestigeFull(world.prestige),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: isDark
                     ? VColors.onSurfaceVariantDark

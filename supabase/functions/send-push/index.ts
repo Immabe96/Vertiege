@@ -13,6 +13,7 @@ type NotificationRecord = {
   world_id?: string | null
   post_id?: string | null
   channel_id?: string | null
+  room_id?: string | null
 }
 
 type DeviceToken = {
@@ -109,6 +110,49 @@ async function sendFcmMessage(
   token: string,
   record: NotificationRecord,
 ): Promise<{ ok: boolean; errorCode?: string }> {
+  const isDm = record.type === 'dmMessage' && !!record.room_id
+  const data = compactStringMap({
+    notification_id: record.id,
+    type: record.type,
+    world_id: record.world_id,
+    post_id: record.post_id,
+    channel_id: record.channel_id,
+    room_id: record.room_id,
+    route: routeFor(record),
+    message: record.message,
+    sender_name: dmSenderName(record.message),
+  })
+
+  const messageBody: Record<string, unknown> = {
+    token,
+    data,
+    android: {
+      priority: 'HIGH',
+      ...(isDm && record.room_id
+        ? { collapse_key: record.room_id }
+        : {}),
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+        },
+      },
+    },
+  }
+
+  // DM: data-only so the app can show MessagingStyle + inline Reply action.
+  if (!isDm) {
+    messageBody.notification = {
+      title: notificationTitle(record),
+      body: record.message ?? 'You have a new Vertiege notification.',
+    }
+    ;(messageBody.android as Record<string, unknown>).notification = {
+      channel_id: 'vertiege_notifications',
+      click_action: 'FLUTTER_NOTIFICATION_CLICK',
+    }
+  }
+
   const response = await fetch(
     `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
     {
@@ -117,37 +161,7 @@ async function sendFcmMessage(
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        message: {
-          token,
-          notification: {
-            title: notificationTitle(record),
-            body: record.message ?? 'You have a new Vertiege notification.',
-          },
-          data: compactStringMap({
-            notification_id: record.id,
-            type: record.type,
-            world_id: record.world_id,
-            post_id: record.post_id,
-            channel_id: record.channel_id,
-            route: routeFor(record),
-          }),
-          android: {
-            priority: 'HIGH',
-            notification: {
-              channel_id: 'vertiege_notifications',
-              click_action: 'FLUTTER_NOTIFICATION_CLICK',
-            },
-          },
-          apns: {
-            payload: {
-              aps: {
-                sound: 'default',
-              },
-            },
-          },
-        },
-      }),
+      body: JSON.stringify({ message: messageBody }),
     },
   )
 
@@ -243,8 +257,17 @@ function compactStringMap(values: Record<string, unknown>) {
   )
 }
 
+function dmSenderName(message?: string) {
+  if (!message) return 'Someone'
+  const idx = message.indexOf(':')
+  if (idx <= 0) return 'Someone'
+  return message.slice(0, idx).trim() || 'Someone'
+}
+
 function notificationTitle(record: NotificationRecord) {
   switch (record.type) {
+    case 'dmMessage':
+      return dmSenderName(record.message)
     case 'comment':
       return 'New comment'
     case 'like':
@@ -261,8 +284,30 @@ function notificationTitle(record: NotificationRecord) {
 }
 
 function routeFor(record: NotificationRecord) {
+  const type = record.type ?? ''
+
+  if (type === 'dmMessage') {
+    if (record.room_id) {
+      return `/chat/${encodeURIComponent(record.room_id)}`
+    }
+    return '/chat'
+  }
+
+  if (type === 'achievementApproved' || type === 'achievementRejected') {
+    return '/achievements'
+  }
+
+  if (
+    (type === 'like' || type === 'comment') &&
+    record.world_id &&
+    record.post_id
+  ) {
+    return `/explore/${encodeURIComponent(record.world_id)}?post=${encodeURIComponent(record.post_id)}`
+  }
+
+  if (record.room_id) return `/chat/${encodeURIComponent(record.room_id)}`
   if (record.post_id) return `/post/${record.post_id}`
   if (record.channel_id) return `/campfire/${record.channel_id}`
-  if (record.world_id) return `/explore/${record.world_id}`
-  return `/notifications/${record.id}`
+  if (record.world_id) return `/explore/${encodeURIComponent(record.world_id)}`
+  return `/notifications/${encodeURIComponent(record.id)}`
 }

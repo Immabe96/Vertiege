@@ -8,8 +8,11 @@ import 'package:vertiege/utils/world_assets.dart';
 void main() {
   group('ACHIEVEMENTS', () {
     test('catalog stays within product limit', () {
-      expect(achievements.length, greaterThanOrEqualTo(580));
+      expect(achievements.length, greaterThan(110));
+      expect(achievements.length, greaterThanOrEqualTo(615));
       expect(achievements.length, lessThanOrEqualTo(achievementCatalogLimit));
+      expect(achievementCatalogSize, achievements.length);
+      expect(coreAchievementCount, 110);
     });
 
     test('non-inApp achievements have verifier proof hints', () {

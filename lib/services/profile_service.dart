@@ -94,26 +94,6 @@ class ProfileService {
     return (data as List).map((e) => _toResident(e)).toList();
   }
 
-  static Map<String, dynamic> _toProfileRow(Resident r) => {
-    'id': r.id,
-    'name': r.name,
-    'bio': r.bio,
-    'tier': r.tier.value,
-    'avatar_url': r.avatarUrl,
-    'profession': r.profession,
-    'decorations': r.decorations,
-    'last_check_in': r.lastCheckIn,
-    'streak_count': r.streakCount,
-    'streak_shields': r.streakShields,
-    'following': r.following,
-    'joined_world_ids': r.joinedWorldIds,
-    if (r.referredBy != null) 'referred_by': r.referredBy,
-    'sovereign_coins': r.sovereignCoins,
-    'onboarding_completed': r.onboardingCompleted,
-    'gate_completed': r.gateCompleted,
-    if (r.avatarFrameId != null) 'avatar_frame_id': r.avatarFrameId,
-  };
-
   static Resident _toResident(
     Map<String, dynamic> data, {
     List<String> verifiedRoles = const [],

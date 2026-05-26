@@ -1,6 +1,18 @@
 import '../config/tiers.dart';
 import '../models/world.dart';
 
+/// Wealth-tier worlds: markets discussion, not personalized advice.
+const kWealthSafetyDisclaimer =
+    'Wealth worlds are for education and peer discussion—not investment, tax, or personalized financial advice. Verify numbers yourself and use licensed professionals before acting on real money.';
+
+/// Strategy / governance worlds: discretion and accountability.
+const kStrategySafetyDisclaimer =
+    'Posts are peer strategy and role-play—not confidential counsel. Do not share private identities or material non-public information; confirm anything operational with qualified advisors.';
+
+/// General community worlds: peer content, not professional services.
+const kCommunitySafetyDisclaimer =
+    'Resident posts are peer opinions, not professional services. Apply world rules, report harm, and seek qualified experts for decisions that affect health, money, law, or safety.';
+
 class WorldFoundation {
   final String premise;
   final List<String> focus;
@@ -36,6 +48,7 @@ WorldFoundation foundationForWorld(World world) {
         ],
         entryPrompt:
             'Introduce yourself with the world you want to build and the kind of residents who should join you.',
+        safetyDisclaimer: kCommunitySafetyDisclaimer,
       );
 }
 
@@ -201,6 +214,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share your current hustle, the next measurable milestone, and one useful lesson you can offer.',
+    safetyDisclaimer: kWealthSafetyDisclaimer,
   ),
   'crystal-shore': WorldFoundation(
     premise:
@@ -217,6 +231,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share the financial habit you are improving and the next small win you are working toward.',
+    safetyDisclaimer: kWealthSafetyDisclaimer,
   ),
   'azure-coast': WorldFoundation(
     premise:
@@ -233,6 +248,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share an opportunity you are studying, the risk you see, and the signal you want from others.',
+    safetyDisclaimer: kWealthSafetyDisclaimer,
   ),
   'crimson-court': WorldFoundation(
     premise:
@@ -249,6 +265,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share a strategic question, negotiation lesson, or room-reading insight without exposing private people.',
+    safetyDisclaimer: kStrategySafetyDisclaimer,
   ),
   'sovereign-city': WorldFoundation(
     premise:
@@ -265,6 +282,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share the system you are building, leading, or trying to repair.',
+    safetyDisclaimer: kStrategySafetyDisclaimer,
   ),
   'golden-estate': WorldFoundation(
     premise:
@@ -281,6 +299,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share a long-horizon principle, stewardship question, or compounding lesson.',
+    safetyDisclaimer: kWealthSafetyDisclaimer,
   ),
   'aetheria': WorldFoundation(
     premise:
@@ -297,6 +316,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share the legacy-scale problem, idea, or obligation currently occupying your attention.',
+    safetyDisclaimer: kWealthSafetyDisclaimer,
   ),
   'nova-station': WorldFoundation(
     premise:
@@ -313,6 +333,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share a frontier thesis, why it might fail, and what evidence would change your mind.',
+    safetyDisclaimer: kWealthSafetyDisclaimer,
   ),
   'aviation-heights': WorldFoundation(
     premise:
@@ -383,6 +404,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share what you are building, the hard technical tradeoff, and what feedback would help.',
+    safetyDisclaimer: kCommunitySafetyDisclaimer,
   ),
   'legal-plaza': WorldFoundation(
     premise:
@@ -417,6 +439,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share what you are making, the kind of critique you want, and one influence behind the work.',
+    safetyDisclaimer: kCommunitySafetyDisclaimer,
   ),
   'quantum-core': WorldFoundation(
     premise:
@@ -451,6 +474,7 @@ const _foundations = <String, WorldFoundation>{
     ],
     entryPrompt:
         'Share what you are writing, the reader effect you want, and the feedback you are ready for.',
+    safetyDisclaimer: kCommunitySafetyDisclaimer,
   ),
 };
 

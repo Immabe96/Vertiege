@@ -12,6 +12,8 @@ import '../models/sync_status.dart';
 import '../services/moderation_filter.dart';
 import '../services/permission_service.dart';
 import '../services/supabase.dart';
+import '../services/analytics_events.dart';
+import '../services/analytics_service.dart';
 import '../services/crash_reporter.dart';
 import 'world_provider.dart';
 import '../services/storage_service.dart';
@@ -336,6 +338,12 @@ class PostNotifier extends Notifier<PostState> {
         }).toList(),
         isPosting: false,
         clearLastError: true,
+      );
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.postCreated,
+          parameters: {'world_id': worldId},
+        ),
       );
     } else if (result.queued) {
       state = state.copyWith(

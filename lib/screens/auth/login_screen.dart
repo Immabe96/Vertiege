@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/analytics_events.dart';
+import '../../services/analytics_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/verifier_session.dart';
 import '../../services/supabase.dart';
@@ -71,6 +73,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final resident = residentState.resident;
     if (resident != null) {
+      unawaited(AnalyticsService.logEvent(AnalyticsEvents.signIn));
       context.go('/');
     } else {
       context.go('/onboarding');

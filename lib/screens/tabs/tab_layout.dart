@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../state/notification_provider.dart';
@@ -9,6 +10,7 @@ import '../../state/voice_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
+import '../../widgets/core/glass_sheet.dart';
 import '../../widgets/feed/post_input.dart';
 
 class ScrollToTopNotifier extends Notifier<int> {
@@ -90,37 +92,8 @@ class _TabLayoutState extends ConsumerState<TabLayout>
       }
     }
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          widget.navigationShell,
-          _FloatingCampfireBar(),
-        ],
-      ),
-      floatingActionButton: fabConfig != null
-          ? ScaleTransition(
-              scale: _fabScale,
-              child: RotationTransition(
-                turns: _fabRotation,
-                child: SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: FloatingActionButton(
-                    onPressed: fabConfig.onPressed,
-                    backgroundColor: fabConfig.backgroundColor,
-                    foregroundColor: fabConfig.foregroundColor,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(VRadius.lg),
-                    ),
-                    child: Icon(fabConfig.icon, size: VIconSize.lg),
-                  ),
-                ),
-              ),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: _AppNavBar(
+    return FScaffold(
+      footer: _MainBottomNav(
         index: index,
         unread: unread,
         onTabTap: (i) {
@@ -134,13 +107,51 @@ class _TabLayoutState extends ConsumerState<TabLayout>
           );
         },
       ),
+      child: Stack(
+        children: [
+          widget.navigationShell,
+          const _FloatingCampfireBar(),
+          if (fabConfig != null)
+            Positioned(
+              right: VSpacing.lg,
+              bottom: VSpacing.lg,
+              child: ScaleTransition(
+                scale: _fabScale,
+                child: RotationTransition(
+                  turns: _fabRotation,
+                  child: Semantics(
+                    label: 'Compose post',
+                    button: true,
+                    child: Material(
+                      elevation: 4,
+                      color: fabConfig.backgroundColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(VRadius.lg),
+                      ),
+                      child: InkWell(
+                        onTap: fabConfig.onPressed,
+                        borderRadius: BorderRadius.circular(VRadius.lg),
+                        child: SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: Icon(
+                            fabConfig.icon,
+                            size: VIconSize.lg,
+                            color: fabConfig.foregroundColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
   _FabConfig? _fabForTab(int index, WidgetRef ref) {
-    // Only show compose FAB on Nexus tab (index 0).
-    // Create-world moved to Explore page UI. New DM in Chat page header.
-    // Edit profile accessible from Identity page.
     if (index != 0) return null;
     return _FabConfig(
       icon: Icons.edit,
@@ -156,162 +167,116 @@ class _TabLayoutState extends ConsumerState<TabLayout>
         ? resident!.joinedWorldIds.first
         : 'nexus';
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => PostInput(worldId: worldId, showWorldSelector: true),
+    showAppSheet(
+      context,
+      PostInput(worldId: worldId, showWorldSelector: true),
+      maxSize: 0.95,
     );
   }
 }
 
-class _AppNavBar extends ConsumerWidget {
+class _MainBottomNav extends StatelessWidget {
   final int index;
   final int unread;
   final void Function(int) onTabTap;
 
-  const _AppNavBar({
+  const _MainBottomNav({
     required this.index,
     required this.unread,
     required this.onTabTap,
   });
 
   static const _destinations = [
-    (icon: Icons.hub_outlined, activeIcon: Icons.hub, label: 'Nexus'),
-    (icon: Icons.explore_outlined, activeIcon: Icons.explore, label: 'Discover'),
+    (
+      icon: Icons.hub_outlined,
+      activeIcon: Icons.hub,
+      label: 'Nexus',
+      semanticsLabel: 'Nexus',
+    ),
+    (
+      icon: Icons.explore_outlined,
+      activeIcon: Icons.explore,
+      label: 'Discover',
+      semanticsLabel: 'Discover',
+    ),
     (
       icon: Icons.chat_bubble_outline,
       activeIcon: Icons.chat_bubble,
       label: 'Chat',
+      semanticsLabel: 'Messages',
     ),
     (
       icon: Icons.account_circle_outlined,
       activeIcon: Icons.account_circle,
       label: 'Identity',
+      semanticsLabel: 'Identity',
     ),
-    (icon: Icons.more_horiz, activeIcon: Icons.more_horiz, label: 'More'),
+    (
+      icon: Icons.more_horiz,
+      activeIcon: Icons.more_horiz,
+      label: 'More',
+      semanticsLabel: 'More',
+    ),
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(VSpacing.lg, 0, VSpacing.lg, VSpacing.sm),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(VRadius.xl),
-          child: Container(
-            height: 64,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(VRadius.xl),
-              border: Border.all(
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: (isDark ? VColors.dark : VColors.onSurface).withValues(alpha: 0.06),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: List.generate(_destinations.length, (i) {
-                final isActive = i == index;
-                final dest = _destinations[i];
-
-                return Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onTabTap(i),
-                    child: AnimatedContainer(
-                      duration: VAnimation.fast,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: VSpacing.xs,
-                        vertical: VSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? (isDark
-                                ? VColors.primaryContainerDark
-                                : VColors.primaryContainer)
-                                .withValues(alpha: 0.4)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(VRadius.md),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            alignment: Alignment.center,
-                            children: [
-                              AnimatedSwitcher(
-                                duration: VAnimation.fast,
-                                transitionBuilder: (child, animation) {
-                                  return ScaleTransition(
-                                    scale: animation,
-                                    child: child,
-                                  );
-                                },
-                                child: Icon(
-                                  isActive ? dest.activeIcon : dest.icon,
-                                  key: ValueKey(isActive),
-                                  size: VIconSize.lg,
-                                  color: isActive
-                                      ? (isDark
-                                          ? VColors.primaryLight
-                                          : VColors.primary)
-                                      : (isDark
-                                          ? VColors.onSurfaceVariantDark
-                                          : VColors.onSurfaceVariant),
-                                ),
-                              ),
-                              if (i == 0 && unread > 0)
-                                Positioned(
-                                  top: -2,
-                                  right: -4,
-                                  child: _UnreadBadge(count: unread),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: VSpacing.xxs),
-                          AnimatedDefaultTextStyle(
-                            duration: VAnimation.fast,
-                            style: TextStyle(
-                              fontSize: VFontSize.labelSm,
-                              fontWeight: isActive
-                                  ? VFontWeight.semiBold
-                                  : VFontWeight.regular,
-                              color: isActive
-                                  ? (isDark
-                                      ? VColors.primaryLight
-                                      : VColors.primary)
-                                  : (isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant),
-                            ),
-                            child: Text(dest.label),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
+  Widget build(BuildContext context) {
+    return FBottomNavigationBar(
+      index: index,
+      onChange: onTabTap,
+      safeAreaBottom: true,
+      children: [
+        for (var i = 0; i < _destinations.length; i++)
+          _navItem(
+            dest: _destinations[i],
+            showBadge: i == 0 && unread > 0,
+            badgeCount: unread,
+            outlined: _destinations[i].icon,
+            filled: _destinations[i].activeIcon,
           ),
+      ],
+    );
+  }
+
+  Widget _navItem({
+    required ({IconData icon, IconData activeIcon, String label, String semanticsLabel}) dest,
+    required bool showBadge,
+    required int badgeCount,
+    required IconData outlined,
+    required IconData filled,
+  }) {
+    return Semantics(
+      label: dest.semanticsLabel,
+      button: true,
+      child: FBottomNavigationBarItem(
+        icon: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _TabNavIcon(outlined: outlined, filled: filled),
+            if (showBadge)
+              Positioned(
+                top: -2,
+                right: -6,
+                child: _UnreadBadge(count: badgeCount),
+              ),
+          ],
         ),
+        label: Text(dest.label),
       ),
     );
+  }
+}
+
+class _TabNavIcon extends StatelessWidget {
+  final IconData outlined;
+  final IconData filled;
+
+  const _TabNavIcon({required this.outlined, required this.filled});
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = FBottomNavigationBarData.of(context).selected;
+    return Icon(selected ? filled : outlined);
   }
 }
 

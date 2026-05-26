@@ -4,9 +4,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
-import '../models/notification.dart';
 import '../services/chat_service.dart';
-import '../services/notification_service.dart';
 import '../services/media_service.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/storage_service.dart';
@@ -243,14 +241,6 @@ class ChatNotifier extends Notifier<ChatState> {
         autoDeleteAfterSeconds: autoDeleteAfterSeconds,
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
-      unawaited(
-        _notifyDmRecipient(
-          roomId: roomId,
-          senderId: senderId,
-          senderName: senderName,
-          preview: content.isNotEmpty ? content : 'Sent an image',
-        ),
-      );
     } catch (_) {
       await MutationOutboxService.enqueue('chat.message', {
         'roomId': roomId,
@@ -270,33 +260,6 @@ class ChatNotifier extends Notifier<ChatState> {
         dmMessages: {...state.dmMessages, roomId: updated ?? []},
       );
     }
-  }
-
-  Future<void> _notifyDmRecipient({
-    required String roomId,
-    required String senderId,
-    required String senderName,
-    required String preview,
-  }) async {
-    final room = state.dmRooms.cast<Map<String, dynamic>?>().firstWhere(
-      (r) => r?['id'] == roomId,
-      orElse: () => null,
-    );
-    if (room == null) return;
-    final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
-    final recipientId = ids.where((id) => id != senderId).firstOrNull;
-    if (recipientId == null || recipientId.isEmpty) return;
-
-    final notification = AppNotification(
-      id: generateId(),
-      type: NotificationType.mention,
-      message: '$senderName: $preview',
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-    );
-    await NotificationService.createNotification(
-      recipientId: recipientId,
-      notification: notification,
-    );
   }
 
   // ── Shared realtime subscription helper ──────────────────

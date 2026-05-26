@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../state/session_reset.dart';
+import 'analytics_events.dart';
+import 'analytics_service.dart';
 import 'crash_reporter.dart';
 import 'secure_storage_service.dart';
 import 'supabase.dart';
@@ -128,6 +132,8 @@ class AuthService {
     if (ref != null) {
       resetUserSessionState(ref);
     }
+    unawaited(AnalyticsService.logEvent(AnalyticsEvents.signOut));
+    CrashReporter.instance.setUser('', name: null);
   }
 
   static Future<Session?> getSession() async {

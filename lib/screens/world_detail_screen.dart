@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +19,7 @@ import '../widgets/worlds/world_channel_list.dart';
 
 import '../widgets/worlds/world_member_row.dart';
 import '../widgets/worlds/world_hero_banner.dart';
+import '../widgets/worlds/world_profile_header.dart';
 import '../widgets/worlds/world_realm_dossier.dart';
 import '../widgets/worlds/world_home_tab.dart';
 import '../widgets/worlds/world_shop_tab.dart';
@@ -24,6 +27,8 @@ import '../widgets/worlds/world_tools_drawer.dart';
 import '../widgets/worlds/world_feed_tab.dart';
 import '../widgets/core/glass_sheet.dart';
 import '../widgets/worlds/world_detail_members.dart';
+import '../services/analytics_events.dart';
+import '../services/analytics_service.dart';
 import '../services/permission_service.dart';
 import '../services/onboarding_funnel_prefs.dart';
 import '../services/world_nav_prefs.dart';
@@ -38,6 +43,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 
 import '../state/post_provider.dart';
+import '../state/quest_provider.dart';
 import '../models/post.dart';
 import '../models/resident.dart';
 import '../models/world.dart' show World;
@@ -104,6 +110,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     _runGovernanceChecks();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       OnboardingFunnelPrefs.markOpenedWorld();
+      ref.read(questProvider.notifier).onWorldVisited();
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.worldViewed,
+          parameters: {'world_id': widget.worldId},
+        ),
+      );
     });
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
@@ -304,7 +317,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
           worldId: widget.worldId,
           worldPosts: posts,
           isJoined: isJoined,
-          onJoin: _handleJoin,
           onOpenFeed: () => _goToTab(world, WorldDetailTabId.feed),
           onOpenRealmGuide: () => _showRealmGuideSheet(
             world,
@@ -654,9 +666,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
     // Prestige-based tier for hero glow, badge, and button colors
     final prestigeTierColor = _getPrestigeTierColor(world.prestige);
-    final heroHeight = (MediaQuery.of(context).size.height * 0.28)
-        .clamp(210.0, 300.0)
-        .toDouble();
 
     final onSettings =
         resident != null &&
@@ -708,22 +717,34 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               WorldHeroBanner(
-                worldId: widget.worldId,
                 world: world,
-                expandedHeight: heroHeight,
                 isDark: isDark,
                 prestigeTierColor: prestigeTierColor,
-                tierLabel: tierLabel,
                 isJoined: isJoined,
                 innerBoxIsScrolled: innerBoxIsScrolled,
                 scaleAnimation: scaleAnimation,
-                joinAnimController: _joinAnimController,
                 joinButtonKey: _joinButtonKey,
                 onBack: () => safeBack(context, fallback: '/explore'),
                 onShare: () => _showWorldShareSheet(world),
                 onSettings: onSettings,
                 onOpenTools: _openToolsDrawer,
                 onJoin: _handleJoin,
+              ),
+
+              SliverToBoxAdapter(
+                child: FadeIn(
+                  delayMs: context.motionEnabled ? 40 : 0,
+                  child: WorldProfileHeader(
+                    world: world,
+                    worldId: widget.worldId,
+                    prestigeTierColor: prestigeTierColor,
+                    tierLabel: tierLabel,
+                    isJoined: isJoined,
+                    scaleAnimation: scaleAnimation,
+                    joinButtonKey: _joinButtonKey,
+                    onJoin: _handleJoin,
+                  ),
+                ),
               ),
 
               SliverToBoxAdapter(

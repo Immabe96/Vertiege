@@ -1,7 +1,7 @@
 # Gamification & Worlds — Product Vision
 
 **Status:** North star (authoritative intent)  
-**Updated:** 2026-05-24  
+**Updated:** 2026-05-27  
 **Source:** Product owner vision — treat this as the goal for phases after core app stability.
 
 ---
@@ -103,3 +103,50 @@ World info / detail UI should eventually express this dossier (deferred until ga
 6. **World creation gate** — tier-gated custom/dominion worlds for mature residents.
 
 Do not treat marketplace/treasury/polls as “done” until they participate in this standing loop.
+
+---
+
+## Progression glossary (user-facing)
+
+Use these terms consistently in UI and support docs. In-app copy lives in
+`lib/config/progression_glossary.dart`; help sheet: **How progression works**.
+
+| Term | Scope | Meaning |
+|------|--------|---------|
+| **XP** | You (global) | Points from verified achievements and in-app milestones. Adds on your profile. |
+| **Tier** | You (global) | Rank from total XP: Hustler → High Roller → Elite → Old Money → Apex. Gates worlds and creation. |
+| **Rep** | You × one world | Reputation earned inside that world (posts, trade, participation). |
+| **Standing** | You × one world | Label from rep (Member, Contributor, Council at 5,000 rep, etc.). |
+| **World prestige** | The world | Realm maturity **1–50**. Unlocks lounge, marketplace, treasury, governance for everyone in that world. **Not** your tier. |
+| **World growth level** | User-created worlds | **1–10** from activity score (posts, joins). Raises member cap. Premade worlds use prestige instead. |
+| **Ascension** | You (optional) | After Apex + 50k XP: reset tier/XP for prestige stars (Hall of Ascension). |
+
+### XP → tier thresholds
+
+| Tier | XP required |
+|------|-------------|
+| Hustler | 0 |
+| High Roller | 500 |
+| Elite | 2,000 |
+| Old Money | 10,000 |
+| Apex | 50,000 |
+
+### UI label rules
+
+- Never label `world.prestige` as “Level” — use **Prestige N** or **Prestige N/50**.
+- Use **Growth level N** only for dominion `activityScore` levels.
+- World entry gates: **Requires {Tier} tier or higher** or **Requires {Profession} verification**.
+- Identity: **Your tier & XP** (global) vs **World rep** (sum across worlds).
+
+### World roles (jobs board)
+
+- Council/sovereign post open roles with min **standing** and **tier**.
+- Eligible members tap **Apply** (optional pitch message).
+- Managers open **Applicants**, **Accept** one → role `filled`, other pending applications rejected.
+- Backend: `world_job_applications`, RPCs `apply_to_world_job`, `accept_world_job_application`.
+
+### Where users learn this
+
+- Identity tab: section headers + `?` opens focused help.
+- Nexus bento: tap tier/XP card for tier help.
+- World detail: profile card + growth card + “How progression works” on Home tab.

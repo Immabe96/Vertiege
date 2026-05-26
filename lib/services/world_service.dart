@@ -457,6 +457,26 @@ class WorldService {
     return slug.isEmpty ? 'world-${generateId().substring(0, 8)}' : slug;
   }
 
+  /// Persists dominion [activity_score] via server RPC (no-op when offline).
+  static Future<void> bumpActivityScore(String worldId, int delta) async {
+    if (!isSupabaseConfigured() || !isRemoteWorldId(worldId) || delta == 0) {
+      return;
+    }
+    try {
+      await getSupabase().rpc(
+        'bump_world_activity_score',
+        params: {'p_world_id': worldId, 'p_delta': delta},
+      );
+    } catch (e, st) {
+      debugPrint('WorldService.bumpActivityScore error: $e');
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'bump_world_activity_score',
+      );
+    }
+  }
+
   // --- Prestige ---
   static Future<List<Map<String, dynamic>>> getHighPrestigeWorlds(
     String residentId,

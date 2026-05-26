@@ -7,14 +7,17 @@ cd "$ROOT"
 
 FORCE=false
 SKIP_TESTS=false
+SPLIT_PER_ABI=false
 for arg in "$@"; do
   case "$arg" in
     --force) FORCE=true ;;
     --skip-tests) SKIP_TESTS=true ;;
+    --split-per-abi) SPLIT_PER_ABI=true ;;
     -h|--help)
-      echo "Usage: $0 [--force] [--skip-tests]"
-      echo "  --force       Build even if core achievement PNGs are incomplete"
-      echo "  --skip-tests  Skip flutter test before build"
+      echo "Usage: $0 [--force] [--skip-tests] [--split-per-abi]"
+      echo "  --force         Build even if core achievement PNGs are incomplete"
+      echo "  --skip-tests    Skip flutter test before build"
+      echo "  --split-per-abi Per-CPU APKs (~40% smaller each); outputs app-*-release.apk"
       exit 0
       ;;
   esac
@@ -46,16 +49,28 @@ if [ ! -f android/key.properties ] && [ ! -f android/upload-keystore.jks ]; then
   echo "==> Warning: android/key.properties missing — APK will use debug signing."
 fi
 
-echo "==> flutter build apk --release"
-flutter build apk --release --no-tree-shake-icons
+BUILD_FLAGS=(--release --no-tree-shake-icons)
+if [ "$SPLIT_PER_ABI" = true ]; then
+  BUILD_FLAGS+=(--split-per-abi)
+fi
 
-APK="$ROOT/build/app/outputs/flutter-apk/app-release.apk"
-if [ -f "$APK" ]; then
-  ls -lh "$APK"
+echo "==> flutter build apk ${BUILD_FLAGS[*]}"
+flutter build apk "${BUILD_FLAGS[@]}"
+
+if [ "$SPLIT_PER_ABI" = true ]; then
   echo ""
-  echo "Release APK: $APK"
-  echo "Install: adb install -r \"$APK\""
+  echo "Per-ABI APKs:"
+  ls -lh "$ROOT/build/app/outputs/flutter-apk/"/*-release.apk 2>/dev/null || true
+  echo "Install (example): adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
 else
-  echo "APK not found at expected path: $APK" >&2
-  exit 1
+  APK="$ROOT/build/app/outputs/flutter-apk/app-release.apk"
+  if [ -f "$APK" ]; then
+    ls -lh "$APK"
+    echo ""
+    echo "Release APK: $APK"
+    echo "Install: adb install -r \"$APK\""
+  else
+    echo "APK not found at expected path: $APK" >&2
+    exit 1
+  fi
 fi

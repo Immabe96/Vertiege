@@ -20,6 +20,7 @@ import '../ui/icons/v_icons.dart';
 import '../utils/chat_new_since_visit.dart';
 import '../utils/date_format.dart';
 import '../utils/presence_utils.dart';
+import '../services/chat_notification_scope.dart';
 import '../services/supabase.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
@@ -77,6 +78,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     _visitDividerAnchor = ref.read(chatProvider).channelReads[roomId];
     notifier.loadDmMessages(roomId, force: true);
     notifier.subscribeToDm(roomId);
+    ChatNotificationScope.setActiveDmRoom(roomId);
 
     _scrollController.addListener(_onScroll);
 
@@ -127,6 +129,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   @override
   void dispose() {
     _typingTimer?.cancel();
+    ChatNotificationScope.setActiveDmRoom(null);
     ref.read(chatProvider.notifier).unsubscribeFromDm(widget.roomId);
     _controller.dispose();
     _scrollController.removeListener(_onScroll);

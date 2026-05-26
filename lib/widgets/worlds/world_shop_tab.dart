@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../config/progression_glossary.dart';
 import '../../config/world_capability_matrix.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
@@ -118,13 +119,13 @@ class WorldShopTab extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     canList
-                        ? 'World level ${world.prestige} · you can create listings'
+                        ? '${ProgressionGlossary.worldPrestigeShort(world.prestige)} · you can create listings'
                         : (WorldCapabilityMatrix.blockReasonCreateListing(
                               resident,
                               world,
                               isJoined: isJoined,
                             ) ??
-                            'World level ${world.prestige} · listing rules apply'),
+                            '${ProgressionGlossary.worldPrestigeShort(world.prestige)} · listing rules apply'),
                     style: TextStyle(
                       fontSize: VFontSize.bodySm,
                       color: isDark

@@ -9,6 +9,7 @@ enum NotificationType {
   streakReminder,
   reactionMilestone,
   mention,
+  dmMessage,
   allegianceRequest,
   achievementApproved,
   achievementRejected,
@@ -20,6 +21,7 @@ class AppNotification {
   final String message;
   final String? worldId;
   final String? postId;
+  final String? roomId;
   final String? allyRequestId;
   final bool read;
   final int createdAt;
@@ -30,6 +32,7 @@ class AppNotification {
     required this.message,
     this.worldId,
     this.postId,
+    this.roomId,
     this.allyRequestId,
     this.read = false,
     required this.createdAt,
@@ -41,6 +44,7 @@ class AppNotification {
     String? message,
     String? worldId,
     String? postId,
+    String? roomId,
     String? allyRequestId,
     bool? read,
     int? createdAt,
@@ -50,6 +54,7 @@ class AppNotification {
     message: message ?? this.message,
     worldId: worldId ?? this.worldId,
     postId: postId ?? this.postId,
+    roomId: roomId ?? this.roomId,
     allyRequestId: allyRequestId ?? this.allyRequestId,
     read: read ?? this.read,
     createdAt: createdAt ?? this.createdAt,
@@ -67,6 +72,8 @@ class AppNotification {
       'streakReminder' => NotificationType.streakReminder,
       'reactionMilestone' => NotificationType.reactionMilestone,
       'mention' => NotificationType.mention,
+      'dmMessage' => NotificationType.dmMessage,
+      'dm_message' => NotificationType.dmMessage,
       'allegianceRequest' => NotificationType.allegianceRequest,
       'achievementApproved' => NotificationType.achievementApproved,
       'achievementRejected' => NotificationType.achievementRejected,
@@ -81,6 +88,7 @@ class AppNotification {
         message: data['message'] ?? '',
         worldId: data['world_id'],
         postId: data['post_id'],
+        roomId: data['room_id'],
         allyRequestId: data['ally_request_id'],
         read: data['read'] ?? false,
         createdAt: data['created_at'] != null
@@ -95,6 +103,7 @@ class AppNotification {
     'message': message,
     'world_id': worldId,
     'post_id': postId,
+    'room_id': roomId,
     'ally_request_id': allyRequestId,
     'read': read,
     'created_at': DateTime.fromMillisecondsSinceEpoch(

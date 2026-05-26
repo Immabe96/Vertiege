@@ -1,9 +1,11 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../config/achievements.dart';
+import '../../../config/progression_glossary.dart';
 import '../../../state/resident_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
+import '../../core/progression_help_sheet.dart';
 import '../../shared/tier_icon.dart';
 
 /// Medium card with tier name + XP progress bar.
@@ -21,7 +23,6 @@ class PrestigeProgressCard extends ConsumerWidget {
     final tierLabel = tier.label;
     final tierNum = tier.value;
 
-    // Calculate progress toward next tier
     final currentThreshold = xpThresholds[tierNum] ?? 0;
     final nextThreshold = tierNum < 5
         ? (xpThresholds[tierNum + 1] ?? totalXp + 1)
@@ -40,102 +41,96 @@ class PrestigeProgressCard extends ConsumerWidget {
       _ => VColors.tierHustler,
     };
 
-    final nextTierLabel = tierNum < 5
-        ? (['High Roller', 'Elite', 'Old Money', 'Apex'])[tierNum - 1]
-        : 'MAX';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => showProgressionHelp(
+          context,
+          focus: ProgressionFocus.xpAndTier,
+        ),
+        borderRadius: BorderRadius.circular(VRadius.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: TierIcon(tier: tierNum, size: 32),
-            ),
-            const SizedBox(width: VSpacing.sm),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
-                Text(
-                  tierLabel.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: VFontSize.labelSm,
-                    fontWeight: VFontWeight.semiBold,
-                    color: VColors.onSurfaceVariant,
-                    letterSpacing: 0,
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: TierIcon(tier: tierNum, size: 32),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'YOUR TIER',
+                        style: TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.semiBold,
+                          color: VColors.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        tierLabel.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.bold,
+                          color: VColors.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '$totalXp XP',
+                        style: const TextStyle(
+                          fontSize: VFontSize.headlineMd,
+                          fontWeight: VFontWeight.bold,
+                          color: VColors.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  '$totalXp XP',
-                  style: const TextStyle(
-                    fontSize: VFontSize.headlineMd,
-                    fontWeight: VFontWeight.bold,
-                    color: VColors.onSurface,
-                  ),
+                const Icon(
+                  Icons.help_outline,
+                  size: VIconSize.sm,
+                  color: VColors.onSurfaceVariant,
                 ),
               ],
             ),
+            const SizedBox(height: VSpacing.xxs),
+            Text(
+              ProgressionGlossary.xpToNextTier(totalXp, tierNum),
+              style: const TextStyle(
+                fontSize: VFontSize.labelSm,
+                color: VColors.outline,
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            if (tierNum < 5)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(VRadius.sm),
+                child: LinearProgressIndicator(
+                  value: progressFraction,
+                  minHeight: 4,
+                  backgroundColor: VColors.glassBorder,
+                  valueColor: AlwaysStoppedAnimation<Color>(tierColor),
+                ),
+              )
+            else
+              ClipRRect(
+                borderRadius: BorderRadius.circular(VRadius.sm),
+                child: const LinearProgressIndicator(
+                  value: 1.0,
+                  minHeight: 4,
+                  backgroundColor: VColors.glassBorder,
+                  valueColor: AlwaysStoppedAnimation<Color>(VColors.tierApex),
+                ),
+              ),
           ],
         ),
-        const SizedBox(height: VSpacing.sm),
-        if (tierNum < 5) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Next: $nextTierLabel',
-                style: const TextStyle(
-                  fontSize: VFontSize.labelSm,
-                  color: VColors.outline,
-                ),
-              ),
-              Text(
-                '${tierRequired - tierProgress} XP',
-                style: TextStyle(
-                  fontSize: VFontSize.labelSm,
-                  fontWeight: VFontWeight.semiBold,
-                  color: tierColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.xs),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(VRadius.sm),
-            child: LinearProgressIndicator(
-              value: progressFraction,
-              minHeight: 4,
-              backgroundColor: VColors.glassBorder,
-              valueColor: AlwaysStoppedAnimation<Color>(tierColor),
-            ),
-          ),
-        ] else ...[
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'SOVEREIGN MAX',
-            style: TextStyle(
-              fontSize: VFontSize.labelSm,
-              fontWeight: VFontWeight.bold,
-              color: tierColor,
-            ),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(VRadius.sm),
-            child: LinearProgressIndicator(
-              value: 1.0,
-              minHeight: 4,
-              backgroundColor: VColors.glassBorder,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                VColors.tierApex,
-              ),
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
