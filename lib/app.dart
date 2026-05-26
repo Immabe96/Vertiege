@@ -17,6 +17,7 @@ import 'state/event_provider.dart';
 import 'state/quest_provider.dart';
 import 'state/league_provider.dart';
 import 'state/ally_provider.dart';
+import 'state/chat_provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
@@ -232,6 +233,12 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
           ref.read(notificationProvider.notifier).loadNotifications,
         ),
       );
+      unawaited(
+        _safeLoad(
+          'dm_rooms',
+          () => ref.read(chatProvider.notifier).loadDmRooms(residentId),
+        ),
+      );
       unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
       unawaited(
         _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
@@ -287,6 +294,26 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     unawaited(ref.read(worldProvider.notifier).loadWorlds());
   }
 
+  void _refreshChatFromForegroundDmPush(RemoteMessage message) {
+    final roomId =
+        message.data['room_id'] ??
+        message.data['roomId'] ??
+        message.data['dm_room_id'];
+    if (roomId is! String || roomId.isEmpty) return;
+
+    final chat = ref.read(chatProvider.notifier);
+    chat.subscribeToDm(roomId);
+    unawaited(chat.loadDmMessages(roomId));
+
+    final residentId = ref.read(residentProvider).resident?.id;
+    if (residentId != null) {
+      final hasRoom = ref.read(chatProvider).dmRooms.any((r) => r['id'] == roomId);
+      if (!hasRoom) {
+        unawaited(chat.loadDmRooms(residentId));
+      }
+    }
+  }
+
   void _showStatusSnackbar(String message) {
     if (!mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -298,6 +325,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   void _showForegroundPush(RemoteMessage message) {
     final type = message.data['type']?.toString() ?? '';
     if (type == 'dmMessage') {
+      _refreshChatFromForegroundDmPush(message);
       return;
     }
     final id =

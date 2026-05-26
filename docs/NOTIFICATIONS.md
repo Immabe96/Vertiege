@@ -29,3 +29,26 @@ Client tried `NotificationService.createNotification` for the **recipient** whil
 ## Suppress while in chat
 
 `ChatNotificationScope` clears banners for the open DM room only.
+
+## Foreground DM refresh (2026-05-25)
+
+When the app is open and an FCM `dmMessage` arrives, `VertiegeApp` calls `_refreshChatFromForegroundDmPush`:
+
+- `subscribeToDm(roomId)` if not already subscribed
+- `loadDmMessages(roomId)` to merge any missed realtime rows
+- `loadDmRooms` when the room is missing from the inbox list
+
+## Realtime messaging (client)
+
+| Feature | Implementation |
+|---------|----------------|
+| Message stream | `chat_messages` Postgres changes per room (`subscribeToDm`) |
+| Inbox preview | `dm_rooms` UPDATE subscription + local preview patch on send/receive |
+| Typing | Broadcast `typing_{roomId}` + `dm_typing` rows (8s TTL, RPC `upsert_dm_typing`) |
+| Pagination | Scroll near top → `loadOlderDmMessages` (100/page, memory cap 300, disk cap 200) |
+| Images | Optimistic local path; upload + `sendMessage` in background |
+| Reconnect | `ChatConnectionBanner` when Realtime socket drops after first connect |
+
+**Hybrid typing:** live updates use broadcast; `dm_typing` backs on-open hydration and multi-device sync via Postgres Realtime. Rows older than ~8s are ignored on read. Upserts throttled to ~2s per room on the client.
+
+Apply migration `20260528120000_dm_typing_persistence.sql` before shipping the client build.

@@ -95,6 +95,24 @@ class WorldAssets {
     'prof-journalist': 'assets/generated/prof-artist.png',
   };
 
+  /// Earned profession medallions (distinct from [professionCatalogIcon] prof-* emblems).
+  static const _professionEarnedBadgePaths = <String, String>{
+    'prof-doctor': 'assets/generated/badge-doctor.png',
+    'prof-engineer': 'assets/generated/badge-engineer.png',
+    'prof-attorney': 'assets/generated/badge-attorney.png',
+    'prof-finance': 'assets/generated/badge-finance.png',
+    'prof-artist': 'assets/generated/badge-artist.png',
+    'prof-pilot': 'assets/generated/badge-pilot.png',
+    'prof-nurse': 'assets/generated/badge-doctor.png',
+    'prof-teacher': 'assets/generated/badge-author.png',
+    'prof-architect': 'assets/generated/badge-engineer.png',
+    'prof-scientist': 'assets/generated/badge-engineer.png',
+    'prof-chef': 'assets/generated/badge-artist.png',
+    'prof-realtor': 'assets/generated/badge-finance.png',
+    'prof-therapist': 'assets/generated/badge-doctor.png',
+    'prof-journalist': 'assets/generated/badge-artist.png',
+  };
+
   static const _tierImagePaths = <int, String>{
     1: 'assets/generated/tier-hustler.png',
     2: 'assets/generated/tier-high-roller.png',
@@ -211,23 +229,74 @@ class WorldAssets {
 
   static String? badgeImageForId(String badgeId) => _badgeImagePaths[badgeId];
 
-  /// Core catalog achievement badge (bespoke PNG per id when generated).
+  /// Core catalog badge: `assets/generated/achievements/<id>.png`.
+  ///
+  /// Generated assets use **two on-disk locations** (see `docs/achievements/CATALOG.md`):
+  /// flat `assets/generated/*` via [_badgeImagePaths], and per-id files under
+  /// `assets/generated/achievements/`. Lookup order is map → per-id folder → category PNG.
   static String? coreAchievementBadgeImage(String achievementId) {
     if (!coreAchievementBadgeIds.contains(achievementId)) return null;
     return 'assets/generated/achievements/$achievementId.png';
   }
 
-  /// Legacy map, then per-id PNG for core catalog achievements.
+  /// Flat-map legacy path, then per-id folder for core catalog achievements.
   static String? achievementBadgeImage(String achievementId) =>
       badgeImageForId(achievementId) ?? coreAchievementBadgeImage(achievementId);
 
-  /// Best raster for an achievement: per-id → category → null (Material fallback).
+  /// Catalog / in-progress emblem — category `ach-*.png` for all non-profession achievements.
+  static String? achievementCatalogEmblem(
+    String achievementId,
+    AchievementCategory category,
+  ) {
+    if (category == AchievementCategory.profession) {
+      return professionCatalogIcon(achievementId);
+    }
+    return achievementCategoryImage(category.name);
+  }
+
+  /// Unique earned badge when verified — per-id / legacy map; never category fallback.
+  static String? achievementEarnedEmblem(
+    String achievementId,
+    AchievementCategory category,
+  ) {
+    if (category == AchievementCategory.profession) {
+      return professionEarnedBadge(achievementId);
+    }
+    return achievementBadgeImage(achievementId);
+  }
+
+  /// Profession row icon (`prof-*.png`), not the generic profession category emblem.
+  static String? professionCatalogIcon(String achievementId) =>
+      badgeImageForId(achievementId);
+
+  /// Profession earned medallion (`badge-*.png` or per-id achievements PNG).
+  static String? professionEarnedBadge(String achievementId) =>
+      _professionEarnedBadgePaths[achievementId] ??
+      coreAchievementBadgeImage(achievementId);
+
+  /// Resolves catalog vs earned emblem for UI.
+  static String? achievementEmblemForDisplay({
+    required String achievementId,
+    required AchievementCategory category,
+    required bool showEarnedBadge,
+  }) {
+    if (showEarnedBadge) {
+      return achievementEarnedEmblem(achievementId, category) ??
+          achievementCatalogEmblem(achievementId, category);
+    }
+    return achievementCatalogEmblem(achievementId, category);
+  }
+
+  /// @deprecated Prefer [achievementCatalogEmblem] or [achievementEarnedEmblem].
   static String? achievementDisplayImage(
     String achievementId,
     AchievementCategory category,
   ) =>
-      achievementBadgeImage(achievementId) ??
-      achievementCategoryImage(category.name);
+      achievementEmblemForDisplay(
+        achievementId: achievementId,
+        category: category,
+        showEarnedBadge: true,
+      );
 
   static String? tierImageForValue(int tier) => _tierImagePaths[tier];
 

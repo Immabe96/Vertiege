@@ -4,6 +4,7 @@ import '../../router/world_navigation.dart';
 import '../../models/resident.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../achievements/achievement_icon.dart';
 import '../shared/share_button.dart';
 import '../../ui/buttons/v_button.dart';
 
@@ -82,37 +83,6 @@ class AchievementShareCard extends StatelessWidget {
         return 'PROFESSION';
       case AchievementCategory.inApp:
         return 'VERTIEGE';
-    }
-  }
-
-  IconData get _categoryIcon {
-    switch (achievement.category) {
-      case AchievementCategory.education:
-        return Icons.school;
-      case AchievementCategory.career:
-        return Icons.work;
-      case AchievementCategory.relationships:
-        return Icons.favorite;
-      case AchievementCategory.health:
-        return Icons.fitness_center;
-      case AchievementCategory.skills:
-        return Icons.build;
-      case AchievementCategory.travel:
-        return Icons.flight;
-      case AchievementCategory.finance:
-        return Icons.account_balance;
-      case AchievementCategory.community:
-        return Icons.groups;
-      case AchievementCategory.funny:
-        return Icons.mood;
-      case AchievementCategory.creative:
-        return Icons.palette;
-      case AchievementCategory.life:
-        return Icons.auto_stories;
-      case AchievementCategory.profession:
-        return Icons.badge;
-      case AchievementCategory.inApp:
-        return Icons.diamond;
     }
   }
 
@@ -204,30 +174,11 @@ class AchievementShareCard extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: VSpacing.sm),
-                // Category icon in circle
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _categoryColor.withValues(alpha: 0.15),
-                    border: Border.all(
-                      color: _categoryColor.withValues(alpha: 0.3),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _categoryColor.withValues(alpha: 0.12),
-                        blurRadius: 16,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    _categoryIcon,
-                    size: VIconSize.lg,
-                    color: _categoryColor,
-                  ),
+                AchievementBadgeAvatar(
+                  achievement: achievement,
+                  accentColor: _categoryColor,
+                  size: 56,
+                  showEarnedBadge: true,
                 ),
                 const SizedBox(height: VSpacing.md),
                 // Category label

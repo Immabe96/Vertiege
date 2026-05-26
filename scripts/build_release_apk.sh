@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Build release APK after all core achievement badge PNGs exist.
+# Default: arm64-v8a only (~73MB) — matches modern phones; use --split-per-abi for all CPUs.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -17,7 +18,7 @@ for arg in "$@"; do
       echo "Usage: $0 [--force] [--skip-tests] [--split-per-abi]"
       echo "  --force         Build even if core achievement PNGs are incomplete"
       echo "  --skip-tests    Skip flutter test before build"
-      echo "  --split-per-abi Per-CPU APKs (~40% smaller each); outputs app-*-release.apk"
+      echo "  --split-per-abi Build armeabi-v7a + arm64 + x86_64 APKs (default is arm64 only)"
       exit 0
       ;;
   esac
@@ -52,6 +53,10 @@ fi
 BUILD_FLAGS=(--release --no-tree-shake-icons)
 if [ "$SPLIT_PER_ABI" = true ]; then
   BUILD_FLAGS+=(--split-per-abi)
+  echo "==> Building per-CPU APKs (armeabi-v7a, arm64-v8a, x86_64)"
+else
+  BUILD_FLAGS+=(--target-platform android-arm64)
+  echo "==> Building arm64-v8a release APK only"
 fi
 
 echo "==> flutter build apk ${BUILD_FLAGS[*]}"
@@ -61,13 +66,13 @@ if [ "$SPLIT_PER_ABI" = true ]; then
   echo ""
   echo "Per-ABI APKs:"
   ls -lh "$ROOT/build/app/outputs/flutter-apk/"/*-release.apk 2>/dev/null || true
-  echo "Install (example): adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+  echo "Install (arm64): adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
 else
   APK="$ROOT/build/app/outputs/flutter-apk/app-release.apk"
   if [ -f "$APK" ]; then
     ls -lh "$APK"
     echo ""
-    echo "Release APK: $APK"
+    echo "Release APK (arm64-v8a): $APK"
     echo "Install: adb install -r \"$APK\""
   else
     echo "APK not found at expected path: $APK" >&2

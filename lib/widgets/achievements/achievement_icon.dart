@@ -3,6 +3,7 @@ import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
+import 'achievement_category_meta.dart';
 import '../shared/badge_asset_image.dart';
 import 'achievement_avatar_surface.dart';
 
@@ -86,27 +87,44 @@ IconData achievementIconData(String iconName) {
   };
 }
 
-/// Badge avatar with asset fallback for achievements.
+/// Achievement emblem: category icon in catalog, unique earned badge when verified.
+///
+/// Non-profession: `ach-<category>.png` until verified, then per-id / legacy badge PNG.
+/// Profession: unique `prof-*.png` icon until verified, then unique `badge-*.png` medallion.
 class AchievementBadgeAvatar extends StatelessWidget {
   final Achievement achievement;
   final Color accentColor;
   final double size;
+  final AchievementStatus? status;
+
+  /// When set, overrides [status] (verified → earned badge).
+  final bool? showEarnedBadge;
 
   const AchievementBadgeAvatar({
     super.key,
     required this.achievement,
     required this.accentColor,
     this.size = VBadgeSize.avatar,
+    this.status,
+    this.showEarnedBadge,
   });
+
+  bool get _useEarnedBadge {
+    if (showEarnedBadge != null) return showEarnedBadge!;
+    return status == AchievementStatus.verified;
+  }
 
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final imagePath = WorldAssets.achievementDisplayImage(
-      achievement.id,
-      achievement.category,
+    final imagePath = WorldAssets.achievementEmblemForDisplay(
+      achievementId: achievement.id,
+      category: achievement.category,
+      showEarnedBadge: _useEarnedBadge,
     );
-    final icon = achievementIconData(achievement.icon);
+    final materialFallback = achievement.category == AchievementCategory.profession
+        ? achievementIconData(achievement.icon)
+        : metaForCategory(achievement.category).icon;
     final hasRaster = imagePath != null;
     final fill = achievementBadgeContainerColor(
       hasRasterAsset: hasRaster,
@@ -114,7 +132,8 @@ class AchievementBadgeAvatar extends StatelessWidget {
       brightness: brightness,
     );
 
-    Widget fallback() => Icon(icon, size: size * 0.45, color: accentColor);
+    Widget fallback() =>
+        Icon(materialFallback, size: size * 0.45, color: accentColor);
 
     if (!hasRaster) {
       return Container(

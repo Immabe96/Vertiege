@@ -533,6 +533,7 @@ class _RecentVerifiedChip extends StatelessWidget {
                 achievement: achievement,
                 accentColor: VColors.success,
                 size: VBadgeSize.avatarCompact,
+                status: AchievementStatus.verified,
               ),
               const SizedBox(height: VSpacing.xs),
               Text(

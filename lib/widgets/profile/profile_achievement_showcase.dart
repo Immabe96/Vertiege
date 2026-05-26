@@ -143,6 +143,7 @@ class _FeaturedRow extends StatelessWidget {
                   achievement: e.achievement,
                   accentColor: VColors.tertiary,
                   size: VBadgeSize.avatarCompact,
+                  showEarnedBadge: true,
                 ),
                 const SizedBox(width: VSpacing.xs),
                 Expanded(

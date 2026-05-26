@@ -41,6 +41,7 @@ class AchievementListTile extends StatelessWidget {
     Widget prefix = AchievementBadgeAvatar(
       achievement: achievement,
       accentColor: isFunnyOrCreative ? VColors.tertiary : accent,
+      status: status,
     );
 
     if (hasProofThumbnail(proofUri)) {

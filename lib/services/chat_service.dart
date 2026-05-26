@@ -166,17 +166,19 @@ class ChatService {
   static Future<List<Map<String, dynamic>>> getMessages(
     String roomId, {
     int limit = 100,
+    DateTime? before,
     int? autoDeleteSeconds,
   }) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
-    final data = await client
-        .from('chat_messages')
-        .select()
-        .eq('room_id', roomId)
-        .order('created_at', ascending: true)
+    var query = client.from('chat_messages').select().eq('room_id', roomId);
+    if (before != null) {
+      query = query.lt('created_at', before.toIso8601String());
+    }
+    final data = await query
+        .order('created_at', ascending: false)
         .limit(limit);
-    final raw = (data as List).cast<Map<String, dynamic>>();
+    final raw = (data as List).cast<Map<String, dynamic>>().reversed.toList();
     final now = DateTime.now();
     return raw.where((msg) {
       final autoDelete = msg['auto_delete_after_seconds'] as int?;
@@ -185,6 +187,31 @@ class ChatService {
       if (createdAt == null) return true;
       return createdAt.add(Duration(seconds: autoDelete)).isAfter(now);
     }).toList();
+  }
+
+  /// Single inbox channel: postgres UPDATE on [dm_rooms] for rooms the user is in.
+  static RealtimeChannel? subscribeToDmRoomListUpdates(
+    String residentId,
+    void Function(Map<String, dynamic> room) onUpdate,
+  ) {
+    if (!isSupabaseConfigured()) return null;
+    final client = getSupabase();
+    final channel = client
+        .channel('dm_rooms_list_$residentId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'dm_rooms',
+          callback: (payload) {
+            final record = payload.newRecord;
+            final ids =
+                (record['resident_ids'] as List?)?.cast<String>() ?? const [];
+            if (!ids.contains(residentId)) return;
+            onUpdate(record);
+          },
+        )
+        .subscribe();
+    return channel;
   }
 
   static RealtimeChannel? subscribeToMessages(

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
+import '../services/crash_reporter.dart';
 import '../services/media_service.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/storage_service.dart';
@@ -17,6 +18,8 @@ import 'resident_provider.dart';
 class ChatState {
   final List<Map<String, dynamic>> dmRooms;
   final Map<String, List<ChannelMessage>> dmMessages;
+  final Map<String, bool> dmHasMore;
+  final Map<String, bool> dmLoadingOlder;
   final Map<String, List<ChannelMessage>> channelMessages;
   final Map<String, DateTime> channelReads;
   final Map<String, DateTime> channelLatestMessageTimes;
@@ -27,6 +30,8 @@ class ChatState {
   const ChatState({
     this.dmRooms = const [],
     this.dmMessages = const {},
+    this.dmHasMore = const {},
+    this.dmLoadingOlder = const {},
     this.channelMessages = const {},
     this.channelReads = const {},
     this.channelLatestMessageTimes = const {},
@@ -38,6 +43,8 @@ class ChatState {
   ChatState copyWith({
     List<Map<String, dynamic>>? dmRooms,
     Map<String, List<ChannelMessage>>? dmMessages,
+    Map<String, bool>? dmHasMore,
+    Map<String, bool>? dmLoadingOlder,
     Map<String, List<ChannelMessage>>? channelMessages,
     Map<String, DateTime>? channelReads,
     Map<String, DateTime>? channelLatestMessageTimes,
@@ -48,6 +55,8 @@ class ChatState {
   }) => ChatState(
     dmRooms: dmRooms ?? this.dmRooms,
     dmMessages: dmMessages ?? this.dmMessages,
+    dmHasMore: dmHasMore ?? this.dmHasMore,
+    dmLoadingOlder: dmLoadingOlder ?? this.dmLoadingOlder,
     channelMessages: channelMessages ?? this.channelMessages,
     channelReads: channelReads ?? this.channelReads,
     channelLatestMessageTimes:
@@ -62,8 +71,14 @@ class ChatState {
 class ChatNotifier extends Notifier<ChatState> {
   final Map<String, RealtimeChannel> _subscriptions = {};
   final Map<String, RealtimeChannel> _dmSubscriptions = {};
+  final Map<String, void Function(String, String, bool)> _typingListeners = {};
+  RealtimeChannel? _dmRoomsListChannel;
+  String? _dmRoomsListSubscribedFor;
   static final DateTime _emptyChannelActivity =
       DateTime.fromMillisecondsSinceEpoch(0);
+  static const int _dmFetchLimit = 100;
+  static const int _dmMemoryCap = 300;
+  static const int _dmPersistCap = 200;
 
   @override
   ChatState build() {
@@ -77,6 +92,9 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void _dispose() {
+    for (final roomId in _typingListeners.keys.toList()) {
+      unsubscribeFromTyping(roomId);
+    }
     TypingService.dispose();
     unsubscribeAll();
   }
@@ -96,6 +114,11 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void subscribeToTyping(String roomId) {
+    final existing = _typingListeners.remove(roomId);
+    if (existing != null) {
+      TypingService.removeListener(existing);
+    }
+
     void handler(String rId, String userId, bool isTyping) {
       if (rId != roomId) return;
       final current = Map<String, Set<String>>.from(state.typingUsers);
@@ -111,10 +134,18 @@ class ChatNotifier extends Notifier<ChatState> {
       state = state.copyWith(typingUsers: current);
     }
 
+    _typingListeners[roomId] = handler;
     TypingService.addListener(handler);
+    TypingService.subscribe(roomId);
   }
 
   void unsubscribeFromTyping(String roomId) {
+    final handler = _typingListeners.remove(roomId);
+    if (handler != null) {
+      TypingService.removeListener(handler);
+    }
+    TypingService.unsubscribe(roomId);
+
     final current = Map<String, Set<String>>.from(state.typingUsers);
     current.remove(roomId);
     state = state.copyWith(typingUsers: current);
@@ -138,6 +169,7 @@ class ChatNotifier extends Notifier<ChatState> {
         final roomId = room['id'] as String?;
         if (roomId != null) subscribeToDm(roomId);
       }
+      _subscribeToDmRoomsList(residentId);
     } catch (_) {
       state = state.copyWith(
         isLoadingRooms: false,
@@ -149,13 +181,74 @@ class ChatNotifier extends Notifier<ChatState> {
   List<ChannelMessage> dmMessagesFor(String roomId) =>
       _filterExpired(state.dmMessages[roomId] ?? []);
 
+  bool dmHasMoreFor(String roomId) => state.dmHasMore[roomId] ?? false;
+
+  bool dmLoadingOlderFor(String roomId) => state.dmLoadingOlder[roomId] ?? false;
+
+  List<ChannelMessage> _capDmRoomMessages(List<ChannelMessage> messages) {
+    if (messages.length <= _dmMemoryCap) return messages;
+    return messages.sublist(messages.length - _dmMemoryCap);
+  }
+
+  List<ChannelMessage> _mergeDmMessages(
+    List<ChannelMessage> older,
+    List<ChannelMessage> existing,
+  ) {
+    final seen = <String>{};
+    final merged = <ChannelMessage>[];
+    for (final message in [...older, ...existing]) {
+      if (seen.add(message.id)) merged.add(message);
+    }
+    merged.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return _capDmRoomMessages(merged);
+  }
+
   Future<void> loadDmMessages(String roomId, {bool force = false}) async {
     if (!force && state.dmMessages.containsKey(roomId)) return;
     await _replayQueuedChatMutations();
-    final msgs = await ChatService.getMessages(roomId);
+    final msgs = await ChatService.getMessages(roomId, limit: _dmFetchLimit);
+    final parsed = _capDmRoomMessages(_toChannelMessages(msgs));
     state = state.copyWith(
-      dmMessages: {...state.dmMessages, roomId: _toChannelMessages(msgs)},
+      dmMessages: {...state.dmMessages, roomId: parsed},
+      dmHasMore: {...state.dmHasMore, roomId: msgs.length >= _dmFetchLimit},
+      dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
     );
+  }
+
+  Future<void> loadOlderDmMessages(String roomId) async {
+    if (state.dmLoadingOlder[roomId] == true) return;
+    if (state.dmHasMore[roomId] != true) return;
+
+    final existing = state.dmMessages[roomId] ?? [];
+    if (existing.isEmpty) return;
+
+    final oldest = existing.first;
+    if (oldest.createdAt <= 0) return;
+
+    state = state.copyWith(
+      dmLoadingOlder: {...state.dmLoadingOlder, roomId: true},
+    );
+
+    try {
+      final msgs = await ChatService.getMessages(
+        roomId,
+        limit: _dmFetchLimit,
+        before: DateTime.fromMillisecondsSinceEpoch(oldest.createdAt),
+      );
+      final older = _toChannelMessages(msgs);
+      state = state.copyWith(
+        dmMessages: {
+          ...state.dmMessages,
+          roomId: _mergeDmMessages(older, existing),
+        },
+        dmHasMore: {...state.dmHasMore, roomId: msgs.length >= _dmFetchLimit},
+        dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
+      );
+    } catch (_) {
+      state = state.copyWith(
+        dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
+      );
+    }
   }
 
   List<ChannelMessage> _filterExpired(List<ChannelMessage> messages) {
@@ -201,13 +294,12 @@ class ChatNotifier extends Notifier<ChatState> {
   }) async {
     if (!RateLimiter.canProceed('message_$roomId', maxCalls: 3)) return;
 
-    String? durableImageUrl = imageUrl;
-    if (durableImageUrl != null && !durableImageUrl.startsWith('http')) {
-      durableImageUrl = await MediaService.uploadPostImage(
-        durableImageUrl,
-        senderId,
-      );
-    }
+    CrashReporter.instance.log(
+      'chat sendDmMessage roomId=$roomId hasImage=${imageUrl != null}',
+    );
+
+    final localImagePath =
+        imageUrl != null && !imageUrl.startsWith('http') ? imageUrl : null;
 
     final msg = ChannelMessage(
       id: generateId(),
@@ -216,7 +308,7 @@ class ChatNotifier extends Notifier<ChatState> {
       senderName: senderName,
       senderAvatar: senderAvatar,
       content: content,
-      imageUrl: durableImageUrl ?? imageUrl,
+      imageUrl: imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       autoDeleteAfterSeconds: autoDeleteAfterSeconds,
     );
@@ -225,9 +317,66 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(
       dmMessages: {
         ...state.dmMessages,
-        roomId: [...existing, msg],
+        roomId: _capDmRoomMessages([...existing, msg]),
       },
     );
+    _patchDmRoomsPreview(roomId, msg);
+
+    if (localImagePath != null) {
+      unawaited(
+        _persistDmMessage(
+          msg: msg,
+          roomId: roomId,
+          senderId: senderId,
+          senderName: senderName,
+          senderAvatar: senderAvatar,
+          content: content,
+          localImagePath: localImagePath,
+          autoDeleteAfterSeconds: autoDeleteAfterSeconds,
+        ),
+      );
+      return;
+    }
+
+    await _persistDmMessage(
+      msg: msg,
+      roomId: roomId,
+      senderId: senderId,
+      senderName: senderName,
+      senderAvatar: senderAvatar,
+      content: content,
+      imageUrl: imageUrl,
+      autoDeleteAfterSeconds: autoDeleteAfterSeconds,
+    );
+  }
+
+  Future<void> _persistDmMessage({
+    required ChannelMessage msg,
+    required String roomId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatar,
+    required String content,
+    String? imageUrl,
+    String? localImagePath,
+    int? autoDeleteAfterSeconds,
+    String? replyToMessageId,
+    String? replyToSenderId,
+    String? replyToSenderName,
+    String? replyToContent,
+  }) async {
+    String? durableImageUrl = imageUrl;
+    if (localImagePath != null) {
+      try {
+        durableImageUrl = await MediaService.uploadPostImage(
+          localImagePath,
+          senderId,
+        );
+      } catch (_) {
+        _markDmMessageFailed(roomId, msg);
+        return;
+      }
+    }
 
     try {
       await ChatService.sendMessage(
@@ -239,6 +388,10 @@ class ChatNotifier extends Notifier<ChatState> {
         content: content,
         imageUrl: durableImageUrl,
         autoDeleteAfterSeconds: autoDeleteAfterSeconds,
+        replyToMessageId: replyToMessageId,
+        replyToSenderId: replyToSenderId,
+        replyToSenderName: replyToSenderName,
+        replyToContent: replyToContent,
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
@@ -251,15 +404,23 @@ class ChatNotifier extends Notifier<ChatState> {
         'imageUrl': durableImageUrl,
         'autoDeleteAfterSeconds': autoDeleteAfterSeconds,
         'messageId': msg.id,
+        if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
+        if (replyToSenderId != null) 'replyToSenderId': replyToSenderId,
+        if (replyToSenderName != null) 'replyToSenderName': replyToSenderName,
+        if (replyToContent != null) 'replyToContent': replyToContent,
       });
-      final failedMsg = msg.copyWith(content: 'Failed to send - tap to retry');
-      final updated = state.dmMessages[roomId]
-          ?.map((m) => m.id == msg.id ? failedMsg : m)
-          .toList();
-      state = state.copyWith(
-        dmMessages: {...state.dmMessages, roomId: updated ?? []},
-      );
+      _markDmMessageFailed(roomId, msg);
     }
+  }
+
+  void _markDmMessageFailed(String roomId, ChannelMessage msg) {
+    final failedMsg = msg.copyWith(content: 'Failed to send - tap to retry');
+    final updated = state.dmMessages[roomId]
+        ?.map((m) => m.id == msg.id ? failedMsg : m)
+        .toList();
+    state = state.copyWith(
+      dmMessages: {...state.dmMessages, roomId: updated ?? []},
+    );
   }
 
   // ── Shared realtime subscription helper ──────────────────
@@ -311,10 +472,14 @@ class ChatNotifier extends Notifier<ChatState> {
     )
     subscribe,
     bool trackChannelActivity = false,
+    void Function(ChannelMessage message)? onMessageInserted,
   }) {
     if (subscriptions.containsKey(roomId)) return;
     final channel = subscribe(roomId, (data) {
       final msg = _parseRealtimeMessage(data, roomId);
+      CrashReporter.instance.log(
+        'chat realtime receive roomId=$roomId messageId=${msg.id}',
+      );
       final messages = getMessageMap();
       final existing = messages[roomId] ?? [];
       if (existing.any((m) => m.id == msg.id)) return;
@@ -332,10 +497,80 @@ class ChatNotifier extends Notifier<ChatState> {
         );
       }
       state = nextState;
+      onMessageInserted?.call(msg);
     });
     if (channel != null) {
       subscriptions[roomId] = channel;
     }
+  }
+
+  void _subscribeToDmRoomsList(String residentId) {
+    if (_dmRoomsListSubscribedFor == residentId && _dmRoomsListChannel != null) {
+      return;
+    }
+    _dmRoomsListChannel?.unsubscribe();
+    _dmRoomsListChannel = ChatService.subscribeToDmRoomListUpdates(
+      residentId,
+      _mergeDmRoomListUpdate,
+    );
+    _dmRoomsListSubscribedFor = residentId;
+  }
+
+  void _mergeDmRoomListUpdate(Map<String, dynamic> record) {
+    final roomId = record['id'] as String?;
+    if (roomId == null || state.dmRooms.isEmpty) return;
+
+    final index = state.dmRooms.indexWhere((room) => room['id'] == roomId);
+    if (index == -1) return;
+
+    final existing = state.dmRooms[index];
+    final lastMessage = record['last_message'];
+    final lastMessageAt = record['last_message_at'];
+    if (lastMessage == null && lastMessageAt == null) return;
+
+    final merged = {
+      ...existing,
+      if (lastMessage != null) 'last_message': lastMessage,
+      if (lastMessageAt != null) 'last_message_at': lastMessageAt,
+    };
+
+    final updated = List<Map<String, dynamic>>.from(state.dmRooms);
+    updated[index] = merged;
+    updated.sort((a, b) {
+      final atA = DateTime.tryParse(a['last_message_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final atB = DateTime.tryParse(b['last_message_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      return atB.compareTo(atA);
+    });
+    state = state.copyWith(dmRooms: updated);
+  }
+
+  /// Keeps DM inbox preview + sort in sync without refetching all rooms.
+  void _patchDmRoomsPreview(String roomId, ChannelMessage msg) {
+    if (state.dmRooms.isEmpty) return;
+    final preview = msg.content.trim().isNotEmpty
+        ? msg.content.trim()
+        : (msg.imageUrl != null ? 'Image' : '');
+    final at = msg.createdAt > 0
+        ? DateTime.fromMillisecondsSinceEpoch(msg.createdAt)
+        : DateTime.now();
+    final updated = state.dmRooms.map((room) {
+      if (room['id'] != roomId) return room;
+      return {
+        ...room,
+        'last_message': preview,
+        'last_message_at': at.toIso8601String(),
+      };
+    }).toList();
+    updated.sort((a, b) {
+      final atA = DateTime.tryParse(a['last_message_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final atB = DateTime.tryParse(b['last_message_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      return atB.compareTo(atA);
+    });
+    state = state.copyWith(dmRooms: updated);
   }
 
   void subscribeToDm(String roomId) {
@@ -343,14 +578,20 @@ class ChatNotifier extends Notifier<ChatState> {
       roomId: roomId,
       subscriptions: _dmSubscriptions,
       getMessageMap: () => state.dmMessages,
-      updateState: (updated) => state.copyWith(dmMessages: updated),
+      updateState: (updated) {
+        final capped = updated.map(
+          (key, value) => MapEntry(key, _capDmRoomMessages(value)),
+        );
+        return state.copyWith(dmMessages: capped);
+      },
       subscribe: ChatService.subscribeToMessages,
+      onMessageInserted: (msg) => _patchDmRoomsPreview(roomId, msg),
     );
   }
 
+  /// Intentionally no per-room unsubscribe — inbox realtime stays active until sign-out.
   void unsubscribeFromDm(String roomId) {
-    _dmSubscriptions[roomId]?.unsubscribe();
-    _dmSubscriptions.remove(roomId);
+    // Reserved for tests or future selective teardown.
   }
 
   List<ChannelMessage> channelMessagesFor(String channelId) =>
@@ -627,6 +868,9 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void unsubscribeAll() {
+    _dmRoomsListChannel?.unsubscribe();
+    _dmRoomsListChannel = null;
+    _dmRoomsListSubscribedFor = null;
     for (final s in _dmSubscriptions.values) {
       s.unsubscribe();
     }
@@ -644,11 +888,21 @@ class ChatNotifier extends Notifier<ChatState> {
     required String senderName,
     String? senderAvatar,
     required String content,
+    String? imageUrl,
     required String replyToMessageId,
     required String replyToSenderId,
     required String replyToSenderName,
     required String replyToContent,
   }) async {
+    if (!RateLimiter.canProceed('message_$roomId', maxCalls: 3)) return;
+
+    CrashReporter.instance.log(
+      'chat sendDmReply roomId=$roomId hasImage=${imageUrl != null}',
+    );
+
+    final localImagePath =
+        imageUrl != null && !imageUrl.startsWith('http') ? imageUrl : null;
+
     final msg = ChannelMessage(
       id: generateId(),
       channelId: roomId,
@@ -656,6 +910,7 @@ class ChatNotifier extends Notifier<ChatState> {
       senderName: senderName,
       senderAvatar: senderAvatar,
       content: content,
+      imageUrl: imageUrl,
       replyToMessageId: replyToMessageId,
       replyToSenderId: replyToSenderId,
       replyToSenderName: replyToSenderName,
@@ -667,9 +922,29 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(
       dmMessages: {
         ...state.dmMessages,
-        roomId: [...existing, msg],
+        roomId: _capDmRoomMessages([...existing, msg]),
       },
     );
+    _patchDmRoomsPreview(roomId, msg);
+
+    if (localImagePath != null) {
+      unawaited(
+        _persistDmMessage(
+          msg: msg,
+          roomId: roomId,
+          senderId: senderId,
+          senderName: senderName,
+          senderAvatar: senderAvatar,
+          content: content,
+          localImagePath: localImagePath,
+          replyToMessageId: replyToMessageId,
+          replyToSenderId: replyToSenderId,
+          replyToSenderName: replyToSenderName,
+          replyToContent: replyToContent,
+        ),
+      );
+      return;
+    }
 
     try {
       await ChatService.sendMessage(
@@ -679,18 +954,15 @@ class ChatNotifier extends Notifier<ChatState> {
         senderName: senderName,
         senderAvatar: senderAvatar,
         content: content,
+        imageUrl: imageUrl,
         replyToMessageId: replyToMessageId,
         replyToSenderId: replyToSenderId,
         replyToSenderName: replyToSenderName,
         replyToContent: replyToContent,
       );
+      ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
-      final reverted =
-          state.dmMessages[roomId]?.where((m) => m.id != msg.id).toList() ??
-          const <ChannelMessage>[];
-      state = state.copyWith(
-        dmMessages: {...state.dmMessages, roomId: reverted},
-      );
+      _markDmMessageFailed(roomId, msg);
       rethrow;
     }
   }
@@ -926,7 +1198,10 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> _persistMessages(ChatState snapshot) async {
     final payload = jsonEncode({
-      'dmMessages': _encodeMessageMap(snapshot.dmMessages),
+      'dmMessages': _encodeMessageMap(
+        snapshot.dmMessages,
+        maxPerRoom: _dmPersistCap,
+      ),
       'channelMessages': _encodeMessageMap(snapshot.channelMessages),
       'channelReads': _encodeDateMap(snapshot.channelReads),
       'channelLatestMessageTimes': _encodeDateMap(
@@ -956,11 +1231,18 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Map<String, dynamic> _encodeMessageMap(
-    Map<String, List<ChannelMessage>> messages,
-  ) => messages.map(
-    (key, value) =>
-        MapEntry(key, value.map((message) => message.toJson()).toList()),
-  );
+    Map<String, List<ChannelMessage>> messages, {
+    int? maxPerRoom,
+  }) =>
+      messages.map((key, value) {
+        final capped = maxPerRoom != null && value.length > maxPerRoom
+            ? value.sublist(value.length - maxPerRoom)
+            : value;
+        return MapEntry(
+          key,
+          capped.map((message) => message.toJson()).toList(),
+        );
+      });
 
   Map<String, DateTime> _decodeDateMap(dynamic value) {
     if (value is! Map) return const {};
@@ -984,3 +1266,12 @@ class ChatNotifier extends Notifier<ChatState> {
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(
   ChatNotifier.new,
 );
+
+/// Narrow watch for a single DM thread (avoids rebuilding on unrelated rooms).
+final dmRoomMessagesProvider = Provider.family<List<ChannelMessage>, String>((
+  ref,
+  roomId,
+) {
+  ref.watch(chatProvider.select((s) => s.dmMessages[roomId]));
+  return ref.read(chatProvider.notifier).dmMessagesFor(roomId);
+});

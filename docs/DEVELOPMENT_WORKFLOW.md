@@ -59,6 +59,7 @@ flutter run
 powershell -ExecutionPolicy Bypass -File scripts/validate_assets.ps1
 flutter analyze --no-fatal-infos --no-fatal-warnings
 flutter test
+# Local release APK (arm64 only, ~73MB): ./scripts/build_release_apk.sh
 # Do NOT run: flutter build apk --release  (uses RAM; CI builds on GitHub)
 
 git add -A && git commit -m "fix: describe change"

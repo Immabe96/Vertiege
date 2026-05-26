@@ -15,6 +15,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
+import '../../widgets/chat/chat_connection_banner.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
@@ -152,6 +153,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
     return Column(
       children: [
+        const ChatConnectionBanner(),
         Padding(
           padding: const EdgeInsets.fromLTRB(
             VSpacing.md,

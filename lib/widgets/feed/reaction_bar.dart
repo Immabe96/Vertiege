@@ -357,6 +357,7 @@ class _BadgeReactionChip extends StatelessWidget {
         achievement: achievement,
         accentColor: accentColor,
         size: 22,
+        showEarnedBadge: true,
       ),
       onPressed: onTap,
       backgroundColor:

@@ -74,7 +74,7 @@
 
 ## P0 device checklist (you)
 
-1. Install `app-arm64-v8a-release.apk`
+1. Install `app-release.apk` (arm64-v8a from `./scripts/build_release_apk.sh`)
 2. DM push: background → banner → tap → `/chat/{room}`
 3. Deny notifications → Settings sheet → Open Settings works
 4. Achievements tier matches Identity XP
@@ -93,7 +93,7 @@ flutter test          # 182 passed
 flutter analyze lib
 supabase db push      # includes 20260527150000, 20260527160000
 supabase functions deploy send-push --no-verify-jwt
-./scripts/build_release_apk.sh --split-per-abi
+./scripts/build_release_apk.sh
 ```
 
 ---

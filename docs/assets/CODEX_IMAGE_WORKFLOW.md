@@ -9,6 +9,9 @@ Use this when your **daily image limit** resets. Work **one file per session**; 
 | `docs/assets/image-manifest.json` | Queue + status + prompts (**commit this after each image**) |
 | `assets/staging/generated/` | **New** images land here first (review before ship) |
 | `assets/generated/` | Production assets the app loads (promote when happy) |
+| `assets/generated/achievements/` | **Second** production folder — per-id core catalog badges (`<id>.png`) |
+
+Achievement badges use **two production locations**: flat files at `assets/generated/` (category `ach-*.png`, legacy `badge-*` / `prof-*` map) and per-id files at `assets/generated/achievements/`. See `docs/achievements/CATALOG.md` for resolution order.
 | `docs/assets/generation-log.md` | Optional human notes per session |
 
 ## Cursor agent (GenerateImage)

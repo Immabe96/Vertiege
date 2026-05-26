@@ -14,6 +14,7 @@ class ChatInputBar extends StatelessWidget {
   final String? replyToContent;
   final VoidCallback? onCancelReply;
   final String? typingIndicator;
+  final ValueChanged<String>? onChanged;
 
   const ChatInputBar({
     super.key,
@@ -26,6 +27,7 @@ class ChatInputBar extends StatelessWidget {
     this.replyToContent,
     this.onCancelReply,
     this.typingIndicator,
+    this.onChanged,
   });
 
   @override
@@ -117,6 +119,7 @@ class ChatInputBar extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: controller,
+                    onChanged: onChanged,
                     style: TextStyle(color: isDark ? VColors.onSurfaceDark : VColors.onSurface),
                     decoration: InputDecoration(
                       hintText: hintText,

@@ -45,7 +45,7 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 - `flutter test` — **182** tests pass
 - `flutter analyze lib` — 0 errors
 - `scripts/validate_assets.ps1` — Dart asset refs + manifest approved files on disk
-- Release APK: `./scripts/build_release_apk.sh --split-per-abi`
+- Release APK: `./scripts/build_release_apk.sh` (arm64-v8a by default)
 
 ### Key remaining work (see REPORT.md "Remaining Work" for full list)
 - **Content**: Safety disclaimers populated for all 15 preset worlds + custom fallback (2026-05-26)
@@ -152,8 +152,8 @@ Design direction: Forui (light-first, AMOLED dark, minimal surfaces, no blur pan
 
 ## Build commands
 ```bash
-./scripts/build_release_apk.sh --split-per-abi
-adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+./scripts/build_release_apk.sh
+adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ## Supabase

@@ -165,6 +165,7 @@ Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-p
 | 17 | Post deep link | | `?post=` opens **FEED** with highlight |
 | 18 | Unclaimed sovereign | | Join CTA; first member can claim (if migration applied) |
 | 19 | Join dialog | | First join asks Feed vs Home default |
+| 19a | World jobs apply | | Eligible member **Apply**; manager **Applicants** → **Accept** marks filled |
 
 ## Checklist — Nexus & onboarding funnel
 

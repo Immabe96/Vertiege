@@ -20,7 +20,7 @@
 | Router tests | ✅ | `app_auth_redirect`, deep links, world routes, notifications |
 | Feature depth | ⚠️ | Marketplace/treasury/polls still thin vs schema |
 | Widget / integration tests | ⚠️ | No broad widget suite |
-| APK size | ⚠️ | Use `./scripts/build_release_apk.sh --split-per-abi` for smaller per-device APKs |
+| APK size | ✅ | `./scripts/build_release_apk.sh` builds arm64-v8a only (~73MB); pass `--split-per-abi` for all CPUs |
 
 ## Completed (2026-05-25 – 2026-05-26)
 
@@ -32,7 +32,7 @@
 - **`app_auth_redirect.dart`** — Pure gate/onboarding redirect helpers; replaces placeholder gate test.
 - **Analytics** — `signIn` / `signOut`, `worldViewed` / `worldJoined`, `postCreated`, `questCompleted`, `onboardingCompleted` / `gateCompleted` (plus existing dossier/marketplace/achievement events).
 - **Crashlytics** — Documented; wired on Firebase init; `setUser` on resident load, cleared on sign-out.
-- **Release build** — `scripts/build_release_apk.sh --split-per-abi` for per-CPU APKs.
+- **Release build** — `scripts/build_release_apk.sh` (arm64 default); `--split-per-abi` optional.
 
 ### Backend (prior session)
 - DM push migration + `send-push` redeploy on `wjaphoaxalvgjnrwqjwe`.
@@ -61,7 +61,7 @@ See `docs/audits/2026-05-24-gamification-vision-gap-audit.md` and `docs/vision/w
 flutter test
 flutter analyze lib
 ./scripts/build_release_apk.sh              # universal APK
-./scripts/build_release_apk.sh --split-per-abi   # smaller per-ABI APKs
+./scripts/build_release_apk.sh   # arm64-v8a (~73MB)
 ```
 
 ## Related docs

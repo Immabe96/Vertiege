@@ -22,6 +22,7 @@ import '../utils/date_format.dart';
 import '../utils/presence_utils.dart';
 import '../services/chat_notification_scope.dart';
 import '../services/supabase.dart';
+import '../widgets/chat/chat_connection_banner.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
@@ -56,10 +57,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   final _scrollController = ScrollController();
 
   bool _showScrollFab = false;
+  bool _loadingOlderRequested = false;
   String? _imagePath;
-  bool _showTyping = false;
-  Timer? _typingTimer;
-  int _previousOtherMessageCount = 0;
+  Timer? _outboundTypingDebounce;
 
   final Set<String> _animatedMessageIds = {};
   Presence? _headerPresence;
@@ -78,6 +78,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     _visitDividerAnchor = ref.read(chatProvider).channelReads[roomId];
     notifier.loadDmMessages(roomId, force: true);
     notifier.subscribeToDm(roomId);
+    notifier.subscribeToTyping(roomId);
     ChatNotificationScope.setActiveDmRoom(roomId);
 
     _scrollController.addListener(_onScroll);
@@ -128,9 +129,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   @override
   void dispose() {
-    _typingTimer?.cancel();
+    _outboundTypingDebounce?.cancel();
+    final resident = ref.read(residentProvider).resident;
+    final notifier = ref.read(chatProvider.notifier);
+    if (resident != null) {
+      notifier.stopTyping(widget.roomId, resident.id);
+    }
+    notifier.unsubscribeFromTyping(widget.roomId);
     ChatNotificationScope.setActiveDmRoom(null);
-    ref.read(chatProvider.notifier).unsubscribeFromDm(widget.roomId);
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -145,6 +151,35 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     if (showFab != _showScrollFab) {
       setState(() => _showScrollFab = showFab);
     }
+    _maybeLoadOlderMessages(offset);
+  }
+
+  void _maybeLoadOlderMessages(double offset) {
+    if (offset > 120 || _loadingOlderRequested) return;
+
+    final chatState = ref.read(chatProvider);
+    final roomId = widget.roomId;
+    if (chatState.dmLoadingOlder[roomId] == true) return;
+    if (chatState.dmHasMore[roomId] != true) return;
+
+    _loadingOlderRequested = true;
+    final beforeExtent = _scrollController.position.maxScrollExtent;
+    final beforeOffset = _scrollController.offset;
+
+    unawaited(
+      ref.read(chatProvider.notifier).loadOlderDmMessages(roomId).whenComplete(() {
+        if (!mounted) return;
+        _loadingOlderRequested = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_scrollController.hasClients || !mounted) return;
+          final afterExtent = _scrollController.position.maxScrollExtent;
+          final delta = afterExtent - beforeExtent;
+          if (delta > 0) {
+            _scrollController.jumpTo(beforeOffset + delta);
+          }
+        });
+      }),
+    );
   }
 
   void _scrollToBottom() {
@@ -156,17 +191,22 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     );
   }
 
-  void _checkTypingIndicator(List<ChannelMessage> messages, String residentId) {
-    if (_typingTimer?.isActive ?? false) return;
-    final others = messages.where((m) => m.senderId != residentId).toList();
-    if (others.length > _previousOtherMessageCount) {
-      _previousOtherMessageCount = others.length;
-      setState(() => _showTyping = true);
-      _typingTimer?.cancel();
-      _typingTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) setState(() => _showTyping = false);
-      });
+  void _onComposerChanged(String text) {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    final notifier = ref.read(chatProvider.notifier);
+    if (text.trim().isEmpty) {
+      _outboundTypingDebounce?.cancel();
+      _outboundTypingDebounce = null;
+      notifier.stopTyping(widget.roomId, resident.id);
+      return;
     }
+
+    _outboundTypingDebounce?.cancel();
+    _outboundTypingDebounce = Timer(const Duration(milliseconds: 350), () {
+      notifier.startTyping(widget.roomId, resident.id);
+    });
   }
 
   Future<void> _pickImage() async {
@@ -227,6 +267,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     if (resident == null) return;
 
     HapticFeedback.lightImpact();
+    ref.read(chatProvider.notifier).stopTyping(widget.roomId, resident.id);
     try {
       if (_replyToMessageId != null) {
         await ref.read(chatProvider.notifier).sendDmReply(
@@ -235,6 +276,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               senderName: resident.name,
               senderAvatar: resident.avatarUrl,
               content: content,
+              imageUrl: _imagePath,
               replyToMessageId: _replyToMessageId!,
               replyToSenderId: _replyToSenderId!,
               replyToSenderName: _replyToSenderName!,
@@ -276,16 +318,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
-    final chatState = ref.watch(chatProvider);
-    final messages = chatState.dmMessages[widget.roomId] ?? [];
+    final messages = ref.watch(dmRoomMessagesProvider(widget.roomId));
+    final dmRooms = ref.watch(chatProvider.select((s) => s.dmRooms));
+    final loadingOlder = ref.watch(
+      chatProvider.select((s) => s.dmLoadingOlder[widget.roomId] ?? false),
+    );
+    final remoteTyping = ref.watch(
+      chatProvider.select((s) => s.typingUsers[widget.roomId] ?? const <String>{}),
+    );
+    final otherTyping = resident != null &&
+        remoteTyping.any((id) => id != resident.id);
 
-    if (resident != null && messages.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _checkTypingIndicator(messages, resident.id);
-      });
-    }
-
-    final room = chatState.dmRooms.cast<Map<String, dynamic>?>().firstWhere(
+    final room = dmRooms.cast<Map<String, dynamic>?>().firstWhere(
       (r) => r?['id'] == widget.roomId,
       orElse: () => null,
     );
@@ -325,6 +369,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       ),
       child: Column(
         children: [
+          const ChatConnectionBanner(),
           Expanded(
             child: messages.isEmpty
                 ? _buildEmpty()
@@ -332,12 +377,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                     children: [
                       ListView.builder(
                         controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: VSpacing.sm,
-                          vertical: VSpacing.sm,
+                        padding: EdgeInsets.only(
+                          left: VSpacing.sm,
+                          right: VSpacing.sm,
+                          top: loadingOlder ? VSpacing.xl + VSpacing.sm : VSpacing.sm,
+                          bottom: VSpacing.sm,
                         ),
                         itemCount: displayItems.length +
-                            (_showTyping ? 1 : 0) +
+                            (otherTyping ? 1 : 0) +
                             (unreadDividerIndex != null ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (unreadDividerIndex != null &&
@@ -349,7 +396,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                       index > unreadDividerIndex
                                   ? index - 1
                                   : index;
-                          if (_showTyping &&
+                          if (otherTyping &&
                               adjustedIndex == displayItems.length) {
                             return const _TypingIndicator();
                           }
@@ -365,6 +412,24 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                           return const SizedBox.shrink();
                         },
                       ),
+                      if (loadingOlder)
+                        Positioned(
+                          top: VSpacing.xs,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
                       if (_showScrollFab)
                         Positioned(
                           right: VSpacing.md,
@@ -379,11 +444,15 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           ChatInputBar(
             controller: _controller,
             onSend: _send,
+            onChanged: _onComposerChanged,
             showAttach: true,
             onAttach: _pickImage,
             replyToName: _replyToSenderName,
             replyToContent: _replyToContent,
             onCancelReply: _cancelReply,
+            typingIndicator: otherTyping
+                ? '${recipientName.isNotEmpty ? recipientName : 'Someone'} is typing…'
+                : null,
           ),
         ],
       ),
@@ -493,76 +562,85 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   ) {
     switch (item.type) {
       case ChatItemType.dateSeparator:
-        return ChatDateSeparator(label: item.dateLabel);
+        return ChatDateSeparator(
+          key: ValueKey('date-${item.dateLabel}'),
+          label: item.dateLabel,
+        );
       case ChatItemType.firstInGroup:
-        return _MessageBubble(
-          message: item.message!,
-          isMe: item.message!.senderId == residentId,
-          showHeader: true,
-          animatedMessageIds: _animatedMessageIds,
-          currentUserId: residentId,
-          onReply: (msg) => _setReply(
-            messageId: msg.id,
-            senderId: msg.senderId,
-            senderName: msg.senderName,
-            content: msg.content,
+        return RepaintBoundary(
+          key: ValueKey(item.message!.id),
+          child: _MessageBubble(
+            message: item.message!,
+            isMe: item.message!.senderId == residentId,
+            showHeader: true,
+            animatedMessageIds: _animatedMessageIds,
+            currentUserId: residentId,
+            onReply: (msg) => _setReply(
+              messageId: msg.id,
+              senderId: msg.senderId,
+              senderName: msg.senderName,
+              content: msg.content,
+            ),
+            onEdit: (msg, newContent) async {
+              await ref.read(chatProvider.notifier).editMessage(
+                    roomId: widget.roomId,
+                    messageId: msg.id,
+                    newContent: newContent,
+                  );
+            },
+            onDelete: (msg) async {
+              await ref.read(chatProvider.notifier).deleteMessage(
+                    roomId: widget.roomId,
+                    messageId: msg.id,
+                  );
+            },
+            onReaction: (msg, emoji) async {
+              await ref.read(chatProvider.notifier).toggleReaction(
+                    roomId: widget.roomId,
+                    messageId: msg.id,
+                    userId: residentId,
+                    emoji: emoji,
+                  );
+            },
           ),
-          onEdit: (msg, newContent) async {
-            await ref.read(chatProvider.notifier).editMessage(
-                  roomId: widget.roomId,
-                  messageId: msg.id,
-                  newContent: newContent,
-                );
-          },
-          onDelete: (msg) async {
-            await ref.read(chatProvider.notifier).deleteMessage(
-                  roomId: widget.roomId,
-                  messageId: msg.id,
-                );
-          },
-          onReaction: (msg, emoji) async {
-            await ref.read(chatProvider.notifier).toggleReaction(
-                  roomId: widget.roomId,
-                  messageId: msg.id,
-                  userId: residentId,
-                  emoji: emoji,
-                );
-          },
         );
       case ChatItemType.subsequent:
-        return _MessageBubble(
-          message: item.message!,
-          isMe: item.message!.senderId == residentId,
-          showHeader: false,
-          animatedMessageIds: _animatedMessageIds,
-          currentUserId: residentId,
-          onReply: (msg) => _setReply(
-            messageId: msg.id,
-            senderId: msg.senderId,
-            senderName: msg.senderName,
-            content: msg.content,
+        return RepaintBoundary(
+          key: ValueKey(item.message!.id),
+          child: _MessageBubble(
+            message: item.message!,
+            isMe: item.message!.senderId == residentId,
+            showHeader: false,
+            animatedMessageIds: _animatedMessageIds,
+            currentUserId: residentId,
+            onReply: (msg) => _setReply(
+              messageId: msg.id,
+              senderId: msg.senderId,
+              senderName: msg.senderName,
+              content: msg.content,
+            ),
+            onEdit: (msg, newContent) async {
+              await ref.read(chatProvider.notifier).editMessage(
+                    roomId: widget.roomId,
+                    messageId: msg.id,
+                    newContent: newContent,
+                  );
+            },
+            onDelete: (msg) async {
+              await ref.read(chatProvider.notifier).deleteMessage(
+                    roomId: widget.roomId,
+                    messageId: msg.id,
+                  );
+            },
+            onReaction: (msg, emoji) async {
+              await ref.read(chatProvider.notifier).toggleReaction(
+                    roomId: widget.roomId,
+                    messageId: msg.id,
+                    userId: residentId,
+                    emoji: emoji,
+                  );
+            },
           ),
-          onEdit: (msg, newContent) async {
-            await ref.read(chatProvider.notifier).editMessage(
-                  roomId: widget.roomId,
-                  messageId: msg.id,
-                  newContent: newContent,
-                );
-          },
-          onDelete: (msg) async {
-            await ref.read(chatProvider.notifier).deleteMessage(
-                  roomId: widget.roomId,
-                  messageId: msg.id,
-                );
-          },
-          onReaction: (msg, emoji) async {
-            await ref.read(chatProvider.notifier).toggleReaction(
-                  roomId: widget.roomId,
-                  messageId: msg.id,
-                  userId: residentId,
-                  emoji: emoji,
-                );
-          },
         );
     }
   }

@@ -117,6 +117,7 @@ class BadgeReactionPickerSheet extends ConsumerWidget {
                               achievement: ach,
                               accentColor: meta.color,
                               size: VBadgeSize.avatarCompact,
+                              showEarnedBadge: true,
                             ),
                             const SizedBox(height: 2),
                             Text(
