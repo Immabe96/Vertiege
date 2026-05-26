@@ -29,7 +29,6 @@ import '../../state/ally_provider.dart';
 import '../../widgets/shared/progress_bar.dart';
 import '../../widgets/profile/streak_display.dart';
 import '../../widgets/profile/completion_hint.dart';
-import '../../widgets/profile/referral_chip.dart';
 import '../../widgets/profile/subscription_badge.dart';
 import '../../widgets/achievements/achievement_queue_summary.dart';
 import '../../widgets/profile/trophy_case.dart';
@@ -40,6 +39,9 @@ import '../../widgets/core/tier_up_dialog.dart';
 import '../../widgets/shared/profession_icon.dart';
 import '../../widgets/shared/tier_icon.dart';
 import '../../widgets/identity/joined_worlds_row.dart';
+import '../../config/onboarding_funnel.dart';
+import '../../services/onboarding_funnel_prefs.dart';
+import '../../widgets/onboarding/first_steps_card.dart';
 import '../../config/achievements.dart';
 import '../../config/cosmetics.dart';
 import '../../widgets/core/v_feedback.dart';
@@ -58,6 +60,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   int _previousXp = 0;
   SubscriptionTier _subscriptionTier = SubscriptionTier.resident;
   List<Map<String, dynamic>> _highPrestigeWorlds = [];
+  bool _funnelDismissed = true;
+  bool _funnelOpenedWorld = false;
+  bool _funnelOpenedNexus = false;
 
   static const double _avatarRadius = 48;
 
@@ -66,6 +71,19 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     super.initState();
     _loadSubscriptionTier();
     _loadHighPrestigeWorlds();
+    _loadFunnelPrefs();
+  }
+
+  Future<void> _loadFunnelPrefs() async {
+    final dismissed = await OnboardingFunnelPrefs.isDismissed();
+    final openedWorld = await OnboardingFunnelPrefs.hasOpenedWorld();
+    final openedNexus = await OnboardingFunnelPrefs.hasOpenedNexus();
+    if (!mounted) return;
+    setState(() {
+      _funnelDismissed = dismissed;
+      _funnelOpenedWorld = openedWorld;
+      _funnelOpenedNexus = openedNexus;
+    });
   }
 
   Future<void> _loadSubscriptionTier() async {
@@ -198,6 +216,11 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final residentState = ref.watch(residentProvider);
     final resident = residentState.resident;
     final achievements = ref.watch(achievementProvider);
+    if (!_funnelOpenedWorld || !_funnelOpenedNexus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadFunnelPrefs();
+      });
+    }
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     ref.listen<ResidentState>(residentProvider, (prev, next) {
@@ -490,6 +513,26 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
           ),
 
+          if (!_funnelDismissed &&
+              !OnboardingFunnel.isComplete(
+                resident: resident,
+                achievements: achievements.userAchievements,
+                openedWorld: _funnelOpenedWorld,
+                openedNexus: _funnelOpenedNexus,
+              )) ...[
+            FirstStepsCard(
+              resident: resident,
+              userAchievements: achievements.userAchievements,
+              openedWorld: _funnelOpenedWorld,
+              openedNexus: _funnelOpenedNexus,
+              onDismiss: () async {
+                await OnboardingFunnelPrefs.setDismissed(true);
+                if (mounted) setState(() => _funnelDismissed = true);
+              },
+            ),
+            const SizedBox(height: VSpacing.md),
+          ],
+
           _SectionHeader(title: 'Standing', theme: theme),
           const SizedBox(height: VSpacing.sm),
 
@@ -615,16 +658,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
             const SizedBox(height: VSpacing.lg),
           ],
-
-          // ── Referral Code ──────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-            child: ReferralChip(
-              referralCode: resident.referralCode,
-              referredBy: resident.referredBy,
-            ),
-          ),
-          const SizedBox(height: VSpacing.lg),
 
           _SectionHeader(title: 'Progress', theme: theme),
           const SizedBox(height: VSpacing.sm),

@@ -70,7 +70,7 @@ const achievementCategoryMeta =
       AchievementCategory.life: AchievementCategoryMeta(
         label: 'Life',
         icon: Icons.auto_stories,
-        color: VColors.tertiary,
+        color: VColors.achievementAdventure,
       ),
       AchievementCategory.profession: AchievementCategoryMeta(
         label: 'Profession',

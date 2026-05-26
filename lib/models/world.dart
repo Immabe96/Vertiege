@@ -167,6 +167,17 @@ class WorldBase {
     this.createdAt = 0,
     this.activityScore = 0,
   });
+
+  bool get isUnclaimed => sovereignId.isEmpty;
+
+  bool get hasSovereign => sovereignId.isNotEmpty;
+
+  String get sovereignDisplayName =>
+      hasSovereign ? sovereignName : 'Unclaimed';
+
+  String get sovereignStatusLabel => hasSovereign
+      ? 'Sovereign: $sovereignName'
+      : 'Unclaimed — first member becomes Sovereign';
 }
 
 class World extends WorldBase {
@@ -432,6 +443,9 @@ class World extends WorldBase {
 
   static DominionType? _parseDominionType(String? raw) {
     if (raw == null || raw.isEmpty) return null;
+    if (raw == 'academy' || raw == 'archive') {
+      return DominionType.sanctuary;
+    }
     return DominionType.values.firstWhere(
       (t) => t.name == raw,
       orElse: () => DominionType.sanctuary,

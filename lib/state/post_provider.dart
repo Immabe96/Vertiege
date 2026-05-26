@@ -395,67 +395,94 @@ class PostNotifier extends Notifier<PostState> {
     return {};
   }
 
-  void addReaction(String postId, String emoji, String residentId) {
+  static const _voteKeys = {'upvote', 'downvote'};
+
+  /// Toggles a reaction (RPC is toggle on server). Handles vote exclusivity.
+  void toggleReaction(String postId, String reactionKey, String residentId) {
     if (!RateLimiter.canProceed('reaction_$postId')) return;
-    if (_userReactions[postId]?.contains(emoji) == true) return;
+    final userSet = _userReactions.putIfAbsent(postId, () => {});
+    final wasActive = userSet.contains(reactionKey);
 
-    final posts = state.posts.map((p) {
-      if (p.id != postId) return p;
-      final reactions = Map<String, int>.from(p.reactions);
-      reactions[emoji] = (reactions[emoji] ?? 0) + 1;
-      return p.copyWith(reactions: reactions);
-    }).toList();
+    if (!wasActive) {
+      for (final other in _voteKeys) {
+        if (other != reactionKey && userSet.contains(other)) {
+          _applyReactionDelta(postId, other, -1);
+          userSet.remove(other);
+        }
+      }
+    }
 
-    state = state.copyWith(posts: posts);
+    if (wasActive) {
+      userSet.remove(reactionKey);
+      _applyReactionDelta(postId, reactionKey, -1);
+    } else {
+      userSet.add(reactionKey);
+      _applyReactionDelta(postId, reactionKey, 1);
+    }
+
     _persist();
-
-    _userReactions.putIfAbsent(postId, () => {}).add(emoji);
 
     unawaited(
       _postsRepository.addReaction(
         postId: postId,
-        emoji: emoji,
+        emoji: reactionKey,
         residentId: residentId,
       ),
     );
 
-    ref.read(residentProvider.notifier).awardActivityXp('reaction', 1);
+    if (!wasActive) {
+      ref.read(residentProvider.notifier).awardActivityXp('reaction', 1);
+      ref.read(questProvider.notifier).onReacted();
 
-    final reactedPost = state.posts.where((p) => p.id == postId).firstOrNull;
-    if (reactedPost != null && reactedPost.residentId != residentId) {
-      ref
-          .read(residentProvider.notifier)
-          .awardActivityXpForUser(
-            reactedPost.residentId,
-            'received_reaction',
-            2,
-          );
-    }
-
-    ref.read(questProvider.notifier).onReacted();
-    ref
-        .read(notificationProvider.notifier)
-        .addNotification(
-          type: NotificationType.like,
-          message: 'Someone reacted to your post',
-          postId: postId,
-          worldId: reactedPost?.worldId,
+      final reactedPost = state.posts.where((p) => p.id == postId).firstOrNull;
+      if (reactedPost != null && reactedPost.residentId != residentId) {
+        ref
+            .read(residentProvider.notifier)
+            .awardActivityXpForUser(
+              reactedPost.residentId,
+              'received_reaction',
+              2,
+            );
+        ref.read(notificationProvider.notifier).addNotification(
+              type: NotificationType.like,
+              message: 'Someone reacted to your post',
+              postId: postId,
+              worldId: reactedPost.worldId,
+            );
+        final totalReactions = reactedPost.reactions.values.fold<int>(
+          0,
+          (sum, c) => sum + c,
         );
-
-    if (reactedPost != null) {
-      final totalReactions = reactedPost.reactions.values.fold<int>(
-        0,
-        (sum, c) => sum + c,
-      );
-      ref
-          .read(notificationProvider.notifier)
-          .reactionMilestone(
-            postId: postId,
-            worldId: reactedPost.worldId,
-            count: totalReactions,
-          );
+        ref.read(notificationProvider.notifier).reactionMilestone(
+              postId: postId,
+              worldId: reactedPost.worldId,
+              count: totalReactions,
+            );
+      }
     }
   }
+
+  void addReaction(String postId, String emoji, String residentId) {
+    toggleReaction(postId, emoji, residentId);
+  }
+
+  void _applyReactionDelta(String postId, String reactionKey, int delta) {
+    final posts = state.posts.map((p) {
+      if (p.id != postId) return p;
+      final reactions = Map<String, int>.from(p.reactions);
+      final next = (reactions[reactionKey] ?? 0) + delta;
+      if (next <= 0) {
+        reactions.remove(reactionKey);
+      } else {
+        reactions[reactionKey] = next;
+      }
+      return p.copyWith(reactions: reactions);
+    }).toList();
+    state = state.copyWith(posts: posts);
+  }
+
+  Set<String> userReactionsForPost(String postId) =>
+      Set<String>.from(_userReactions[postId] ?? const {});
 
   void editPostStatus(String postId, String newStatus) {
     final posts = state.posts.map((p) {

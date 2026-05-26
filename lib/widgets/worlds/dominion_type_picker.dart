@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/world_page_ia.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -23,20 +24,20 @@ class DominionTypePicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Choose Dominion Type',
+          'Choose world type',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: VFontWeight.bold,
           ),
         ),
         const SizedBox(height: VSpacing.xs),
         Text(
-          'Each type has unique features and identity.',
+          'Community for discussion, or Shop for marketplace and treasury.',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: VSpacing.lg),
-        ...DominionType.values.map((type) {
+        ...WorldPageIa.userCreatableDominions.map((type) {
           final isSelected = selected == type;
           return Padding(
             padding: const EdgeInsets.only(bottom: VSpacing.sm),

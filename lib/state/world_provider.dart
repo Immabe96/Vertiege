@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/tiers.dart';
+import '../config/world_page_ia.dart';
 import '../models/world.dart';
 import '../models/post.dart';
 import '../models/alliance.dart';
@@ -112,6 +113,12 @@ class WorldNotifier extends Notifier<WorldState> {
     String? worldCurrencyName,
     List<String>? tags,
   }) async {
+    if (dominionType != null &&
+        !WorldPageIa.isCreatableDominionName(dominionType)) {
+      throw StateError(
+        'Only Community (sanctuary) and Shop (marketplace) worlds can be created.',
+      );
+    }
     if (!RateLimiter.canProceed('create_world_$sovereignId', windowMs: 30000, maxCalls: 2)) {
       throw StateError(
         'Please wait a moment before creating another world.',

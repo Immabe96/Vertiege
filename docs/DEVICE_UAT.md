@@ -121,25 +121,72 @@ adb install -r path\to\app-release.apk
 
 ---
 
-## Checklist
+## Local release APK (2026-05-26)
+
+```bash
+# Build (requires 110/110 core achievement PNGs unless --force)
+./scripts/build_release_apk.sh
+# Or:
+flutter build apk --release
+
+adb uninstall com.vertiege   # if signature / package conflict
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+
+Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-page-redesign.md), [onboarding-funnel.md](vision/onboarding-funnel.md).
+
+---
+
+## Checklist — core shell
 
 | # | Area | Pass? | Notes |
 |---|------|-------|-------|
 | 1 | Cold start / login | | No black screen; reaches main shell |
-| 2 | Bottom tabs (5) | | Nexus, Discover, Chat, Identity, More |
-| 3 | Chat → worlds rail | | Names readable; opens correct world |
+| 2 | Bottom tabs (5) | | Nexus, Worlds (Explore), Chat, Identity, More |
+| 3 | Chat → world icons | | Raster world icons (no glass box in list) |
 | 4 | World channels | | Lists channels; can open a channel |
-| 5 | World members | | Shows all members in joined worlds |
+| 5 | World members | | Members tab; stat chip opens full list |
 | 6 | Search residents | | Can find other members by name |
-| 7 | Create world | | Completes or clear error |
+| 7 | Create world | | Only **Community** + **Shop** dominion types |
 | 8 | Subscription (tier 1) | | Tier 1 users: expect upgrade gate, not silent bounce |
 | 9 | Clear app data → relaunch | | Posts/chat recover from Supabase |
 | 10 | Push token | | Row in `device_tokens` after allow + login |
-| 11 | World About (visitor) | | Not joined → lands **ABOUT**; charter teaser; locked economy tiles show reason |
-| 12 | World About (member) | | Joined → lands **FEED**; ABOUT shows full charter, rep, economy unlocks |
-| 13 | World About — orientation | | Get started steps open #info / #rules / #roles / #general |
-| 14 | World About — news | | Tap decree/announcement → Feed highlights post |
-| 15 | World About — leadership | | Sovereign + council rows; tap → resident profile |
+
+## Checklist — world page IA (Release 1–5)
+
+| # | Area | Pass? | Notes |
+|---|------|-------|-------|
+| 11 | World visitor default | | Lands **HOME** tab |
+| 12 | World member default | | Lands **FEED** (or **HOME** if Settings → “Open joined worlds on Feed” off) |
+| 13 | World **···** drawer | | Polls, jobs, archive, economy (non-shop worlds), realm guide sheet |
+| 14 | Marketplace world | | **SHOP** tab; treasury + marketplace entry |
+| 15 | Wealth / profession world | | No **SHOP** tab; economy in drawer |
+| 16 | Home tab | | About group, admin announcement, recent discussion |
+| 17 | Post deep link | | `?post=` opens **FEED** with highlight |
+| 18 | Unclaimed sovereign | | Join CTA; first member can claim (if migration applied) |
+| 19 | Join dialog | | First join asks Feed vs Home default |
+
+## Checklist — Nexus & onboarding funnel
+
+| # | Area | Pass? | Notes |
+|---|------|-------|-------|
+| 20 | Nexus context strip | | Proof-first copy; “Browse worlds” if no joins |
+| 21 | Nexus empty feed | | No worlds → CTA to Explore |
+| 22 | Onboarding step 3 | | Open Nexus / Visit world / Submit proof CTAs |
+| 23 | Post-onboarding Nexus | | One-time welcome toast |
+| 24 | Identity first steps | | Checklist; dismissible; updates after world + Nexus |
+| 25 | Explore intro | | Achievement / proof-first blurb under search |
+
+## Checklist — achievements & feed
+
+| # | Area | Pass? | Notes |
+|---|------|-------|-------|
+| 26 | Submit proof screen | | Search, category chips, manual-review banner, remove photos |
+| 27 | Submit proof flow | | Upload → “submitted for verification” toast; appears pending |
+| 28 | Achievement badges | | Category PNG on wall / list (not generic Material icon) |
+| 29 | Nexus post actions | | Like, reactions, comment, repost, share on posts |
+| 30 | Identity worlds row | | Larger bare icons (no chip box) |
+| 31 | Funny vs Life icons | | Distinct category colors / assets |
 
 ---
 

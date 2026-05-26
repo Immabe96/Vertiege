@@ -23,6 +23,7 @@ class WorldHeroBanner extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onShare;
   final VoidCallback? onSettings;
+  final VoidCallback? onOpenTools;
   final VoidCallback onJoin;
 
   const WorldHeroBanner({
@@ -41,6 +42,7 @@ class WorldHeroBanner extends StatelessWidget {
     required this.onBack,
     required this.onShare,
     this.onSettings,
+    this.onOpenTools,
     required this.onJoin,
   });
 
@@ -77,6 +79,13 @@ class WorldHeroBanner extends StatelessWidget {
             )
           : null,
       actions: [
+        if (onOpenTools != null)
+          IconButton(
+            icon: const Icon(Icons.more_horiz),
+            tooltip: 'World tools',
+            color: toolbarFg,
+            onPressed: onOpenTools,
+          ),
         IconButton(
           icon: const Icon(Icons.share_outlined),
           tooltip: 'Share world',
@@ -207,7 +216,7 @@ class WorldHeroBanner extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (world.sovereignName.trim().isNotEmpty) ...[
+                      if (world.hasSovereign || world.isUnclaimed) ...[
                         const SizedBox(height: VSpacing.xs),
                         Material(
                           color: Colors.transparent,
@@ -238,7 +247,9 @@ class WorldHeroBanner extends StatelessWidget {
                                   const SizedBox(width: VSpacing.sm),
                                   Flexible(
                                     child: Text(
-                                      'Founded by ${world.sovereignName}',
+                                      world.hasSovereign
+                                          ? 'Founded by ${world.sovereignName}'
+                                          : world.sovereignStatusLabel,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(

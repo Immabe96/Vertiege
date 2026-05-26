@@ -15,6 +15,7 @@ import '../services/backup_service.dart';
 import '../services/firebase_bootstrap.dart';
 import '../services/mutation_outbox_service.dart';
 import '../services/supabase.dart';
+import '../services/world_nav_prefs.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
@@ -27,6 +28,7 @@ const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
 const _kPrefCommentsEnabled = 'settings_comments_enabled';
 const _kPrefWorldInvitesEnabled = 'settings_world_invites_enabled';
+const _kPrefMemberOpensOnFeed = WorldNavPrefs.memberOpensOnFeedKey;
 const _kPrefTierUpgradesEnabled = 'settings_tier_upgrades_enabled';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -41,6 +43,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _likesEnabled = true;
   bool _commentsEnabled = true;
   bool _worldInvitesEnabled = true;
+  bool _memberOpensOnFeed = true;
   bool _tierUpgradesEnabled = true;
   int _cacheSizeBytes = 0;
   int _failedOutboxCount = 0;
@@ -74,6 +77,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _likesEnabled = prefs.getBool(_kPrefLikesEnabled) ?? true;
       _commentsEnabled = prefs.getBool(_kPrefCommentsEnabled) ?? true;
       _worldInvitesEnabled = prefs.getBool(_kPrefWorldInvitesEnabled) ?? true;
+      _memberOpensOnFeed = prefs.getBool(_kPrefMemberOpensOnFeed) ?? true;
       _tierUpgradesEnabled = prefs.getBool(_kPrefTierUpgradesEnabled) ?? true;
       _prefsLoaded = true;
     });
@@ -948,6 +952,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ? (v) {
                           setState(() => _tierUpgradesEnabled = v);
                           _setNotificationPref(_kPrefTierUpgradesEnabled, v);
+                        }
+                      : null,
+                ),
+              ],
+            ),
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
+              title: 'Worlds',
+              children: [
+                VSectionSwitchTile(
+                  icon: Icons.dynamic_feed,
+                  label: 'Open joined worlds on Feed',
+                  value: _memberOpensOnFeed,
+                  onChanged: _prefsLoaded
+                      ? (v) async {
+                          setState(() => _memberOpensOnFeed = v);
+                          await WorldNavPrefs.setMemberOpensOnFeed(v);
                         }
                       : null,
                 ),

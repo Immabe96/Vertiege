@@ -1,8 +1,14 @@
 ﻿import 'package:flutter/material.dart';
+
+import '../../config/achievements.dart' as ach_config;
+import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
+import '../../widgets/achievements/achievement_category_meta.dart';
+import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/core/v_feedback.dart';
+import 'badge_reaction_picker.dart';
 
 class _ExclusiveReaction {
   final String emoji;
@@ -25,6 +31,7 @@ class ReactionBar extends StatefulWidget {
   final String currentResidentId;
   final ValueChanged<String> onReact;
   final int userTier;
+  final Set<String>? activeReactions;
 
   const ReactionBar({
     super.key,
@@ -32,6 +39,7 @@ class ReactionBar extends StatefulWidget {
     required this.currentResidentId,
     required this.onReact,
     this.userTier = 1,
+    this.activeReactions,
   });
 
   @override
@@ -39,7 +47,6 @@ class ReactionBar extends StatefulWidget {
 }
 
 class _ReactionBarState extends State<ReactionBar> {
-  static const _emojis = ['fire', 'diamond', 'trophy', 'clap'];
   static const _allEmojis = [
     'fire',
     'diamond',
@@ -83,6 +90,8 @@ class _ReactionBarState extends State<ReactionBar> {
   /// Tracks which reactions the current user has tapped during this session.
   final Set<String> _userReactions = {};
 
+  Set<String> get _active => widget.activeReactions ?? _userReactions;
+
   IconData _iconFor(String emoji) => switch (emoji) {
     'fire' => Icons.local_fire_department,
     'diamond' => Icons.diamond,
@@ -111,13 +120,15 @@ class _ReactionBarState extends State<ReactionBar> {
 
   void _onReactionTap(String emoji) {
     Haptics.light();
-    setState(() {
-      if (_userReactions.contains(emoji)) {
-        _userReactions.remove(emoji);
-      } else {
-        _userReactions.add(emoji);
-      }
-    });
+    if (widget.activeReactions == null) {
+      setState(() {
+        if (_userReactions.contains(emoji)) {
+          _userReactions.remove(emoji);
+        } else {
+          _userReactions.add(emoji);
+        }
+      });
+    }
     widget.onReact(emoji);
   }
 
@@ -280,23 +291,77 @@ class _ReactionBarState extends State<ReactionBar> {
 
   @override
   Widget build(BuildContext context) {
+    final keys = widget.reactions.entries
+        .where((e) => e.value > 0)
+        .map((e) => e.key)
+        .toList()
+      ..sort();
+
     return GestureDetector(
       onLongPress: _showLongPressMenu,
       behavior: HitTestBehavior.opaque,
       child: Wrap(
         spacing: 6,
-        children: _emojis.map((emoji) {
-          final count = widget.reactions[emoji] ?? 0;
-          final isActive = _userReactions.contains(emoji);
+        runSpacing: 4,
+        children: keys.map((key) {
+          final count = widget.reactions[key] ?? 0;
+          final isActive = _active.contains(key);
+          if (isBadgeReactionKey(key)) {
+            final achId = achievementIdFromBadgeReaction(key);
+            final ach =
+                achId == null ? null : ach_config.achievementForId(achId);
+            if (ach == null) return const SizedBox.shrink();
+            final meta = metaForCategory(ach.category);
+            return _BadgeReactionChip(
+              count: count,
+              isActive: isActive,
+              achievement: ach,
+              accentColor: meta.color,
+              onTap: () => _onReactionTap(key),
+            );
+          }
           return _ReactionChip(
-            emoji: emoji,
-            icon: _iconFor(emoji),
+            emoji: key,
+            icon: _iconFor(key),
             count: count,
             isActive: isActive,
-            onTap: () => _onReactionTap(emoji),
+            onTap: () => _onReactionTap(key),
           );
         }).toList(),
       ),
+    );
+  }
+}
+
+class _BadgeReactionChip extends StatelessWidget {
+  final int count;
+  final bool isActive;
+  final Achievement achievement;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _BadgeReactionChip({
+    required this.count,
+    required this.isActive,
+    required this.achievement,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InputChip(
+      label: Text('$count'),
+      avatar: AchievementBadgeAvatar(
+        achievement: achievement,
+        accentColor: accentColor,
+        size: 22,
+      ),
+      onPressed: onTap,
+      backgroundColor:
+          isActive ? theme.colorScheme.primaryContainer : null,
+      showCheckmark: false,
     );
   }
 }

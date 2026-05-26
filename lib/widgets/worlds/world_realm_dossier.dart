@@ -318,7 +318,7 @@ class _TypeLeadSection extends StatelessWidget {
             ),
             const SizedBox(height: VSpacing.xs),
             Text(
-              'Prestige ${world.prestige} · Sovereign ${world.sovereignName}',
+              'Prestige ${world.prestige} · ${world.sovereignStatusLabel}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: isDark
                     ? VColors.onSurfaceVariantDark

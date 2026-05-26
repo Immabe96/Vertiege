@@ -341,7 +341,7 @@ class _BannerThumbnail extends StatelessWidget {
                 right: 0,
                 child: Center(
                   child: WorldIcon(
-                    worldId: world.id,
+                    worldId: world.assetKey,
                     size: VIconSize.md + 16,
                     tintColor: WorldAssets.colorForPrestige(world.prestige),
                   ),

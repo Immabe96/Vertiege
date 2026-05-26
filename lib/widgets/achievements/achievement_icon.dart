@@ -102,9 +102,10 @@ class AchievementBadgeAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final imagePath =
-        WorldAssets.achievementBadgeImage(achievement.id) ??
-        WorldAssets.achievementCategoryImage(achievement.category.name);
+    final imagePath = WorldAssets.achievementDisplayImage(
+      achievement.id,
+      achievement.category,
+    );
     final icon = achievementIconData(achievement.icon);
     final hasRaster = imagePath != null;
     final fill = achievementBadgeContainerColor(

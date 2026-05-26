@@ -20,7 +20,7 @@ import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
-import '../../utils/world_assets.dart';
+import '../../widgets/worlds/world_icon.dart';
 
 enum _ChatMode { worlds, dms }
 
@@ -629,7 +629,6 @@ class _WorldRail extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
         children: worlds.map((world) {
           final isSelected = world.id == selectedWorldId;
-          final worldIcon = WorldAssets.iconForWorld(world.id);
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
             child: GestureDetector(
@@ -657,10 +656,11 @@ class _WorldRail extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      worldIcon,
-                      size: VIconSize.lg,
-                      color: isSelected
+                    WorldIcon(
+                      worldId: world.assetKey,
+                      size: 36,
+                      useGlassContainer: false,
+                      tintColor: isSelected
                           ? VColors.primary
                           : (isDark
                               ? VColors.onSurfaceVariantDark

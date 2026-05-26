@@ -613,7 +613,11 @@ class _WorldTile extends StatelessWidget {
             onTap: () => context.push(exploreWorldPath(world.id)),
             borderRadius: BorderRadius.circular(VRadius.lg),
             child: ListTile(
-              leading: WorldIcon(worldId: world.id, size: 36),
+              leading: WorldIcon(
+                worldId: world.assetKey,
+                size: 36,
+                useGlassContainer: false,
+              ),
               title: Text(
                 world.name,
                 style: theme.textTheme.bodyLarge?.copyWith(

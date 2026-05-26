@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../config/core_achievement_badge_ids.dart';
+import '../models/achievement.dart';
 import '../models/world.dart';
 import '../theme/v_colors.dart';
 
@@ -7,6 +8,25 @@ import '../theme/v_colors.dart';
 /// Every world gets a unique visual identity derived from its ID hash.
 class WorldAssets {
   WorldAssets._();
+
+  static const _worldIconPaths = <String, String>{
+    'aetheria': 'assets/generated/world-icon-aetheria.png',
+    'arts-pavilion': 'assets/generated/world-icon-arts-pavilion.png',
+    'aviation-heights': 'assets/generated/world-icon-aviation-heights.png',
+    'azure-coast': 'assets/generated/world-icon-azure-coast.png',
+    'crimson-court': 'assets/generated/world-icon-crimson-court.png',
+    'crystal-shore': 'assets/generated/world-icon-crystal-shore.png',
+    'financial-district': 'assets/generated/world-icon-financial-district.png',
+    'golden-estate': 'assets/generated/world-icon-golden-estate.png',
+    'legal-plaza': 'assets/generated/world-icon-legal-plaza.png',
+    'medical-nexus': 'assets/generated/world-icon-medical-nexus.png',
+    'neon-district': 'assets/generated/world-icon-neon-district.png',
+    'nova-station': 'assets/generated/world-icon-nova-station.png',
+    'quantum-core': 'assets/generated/world-icon-quantum-core.png',
+    'silver-page': 'assets/generated/world-icon-silver-page.png',
+    'sovereign-city': 'assets/generated/world-icon-sovereign-city.png',
+    'tech-sprawl': 'assets/generated/world-icon-tech-sprawl.png',
+  };
 
   static const _worldImagePaths = <String, String>{
     'aetheria': 'assets/generated/world-aetheria.jpg',
@@ -156,10 +176,31 @@ class WorldAssets {
   }
 
   static String? imageForWorld(String worldId) {
-    final normalized = worldId.startsWith('world-')
-        ? worldId.substring('world-'.length)
-        : worldId;
+    final normalized = _normalizeWorldKey(worldId);
     return _worldImagePaths[normalized] ?? _worldImagePaths[worldId];
+  }
+
+  /// Square raster emblem for preset worlds (falls back to [iconForWorld]).
+  static String? iconImageForWorld(String worldId, {String? assetKey}) {
+    for (final key in _worldLookupKeys(worldId, assetKey)) {
+      final path = _worldIconPaths[key];
+      if (path != null) return path;
+    }
+    return null;
+  }
+
+  static Iterable<String> _worldLookupKeys(String worldId, String? assetKey) sync* {
+    if (assetKey != null && assetKey.isNotEmpty) {
+      yield _normalizeWorldKey(assetKey);
+    }
+    yield _normalizeWorldKey(worldId);
+  }
+
+  static String _normalizeWorldKey(String worldId) {
+    if (worldId.startsWith('world-')) {
+      return worldId.substring('world-'.length);
+    }
+    return worldId;
   }
 
   static String avatarForSeed(String seed) {
@@ -176,9 +217,17 @@ class WorldAssets {
     return 'assets/generated/achievements/$achievementId.png';
   }
 
-  /// Legacy badges, then core per-id art, then null (caller uses category fallback).
+  /// Legacy map, then per-id PNG for core catalog achievements.
   static String? achievementBadgeImage(String achievementId) =>
       badgeImageForId(achievementId) ?? coreAchievementBadgeImage(achievementId);
+
+  /// Best raster for an achievement: per-id → category → null (Material fallback).
+  static String? achievementDisplayImage(
+    String achievementId,
+    AchievementCategory category,
+  ) =>
+      achievementBadgeImage(achievementId) ??
+      achievementCategoryImage(category.name);
 
   static String? tierImageForValue(int tier) => _tierImagePaths[tier];
 

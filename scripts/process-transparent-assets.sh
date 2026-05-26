@@ -75,8 +75,10 @@ transparent_categories = {
     "badge",
     "profession",
     "achievement_category",
+    "achievement_badge",
     "tier",
     "avatar",
+    "world_icon",
 }
 if categories_filter:
     transparent_categories = {
@@ -116,8 +118,15 @@ if base.is_dir():
         "ach-*.png",
         "tier-*.png",
         "avatar*.png",
+        "world-icon-*.png",
     ):
         for p in sorted(base.glob(pattern)):
+            if str(p) not in seen:
+                seen.add(str(p))
+                paths.append(str(p))
+    achievements_dir = base / "achievements"
+    if achievements_dir.is_dir():
+        for p in sorted(achievements_dir.glob("*.png")):
             if str(p) not in seen:
                 seen.add(str(p))
                 paths.append(str(p))

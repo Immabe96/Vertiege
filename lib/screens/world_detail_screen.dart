@@ -6,7 +6,7 @@ import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../config/tiers.dart';
-import '../config/world_capability_matrix.dart';
+import '../config/world_page_ia.dart';
 import '../models/channel.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
@@ -18,13 +18,16 @@ import '../widgets/worlds/world_channel_list.dart';
 import '../widgets/worlds/world_member_row.dart';
 import '../widgets/worlds/world_hero_banner.dart';
 import '../widgets/worlds/world_realm_dossier.dart';
-
+import '../widgets/worlds/world_home_tab.dart';
+import '../widgets/worlds/world_shop_tab.dart';
+import '../widgets/worlds/world_tools_drawer.dart';
 import '../widgets/worlds/world_feed_tab.dart';
-import '../widgets/v_section_list.dart';
+import '../widgets/core/glass_sheet.dart';
 import '../widgets/worlds/world_detail_members.dart';
 import '../services/permission_service.dart';
+import '../services/onboarding_funnel_prefs.dart';
+import '../services/world_nav_prefs.dart';
 import '../services/world_service.dart';
-import '../services/feature_flags.dart';
 import '../state/event_provider.dart';
 import '../router/world_navigation.dart';
 import '../utils/navigation.dart';
@@ -35,6 +38,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 
 import '../state/post_provider.dart';
+import '../models/post.dart';
 import '../models/resident.dart';
 import '../models/world.dart' show World;
 import '../widgets/worlds/world_share_card.dart';
@@ -54,7 +58,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     with TickerProviderStateMixin {
   late final AnimationController _joinAnimController;
   TabController? _tabController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey _joinButtonKey = GlobalKey();
+  List<WorldDetailTabId> _tabIds = const [];
 
   List<WorldMemberEntry> _members = [];
   bool _membersLoading = true;
@@ -68,6 +74,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   String? _highlightPostId;
   bool _appliedPostQuery = false;
   bool _defaultTabApplied = false;
+  bool _memberOpensOnFeed = true;
+  bool _navPrefsLoaded = false;
 
   bool _isSovereignOrCouncil(Resident? resident, World world) {
     if (resident == null) return false;
@@ -91,8 +99,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       vsync: this,
     );
     _loadMembers();
+    _loadNavPrefs();
     _maybeAutoJoin();
     _runGovernanceChecks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      OnboardingFunnelPrefs.markOpenedWorld();
+    });
     final resident = ref.read(residentProvider).resident;
     if (resident != null) {
       ref.read(chatProvider.notifier).loadChannelReads(resident.id);
@@ -224,27 +236,175 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (postId != null && postId.isNotEmpty) {
       _highlightPostId = postId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final w = ref.read(worldProvider).worlds[widget.worldId];
+        if (w == null || _tabController == null) return;
         final duration = context.motionDuration(VAnimation.normal);
-        _tabController?.animateTo(0, duration: duration);
+        _tabController!.animateTo(
+          WorldPageIa.feedIndex(w),
+          duration: duration,
+        );
       });
     }
   }
 
-  void _applyDefaultTabIfNeeded(bool isJoined) {
-    if (_defaultTabApplied || _tabController == null) return;
-    final hasPost =
-        _highlightPostId != null && _highlightPostId!.isNotEmpty;
-    if (hasPost) {
-      _defaultTabApplied = true;
+  Future<void> _loadNavPrefs() async {
+    final opensOnFeed = await WorldNavPrefs.memberOpensOnFeed();
+    if (!mounted) return;
+    setState(() {
+      _memberOpensOnFeed = opensOnFeed;
+      _navPrefsLoaded = true;
+    });
+  }
+
+  void _applyDefaultTabIfNeeded(World world, bool isJoined) {
+    if (_defaultTabApplied || _tabController == null || !_navPrefsLoaded) {
       return;
     }
-    final index = isJoined ? 0 : 4;
+    final hasPost =
+        _highlightPostId != null && _highlightPostId!.isNotEmpty;
+    final index = WorldPageIa.defaultTabIndex(
+      world: world,
+      isJoined: isJoined,
+      hasPostHighlight: hasPost,
+      memberOpensOnFeed: _memberOpensOnFeed,
+    );
     _defaultTabApplied = true;
     if (_tabController!.index == index) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _tabController == null) return;
       _tabController!.animateTo(index);
     });
+  }
+
+  void _goToTab(World world, WorldDetailTabId id) {
+    final index = WorldPageIa.indexOf(world, id);
+    if (index < 0 || _tabController == null) return;
+    _tabController!.animateTo(index);
+  }
+
+  void _openToolsDrawer() {
+    _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  Widget _buildTabBody(
+    WorldDetailTabId tabId, {
+    required World world,
+    required Resident? resident,
+    required List<Post> posts,
+    required List<WorldChannel> channels,
+    required ColorScheme cs,
+    required bool isJoined,
+    required VoidCallback? onSettings,
+  }) {
+    switch (tabId) {
+      case WorldDetailTabId.home:
+        return WorldHomeTab(
+          world: world,
+          worldId: widget.worldId,
+          worldPosts: posts,
+          isJoined: isJoined,
+          onJoin: _handleJoin,
+          onOpenFeed: () => _goToTab(world, WorldDetailTabId.feed),
+          onOpenRealmGuide: () => _showRealmGuideSheet(
+            world,
+            channels: channels,
+            posts: posts,
+            resident: resident,
+            isJoined: isJoined,
+            onSettings: onSettings,
+          ),
+        );
+      case WorldDetailTabId.feed:
+        return WorldFeedTab(
+          worldId: widget.worldId,
+          world: world,
+          resident: resident,
+          posts: posts,
+          cs: cs,
+          primaryScroll: true,
+          highlightPostId: _highlightPostId,
+          isJoined: isJoined,
+          onJoin: _handleJoin,
+          onHighlightMissing: _onHighlightPostMissing,
+          channels: channels,
+        );
+      case WorldDetailTabId.channels:
+        return channels.isEmpty
+            ? AppEmptyState(
+                title: 'Preparing channels',
+                description:
+                    'This world is getting its starter channels.',
+                icon: Icons.forum_outlined,
+                actionLabel: 'Retry',
+                onAction: () => ref
+                    .read(channelProvider.notifier)
+                    .ensureDefaultChannels(widget.worldId),
+              )
+            : WorldChannelList(worldId: widget.worldId);
+      case WorldDetailTabId.members:
+        return (!_membersLoading && _members.isEmpty)
+            ? AppEmptyState(
+                title: 'No members yet',
+                description: isJoined
+                    ? 'Invite people who match this world\'s culture.'
+                    : 'Join to meet members and join the conversation.',
+                icon: Icons.people_outline,
+                actionLabel: isJoined ? 'Invite members' : 'Join world',
+                onAction: isJoined
+                    ? () => context.push('/search')
+                    : _handleJoin,
+              )
+            : WorldDetailMembers(
+                worldId: widget.worldId,
+                world: world,
+                members: _members,
+                membersLoading: _membersLoading,
+              );
+      case WorldDetailTabId.shop:
+        return WorldShopTab(
+          world: world,
+          worldId: widget.worldId,
+          isJoined: isJoined,
+        );
+    }
+  }
+
+  void _showRealmGuideSheet(
+    World world, {
+    required List<WorldChannel> channels,
+    required List<Post> posts,
+    required Resident? resident,
+    required bool isJoined,
+    required VoidCallback? onSettings,
+  }) {
+    showAppSheet(
+      context,
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          VSpacing.md,
+          VSpacing.sm,
+          VSpacing.md,
+          VSpacing.xl,
+        ),
+        child: WorldRealmDossier(
+          world: world,
+          worldId: widget.worldId,
+          channels: channels,
+          worldPosts: posts,
+          resident: resident,
+          isJoined: isJoined,
+          isSovereignOrCouncil: _isSovereignOrCouncil(resident, world),
+          onJoin: _handleJoin,
+          onSettings: onSettings,
+          onShare: () => _showWorldShareSheet(world),
+          onOpenChannel: (name) => _openChannelByName(name, channels),
+          members: _members,
+          membersLoading: _membersLoading,
+        ),
+      ),
+      maxSize: 0.92,
+    );
   }
 
   void _onHighlightPostMissing() {
@@ -260,15 +420,74 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     super.dispose();
   }
 
-  void _handleJoin() {
+  Future<void> _handleJoin() async {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
     final isJoined = resident.joinedWorldIds.contains(widget.worldId);
     if (isJoined) {
       _showLeaveConfirmation();
-    } else {
-      _animateJoinButton();
-      ref.read(residentProvider.notifier).joinWorld(widget.worldId);
+      return;
+    }
+    _animateJoinButton();
+    await ref.read(residentProvider.notifier).joinWorld(widget.worldId);
+    if (!mounted) return;
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    if (world == null) return;
+    await _maybePromptFeedDefault(world);
+    if (!mounted) return;
+    setState(() => _defaultTabApplied = false);
+    _applyDefaultTabIfNeeded(world, true);
+  }
+
+  Future<void> _maybePromptFeedDefault(World world) async {
+    if (await WorldNavPrefs.hasAskedFeedDefault()) return;
+    if (!mounted) return;
+
+    final openFeed = await showFDialog<bool>(
+      context: context,
+      builder: (ctx, style, animation) => FDialog.raw(
+        builder: (context, dialogStyle) => Padding(
+          padding: const EdgeInsets.all(VSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'You joined ${world.name}',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              const Text(
+                'When you open worlds you\'ve joined, start on the Feed tab? '
+                'You can change this anytime in Settings.',
+              ),
+              const SizedBox(height: VSpacing.lg),
+              FButton(
+                onPress: () => Navigator.pop(ctx, true),
+                child: const Text('Yes, open on Feed'),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Start on Home instead'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final preferFeed = openFeed ?? true;
+    await WorldNavPrefs.setMemberOpensOnFeed(preferFeed);
+    if (!mounted) return;
+    setState(() {
+      _memberOpensOnFeed = preferFeed;
+      _defaultTabApplied = false;
+    });
+    if (preferFeed) {
+      _goToTab(world, WorldDetailTabId.feed);
     }
   }
 
@@ -372,8 +591,15 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     final cs = theme.colorScheme;
     final isJoined = resident?.joinedWorldIds.contains(widget.worldId) ?? false;
 
-    _ensureTabController(5); // Feed, Channels, People, Manage, About
-    _applyDefaultTabIfNeeded(isJoined);
+    if (world != null) {
+      final nextTabs = WorldPageIa.tabsFor(world);
+      if (_tabIds != nextTabs) {
+        _tabIds = nextTabs;
+        _defaultTabApplied = false;
+      }
+      _ensureTabController(nextTabs.length);
+      _applyDefaultTabIfNeeded(world, isJoined);
+    }
 
     final scaleAnimation =
         TweenSequence<double>([
@@ -446,9 +672,29 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         ? () => context.push(worldSettingsPath(widget.worldId))
         : null;
 
+    final tabLabels = WorldPageIa.tabsFor(world).map(WorldPageIa.tabLabel).toList();
+    final isAdminOrCouncil = _isSovereignOrCouncil(resident, world);
+
     return WorldAccessGuard(
       worldId: widget.worldId,
       child: Scaffold(
+        key: _scaffoldKey,
+        endDrawer: WorldToolsDrawer(
+          world: world,
+          worldId: widget.worldId,
+          isJoined: isJoined,
+          isAdminOrCouncil: isAdminOrCouncil,
+          onShare: () => _showWorldShareSheet(world),
+          onSettings: onSettings,
+          onOpenRealmGuide: () => _showRealmGuideSheet(
+            world,
+            channels: channels,
+            posts: posts,
+            resident: resident,
+            isJoined: isJoined,
+            onSettings: onSettings,
+          ),
+        ),
         body: RefreshIndicator(
           onRefresh: () async {
             await ref.read(postProvider.notifier).loadPosts();
@@ -476,6 +722,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 onBack: () => safeBack(context, fallback: '/explore'),
                 onShare: () => _showWorldShareSheet(world),
                 onSettings: onSettings,
+                onOpenTools: _openToolsDrawer,
                 onJoin: _handleJoin,
               ),
 
@@ -507,6 +754,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                   delegate: _WorldTabBarDelegate(
                     controller: _tabController!,
                     color: prestigeTierColor,
+                    tabLabels: tabLabels,
                   ),
                 ),
               ),
@@ -514,81 +762,19 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
             body: TabBarView(
               controller: _tabController,
               children: [
-                _WorldDetailTabScroll(
-                  child: WorldFeedTab(
-                    worldId: widget.worldId,
-                    world: world,
-                    resident: resident,
-                    posts: posts,
-                    cs: cs,
-                    primaryScroll: true,
-                    highlightPostId: _highlightPostId,
-                    isJoined: isJoined,
-                    onJoin: _handleJoin,
-                    onHighlightMissing: _onHighlightPostMissing,
-                    channels: channels,
+                for (final tabId in WorldPageIa.tabsFor(world))
+                  _WorldDetailTabScroll(
+                    child: _buildTabBody(
+                      tabId,
+                      world: world,
+                      resident: resident,
+                      posts: posts,
+                      channels: channels,
+                      cs: cs,
+                      isJoined: isJoined,
+                      onSettings: onSettings,
+                    ),
                   ),
-                ),
-                _WorldDetailTabScroll(
-                  child: channels.isEmpty
-                      ? AppEmptyState(
-                          title: 'Preparing channels',
-                          description:
-                              'This world is getting its starter channels.',
-                          icon: Icons.forum_outlined,
-                          actionLabel: 'Retry',
-                          onAction: () => ref
-                              .read(channelProvider.notifier)
-                              .ensureDefaultChannels(widget.worldId),
-                        )
-                      : WorldChannelList(worldId: widget.worldId),
-                ),
-                _WorldDetailTabScroll(
-                  child: (!_membersLoading && _members.isEmpty)
-                      ? AppEmptyState(
-                          title: 'No residents yet',
-                          description: isJoined
-                              ? 'Invite people who match this world\'s culture.'
-                              : 'Join to meet members and join the conversation.',
-                          icon: Icons.people_outline,
-                          actionLabel: isJoined ? 'Invite residents' : 'Join world',
-                          onAction: isJoined
-                              ? () => context.push('/search')
-                              : _handleJoin,
-                        )
-                      : WorldDetailMembers(
-                          worldId: widget.worldId,
-                          world: world,
-                          members: _members,
-                          membersLoading: _membersLoading,
-                        ),
-                ),
-                _WorldDetailTabScroll(
-                  child: _ManageTab(
-                    world: world,
-                    worldId: widget.worldId,
-                    isJoined: isJoined,
-                  ),
-                ),
-                _WorldDetailTabScroll(
-                  child: WorldRealmDossier(
-                    world: world,
-                    worldId: widget.worldId,
-                    channels: channels,
-                    worldPosts: posts,
-                    resident: resident,
-                    isJoined: isJoined,
-                    isSovereignOrCouncil:
-                        _isSovereignOrCouncil(resident, world),
-                    onJoin: _handleJoin,
-                    onSettings: onSettings,
-                    onShare: () => _showWorldShareSheet(world),
-                    onOpenChannel: (name) =>
-                        _openChannelByName(name, channels),
-                    members: _members,
-                    membersLoading: _membersLoading,
-                  ),
-                ),
               ],
             ),
           ),
@@ -770,10 +956,12 @@ class _WorldDetailTabScroll extends StatelessWidget {
 class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabController controller;
   final Color color;
+  final List<String> tabLabels;
 
   const _WorldTabBarDelegate({
     required this.controller,
     required this.color,
+    required this.tabLabels,
   });
 
   @override
@@ -818,12 +1006,8 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
             fontSize: VFontSize.labelSm,
             fontWeight: VFontWeight.regular,
           ),
-          tabs: const [
-            Tab(text: 'FEED'),
-            Tab(text: 'CHANNELS'),
-            Tab(text: 'PEOPLE'),
-            Tab(text: 'MANAGE'),
-            Tab(text: 'ABOUT'),
+          tabs: [
+            for (final label in tabLabels) Tab(text: label),
           ],
         ),
       ),
@@ -833,128 +1017,7 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _WorldTabBarDelegate oldDelegate) {
     return oldDelegate.controller != controller ||
-        oldDelegate.color != color;
-  }
-}
-
-class _ManageTab extends ConsumerWidget {
-  final World world;
-  final String worldId;
-  final bool isJoined;
-
-  const _ManageTab({
-    required this.world,
-    required this.worldId,
-    required this.isJoined,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final resident = ref.watch(residentProvider).resident;
-    final showMarket = WorldCapabilityMatrix.worldHasMarketplace(world);
-    final showTreasury = WorldCapabilityMatrix.worldHasTreasury(world);
-    final canList = WorldCapabilityMatrix.canCreateListing(
-      resident,
-      world,
-      isJoined: isJoined,
-    );
-    final canTreasuryAdmin = WorldCapabilityMatrix.canManageTreasury(
-      resident,
-      world,
-    );
-
-    if (!isJoined) {
-      return const AppEmptyState(
-        title: 'Join to manage',
-        description: 'Economy and world tools unlock after you join.',
-        icon: Icons.lock_outline,
-        variant: EmptyStateVariant.default_,
-      );
-    }
-
-    final isCouncilOrSovereign = canTreasuryAdmin;
-
-    final links = <FTileMixin>[
-      if (FeatureFlags.treasury && showTreasury)
-        VSectionTile(
-          icon: Icons.account_balance_wallet,
-          label: 'Treasury',
-          onTap: () => context.push(
-            worldTreasuryPath(worldId, admin: canTreasuryAdmin),
-          ),
-        ),
-      if (FeatureFlags.marketplace && showMarket)
-        VSectionTile(
-          icon: Icons.storefront,
-          label: 'Marketplace',
-          onTap: () => context.push(
-            worldMarketplacePath(worldId, member: isJoined),
-          ),
-        ),
-      if (FeatureFlags.polls)
-        VSectionTile(
-          icon: Icons.how_to_vote,
-          label: 'Polls',
-          onTap: () => context.push(
-            worldPollsPath(worldId, admin: isCouncilOrSovereign),
-          ),
-        ),
-      VSectionTile(
-        icon: Icons.work_outline,
-        label: 'Role board',
-        onTap: () => context.push(
-          worldJobsPath(worldId, admin: isCouncilOrSovereign),
-        ),
-      ),
-      VSectionTile(
-        icon: Icons.menu_book_outlined,
-        label: 'World archive',
-        onTap: () => context.push(worldArchivePath(worldId)),
-      ),
-    ];
-
-    final prestigeColor = world.prestige >= 40
-        ? VColors.tierApex
-        : world.prestige >= 20
-        ? VColors.primary
-        : VColors.tierHustler;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        VSectionList(title: 'World tools', children: links),
-        const SizedBox(height: VSpacing.md),
-        FCard.raw(
-          child: Padding(
-            padding: const EdgeInsets.all(VSpacing.md),
-            child: Row(
-              children: [
-                Icon(Icons.auto_awesome, color: prestigeColor),
-                const SizedBox(width: VSpacing.sm),
-                Expanded(
-                  child: Text(
-                    canList
-                        ? 'Prestige ${world.prestige} · you can list on the marketplace'
-                        : (WorldCapabilityMatrix.blockReasonCreateListing(
-                              resident,
-                              world,
-                              isJoined: isJoined,
-                            ) ??
-                            'Prestige ${world.prestige} · economy modules'),
-                    style: TextStyle(
-                      fontSize: VFontSize.bodySm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+        oldDelegate.color != color ||
+        oldDelegate.tabLabels != tabLabels;
   }
 }

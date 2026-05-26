@@ -52,7 +52,7 @@ class NexusShortcutsSection extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Progress & shortcuts',
+                      'Achievements & progress',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: VFontWeight.semiBold,
                         color: context.vOnSurface,
@@ -111,7 +111,7 @@ class NexusShortcutsSection extends StatelessWidget {
                 ),
                 const BentoCard(
                   child: TrendingCard(),
-                  size: BentoSize.large,
+                  size: BentoSize.medium,
                 ),
               ],
             ),

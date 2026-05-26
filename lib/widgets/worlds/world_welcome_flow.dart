@@ -381,24 +381,6 @@ class _RoleStep extends StatelessWidget {
               onTap: () {},
             ),
           ],
-          if (world.dominionType == DominionType.academy) ...[
-            const SizedBox(height: VSpacing.sm),
-            _ActionCard(
-              icon: Icons.school,
-              title: 'View Courses',
-              subtitle: 'Enroll in available courses',
-              onTap: () {},
-            ),
-          ],
-          if (world.dominionType == DominionType.archive) ...[
-            const SizedBox(height: VSpacing.sm),
-            _ActionCard(
-              icon: Icons.menu_book,
-              title: 'Browse Documents',
-              subtitle: 'Explore the knowledge base',
-              onTap: () {},
-            ),
-          ],
         ],
       ),
     );

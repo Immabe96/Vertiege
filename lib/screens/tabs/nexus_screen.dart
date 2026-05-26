@@ -17,6 +17,9 @@ import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/feed/post_item.dart';
 import '../../widgets/nexus/feed_sort_dropdown.dart';
+import '../../services/onboarding_funnel_prefs.dart';
+import '../../widgets/core/v_feedback.dart';
+import '../../widgets/nexus/nexus_context_strip.dart';
 import '../../widgets/nexus/nexus_feed_header.dart';
 import '../../widgets/nexus/nexus_shortcuts_section.dart';
 import '../tabs/tab_layout.dart';
@@ -52,7 +55,19 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
       if (postState.posts.isEmpty && !postState.isLoading) {
         ref.read(postProvider.notifier).loadPosts();
       }
+      _onNexusOpened();
     });
+  }
+
+  Future<void> _onNexusOpened() async {
+    await OnboardingFunnelPrefs.markOpenedNexus();
+    if (!mounted) return;
+    final welcome = await OnboardingFunnelPrefs.consumeJustFinishedOnboarding();
+    if (!mounted || !welcome) return;
+    VFeedback.showMessage(
+      context,
+      'Welcome! Your Nexus feed fills as you join worlds and submit proof.',
+    );
   }
 
   @override
@@ -160,6 +175,11 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
       postProvider.select((s) => s.isLoading),
     );
 
+    final joinedRemoteWorlds = resident?.joinedWorldIds
+            .where(WorldService.isRemoteWorldId)
+            .length ??
+        0;
+
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
         label: _searchExpanded ? 'Close search' : 'Search',
@@ -247,6 +267,11 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                   controller: _scrollController,
                   slivers: [
                     SliverToBoxAdapter(
+                      child: NexusContextStrip(
+                        showJoinWorldsCta: joinedRemoteWorlds == 0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
                       child: NexusShortcutsSection(
                         expanded: _shortcutsExpanded,
                         onExpandedChanged: (v) =>
@@ -326,6 +351,11 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   }
 
   Widget _buildEmptyState() {
+    final resident = ref.read(residentProvider).resident;
+    final hasJoinedWorlds = resident?.joinedWorldIds
+            .any(WorldService.isRemoteWorldId) ??
+        false;
+
     if (_searchQuery.isNotEmpty) {
       return AppEmptyState(
         title: 'No results for "$_searchQuery"',
@@ -338,20 +368,32 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
         return const AppEmptyState(
           title: 'No posts from people you follow',
           description:
-              'Follow residents in your worlds to see their posts here',
+              'Follow members in your worlds to see their posts here',
           icon: Icons.people_outline,
         );
       case _FeedTab.announcements:
         return const AppEmptyState(
           title: 'No announcements yet',
           description:
-              'Announcements from world moderators will appear here',
+              'Admin announcements from your worlds will appear here',
           icon: Icons.campaign_outlined,
         );
       case _FeedTab.all:
+        if (!hasJoinedWorlds) {
+          return AppEmptyState(
+            title: 'Join a world to fill your feed',
+            description:
+                'Browse worlds to submit achievement proof, earn reputation, '
+                'and see posts from communities you join.',
+            icon: Icons.explore_outlined,
+            actionLabel: 'Browse worlds',
+            onAction: () => context.go('/explore'),
+          );
+        }
         return const AppEmptyState(
-          title: 'No posts yet',
-          description: 'Be the first to share something with the community!',
+          title: 'No posts in your worlds yet',
+          description:
+              'Share an update or visit a world feed to start the conversation.',
           icon: Icons.auto_awesome,
         );
     }

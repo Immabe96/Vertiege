@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../config/professions.dart';
 import '../../config/tiers.dart';
@@ -16,6 +17,8 @@ import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
 import 'the_gate_screen.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../services/onboarding_funnel_prefs.dart';
+import '../../services/world_service.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -168,7 +171,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  void _enterApp() {
+  Future<void> _enterApp() async {
+    await OnboardingFunnelPrefs.markJustFinishedOnboarding();
     if (mounted) context.go('/');
   }
 
@@ -797,24 +801,45 @@ class _WorldTab extends ConsumerWidget {
           ),
           const SizedBox(height: VSpacing.sm),
           Text(
-            'You start in Neon District and Crystal Shore. '
-            'More worlds unlock as you verify your profession or level up your tier.',
+            _starterWorldsCopy(ref),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: isDark
                   ? VColors.onSurfaceVariantDark
                   : VColors.onSurfaceVariant,
+              height: 1.45,
             ),
           ),
-          const SizedBox(height: VSpacing.xl),
+          const SizedBox(height: VSpacing.lg),
           FilledButton.icon(
             onPressed: onEnter,
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text('Enter the App'),
+            icon: const Icon(Icons.home_outlined),
+            label: const Text('Open Nexus'),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: () {
+              final id = resident?.joinedWorldIds
+                  .where(WorldService.isRemoteWorldId)
+                  .firstOrNull;
+              if (id != null) {
+                context.push(exploreWorldPath(id));
+              } else {
+                context.go('/explore');
+              }
+            },
+            icon: const Icon(Icons.public),
+            label: const Text('Visit your world'),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/achievements/submit'),
+            icon: const Icon(Icons.verified_outlined),
+            label: const Text('Submit proof'),
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
-            'Your Gate results shape your feed recommendations and achievement paths.',
+            'Recommended path: profile → join worlds → Nexus feed → achievement proof.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: isDark
@@ -836,5 +861,29 @@ class _WorldTab extends ConsumerWidget {
       'governance' => 'Governance',
       _ => 'Explorer',
     };
+  }
+
+  String _starterWorldsCopy(WidgetRef ref) {
+    final resident = ref.read(residentProvider).resident;
+    final worlds = ref.read(worldProvider).worlds;
+    final names = <String>[];
+    if (resident != null) {
+      for (final id in resident.joinedWorldIds) {
+        final w = worlds[id];
+        if (w != null) names.add(w.name);
+      }
+    }
+    if (names.isEmpty) {
+      return 'You\'re set up with starter worlds. More unlock as you verify '
+          'your profession or level up.';
+    }
+    if (names.length == 1) {
+      return 'You start in ${names.first}. Submit proof and earn reputation '
+          'there, then explore more worlds.';
+    }
+    final head = names.take(2).join(' and ');
+    final extra = names.length > 2 ? ' (+${names.length - 2} more)' : '';
+    return 'You start in $head$extra. Submit achievement proof in your worlds, '
+        'then browse Nexus for updates.';
   }
 }

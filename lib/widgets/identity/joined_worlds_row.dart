@@ -33,45 +33,41 @@ class JoinedWorldsRow extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 88,
+      height: 96,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
         itemCount: worlds.length,
-        separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(width: VSpacing.md),
         itemBuilder: (context, index) {
           final world = worlds[index];
-          return Material(
-            color: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(VRadius.lg),
-              onTap: () => context.push(exploreWorldPath(world.id)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: VSpacing.md,
-                  vertical: VSpacing.sm,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    WorldIcon(worldId: world.id, size: 40),
-                    const SizedBox(width: VSpacing.sm),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 120),
-                      child: Text(
-                        world.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      ),
+          return InkWell(
+            onTap: () => context.push(exploreWorldPath(world.id)),
+            borderRadius: BorderRadius.circular(VRadius.md),
+            child: SizedBox(
+              width: 72,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  WorldIcon(
+                    worldId: world.assetKey,
+                    size: 52,
+                    useGlassContainer: false,
+                  ),
+                  const SizedBox(height: VSpacing.xs),
+                  Text(
+                    world.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
+                      color: isDark
+                          ? VColors.onSurfaceDark
+                          : VColors.onSurface,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );

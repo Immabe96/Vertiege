@@ -37,7 +37,7 @@ class ProfileAchievementShowcase extends StatelessWidget {
           (e) => UserAchievement(
             achievementId: e.achievement.id,
             status: AchievementStatus.verified,
-            isProfileVisible: e.isProfileVisible,
+            isProfileVisible: e.userAchievement.isProfileVisible,
             featuredOrder: e.featuredOrder,
           ),
         )

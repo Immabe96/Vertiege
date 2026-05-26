@@ -22,6 +22,7 @@ import '../shared/tier_icon.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
 import 'comment_sheet.dart';
+import 'post_action_bar.dart';
 import 'reaction_bar.dart';
 import 'heart_animation.dart';
 import 'post_image.dart';
@@ -68,7 +69,7 @@ class PostItem extends ConsumerWidget {
             }
             ref
                 .read(postProvider.notifier)
-                .addReaction(post.id, '❤️', resident.id);
+                .toggleReaction(post.id, 'heart', resident.id);
             HapticFeedback.mediumImpact();
           }
         },
@@ -76,7 +77,7 @@ class PostItem extends ConsumerWidget {
           if (resident != null) {
             ref
                 .read(postProvider.notifier)
-                .addReaction(post.id, '❤️', resident.id);
+                .toggleReaction(post.id, 'heart', resident.id);
             HapticFeedback.mediumImpact();
           }
         },
@@ -302,51 +303,33 @@ class PostItem extends ConsumerWidget {
                     ),
                   ),
                 ],
-                IntrinsicHeight(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ReactionBar(
-                          reactions: post.reactions,
-                          currentResidentId: resident?.id ?? '',
-                          userTier: resident?.tier.value ?? 1,
-                          onReact: (emoji) {
-                            ref
-                                .read(postProvider.notifier)
-                                .addReaction(
-                                  post.id,
-                                  emoji,
-                                  resident?.id ?? '',
-                                );
-                          },
-                        ),
-                      ),
-                      if (post.comments.isNotEmpty) ...[
-                        Container(width: 1, color: theme.dividerColor),
-                        GestureDetector(
-                          onTap: () => _showComments(context, ref),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.chat_bubble_outline,
-                                  size: 16,
-                                  color: theme.colorScheme.outline,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${post.comments.length}',
-                                  style: theme.textTheme.labelSmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                PostActionBar(
+                  post: post,
+                  residentId: resident?.id,
+                  activeReactions: ref
+                      .read(postProvider.notifier)
+                      .userReactionsForPost(post.id),
+                  onComment: () => _showComments(context, ref),
                 ),
+                if (post.reactions.isNotEmpty) ...[
+                  const SizedBox(height: VSpacing.xs),
+                  ReactionBar(
+                    reactions: post.reactions,
+                    currentResidentId: resident?.id ?? '',
+                    userTier: resident?.tier.value ?? 1,
+                    activeReactions: ref
+                        .read(postProvider.notifier)
+                        .userReactionsForPost(post.id),
+                    onReact: (key) {
+                      if (resident == null) return;
+                      ref.read(postProvider.notifier).toggleReaction(
+                            post.id,
+                            key,
+                            resident.id,
+                          );
+                    },
+                  ),
+                ],
               ],
             ),
           ),

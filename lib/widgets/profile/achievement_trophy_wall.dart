@@ -123,7 +123,7 @@ class _TrophyCell extends StatelessWidget {
               AchievementBadgeAvatar(
                 achievement: achievement,
                 accentColor: VColors.tertiary,
-                size: VBadgeSize.avatarCompact,
+                size: VBadgeSize.avatar,
               ),
               if (hidden)
                 Positioned(

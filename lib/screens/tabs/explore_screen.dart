@@ -155,6 +155,27 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   VSpacing.md,
                   VSpacing.sm,
                   VSpacing.md,
+                  VSpacing.sm,
+                ),
+                child: Text(
+                  'Join a world to submit achievement proof, earn reputation, '
+                  'and unlock channels. Wealth and profession worlds match your tier; '
+                  'create a community or shop when you\'re ready.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  VSpacing.md,
+                  0,
+                  VSpacing.md,
                   VSpacing.md,
                 ),
                 child: TextField(
@@ -643,7 +664,7 @@ class _WorldListCard extends StatelessWidget {
                         children: [
                           _InfoChip(
                             icon: Icons.person,
-                            label: 'Sovereign: ${world.sovereignName}',
+                            label: world.sovereignStatusLabel,
                           ),
                           if (world.requiredTier != null)
                             _InfoChip(

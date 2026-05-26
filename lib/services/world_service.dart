@@ -292,6 +292,18 @@ class WorldService {
         'joined_at': DateTime.now().toIso8601String(),
       });
       await client.rpc('increment_world_members', params: {'w_id': worldId});
+      try {
+        await client.rpc(
+          'claim_world_sovereignty_if_unclaimed',
+          params: {'p_world_id': worldId},
+        );
+      } catch (e, st) {
+        CrashReporter.instance.recordError(
+          e,
+          st,
+          hint: 'claim_world_sovereignty_if_unclaimed',
+        );
+      }
     } on PostgrestException catch (e) {
       if (e.code == '23505') return;
       rethrow;
