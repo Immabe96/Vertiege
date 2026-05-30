@@ -45,9 +45,8 @@ import '../screens/hall_of_ascension_screen.dart';
 import '../screens/journey/ascension_path_screen.dart';
 import '../screens/season_screen.dart';
 import '../screens/auth/verifier_login_screen.dart';
-import '../screens/verifier_portal_screen.dart';
+import '../screens/verification_review_screen.dart';
 import '../services/admin_access_service.dart';
-import '../services/verifier_session.dart';
 import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
@@ -142,25 +141,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final currentUser = supabaseClient?.auth.currentUser;
       final isVerifier = AdminAccessService.isVerifierUser(currentUser);
 
-      // ── Verifier portal (staff only, no main app) ─────────────────
+      // ── Verifier portal (staff review; same session as main app) ───
       if (isVerifierRoute) {
         if (!hasSession) {
           return isVerifierLogin ? null : '/verifier/login';
         }
         if (!isVerifier) {
-          return '/verifier/login';
+          return '/login';
         }
-        if (location == '/verifier/review' && !VerifierSession.active) {
-          return '/verifier/login';
-        }
-        if (isVerifierLogin && VerifierSession.active) {
-          return '/verifier/review';
+        if (isVerifierLogin) {
+          return '/';
         }
         return null;
-      }
-
-      if (hasSession && isVerifier && VerifierSession.active) {
-        return '/verifier/review';
       }
 
       // Auth pages are always accessible (they handle their own state)
@@ -512,7 +504,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/verifier/review',
-        builder: (context, state) => const VerifierPortalScreen(),
+        builder: (context, state) => const VerificationReviewScreen(),
       ),
       GoRoute(
         path: '/twin-seal',

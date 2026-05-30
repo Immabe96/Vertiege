@@ -16,10 +16,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 
 class VerificationReviewScreen extends ConsumerStatefulWidget {
-  const VerificationReviewScreen({super.key, this.onSignOut});
-
-  /// When set (verifier portal), shows sign-out instead of normal back navigation.
-  final VoidCallback? onSignOut;
+  const VerificationReviewScreen({super.key});
 
   @override
   ConsumerState<VerificationReviewScreen> createState() =>
@@ -139,14 +136,7 @@ class _VerificationReviewScreenState
     final theme = Theme.of(context);
     return VHubPage(
       title: 'Staff review',
-      showBack: widget.onSignOut == null,
-      headerActions: [
-        if (widget.onSignOut != null)
-          FHeaderAction(
-            icon: const Icon(Icons.logout),
-            onPress: widget.onSignOut,
-          ),
-      ],
+      showBack: true,
       body: FTabs(
         expands: true,
         control: const FTabControl.managed(),

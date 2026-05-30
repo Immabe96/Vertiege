@@ -8,7 +8,7 @@ import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/invite_service.dart';
-import '../../services/verifier_session.dart';
+import '../../services/admin_access_service.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../state/supabase_bootstrap_provider.dart';
@@ -56,8 +56,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _finishSignInAfterAuth() async {
-    VerifierSession.exit();
-
     await ref
         .read(residentProvider.notifier)
         .loadResident()
@@ -598,9 +596,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: TextButton(
                       onPressed: _isLoading
                           ? null
-                          : () => context.go('/verifier/login'),
+                          : () {
+                              if (AdminAccessService
+                                  .isCurrentSessionVerifier()) {
+                                context.push('/verifier/review');
+                              } else {
+                                context.go('/verifier/login');
+                              }
+                            },
                       child: Text(
-                        'Staff verification portal',
+                        AdminAccessService.isCurrentSessionVerifier()
+                            ? 'Open staff review'
+                            : 'Staff sign-in',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: isDark
                               ? VColors.onSurfaceVariantDark

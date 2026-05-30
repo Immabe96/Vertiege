@@ -92,9 +92,10 @@ class NexusShortcutsSection extends StatelessWidget {
                   size: BentoSize.small,
                   onTap: () => context.push('/daily-quests'),
                 ),
-                const BentoCard(
-                  child: SeasonSnapshotCard(),
+                BentoCard(
+                  child: const SeasonSnapshotCard(),
                   size: BentoSize.small,
+                  onTap: () => context.push('/season'),
                 ),
                 const BentoCard(
                   child: SpotlightCard(),
@@ -136,6 +137,11 @@ class _CompactShortcutsRow extends StatelessWidget {
         children: [
           _CompactShortcut(
             icon: Icons.auto_awesome,
+            label: 'Season 1',
+            onTap: () => context.push('/season'),
+          ),
+          _CompactShortcut(
+            icon: Icons.flag_outlined,
             label: 'Quest',
             onTap: () => context.push('/daily-quests'),
           ),

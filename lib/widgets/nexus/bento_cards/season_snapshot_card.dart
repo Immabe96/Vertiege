@@ -1,34 +1,28 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+
+import '../../../config/season_catalog.dart';
+import '../../../services/season_service.dart';
 import '../../../state/resident_provider.dart';
 import '../../../state/world_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
 
-/// Small card with season name + user's worlds count.
+/// Nexus bento tile — Season 1 snapshot (tap handled by parent [BentoCard]).
 class SeasonSnapshotCard extends ConsumerWidget {
   const SeasonSnapshotCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resident = ref.watch(residentProvider).resident;
-    final worldState = ref.watch(worldProvider);
-    final worlds = worldState.worlds.values.toList();
+    final worlds = ref.watch(worldProvider).worlds.values.toList();
 
     if (resident == null) return const SizedBox.shrink();
 
+    final def = SeasonCatalog.active;
     final joinedCount = resident.joinedWorldIds.length;
-    final totalWorlds = worlds.length;
-
-    // Determine a season-like label based on current month
-    final month = DateTime.now().month;
-    final seasonLabel = switch (month) {
-      >= 3 && <= 5 => 'Spring Season',
-      >= 6 && <= 8 => 'Summer Season',
-      >= 9 && <= 11 => 'Autumn Season',
-      _ => 'Winter Season',
-    };
+    final unclaimed = SeasonService.unclaimedWorlds(worlds).length;
+    final growing = SeasonService.growingWorldCount(worlds);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +37,7 @@ class SeasonSnapshotCard extends ConsumerWidget {
             ),
             const SizedBox(width: VSpacing.xs),
             const Text(
-              'SEASON',
+              'SEASON 1',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
                 fontWeight: VFontWeight.semiBold,
@@ -55,41 +49,34 @@ class SeasonSnapshotCard extends ConsumerWidget {
         ),
         const SizedBox(height: VSpacing.sm),
         Text(
-          seasonLabel,
+          'The Big Bang',
           style: const TextStyle(
             fontSize: VFontSize.bodyMd,
             fontWeight: VFontWeight.bold,
             color: VColors.onSurface,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: VSpacing.xs),
         Text(
-          '$joinedCount of $totalWorlds worlds joined',
+          def.tagline,
           style: const TextStyle(
             fontSize: VFontSize.labelSm,
             color: VColors.outline,
           ),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: VSpacing.md),
-        GestureDetector(
-          onTap: () => context.push('/season'),
-          child: const Row(
-            children: [
-              Text(
-                'View Season',
-                style: TextStyle(
-                  fontSize: VFontSize.labelSm,
-                  color: VColors.primary,
-                ),
-              ),
-              SizedBox(width: VSpacing.xs),
-              Icon(
-                Icons.chevron_right,
-                size: VIconSize.sm,
-                color: VColors.primary,
-              ),
-            ],
+        const SizedBox(height: VSpacing.xs),
+        Text(
+          '$unclaimed open · $growing growing · $joinedCount joined',
+          style: const TextStyle(
+            fontSize: VFontSize.labelSm,
+            color: VColors.primary,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

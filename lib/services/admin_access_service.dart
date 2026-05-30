@@ -13,7 +13,7 @@ class AdminAccessService {
 
     final appMeta = user.appMetadata;
     if (appMeta['is_verifier'] == true) return true;
-    if (appMeta['role'] == 'verifier' || appMeta['role'] == 'super_admin') {
+    if (appMeta['role'] == 'verifier') {
       return true;
     }
 

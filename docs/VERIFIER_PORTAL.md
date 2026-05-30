@@ -1,10 +1,10 @@
 # Verifier portal (staff only)
 
-Staff use a **separate login path** from normal players. The main app **Settings** screen does not link here.
+Staff use the **same account and app** as players. Verification review is an extra screen, not a separate app shell.
 
 ## What it does
 
-After verifier sign-in you only see **Staff review**:
+Open **Settings → Staff review** (visible only for verifier accounts):
 
 | Tab | Data | Action |
 |-----|------|--------|
@@ -12,66 +12,44 @@ After verifier sign-in you only see **Staff review**:
 | **Achievements** | `user_achievements` (status `submitted`) | Approve / reject achievement proof |
 | **Flagged Posts** | Posts with `pending_review` / `flagged` | Approve / remove |
 
-Sign out returns to verifier login. You cannot open Nexus, Chat, or other app routes while in **verifier session** (see below).
+Use the back button to return to Nexus, Chat, and the rest of the app. Sign out from **Settings** like any player.
 
-## Who can sign in
+## Who can access
 
 An account must match **one** of:
 
 - Supabase Auth `app_metadata.is_verifier = true` (or `role = verifier`)
-- Email listed in repo secret / local `.env`: `VERIFIER_ADMIN_EMAILS` (comma-separated)
+- Email listed in repo secret / local `.env`: `VERIFIER_ADMIN_EMAILS` (comma-separated, debug builds)
 
 Migrations `20260522120000_verifier_portal_access.sql` and `20260522123000_verifier_achievement_access.sql` add RLS for verifiers on submission tables.
 
-## Two login modes (same account allowed)
+## Sign-in
 
-| Entry | Route | Result |
-|-------|--------|--------|
-| **Player** | Normal app → Login | Full app (Nexus, Chat, …) |
-| **Staff** | `vertiege://verifier/login` | Staff review only |
+| Entry | Result |
+|-------|--------|
+| **Player login** (`/login`) | Full app; verifiers also see Staff review in Settings |
+| **Staff sign-in** (`/verifier/login` or deep link) | Same session → lands on Nexus after onboarding (not review-only) |
 
-Use **player login** for everyday testing. Use the **deep link** when reviewing submissions.
+## Open staff review on a device (APK)
 
-Internally, verifier login sets `VerifierSession.active`; player login clears it.
+1. Sign in with a verifier account (normal login is fine).
+2. **Settings → Staff review**
 
-## Open verifier login on a device (APK)
+Optional deep link to the review screen (must already be signed in as a verifier):
 
-**Easiest (after build with in-app link):** Player **Login** screen → **Staff verification portal** (bottom).
+```powershell
+adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/review" com.vertiege
+```
 
-**ADB deep link** (requires APK with router fix for `vertiege://verifier/login`):
-
-1. Enable USB debugging, install the CI APK.
-2. On your PC:
-
-   ```powershell
-   adb shell am force-stop com.vertiege
-   adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" com.vertiege
-   ```
-
-3. You should see **Staff** sign-in (not the normal player login). If you still see player login, install a newer APK — older builds mapped this deep link to `/login` by mistake.
-
-4. Sign in with a verifier account.
-5. Review pending items; tap **Sign out** when done.
+Staff sign-in deep link (`vertiege://verifier/login`) opens the staff login form; after sign-in you enter the main app like everyone else.
 
 ## Local development
 
 ```powershell
 flutter run
-# Then open route /verifier/login in IDE, or use the adb command above on a connected device.
 ```
 
 Ensure `.env` has `VERIFIER_ADMIN_EMAILS=your@email.com` if you rely on email allowlist without Supabase metadata.
-
-## Achievement vs profession
-
-- **Pending Review** on Identity → **Achievements** is `user_achievements` → use **Achievements** tab here.
-- Profession badge verification uses **Professions** tab (`verification_submissions`).
-
-Achievement proofs are **manual-only** (no AI auto-approval). In the **Achievements** tab:
-
-- **Proof gallery** — multiple images when the resident uploaded more than one.
-- **Approve** — optional congratulations message (stored for the resident).
-- **Reject** — reason code + optional note (mapped to friendly text for the resident).
 
 ## Grant another verifier
 

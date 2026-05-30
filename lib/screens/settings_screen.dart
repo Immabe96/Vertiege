@@ -11,6 +11,7 @@ import '../config/build_info.dart';
 import '../state/theme_provider.dart';
 import '../state/resident_provider.dart';
 import '../services/storage_service.dart';
+import '../services/admin_access_service.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
 import '../services/device_permission_service.dart';
@@ -909,6 +910,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             VSectionList(
               title: 'Account',
               children: [
+                if (AdminAccessService.isCurrentSessionVerifier())
+                  VSectionTile(
+                    icon: Icons.verified_user_outlined,
+                    label: 'Staff review',
+                    onTap: () => context.push('/verifier/review'),
+                  ),
                 VSectionTile(
                   icon: Icons.email_outlined,
                   label: 'Change Email',

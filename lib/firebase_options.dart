@@ -59,10 +59,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDlrYB-KZskQuktszLXHMZ5NGLpp2fJQIY',
-    appId: '1:92526224561:ios:81887c2e30ab2bdd7cae90',
+    appId: '1:92526224561:ios:29b2459028dca5757cae90',
     messagingSenderId: '92526224561',
     projectId: 'veritage',
     storageBucket: 'veritage.firebasestorage.app',
+    androidClientId: '92526224561-oq7m8j0fgqmbqadcluhvc1h6lqvq7709.apps.googleusercontent.com',
     iosBundleId: 'com.vertiege',
   );
+
 }

@@ -22,7 +22,12 @@ if [[ -z "${ANDROID_KEYSTORE_PASSWORD:-}" || -z "${ANDROID_KEY_PASSWORD:-}" ]]; 
   exit 0
 fi
 
-echo "$ANDROID_KEYSTORE_BASE64" | base64 -d >"$KEYSTORE"
+# GitHub secret paste may include newlines/spaces — strip before decode.
+CLEAN_B64="$(printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]')"
+if ! printf '%s' "$CLEAN_B64" | base64 -d >"$KEYSTORE" 2>/dev/null; then
+  echo "::error::ANDROID_KEYSTORE_BASE64 is not valid base64. Re-set with: base64 -i android/upload-keystore.jks | tr -d '\\n'"
+  exit 1
+fi
 cat >"$PROPS" <<EOF
 storePassword=$ANDROID_KEYSTORE_PASSWORD
 keyPassword=$ANDROID_KEY_PASSWORD

@@ -2,14 +2,14 @@
 // Source: pubspec.yaml version line.
 
 /// Semantic version (no build number).
-const String kAppVersionName = '1.1.0-beta.2';
+const String kAppVersionName = '1.1.0-beta.3';
 
 /// Android versionCode / iOS CFBundleVersion.
-const int kAppBuildNumber = 6;
+const int kAppBuildNumber = 7;
 
 /// Human-readable label for Settings and release manifests.
-const String kAppVersionLabel = '1.1.0-beta.2+6';
+const String kAppVersionLabel = '1.1.0-beta.3+7';
 
 /// Release APK filename segment: vertiege-{name}+{build}-arm64-release.apk
 String get kReleaseApkBasename =>
-    'vertiege-1.1.0-beta.2+6-arm64-release.apk';
+    'vertiege-1.1.0-beta.3+7-arm64-release.apk';

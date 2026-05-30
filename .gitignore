@@ -35,6 +35,7 @@ migrate_working_dir/
 .pub/
 /build/
 /releases/*.apk
+/releases/*.aab
 /coverage/
 node_modules/
 analyze_output.txt

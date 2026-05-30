@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,13 +7,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../services/admin_access_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/verifier_session.dart';
+import '../../services/invite_service.dart';
+import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 import '../../widgets/auth/auth_error_card.dart';
 
-/// Staff-only sign-in. Successful login lands on [VerificationReviewScreen] only.
+/// Staff sign-in (same Supabase account as the player app).
 class VerifierLoginScreen extends ConsumerStatefulWidget {
   const VerifierLoginScreen({super.key});
 
@@ -39,6 +42,18 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
         _passwordController.text.length >= 6;
   }
 
+  Future<void> _routeAfterSignIn() async {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null || !resident.gateCompleted) {
+      if (mounted) context.go('/onboarding');
+      return;
+    }
+
+    final invitePath = await InviteService.takePendingInvitePath();
+    if (!mounted) return;
+    context.go(invitePath ?? '/');
+  }
+
   Future<void> _handleLogin() async {
     if (!_isValid || _isLoading) return;
 
@@ -63,14 +78,35 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
         });
         return;
       }
+
+      await ref
+          .read(residentProvider.notifier)
+          .loadResident()
+          .timeout(const Duration(seconds: 12));
       if (!mounted) return;
-      VerifierSession.enter();
-      context.go('/verifier/review');
+
+      final residentState = ref.read(residentProvider);
+      if (residentState.loadError != null) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = residentState.loadError;
+        });
+        return;
+      }
+
+      await _routeAfterSignIn();
     } on AuthException catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
         _errorMessage = e.message;
+      });
+    } on TimeoutException {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage =
+            'Sign-in timed out. Check your connection and try again.';
       });
     } catch (e) {
       if (!mounted) return;
@@ -104,7 +140,7 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                   ),
                   const SizedBox(height: VSpacing.md),
                   Text(
-                    'Verifier sign-in',
+                    'Staff sign-in',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: VFontWeight.bold,
                     ),
@@ -112,7 +148,7 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                   ),
                   const SizedBox(height: VSpacing.xs),
                   Text(
-                    'Staff access for profession verification review only.',
+                    'Same account as the main app. After sign-in, open Settings → Staff review.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: VColors.onSurfaceVariant,
                     ),
@@ -128,7 +164,7 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
                     decoration: const InputDecoration(
-                      labelText: 'Admin email',
+                      labelText: 'Email',
                       border: OutlineInputBorder(),
                     ),
                     onSubmitted: (_) => _handleLogin(),
@@ -159,6 +195,11 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                     label: _isLoading ? 'Signing in…' : 'Sign in',
                     onPressed: _isValid && !_isLoading ? _handleLogin : null,
                     isLoading: _isLoading,
+                  ),
+                  const SizedBox(height: VSpacing.md),
+                  TextButton(
+                    onPressed: _isLoading ? null : () => context.go('/login'),
+                    child: const Text('Use player sign-in instead'),
                   ),
                 ],
               ),

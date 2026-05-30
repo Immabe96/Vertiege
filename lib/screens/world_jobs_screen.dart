@@ -17,7 +17,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_dialog.dart';
 import '../widgets/core/v_feedback.dart';
-import '../widgets/worlds/world_capability_hint.dart';
+import '../widgets/core/new_user_context_hint.dart';
 import '../ui/icons/v_icons.dart';
 
 class WorldJobsScreen extends ConsumerStatefulWidget {
@@ -344,7 +344,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WorldCapabilityHint(
+          NewUserContextHint(
             message:
                 'Roles respect world standing and tier. Apply when you qualify; council can review applicants.',
             icon: Icons.work_outline,

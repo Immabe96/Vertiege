@@ -14,9 +14,12 @@ Example: `vertiege-1.1.0-beta.2+6-arm64-release.apk`
 ## Build
 
 ```bash
-./scripts/build_release_apk.sh           # bump build +1, test, build, copy here
-./scripts/build_release_apk.sh --no-bump # keep pubspec build number
+./scripts/build_release_apk.sh              # bump build +1, test, build, copy here
+./scripts/build_release_apk.sh --no-bump    # keep pubspec build number
+./scripts/build_release_appbundle.sh        # Google Play closed testing (.aab)
 ```
+
+Closed beta (Play + TestFlight): **[docs/CLOSED_BETA.md](../docs/CLOSED_BETA.md)**
 
 APK binaries are gitignored (`/releases/*.apk`). Manifests are committed.
 

@@ -12,7 +12,7 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
-import '../widgets/worlds/world_capability_hint.dart';
+import '../widgets/core/new_user_context_hint.dart';
 
 class WorldTreasuryScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -218,7 +218,7 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WorldCapabilityHint(
+          NewUserContextHint(
             message: donateBlock ??
                 'Treasury unlocks at world prestige '
                 '${WorldCapabilityMatrix.minWorldPrestigeTreasury}. '

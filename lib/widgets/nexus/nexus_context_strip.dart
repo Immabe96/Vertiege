@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../services/contextual_help_prefs.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/progression_help_button.dart';
@@ -30,33 +31,46 @@ class NexusContextStrip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Your proof-first home base',
+            'Nexus',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: VFontWeight.semiBold,
               color: context.vOnSurface,
             ),
           ),
-          const SizedBox(height: VSpacing.xs),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  showJoinWorldsCta
-                      ? 'Join a world to unlock your feed and submit proof.'
-                      : 'Your worlds, quests, and progress — start here.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: context.vOnSurfaceVariant,
-                    height: 1.35,
+          FutureBuilder<bool>(
+            future: ContextualHelpPrefs.shouldShowContextualHelp(),
+            builder: (context, snapshot) {
+              if (snapshot.data != true) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: VSpacing.xs),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          showJoinWorldsCta
+                              ? 'Join a world to unlock your feed and submit proof.'
+                              : 'Your worlds, quests, and progress — start here.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: context.vOnSurfaceVariant,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                      ProgressionHelpButton(
+                        focus: ProgressionFocus.overview,
+                        tooltip: 'How XP, tier & rep work',
+                        iconSize: VIconSize.md,
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              ProgressionHelpButton(
-                focus: ProgressionFocus.overview,
-                tooltip: 'How XP, tier & rep work',
-                iconSize: VIconSize.md,
-              ),
-            ],
+                ],
+              );
+            },
           ),
           if (showJoinWorldsCta) ...[
             const SizedBox(height: VSpacing.sm),

@@ -10,7 +10,6 @@ import 'analytics_service.dart';
 import 'crash_reporter.dart';
 import 'secure_storage_service.dart';
 import 'supabase.dart';
-import 'verifier_session.dart';
 
 class AuthService {
   static SupabaseClient _requireClient() {
@@ -122,7 +121,6 @@ class AuthService {
   // ── Session utilities ────────────────────────────────────
 
   static Future<void> signOut({WidgetRef? ref}) async {
-    VerifierSession.exit();
     final client = maybeSupabase();
     if (client != null) {
       await client.auth.signOut();

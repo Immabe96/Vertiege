@@ -11,7 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/core/v_feedback.dart';
-import 'world_capability_hint.dart';
+import '../core/new_user_context_hint.dart';
 
 class CreateListingDialog extends ConsumerStatefulWidget {
   final String worldId;
@@ -169,7 +169,7 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
                   ],
                 ),
                 const SizedBox(height: VSpacing.md),
-                WorldCapabilityHint(
+                NewUserContextHint(
                   message: WorldCapabilityMatrix.createListingGateHint(),
                   icon: Icons.storefront_outlined,
                 ),

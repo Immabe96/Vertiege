@@ -2,11 +2,13 @@
 
 Social world app — join realms, chat in channels, post, earn prestige, and climb tiers. Built with Flutter, Supabase, and Firebase (FCM).
 
-**Version:** 1.1.0-beta.1
+**Version:** 1.1.0-beta.2+6 (see `pubspec.yaml`)
 
 ## Download
 
 Stable APKs: **[GitHub Releases](https://github.com/Immabe96/Vertiege/releases)** (`app-release.apk`).
+
+**Closed beta (Play + TestFlight):** **[docs/CLOSED_BETA.md](docs/CLOSED_BETA.md)** · tester copy: **[docs/beta/TESTER_GUIDE.md](docs/beta/TESTER_GUIDE.md)**
 
 ## How we develop
 
