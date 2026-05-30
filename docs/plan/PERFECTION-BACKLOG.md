@@ -68,11 +68,15 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ## Wave 4 — Security (Supabase)
 
-| Item | Status |
-|------|--------|
-| P0-3 anon RPC revoke | Open |
-| P1-8 storage listing policies | Open |
-| P1-9 leaked password protection | Open (Pro) |
+| Item | Status | Notes |
+|------|--------|-------|
+| P0-3 anon RPC revoke | Done | Verified empty on prod; sweeps in `20260528130000_*` |
+| Maintenance RPC → service_role only | Done | `20260530140000_wave4_security_hardening.sql` applied |
+| `award_rep_milestone_xp` auth.uid guard | Done | Same migration |
+| RLS `activity_xp_log` / `tier_perks` reads | Done | Self-read + public tier perks |
+| P1-8 storage listing policies | Done | `20260524120000_storage_listing_hardening.sql` |
+| P1-9 leaked password protection | Open | Supabase Pro dashboard only |
+| Security check script | Done | `scripts/check_supabase_security.sql` |
 
 ---
 
@@ -97,6 +101,6 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ## Next actions
 
-1. Wave 3: Forui hub screens (P2-1).
-2. Wave 4: Supabase migration draft for anon RPC revoke (P0-3).
-3. Wave 6: Device UAT sign-off.
+1. Wave 5: analyzer unused symbols, dead code, navigation tests.
+2. Wave 6: Device UAT sign-off (`docs/uat/WAVE-4-DEVICE-CHECKLIST.md`).
+3. Dashboard: enable leaked-password protection when on Supabase Pro.
