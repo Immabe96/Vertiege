@@ -6,6 +6,7 @@ import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import 'package:forui/forui.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/brand_assets.dart';
 import '../../ui/buttons/v_button.dart';
 
 class AuthCallbackScreen extends ConsumerStatefulWidget {
@@ -100,7 +101,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(VSpacing.xs),
                     child: Image.asset(
-                      'assets/images/splash-icon.png',
+                      brandMarkAsset(context),
                       fit: BoxFit.contain,
                       cacheWidth: 128,
                     ),

@@ -9,6 +9,7 @@ import '../../widgets/auth/auth_error_card.dart';
 import '../../widgets/auth/auth_fields.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/brand_assets.dart';
 import '../../ui/icons/v_icons.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
@@ -137,7 +138,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(VSpacing.xs),
                     child: Image.asset(
-                      'assets/images/splash-icon.png',
+                      brandMarkAsset(context),
                       fit: BoxFit.contain,
                       cacheWidth: 128,
                     ),

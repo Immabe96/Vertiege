@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../utils/brand_assets.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -135,7 +136,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Padding(
                     padding: const EdgeInsets.all(VSpacing.sm),
                     child: Image.asset(
-                      'assets/images/splash-icon.png',
+                      brandMarkAsset(context),
                       fit: BoxFit.contain,
                       cacheWidth: 180,
                     ),
