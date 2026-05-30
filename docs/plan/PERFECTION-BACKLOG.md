@@ -88,16 +88,18 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 | Create post Forui shell | Done | `FScaffold` + `FHeader.nested` |
 | `v_context_colors` consolidation | Open | Large refactor |
 | Test coverage for navigation edge cases | Open |
-| Raw `Scaffold` (thread, world detail) | Open |
+| Thread / channel / campfire Forui | Done | `FScaffold` + thread load errors |
+| Raw `Scaffold` (world detail, auth) | Open | `world_detail` nested shell intentional |
 
 ---
 
 ## Wave 6 — UAT & release
 
-| Item | Status |
-|------|--------|
-| [WAVE-4-DEVICE-CHECKLIST.md](../uat/WAVE-4-DEVICE-CHECKLIST.md) sign-off | Open |
-| Release APK smoke on emulator | Partial |
+| Item | Status | Notes |
+|------|--------|-------|
+| [WAVE-4-DEVICE-CHECKLIST.md](../uat/WAVE-4-DEVICE-CHECKLIST.md) | Open | Full world IA pass |
+| [PERFECTION-SMOKE-CHECKLIST.md](../uat/PERFECTION-SMOKE-CHECKLIST.md) | Added | Waves 0–5 regression smoke |
+| Release APK smoke on emulator | Open | Run after each wave batch |
 
 ---
 

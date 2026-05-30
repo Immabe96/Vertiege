@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/channel.dart';
@@ -16,6 +17,7 @@ import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
+import '../widgets/core/v_accessible.dart';
 import '../utils/chat_new_since_visit.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/new_since_visit_divider.dart';
@@ -187,46 +189,45 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final isAnnouncement = channel?.channelType == ChannelType.announcement;
     final canPostInChannel = !isAnnouncement || canPin;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
-            .withValues(alpha: 0.86),
-        elevation: 0,
-        leading: Semantics(
-          label: 'Back to world',
-          child: BackButton(
-            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+    return FScaffold(
+      header: FHeader.nested(
+        prefixes: [
+          VAccessibleHeaderAction(
+            label: 'Back to world',
+            icon: const Icon(FIcons.chevronLeft),
+            onPress: () {
+              if (context.canPop()) context.pop();
+            },
           ),
-        ),
+        ],
         title: Semantics(
           header: true,
           label: '${widget.channelName} channel, $activeMembers members',
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '# ${widget.channelName}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: VFontWeight.bold,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '# ${widget.channelName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              activeMembers == 1 ? '1 member' : '$activeMembers members',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: VFontWeight.regular,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+              Text(
+                activeMembers == 1 ? '1 member' : '$activeMembers members',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: VFontWeight.regular,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),
-      body: Column(
+      child: Column(
         children: [
           Expanded(
             child: isLoading

@@ -1,11 +1,14 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:livekit_client/livekit_client.dart';
 import '../state/resident_provider.dart';
 import '../state/voice_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../ui/icons/v_icons.dart';
+import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 
 class CampfireScreen extends ConsumerStatefulWidget {
@@ -50,11 +53,17 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+    return FScaffold(
+      header: FHeader.nested(
+        prefixes: [
+          VAccessibleHeaderAction(
+            label: 'Leave voice channel',
+            icon: const Icon(FIcons.chevronLeft),
+            onPress: () {
+              if (context.canPop()) context.pop();
+            },
+          ),
+        ],
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -76,7 +85,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
           ],
         ),
       ),
-      body: Column(
+      child: Column(
         children: [
           const SizedBox(height: VSpacing.xl),
           Expanded(

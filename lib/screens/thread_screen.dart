@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/message.dart';
 import '../state/chat_provider.dart';
@@ -13,7 +15,9 @@ import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
+import '../ui/icons/v_icons.dart';
 import '../widgets/core/empty_state.dart';
+import '../widgets/core/v_accessible.dart';
 import '../widgets/core/screen_loading.dart';
 import '../utils/date_format.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
@@ -113,19 +117,25 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     final resident = ref.watch(residentProvider).resident;
     final messages =
         ref.watch(chatProvider).channelMessages[widget.parentMessage.id] ?? [];
-    final isLoading = !ref
-        .watch(chatProvider)
-        .channelMessages
-        .containsKey(widget.parentMessage.id);
+    final threadId = widget.parentMessage.id;
+    final chatState = ref.watch(chatProvider);
+    final isLoading = !chatState.channelMessages.containsKey(threadId);
+    final messagesLoadError = chatState.messagesLoadErrorFor(threadId);
     final displayItems = buildChatDisplayItems(messages);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+    return FScaffold(
+      header: FHeader.nested(
+        prefixes: [
+          VAccessibleHeaderAction(
+            label: 'Back to channel',
+            icon: const Icon(FIcons.chevronLeft),
+            onPress: () {
+              if (context.canPop()) context.pop();
+            },
+          ),
+        ],
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -146,7 +156,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
           ],
         ),
       ),
-      body: Column(
+      child: Column(
         children: [
           _ParentMessageCard(
             message: widget.parentMessage,
@@ -155,6 +165,13 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
           Expanded(
             child: isLoading
                 ? const ScreenLoading.list()
+                : messagesLoadError != null && messages.isEmpty
+                ? AppErrorState(
+                    message: messagesLoadError,
+                    onRetry: () => ref
+                        .read(chatProvider.notifier)
+                        .loadThreadMessages(threadId),
+                  )
                 : messages.isEmpty
                     ? AppEmptyState(
                         title: 'No replies yet',

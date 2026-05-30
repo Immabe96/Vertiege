@@ -837,13 +837,33 @@ class ChatNotifier extends Notifier<ChatState> {
   // ── Threads ────────────────────────────────────────────
 
   Future<void> loadThreadMessages(String threadId) async {
-    final msgs = await ChatService.getThreadMessages(threadId);
-    state = state.copyWith(
-      channelMessages: {
-        ...state.channelMessages,
-        threadId: _toChannelMessages(msgs),
-      },
-    );
+    final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
+      ..remove(threadId);
+    state = state.copyWith(messagesLoadErrors: clearedErrors);
+    try {
+      final msgs = await ChatService.getThreadMessages(threadId).timeout(
+        const Duration(seconds: 10),
+      );
+      final errors = Map<String, String>.from(state.messagesLoadErrors)
+        ..remove(threadId);
+      state = state.copyWith(
+        channelMessages: {
+          ...state.channelMessages,
+          threadId: _toChannelMessages(msgs),
+        },
+        messagesLoadErrors: errors,
+      );
+    } catch (e) {
+      final errors = Map<String, String>.from(state.messagesLoadErrors)
+        ..[threadId] = userFacingLoadError(
+          e,
+          fallback: 'Could not load thread replies. Pull to refresh.',
+        );
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, threadId: const []},
+        messagesLoadErrors: errors,
+      );
+    }
   }
 
   Future<void> sendThreadReply({
