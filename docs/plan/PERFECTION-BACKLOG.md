@@ -82,11 +82,13 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ## Wave 5 — Code health
 
-| Item | Status |
-|------|--------|
-| P2-3 analyzer unused symbols | Open |
-| `v_context_colors` consolidation | Open |
+| Item | Status | Notes |
+|------|--------|-------|
+| P2-3 analyzer unused symbols | Done | Prior refactors; no current hits |
+| Create post Forui shell | Done | `FScaffold` + `FHeader.nested` |
+| `v_context_colors` consolidation | Open | Large refactor |
 | Test coverage for navigation edge cases | Open |
+| Raw `Scaffold` (thread, world detail) | Open |
 
 ---
 

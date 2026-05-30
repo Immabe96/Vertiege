@@ -191,18 +191,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
     );
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: (isDark ? VColors.surfaceDark : VColors.surface)
-            .withValues(alpha: 0.8),
-        leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+    return FScaffold(
+      header: FHeader.nested(
+        prefixes: [
+          FHeaderAction(
+            icon: Icon(
+              Icons.close,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+            onPress: () => context.go('/'),
           ),
-          onPressed: () => context.go('/'),
-        ),
+        ],
         title: Text(
           'Vertiege',
           style: TextStyle(
@@ -212,9 +213,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             color: VColors.tertiary,
           ),
         ),
-        actions: [
+        suffixes: [
           Padding(
-            padding: const EdgeInsets.only(right: VSpacing.md),
+            padding: const EdgeInsets.only(right: VSpacing.sm),
             child: VButton(
               label: 'PUBLISH',
               onPressed: worlds.isEmpty ? null : _publish,
@@ -222,7 +223,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           children: [
