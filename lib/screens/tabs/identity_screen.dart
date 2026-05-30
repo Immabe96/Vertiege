@@ -65,6 +65,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   bool _funnelDismissed = true;
   bool _funnelOpenedWorld = false;
   bool _funnelOpenedNexus = false;
+  bool _tierPerksExpanded = false;
 
   static const double _avatarRadius = 48;
 
@@ -332,6 +333,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           Container(
             padding: const EdgeInsets.all(VSpacing.lg),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Avatar with tier-colored glow
                 Container(
@@ -542,22 +544,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               focus: ProgressionFocus.repAndStanding,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              VSpacing.lg,
-              VSpacing.xs,
-              VSpacing.lg,
-              0,
-            ),
-            child: Text(
-              'Achievements and worlds you joined. Rep is earned inside each world.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
-          ),
           const SizedBox(height: VSpacing.sm),
 
           // ── Honour stats (achievements · worlds · rep) ──
@@ -617,28 +603,31 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     streakCount: resident.streakCount,
                     streakShields: resident.streakShields,
                   )
-                : Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(VSpacing.md),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.surfaceContainerDark
-                          : VColors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(VRadius.lg),
-                      border: Border.all(
-                        color: isDark
-                            ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                            : VColors.outlineVariant.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      'No active streak—complete daily quests to start one.',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                : Row(
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_outlined,
+                        size: VIconSize.md,
                         color: isDark
                             ? VColors.onSurfaceVariantDark
                             : VColors.onSurfaceVariant,
                       ),
-                    ),
+                      const SizedBox(width: VSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          'No active streak—start from daily quests.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push('/daily-quests'),
+                        child: const Text('Quests'),
+                      ),
+                    ],
                   ),
           ),
           const SizedBox(height: VSpacing.lg),
@@ -690,22 +679,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               focus: ProgressionFocus.xpAndTier,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              VSpacing.lg,
-              VSpacing.xs,
-              VSpacing.lg,
-              0,
-            ),
-            child: Text(
-              'Global rank from activity XP and verified achievements — separate from reputation in worlds.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
-          ),
           const SizedBox(height: VSpacing.sm),
 
           // ── Progress (tier bar + XP + collapsible perks) ──
@@ -725,6 +698,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
@@ -755,26 +729,40 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           : VColors.onSurfaceVariant,
                     ),
                   ),
-                  Theme(
-                    data: theme.copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      tilePadding: EdgeInsets.zero,
-                      childrenPadding: EdgeInsets.zero,
-                      title: Text(
-                        'Tier perks',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: VFontWeight.semiBold,
-                        ),
+                  InkWell(
+                    onTap: () =>
+                        setState(() => _tierPerksExpanded = !_tierPerksExpanded),
+                    borderRadius: BorderRadius.circular(VRadius.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Tier perks',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: VFontWeight.semiBold,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            _tierPerksExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                        ],
                       ),
-                      children: [
-                        _PerksCard(
-                          tier: tierValue,
-                          isDark: isDark,
-                          showHeader: false,
-                        ),
-                      ],
                     ),
                   ),
+                  if (_tierPerksExpanded)
+                    _PerksCard(
+                      tier: tierValue,
+                      isDark: isDark,
+                      showHeader: false,
+                    ),
                 ],
               ),
             ),
@@ -837,6 +825,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   ),
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -929,7 +918,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
 
           Padding(
             key: _exploreSectionKey,
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
             child: VSectionList(
               title: 'Social',
               children: [
@@ -950,7 +939,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           ),
           const SizedBox(height: VSpacing.md),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
             child: VSectionList(
               title: 'Explore',
               children: [
@@ -974,7 +963,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           ),
           const SizedBox(height: VSpacing.md),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
             child: VSectionList(
               title: 'Vault',
               children: [
@@ -996,7 +985,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           const SizedBox(height: VSpacing.sm),
 
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
             child: VSectionList(
               title: 'Account',
               children: [
@@ -1115,61 +1104,63 @@ class _PerksCard extends ConsumerWidget {
       );
     }
 
-    final perksBody = Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(VRadius.lg),
-              border: Border.all(
-                color: isDark
-                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                    : VColors.outlineVariant.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _tile(
-                  Icons.trending_up,
-                  'XP Multiplier',
-                  'x${multiplier.toStringAsFixed(2)}',
-                ),
-                _divider(),
-                _tile(Icons.monetization_on, 'Daily Coin Bonus', '+$coinBonus'),
-                _divider(),
-                _tile(
-                  Icons.emoji_emotions,
-                  'Custom Reactions',
-                  '$reactionSlots slots',
-                ),
-                _divider(),
-                _tile(
-                  Icons.push_pin,
-                  'Post Pins',
-                  pinLimit > 0 ? '$pinLimit available' : 'Locked',
-                ),
-                _divider(),
-                _tile(Icons.language, 'World Creation', '$worldLimit worlds'),
-                _divider(),
-                _tile(
-                  Icons.local_bar,
-                  'Lounge Access',
-                  hasLounge ? 'Unlocked' : 'Locked',
-                ),
-                _divider(),
-                _tile(
-                  Icons.how_to_vote,
-                  'Governance Vote',
-                  hasVote ? 'Unlocked' : 'Locked',
-                ),
-              ],
-            ),
-          );
+    final perksTiles = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _tile(
+          Icons.trending_up,
+          'XP Multiplier',
+          'x${multiplier.toStringAsFixed(2)}',
+        ),
+        _divider(),
+        _tile(Icons.monetization_on, 'Daily Coin Bonus', '+$coinBonus'),
+        _divider(),
+        _tile(
+          Icons.emoji_emotions,
+          'Custom Reactions',
+          '$reactionSlots slots',
+        ),
+        _divider(),
+        _tile(
+          Icons.push_pin,
+          'Post Pins',
+          pinLimit > 0 ? '$pinLimit available' : 'Locked',
+        ),
+        _divider(),
+        _tile(Icons.language, 'World Creation', '$worldLimit worlds'),
+        _divider(),
+        _tile(
+          Icons.local_bar,
+          'Lounge Access',
+          hasLounge ? 'Unlocked' : 'Locked',
+        ),
+        _divider(),
+        _tile(
+          Icons.how_to_vote,
+          'Governance Vote',
+          hasVote ? 'Unlocked' : 'Locked',
+        ),
+      ],
+    );
 
     if (!showHeader) {
-      return perksBody;
+      return perksTiles;
     }
+
+    final perksBody = Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        border: Border.all(
+          color: isDark
+              ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+              : VColors.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: perksTiles,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),

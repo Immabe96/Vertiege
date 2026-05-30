@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 import '../../config/progression_glossary.dart';
 import '../../theme/v_tokens.dart';
@@ -20,7 +21,7 @@ class ProgressionHelpButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.help_outline, size: iconSize),
+      icon: Icon(FIcons.info, size: iconSize),
       tooltip: tooltip ?? ProgressionGlossary.sheetTitle,
       onPressed: () => showProgressionHelp(context, focus: focus),
     );
@@ -44,7 +45,7 @@ class ProgressionHelpLink extends StatelessWidget {
       alignment: Alignment.center,
       child: TextButton.icon(
         onPressed: () => showProgressionHelp(context, focus: focus),
-        icon: const Icon(Icons.help_outline, size: VIconSize.sm),
+        icon: const Icon(FIcons.info, size: VIconSize.sm),
         label: Text(label),
       ),
     );

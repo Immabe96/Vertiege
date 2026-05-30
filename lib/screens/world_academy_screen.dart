@@ -88,7 +88,7 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 TextField(
                   controller: descController,
                   decoration: const InputDecoration(
@@ -97,7 +97,7 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                   ),
                   maxLines: 2,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 FSelect<String>.rich(
                   format: (value) => value == 'individual' ? 'Individual' : 'Collective',
                   control: FSelectControl.lifted(
@@ -111,7 +111,7 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                     FSelectItem<String>(value: 'collective', title: Text('Collective')),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 TextField(
                   controller: targetController,
                   decoration: const InputDecoration(
@@ -120,7 +120,7 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                   ),
                   keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 Row(
                   children: [
                     Expanded(

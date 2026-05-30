@@ -543,6 +543,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
 
   Future<void> _accept() async {
     final invite = await InviteService.validateInvite(widget.code);
+    if (!mounted) return;
     if (invite == null || !invite.isValid) {
       setState(() {
         _loading = false;
@@ -552,6 +553,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     }
 
     final resident = ref.read(residentProvider).resident;
+    if (!mounted) return;
     if (resident == null) {
       setState(() {
         _loading = false;
@@ -561,9 +563,10 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     }
 
     await InviteService.acceptInvite(invite.id, invite.worldId, resident.id);
+    if (!mounted) return;
     await ref.read(residentProvider.notifier).joinWorld(invite.worldId);
-
-    if (mounted) context.go(exploreWorldPath(invite.worldId));
+    if (!mounted) return;
+    context.go(exploreWorldPath(invite.worldId));
   }
 
   @override

@@ -741,7 +741,10 @@ class _MessageBubbleState extends State<_MessageBubble>
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: VSpacing.md,
+        vertical: VSpacing.md + VSpacing.xxs,
+      ),
       decoration: BoxDecoration(
         color: VColors.primary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(VRadius.lg),
@@ -785,7 +788,10 @@ class _MessageBubbleState extends State<_MessageBubble>
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+        horizontal: VSpacing.md,
+        vertical: VSpacing.md + VSpacing.xxs,
+      ),
           decoration: const BoxDecoration(
             color: VColors.primary,
             borderRadius: _sentRadius,
@@ -886,7 +892,10 @@ class _MessageBubbleState extends State<_MessageBubble>
           const SizedBox(height: 4),
         ],
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+        horizontal: VSpacing.md,
+        vertical: VSpacing.md + VSpacing.xxs,
+      ),
           decoration: BoxDecoration(
             color: isDark
                 ? VColors.glassBackgroundDark

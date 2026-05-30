@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/progression_help_button.dart';
+import '../../config/progression_glossary.dart';
 
 /// Achievement-first context line at the top of Nexus.
 class NexusContextStrip extends StatelessWidget {
@@ -36,21 +37,26 @@ class NexusContextStrip extends StatelessWidget {
             ),
           ),
           const SizedBox(height: VSpacing.xs),
-          Text(
-            showJoinWorldsCta
-                ? 'Join a world to unlock your feed, submit achievements, and earn reputation.'
-                : 'Posts from your worlds, daily quests, and progress — start here each session.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: context.vOnSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: ProgressionHelpLink(
-              label: 'How XP, tier & rep work',
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  showJoinWorldsCta
+                      ? 'Join a world to unlock your feed and submit proof.'
+                      : 'Your worlds, quests, and progress — start here.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: context.vOnSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              ProgressionHelpButton(
+                focus: ProgressionFocus.overview,
+                tooltip: 'How XP, tier & rep work',
+                iconSize: VIconSize.md,
+              ),
+            ],
           ),
           if (showJoinWorldsCta) ...[
             const SizedBox(height: VSpacing.sm),

@@ -89,7 +89,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 TextField(
                   controller: descController,
                   decoration: const InputDecoration(
@@ -98,7 +98,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   ),
                   maxLines: 2,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 FSelect<String>.rich(
                   format: (value) => value == 'individual' ? 'Individual' : 'Collective',
                   control: FSelectControl.lifted(
@@ -112,7 +112,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                     FSelectItem<String>(value: 'collective', title: Text('Collective')),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 TextField(
                   controller: targetController,
                   decoration: const InputDecoration(
@@ -121,7 +121,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   ),
                   keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: VSpacing.lg),
                 Row(
                   children: [
                     Expanded(

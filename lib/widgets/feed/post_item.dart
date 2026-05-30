@@ -21,6 +21,7 @@ import '../core/tier_badge.dart';
 import '../shared/tier_icon.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
+import '../core/tab_aware_sheet.dart';
 import 'comment_sheet.dart';
 import 'post_action_bar.dart';
 import 'reaction_bar.dart';
@@ -508,7 +509,7 @@ class PostItem extends ConsumerWidget {
   void _onReport(BuildContext context, WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
-    showModalBottomSheet(
+    showTabAwareModalBottomSheet(
       context: context,
       builder: (ctx) => _ReportSheet(
         onSubmit: (reason, details) {
@@ -527,11 +528,11 @@ class PostItem extends ConsumerWidget {
   }
 
   void _showComments(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showPostCommentSheet(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => CommentSheet(
+      sheet: CommentSheet(
         comments: post.comments,
+        postAuthorId: post.residentId,
         onSubmit: (content) {
           final resident = ref.read(residentProvider).resident;
           if (resident == null) return;

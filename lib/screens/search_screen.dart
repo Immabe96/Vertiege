@@ -20,6 +20,7 @@ import '../ui/icons/v_icons.dart';
 import '../widgets/core/shimmer.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/worlds/world_icon.dart';
+import '../widgets/shared/tier_icon.dart';
 
 const _recentSearchesKey = '@recent_searches';
 const _maxRecentSearches = 5;
@@ -643,26 +644,6 @@ class _PersonTile extends StatelessWidget {
 
   const _PersonTile({required this.entry});
 
-  IconData _tierIcon(ResidentTier tier) {
-    return switch (tier) {
-      ResidentTier.apex => Icons.diamond,
-      ResidentTier.oldMoney => Icons.workspace_premium,
-      ResidentTier.elite => Icons.military_tech,
-      ResidentTier.highRollers => Icons.stars,
-      ResidentTier.hustlers => Icons.person,
-    };
-  }
-
-  Color _tierColor(ResidentTier tier) {
-    return switch (tier) {
-      ResidentTier.apex => VColors.tertiary,
-      ResidentTier.oldMoney => VColors.secondary,
-      ResidentTier.elite => VColors.primary,
-      ResidentTier.highRollers => VColors.warning,
-      ResidentTier.hustlers => VColors.outline,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -702,11 +683,7 @@ class _PersonTile extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: VSpacing.xs),
-                  Icon(
-                    _tierIcon(resident.tier),
-                    size: 16,
-                    color: _tierColor(resident.tier),
-                  ),
+                  TierIcon(tier: resident.tier.value, size: 18),
                 ],
               ),
               subtitle: resident.profession != null

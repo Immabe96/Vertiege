@@ -1,5 +1,7 @@
 ﻿import 'package:flutter/material.dart';
+
 import '../../models/post.dart';
+import '../core/tab_aware_sheet.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/date_format.dart';
@@ -10,6 +12,19 @@ import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/v_feedback.dart';
 
 enum CommentSort { best, newest, oldest }
+
+/// Opens comments above tab-shell chrome (compose FAB) and restores it on close.
+Future<void> showPostCommentSheet({
+  required BuildContext context,
+  required CommentSheet sheet,
+}) {
+  return showTabAwareModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => sheet,
+  );
+}
 
 class CommentSheet extends StatefulWidget {
   final List<Comment> comments;
@@ -103,6 +118,20 @@ class _CommentSheetState extends State<CommentSheet> {
       result.add(child);
       _attachChildren(child, children, sortList, result);
     }
+  }
+
+  void _submitComment() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    final content = _replyToId != null
+        ? '@$_replyToName $text'
+        : text;
+    widget.onSubmit(content);
+    _controller.clear();
+    setState(() {
+      _replyToId = null;
+      _replyToName = null;
+    });
   }
 
   int _getDepth(String commentId) {
@@ -244,12 +273,24 @@ class _CommentSheetState extends State<CommentSheet> {
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.all(VSpacing.sm),
+                padding: EdgeInsets.fromLTRB(
+                  VSpacing.sm,
+                  VSpacing.sm,
+                  VSpacing.sm,
+                  MediaQuery.viewInsetsOf(context).bottom +
+                      MediaQuery.paddingOf(context).bottom +
+                      VSpacing.xs,
+                ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
                       child: TextField(
                         controller: _controller,
+                        minLines: 1,
+                        maxLines: 4,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _submitComment(),
                         decoration: InputDecoration(
                           hintText: _replyToId != null
                               ? 'Reply to $_replyToName...'
@@ -263,24 +304,18 @@ class _CommentSheetState extends State<CommentSheet> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: VSpacing.xs),
                     IconButton(
                       icon: const Icon(VIcons.send),
-                      onPressed: () {
-                        if (_controller.text.trim().isNotEmpty) {
-                          // If replying, prepend parent ID reference
-                          final content = _replyToId != null
-                              ? '@$_replyToName ${_controller.text.trim()}'
-                              : _controller.text.trim();
-                          widget.onSubmit(content);
-                          _controller.clear();
-                          setState(() {
-                            _replyToId = null;
-                            _replyToName = null;
-                          });
-                        }
-                      },
+                      onPressed: _submitComment,
                       tooltip: 'Send comment',
                       color: VColors.primary,
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(
+                          VTouchTarget.iconButton,
+                          VTouchTarget.iconButton,
+                        ),
+                      ),
                     ),
                   ],
                 ),

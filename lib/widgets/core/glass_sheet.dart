@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+
+import '../../state/tab_shell_overlay_provider.dart';
 
 /// A bottom sheet wrapper using forui's FSheet.
 class GlassSheet extends StatelessWidget {
@@ -24,6 +27,9 @@ void showAppSheet(
   double minSize = 0.25,
   double maxSize = 0.95,
 }) {
+  final container = ProviderScope.containerOf(context);
+  final overlay = container.read(tabShellOverlayProvider.notifier);
+  overlay.acquire();
   showFSheet(
     context: context,
     side: FLayout.btt,
@@ -31,7 +37,7 @@ void showAppSheet(
     draggable: true,
     barrierDismissible: true,
     builder: (_) => SingleChildScrollView(child: child),
-  );
+  ).whenComplete(overlay.release);
 }
 
 @Deprecated('Use showAppSheet')

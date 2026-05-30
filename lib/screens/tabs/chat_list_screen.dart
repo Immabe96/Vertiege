@@ -512,12 +512,27 @@ class _ChannelTile extends StatelessWidget {
     required this.unreadCount,
   });
 
-  IconData get _icon => switch (channel.channelType) {
-        ChannelType.announcement => Icons.campaign,
-        ChannelType.feed => Icons.dynamic_feed,
-        ChannelType.text => Icons.tag,
-        ChannelType.voice => Icons.volume_up,
-      };
+  IconData get _icon {
+    final name = channel.name.toLowerCase();
+    if (name == 'info' || name.contains('about')) {
+      return Icons.info_outline;
+    }
+    if (name == 'rules' || name.contains('rule')) {
+      return Icons.gavel_outlined;
+    }
+    if (name == 'roles' || name.contains('role')) {
+      return Icons.badge_outlined;
+    }
+    if (name == 'general' || name == 'chat') {
+      return Icons.tag;
+    }
+    return switch (channel.channelType) {
+      ChannelType.announcement => Icons.campaign_outlined,
+      ChannelType.feed => Icons.dynamic_feed_outlined,
+      ChannelType.text => Icons.tag,
+      ChannelType.voice => Icons.volume_up_outlined,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -566,7 +581,7 @@ class _ChannelTile extends StatelessWidget {
                     if (channel.description != null && channel.description!.isNotEmpty)
                       Text(
                         channel.description!,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: isDark
@@ -738,7 +753,7 @@ class _WorldPanelHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$residentCount Residents · Lv.$prestige',
+                  '${residentCount == 1 ? '1 Resident' : '$residentCount Residents'} · Lv.$prestige',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: isDark
                         ? VColors.onSurfaceVariantDark

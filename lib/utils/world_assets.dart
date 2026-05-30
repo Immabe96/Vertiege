@@ -47,16 +47,11 @@ class WorldAssets {
     'tech-sprawl': 'assets/generated/world-tech-sprawl.jpg',
   };
 
+  /// Alpha: single bundled default avatar; [avatarForSeed] maps all seeds to it.
+  static const _defaultAvatarPath = 'assets/generated/avatar-1.png';
+
   static const _avatarPaths = <String>[
-    'assets/generated/avatar-1.png',
-    'assets/generated/avatar-2.png',
-    'assets/generated/avatar-3.png',
-    'assets/generated/avatar-4.png',
-    'assets/generated/avatar-5.png',
-    'assets/generated/avatar-6.png',
-    'assets/generated/avatar-marcus.png',
-    'assets/generated/avatar-elena.png',
-    'assets/generated/avatar-alistair.png',
+    _defaultAvatarPath,
   ];
 
   static const _badgeImagePaths = <String, String>{

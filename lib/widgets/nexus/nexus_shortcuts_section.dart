@@ -105,9 +105,10 @@ class NexusShortcutsSection extends StatelessWidget {
                   size: BentoSize.small,
                   onTap: () => context.push('/challenges'),
                 ),
-                const BentoCard(
-                  child: LeagueCard(),
+                BentoCard(
+                  child: const LeagueCard(),
                   size: BentoSize.small,
+                  onTap: () => context.push(leaguesPath()),
                 ),
                 const BentoCard(
                   child: TrendingCard(),
@@ -187,7 +188,7 @@ class _CompactShortcut extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(VRadius.lg),
           child: SizedBox(
-            width: 88,
+            width: 96,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: VSpacing.sm,

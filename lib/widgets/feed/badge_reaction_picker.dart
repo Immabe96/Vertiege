@@ -7,6 +7,7 @@ import '../../state/achievement_provider.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
+import '../core/tab_aware_sheet.dart';
 
 /// Reaction key stored on posts for earned-badge reactions.
 String badgeReactionKey(String achievementId) => 'badge:$achievementId';
@@ -26,7 +27,7 @@ class BadgeReactionPickerSheet extends ConsumerWidget {
     BuildContext context, {
     required ValueChanged<String> reactionKey,
   }) {
-    return showModalBottomSheet<void>(
+    return showTabAwareModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

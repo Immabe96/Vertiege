@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../state/notification_provider.dart';
+import '../../state/tab_shell_overlay_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/voice_provider.dart';
 import '../../theme/v_colors.dart';
@@ -83,7 +84,9 @@ class _TabLayoutState extends ConsumerState<TabLayout>
         .where((n) => !n.read)
         .length;
     final index = widget.navigationShell.currentIndex;
-    final fabConfig = _fabForTab(index, ref);
+    final overlayBlocksFab = ref.watch(tabShellOverlayProvider) > 0;
+    final fabConfig =
+        overlayBlocksFab ? null : _fabForTab(index, ref);
 
     if (index != _previousIndex) {
       _previousIndex = index;

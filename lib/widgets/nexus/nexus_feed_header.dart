@@ -60,7 +60,7 @@ class NexusFeedHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   FeedTabChip(
-                    label: 'Announcements',
+                    label: 'News',
                     selected: announcementsSelected,
                     icon: Icons.campaign,
                     onTap: onAnnouncementsTap,

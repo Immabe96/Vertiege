@@ -6,6 +6,7 @@ import '../../forui/v_tab_page.dart';
 import '../../state/resident_provider.dart';
 import '../../services/world_service.dart';
 import '../../state/post_provider.dart';
+import '../../widgets/core/tab_aware_sheet.dart';
 import '../../state/notification_provider.dart';
 import '../../models/post.dart';
 import '../../theme/v_colors.dart';
@@ -107,7 +108,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   }
 
   void _showNotifications() {
-    showModalBottomSheet(
+    showTabAwareModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -323,6 +324,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           childCount: posts.length,
                         ),
                       ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: VSpacing.xxl),
+                    ),
                   ],
                 ),
 

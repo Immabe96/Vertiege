@@ -297,6 +297,10 @@ class _PrestigeStarsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prestigeTitle = stars == 1 ? 'Apex I' : 'Apex $stars';
+    const visibleStars = 5;
+    final showStars = stars > visibleStars ? visibleStars : stars;
+    final overflow = stars > visibleStars ? stars - visibleStars : 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -325,18 +329,34 @@ class _PrestigeStarsSection extends StatelessWidget {
           child: Row(
             children: [
               ...List.generate(
-                stars,
+                showStars,
                 (i) => Padding(
-                  padding: EdgeInsets.only(right: i < stars - 1 ? 6 : 0),
-                  child: const Icon(VIcons.sparkles, color: VColors.tertiary, size: 28),
+                  padding: EdgeInsets.only(right: i < showStars - 1 ? 4 : 0),
+                  child: const Icon(
+                    VIcons.sparkles,
+                    color: VColors.tertiary,
+                    size: 24,
+                  ),
                 ),
               ),
+              if (overflow > 0) ...[
+                const SizedBox(width: VSpacing.xs),
+                Text(
+                  '+$overflow',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: VColors.tertiary,
+                    fontWeight: VFontWeight.bold,
+                  ),
+                ),
+              ],
               const SizedBox(width: VSpacing.md),
-              Text(
-                prestigeTitle,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                  color: VColors.tertiary,
+              Expanded(
+                child: Text(
+                  prestigeTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: VFontWeight.bold,
+                    color: VColors.tertiary,
+                  ),
                 ),
               ),
             ],

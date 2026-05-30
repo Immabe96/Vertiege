@@ -43,30 +43,34 @@ class PostActionBar extends ConsumerWidget {
       padding: const EdgeInsets.only(top: VSpacing.xs),
       child: Row(
         children: [
-          _ActionButton(
+          _CompactAction(
             icon: activeReactions.contains('heart')
                 ? Icons.favorite
                 : Icons.favorite_border,
-            label: count('heart') > 0 ? '${count('heart')}' : 'Like',
+            tooltip: count('heart') > 0 ? 'Like (${count('heart')})' : 'Like',
             active: activeReactions.contains('heart'),
             color: VColors.error,
             onTap: canInteract ? () => _toggle(ref, 'heart') : null,
+            badge: count('heart') > 0 ? count('heart') : null,
           ),
-          _ActionButton(
+          _CompactAction(
             icon: Icons.arrow_upward,
-            label: count('upvote') > 0 ? '${count('upvote')}' : 'Up',
+            tooltip: count('upvote') > 0 ? 'Upvote (${count('upvote')})' : 'Upvote',
             active: activeReactions.contains('upvote'),
             onTap: canInteract ? () => _toggle(ref, 'upvote') : null,
+            badge: count('upvote') > 0 ? count('upvote') : null,
           ),
-          _ActionButton(
+          _CompactAction(
             icon: Icons.arrow_downward,
-            label: count('downvote') > 0 ? '${count('downvote')}' : 'Down',
+            tooltip:
+                count('downvote') > 0 ? 'Downvote (${count('downvote')})' : 'Downvote',
             active: activeReactions.contains('downvote'),
             onTap: canInteract ? () => _toggle(ref, 'downvote') : null,
+            badge: count('downvote') > 0 ? count('downvote') : null,
           ),
           if (score != 0)
             Padding(
-              padding: const EdgeInsets.only(right: VSpacing.xs),
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.xxs),
               child: Text(
                 '$score',
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -75,16 +79,17 @@ class PostActionBar extends ConsumerWidget {
                 ),
               ),
             ),
-          _ActionButton(
+          _CompactAction(
             icon: Icons.chat_bubble_outline,
-            label: post.comments.isEmpty
+            tooltip: post.comments.isEmpty
                 ? 'Comment'
-                : '${post.comments.length}',
+                : 'Comments (${post.comments.length})',
             onTap: onComment,
+            badge: post.comments.isNotEmpty ? post.comments.length : null,
           ),
-          _ActionButton(
+          _CompactAction(
             icon: Icons.repeat,
-            label: 'Repost',
+            tooltip: 'Repost',
             onTap: canInteract
                 ? () {
                     Haptics.light();
@@ -92,21 +97,23 @@ class PostActionBar extends ConsumerWidget {
                   }
                 : null,
           ),
-          _ActionButton(
+          _CompactAction(
             icon: Icons.share_outlined,
-            label: 'Share',
+            tooltip: 'Share',
             onTap: () {
               final text = post.content.trim();
-              Share.share(
-                text.isEmpty
-                    ? 'Check out this post on Vertiege'
-                    : '$text\n\n— via Vertiege',
+              SharePlus.instance.share(
+                ShareParams(
+                  text: text.isEmpty
+                      ? 'Check out this post on Vertiege'
+                      : '$text\n\n— via Vertiege',
+                ),
               );
             },
           ),
-          _ActionButton(
+          _CompactAction(
             icon: Icons.workspace_premium_outlined,
-            label: 'Badge',
+            tooltip: 'Badge reaction',
             onTap: canInteract
                 ? () => BadgeReactionPickerSheet.show(
                       context,
@@ -120,19 +127,21 @@ class PostActionBar extends ConsumerWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class _CompactAction extends StatelessWidget {
   final IconData icon;
-  final String label;
+  final String tooltip;
   final VoidCallback? onTap;
   final bool active;
   final Color? color;
+  final int? badge;
 
-  const _ActionButton({
+  const _CompactAction({
     required this.icon,
-    required this.label,
+    required this.tooltip,
     this.onTap,
     this.active = false,
     this.color,
+    this.badge,
   });
 
   @override
@@ -142,27 +151,45 @@ class _ActionButton extends StatelessWidget {
         ? (color ?? theme.colorScheme.primary)
         : theme.colorScheme.onSurfaceVariant;
 
-    return Expanded(
+    return Tooltip(
+      message: tooltip,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(VRadius.sm),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        child: SizedBox(
+          width: VTouchTarget.iconButton,
+          height: VTouchTarget.iconButton,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
             children: [
-              Icon(icon, size: 18, color: iconColor),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: 10,
-                  color: iconColor,
-                  fontWeight: active ? VFontWeight.semiBold : VFontWeight.regular,
+              Icon(icon, size: VIconSize.md, color: iconColor),
+              if (badge != null)
+                Positioned(
+                  right: 2,
+                  top: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: Text(
+                      badge! > 99 ? '99+' : '$badge',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: 9,
+                        fontWeight: VFontWeight.bold,
+                        color: iconColor,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         ),

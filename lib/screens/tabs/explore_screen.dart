@@ -16,6 +16,7 @@ import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/explore/shimmer_world_card.dart';
+import '../../widgets/worlds/world_icon.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -158,9 +159,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   VSpacing.sm,
                 ),
                 child: Text(
-                  'Join a world to submit achievement proof, earn reputation, '
-                  'and unlock channels. Wealth and profession worlds match your tier; '
-                  'create a community or shop when you\'re ready.',
+                  'Join a world to submit proof, earn rep, and unlock channels.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDark
                         ? VColors.onSurfaceVariantDark
@@ -512,18 +511,12 @@ class _WorldListCard extends StatelessWidget {
                 padding: const EdgeInsets.all(VSpacing.md),
                 child: Row(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: typeColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(VRadius.md),
-                      ),
-                      child: Icon(
-                        typeIcon,
-                        color: typeColor,
-                        size: VIconSize.md,
-                      ),
+                    WorldIcon(
+                      worldId: world.assetKey.isNotEmpty
+                          ? world.assetKey
+                          : world.id,
+                      size: 40,
+                      useGlassContainer: false,
                     ),
                     const SizedBox(width: VSpacing.md),
                     Expanded(

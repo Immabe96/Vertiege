@@ -39,6 +39,7 @@ IconData achievementIconData(String iconName) {
     'surfing' => Icons.surfing,
     'mic' => Icons.mic_none,
     'construction' => Icons.construction,
+    'home_repair_service' => Icons.handyman_outlined,
     'flight' => Icons.flight,
     'flight_takeoff' => Icons.flight_takeoff,
     'public' => Icons.public,

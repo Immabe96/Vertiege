@@ -7,6 +7,7 @@ import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
+import '../../widgets/core/tab_aware_sheet.dart';
 import '../../widgets/core/v_feedback.dart';
 import 'badge_reaction_picker.dart';
 
@@ -138,7 +139,7 @@ class _ReactionBarState extends State<ReactionBar> {
   }
 
   void _showLongPressMenu() {
-    showModalBottomSheet(
+    showTabAwareModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) {

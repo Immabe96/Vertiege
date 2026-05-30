@@ -336,7 +336,7 @@ const List<Achievement> _achievementCatalogRaw = [
     title: 'Builder',
     description: 'Built something with your hands',
     xpValue: 200,
-    icon: 'construction',
+    icon: 'home_repair_service',
   ),
 
   // Travel (6)
