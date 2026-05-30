@@ -1,8 +1,13 @@
 ﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../forui/v_hub_page.dart';
+import '../utils/provider_errors.dart';
+import '../widgets/core/empty_state.dart';
+import '../widgets/core/sync_warning_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../router/world_navigation.dart';
 import '../models/world.dart';
@@ -43,6 +48,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<String> _recentSearches = [];
   List<_ResidentEntry> _allResidents = [];
   bool _loadingResidents = true;
+  String? _residentsLoadError;
 
   @override
   void initState() {
@@ -118,6 +124,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Future<void> _loadAllResidents() async {
+    setState(() {
+      _loadingResidents = true;
+      _residentsLoadError = null;
+    });
     try {
       final worldState = ref.read(worldProvider);
       final worldIds = worldState.worlds.keys.toList();
@@ -151,10 +161,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         setState(() {
           _allResidents = allMembers.values.toList();
           _loadingResidents = false;
+          if (allMembers.isEmpty && worldIds.isNotEmpty) {
+            _residentsLoadError =
+                'Could not load residents from worlds. Try again.';
+          }
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loadingResidents = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loadingResidents = false;
+          _residentsLoadError = userFacingLoadError(
+            e,
+            fallback: 'Could not load residents. Pull to refresh.',
+          );
+        });
+      }
     }
   }
 
@@ -244,67 +266,64 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ? _search(_query)
         : null;
 
-    return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          autofocus: true,
-          style: TextStyle(
-            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-          ),
-          onChanged: (v) {
-            setState(() => _query = v);
-            if (v.isEmpty) {
-              setState(() {});
-            }
-          },
-          onSubmitted: _onSubmitted,
-          decoration: InputDecoration(
-            hintText: 'Search worlds, people, posts...',
-            hintStyle: TextStyle(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                  : VColors.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-            border: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
-              ),
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
-              ),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: VColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainerLow,
-          ),
+    return VHubPage(
+      title: 'Search',
+      showBack: true,
+      titleWidget: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        autofocus: true,
+        style: TextStyle(
+          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
         ),
-        actions: [
-          if (_controller.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(VIcons.x),
-              onPressed: () {
-                _controller.clear();
-                setState(() => _query = '');
-              },
+        onChanged: (v) {
+          setState(() => _query = v);
+          if (v.isEmpty) {
+            setState(() {});
+          }
+        },
+        onSubmitted: _onSubmitted,
+        decoration: InputDecoration(
+          hintText: 'Search worlds, people, posts...',
+          hintStyle: TextStyle(
+            color: isDark
+                ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
+                : VColors.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+      headerActions: [
+        if (_controller.text.isNotEmpty)
+          FHeaderAction(
+            icon: const Icon(VIcons.x),
+            onPress: () {
+              _controller.clear();
+              setState(() => _query = '');
+            },
+          ),
+      ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_residentsLoadError != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.md,
+                VSpacing.sm,
+                VSpacing.md,
+                0,
+              ),
+              child: SyncWarningBanner(
+                message: _residentsLoadError!,
+                onRetry: _loadAllResidents,
+              ),
             ),
+          Expanded(child: _buildBody(theme, results, showRecent, isDark)),
         ],
       ),
-      body: _buildBody(theme, results, showRecent, isDark),
     );
   }
 

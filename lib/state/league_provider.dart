@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/league_service.dart';
+import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
 
 class LeagueParticipant {
@@ -145,7 +146,13 @@ class LeagueNotifier extends Notifier<LeagueState> {
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: userFacingLoadError(
+          e,
+          fallback: 'Could not load league data. Pull to refresh.',
+        ),
+      );
     }
   }
 

@@ -53,11 +53,16 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ## Wave 3 — UI/UX consistency
 
-| Item | Status |
-|------|--------|
-| U01–U12 tracker items | Done (2026-05-24 doc) |
-| Forui migration on hub screens (P2-1) | Open |
-| Remaining `showModalBottomSheet` on full-screen routes (no tab FAB) | OK as-is |
+| Item | Status | Notes |
+|------|--------|-------|
+| U01–U12 tracker items | Done | 2026-05-24 doc |
+| Hub screens on `VHubPage` | Done | League, challenges, quests, season, profile |
+| `VHubPage.titleWidget` | Done | Inline search header |
+| Search → Forui shell | Done | `search_screen.dart` |
+| Challenges load errors | Done | `challenge_provider` + retry |
+| League friendly errors | Done | `userFacingLoadError` |
+| Daily quests empty/refresh | Done | `AppEmptyState` + header refresh |
+| Remaining raw `Scaffold` (auth, world detail, threads) | Open | P2-1 remainder |
 
 ---
 

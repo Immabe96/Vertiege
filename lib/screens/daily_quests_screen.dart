@@ -6,28 +6,44 @@ import '../forui/v_hub_page.dart';
 import '../state/quest_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../widgets/core/empty_state.dart';
 
 /// Lists today's daily quests (distinct from seasonal `/challenges`).
-class DailyQuestsScreen extends ConsumerWidget {
+class DailyQuestsScreen extends ConsumerStatefulWidget {
   const DailyQuestsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  ConsumerState<DailyQuestsScreen> createState() => _DailyQuestsScreenState();
+}
+
+class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(questProvider.notifier).loadQuests();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final questState = ref.watch(questProvider);
     final quests = questState.quests;
 
     return VHubPage(
       title: 'Daily Quests',
       showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: () => ref.read(questProvider.notifier).loadQuests(),
+        ),
+      ],
       body: quests.isEmpty
-          ? Center(
-              child: Text(
-                'No quests for today yet.',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: VColors.onSurfaceVariant,
-                ),
-              ),
+          ? const AppEmptyState(
+              title: 'Loading today\'s quests',
+              description: 'If this stays empty, pull to refresh.',
+              icon: Icons.flag_outlined,
             )
           : ListView.separated(
               padding: const EdgeInsets.all(VSpacing.md),

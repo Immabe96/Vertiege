@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../forui/v_hub_page.dart';
 import '../../state/challenge_provider.dart';
@@ -32,9 +33,25 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
     return VHubPage(
       title: 'Seasonal Challenges',
       showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: () => ref
+              .read(challengeProvider.notifier)
+              .loadChallengesForWorld(''),
+        ),
+      ],
       body: challengeState.isLoading
           ? const ScreenLoading.list()
-          : challengeState.activeChallenges.isEmpty
+          : challengeState.loadError != null &&
+                challengeState.activeChallenges.isEmpty
+              ? AppErrorState(
+                  message: challengeState.loadError!,
+                  onRetry: () => ref
+                      .read(challengeProvider.notifier)
+                      .loadChallengesForWorld(''),
+                )
+              : challengeState.activeChallenges.isEmpty
               ? const AppEmptyState(
                   title: 'No active challenges',
                   description: 'Check back when a new season starts!',

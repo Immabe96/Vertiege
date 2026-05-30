@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/challenge_service.dart';
+import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
 
 class ChallengeData {
@@ -61,12 +62,14 @@ class ChallengeState {
   final List<ChallengeData> activeChallenges;
   final Map<String, ChallengeProgressData> userProgress;
   final bool isLoading;
+  final String? loadError;
   final List<String> completedChallengeIds;
 
   const ChallengeState({
     this.activeChallenges = const [],
     this.userProgress = const {},
     this.isLoading = false,
+    this.loadError,
     this.completedChallengeIds = const [],
   });
 
@@ -74,12 +77,15 @@ class ChallengeState {
     List<ChallengeData>? activeChallenges,
     Map<String, ChallengeProgressData>? userProgress,
     bool? isLoading,
+    String? loadError,
+    bool clearLoadError = false,
     List<String>? completedChallengeIds,
   }) {
     return ChallengeState(
       activeChallenges: activeChallenges ?? this.activeChallenges,
       userProgress: userProgress ?? this.userProgress,
       isLoading: isLoading ?? this.isLoading,
+      loadError: clearLoadError ? null : (loadError ?? this.loadError),
       completedChallengeIds: completedChallengeIds ?? this.completedChallengeIds,
     );
   }
@@ -92,7 +98,7 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
   }
 
   Future<void> loadChallengesForWorld(String worldId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearLoadError: true);
     try {
       final challenges = await ChallengeService.getChallenges(
         worldId,
@@ -133,10 +139,17 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
         activeChallenges: challengeData,
         userProgress: progress,
         isLoading: false,
+        clearLoadError: true,
         completedChallengeIds: completedIds,
       );
-    } catch (_) {
-      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        loadError: userFacingLoadError(
+          e,
+          fallback: 'Could not load challenges. Pull to refresh.',
+        ),
+      );
     }
   }
 
