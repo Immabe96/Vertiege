@@ -33,6 +33,7 @@ import '../widgets/chat/scroll_fab.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/core/status_dot.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_feedback.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
@@ -319,6 +320,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final messages = ref.watch(dmRoomMessagesProvider(widget.roomId));
+    final messagesLoadError = ref.watch(
+      chatProvider.select((s) => s.messagesLoadErrorFor(widget.roomId)),
+    );
     final dmRooms = ref.watch(chatProvider.select((s) => s.dmRooms));
     final loadingOlder = ref.watch(
       chatProvider.select((s) => s.dmLoadingOlder[widget.roomId] ?? false),
@@ -371,7 +375,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         children: [
           const ChatConnectionBanner(),
           Expanded(
-            child: messages.isEmpty
+            child: messagesLoadError != null && messages.isEmpty
+                ? AppErrorState(
+                    message: messagesLoadError,
+                    onRetry: () => ref
+                        .read(chatProvider.notifier)
+                        .loadDmMessages(widget.roomId, force: true),
+                  )
+                : messages.isEmpty
                 ? _buildEmpty()
                 : Stack(
                     children: [

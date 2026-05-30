@@ -148,12 +148,11 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
-    final messages =
-        ref.watch(chatProvider).channelMessages[widget.channelId] ?? [];
-    final isLoading = !ref
-        .watch(chatProvider)
-        .channelMessages
-        .containsKey(widget.channelId);
+    final chatState = ref.watch(chatProvider);
+    final messages = chatState.channelMessages[widget.channelId] ?? [];
+    final messagesLoadError =
+        chatState.messagesLoadErrorFor(widget.channelId);
+    final isLoading = !chatState.channelMessages.containsKey(widget.channelId);
 
     final pinnedMessages = messages.where((m) => m.isPinned).toList();
     final unpinnedMessages = messages.where((m) => !m.isPinned).toList();
@@ -232,6 +231,13 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
           Expanded(
             child: isLoading
                 ? const ScreenLoading.list()
+                : messagesLoadError != null && messages.isEmpty
+                ? AppErrorState(
+                    message: messagesLoadError,
+                    onRetry: () => ref
+                        .read(chatProvider.notifier)
+                        .loadChannelMessages(widget.channelId, force: true),
+                  )
                 : messages.isEmpty
                 ? _buildEmpty(channel)
                 : Stack(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/channel.dart';
 import '../services/world_service.dart';
 import '../utils/id_generator.dart';
+import '../utils/provider_errors.dart';
 
 class ChannelState {
   final Map<String, List<WorldChannel>> channelsByWorld;
@@ -43,7 +44,10 @@ class ChannelNotifier extends Notifier<ChannelState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        error: userFacingLoadError(
+          e,
+          fallback: 'Could not load channels. Pull to refresh.',
+        ),
       );
     }
   }

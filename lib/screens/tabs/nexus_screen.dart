@@ -14,6 +14,7 @@ import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/feed/post_item.dart';
@@ -300,12 +301,28 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                       ),
                     ),
 
-                    if (postHasError)
+                    if (postHasError && posts.isEmpty)
                       SliverToBoxAdapter(
                         child: AppErrorState(
                           message: postError ?? 'Something went wrong',
                           onRetry: () =>
                               ref.read(postProvider.notifier).loadPosts(),
+                        ),
+                      )
+                    else if (postHasError && posts.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            VSpacing.md,
+                            VSpacing.sm,
+                            VSpacing.md,
+                            0,
+                          ),
+                          child: SyncWarningBanner(
+                            message: postError!,
+                            onRetry: () =>
+                                ref.read(postProvider.notifier).loadPosts(),
+                          ),
                         ),
                       )
                     else if (postIsLoading && posts.isEmpty)

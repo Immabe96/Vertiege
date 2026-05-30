@@ -33,6 +33,7 @@ import '../../widgets/profile/subscription_badge.dart';
 import '../../widgets/achievements/achievement_queue_summary.dart';
 import '../../widgets/profile/trophy_case.dart';
 import '../../widgets/core/screen_loading.dart';
+import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/tier_up_dialog.dart';
@@ -329,6 +330,35 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: VSpacing.xxl),
           children: [
+          if (residentState.loadError != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.md,
+                VSpacing.sm,
+                VSpacing.md,
+                0,
+              ),
+              child: SyncWarningBanner(
+                message: residentState.loadError!,
+                onRetry: () =>
+                    ref.read(residentProvider.notifier).loadResident(),
+              ),
+            ),
+          if (achievements.error != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.md,
+                VSpacing.sm,
+                VSpacing.md,
+                0,
+              ),
+              child: SyncWarningBanner(
+                message: achievements.error!,
+                onRetry: () => ref
+                    .read(achievementProvider.notifier)
+                    .loadAchievements(),
+              ),
+            ),
           // ── Hero Section ──────────────────────────────
           Container(
             padding: const EdgeInsets.all(VSpacing.lg),

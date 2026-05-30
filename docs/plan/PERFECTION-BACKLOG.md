@@ -38,10 +38,16 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ## Wave 2 — Data & state honesty
 
-| Item | Status |
-|------|--------|
-| Provider silent `catch (_) {}` → error UI | Open |
-| Empty lists with failed fetch explained | Open |
+| Item | Status | Notes |
+|------|--------|-------|
+| `userFacingLoadError` helper | Done | `lib/utils/provider_errors.dart` |
+| `SyncWarningBanner` widget | Done | Cache/sync warnings with retry |
+| Post feed: all worlds fail / partial | Done | `post_provider` + Nexus warning vs error |
+| Chat DM/channel message load errors | Done | `messagesLoadErrors` + room/channel UI |
+| Notifications friendly errors | Done | `notification_provider` |
+| Channel list friendly errors | Done | `channel_provider` |
+| Identity / achievements sync banners | Done | Profile + achievement warnings |
+| Background RPC swallow (rep, referral) | Deferred | Non-user-visible; log only if needed |
 
 ---
 
@@ -84,8 +90,8 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ---
 
-## Next actions (after Wave 0 commit)
+## Next actions
 
-1. Wave 1 spot-check: achievement proof sheet copy (P0-4).
-2. Wave 2: one provider at a time — `achievement_provider`, `post_provider`, `resident_provider`.
-3. Wave 4: Supabase migration draft for anon RPC revoke.
+1. Wave 3: Forui hub screens (P2-1).
+2. Wave 4: Supabase migration draft for anon RPC revoke (P0-3).
+3. Wave 6: Device UAT sign-off.

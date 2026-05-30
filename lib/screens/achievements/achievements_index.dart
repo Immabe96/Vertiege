@@ -17,6 +17,7 @@ import '../../utils/world_assets.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_avatar_surface.dart';
 import '../../widgets/achievements/achievement_icon.dart';
+import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/v_section_list.dart';
 
 class AchievementsIndexScreen extends ConsumerWidget {
@@ -86,28 +87,9 @@ class AchievementsIndexScreen extends ConsumerWidget {
             ),
             if (state.error != null) ...[
               const SizedBox(height: VSpacing.sm),
-              Material(
-                color: VColors.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(VRadius.md),
-                child: Padding(
-                  padding: const EdgeInsets.all(VSpacing.sm),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.cloud_off,
-                        size: 18,
-                        color: VColors.warning,
-                      ),
-                      const SizedBox(width: VSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          state.error!,
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              SyncWarningBanner(
+                message: state.error!,
+                onRetry: () => notifier.loadAchievements(),
               ),
             ],
             if (nextTierInfo != null) ...[

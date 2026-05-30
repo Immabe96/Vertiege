@@ -24,6 +24,7 @@ import '../repositories/post_repository.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
 import '../utils/haptics.dart';
+import '../utils/provider_errors.dart';
 import '../utils/rate_limiter.dart';
 import '../config/achievements.dart';
 import 'resident_provider.dart';
@@ -879,25 +880,27 @@ class PostNotifier extends Notifier<PostState> {
         );
       }
 
-      final joinedWorldPosts = await _loadPostsFromJoinedWorlds();
-      final posts = joinedWorldPosts ?? [];
+      final joinedResult = await _loadPostsFromJoinedWorlds();
+      final posts = joinedResult?.posts ?? [];
 
       state = state.copyWith(
         posts: posts,
         mutualWorldResidentIds: mutualIds,
         isLoading: false,
-        clearError: true,
+        error: joinedResult?.loadError,
+        clearError: joinedResult?.loadError == null,
         hasMorePosts: false,
       );
       _persist();
       unawaited(_subscribeRealtime());
     } catch (e) {
-      final joinedWorldPosts = await _loadPostsFromJoinedWorlds();
-      if (joinedWorldPosts != null) {
+      final joinedResult = await _loadPostsFromJoinedWorlds();
+      if (joinedResult != null) {
         state = state.copyWith(
-          posts: joinedWorldPosts,
+          posts: joinedResult.posts,
+          error: joinedResult.loadError,
+          clearError: joinedResult.loadError == null,
           isLoading: false,
-          clearError: true,
         );
         _persist();
         unawaited(_subscribeRealtime());
@@ -918,7 +921,10 @@ class PostNotifier extends Notifier<PostState> {
         return;
       }
       state = state.copyWith(
-        error: 'Failed to load posts: $e',
+        error: userFacingLoadError(
+          e,
+          fallback: 'Failed to load posts. Pull to refresh.',
+        ),
         isLoading: false,
       );
     }
@@ -968,7 +974,10 @@ class PostNotifier extends Notifier<PostState> {
     } catch (e) {
       state = state.copyWith(
         followingPosts: [],
-        error: 'Failed to load following feed: $e',
+        error: userFacingLoadError(
+          e,
+          fallback: 'Failed to load following feed. Pull to refresh.',
+        ),
       );
     }
   }
@@ -1023,7 +1032,7 @@ class PostNotifier extends Notifier<PostState> {
         .subscribe();
   }
 
-  Future<List<Post>?> _loadPostsFromJoinedWorlds() async {
+  Future<({List<Post> posts, String? loadError})?> _loadPostsFromJoinedWorlds() async {
     final joinedWorldIds = ref
         .read(residentProvider)
         .resident
@@ -1034,6 +1043,7 @@ class PostNotifier extends Notifier<PostState> {
     if (joinedWorldIds == null || joinedWorldIds.isEmpty) return null;
 
     final posts = <Post>[];
+    var failures = 0;
     for (final worldId in joinedWorldIds) {
       try {
         final result = await _postsRepository.loadPosts(
@@ -1042,12 +1052,23 @@ class PostNotifier extends Notifier<PostState> {
         );
         posts.addAll(result.items.map(_postFromJson));
       } catch (_) {
-        // Skip worlds that fail; continue with others.
+        failures++;
       }
     }
 
-    if (posts.isEmpty) return [];
-    return _sortPosts(posts).take(150).toList();
+    final sorted = posts.isEmpty
+        ? <Post>[]
+        : _sortPosts(posts).take(150).toList();
+
+    String? loadError;
+    if (failures > 0 && failures == joinedWorldIds.length) {
+      loadError =
+          'Could not load posts from your worlds. Pull to refresh.';
+    } else if (failures > 0 && sorted.isNotEmpty) {
+      loadError = 'Some worlds could not be loaded.';
+    }
+
+    return (posts: sorted, loadError: loadError);
   }
 
   static Post _postFromJson(Map<String, dynamic> json) {

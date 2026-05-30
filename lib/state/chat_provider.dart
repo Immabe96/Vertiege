@@ -12,6 +12,7 @@ import '../services/storage_service.dart';
 import '../services/typing_service.dart';
 import '../utils/chat_unread.dart';
 import '../utils/id_generator.dart';
+import '../utils/provider_errors.dart';
 import '../utils/rate_limiter.dart';
 import 'resident_provider.dart';
 
@@ -26,6 +27,8 @@ class ChatState {
   final Map<String, Set<String>> typingUsers;
   final bool isLoadingRooms;
   final String? roomsLoadError;
+  /// Per room/channel id when message history failed to load.
+  final Map<String, String> messagesLoadErrors;
 
   const ChatState({
     this.dmRooms = const [],
@@ -38,6 +41,7 @@ class ChatState {
     this.typingUsers = const {},
     this.isLoadingRooms = false,
     this.roomsLoadError,
+    this.messagesLoadErrors = const {},
   });
 
   ChatState copyWith({
@@ -52,6 +56,7 @@ class ChatState {
     bool? isLoadingRooms,
     String? roomsLoadError,
     bool clearRoomsLoadError = false,
+    Map<String, String>? messagesLoadErrors,
   }) => ChatState(
     dmRooms: dmRooms ?? this.dmRooms,
     dmMessages: dmMessages ?? this.dmMessages,
@@ -65,7 +70,10 @@ class ChatState {
     isLoadingRooms: isLoadingRooms ?? this.isLoadingRooms,
     roomsLoadError:
         clearRoomsLoadError ? null : (roomsLoadError ?? this.roomsLoadError),
+    messagesLoadErrors: messagesLoadErrors ?? this.messagesLoadErrors,
   );
+
+  String? messagesLoadErrorFor(String id) => messagesLoadErrors[id];
 }
 
 class ChatNotifier extends Notifier<ChatState> {
@@ -205,14 +213,37 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> loadDmMessages(String roomId, {bool force = false}) async {
     if (!force && state.dmMessages.containsKey(roomId)) return;
-    await _replayQueuedChatMutations();
-    final msgs = await ChatService.getMessages(roomId, limit: _dmFetchLimit);
-    final parsed = _capDmRoomMessages(_toChannelMessages(msgs));
-    state = state.copyWith(
-      dmMessages: {...state.dmMessages, roomId: parsed},
-      dmHasMore: {...state.dmHasMore, roomId: msgs.length >= _dmFetchLimit},
-      dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
-    );
+    final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
+      ..remove(roomId);
+    state = state.copyWith(messagesLoadErrors: clearedErrors);
+    try {
+      await _replayQueuedChatMutations();
+      final msgs = await ChatService.getMessages(
+        roomId,
+        limit: _dmFetchLimit,
+      ).timeout(const Duration(seconds: 10));
+      final parsed = _capDmRoomMessages(_toChannelMessages(msgs));
+      final errors = Map<String, String>.from(state.messagesLoadErrors)
+        ..remove(roomId);
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: parsed},
+        dmHasMore: {...state.dmHasMore, roomId: msgs.length >= _dmFetchLimit},
+        dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
+        messagesLoadErrors: errors,
+      );
+    } catch (e) {
+      final errors = Map<String, String>.from(state.messagesLoadErrors)
+        ..[roomId] = userFacingLoadError(
+          e,
+          fallback: 'Could not load messages. Pull to refresh.',
+        );
+      state = state.copyWith(
+        dmMessages: {...state.dmMessages, roomId: const []},
+        dmHasMore: {...state.dmHasMore, roomId: false},
+        dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
+        messagesLoadErrors: errors,
+      );
+    }
   }
 
   Future<void> loadOlderDmMessages(String roomId) async {
@@ -624,14 +655,34 @@ class ChatNotifier extends Notifier<ChatState> {
     bool force = false,
   }) async {
     if (!force && state.channelMessages.containsKey(channelId)) return;
-    await _replayQueuedChatMutations();
-    final msgs = await ChatService.getChannelMessages(channelId);
-    state = state.copyWith(
-      channelMessages: {
-        ...state.channelMessages,
-        channelId: _toChannelMessages(msgs),
-      },
-    );
+    final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
+      ..remove(channelId);
+    state = state.copyWith(messagesLoadErrors: clearedErrors);
+    try {
+      await _replayQueuedChatMutations();
+      final msgs = await ChatService.getChannelMessages(channelId).timeout(
+        const Duration(seconds: 10),
+      );
+      final errors = Map<String, String>.from(state.messagesLoadErrors)
+        ..remove(channelId);
+      state = state.copyWith(
+        channelMessages: {
+          ...state.channelMessages,
+          channelId: _toChannelMessages(msgs),
+        },
+        messagesLoadErrors: errors,
+      );
+    } catch (e) {
+      final errors = Map<String, String>.from(state.messagesLoadErrors)
+        ..[channelId] = userFacingLoadError(
+          e,
+          fallback: 'Could not load channel messages. Pull to refresh.',
+        );
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, channelId: const []},
+        messagesLoadErrors: errors,
+      );
+    }
   }
 
   Future<void> sendChannelMessage({

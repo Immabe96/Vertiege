@@ -7,6 +7,7 @@ import '../services/notification_service.dart';
 import '../services/push_service.dart';
 import '../services/quiet_hours_service.dart';
 import '../utils/id_generator.dart';
+import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
 
 class NotificationState {
@@ -168,11 +169,13 @@ class NotificationNotifier extends Notifier<NotificationState> {
         _persist();
         return;
       } catch (e) {
-        if (cached.isNotEmpty) {
-          state = state.copyWith(isLoading: false, error: e.toString());
-          return;
-        }
-        state = state.copyWith(isLoading: false, error: e.toString());
+        final message = cached.isNotEmpty
+            ? 'Showing cached notifications (sync failed).'
+            : userFacingLoadError(
+                e,
+                fallback: 'Could not load notifications. Pull to refresh.',
+              );
+        state = state.copyWith(isLoading: false, error: message);
         return;
       }
     }

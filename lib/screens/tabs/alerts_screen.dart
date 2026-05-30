@@ -10,6 +10,7 @@ import '../../router/notification_navigation.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../forui/v_hub_page.dart';
@@ -128,35 +129,18 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
       body: Column(
         children: [
           if (notifState.error != null)
-            Material(
-              color: VColors.warning.withValues(alpha: 0.12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.cloud_off,
-                      size: 18,
-                      color: VColors.warning,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        notifState.error!,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => ref
-                          .read(notificationProvider.notifier)
-                          .loadNotifications(),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.md,
+                VSpacing.sm,
+                VSpacing.md,
+                0,
+              ),
+              child: SyncWarningBanner(
+                message: notifState.error!,
+                onRetry: () => ref
+                    .read(notificationProvider.notifier)
+                    .loadNotifications(),
               ),
             ),
           Expanded(
