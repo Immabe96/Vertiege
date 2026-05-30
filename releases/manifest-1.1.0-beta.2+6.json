@@ -1,0 +1,10 @@
+{
+  "version": "1.1.0-beta.2",
+  "build": 6,
+  "label": "1.1.0-beta.2+6",
+  "git": "560e9fc",
+  "built_at": "2026-05-31T00:52:00Z",
+  "abi": "arm64-v8a",
+  "apk": "vertiege-1.1.0-beta.2+6-arm64-release.apk",
+  "supabase_project": "wjaphoaxalvgjnrwqjwe"
+}

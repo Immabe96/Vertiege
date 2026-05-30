@@ -12,6 +12,8 @@ import '../state/channel_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_tokens.dart';
+import '../widgets/core/empty_state.dart';
+import '../widgets/core/v_feedback.dart';
 import '../widgets/v_section_list.dart';
 import '../services/permission_service.dart';
 
@@ -69,11 +71,16 @@ class WorldManageScreen extends ConsumerWidget {
       ).reason;
     }
 
-    final marketplaceGate = WorldCapabilityMatrix.blockReasonCreateListing(
-      resident,
-      world,
-      isJoined: isJoined,
-    );
+    final String? marketplaceGate;
+    if (!isJoined) {
+      marketplaceGate = 'Join this world to open the marketplace.';
+    } else if (!WorldCapabilityMatrix.worldHasMarketplace(world)) {
+      marketplaceGate =
+          'Marketplace unlocks at world prestige '
+          '${WorldCapabilityMatrix.minWorldPrestigeMarketplace}.';
+    } else {
+      marketplaceGate = null;
+    }
     final treasuryGate = WorldCapabilityMatrix.blockReasonTreasuryDonate(
       resident,
       world,
@@ -89,43 +96,48 @@ class WorldManageScreen extends ConsumerWidget {
           if (!isJoined)
             const Padding(
               padding: EdgeInsets.only(bottom: VSpacing.md),
-              child: Text('Join this world to use economy and community tools.'),
+              child: AppEmptyState(
+                title: 'Join to participate',
+                description:
+                    'Economy, Lounge, Campfire, and polls unlock after you join this world.',
+                icon: Icons.group_add_outlined,
+              ),
             ),
           VSectionList(
             title: 'Social',
             children: [
-              _gateTile(
+              _manageTile(
+                context,
                 icon: Icons.weekend_outlined,
                 label: 'Lounge',
                 gate: loungeGate,
-                enabled: isJoined && loungeGate == null && lounge != null,
-                onTap: lounge == null
-                    ? null
-                    : () => context.push(
+                onOpen: lounge != null && loungeGate == null
+                    ? () => context.push(
                           worldChannelDestinationPath(
                             worldId,
                             lounge!,
                             worldName: world.name,
                           ),
-                        ),
+                        )
+                    : null,
               ),
-              _gateTile(
+              _manageTile(
+                context,
                 icon: Icons.local_fire_department,
                 label: 'Campfire',
                 gate: campfireGate ??
                     (features.audioRooms
                         ? null
                         : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
-                enabled: isJoined && campfireGate == null && campfire != null,
-                onTap: campfire == null
-                    ? null
-                    : () => context.push(
+                onOpen: campfire != null && campfireGate == null
+                    ? () => context.push(
                           worldChannelDestinationPath(
                             worldId,
                             campfire!,
                             worldName: world.name,
                           ),
-                        ),
+                        )
+                    : null,
               ),
               if (FeatureFlags.polls)
                 VSectionTile(
@@ -159,27 +171,27 @@ class WorldManageScreen extends ConsumerWidget {
           VSectionList(
             title: 'Economy',
             children: [
-              _gateTile(
+              _manageTile(
+                context,
                 icon: Icons.account_balance_wallet,
                 label: 'Treasury',
                 gate: treasuryGate,
-                enabled: isJoined && treasuryGate == null,
-                onTap: () => context.push(
-                  worldTreasuryPath(worldId, admin: isCouncil),
-                ),
+                onOpen: treasuryGate == null
+                    ? () => context.push(
+                          worldTreasuryPath(worldId, admin: isCouncil),
+                        )
+                    : null,
               ),
-              _gateTile(
+              _manageTile(
+                context,
                 icon: Icons.storefront,
                 label: 'Marketplace',
-                gate: marketplaceGate ??
-                    (!WorldCapabilityMatrix.worldHasMarketplace(world)
-                        ? 'Unlocks at prestige ${WorldCapabilityMatrix.minWorldPrestigeMarketplace}.'
-                        : null),
-                enabled: isJoined &&
-                    WorldCapabilityMatrix.worldHasMarketplace(world),
-                onTap: () => context.push(
-                  worldMarketplacePath(worldId, member: isJoined),
-                ),
+                gate: marketplaceGate,
+                onOpen: marketplaceGate == null
+                    ? () => context.push(
+                          worldMarketplacePath(worldId, member: isJoined),
+                        )
+                    : null,
               ),
             ],
           ),
@@ -212,37 +224,21 @@ class WorldManageScreen extends ConsumerWidget {
     );
   }
 
-  Widget _gateTile({
+  VSectionTile _manageTile(
+    BuildContext context, {
     required IconData icon,
     required String label,
-    required String? gate,
-    required bool enabled,
-    VoidCallback? onTap,
+    String? gate,
+    VoidCallback? onOpen,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        VSectionTile(
-          icon: icon,
-          label: label,
-          enabled: enabled,
-          onTap: onTap,
-        ),
-        if (gate != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              VSpacing.lg,
-              0,
-              VSpacing.lg,
-              VSpacing.sm,
-            ),
-            child: Text(
-              gate,
-              style: const TextStyle(fontSize: VFontSize.labelSm),
-            ),
-          ),
-      ],
+    final locked = gate != null;
+    return VSectionTile(
+      icon: icon,
+      label: label,
+      enabled: onOpen != null || locked,
+      onTap: locked
+          ? () => VFeedback.showMessage(context, gate!)
+          : onOpen,
     );
   }
 }

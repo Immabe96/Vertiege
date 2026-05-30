@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import '../forui/v_hub_page.dart';
 import '../services/governance_service.dart';
 import '../theme/v_tokens.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_feedback.dart';
 import '../ui/buttons/v_button.dart';
@@ -71,8 +72,11 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       body: _loading
           ? const ScreenLoading.list()
           : _proposals.isEmpty
-              ? const Center(
-                  child: Text('No pending approvals.'),
+              ? const AppEmptyState(
+                  title: 'Queue is clear',
+                  description:
+                      'Treasury withdrawals from council appear here when submitted. Only council and sovereign may withdraw.',
+                  icon: Icons.gavel_outlined,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(VSpacing.md),
@@ -103,7 +107,7 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
                                 Expanded(
                                   child: VButton(
                                     label: 'Reject',
-                                    variant: ButtonVariant.outline,
+                                    variant: ButtonVariant.outlined,
                                     onPressed: () => _review(p, false),
                                   ),
                                 ),

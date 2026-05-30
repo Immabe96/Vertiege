@@ -49,7 +49,7 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
     final growing = SeasonService.growingWorldCount(allWorlds);
 
     return VHubPage(
-      title: season.name,
+      title: 'Season 1',
       showBack: true,
       body: isLoaded
           ? CustomScrollView(
@@ -255,6 +255,21 @@ class _SeasonHero extends StatelessWidget {
               ),
             ),
           ),
+          if (season.narrative.isNotEmpty) ...[
+            const SizedBox(height: VSpacing.md),
+            FadeIn(
+              delayMs: 300,
+              child: Text(
+                season.narrative,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
