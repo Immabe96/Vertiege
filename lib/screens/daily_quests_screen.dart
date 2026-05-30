@@ -27,6 +27,7 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final questState = ref.watch(questProvider);
     final quests = questState.quests;
 
