@@ -89,7 +89,8 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 | `v_context_colors` consolidation | Open | Large refactor |
 | Test coverage for navigation edge cases | Open |
 | Thread / channel / campfire Forui | Done | `FScaffold` + thread load errors |
-| Raw `Scaffold` (world detail, auth) | Open | `world_detail` nested shell intentional |
+| World detail `FScaffold` + tools sheet | Done | No end drawer; Forui `showAppSheet` |
+| Raw `Scaffold` (auth, splash) | Open | Expected for auth flows |
 
 ---
 

@@ -23,7 +23,8 @@ import '../widgets/worlds/world_profile_header.dart';
 import '../widgets/worlds/world_realm_dossier.dart';
 import '../widgets/worlds/world_home_tab.dart';
 import '../widgets/worlds/world_shop_tab.dart';
-import '../widgets/worlds/world_tools_drawer.dart';
+import '../widgets/worlds/world_tools_panel.dart';
+import '../widgets/core/sync_warning_banner.dart';
 import '../widgets/worlds/world_feed_tab.dart';
 import '../widgets/core/glass_sheet.dart';
 import '../widgets/worlds/world_detail_members.dart';
@@ -64,7 +65,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     with TickerProviderStateMixin {
   late final AnimationController _joinAnimController;
   TabController? _tabController;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey _joinButtonKey = GlobalKey();
   List<WorldDetailTabId> _tabIds = const [];
 
@@ -296,8 +296,33 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     _tabController!.animateTo(index);
   }
 
-  void _openToolsDrawer() {
-    _scaffoldKey.currentState?.openEndDrawer();
+  void _openToolsSheet(
+    World world, {
+    required bool isJoined,
+    required bool isAdminOrCouncil,
+    required VoidCallback? onSettings,
+  }) {
+    showAppSheet(
+      context,
+      WorldToolsPanel(
+        world: world,
+        worldId: widget.worldId,
+        isJoined: isJoined,
+        isAdminOrCouncil: isAdminOrCouncil,
+        onDismiss: () => Navigator.pop(context),
+        onShare: () => _showWorldShareSheet(world),
+        onSettings: onSettings,
+        onOpenRealmGuide: () => _showRealmGuideSheet(
+          world,
+          channels: ref.read(channelProvider).channelsByWorld[widget.worldId] ?? [],
+          posts: ref.read(postProvider.notifier).getPostsByWorld(widget.worldId),
+          resident: ref.read(residentProvider).resident,
+          isJoined: isJoined,
+          onSettings: onSettings,
+        ),
+      ),
+      maxSize: 0.92,
+    );
   }
 
   Widget _buildTabBody(
@@ -686,25 +711,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
     return WorldAccessGuard(
       worldId: widget.worldId,
-      child: Scaffold(
-        key: _scaffoldKey,
-        endDrawer: WorldToolsDrawer(
-          world: world,
-          worldId: widget.worldId,
-          isJoined: isJoined,
-          isAdminOrCouncil: isAdminOrCouncil,
-          onShare: () => _showWorldShareSheet(world),
-          onSettings: onSettings,
-          onOpenRealmGuide: () => _showRealmGuideSheet(
-            world,
-            channels: channels,
-            posts: posts,
-            resident: resident,
-            isJoined: isJoined,
-            onSettings: onSettings,
-          ),
-        ),
-        body: RefreshIndicator(
+      child: FScaffold(
+        childPad: false,
+        child: RefreshIndicator(
           onRefresh: () async {
             await ref.read(postProvider.notifier).loadPosts();
             await ref
@@ -727,10 +736,30 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 onBack: () => safeBack(context, fallback: '/explore'),
                 onShare: () => _showWorldShareSheet(world),
                 onSettings: onSettings,
-                onOpenTools: _openToolsDrawer,
+                onOpenTools: () => _openToolsSheet(
+                  world,
+                  isJoined: isJoined,
+                  isAdminOrCouncil: isAdminOrCouncil,
+                  onSettings: onSettings,
+                ),
                 onJoin: _handleJoin,
               ),
-
+              if (worldState.loadError != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      VSpacing.md,
+                      VSpacing.sm,
+                      VSpacing.md,
+                      0,
+                    ),
+                    child: SyncWarningBanner(
+                      message: worldState.loadError!,
+                      onRetry: () =>
+                          ref.read(worldProvider.notifier).loadWorlds(),
+                    ),
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: FadeIn(
                   delayMs: context.motionEnabled ? 40 : 0,

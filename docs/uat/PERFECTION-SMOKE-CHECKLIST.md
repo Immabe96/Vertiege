@@ -12,6 +12,13 @@
 - [ ] **Identity:** Profile loads; achievement sync warning if applicable; Wall of Honour scrolls without giant gray box
 - [ ] **Chat:** DM list error + retry; world channels error + retry; open DM and channel
 
+## World detail
+
+- [ ] **Back:** Returns to Explore (not blank Nexus)
+- [ ] **Tools (⋯):** Opens bottom sheet; treasury/marketplace links work; close dismisses
+- [ ] **Join / tabs / feed:** Hero, stats, tab bar scroll correctly
+- [ ] **Sync warning:** If shown, retry refreshes world list
+
 ## Hub screens (Forui shell)
 
 - [ ] **Search:** Forui header with inline search; back works
