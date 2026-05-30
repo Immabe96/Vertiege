@@ -234,66 +234,8 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
       if (isJoined) WorldFeedChatTeaser(worldId: worldId),
     ];
 
-    if (!primaryScroll) {
-      return Column(
-        children: [
-          postHeader,
-          ...feedExtras,
-          if (eventPosts.isNotEmpty)
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-                scrollDirection: Axis.horizontal,
-                itemCount: eventPosts.length,
-                itemBuilder: (context, index) => SizedBox(
-                  width: 300,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: index < eventPosts.length - 1 ? VSpacing.sm : 0,
-                    ),
-                    child: EventCard(post: eventPosts[index]),
-                  ),
-                ),
-              ),
-            ),
-          Expanded(
-            child: regularPosts.isEmpty && eventPosts.isEmpty
-                ? AppEmptyState(
-                    title: isJoined ? 'No posts yet' : 'Join to participate',
-                    description: isJoined
-                        ? 'Be the first to share an update in this world.'
-                        : 'Join this world to read the full feed and post with members.',
-                    icon: isJoined
-                        ? Icons.auto_awesome
-                        : Icons.lock_outline,
-                    actionLabel: isJoined ? null : 'Join world',
-                    onAction: isJoined ? null : onJoin,
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(
-                      bottom: VSpacing.xxl + VSpacing.xxl,
-                    ),
-                    itemCount: regularPosts.length,
-                    itemBuilder: (context, index) => _postTile(
-                      regularPosts[index] as Post,
-                      index,
-                      worldId,
-                      highlightPostId,
-                    ),
-                  ),
-          ),
-        ],
-      );
-    }
-
-    return ListView(
-      padding: const EdgeInsets.only(bottom: VSpacing.xxl + VSpacing.xxl),
-      children: [
-        postHeader,
-        ...feedExtras,
-        if (eventPosts.isNotEmpty)
-          SizedBox(
+    final eventCarousel = eventPosts.isNotEmpty
+        ? SizedBox(
             height: 200,
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
@@ -309,9 +251,11 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
                 ),
               ),
             ),
-          ),
-        if (regularPosts.isEmpty && eventPosts.isEmpty)
-          Padding(
+          )
+        : null;
+
+    final postsSection = regularPosts.isEmpty && eventPosts.isEmpty
+        ? Padding(
             padding: const EdgeInsets.all(VSpacing.xl),
             child: AppEmptyState(
               title: isJoined ? 'No posts yet' : 'Join to participate',
@@ -323,17 +267,41 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
               onAction: isJoined ? null : onJoin,
             ),
           )
-        else
-          ...List.generate(
-            regularPosts.length,
-            (index) => _postTile(
-              regularPosts[index] as Post,
-              index,
-              worldId,
-              highlightPostId,
+        : Column(
+            children: List.generate(
+              regularPosts.length,
+              (index) => _postTile(
+                regularPosts[index] as Post,
+                index,
+                worldId,
+                highlightPostId,
+              ),
             ),
-          ),
+          );
+
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        postHeader,
+        ...feedExtras,
+        if (eventCarousel != null) eventCarousel,
+        postsSection,
+        const SizedBox(height: VSpacing.xxl + VSpacing.xxl),
       ],
     );
+
+    if (!primaryScroll) {
+      return Column(
+        children: [
+          postHeader,
+          ...feedExtras,
+          if (eventCarousel != null) eventCarousel,
+          Expanded(child: postsSection),
+        ],
+      );
+    }
+
+    // Outer [NestedScrollView] tab scroll — no nested [ListView].
+    return body;
   }
 }

@@ -64,5 +64,6 @@ flutter:
   assets:
     - .env
     - assets/generated/
+    - assets/generated/achievements/
     - assets/images/
     - assets/images/empty_states/

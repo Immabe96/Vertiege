@@ -26,7 +26,7 @@
 - [ ] **League / Challenges / Daily quests:** Load or error state with retry
 - [ ] **Thread:** Back to channel; replies load or error + retry
 - [ ] **World channel:** Back to world (not blank); messages load
-- [ ] **Campfire:** Back leaves voice room
+- [ ] **Campfire / voice:** *Blocked on stock worlds* — no default voice channel; see UAT #3. When wired: voice channel in list → Campfire; mini-bar while connected; back leaves room
 
 ## Security (spot)
 

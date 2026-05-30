@@ -985,18 +985,28 @@ class _WorldDetailTabScroll extends StatelessWidget {
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
-        return CustomScrollView(
-          slivers: [
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-                child: child,
+        final bg = Theme.of(context).scaffoldBackgroundColor;
+        return ColoredBox(
+          color: bg,
+          child: CustomScrollView(
+            slivers: [
+              SliverOverlapInjector(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
               ),
-            ),
-          ],
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                sliver: SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
