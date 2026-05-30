@@ -3,10 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../config/world_capability_matrix.dart';
+import '../../models/channel.dart';
+import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
 import '../../services/feature_flags.dart';
+import '../../services/world_channel_access_service.dart';
+import '../../state/channel_provider.dart';
 import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
+import '../core/v_feedback.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
@@ -47,6 +53,17 @@ class WorldToolsPanel extends ConsumerWidget {
       world,
     );
     final showShopInDrawer = !world.isMarketplace;
+    final features = ref.read(worldProvider.notifier).featuresForWorld(worldId);
+    final channels = ref.watch(channelProvider).channelsByWorld[worldId] ?? [];
+    WorldChannel? loungeChannel;
+    WorldChannel? campfireChannel;
+    for (final ch in channels) {
+      if (WorldChannelAccessService.isLoungeChannel(ch)) {
+        loungeChannel = ch;
+      } else if (WorldChannelAccessService.isCampfireChannel(ch)) {
+        campfireChannel = ch;
+      }
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -126,6 +143,38 @@ class WorldToolsPanel extends ConsumerWidget {
           VSectionList(
             title: 'Community',
             children: [
+              if (loungeChannel != null)
+                VSectionTile(
+                  icon: Icons.weekend_outlined,
+                  label: 'Lounge',
+                  enabled: isJoined,
+                  onTap: isJoined
+                      ? () => _openGatedChannel(
+                            context,
+                            world: world,
+                            channel: loungeChannel!,
+                            features: features,
+                            resident: resident,
+                            onDismiss: onDismiss,
+                          )
+                      : null,
+                ),
+              if (campfireChannel != null)
+                VSectionTile(
+                  icon: Icons.local_fire_department,
+                  label: 'Campfire',
+                  enabled: isJoined,
+                  onTap: isJoined
+                      ? () => _openGatedChannel(
+                            context,
+                            world: world,
+                            channel: campfireChannel!,
+                            features: features,
+                            resident: resident,
+                            onDismiss: onDismiss,
+                          )
+                      : null,
+                ),
               if (FeatureFlags.polls)
                 VSectionTile(
                   icon: Icons.how_to_vote,
@@ -164,6 +213,15 @@ class WorldToolsPanel extends ConsumerWidget {
         VSectionList(
           title: 'More',
           children: [
+            if (isJoined)
+              VSectionTile(
+                icon: Icons.hub_outlined,
+                label: 'Manage & participate',
+                onTap: () {
+                  onDismiss();
+                  context.push(worldManagePath(worldId));
+                },
+              ),
             VSectionTile(
               icon: Icons.menu_book,
               label: 'Realm guide & growth',
@@ -193,6 +251,37 @@ class WorldToolsPanel extends ConsumerWidget {
         ),
         const SizedBox(height: VSpacing.md),
       ],
+    );
+  }
+
+  void _openGatedChannel(
+    BuildContext context, {
+    required World world,
+    required WorldChannel channel,
+    required WorldFeatures features,
+    required Resident? resident,
+    required VoidCallback onDismiss,
+  }) {
+    final decision = WorldChannelAccessService.decision(
+      world: world,
+      channel: channel,
+      features: features,
+      resident: resident,
+    );
+    if (!decision.canOpen) {
+      VFeedback.showMessage(
+        context,
+        decision.reason ?? 'This channel is locked.',
+      );
+      return;
+    }
+    onDismiss();
+    context.push(
+      worldChannelDestinationPath(
+        worldId,
+        channel,
+        worldName: world.name,
+      ),
     );
   }
 }

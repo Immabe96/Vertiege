@@ -15,6 +15,8 @@ import '../../utils/id_generator.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
 
+/// Legacy full-screen composer — not routed. Use [PostInput] (Nexus / world feed).
+@Deprecated('Use PostInput; capabilities via PostCapabilities')
 class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
 

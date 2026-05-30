@@ -2,7 +2,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/permission_service.dart';
+import '../../services/post_capabilities.dart';
 import '../../services/storage_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
@@ -402,13 +402,13 @@ class _PostInputState extends ConsumerState<PostInput>
     final worlds = allWorlds.values
         .where((w) => resident?.joinedWorldIds.contains(w.id) ?? false)
         .toList();
-    final canAnnounce =
-        resident != null &&
-        WorldPermissions.canAnnounce(
-          resident,
-          widget.worldId,
-          widget.sovereignId,
-        );
+    final canAnnounce = resident != null &&
+        PostCapabilities.check(
+          capability: PostCapability.announcement,
+          resident: resident,
+          worldId: widget.worldId,
+          sovereignId: widget.sovereignId,
+        ).allowed;
 
     final charLength = _controller.text.length;
     final charColor = _charCountColor(charLength);

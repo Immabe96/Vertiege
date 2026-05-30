@@ -65,6 +65,30 @@ class SubscriptionService {
     _cachedUserId = null;
   }
 
+  /// Receipt-backed entitlement (Wave 9). [purchaseToken] from the store purchase.
+  static Future<String?> verifyPurchase({
+    required String productId,
+    required String purchaseToken,
+  }) async {
+    final client = maybeSupabase();
+    if (client == null) return 'Sign in to verify purchase.';
+    final result = await client.rpc(
+      'verify_subscription_purchase',
+      params: {
+        'p_product_id': productId,
+        'p_purchase_token': purchaseToken,
+      },
+    );
+    if (result is! Map) return 'Unexpected response';
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] == true) {
+      _cachedTier = null;
+      _cachedUserId = null;
+      return null;
+    }
+    return map['error'] as String? ?? 'Verification failed';
+  }
+
   static SubscriptionTier _parseTier(String? value) {
     switch (value) {
       case 'patrician':
@@ -83,36 +107,39 @@ class SubscriptionService {
         return {
           'label': 'Resident',
           'color': VColors.onSurfaceVariant,
-          'worldLimit': 3,
+          'extraCosmeticSlots': 0,
           'streakShieldsPerMonth': 0,
-          'priorityVerification': false,
+          'priorityReviewVisibility': false,
           'goldName': false,
-          'customBackground': false,
+          'customFrame': false,
           'analytics': false,
+          'savedDrafts': 3,
           'badgeLabel': '',
         };
       case SubscriptionTier.patrician:
         return {
           'label': 'Patrician',
           'color': VColors.tertiary,
-          'worldLimit': 10,
-          'streakShieldsPerMonth': 1,
-          'priorityVerification': true,
+          'extraCosmeticSlots': 2,
+          'streakShieldsPerMonth': 0,
+          'priorityReviewVisibility': true,
           'goldName': false,
-          'customBackground': false,
+          'customFrame': true,
           'analytics': false,
+          'savedDrafts': 10,
           'badgeLabel': 'PATRICIAN',
         };
       case SubscriptionTier.sovereignElite:
         return {
           'label': 'Sovereign Elite',
           'color': VColors.tertiary,
-          'worldLimit': 999,
-          'streakShieldsPerMonth': 3,
-          'priorityVerification': true,
+          'extraCosmeticSlots': 6,
+          'streakShieldsPerMonth': 0,
+          'priorityReviewVisibility': true,
           'goldName': true,
-          'customBackground': true,
+          'customFrame': true,
           'analytics': true,
+          'savedDrafts': 25,
           'badgeLabel': 'SOVEREIGN ELITE',
         };
     }

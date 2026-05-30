@@ -74,7 +74,9 @@ class ResourceVault extends StatelessWidget {
               for (final channel in guideChannels)
                 _GuideItem(
                   channel: channel,
-                  onTap: () => context.push(worldChannelPath(worldId, channel)),
+                  onTap: () => context.push(
+                        worldChannelDestinationPath(worldId, channel),
+                      ),
                 ),
           ],
         ),

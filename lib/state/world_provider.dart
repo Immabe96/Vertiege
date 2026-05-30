@@ -293,29 +293,7 @@ class WorldNotifier extends Notifier<WorldState> {
   }
 
   Future<StorePurchaseState> boostWorld(String worldId) async {
-    final world = state.worlds[worldId];
-    if (world == null || world.type != WorldType.dominion) {
-      return StorePurchaseState.error;
-    }
-    if (world.boostsRemaining <= 0) return StorePurchaseState.error;
-
-    final result = await StoreService.buyWorldBoost();
-    if (result != StorePurchaseState.purchased) return result;
-
-    final now = DateTime.now();
-    final thisMonth = now.year * 12 + now.month;
-    final newCount = world.lastBoostMonth == thisMonth
-        ? world.boostCount + 1
-        : 1;
-
-    final updated = world.copyWith(
-      activityScore: world.activityScore + World.boostActivityPoints,
-      boostCount: newCount,
-      lastBoostMonth: thisMonth,
-    );
-    state = state.copyWith(worlds: {...state.worlds, worldId: updated});
-
-    return StorePurchaseState.purchased;
+    return StorePurchaseState.disabled;
   }
 
   void formAlliance(String worldId1, String worldId2) {

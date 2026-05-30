@@ -3,6 +3,8 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../forui/v_hub_page.dart';
 import '../../state/challenge_provider.dart';
+import '../../state/resident_provider.dart';
+import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
@@ -19,42 +21,88 @@ class ChallengesScreen extends ConsumerStatefulWidget {
 }
 
 class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
+  String? _worldId;
+  String? _worldName;
+  bool _initializing = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(challengeProvider.notifier).loadChallengesForWorld('');
+      _loadInitialChallenges();
     });
+  }
+
+  Future<void> _loadInitialChallenges() async {
+    var worldState = ref.read(worldProvider);
+    if (worldState.worlds.isEmpty && !worldState.isLoading) {
+      await ref.read(worldProvider.notifier).loadWorlds();
+      worldState = ref.read(worldProvider);
+    }
+
+    final resident = ref.read(residentProvider).resident;
+    final joinedWorldId = resident?.joinedWorldIds.where((id) {
+      return worldState.worlds.containsKey(id);
+    }).firstOrNull;
+
+    if (!mounted) return;
+    setState(() {
+      _worldId = joinedWorldId;
+      _worldName = joinedWorldId == null
+          ? null
+          : worldState.worlds[joinedWorldId]?.name;
+      _initializing = false;
+    });
+
+    if (joinedWorldId != null) {
+      await ref
+          .read(challengeProvider.notifier)
+          .loadChallengesForWorld(joinedWorldId);
+    }
+  }
+
+  Future<void> _refresh() async {
+    if (_worldId == null) {
+      await _loadInitialChallenges();
+      return;
+    }
+    await ref.read(challengeProvider.notifier).loadChallengesForWorld(_worldId!);
   }
 
   @override
   Widget build(BuildContext context) {
     final challengeState = ref.watch(challengeProvider);
     return VHubPage(
-      title: 'Seasonal Challenges',
+      title: _worldName == null ? 'World Challenges' : '$_worldName Challenges',
       showBack: true,
       headerActions: [
         FHeaderAction(
           icon: const Icon(FIcons.rotateCw),
-          onPress: () => ref
-              .read(challengeProvider.notifier)
-              .loadChallengesForWorld(''),
+          onPress: _refresh,
         ),
       ],
-      body: challengeState.isLoading
+      body: _initializing
+          ? const ScreenLoading.list()
+          : _worldId == null
+          ? const AppEmptyState(
+              title: 'Join a world to see challenges',
+              description:
+                  'Challenges are scoped to worlds and seasons, not a permanent global board.',
+              icon: Icons.emoji_events_outlined,
+            )
+          : challengeState.isLoading
           ? const ScreenLoading.list()
           : challengeState.loadError != null &&
                 challengeState.activeChallenges.isEmpty
               ? AppErrorState(
                   message: challengeState.loadError!,
-                  onRetry: () => ref
-                      .read(challengeProvider.notifier)
-                      .loadChallengesForWorld(''),
+                  onRetry: _refresh,
                 )
               : challengeState.activeChallenges.isEmpty
               ? const AppEmptyState(
-                  title: 'No active challenges',
-                  description: 'Check back when a new season starts!',
+                  title: 'No active world challenges',
+                  description:
+                      'Season 1: The Big Bang — world-scoped challenges appear as your realm grows.',
                   icon: Icons.emoji_events_outlined,
                 )
               : ListView.builder(

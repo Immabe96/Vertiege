@@ -1,433 +1,250 @@
-# Vertiege Long-Horizon Product Completion Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` or `superpowers:executing-plans` task-by-task. The implementing agent may not have image-reading capability. If a task requires visual inspection of screenshots, generated assets, UI captures, image quality, placeholder quality, contrast from screenshots, or banner/icon evaluation, write a clear note in the milestone report for Codex to perform the visual review.
-
-**Goal:** Turn Vertiege from a working stabilization APK into a polished, reliable, production-grade social world app with consistent Forui UI, persistent Supabase-backed data, Firebase infrastructure, fast loading, complete world content, and a clear feature roadmap.
-
-**Architecture:** Supabase remains source of truth for app data, auth, storage, realtime, RLS, and domain state. Firebase is infrastructure-only for Crashlytics, Analytics, Remote Config, and FCM. Flutter uses Forui-led app primitives, repository-backed state, cache-first loading, durable outbox mutations, and explicit error/loading/sync states.
-
-**Tech Stack:** Flutter/Dart, Riverpod, go_router, Forui, Supabase Postgres/RLS/Realtime/Storage/Edge Functions, Firebase Core/Messaging/Crashlytics/Analytics/Remote Config, Android JDK 21, GitHub Actions.
-
----
-
-## Non-Negotiable Agent Reporting Rule
-
-Maintain an implementation report after each milestone with completed tasks, files changed, test results, unresolved risks, screenshots or APK paths if produced, and Codex visual-review requests for anything requiring image/UI inspection.
-
-Use this exact marker:
-
-```markdown
-## Codex Visual Review Needed
-- Screen/asset:
-- Why visual inspection is needed:
-- How to reproduce/open it:
-- Related files:
-```
-
-Do not claim visual quality is fixed purely from code inspection when the issue depends on rendered screenshots or images.
-
----
-
-## Phase 0: Baseline And Merge
-
-**Goal:** Accept the stabilization branch as the new baseline, then stop treating old plans as active truth.
-
-**Required Actions**
-- Merge `feat/stabilization-plan` into `main` after confirming Nexus feed recursion is gone, world channels show, FAB behavior is accepted, APK builds and installs, and `flutter test` passes.
-- Delete or archive stale feature branches only after confirming their commits are merged or obsolete.
-- Keep `REPORT.md` as historical reference.
-- Make this `PLAN.md` the active working plan.
-- Update `README.md`, `docs/DESIGN.md`, and `docs/PROGRESS.md` because they still describe older dark/glass direction.
-
-**Acceptance**
-- `main` contains stabilization work.
-- Root `PLAN.md` contains this roadmap or a task-sliced version of it.
-- No active docs describe glass-first/dark-first UI as current product direction.
-
----
-
-## Phase 1: Immediate Installed-App Polish
-
-**Goal:** Fix the issues still visible in the installed APK before starting deeper architecture work.
-
-**Key Fixes**
-- Redesign Chat > Worlds so the world rail shows both icon/image and readable name.
-- Replace overcrowded world detail tabs with `Feed`, `Channels`, `Residents`, `More`.
-- Move secondary world tools into `More`.
-- Verify create-world flow on device and capture exact error if it fails.
-- Separate `Foundation` lore from `Guide` action shortcuts.
-- Replace missing/noisy empty states with minimal Forui-style states.
-
-**Visual Review Note**
-- Ask Codex to review screenshots for world rail readability, tab overflow, placeholder image quality, banner image distortion, and light/dark contrast.
-
-**Acceptance**
-- User can identify worlds by name in Chat.
-- No world page has clipped tab labels.
-- Create world succeeds or reports a precise actionable error.
-- Empty states look intentional after Codex visual review.
-
----
-
-## Phase 2: Product Source Of Truth Cleanup
-
-**Goal:** Make the app vision, docs, and implementation agree.
-
-**Update**
-- `README.md`
-- `docs/DESIGN.md`
-- `docs/PROGRESS.md`
-- `PLAN.md`
-- `docs/audits/product-gap-audit.md`
-
-**Product Definition**
-- Vertiege is a social world/community app, not a financial app.
-- Worlds are identity-rich communities with channels, residents, lore, posts, polls, quests, events, achievements, and economy features where relevant.
-- Default worlds must feel independent.
-- Immabe remains admin/testing superuser with all-world access.
-
-**Acceptance**
-- New agent can understand the current product from docs.
-- Historical glass/dark-first design language is removed or explicitly marked historical.
-
----
-
-## Phase 3: Forui Design System Completion
-
-**Goal:** Finish the UI migration so every screen feels like one app.
-
-**Design Rules**
-- Light theme: white/minimal surfaces, dark readable text, compact spacing.
-- Dark theme: AMOLED black, high-contrast text, restrained borders.
-- Accent colors only for selected state, semantic status, world identity, rarity, or destructive/success/warning states.
-- Avoid heavy gradients, blur panels, and white text over uncontrolled images.
-- Use subtle scrims only when text overlays images.
-
-**Implementation**
-- Standardize app primitives: `VScaffold`, `VTopBar`, `VBottomNav`, `VCard`, `VListTile`, `VButton`, `VEmptyState`, `VLoadingState`, `VErrorState`, `VImage`, `VWorldBadge`, and `VSyncStatusBadge`.
-- Replace legacy patterns: `GlassPanel`, `GlassSheet`, `SovereignCard`, screen-level `GoogleFonts`, arbitrary `Colors.*`, unreviewed `LinearGradient`, and unreviewed `BackdropFilter`.
-- Keep documented exceptions only for image viewers, export/share visuals, readable image scrims, and generated media previews.
-
-**Acceptance**
-- Legacy UI searches only return documented exceptions.
-- No low-contrast text, clipped labels, oversized card headings, or mismatched plain widgets after Codex visual review.
-
----
-
-## Phase 4: Navigation And Information Architecture
-
-**Goal:** Make the app easier to understand and faster to move through.
-
-**Navigation Model**
-- Bottom tabs: `Nexus`, `Discover`, `Chat`, `Identity`, `More`.
-- Chat owns DMs, world channels, unread counts, and active residents.
-- World detail owns overview, feed, channels shortcut, residents, and secondary modules through `More`.
-- Composer appears only from valid feed/channel contexts.
-
-**Deep Links**
-- Add routes for post detail, world detail, channel, profile, notification target, and auth callback.
-- Replace placeholder auth callback handling with real session handling.
-
-**Acceptance**
-- New user can find worlds, join/enter channels, create a post, and return home without confusion.
-- Route restoration works after restart or notification tap.
-
----
-
-## Phase 5: World Content, Identity, And Media System
-
-**Goal:** Make every world feel distinct and remove placeholder-looking content.
-
-**World Requirements**
-- Every world has name, slug, description, lore, banner, icon, accent, category, tags, default channels, and starter content.
-- Starter worlds remain `neon-district` and `crystal-shore`.
-- Immabe can access every world regardless of tier or visibility.
-
-**Channels**
-- Every default world gets `info`, `rules`, `roles`, and `general`.
-- Channel text must be world-specific and include safety disclaimers for medical, financial, legal, and technical-risk worlds.
-
-**Media Pipeline**
-- Standardize all images through `VImage`.
-- Fallback order: Supabase image, bundled generated asset, category placeholder, minimal icon empty state.
-- Compress large assets.
-- Add or verify storage buckets for avatars, world banners, icons, post media, marketplace media, and verification evidence.
-
-**Acceptance**
-- No world uses generic placeholder visuals unless intentionally unconfigured.
-- Chat world navigation shows recognizable icon and name.
-- Missing images degrade gracefully.
-
----
-
-## Phase 6: Supabase Reliability And Migration Hygiene
-
-**Goal:** Ensure the backend can be trusted across fresh projects and the existing remote project.
-
-**Work**
-- Do not rewrite applied migrations.
-- Add corrective migrations for remote issues.
-- Quarantine faulty unapplied migrations.
-- Audit RLS for worlds, memberships, channels, messages, posts, comments, reactions, bookmarks, polls, quests, events, notifications, marketplace, treasury, achievements, device tokens, and storage.
-- Eliminate recursive policy patterns.
-- Use security-definer helpers with fixed `search_path`.
-- Add or verify RPCs for join world, create world, post actions, comments, reactions, bookmarks, poll votes, channel reads/messages, marketplace, treasury, and quest progress.
-- Add indexes for feed, comments, reactions, bookmarks, memberships, channel messages, notifications, search, and marketplace filters.
-
-**Acceptance**
-- Fresh Supabase project can run all migrations once.
-- Existing remote project can apply new migrations without reset.
-- Allowed reads work; denied private rows remain denied.
-- Immabe superuser can read/admin all worlds.
-
----
-
-## Phase 7: Persistence, Repositories, And Outbox
-
-**Goal:** Stop features from pretending to work locally when they are not durable.
-
-**Repository Standard**
-- Add or complete repositories for profile, worlds, posts, chat, notifications, achievements, quests, events, polls, marketplace, treasury, alliances, and cosmetics.
-- Providers must call repositories, not write authoritative state directly to `SharedPreferences`.
-
-**State Types**
-- Standardize `RepositoryResult<T>`, `LoadState<T>`, `AppFailure`, `SyncStatus`, `MutationOutboxItem`, `RetryPolicy`, and `ConflictResolution`.
-
-**Outbox**
-- Unify deprecated offline queue and mutation outbox.
-- Durable actions: post, comment, reaction, bookmark, poll vote, join world, create world, channel message, marketplace action, treasury action, quest progress.
-- Failed mutations show visible retry/failure state.
-
-**Acceptance**
-- Refresh/restart does not lose user actions.
-- Missing Supabase/auth does not return fake success.
-- Offline actions reconcile when connectivity returns.
-
----
-
-## Phase 8: Performance And Loading Speed
-
-**Goal:** Make the app feel fast without hiding backend failures.
-
-**Startup**
-- Remove fixed splash delays.
-- Show shell quickly.
-- Load resident/world/feed first.
-- Lazy-load achievements, events, quests, store, notifications.
-- Register push tokens after resident becomes available.
-
-**Loading**
-- Add pagination for feed, comments, channel messages, notifications, marketplace, and residents.
-- Use cache-first display, server refresh, and realtime updates.
-- Batch queries and avoid duplicate provider loads.
-
-**Images**
-- Use thumbnails in lists.
-- Precache visible world icons/banners.
-- Compress oversized bundled images.
-- Avoid full banners in small rail/list cells.
-
-**Instrumentation**
-- Trace startup, first feed load, world list load, channel load, create post, create world, and notification open.
-
-**Acceptance**
-- App shell appears quickly.
-- Nexus and Chat show skeletons instead of blank stalls.
-- Large images do not cause jank.
-
----
-
-## Phase 9: Firebase Infrastructure Completion
-
-**Goal:** Make Firebase useful without moving app data out of Supabase.
-
-**Crashlytics**
-- Replace console-only reporter with Firebase Crashlytics.
-- Record Flutter/platform/repository/Supabase/outbox failures.
-- Attach only non-PII context.
-
-**Analytics**
-- Track onboarding, world viewed/joined/created, channel opened, post/comment/reaction/bookmark, notification opened, marketplace action, quest action, surfaced errors, and outbox failures.
-- Do not log message body, post body, email, or sensitive content.
-
-**Remote Config**
-- Add feature flags and defaults for marketplace, treasury, quests, events, page sizes, startup load limit, verbose errors, minimum build, and maintenance banner.
-
-**FCM**
-- Handle token registration, token refresh, foreground notifications, background/opened notifications, and notification deep-link routing.
-- Use Supabase Edge Functions for fanout.
-
-**Acceptance**
-- Crash test appears in Crashlytics.
-- Notification tap opens the right route.
-- Remote Config can disable a feature without app release.
-
----
-
-## Phase 10: Feature Completion Roadmap
-
-**Goal:** Close the gap between app vision and visible product.
-
-**Major Areas**
-- Nexus/feed: unified composer, media, post detail, comments, reactions, bookmarks, edit/delete/pin, filters, report/hide/mute.
-- Worlds: creation, settings, roles, permissions, invites, resident list, moderation, analytics.
-- Chat: persistent messages, unread badges, last-read marker, edit/delete, attachments, mentions.
-- Quests/events/challenges: definitions, progress, RSVP, reminders, rewards.
-- Marketplace/treasury: listings, media, transactions, ledger, admin audit.
-- Cosmetics/achievements: inventory, unlock/equip, progress, rarity styles.
-- Governance/polls: creation, voting, results, eligibility, realtime updates.
-- Search/discovery: worlds, posts, residents, channels, tags, recommendations.
-- Identity: edit profile, avatar upload, verification, account export/delete, privacy.
-- Admin/moderation: reports queue, takedown, suspension, audit log, real moderation pipeline.
-
-**Acceptance**
-- No visible "coming soon" unless feature-flagged off.
-- Every visible button works, explains unavailable state, or is hidden.
-- Feature data persists through restart.
-
----
-
-## Phase 11: Security, Privacy, And Abuse Prevention
-
-**Goal:** Avoid shipping a social app with weak access control or unsafe content handling.
-
-**Work**
-- RLS tests for every table.
-- Storage bucket policy tests.
-- Superuser access scoped and auditable.
-- No service-role key in Flutter app.
-- Rate limits for post, world, message, reaction, report, invite flows.
-- Edge Functions verify JWT and permissions.
-- Account deletion/export.
-- Block/mute/report.
-- No PII in analytics/crash logs.
-- World-specific safety rules for medical, financial, legal, and exploit-risk content.
-
-**Acceptance**
-- RLS denial cases are tested.
-- Abuse-prone flows have limits and report paths.
-- Sensitive text is not sent to analytics.
-
----
-
-## Phase 12: Accessibility, Mobile Quality, And Internationalization
-
-**Goal:** Make the app usable on real phones, not just ideal screenshots.
-
-**Work**
-- Test text scale at 1.0, 1.3, and 1.6.
-- Minimum tap target 44x44 where practical.
-- Semantic labels for icon-only buttons.
-- Contrast checks in light and AMOLED dark.
-- Reduced motion support.
-- Keyboard avoidance for composer, comments, chat, auth, and create world.
-- Safe areas on every screen.
-- Pull-to-refresh where expected.
-- Extract user-facing strings.
-
-**Acceptance**
-- No major screen breaks with larger text.
-- Keyboard does not cover submit buttons.
-- Icon-only controls have semantics/tooltips.
-
----
-
-## Phase 13: Testing, CI, And Release Discipline
-
-**Goal:** Make future agents prove changes before producing APKs.
-
-**Test Layers**
-- Unit tests for models, repositories, outbox, sync status, remote config defaults.
-- Provider tests for cache-first load, refresh, error, retry.
-- Supabase tests for RLS and RPC behavior.
-- Widget/golden tests for Nexus, Chat > Worlds, World Detail, Channel, Identity, Composer, Empty/Error states.
-- Integration tests for onboarding, join world, create post, send message, create world, restart persistence.
-- Performance tests for startup, feed load, channel load, image-heavy screens.
-
-**CI**
-- Analyze.
-- Test.
-- Migration validation.
-- Android release APK build with JDK 21.
-- Upload APK artifact.
-- Optional Firebase App Distribution after secrets are configured.
-
-**Required Commands**
-
-```powershell
-$env:JAVA_HOME="C:\Users\Immabe\AppData\Local\jdk-21.0.9+10"
-flutter pub get
-flutter analyze --no-fatal-infos --no-fatal-warnings
-flutter test
-flutter build apk --release
-```
-
-**Acceptance**
-- CI can build APK without local machine intervention.
-- Release APK is attached as artifact.
-- No branch merges without green checks unless explicitly overridden.
-
----
-
-## Public Interfaces And Types To Add Or Standardize
-
-**Flutter**
-- `RepositoryResult<T>`
-- `LoadState<T>`
-- `AppFailure`
-- `SyncStatus`
-- `MutationOutboxItem`
-- `WorldNavigationSummary`
-- `WorldMedia`
-- `MediaAssetRef`
-- `VImageSource`
-- `NotificationPayload`
-- `AnalyticsEvent`
-- `RemoteConfigKeys`
-- `PerformanceTraceName`
-
-**Supabase**
-- Stable RPCs for core mutations.
-- `device_tokens` token refresh support.
-- Storage buckets and policies for media.
-- World icon/banner fields.
-- Channel foundation/starter content fields.
-- Audit log table for admin/moderation actions.
-
-**UI**
-- One canonical composer.
-- One canonical empty state.
-- One canonical image widget.
-- One canonical world list/rail item.
-- One canonical error surface.
-
----
-
-## Milestone Order
-
-1. Merge stabilization baseline.
-2. Fix installed-app polish: world names, tab overflow, create-world verification.
-3. Rewrite source-of-truth docs.
-4. Finish Forui UI migration.
-5. Complete media/world identity system.
-6. Harden Supabase/RLS/RPC/migrations.
-7. Standardize repositories and durable outbox.
-8. Improve startup/loading/realtime/image performance.
-9. Complete Firebase infrastructure.
-10. Fill feature gaps.
-11. Harden security/privacy/accessibility.
-12. Build CI-backed release process.
-
----
+# Vertiege Completion Plan: Worlds, Progression, Commerce, and Social Loops
+
+## Summary
+
+Build Vertiege 1.0 around the core promise: real-life achievements drive XP and tier, worlds provide social/economic status, and paid features stay cosmetic or convenience-only.
+
+Key decisions locked:
+- Campfire unlocks at world prestige 25 through existing `audioRooms`; Lounge starts earlier at world prestige 10.
+- Lounge is a combined high-status space: text lounge at prestige 10, voice Campfire lounge at prestige 25, both for Veteran+ residents, council, and sovereigns.
+- Use one post composer with capability-gated options.
+- Subscriptions launch in v1, but no XP boosts, paid progression, paid world access, or pay-to-win advantages.
+- Cosmetics are purchasable with sovereign coins and real money.
+- Council approval required for treasury withdrawals, job posting, rank changes, and major governance actions; poll creation is allowed for qualified high-level residents.
+- Challenges should be seasonal/world/team scoped, not permanent global-only. Research supports fair cohorts, opt-out/low-pressure paths, friend/team quests, and visible streak/progress loops.
+- Public profile v1 includes verified achievement wall, badges, titles, featured achievements, and equipped cosmetics.
+- Invite links redirect signed-out users through login/signup and auto-accept after auth.
+- Android support target: run on at least Android 11/API 30 for “5-year-old OS” UAT, while keeping current lower `minSdk` if dependencies allow; Play submission must target current Play requirements, currently Android 15/API 35+ per Google Play docs.
+
+Research anchors:
+- Duolingo leagues use weekly cohorts, similar-habit matching, tournaments, opt-out, and anti-cheat monitoring: [Duolingo Leaderboards](https://blog.duolingo.com/duolingo-leagues-leaderboards/).
+- Duolingo streak research shows retention gains from commitment loops and break-protection, not raw grind: [Duolingo Streaks](https://blog.duolingo.com/how-streaks-keep-duolingo-learners-committed-to-their-language-goals/).
+- Gamification research warns against simplistic leaderboards and recommends designs that support autonomy, competence, and relatedness: [Springer SDT gamification paper](https://link.springer.com/article/10.1007/s11528-024-00968-9).
+- Google Play target API requirements require modern target SDKs while still allowing older runtime support: [Android target API requirements](https://developer.android.com/google/play/requirements/target-sdk).
+
+## Already addressed (baseline — do not re-plan)
+
+Tracked in detail: [`docs/plan/PERFECTION-BACKLOG.md`](docs/plan/PERFECTION-BACKLOG.md) (Waves 0–6), [`docs/uat/UAT-ISSUE-LOG.md`](docs/uat/UAT-ISSUE-LOG.md) (device UAT).
+
+| Area | Status | Notes |
+|------|--------|--------|
+| **Waves 0–6** (polish, nav, load errors, Forui hubs, security migration, world detail shell) | **Done** on `main` | See backlog; Wave 6 full device sign-off still open |
+| **UAT #1** — achievement badge PNGs | **Fixed** | `pubspec.yaml` → `assets/generated/achievements/` |
+| **UAT #2** — world detail Channels/Members grey void | **Fixed** | Single inner scroll + `Column(min)`; no child `VLoadingCard` for residents; InkWell rows |
+| **Brand splash** | **Done** | New mark assets + theme-aware `brandMarkAsset` |
+| **Wave 7** (voice / Lounge / Campfire) | **Done (code)** — device UAT pending | Routing, gates, seed migration, tools panel, LiveKit validation |
+| **Wave 8** (composer) | **Done (core)** | `PostInput` + `PostCapabilities` + `create_post` RPC |
+| **Wave 9** (commerce) | **MVP done** | Receipt RPC (token dedupe), coin cosmetics; real store verify TBD |
+| **Wave 10** (governance) | **Partial** | Manage hub + treasury proposals + council queue |
+| **Wave 11** (progression) | **Partial** | Challenge `scope`, opt-out, `display_title`; seasons TBD |
+| **Wave 12** (release) | **Partial** | Invites; Forui + API 30 smoke open |
+| **Wave 12** regression | **#1 + #2 only** | Re-smoke badge PNGs and world tab layout after each release |
+
+When implementing a wave below, **extend** these docs; do not reopen closed UAT items unless regression.
+
+## Key Changes
+
+### 1. Voice, Lounge, and World Status
+
+- Keep existing unlock constants as the source of truth:
+  - `lounge` at prestige 10.
+  - `audioRooms` at prestige 25.
+  - `marketplace` at prestige 30.
+  - `treasury` at prestige 35.
+  - `governance` at prestige 50.
+- Define Lounge eligibility as world prestige 10 plus resident standing level 4/Veteran or higher, with sovereign/council override.
+- Add a Lounge text channel for eligible residents and a Campfire voice room inside Lounge once `audioRooms` unlocks.
+- Route voice channels to Campfire, never to the text channel screen.
+- Add connecting, failed, disconnected, muted, deafened, and permission-denied states to voice UI.
+- Validate LiveKit token requests server-side against authenticated user, world membership, channel type, and eligibility.
+
+### 2. Unified Composer
+
+- Consolidate `PostInput`, `PostComposer`, and `CreatePostScreen` into one canonical composer component.
+- Route all compose entry points through this component: Nexus FAB, world feed composer, post reply/decree/announcement entry points.
+- Add a shared post capability service for:
+  - text post
+  - media
+  - poll
+  - scheduled post
+  - announcement
+  - decree
+  - pinned post
+- Enforce the same capabilities in UI and server write path.
+- Replace raw privileged post writes with a server-enforced post creation RPC so announcement/decree/pin/poll permissions cannot be bypassed.
+
+### 3. Subscriptions and Cosmetics Without Pay-to-Win
+
+- Ship subscriptions in v1 as cosmetic/convenience only:
+  - subscription badge
+  - profile frame/name treatment
+  - extra cosmetic slots
+  - profile analytics
+  - saved drafts
+  - priority support/review queue visibility, without approval advantage
+- Remove or disable paid XP multipliers, paid world access, paid world boosts, paid post pin advantages, and paid world creation expansion.
+- Replace current “activated” subscription UI with receipt-backed entitlement verification.
+- Split store products into subscription products, coin packs, and direct cosmetic purchases.
+- Move cosmetic purchase/grant logic to server-backed atomic flows:
+  - purchase with sovereign coins
+  - purchase/grant from real-money receipt
+  - equip/unequip cosmetic
+- Keep sovereign coins earnable through achievements/activity so real-life achievement remains the main game.
+
+### 4. Worlds, Council, and Governance
+
+- Add a world “Manage / Participate” hub that exposes Marketplace, Treasury, Polls, Jobs, Archive, Lounge, Settings, and Audit Log with visible gate reasons.
+- Council approval required for:
+  - treasury withdrawals
+  - job postings
+  - rank changes
+  - major settings/governance changes
+- Poll creation allowed for qualified high-level residents without council approval; council/sovereign can close or moderate polls.
+- Treasury withdrawals use proposals: requested, approved, rejected, executed.
+- Job postings use approval before publishing; applications keep current pending/accepted flow.
+- Audit log records approvals, withdrawals, job publications, rank changes, poll moderation, and treasury actions.
+
+### 5. Challenges, Seasons, and Retention Loops
+
+- Replace `/challenges` global empty-world sentinel with an explicit model:
+  - daily quests are personal
+  - world challenges are world-scoped
+  - season challenges are cohort/team scoped
+- Do not use a permanent global leaderboard as the main challenge model.
+- Add fair seasonal cohorts based on tier/activity band and timezone.
+- Add world/team challenges that encourage cooperation, not only individual grinding.
+- Add opt-out or low-pressure mode for competitive rankings while preserving daily quests and world participation.
+- Add anti-abuse checks for XP spikes, repeated actions, and paid-item exclusion from rankings.
+- Add streak protection through earned items or subscription convenience only if it does not affect XP/tier outcomes.
+
+### 6. Profile, Identity, and Achievements
+
+- Public profile v1 includes:
+  - verified achievement wall
+  - featured achievements
+  - badges
+  - titles
+  - equipped cosmetics
+  - visibility controls per achievement
+- Add profile management for selecting title, featured achievements, badge, avatar frame, and name treatment.
+- Persist title/cosmetic/profile display fields through profile service, not only local resident state.
+- Keep manual achievement review as the core XP source; in-app achievements remain secondary and server-authoritative.
+
+### 7. Invites, Deep Links, and Android UAT
+
+- Generate full invite deep links, not just invite codes.
+- Signed-out invite links redirect to login/signup, preserve the invite, and auto-accept after resident creation/auth.
+- Add Android manifest handling for invite links in addition to auth/verifier links.
+- Android UAT baseline:
+  - primary release surface: Android release APK.
+  - minimum test OS: Android 11/API 30 because that is approximately five years old in 2026.
+  - keep current lower `minSdk` if Flutter/dependencies support it, but do not claim support without smoke testing.
+  - target SDK must satisfy Play requirements at release time.
+
+## Implementation Waves
+
+### Wave 7: Truthful Voice and Lounge
+
+- Add voice-aware channel routing and Campfire entry points.
+- Add Lounge eligibility checks and UI gate reasons.
+- Add LiveKit membership validation.
+- Update UAT checklist for Lounge text, Campfire unlock, join failure, mini-bar, and leave behavior.
+
+### Wave 8: One Composer
+
+- Choose the canonical composer implementation and remove dead route drift.
+- Add post capability service.
+- Add server-enforced post creation path.
+- Smoke test Nexus compose, world compose, polls, announcements, decrees, and pinned posts.
+
+### Wave 9: Commerce v1 Without Pay-to-Win
+
+- Replace subscription activation with receipt-backed entitlement.
+- Rewrite subscription benefits to cosmetic/convenience only.
+- Add server-backed cosmetics catalog and purchase/grant flows.
+- Disable or remove paid progression features from UI copy and enforcement.
+
+### Wave 10: Governance and World Economy
+
+- Add world Manage/Participate hub.
+- Add council approval queue for treasury withdrawals, job postings, and rank changes.
+- Add poll permission model for high-level residents.
+- Expand audit log to show resident names and governance actions.
+
+### Wave 11: Progression and Seasons
+
+- Replace global challenge sentinel with explicit daily/world/season scopes.
+- Add fair cohorts and low-pressure opt-out.
+- Add leaderboard anti-abuse checks.
+- Finish public profile achievements, badges, titles, featured achievements, and equipped cosmetics.
+
+### Wave 12: Release Polish and Android UAT
+
+- Complete Forui polish on forms/dialogs most visible in commerce, verifier, create world, settings, and world management.
+- Add invite deep-link auth continuation.
+- Run release APK smoke on Android 11/API 30 and current Android emulator.
+- Keep UAT #1 and #2 only as regression checks: achievement PNGs and no world-detail grey void.
+
+## Public Interfaces and Data Additions
+
+- Add `PostCapabilities` model/service used by composer UI and post provider.
+- Add server post creation RPC for capability-enforced posting.
+- Add voice token validation input for world/channel context.
+- Add cosmetic catalog, user cosmetics, purchase receipt, and coin transaction concepts.
+- Add subscription entitlement verification path.
+- Add governance proposal/action model for treasury, jobs, ranks, and audit events.
+- Add challenge scope field or separate models for daily, world, and season challenges.
+- Add profile display fields for title, featured achievements, badge, avatar frame, and name treatment.
+- Add invite continuation state for post-login auto-accept.
+
+## Test Plan
+
+- Voice:
+  - non-eligible resident sees Lounge/Campfire gate reason.
+  - eligible resident opens Lounge text.
+  - prestige 25 world shows Campfire voice entry.
+  - token request fails for non-member or non-voice channel.
+  - mini-bar appears only after successful connection.
+
+- Composer:
+  - same composer opens from Nexus and world feed.
+  - unavailable options are hidden or disabled with reasons.
+  - server rejects unauthorized announcement/decree/pin/poll attempts.
+
+- Commerce:
+  - failed/canceled purchase does not activate subscription.
+  - subscription benefits never alter XP, tier, world access, or rankings.
+  - coin cosmetic purchase is atomic.
+  - real-money cosmetic receipt grants exactly one owned cosmetic.
+
+- Governance:
+  - treasury withdrawal requires council approval.
+  - job post requires approval.
+  - rank change requires approval.
+  - qualified resident can create poll without approval.
+  - audit log records each action with readable actor names.
+
+- Progression:
+  - daily quest claim updates XP through server-authoritative path.
+  - world challenge progress is world-scoped.
+  - season cohort leaderboard excludes paid boosts.
+  - opt-out hides competitive ranking without disabling quests.
+
+- Profile:
+  - public profile shows verified wall, featured achievements, title, badge, and cosmetics.
+  - hidden achievements do not appear publicly.
+  - equipped cosmetics persist after restart.
+
+- Android:
+  - release APK installs and runs on Android 11/API 30.
+  - release APK also passes current emulator smoke.
+  - invite link opens app, auths if needed, then auto-accepts.
 
 ## Assumptions
 
-- The stabilization APK is good enough to merge, but not production quality.
-- `feat/stabilization-plan` is the accepted baseline branch.
-- Supabase remains the source of truth for app data and auth.
-- Firebase remains infrastructure-only.
-- Immabe / `ltyl.naughty@gmail.com` remains superuser with all-world access.
-- Light theme is the default.
-- Dark theme should be AMOLED black.
-- DeepSeek v4 Pro can implement code and run tests, but Codex must handle visual/image-based review.
-- Work should proceed in milestones, not one giant change.
+- “Only at certain level” maps to existing world prestige gates: Lounge at 10, Campfire/audio at 25.
+- “High-level residents” maps to Veteran standing or higher in a specific world, plus sovereign/council overrides.
+- “Avoid pay-to-win” means paid features must not affect XP, tier, world access, governance power, marketplace advantage, rankings, or achievement approval probability.
+- “Both” for cosmetics means sovereign coins and real money can grant cosmetics, but neither path grants progression.
+- “All” public profile promise includes achievements, badges, titles, featured achievements, and equipped cosmetics.
+- Android 11/API 30 is the UAT floor for the “5-year-old operating systems” promise; lower Android versions may remain technically supported only if smoke-tested.

@@ -992,6 +992,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: VSpacing.md),
             VSectionList(
+              title: 'Progression',
+              children: [
+                VSectionSwitchTile(
+                  icon: Icons.leaderboard_outlined,
+                  label: 'Low-pressure mode',
+                  value: ref.watch(residentProvider).resident?.leaderboardOptOut ??
+                      false,
+                  onChanged: (v) {
+                    ref.read(residentProvider.notifier).setLeaderboardOptOut(v);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: VSpacing.md),
+            VSectionList(
               title: 'Worlds',
               children: [
                 VSectionSwitchTile(

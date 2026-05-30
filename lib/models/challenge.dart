@@ -4,6 +4,7 @@ class WorldChallenge {
   final String title;
   final String description;
   final String challengeType;
+  final String scope;
   final int targetValue;
   final int currentValue;
   final int rewardXp;
@@ -20,6 +21,7 @@ class WorldChallenge {
     required this.title,
     required this.description,
     this.challengeType = 'individual',
+    this.scope = 'world',
     this.targetValue = 0,
     this.currentValue = 0,
     this.rewardXp = 0,
@@ -48,6 +50,7 @@ class WorldChallenge {
     'title': title,
     'description': description,
     'challenge_type': challengeType,
+    'scope': scope,
     'target_value': targetValue,
     'current_value': currentValue,
     'reward_xp': rewardXp,
@@ -65,6 +68,7 @@ class WorldChallenge {
     title: json['title'] ?? '',
     description: json['description'] ?? '',
     challengeType: json['challenge_type'] ?? 'individual',
+    scope: json['scope'] as String? ?? 'world',
     targetValue: (json['target_value'] as num?)?.toInt() ?? 0,
     currentValue: (json['current_value'] as num?)?.toInt() ?? 0,
     rewardXp: (json['reward_xp'] as num?)?.toInt() ?? 0,
@@ -82,6 +86,7 @@ class WorldChallenge {
     title: data['title'] ?? '',
     description: data['description'] ?? '',
     challengeType: data['challenge_type'] ?? 'individual',
+    scope: data['scope'] as String? ?? 'world',
     targetValue: (data['target_value'] as num?)?.toInt() ?? 0,
     currentValue: (data['current_value'] as num?)?.toInt() ?? 0,
     rewardXp: (data['reward_xp'] as num?)?.toInt() ?? 0,

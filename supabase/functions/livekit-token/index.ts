@@ -11,11 +11,11 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { roomName, participantIdentity } = await req.json()
+    const { channelId, worldId, participantIdentity } = await req.json()
 
-    if (!roomName || !participantIdentity) {
+    if (!channelId || !worldId || !participantIdentity) {
       return new Response(
-        JSON.stringify({ error: 'roomName and participantIdentity required' }),
+        JSON.stringify({ error: 'channelId, worldId and participantIdentity required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } },
       )
     }
@@ -41,6 +41,64 @@ serve(async (req: Request) => {
         headers: { 'Content-Type': 'application/json' },
       })
     }
+    if (participantIdentity !== user.id) {
+      return new Response(JSON.stringify({ error: 'Participant mismatch' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ??
+        Deno.env.get('SUPABASE_ANON_KEY') ??
+        '',
+    )
+
+    const { data: channel, error: channelError } = await admin
+      .from('channels')
+      .select('id, world_id, name, channel_type')
+      .eq('id', channelId)
+      .maybeSingle()
+    if (channelError || !channel || channel.world_id !== worldId) {
+      return new Response(JSON.stringify({ error: 'Voice channel not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    if (channel.channel_type !== 'voice') {
+      return new Response(JSON.stringify({ error: 'Not a voice channel' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const { data: world } = await admin
+      .from('worlds')
+      .select('id, prestige, sovereign_id')
+      .eq('id', worldId)
+      .maybeSingle()
+    if (!world || Number(world.prestige ?? 0) < 25) {
+      return new Response(JSON.stringify({ error: 'Audio rooms locked' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const { data: membership } = await admin
+      .from('world_members')
+      .select('rep')
+      .eq('world_id', worldId)
+      .eq('resident_id', user.id)
+      .maybeSingle()
+    const isSovereign = world.sovereign_id === user.id
+    const hasVeteranStanding = Number(membership?.rep ?? 0) >= 200
+    if (!isSovereign && !hasVeteranStanding) {
+      return new Response(JSON.stringify({ error: 'Veteran standing required' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
 
     const apiKey = Deno.env.get('LIVEKIT_API_KEY')
     const apiSecret = Deno.env.get('LIVEKIT_API_SECRET')
@@ -60,7 +118,7 @@ serve(async (req: Request) => {
 
     token.addGrant({
       roomJoin: true,
-      room: roomName,
+      room: `campfire_${channelId}`,
       canPublish: true,
       canSubscribe: true,
     })

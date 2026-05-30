@@ -581,7 +581,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       ref.read(channelProvider.notifier).ensureDefaultChannels(widget.worldId);
       return;
     }
-    context.push(worldChannelPath(widget.worldId, channel));
+    context.push(
+      worldChannelDestinationPath(
+        widget.worldId,
+        channel,
+        worldName: ref.read(worldProvider).worlds[widget.worldId]?.name,
+      ),
+    );
   }
 
   void _showWorldShareSheet(World world) {
@@ -809,23 +815,50 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 ),
               ),
             ],
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                for (final tabId in WorldPageIa.tabsFor(world))
-                  _WorldDetailTabScroll(
-                    child: _buildTabBody(
-                      tabId,
-                      world: world,
-                      resident: resident,
-                      posts: posts,
-                      channels: channels,
-                      cs: cs,
-                      isJoined: isJoined,
-                      onSettings: onSettings,
-                    ),
-                  ),
-              ],
+            body: AnimatedBuilder(
+              animation: _tabController!,
+              builder: (context, _) {
+                final tabIds = WorldPageIa.tabsFor(world);
+                final tabId = tabIds[_tabController!.index];
+                return Builder(
+                  builder: (context) {
+                    return CustomScrollView(
+                      key: PageStorageKey('world_tab_${tabId.name}'),
+                      slivers: [
+                        SliverOverlapInjector(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                            context,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: VSpacing.md,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildTabBody(
+                                  tabId,
+                                  world: world,
+                                  resident: resident,
+                                  posts: posts,
+                                  channels: channels,
+                                  cs: cs,
+                                  isJoined: isJoined,
+                                  onSettings: onSettings,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ),
         ),
@@ -972,43 +1005,6 @@ class _StatChip extends StatelessWidget {
         ),
         ),
       ),
-    );
-  }
-}
-
-class _WorldDetailTabScroll extends StatelessWidget {
-  final Widget child;
-
-  const _WorldDetailTabScroll({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        final bg = Theme.of(context).scaffoldBackgroundColor;
-        return ColoredBox(
-          color: bg,
-          child: CustomScrollView(
-            slivers: [
-              SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-                sliver: SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: child,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

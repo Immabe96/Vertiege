@@ -20,3 +20,11 @@ String? redirectVerifierHostDeepLink(Uri uri, String location) {
   }
   return '/verifier$location';
 }
+
+/// Android intent: `vertiege://invite/ABC123` → `/invite/ABC123`.
+String? redirectInviteHostDeepLink(Uri uri, String location) {
+  if (uri.host != 'invite' || location.startsWith('/invite')) return null;
+  final code = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+  if (code.isEmpty) return '/invite';
+  return '/invite/${Uri.encodeComponent(code)}';
+}

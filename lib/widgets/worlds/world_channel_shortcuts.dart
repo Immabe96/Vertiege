@@ -37,7 +37,7 @@ class WorldChannelShortcuts extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     void open(WorldChannel channel) {
-      context.push(worldChannelPath(worldId, channel));
+      context.push(worldChannelDestinationPath(worldId, channel));
     }
 
     return Padding(

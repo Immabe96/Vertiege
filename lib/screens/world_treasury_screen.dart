@@ -179,13 +179,19 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
               final amount = int.tryParse(amountController.text);
               if (amount == null || amount <= 0) return;
 
-              await TreasuryService.withdraw(
+              final result = await TreasuryService.withdraw(
                 widget.worldId,
                 amount,
                 descController.text.trim(),
               );
               if (context.mounted) {
                 Navigator.of(ctx).pop();
+                if (!result.ok) {
+                  VFeedback.showMessage(
+                    context,
+                    result.error ?? 'Withdrawal failed.',
+                  );
+                }
                 _loadData();
               }
             },

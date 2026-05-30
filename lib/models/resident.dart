@@ -72,6 +72,7 @@ class Resident {
   final int postPinLimit;
   final int worldCreationLimit;
   final int lastActivityAt;
+  final bool leaderboardOptOut;
 
   const Resident({
     required this.id,
@@ -111,6 +112,7 @@ class Resident {
     this.postPinLimit = 0,
     this.worldCreationLimit = 1,
     this.lastActivityAt = 0,
+    this.leaderboardOptOut = false,
   });
 
   /// Unique referral code derived from the resident's ID — first 8 chars,
@@ -157,6 +159,7 @@ class Resident {
     int? postPinLimit,
     int? worldCreationLimit,
     int? lastActivityAt,
+    bool? leaderboardOptOut,
   }) => Resident(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -195,5 +198,6 @@ class Resident {
     postPinLimit: postPinLimit ?? this.postPinLimit,
     worldCreationLimit: worldCreationLimit ?? this.worldCreationLimit,
     lastActivityAt: lastActivityAt ?? this.lastActivityAt,
+    leaderboardOptOut: leaderboardOptOut ?? this.leaderboardOptOut,
   );
 }

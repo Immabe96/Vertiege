@@ -45,6 +45,13 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="vertiege" android:host="verifier" android:pathPrefix="/login"/>
             </intent-filter>
+            <!-- World invite links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="vertiege" android:host="invite"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

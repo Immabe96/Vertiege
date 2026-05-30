@@ -71,7 +71,9 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
           ),
           ...archiveChannels.map((channel) => _ArchiveItem(
                 channel: channel,
-                onTap: () => context.push(worldChannelPath(widget.worldId, channel)),
+                onTap: () => context.push(
+                      worldChannelDestinationPath(widget.worldId, channel),
+                    ),
               )),
         ],
       ),

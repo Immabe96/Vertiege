@@ -6,6 +6,7 @@ import '../../models/channel.dart';
 import '../../router/world_navigation.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
+import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
@@ -40,7 +41,14 @@ class _WorldFeedChatTeaserState extends ConsumerState<WorldFeedChatTeaser> {
   }
 
   void _openChannel(WorldChannel channel) {
-    context.push(worldChannelPath(widget.worldId, channel));
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    context.push(
+      worldChannelDestinationPath(
+        widget.worldId,
+        channel,
+        worldName: world?.name,
+      ),
+    );
   }
 
   @override

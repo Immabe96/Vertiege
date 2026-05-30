@@ -55,20 +55,37 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     });
 
     try {
-      await StoreService.buyWealthTier(
-        tier == SubscriptionTier.patrician ? 2 : 3,
+      final productId = tier == SubscriptionTier.patrician
+          ? SubscriptionService.patricianProductId
+          : SubscriptionService.sovereignEliteProductId;
+      final result = await StoreService.buyProduct(productId);
+      if (result != StorePurchaseState.purchased) {
+        throw StateError('Purchase was not completed.');
+      }
+
+      final token = StoreService.lastPurchaseToken;
+      if (token == null || token.isEmpty) {
+        throw StateError('Missing purchase receipt.');
+      }
+
+      final resident = ref.read(residentProvider).resident;
+      if (resident == null) {
+        throw StateError('Sign in required.');
+      }
+
+      final verifyError = await SubscriptionService.verifyPurchase(
+        productId: productId,
+        purchaseToken: token,
       );
+      if (verifyError != null) {
+        throw StateError(verifyError);
+      }
 
       if (mounted) {
-        final resident = ref.read(residentProvider).resident;
-        if (resident != null) {
-          await SubscriptionService.setTier(resident.id, tier);
-        }
+        await _loadTier();
         setState(() {
-          _currentTier = tier;
           _purchasing = false;
-          _purchaseMessage =
-              'Subscription activated! Welcome to ${SubscriptionService.getBenefits(tier)['label']}.';
+          _purchaseMessage = 'Subscription active. Cosmetic perks unlocked.';
         });
       }
     } catch (_) {
@@ -244,28 +261,26 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   List<_TierFeature> _buildFeatures(Map<String, dynamic> benefits) {
     final features = <_TierFeature>[];
 
-    final worldLimit = benefits['worldLimit'] as int;
-    final shields = benefits['streakShieldsPerMonth'] as int;
-    final priorityV = benefits['priorityVerification'] as bool;
+    final cosmeticSlots = benefits['extraCosmeticSlots'] as int;
+    final priorityV = benefits['priorityReviewVisibility'] as bool;
     final goldN = benefits['goldName'] as bool;
-    final customBg = benefits['customBackground'] as bool;
+    final customFrame = benefits['customFrame'] as bool;
     final analytics = benefits['analytics'] as bool;
+    final savedDrafts = benefits['savedDrafts'] as int;
 
     features.add(
       _TierFeature(
-        label: worldLimit >= 999
-            ? 'Create unlimited worlds'
-            : 'Create up to $worldLimit worlds',
+        label: cosmeticSlots > 0
+            ? '+$cosmeticSlots equipped cosmetic slots'
+            : 'Standard cosmetic slots',
         included: true,
       ),
     );
 
     features.add(
       _TierFeature(
-        label: shields > 0
-            ? '$shields streak shield${shields > 1 ? "s" : ""}/month'
-            : 'No streak shields',
-        included: shields > 0,
+        label: 'Up to $savedDrafts saved drafts',
+        included: true,
       ),
     );
 
@@ -273,15 +288,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       const _TierFeature(label: 'Gold profile frame', included: true),
     );
 
-    features.add(
-      _TierFeature(label: 'Priority verification queue', included: priorityV),
-    );
+    features.add(_TierFeature(
+      label: 'Review queue status visibility',
+      included: priorityV,
+    ));
 
     features.add(_TierFeature(label: 'Gold name treatment', included: goldN));
 
-    features.add(
-      _TierFeature(label: 'Custom profile background', included: customBg),
-    );
+    features.add(_TierFeature(label: 'Custom profile frame', included: customFrame));
 
     features.add(
       _TierFeature(label: 'Analytics dashboard', included: analytics),

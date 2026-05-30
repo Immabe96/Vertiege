@@ -90,7 +90,20 @@ class WorldService {
       },
     );
     if (result is Map) {
-      return Map<String, dynamic>.from(result);
+      final createdWorld = Map<String, dynamic>.from(result);
+      final worldId = createdWorld['id']?.toString();
+      if (worldId != null && worldId.isNotEmpty) {
+        try {
+          await createDefaultChannels(worldId);
+        } catch (e, st) {
+          CrashReporter.instance.recordError(
+            e,
+            st,
+            hint: 'world_service post-create gated channel creation',
+          );
+        }
+      }
+      return createdWorld;
     }
     return world;
   }
@@ -405,6 +418,16 @@ class WorldService {
         ChannelType.announcement,
       ),
       ('general', 'General discussion for all residents.', ChannelType.text),
+      (
+        'lounge',
+        'A high-standing resident lounge for trusted world conversation.',
+        ChannelType.text,
+      ),
+      (
+        'campfire',
+        'Live voice for eligible lounge residents once audio rooms unlock.',
+        ChannelType.voice,
+      ),
     ];
 
     for (var i = 0; i < defaults.length; i++) {

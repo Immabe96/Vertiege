@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/invite_service.dart';
 import '../../services/verifier_session.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
@@ -75,10 +76,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final resident = residentState.resident;
     if (resident != null) {
       unawaited(AnalyticsService.logEvent(AnalyticsEvents.signIn));
-      context.go('/');
+      await _routeAfterSignIn();
     } else {
       context.go('/onboarding');
     }
+  }
+
+  Future<void> _routeAfterSignIn() async {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null || !resident.gateCompleted) {
+      if (mounted) context.go('/onboarding');
+      return;
+    }
+
+    final invitePath = await InviteService.takePendingInvitePath();
+    if (!mounted) return;
+    context.go(invitePath ?? '/');
   }
 
   String? _bootstrapMessage(SupabaseBootstrapResult bootstrap) {
@@ -303,7 +316,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted || _isLoading) return;
       if (next.isLoading || next.resident == null) return;
       if (maybeSupabase()?.auth.currentSession == null) return;
-      context.go('/');
+      unawaited(_routeAfterSignIn());
     });
 
     final bootstrapHint = _bootstrapMessage(bootstrap);

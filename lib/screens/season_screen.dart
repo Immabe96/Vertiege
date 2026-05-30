@@ -45,13 +45,24 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
         .where((s) => myWorlds.any((w) => w.id == s.worldId))
         .toList();
 
+    final unclaimed = SeasonService.unclaimedWorlds(allWorlds);
+    final growing = SeasonService.growingWorldCount(allWorlds);
+
     return VHubPage(
-      title: 'Sovereign Seasons',
+      title: season.name,
       showBack: true,
       body: isLoaded
           ? CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(child: _SeasonHero(season: season)),
+                SliverToBoxAdapter(
+                  child: _SeasonHero(
+                    season: season,
+                    unclaimedCount: unclaimed.length,
+                    growingCount: growing,
+                  ),
+                ),
+                if (season.pillars.isNotEmpty)
+                  SliverToBoxAdapter(child: _SeasonPillars(season: season)),
                 SliverToBoxAdapter(child: _SeasonProgress(season: season)),
                 SliverToBoxAdapter(child: _CountdownBanner(season: season)),
                 if (rankings.isNotEmpty)
@@ -118,10 +129,59 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
   }
 }
 
-class _SeasonHero extends StatelessWidget {
+class _SeasonPillars extends StatelessWidget {
   final Season season;
 
-  const _SeasonHero({required this.season});
+  const _SeasonPillars({required this.season});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        0,
+        VSpacing.md,
+        VSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'This season',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          for (final pillar in season.pillars)
+            Padding(
+              padding: const EdgeInsets.only(bottom: VSpacing.xs),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.bolt, size: 16, color: VColors.tertiary),
+                  const SizedBox(width: VSpacing.xs),
+                  Expanded(child: Text(pillar, style: theme.textTheme.bodySmall)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeasonHero extends StatelessWidget {
+  final Season season;
+  final int unclaimedCount;
+  final int growingCount;
+
+  const _SeasonHero({
+    required this.season,
+    required this.unclaimedCount,
+    required this.growingCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +211,7 @@ class _SeasonHero extends StatelessWidget {
           FadeIn(
             delayMs: 60,
             child: Text(
-              'SOVEREIGN SEASONS',
+              'SEASON 1',
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: VFontWeight.bold,
                 letterSpacing: 1.5,
@@ -163,7 +223,7 @@ class _SeasonHero extends StatelessWidget {
           FadeIn(
             delayMs: 120,
             child: Text(
-              season.name.toUpperCase(),
+              'THE BIG BANG',
               textAlign: TextAlign.center,
               style: theme.textTheme.displayLarge?.copyWith(
                 fontWeight: VFontWeight.bold,
@@ -175,12 +235,23 @@ class _SeasonHero extends StatelessWidget {
           FadeIn(
             delayMs: 180,
             child: Text(
-              'World activity is ranked from live activity signals',
+              season.tagline,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: isDark
                     ? VColors.onSurfaceVariantDark
                     : VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          FadeIn(
+            delayMs: 240,
+            child: Text(
+              '$unclaimedCount realms awaiting sovereigns · $growingCount worlds growing',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: VColors.tertiary,
               ),
             ),
           ),

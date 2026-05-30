@@ -28,6 +28,8 @@ class WorldDetailMembers extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Member avatars wrapped in GlassPanel
         VSurfacePanel(
@@ -50,7 +52,11 @@ class WorldDetailMembers extends ConsumerWidget {
           WorldEventsCard(worldId: worldId, sovereignId: world.sovereignId),
         WorldLeaderboard(worldId: worldId),
         const SizedBox(height: VSpacing.md),
-        WorldResidents(world: world),
+        WorldResidents(
+          world: world,
+          members: members,
+          isLoading: membersLoading,
+        ),
         const SizedBox(height: VSpacing.xxl),
       ],
     );

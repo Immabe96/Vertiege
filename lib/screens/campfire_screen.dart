@@ -8,6 +8,7 @@ import '../state/voice_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 
@@ -42,6 +43,8 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
             channelName: widget.channelName,
             residentId: resident.id,
             residentName: resident.name,
+            worldId: widget.worldId,
+            worldName: widget.worldName,
           );
     }
   }
@@ -50,6 +53,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
   Widget build(BuildContext context) {
     final voiceState = ref.watch(voiceProvider);
     final participants = voiceState.participants;
+    final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -89,7 +93,38 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
         children: [
           const SizedBox(height: VSpacing.xl),
           Expanded(
-            child: participants.isEmpty
+            child: resident == null
+                ? const AppEmptyState(
+                    title: 'Sign in to join Campfire',
+                    description: 'Voice rooms are reserved for eligible residents.',
+                    icon: Icons.lock_outline,
+                  )
+                : voiceState.error != null
+                    ? AppEmptyState(
+                        title: 'Could not join Campfire',
+                        description: voiceState.error,
+                        icon: Icons.volume_off_outlined,
+                        variant: EmptyStateVariant.error,
+                      )
+                    : voiceState.isConnecting
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const FCircularProgress(),
+                                const SizedBox(height: VSpacing.lg),
+                                Text(
+                                  'Joining Campfire...',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: isDark
+                                        ? VColors.onSurfaceVariantDark
+                                        : VColors.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : participants.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

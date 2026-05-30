@@ -8,7 +8,6 @@ import '../../models/resident.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../services/access_control.dart';
-import '../../services/store_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/loading_state.dart';
@@ -105,24 +104,20 @@ class WorldAccessGuard extends ConsumerWidget {
     Resident resident,
   ) {
     if (world.type == WorldType.wealth) {
-      if (StoreService.isEnabled) {
-        _showPurchaseSheet(context, ref, world);
-      } else {
-        VFeedback.showMessage(context, 'Store access is disabled for this build. Try profession or open worlds for now.',);
-      }
+      _showTierRequirementSheet(context, world);
     } else if (world.type == WorldType.profession) {
       _showVerificationSheet(context, ref, world.requiredProfession ?? '');
     }
   }
 
-  void _showPurchaseSheet(BuildContext context, WidgetRef ref, World world) {
+  void _showTierRequirementSheet(BuildContext context, World world) {
     final tier = world.requiredTier ?? 1;
-    final (title, price) = switch (tier) {
-      2 => ('High Roller Access', '\$4.99'),
-      3 => ('Elite Access', '\$9.99'),
-      4 => ('Old Money Access', '\$19.99'),
-      5 => ('Apex Access', '\$49.99'),
-      _ => ('Access', ''),
+    final title = switch (tier) {
+      2 => 'High Roller',
+      3 => 'Elite',
+      4 => 'Old Money',
+      5 => 'Apex',
+      _ => 'Resident',
     };
 
     showModalBottomSheet(
@@ -149,42 +144,31 @@ class WorldAccessGuard extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              '$title - $price',
+              '$title tier required',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 4),
             Text(
-              'One-time purchase. Permanent access.',
+              'World access is earned through real-life achievements and verified XP.',
               style: Theme.of(context).textTheme.labelSmall,
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                icon: const Icon(VIcons.shoppingCart),
-                label: Text('Buy $price'),
-                onPressed: () async {
+                icon: const Icon(VIcons.trophy),
+                label: const Text('Go to Achievements'),
+                onPressed: () {
                   Navigator.pop(ctx);
-                  final result = await StoreService.buyWealthTier(tier);
-                  if (ctx.mounted) {
-                    if (result == StorePurchaseState.purchased) {
-                      ref
-                          .read(residentProvider.notifier)
-                          .unlockWealthWorld(world.id);
-                      VFeedback.showMessage(context, 'Welcome to ${world.name}!');
-                    } else if (result == StorePurchaseState.error) {
-                      VFeedback.showMessage(context, 'Purchase failed. Please try again.');
-                    }
-                  }
+                  context.push('/achievements');
                 },
               ),
             ),
             const SizedBox(height: 8),
             VButton(
-              label: 'Restore Purchases',
+              label: 'Close',
               onPressed: () {
                 Navigator.pop(ctx);
-                StoreService.restorePurchases();
               },
               variant: ButtonVariant.text,
               isFullWidth: true,

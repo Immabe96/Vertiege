@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../services/invite_service.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
@@ -86,8 +87,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       await ref.read(residentProvider.notifier).loadResident();
       if (!mounted) return;
 
-      if (ref.read(residentProvider).resident != null) {
-        context.go('/');
+      final resident = ref.read(residentProvider).resident;
+      if (resident != null && resident.gateCompleted) {
+        final invitePath = await InviteService.takePendingInvitePath();
+        if (!mounted) return;
+        context.go(invitePath ?? '/');
       } else {
         context.go('/onboarding');
       }

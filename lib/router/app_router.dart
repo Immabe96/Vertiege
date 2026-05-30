@@ -56,6 +56,8 @@ import '../screens/daily_quests_screen.dart';
 import '../screens/world_marketplace_screen.dart';
 import '../screens/world_polls_screen.dart';
 import '../screens/world_treasury_screen.dart';
+import '../screens/world_manage_screen.dart';
+import '../screens/world_governance_screen.dart';
 import '../screens/world_challenges_screen.dart';
 import '../screens/world_jobs_screen.dart';
 import '../screens/world_archive_screen.dart';
@@ -123,11 +125,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authRedirect = redirectAuthHostDeepLink(uri, location);
       if (authRedirect != null) return authRedirect;
 
+      final inviteRedirect = redirectInviteHostDeepLink(uri, location);
+      if (inviteRedirect != null) return inviteRedirect;
+
       // Never interrupt deep-link auth callbacks or splash
       if (location == '/auth/callback' || location == '/splash') return null;
 
       final isVerifierRoute = location.startsWith('/verifier');
       final isVerifierLogin = location == '/verifier/login';
+      final isInviteRoute = location.startsWith('/invite/');
 
       // Legacy admin URL → verifier portal
       if (location == '/admin/verifications') return '/verifier/review';
@@ -163,19 +169,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final unauthRedirect = resolveUnauthenticatedRedirect(
         hasSession: hasSession,
         location: location,
-        isAuthPage: isAuthPage,
+        isAuthPage: isAuthPage || isInviteRoute,
       );
       if (unauthRedirect != null) return unauthRedirect;
 
-      final onboardingRedirect = resolveResidentOnboardingRedirect(
-        hasSession: hasSession,
-        isLoading: isLoading,
-        hasResident: resident != null,
-        gateCompleted: resident?.gateCompleted ?? false,
-        location: location,
-        isAuthPage: isAuthPage,
-      );
-      if (onboardingRedirect != null) return onboardingRedirect;
+      if (!isInviteRoute) {
+        final onboardingRedirect = resolveResidentOnboardingRedirect(
+          hasSession: hasSession,
+          isLoading: isLoading,
+          hasResident: resident != null,
+          gateCompleted: resident?.gateCompleted ?? false,
+          location: location,
+          isAuthPage: isAuthPage,
+        );
+        if (onboardingRedirect != null) return onboardingRedirect;
+      }
 
       if (resident == null) return null;
 
@@ -295,6 +303,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       GoRoute(
                         path: 'archive',
                         builder: (context, state) => WorldArchiveScreen(
+                          worldId: state.pathParameters['worldId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'manage',
+                        builder: (context, state) => WorldManageScreen(
+                          worldId: state.pathParameters['worldId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'governance',
+                        builder: (context, state) => WorldGovernanceScreen(
                           worldId: state.pathParameters['worldId']!,
                         ),
                       ),
@@ -554,15 +574,20 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
 
     final resident = ref.read(residentProvider).resident;
     if (!mounted) return;
-    if (resident == null) {
-      setState(() {
-        _loading = false;
-        _error = 'Sign in to accept this invite.';
-      });
+    if (resident == null || !resident.gateCompleted) {
+      await InviteService.savePendingInviteCode(widget.code);
+      if (!mounted) return;
+      final hasSession = maybeSupabase()?.auth.currentSession != null;
+      context.go(hasSession ? '/onboarding' : '/login');
       return;
     }
 
-    await InviteService.acceptInvite(invite.id, invite.worldId, resident.id);
+    await InviteService.acceptInvite(
+      invite.id,
+      invite.worldId,
+      resident.id,
+      residentName: resident.name,
+    );
     if (!mounted) return;
     await ref.read(residentProvider.notifier).joinWorld(invite.worldId);
     if (!mounted) return;

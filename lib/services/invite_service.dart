@@ -1,10 +1,33 @@
 import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/invite.dart';
 import '../utils/id_generator.dart';
 import 'supabase.dart';
 
 class InviteService {
+  static const _pendingInviteCodeKey = 'pending_invite_code';
+
+  static String inviteDeepLink(String code) =>
+      'vertiege://invite/${Uri.encodeComponent(code)}';
+
+  static String invitePath(String code) => '/invite/${Uri.encodeComponent(code)}';
+
+  static Future<void> savePendingInviteCode(String code) async {
+    final normalized = code.trim();
+    if (normalized.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pendingInviteCodeKey, normalized);
+  }
+
+  static Future<String?> takePendingInvitePath() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString(_pendingInviteCodeKey);
+    if (code == null || code.trim().isEmpty) return null;
+    await prefs.remove(_pendingInviteCodeKey);
+    return invitePath(code);
+  }
+
   static Future<WorldInvite?> createInvite({
     required String worldId,
     required String createdBy,

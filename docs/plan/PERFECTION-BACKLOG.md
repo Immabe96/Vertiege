@@ -13,7 +13,7 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 | UI/UX polish batch (Discover, Nexus, Feed, Identity, Search, Chat, worlds) | Done | See git diff on `develop` |
 | Comment FAB vs bottom sheets | Done | `tab_shell_overlay_provider` + `tab_aware_sheet.dart` |
 | `PERFECTION-BACKLOG.md` | Done | This file |
-| Commit + optional release APK | In progress | After analyze |
+| Commit + optional release APK | Done | `main` @ `080e1a5`+; Wave 7 batch uncommitted |
 
 ---
 
@@ -23,7 +23,7 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 |----|------|--------|-------|
 | P0-1 | Nexus Challenges → `/challenges` | Done | `nexus_shortcuts_section.dart` |
 | P0-2 | `world_hub_tab` dead/wrong route | Done | File removed |
-| P0-3 | Revoke anon EXECUTE on privileged RPCs | Open | Supabase migration (Wave 4) |
+| P0-3 | Revoke anon EXECUTE on privileged RPCs | Done | Wave 4 `20260528130000_*` |
 | P0-4 | Achievement AI copy vs behavior | Partial | No “AI-Verified” strings; verify proof sheet copy |
 | P1-2 | Identity Following/Allies routes | Done | `/following`, `/allies` |
 | P1-6 | Router invite accept `mounted` | Done | `_AcceptInviteScreen._accept` |
@@ -106,6 +106,8 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 
 ## Next actions
 
-1. Wave 5: analyzer unused symbols, dead code, navigation tests.
-2. Wave 6: Device UAT sign-off (`docs/uat/WAVE-4-DEVICE-CHECKLIST.md`).
+**Product roadmap:** [`PLAN.md`](../../PLAN.md) (audit completion plan, Waves 7–12). Baseline Waves 0–6 live here.
+
+1. Wave 6: Device UAT sign-off (`docs/uat/WAVE-4-DEVICE-CHECKLIST.md`); UAT #1–#2 are regression-only per `PLAN.md` Wave 12.
+2. Wave 7+: Execute `PLAN.md` (voice/Lounge, composer, commerce, governance, seasons, release polish).
 3. Dashboard: enable leaked-password protection when on Supabase Pro.

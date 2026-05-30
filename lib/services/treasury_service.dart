@@ -57,16 +57,58 @@ class TreasuryService {
     return result == true;
   }
 
-  static Future<bool> withdraw(String worldId, int amount, String description) async {
+  /// Council and sovereign only (server-enforced).
+  static Future<TreasuryWithdrawResult> withdraw(
+    String worldId,
+    int amount,
+    String description,
+  ) async {
     if (!isSupabaseConfigured()) {
       throw StateError('Supabase is required to withdraw from treasury.');
     }
     final client = getSupabase();
-    final result = await client.rpc('withdraw_from_treasury', params: {
-      'p_world_id': worldId,
-      'p_amount': amount,
-      'p_description': description,
-    });
-    return result == true;
+    final result = await client.rpc(
+      'request_treasury_withdrawal',
+      params: {
+        'p_world_id': worldId,
+        'p_amount': amount,
+        'p_description': description,
+      },
+    );
+    if (result is! Map) return const TreasuryWithdrawResult.failed();
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] != true) {
+      return TreasuryWithdrawResult(
+        ok: false,
+        error: map['error'] as String?,
+      );
+    }
+    if (map['executed'] == true) {
+      return const TreasuryWithdrawResult(ok: true, executed: true);
+    }
+    return TreasuryWithdrawResult(
+      ok: false,
+      error: map['error'] as String? ?? 'Withdrawal failed',
+    );
   }
+}
+
+class TreasuryWithdrawResult {
+  final bool ok;
+  final bool executed;
+  final bool pendingApproval;
+  final String? error;
+
+  const TreasuryWithdrawResult({
+    required this.ok,
+    this.executed = false,
+    this.pendingApproval = false,
+    this.error,
+  });
+
+  const TreasuryWithdrawResult.failed()
+      : ok = false,
+        executed = false,
+        pendingApproval = false,
+        error = null;
 }

@@ -36,6 +36,22 @@ String worldChannelPath(String worldId, WorldChannel channel) {
   );
 }
 
+String worldChannelDestinationPath(
+  String worldId,
+  WorldChannel channel, {
+  String? worldName,
+}) {
+  if (channel.channelType == ChannelType.voice) {
+    return campfirePath(
+      channelId: channel.id,
+      name: channel.name,
+      worldId: worldId,
+      worldName: worldName,
+    );
+  }
+  return worldChannelPath(worldId, channel);
+}
+
 @visibleForTesting
 String worldChannelPathFromParts(
   String worldId, {
@@ -110,6 +126,12 @@ String worldJobsPath(String worldId, {bool admin = false}) {
 
 String worldArchivePath(String worldId) =>
     '/explore/${Uri.encodeComponent(worldId)}/archive';
+
+String worldManagePath(String worldId) =>
+    '/explore/${Uri.encodeComponent(worldId)}/manage';
+
+String worldGovernancePath(String worldId) =>
+    '/explore/${Uri.encodeComponent(worldId)}/governance';
 
 String residentProfilePath(
   String residentId, {

@@ -4,7 +4,7 @@ import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/fade_in.dart';
-import '../core/loading_state.dart';
+import '../core/shimmer.dart';
 import '../profile/cosmetic_avatar.dart';
 
 class WorldLeaderboard extends ConsumerStatefulWidget {
@@ -76,9 +76,33 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
     final theme = Theme.of(context);
 
     if (_loading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        child: VLoadingCard(),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
+        child: Row(
+          children: [
+            const Pulse(width: 28, height: 28, borderRadius: VRadius.pill),
+            const SizedBox(width: VSpacing.sm),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Pulse(
+                    width: 140,
+                    height: VFontSize.bodyMd,
+                    borderRadius: VRadius.sm,
+                  ),
+                  const SizedBox(height: VSpacing.xs),
+                  Pulse(
+                    width: 64,
+                    height: VFontSize.labelSm,
+                    borderRadius: VRadius.sm,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -93,6 +117,7 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.lg),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.leaderboard_outlined,
@@ -130,6 +155,7 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(

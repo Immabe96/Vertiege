@@ -357,8 +357,8 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   }
 
   void _copyInviteCode(String code) {
-    Clipboard.setData(ClipboardData(text: code));
-    VFeedback.showMessage(context, 'Invite code copied to clipboard.');
+    Clipboard.setData(ClipboardData(text: InviteService.inviteDeepLink(code)));
+    VFeedback.showMessage(context, 'Invite link copied to clipboard.');
   }
 
   Future<void> _deleteWorld() async {
@@ -1258,7 +1258,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 }
 
 // ──────────────────────────────────────────────────────────
-// Boost World Card — dominion world level progression via IAP
+// Boost World Card — shows earned growth progress; paid boosts are disabled.
 // ──────────────────────────────────────────────────────────
 
 class _BoostWorldCard extends ConsumerWidget {
@@ -1285,8 +1285,8 @@ class _BoostWorldCard extends ConsumerWidget {
         : 1.0;
     final isMaxLevel = currentLevel >= 10;
 
-    final enabled = StoreService.isEnabled;
-    final canBoost = enabled && world.boostsRemaining > 0 && !isMaxLevel;
+    const paidBoostsEnabled = false;
+    const canBoost = false;
 
     return _Card(
       padding: const EdgeInsets.all(VSpacing.lg),
@@ -1306,7 +1306,7 @@ class _BoostWorldCard extends ConsumerWidget {
           ),
           const SizedBox(height: VSpacing.sm),
           Text(
-            'Accelerate your world\'s progression with a one-time boost.',
+            'World growth advances through member activity. Paid boosts are disabled for v1.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: isDark
                   ? VColors.onSurfaceVariantDark
@@ -1378,22 +1378,18 @@ class _BoostWorldCard extends ConsumerWidget {
               Icon(Icons.bolt, size: 16, color: VColors.tertiary),
               const SizedBox(width: 4),
               Text(
-                '+${World.boostActivityPoints} activity pts per boost',
+                'Earn activity through posts, jobs, trades, and participation',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
               ),
               const Spacer(),
               Text(
-                enabled
-                    ? '${world.boostsRemaining} of ${World.maxBoostsPerMonth} remaining'
-                    : 'Store disabled in this build',
+                'Earned only',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: enabled
-                      ? (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant)
-                      : VColors.error,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                   fontWeight: VFontWeight.regular,
                 ),
               ),
@@ -1411,7 +1407,7 @@ class _BoostWorldCard extends ConsumerWidget {
                   : null,
               icon: const Icon(VIcons.rocket, size: 20),
               label: Text(
-                enabled ? 'Boost World - \$4.99' : 'Boost unavailable',
+                paidBoostsEnabled ? 'Boost World' : 'Paid boosts disabled',
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: canBoost ? VColors.tertiary : null,

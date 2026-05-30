@@ -14,6 +14,8 @@ import '../core/xp_toast.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/v_feedback.dart';
 
+/// Unused duplicate composer — [PostInput] is canonical.
+@Deprecated('Use PostInput')
 class PostComposer extends ConsumerStatefulWidget {
   const PostComposer({super.key});
 

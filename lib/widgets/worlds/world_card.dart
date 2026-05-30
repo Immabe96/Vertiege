@@ -156,9 +156,7 @@ class _CardBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final resident = ref.watch(residentProvider).resident;
-    final isSovereign = resident?.id == world.sovereignId;
-    final canBoost = world.type == WorldType.dominion && isSovereign && world.boostsRemaining > 0 && StoreService.isEnabled;
+    final canBoost = false;
     final worldAlliances = ref.watch(worldProvider).alliances
         .where((a) => a.worldId1 == world.id || a.worldId2 == world.id)
         .toList();
@@ -222,8 +220,6 @@ class _CardBody extends ConsumerWidget {
               ),
               if (isLocked)
                 _Badge(label: 'Locked', icon: Icons.lock, color: theme.colorScheme.error),
-              if (world.isBoosted)
-                _Badge(label: 'Boosted', icon: Icons.rocket_launch, color: VColors.tertiary),
               if (legacyTier != LegacyTier.none)
                 _Badge(
                   label: 'LEGACY: ${legacyTier.label}',

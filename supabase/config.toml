@@ -1,0 +1,5 @@
+# Vertiege — linked remote (see docs/FIREBASE_SUPABASE_HYBRID_SETUP.md)
+project_id = "wjaphoaxalvgjnrwqjwe"
+
+[db]
+major_version = 15

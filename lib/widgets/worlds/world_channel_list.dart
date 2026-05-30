@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/channel.dart';
+import '../../models/resident.dart';
+import '../../models/world.dart';
 import '../../router/world_navigation.dart';
+import '../../services/world_channel_access_service.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
@@ -23,6 +26,7 @@ class WorldChannelList extends ConsumerStatefulWidget {
 
 class _WorldChannelListState extends ConsumerState<WorldChannelList> {
   Map<String, bool> _wardExpanded = {};
+  String? _lastActivityKey;
 
   static const String _prefsKey = 'ward_collapsed_state';
 
@@ -58,7 +62,8 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     await prefs.setStringList(_prefsKey, _collapsedState.toList());
   }
 
-  bool _isExpanded(String wardId) => _wardExpanded[wardId] ?? !_collapsedState.contains(wardId);
+  bool _isExpanded(String wardId) =>
+      _wardExpanded[wardId] ?? !_collapsedState.contains(wardId);
 
   @override
   Widget build(BuildContext context) {
@@ -67,16 +72,21 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     final features = ref
         .read(worldProvider.notifier)
         .featuresForWorld(widget.worldId);
-    final channels = allChannels.where((c) {
-      if (c.name == 'lounge' && !features.lounge) return false;
-      return true;
-    }).toList();
-    Future.microtask(
-      () => ref
-          .read(chatProvider.notifier)
-          .loadChannelActivity(channels.map((c) => c.id).toList()),
-    );
+    final channels = allChannels;
+    final activityIds = channels
+        .where((c) => c.channelType != ChannelType.voice)
+        .map((c) => c.id)
+        .toList();
+    final activityKey = activityIds.join('|');
+    if (_lastActivityKey != activityKey) {
+      _lastActivityKey = activityKey;
+      Future.microtask(
+        () => ref.read(chatProvider.notifier).loadChannelActivity(activityIds),
+      );
+    }
     final theme = Theme.of(context);
+    final world = ref.watch(worldProvider).worlds[widget.worldId];
+    final resident = ref.watch(residentProvider).resident;
 
     if (channels.isEmpty) {
       return const AppEmptyState(
@@ -96,14 +106,13 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 8,
-            bottom: 4,
+            top: VSpacing.sm,
+            bottom: VSpacing.xs,
           ),
           child: Text(
             'Channels',
@@ -122,15 +131,43 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
           ),
         // Ungrouped channels
         for (final ch in ungrouped)
-          _ChannelTile(
-            channel: ch,
-            unreadCount: ref.read(chatProvider.notifier).unreadCount(
-              ch.id,
-              currentUserId: ref.read(residentProvider).resident?.id,
-            ),
-            onTap: () => context.push(worldChannelPath(widget.worldId, ch)),
-          ),
+          _buildChannelTile(ch, world, features, resident),
       ],
+    );
+  }
+
+  Widget _buildChannelTile(
+    WorldChannel channel,
+    World? world,
+    WorldFeatures features,
+    Resident? resident,
+  ) {
+    final decision = world == null
+        ? const ChannelAccessDecision.locked('World unavailable.')
+        : WorldChannelAccessService.decision(
+            world: world,
+            channel: channel,
+            features: features,
+            resident: resident,
+          );
+    return _ChannelTile(
+      channel: channel,
+      unreadCount: decision.canOpen && channel.channelType != ChannelType.voice
+          ? ref.read(chatProvider.notifier).unreadCount(
+                channel.id,
+                currentUserId: resident?.id,
+              )
+          : 0,
+      lockedReason: decision.reason,
+      onTap: decision.canOpen && world != null
+          ? () => context.push(
+                worldChannelDestinationPath(
+                  widget.worldId,
+                  channel,
+                  worldName: world.name,
+                ),
+              )
+          : null,
     );
   }
 
@@ -142,6 +179,8 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final expanded = _isExpanded(wardId);
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
           onTap: () => _toggleWard(wardId),
@@ -175,13 +214,11 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
         ),
         if (expanded)
           for (final ch in wardChannels)
-            _ChannelTile(
-              channel: ch,
-              unreadCount: ref.read(chatProvider.notifier).unreadCount(
-                ch.id,
-                currentUserId: ref.read(residentProvider).resident?.id,
-              ),
-              onTap: () => context.push(worldChannelPath(widget.worldId, ch)),
+            _buildChannelTile(
+              ch,
+              ref.watch(worldProvider).worlds[widget.worldId],
+              ref.read(worldProvider.notifier).featuresForWorld(widget.worldId),
+              ref.watch(residentProvider).resident,
             ),
       ],
     );
@@ -191,19 +228,21 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
 class _ChannelTile extends StatelessWidget {
   final WorldChannel channel;
   final int unreadCount;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final String? lockedReason;
 
   const _ChannelTile({
     required this.channel,
     required this.unreadCount,
     required this.onTap,
+    this.lockedReason,
   });
 
   IconData get _icon => switch (channel.channelType) {
     ChannelType.announcement => Icons.campaign,
     ChannelType.feed => Icons.dynamic_feed,
     ChannelType.text => Icons.tag,
-    ChannelType.voice => Icons.volume_up,
+    ChannelType.voice => Icons.local_fire_department,
   };
 
   @override
@@ -211,53 +250,94 @@ class _ChannelTile extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return ListTile(
-      dense: true,
-      leading: Icon(
-        _icon,
-        size: 20,
-        color: unreadCount > 0
-            ? isDark ? VColors.onSurfaceDark : VColors.onSurface
-            : theme.colorScheme.onSurfaceVariant,
-      ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '# ${channel.name}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: unreadCount > 0
-                    ? VFontWeight.bold
-                    : VFontWeight.regular,
-              ),
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.sm,
+            vertical: VSpacing.xs,
           ),
-          if (unreadCount > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                color: VColors.error,
-                borderRadius: BorderRadius.circular(9),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                lockedReason != null ? Icons.lock_outline : _icon,
+                size: 20,
+                color: lockedReason != null
+                    ? theme.colorScheme.onSurfaceVariant
+                    : unreadCount > 0
+                        ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                        : theme.colorScheme.onSurfaceVariant,
               ),
-              child: Text(
-                unreadCount > 99 ? '99+' : '$unreadCount',
-                style: const TextStyle(
-                  fontSize: VFontSize.labelSm,
-                  fontWeight: VFontWeight.bold,
-                  color: VColors.onPrimary,
+              const SizedBox(width: VSpacing.sm),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            channel.channelType == ChannelType.voice
+                                ? channel.name
+                                : '# ${channel.name}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: unreadCount > 0
+                                  ? VFontWeight.bold
+                                  : VFontWeight.regular,
+                            ),
+                          ),
+                        ),
+                        if (unreadCount > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: VColors.error,
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            child: Text(
+                              unreadCount > 99 ? '99+' : '$unreadCount',
+                              style: const TextStyle(
+                                fontSize: VFontSize.labelSm,
+                                fontWeight: VFontWeight.bold,
+                                color: VColors.onPrimary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (lockedReason != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        lockedReason!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: VColors.tertiary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ] else if (channel.description != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        channel.description!,
+                        style: theme.textTheme.labelSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ),
-        ],
+            ],
+          ),
+        ),
       ),
-      subtitle: channel.description != null
-          ? Text(
-              channel.description!,
-              style: theme.textTheme.labelSmall,
-              maxLines: 1,
-            )
-          : null,
-      onTap: onTap,
     );
   }
 }

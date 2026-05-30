@@ -541,7 +541,13 @@ class _ChannelTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push(worldChannelPath(world.id, channel)),
+        onTap: () => context.push(
+          worldChannelDestinationPath(
+            world.id,
+            channel,
+            worldName: world.name,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.md,

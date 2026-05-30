@@ -14,6 +14,7 @@
 
 ## World detail
 
+- [ ] **Channels / Members:** No grey void below lists; Residents has no grey loading card (see [UAT-ISSUE-LOG.md](./UAT-ISSUE-LOG.md) #2)
 - [ ] **Back:** Returns to Explore (not blank Nexus)
 - [ ] **Tools (⋯):** Opens bottom sheet; treasury/marketplace links work; close dismisses
 - [ ] **Join / tabs / feed:** Hero, stats, tab bar scroll correctly
@@ -26,7 +27,7 @@
 - [ ] **League / Challenges / Daily quests:** Load or error state with retry
 - [ ] **Thread:** Back to channel; replies load or error + retry
 - [ ] **World channel:** Back to world (not blank); messages load
-- [ ] **Campfire / voice:** *Blocked on stock worlds* — no default voice channel; see UAT #3. When wired: voice channel in list → Campfire; mini-bar while connected; back leaves room
+- [ ] **Campfire / voice (Wave 7):** World tools → Lounge / Campfire; channel list shows `# lounge` + Campfire icon; voice opens Campfire (not text screen); locked resident sees gate reason; mini-bar while connected; back leaves room
 
 ## Security (spot)
 

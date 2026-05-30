@@ -19,8 +19,15 @@ class StoreProduct {
 enum StorePurchaseState { idle, loading, purchased, error, disabled }
 
 class StoreService {
+  /// Legacy pay-to-win SKUs — not offered in v1 (PLAN.md Wave 9).
   static const wealthTierPrefix = 'wealth_access_tier_';
   static const worldBoostId = 'world_boost';
+  static const patricianSubscriptionId = 'subscription_patrician';
+  static const sovereignEliteSubscriptionId = 'subscription_sovereign_elite';
+  static const subscriptionProductIds = {
+    patricianSubscriptionId,
+    sovereignEliteSubscriptionId,
+  };
 
   /// Product IDs for each wealth tier (2-5). Tier 1 is free.
   static const wealthTierProducts = {
@@ -35,6 +42,8 @@ class StoreService {
   static bool _available = false;
   static StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   static final Map<String, Completer<StorePurchaseState>> _pendingPurchases = {};
+  static String? lastPurchaseToken;
+  static String? lastPurchasedProductId;
 
   /// Whether the store is available on this device.
   static bool get isEnabled => _available;
@@ -60,7 +69,7 @@ class StoreService {
     if (!isEnabled) return _fallbackProducts();
 
     try {
-      final allIds = [...wealthTierProducts.values, worldBoostId];
+      final allIds = [...subscriptionProductIds];
       final response = await _store.queryProductDetails(allIds.toSet());
       if (response.notFoundIDs.isNotEmpty) {
         debugPrint('Store: not found: ${response.notFoundIDs}');
@@ -81,10 +90,16 @@ class StoreService {
   }
 
   /// Purchase access to a wealth tier.
+  @Deprecated('Paid world access is disabled for v1; use achievements for tier.')
   static Future<StorePurchaseState> buyWealthTier(int tier) async {
+    return StorePurchaseState.disabled;
+  }
+
+  static Future<StorePurchaseState> buyProduct(String productId) async {
     if (!isEnabled) return StorePurchaseState.disabled;
-    final productId = wealthTierProducts[tier];
-    if (productId == null) return StorePurchaseState.error;
+    if (!subscriptionProductIds.contains(productId)) {
+      return StorePurchaseState.error;
+    }
 
     try {
       final response = await _store.queryProductDetails({productId}.toSet());
@@ -114,32 +129,7 @@ class StoreService {
 
   /// Purchase a world boost (consumable, +1 level to a custom world).
   static Future<StorePurchaseState> buyWorldBoost() async {
-    if (!isEnabled) return StorePurchaseState.disabled;
-
-    try {
-      final response = await _store.queryProductDetails({worldBoostId}.toSet());
-      if (response.productDetails.isEmpty) return StorePurchaseState.error;
-
-      final completer = Completer<StorePurchaseState>();
-      _pendingPurchases[worldBoostId] = completer;
-
-      await _store.buyConsumable(
-        purchaseParam: PurchaseParam(
-          productDetails: response.productDetails.first,
-        ),
-      );
-
-      return completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          _pendingPurchases.remove(worldBoostId);
-          return StorePurchaseState.error;
-        },
-      );
-    } catch (_) {
-      _pendingPurchases.remove(worldBoostId);
-      return StorePurchaseState.error;
-    }
+    return StorePurchaseState.disabled;
   }
 
   /// Restore previous purchases from the store.
@@ -153,6 +143,9 @@ class StoreService {
       final completer = _pendingPurchases[purchase.productID];
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
+        lastPurchaseToken = purchase.purchaseID ??
+            purchase.verificationData.serverVerificationData;
+        lastPurchasedProductId = purchase.productID;
         InAppPurchase.instance.completePurchase(purchase);
         completer?.complete(StorePurchaseState.purchased);
         _pendingPurchases.remove(purchase.productID);
@@ -169,34 +162,16 @@ class StoreService {
   /// Fallback product info shown during development.
   static List<StoreProduct> _fallbackProducts() => [
     const StoreProduct(
-      id: '${wealthTierPrefix}2',
-      title: 'High Roller Access',
-      description: 'Unlock tier 2 wealth worlds',
+      id: patricianSubscriptionId,
+      title: 'Patrician',
+      description: 'Cosmetic profile perks and convenience tools',
       price: '\$4.99',
     ),
     const StoreProduct(
-      id: '${wealthTierPrefix}3',
-      title: 'Elite Access',
-      description: 'Unlock tier 3 wealth worlds',
-      price: '\$9.99',
-    ),
-    const StoreProduct(
-      id: '${wealthTierPrefix}4',
-      title: 'Old Money Access',
-      description: 'Unlock tier 4 wealth worlds',
-      price: '\$19.99',
-    ),
-    const StoreProduct(
-      id: '${wealthTierPrefix}5',
-      title: 'Apex Access',
-      description: 'Unlock tier 5 wealth worlds',
-      price: '\$49.99',
-    ),
-    const StoreProduct(
-      id: worldBoostId,
-      title: 'World Boost',
-      description: '+1 level to your custom world (monthly limit)',
-      price: '\$4.99',
+      id: sovereignEliteSubscriptionId,
+      title: 'Sovereign Elite',
+      description: 'Premium cosmetics, profile analytics, and draft tools',
+      price: '\$14.99',
     ),
   ];
 }

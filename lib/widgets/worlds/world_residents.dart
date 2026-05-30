@@ -1,88 +1,99 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/world.dart';
-import '../../router/world_navigation.dart';
 import '../../config/tiers.dart';
 import '../../models/resident.dart';
-import '../../services/world_service.dart';
+import '../../models/world.dart';
+import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/fade_in.dart';
-import '../core/loading_state.dart';
+import '../core/shimmer.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../../ui/buttons/v_button.dart';
+import 'world_member_row.dart';
 
-class WorldResidents extends ConsumerStatefulWidget {
+/// Resident list on world Members tab — uses members already loaded on the screen.
+class WorldResidents extends StatelessWidget {
   final World world;
+  final List<WorldMemberEntry> members;
+  final bool isLoading;
 
-  const WorldResidents({super.key, required this.world});
-
-  @override
-  ConsumerState<WorldResidents> createState() => _WorldResidentsState();
-}
-
-class _WorldResidentsState extends ConsumerState<WorldResidents> {
-  List<_MemberEntry> _residents = [];
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadMembers();
-  }
-
-  Future<void> _loadMembers() async {
-    try {
-      final members = await WorldService.getMembers(widget.world.id);
-      if (mounted) {
-        setState(() {
-          _residents = members
-              .map(
-                (m) =>
-                    _MemberEntry(resident: _toResident(m), rep: m['rep'] ?? 0),
-              )
-              .toList();
-          _loading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Resident _toResident(Map<String, dynamic> m) => Resident(
-    id: m['resident_id'] ?? '',
-    name: m['resident_name'] ?? 'Member',
-    tier: ResidentTier.fromValue(m['standing'] ?? 1),
-    avatarUrl: m['avatar_url'] ?? m['avatarUrl'] ?? '',
-    streakCount: 0,
-  );
+  const WorldResidents({
+    super.key,
+    required this.world,
+    required this.members,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final preview = members.take(5).toList();
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Residents (${_residents.length})',
+          'Residents (${members.length})',
           style: theme.textTheme.titleMedium,
         ),
-        const SizedBox(height: 8),
-        if (_loading)
-          const VLoadingCard()
-        else if (_residents.isEmpty)
-          Text('No residents yet', style: theme.textTheme.bodyMedium)
+        const SizedBox(height: VSpacing.sm),
+        if (isLoading)
+          ...List.generate(
+            3,
+            (_) => Padding(
+              padding: const EdgeInsets.only(bottom: VSpacing.sm),
+              child: Row(
+                children: [
+                  const Pulse(
+                    width: 40,
+                    height: 40,
+                    borderRadius: VRadius.pill,
+                  ),
+                  const SizedBox(width: VSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Pulse(
+                          width: 120,
+                          height: VFontSize.bodyMd,
+                          borderRadius: VRadius.sm,
+                        ),
+                        const SizedBox(height: VSpacing.xs),
+                        Pulse(
+                          width: 72,
+                          height: VFontSize.labelSm,
+                          borderRadius: VRadius.sm,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else if (members.isEmpty)
+          Text(
+            'No residents yet',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          )
         else
-          ..._residents.take(5).toList().asMap().entries.map((entry) {
+          ...preview.asMap().entries.map((entry) {
             final idx = entry.key;
             final member = entry.value;
             final resident = member.resident;
             final standing = getStanding(member.rep);
-            final isSovereign = resident.id == widget.world.sovereignId;
-            final medalColor = idx == 0
+            final isSovereign = resident.id == world.sovereignId;
+            final rankLabel = idx < 3 ? '${idx + 1}' : null;
+            final rankColor = idx == 0
                 ? VColors.tertiary
                 : idx == 1
                 ? VColors.outline
@@ -92,63 +103,27 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
 
             return FadeIn(
               delayMs: idx * 50,
-              child: ListTile(
-                leading: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CosmeticAvatar(
-                      imageUrl: resident.avatarUrl,
-                      seed: resident.id,
-                      size: 40,
-                    ),
-                    if (medalColor != null)
-                      Text(
-                        '${idx + 1}',
-                        style: TextStyle(
-                          color: medalColor,
-                          fontWeight: VFontWeight.bold,
-                          fontSize: VFontSize.bodyMd,
-                        ),
-                      ),
-                  ],
-                ),
-                title: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        resident.name,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (isSovereign) ...[
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 14,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ],
-                  ],
-                ),
-                subtitle: Text(standing.title),
-                trailing: Text(
-                  'Rep ${member.rep}',
-                  style: theme.textTheme.labelSmall,
-                ),
+              child: _ResidentRow(
+                resident: resident,
+                standingTitle: standing.title,
+                rep: member.rep,
+                isSovereign: isSovereign,
+                rankLabel: rankLabel,
+                rankColor: rankColor,
                 onTap: () => context.push(residentProfilePath(resident.id)),
               ),
             );
           }),
-        if (_residents.length > 5)
+        if (!isLoading && members.length > 5)
           Padding(
-            padding: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.only(top: VSpacing.xs),
             child: VButton(
-              label: 'See all ${_residents.length} members',
+              label: 'See all ${members.length} members',
               onPressed: () => context.push(
                 worldMembersPath(
-                  widget.world.id,
-                  worldName: widget.world.name,
-                  sovereignId: widget.world.sovereignId,
+                  world.id,
+                  worldName: world.name,
+                  sovereignId: world.sovereignId,
                 ),
               ),
               variant: ButtonVariant.text,
@@ -159,8 +134,104 @@ class _WorldResidentsState extends ConsumerState<WorldResidents> {
   }
 }
 
-class _MemberEntry {
+class _ResidentRow extends StatelessWidget {
   final Resident resident;
+  final String standingTitle;
   final int rep;
-  const _MemberEntry({required this.resident, required this.rep});
+  final bool isSovereign;
+  final String? rankLabel;
+  final Color? rankColor;
+  final VoidCallback onTap;
+
+  const _ResidentRow({
+    required this.resident,
+    required this.standingTitle,
+    required this.rep,
+    required this.isSovereign,
+    required this.rankLabel,
+    required this.rankColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark
+        ? VColors.onSurfaceVariantDark
+        : VColors.onSurfaceVariant;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: [
+                  CosmeticAvatar(
+                    imageUrl: resident.avatarUrl,
+                    seed: resident.id,
+                    size: 40,
+                  ),
+                  if (rankLabel != null && rankColor != null)
+                    Text(
+                      rankLabel!,
+                      style: TextStyle(
+                        color: rankColor,
+                        fontWeight: VFontWeight.bold,
+                        fontSize: VFontSize.bodyMd,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: VSpacing.sm),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            resident.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: VFontWeight.medium,
+                            ),
+                          ),
+                        ),
+                        if (isSovereign) ...[
+                          const SizedBox(width: VSpacing.xs),
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 14,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      standingTitle,
+                      style: theme.textTheme.labelSmall?.copyWith(color: muted),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'Rep $rep',
+                style: theme.textTheme.labelSmall?.copyWith(color: muted),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

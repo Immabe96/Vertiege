@@ -27,6 +27,7 @@ class TrophyCase extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(

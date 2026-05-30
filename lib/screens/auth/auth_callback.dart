@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/auth_service.dart';
+import '../../services/invite_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import 'package:forui/forui.dart';
@@ -49,7 +50,9 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
       } else if (!resident.gateCompleted) {
         context.go('/onboarding');
       } else {
-        context.go('/');
+        final invitePath = await InviteService.takePendingInvitePath();
+        if (!mounted) return;
+        context.go(invitePath ?? '/');
       }
     } catch (_) {
       if (!mounted) return;

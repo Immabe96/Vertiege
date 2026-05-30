@@ -123,9 +123,9 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
             'title': c.title,
             'description': c.description,
             'type': c.challengeType,
-            'targetValue': c.targetValue,
-            'xpReward': c.rewardXp,
-            'sortOrder': 0,
+            'target_value': c.targetValue,
+            'xp_reward': c.rewardXp,
+            'sort_order': 0,
           }))
           .toList()
         ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));

@@ -29,7 +29,27 @@ class ProfileService {
     'onboarding_completed': r.onboardingCompleted,
     'gate_completed': r.gateCompleted,
     if (r.avatarFrameId != null) 'avatar_frame_id': r.avatarFrameId,
+    if (r.title != null) 'display_title': r.title,
+    'leaderboard_opt_out': r.leaderboardOptOut,
   };
+
+  static Future<void> updateProgressionPreferences({
+    required String userId,
+    bool? leaderboardOptOut,
+    String? displayTitle,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    final patch = <String, dynamic>{};
+    if (leaderboardOptOut != null) {
+      patch['leaderboard_opt_out'] = leaderboardOptOut;
+    }
+    if (displayTitle != null) {
+      patch['display_title'] = displayTitle.isEmpty ? null : displayTitle;
+    }
+    if (patch.isEmpty) return;
+    await client.from('profiles').update(patch).eq('id', userId);
+  }
 
   /// Server-side daily check-in (F31). Returns null if already checked in today.
   static Future<({int streak, int bonusXp, bool shieldUsed})?>
@@ -132,6 +152,8 @@ class ProfileService {
       successfulReferrals:
           (data['successful_referrals'] as num?)?.toInt() ?? 0,
       lastActivityAt: _parseLastActivityAt(data['last_activity_at']),
+      title: data['display_title'] as String? ?? data['title'] as String?,
+      leaderboardOptOut: data['leaderboard_opt_out'] == true,
     );
   }
 

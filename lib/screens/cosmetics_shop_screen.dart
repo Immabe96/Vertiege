@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../models/listing.dart';
 import '../services/marketplace_service.dart';
+import '../services/cosmetic_purchase_service.dart';
 import '../state/resident_provider.dart';
 import '../forui/v_hub_page.dart';
 import '../theme/v_colors.dart';
@@ -150,36 +151,36 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
 
   static const _boosts = <_ShopItem>[
     _ShopItem(
-      'World XP Boost',
-      'Double XP for one world for 7 days',
+      'Profile Spotlight',
+      'Highlight your profile card for 24 hours',
       100,
-      Icons.trending_up,
+      Icons.auto_awesome,
       VColors.primary,
-      'Boost',
+      'Flair',
     ),
     _ShopItem(
-      'Prestige Accelerator',
-      'Fast-track world prestige gain',
+      'Draft Cabinet',
+      'Unlock an extra saved-draft slot',
       150,
-      Icons.rocket_launch,
+      Icons.inventory_2_outlined,
       VColors.tertiary,
-      'Boost',
+      'Convenience',
     ),
     _ShopItem(
-      'Feature Unlock Token',
-      'Unlock a locked world feature early',
+      'Reaction Pack',
+      'Add cosmetic reactions to your palette',
       200,
-      Icons.lock_open,
+      Icons.add_reaction_outlined,
       VColors.warning,
-      'Boost',
+      'Cosmetic',
     ),
     _ShopItem(
-      'Channel Expansion',
-      'Add extra channels to a world',
+      'Nameplate Spark',
+      'Add a subtle spark to your nameplate',
       75,
-      Icons.add_circle,
+      Icons.auto_awesome,
       VColors.success,
-      'Boost',
+      'Cosmetic',
     ),
   ];
 
@@ -338,6 +339,7 @@ class _ShopGrid extends StatelessWidget {
         final canAfford = coins >= item.price;
 
         return _ShopCard(
+          category: category,
           item: item,
           canAfford: canAfford,
           index: index,
@@ -347,26 +349,28 @@ class _ShopGrid extends StatelessWidget {
   }
 }
 
-class _ShopCard extends StatelessWidget {
+class _ShopCard extends ConsumerWidget {
+  final _ShopCategory category;
   final _ShopItem item;
   final bool canAfford;
   final int index;
 
   const _ShopCard({
+    required this.category,
     required this.item,
     required this.canAfford,
     required this.index,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: canAfford ? () => _buyItem(context, item) : null,
+        onTap: canAfford ? () => _buyItem(context, ref, item) : null,
         borderRadius: BorderRadius.circular(VRadius.lg),
         child: Container(
           decoration: BoxDecoration(
@@ -469,7 +473,9 @@ class _ShopCard extends StatelessWidget {
                     SizedBox(
                       height: 28,
                       child: FilledButton(
-                        onPressed: canAfford ? () => _buyItem(context, item) : null,
+                        onPressed: canAfford
+                            ? () => _buyItem(context, ref, item)
+                            : null,
                         style: FilledButton.styleFrom(
                           backgroundColor: canAfford
                               ? VColors.tertiary
@@ -503,13 +509,44 @@ class _ShopCard extends StatelessWidget {
     );
   }
 
-  void _buyItem(BuildContext context, _ShopItem item) {
-    final ref = ProviderScope.containerOf(context);
+  Future<void> _buyItem(
+    BuildContext context,
+    WidgetRef ref,
+    _ShopItem item,
+  ) async {
+    if (category == _ShopCategory.boosts || category == _ShopCategory.passes) {
+      if (context.mounted) {
+        VFeedback.showMessage(
+          context,
+          'Paid progression and world access are disabled in v1.',
+        );
+      }
+      return;
+    }
+
+    if (category == _ShopCategory.cosmetics) {
+      final cosmeticId = item.name.toLowerCase().replaceAll(' ', '_');
+      final error = await CosmeticPurchaseService.purchaseWithCoins(
+        cosmeticId: cosmeticId,
+        coinPrice: item.price,
+      );
+      if (!context.mounted) return;
+      if (error != null) {
+        VFeedback.showMessage(context, error);
+        return;
+      }
+      await ref.read(residentProvider.notifier).loadResident();
+      VFeedback.showMessage(context, '${item.name} purchased!');
+      return;
+    }
+
     final notifier = ref.read(residentProvider.notifier);
-    final success =
-        notifier.addDecoration(item.name) && notifier.spendCoins(item.price);
+    final spent = notifier.spendCoins(item.price);
+    final success = spent && notifier.addDecoration(item.name);
     if (success && context.mounted) {
       VFeedback.showMessage(context, '${item.name} purchased!');
+    } else if (context.mounted) {
+      VFeedback.showMessage(context, 'Not enough coins for ${item.name}.');
     }
   }
 }

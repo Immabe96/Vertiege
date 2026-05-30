@@ -38,6 +38,9 @@ class SeasonWorldScore {
 class Season {
   final String id;
   final String name;
+  final String tagline;
+  final String narrative;
+  final List<String> pillars;
   final DateTime startDate;
   final DateTime endDate;
   final bool isActive;
@@ -46,6 +49,9 @@ class Season {
   const Season({
     required this.id,
     required this.name,
+    this.tagline = '',
+    this.narrative = '',
+    this.pillars = const [],
     required this.startDate,
     required this.endDate,
     required this.isActive,

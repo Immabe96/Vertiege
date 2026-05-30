@@ -984,6 +984,21 @@ class ResidentNotifier extends Notifier<ResidentState> {
     if (r == null) return;
     state = state.copyWith(resident: r.copyWith(title: title));
     _persist();
+    ProfileService.updateProgressionPreferences(
+      userId: r.id,
+      displayTitle: title,
+    ).catchError((_) {});
+  }
+
+  Future<void> setLeaderboardOptOut(bool value) async {
+    final r = state.resident;
+    if (r == null) return;
+    state = state.copyWith(resident: r.copyWith(leaderboardOptOut: value));
+    _persist();
+    await ProfileService.updateProgressionPreferences(
+      userId: r.id,
+      leaderboardOptOut: value,
+    );
   }
 
   bool addDecoration(String decorationId) {

@@ -81,14 +81,43 @@ class PostRepository {
       createPostMutation,
       _postPayload(post),
       () async {
-        await getSupabase().from('posts').insert(_postRow(post));
-        return post.copyWith(
+        final synced = await _createPostViaRpc(post);
+        return synced.copyWith(
           syncStatus: SyncStatus.synced,
           clearSyncError: true,
         );
       },
       data: post.copyWith(syncStatus: SyncStatus.pending),
     );
+  }
+
+  static Future<Post> _createPostViaRpc(Post post) async {
+    final client = getSupabase();
+    final result = await client.rpc(
+      'create_post',
+      params: {
+        'p_world_id': post.worldId,
+        'p_content': post.content,
+        'p_image_url': post.imageUri,
+        'p_media': post.allImageUris,
+        'p_is_announcement': post.isAnnouncement,
+        'p_is_decree': post.isDecree,
+        'p_is_pinned': post.isPinned,
+        'p_poll': post.poll?.toJson(),
+        'p_mentions': post.mentions,
+        'p_hashtags': post.hashtags,
+        'p_scheduled_for': post.scheduledFor?.toUtc().toIso8601String(),
+      },
+    );
+    if (result is! Map) {
+      throw StateError('Unexpected create_post response');
+    }
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] != true) {
+      throw StateError(map['error'] as String? ?? 'Could not create post');
+    }
+    final postId = map['post_id'] as String? ?? post.id;
+    return post.copyWith(id: postId);
   }
 
   Future<RepositoryResult<void>> editPost({

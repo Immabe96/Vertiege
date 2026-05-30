@@ -53,7 +53,7 @@ class WorldSettingsInvites extends StatelessWidget {
         ),
         const SizedBox(height: VSpacing.sm),
         Text(
-          'Create and manage invitation codes for this world.',
+          'Create and manage invitation links for this world.',
           style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
         ),
         const SizedBox(height: VSpacing.md),
@@ -98,7 +98,7 @@ class WorldSettingsInvites extends StatelessWidget {
               IconButton.filled(
                 onPressed: () => onCopy(generatedCode!),
                 icon: const Icon(Icons.copy),
-                tooltip: 'Copy code',
+                tooltip: 'Copy link',
               ),
             ],
           ),
@@ -177,7 +177,7 @@ class _InviteRow extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.copy, size: 18),
               onPressed: () => onCopy(invite.code),
-              tooltip: 'Copy code',
+              tooltip: 'Copy link',
             ),
           ],
         ),

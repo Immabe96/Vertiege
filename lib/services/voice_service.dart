@@ -22,15 +22,16 @@ class VoiceService {
 
   static bool get isConnected => _currentRoom != null;
 
-  static Future<void> joinCampfire({
+  static Future<bool> joinCampfire({
     required String channelId,
+    required String worldId,
     required String residentId,
     required String residentName,
   }) async {
     if (_currentRoom != null) await leaveCampfire();
 
-    final token = await _fetchToken(channelId, residentId);
-    if (token == null) return;
+    final token = await _fetchToken(channelId, worldId, residentId);
+    if (token == null) return false;
 
     final room = Room();
     await room.connect(token['livekitUrl'] as String, token['token'] as String);
@@ -42,10 +43,13 @@ class VoiceService {
       _participantsController = StreamController<List<Participant>>.broadcast();
       _disposed = false;
     }
+    _onRoomUpdate();
+    return true;
   }
 
   static Future<Map<String, dynamic>?> _fetchToken(
     String channelId,
+    String worldId,
     String residentId,
   ) async {
     if (!isSupabaseConfigured()) return null;
@@ -57,7 +61,8 @@ class VoiceService {
       final res = await client.functions.invoke(
         'livekit-token',
         body: {
-          'roomName': 'campfire_$channelId',
+          'channelId': channelId,
+          'worldId': worldId,
           'participantIdentity': residentId,
         },
       );
