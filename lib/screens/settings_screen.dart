@@ -78,6 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       _pushEnabled = prefs.getBool(_kPrefPushEnabled) ?? true;
       _likesEnabled = prefs.getBool(_kPrefLikesEnabled) ?? true;
@@ -240,7 +241,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               final email = controller.text.trim();
               if (email.isEmpty) return;
               try {
-                final client = getSupabase();
+                final client = maybeSupabase();
+                if (client == null) {
+                  if (context.mounted) {
+                    VFeedback.showError(
+                      context,
+                      'Cloud sync is unavailable. Check your connection and try again.',
+                    );
+                  }
+                  return;
+                }
                 await client.auth.updateUser(UserAttributes(email: email));
                 if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
@@ -376,7 +386,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
               try {
-                final client = getSupabase();
+                final client = maybeSupabase();
+                if (client == null) {
+                  if (context.mounted) {
+                    VFeedback.showError(
+                      context,
+                      'Cloud sync is unavailable. Check your connection and try again.',
+                    );
+                  }
+                  return;
+                }
                 await client.auth.updateUser(
                   UserAttributes(password: newController.text),
                 );
@@ -460,7 +479,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onPressed: confirmText.trim() == 'DELETE'
                     ? () async {
                         try {
-                          final client = getSupabase();
+                          final client = maybeSupabase();
+                          if (client == null) {
+                            if (context.mounted) {
+                              VFeedback.showError(
+                                context,
+                                'Cloud sync is unavailable. Check your connection and try again.',
+                              );
+                            }
+                            return;
+                          }
                           final user = client.auth.currentUser;
                           if (user != null) {
                             await client.functions.invoke('delete-account');

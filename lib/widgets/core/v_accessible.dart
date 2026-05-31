@@ -65,10 +65,13 @@ class VMinTapTarget extends StatelessWidget {
       );
     }
     if (onTap == null) return content;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(VRadius.pill),
-      child: content,
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(VRadius.pill),
+        child: content,
+      ),
     );
   }
 }

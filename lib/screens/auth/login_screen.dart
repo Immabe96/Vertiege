@@ -11,17 +11,10 @@ import '../../services/invite_service.dart';
 import '../../services/admin_access_service.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
-import '../../state/supabase_bootstrap_provider.dart';
 import '../../services/supabase_bootstrap.dart';
-import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
-import '../../widgets/auth/auth_fields.dart';
 import '../../theme/v_colors.dart';
-import '../../utils/asset_image_decode.dart';
-import '../../utils/brand_assets.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/icons/v_icons.dart';
-import '../../ui/buttons/v_button.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/auth/auth_social_buttons.dart';
 
@@ -37,9 +30,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
+  bool _obscurePassword = true;
 
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual<ResidentState>(residentProvider, (previous, next) {
+      if (!mounted) return;
+      if (next.isLoading || next.resident == null) return;
+      if (maybeSupabase()?.auth.currentSession == null) return;
+      unawaited(_onOAuthResidentReady());
+    });
+    if (maybeSupabase() == null &&
+        SupabaseBootstrap.lastResult ==
+            SupabaseBootstrapResult.missingConfig) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              'Cloud sign-in is not configured in this build (.env missing).';
+        });
+      });
+    }
+  }
+
+  Future<void> _onOAuthResidentReady() async {
+    _setLoading(false);
+    if (!mounted) return;
+    await _routeAfterSignIn();
+  }
 
   @override
   void dispose() {
@@ -54,6 +76,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final email = _emailController.text.trim();
     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) &&
         _passwordController.text.length >= 6;
+  }
+
+  void _setLoading(bool value) {
+    if (!mounted) return;
+    setState(() => _isLoading = value);
   }
 
   Future<void> _finishSignInAfterAuth() async {
@@ -74,9 +101,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final resident = residentState.resident;
     if (resident != null) {
+      _setLoading(false);
       unawaited(AnalyticsService.logEvent(AnalyticsEvents.signIn));
       await _routeAfterSignIn();
     } else {
+      _setLoading(false);
+      if (!mounted) return;
       context.go('/onboarding');
     }
   }
@@ -118,21 +148,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    if (!await _ensureSupabaseReady()) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = _bootstrapMessage(ref.read(supabaseBootstrapProvider)) ??
-            'Cloud sign-in is unavailable.';
-      });
-      return;
-    }
-
     try {
+      if (!await _ensureSupabaseReady()) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+          _errorMessage =
+              _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+              'Cloud sign-in is unavailable.';
+        });
+        return;
+      }
+
       await AuthService.signInWithEmail(
         _emailController.text.trim(),
         _passwordController.text,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (!mounted) return;
       await _finishSignInAfterAuth();
@@ -166,20 +197,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    if (!await _ensureSupabaseReady()) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = _bootstrapMessage(ref.read(supabaseBootstrapProvider)) ??
-            'Cloud sign-in is unavailable.';
-      });
-      return;
-    }
-
     try {
+      if (!await _ensureSupabaseReady()) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+              'Cloud sign-in is unavailable.';
+        });
+        return;
+      }
+
       final launched = await AuthService.signInWithGoogle();
       if (!mounted) return;
-      setState(() => _isLoading = false);
       if (!launched) {
         setState(() {
           _errorMessage =
@@ -189,10 +218,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _isLoading = false;
         _errorMessage =
             'Google sign-in failed. Use email/password or try again later.';
       });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -204,31 +234,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    if (!await _ensureSupabaseReady()) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = _bootstrapMessage(ref.read(supabaseBootstrapProvider)) ??
-            'Cloud sign-in is unavailable.';
-      });
-      return;
-    }
-
     try {
+      if (!await _ensureSupabaseReady()) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+              'Cloud sign-in is unavailable.';
+        });
+        return;
+      }
+
       final launched = await AuthService.signInWithApple();
       if (!mounted) return;
-      setState(() => _isLoading = false);
       if (!launched) {
-        setState(() {
-          _errorMessage = 'Could not open Apple sign-in.';
-        });
+        setState(() => _errorMessage = 'Could not open Apple sign-in.');
       }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _isLoading = false;
         _errorMessage = 'Apple sign-in failed. Try email/password instead.';
       });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -274,14 +301,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
         actions: [
-          VButton(
-            label: 'Cancel',
+          TextButton(
             onPressed: () => Navigator.pop(context, false),
-            variant: ButtonVariant.text,
+            child: const Text('Cancel'),
           ),
-          VButton(
-            label: 'Send reset link',
+          FilledButton(
             onPressed: () => Navigator.pop(context, true),
+            child: const Text('Send reset link'),
           ),
         ],
       ),
@@ -305,275 +331,169 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     emailController.dispose();
   }
 
+  InputDecoration _fieldDecoration(
+    BuildContext context, {
+    required String label,
+    String? hint,
+    Widget? suffixIcon,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(VRadius.md),
+    );
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      suffixIcon: suffixIcon,
+      border: border,
+      enabledBorder: border.copyWith(
+        borderSide: BorderSide(
+          color: isDark ? VColors.outlineDark : VColors.outline,
+        ),
+      ),
+      focusedBorder: border.copyWith(
+        borderSide: const BorderSide(color: VColors.primary, width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bootstrap = ref.watch(supabaseBootstrapProvider);
-
-    ref.listen<ResidentState>(residentProvider, (previous, next) {
-      if (!mounted || _isLoading) return;
-      if (next.isLoading || next.resident == null) return;
-      if (maybeSupabase()?.auth.currentSession == null) return;
-      unawaited(_routeAfterSignIn());
-    });
-
-    final bootstrapHint = _bootstrapMessage(bootstrap);
-    final displayError = _errorMessage ?? bootstrapHint;
-
-    final coverCache = assetCacheSizeForCover(context);
 
     return Scaffold(
       backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/generated/bg-onboarding.jpg',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
-            cacheWidth: coverCache.width,
-            cacheHeight: coverCache.height,
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  (isDark ? VColors.surfaceDark : VColors.surface).withValues(alpha: 0.30),
-                  (isDark ? VColors.surfaceDark : VColors.surface).withValues(alpha: 0.76),
-                  isDark ? VColors.surfaceDark : VColors.surface,
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(VSpacing.lg),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 80),
-
-                  FadeIn(
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? VColors.glassBackgroundDark
-                            : VColors.glassBackground,
-                        borderRadius: BorderRadius.circular(VRadius.xl),
-                        border: Border.all(
-                          color: isDark
-                              ? VColors.glassBorderDark
-                              : VColors.glassBorder,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: VColors.primary.withValues(alpha: 0.18),
-                            blurRadius: 28,
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(VSpacing.xs),
-                        child: Image.asset(
-                          brandMarkAsset(context),
-                          fit: BoxFit.contain,
-                          cacheWidth: 128,
-                        ),
-                      ),
+                  Text(
+                    'Vertiege',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: VFontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: VSpacing.lg),
-                  FadeIn(
-                    delayMs: 100,
-                    child: Text(
-                      'Vertiege',
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: VFontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: VSpacing.xs),
-                  FadeIn(
-                    delayMs: 150,
-                    child: Text(
-                      'Welcome back to your worlds',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: VSpacing.xxl),
-
-                  Container(
-                    padding: const EdgeInsets.all(VSpacing.lg),
-                    decoration: BoxDecoration(
+                  Text(
+                    'Welcome back',
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: isDark
-                          ? VColors.surfaceContainerDark
-                          : VColors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(VRadius.xl),
-                      border: Border.all(
-                        color: isDark
-                            ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                            : VColors.outlineVariant.withValues(alpha: 0.3),
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: VSpacing.xl),
+                  if (_errorMessage != null) ...[
+                    AuthErrorCard(message: _errorMessage!),
+                    const SizedBox(height: VSpacing.md),
+                  ],
+                  TextField(
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    enabled: !_isLoading,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.email],
+                    autocorrect: false,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (_) => setState(() => _errorMessage = null),
+                    onSubmitted: (_) => _passwordFocus.requestFocus(),
+                    decoration: _fieldDecoration(
+                      context,
+                      label: 'Email',
+                      hint: 'you@example.com',
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.md),
+                  TextField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocus,
+                    enabled: !_isLoading,
+                    obscureText: _obscurePassword,
+                    autofillHints: const [AutofillHints.password],
+                    textInputAction: TextInputAction.done,
+                    onChanged: (_) => setState(() => _errorMessage = null),
+                    onSubmitted: _isValid ? (_) => _handleLogin() : null,
+                    decoration: _fieldDecoration(
+                      context,
+                      label: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (displayError != null) ...[
-                          AuthErrorCard(message: displayError),
-                          const SizedBox(height: VSpacing.lg),
-                        ],
-
-                        FadeIn(
-                          delayMs: 200,
-                          child: AuthEmailField(
-                            controller: _emailController,
-                            focusNode: _emailFocus,
-                            enabled: !_isLoading,
-                            onChanged: () =>
-                                setState(() => _errorMessage = null),
-                            onSubmit: (_) => _passwordFocus.requestFocus(),
-                          ),
-                        ),
-                        const SizedBox(height: VSpacing.md),
-
-                        FadeIn(
-                          delayMs: 250,
-                          child: AuthPasswordField(
-                            controller: _passwordController,
-                            focusNode: _passwordFocus,
-                            enabled: !_isLoading,
-                            onChanged: () =>
-                                setState(() => _errorMessage = null),
-                            onSubmit:
-                                _isValid ? (_) => _handleLogin() : null,
-                          ),
-                        ),
-                        const SizedBox(height: VSpacing.xl),
-
-                        FadeIn(
-                          delayMs: 300,
-                        child: VButton(
-                          label: 'Sign In',
-                          onPressed: _isLoading || !_isValid ? null : _handleLogin,
-                          icon: const Icon(VIcons.arrowLeft),
-                          isLoading: _isLoading,
-                        ),
-                        ),
-                        const SizedBox(height: VSpacing.sm),
-                        FadeIn(
-                          delayMs: 320,
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: _isLoading ? null : _showForgotPassword,
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                'Forgot password?',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: VColors.tertiary,
-                                  fontWeight: VFontWeight.semiBold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: VSpacing.lg),
-
-                  FadeIn(
-                    delayMs: 350,
-                    child: AuthSocialButtons(
-                      isLoading: _isLoading,
-                      isDark: isDark,
-                      onGoogle: _handleGoogleSignIn,
-                      onApple: _handleAppleSignIn,
-                    ),
-                  ),
-
-                  const SizedBox(height: VSpacing.lg),
-
-                  FadeIn(
-                    delayMs: 400,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: _isLoading
-                              ? null
-                              : () => context.go('/signup'),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Sign Up',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: VColors.tertiary,
-                              fontWeight: VFontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: VSpacing.lg),
-                  FadeIn(
-                    delayMs: 450,
+                  FilledButton(
+                    onPressed: _isLoading || !_isValid ? null : _handleLogin,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Sign In'),
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Align(
+                    alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () {
-                              if (AdminAccessService
-                                  .isCurrentSessionVerifier()) {
-                                context.push('/verifier/review');
-                              } else {
-                                context.go('/verifier/login');
-                              }
-                            },
-                      child: Text(
-                        AdminAccessService.isCurrentSessionVerifier()
-                            ? 'Open staff review'
-                            : 'Staff sign-in',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
+                      onPressed: _isLoading ? null : _showForgotPassword,
+                      child: const Text('Forgot password?'),
                     ),
                   ),
-                  const SizedBox(height: VSpacing.xxl),
+                  const SizedBox(height: VSpacing.lg),
+                  AuthSocialButtons(
+                    isLoading: _isLoading,
+                    isDark: isDark,
+                    onGoogle: _handleGoogleSignIn,
+                    onApple: _handleAppleSignIn,
+                  ),
+                  const SizedBox(height: VSpacing.lg),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account? "),
+                      TextButton(
+                        onPressed: _isLoading ? null : () => context.go('/signup'),
+                        child: const Text('Sign Up'),
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            if (AdminAccessService.isCurrentSessionVerifier()) {
+                              context.push('/verifier/review');
+                            } else {
+                              context.go('/verifier/login');
+                            }
+                          },
+                    child: Text(
+                      AdminAccessService.isCurrentSessionVerifier()
+                          ? 'Open staff review'
+                          : 'Staff sign-in',
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

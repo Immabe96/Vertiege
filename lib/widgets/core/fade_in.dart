@@ -58,21 +58,29 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
     if (_started) return;
     _started = true;
 
-    if (!context.motionEnabled) {
-      _controller.value = 1.0;
-      return;
-    }
-    if (widget.delayMs <= 0) {
+    if (!context.motionEnabled || widget.durationMs <= 0) {
       _controller.value = 1.0;
       return;
     }
 
-    Future.delayed(Duration(milliseconds: widget.delayMs), () {
-      if (mounted) _controller.forward();
-    });
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted && _controller.value < 0.99) _controller.value = 1.0;
-    });
+    void start() {
+      if (!mounted) return;
+      _controller.forward(from: 0);
+    }
+
+    if (widget.delayMs <= 0) {
+      start();
+    } else {
+      Future.delayed(Duration(milliseconds: widget.delayMs), start);
+    }
+
+    // Safety: never leave content at opacity 0 (blocks taps on iOS/Android).
+    Future.delayed(
+      Duration(milliseconds: widget.delayMs + widget.durationMs + 400),
+      () {
+        if (mounted) _controller.value = 1.0;
+      },
+    );
   }
 
   @override
@@ -81,13 +89,21 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  /// Opacity 0 excludes the subtree from hit-testing; keep a tiny floor.
+  double get _hitTestOpacity {
+    final v = _opacity.value;
+    return v < 0.01 ? 0.01 : v;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!context.motionEnabled) return widget.child;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         return Opacity(
-          opacity: _opacity.value,
+          opacity: _hitTestOpacity,
           child: FractionalTranslation(
             translation: _slide.value,
             child: widget.withScale

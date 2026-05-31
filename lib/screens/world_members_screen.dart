@@ -315,8 +315,11 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     final original = Set<String>.from(selected);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final sheetMaxHeight = MediaQuery.sizeOf(context).height * 0.65;
+
     await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: isDark
           ? VColors.surfaceContainerHighDark
@@ -334,15 +337,16 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Text(
-                'Ranks for $residentName',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                  fontWeight: VFontWeight.bold,
+                Text(
+                  'Ranks for $residentName',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    fontWeight: VFontWeight.bold,
+                  ),
                 ),
-              ),
                 const SizedBox(height: VSpacing.md),
-                Flexible(
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: sheetMaxHeight),
                   child: ListView(
                     shrinkWrap: true,
                     children: [
@@ -394,6 +398,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                         }
                         if (!ctx.mounted) return;
                         Navigator.pop(ctx);
+                        if (!mounted) return;
                         await _load();
                       },
                       icon: const Icon(Icons.save_outlined),

@@ -267,35 +267,44 @@ class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.textColor,
   });
 
+  static const double _extent = 44;
+
   @override
   Widget build(
     BuildContext context,
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return Container(
-      color: backgroundColor,
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.sm,
-      ),
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: textColor,
-          fontWeight: VFontWeight.semiBold,
-          letterSpacing: 0,
+    return SizedBox(
+      height: _extent,
+      child: ColoredBox(
+        color: backgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: textColor,
+                fontWeight: VFontWeight.semiBold,
+                letterSpacing: 0,
+                height: 1.2,
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
   @override
-  double get maxExtent => 40;
+  double get maxExtent => _extent;
 
   @override
-  double get minExtent => 40;
+  double get minExtent => _extent;
 
   @override
   bool shouldRebuild(covariant _SectionHeaderDelegate oldDelegate) =>

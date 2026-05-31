@@ -153,10 +153,12 @@ class _CompactAction extends StatelessWidget {
 
     return Tooltip(
       message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(VRadius.sm),
-        child: SizedBox(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(VRadius.sm),
+          child: SizedBox(
           width: VTouchTarget.iconButton,
           height: VTouchTarget.iconButton,
           child: Stack(
@@ -192,6 +194,7 @@ class _CompactAction extends StatelessWidget {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );

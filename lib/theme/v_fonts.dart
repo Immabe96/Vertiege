@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-/// Typography wiring — tokens name Plus Jakarta; this applies it app-wide.
+/// Typography tokens — system sans for now so login never sync-loads Google Fonts.
+///
+/// Plus Jakarta via `google_fonts` can be re-enabled with bundled assets once
+/// startup profiling is clean on device.
 class VFonts {
   VFonts._();
 
-  static String get sansFamily => GoogleFonts.plusJakartaSans().fontFamily!;
+  static const String sansFamily = 'sans-serif';
+
+  static Future<void> ensureLoaded() async {}
 
   static TextStyle sans({
     double? fontSize,
@@ -15,7 +19,8 @@ class VFonts {
     FontStyle? fontStyle,
     double? letterSpacing,
   }) =>
-      GoogleFonts.plusJakartaSans(
+      TextStyle(
+        fontFamily: sansFamily,
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
@@ -24,6 +29,5 @@ class VFonts {
         letterSpacing: letterSpacing,
       );
 
-  static TextTheme apply(TextTheme theme) =>
-      GoogleFonts.plusJakartaSansTextTheme(theme);
+  static TextTheme apply(TextTheme theme) => theme;
 }

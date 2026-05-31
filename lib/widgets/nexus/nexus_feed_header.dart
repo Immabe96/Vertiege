@@ -85,7 +85,7 @@ class NexusFeedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   NexusFeedHeaderDelegate({required this.header});
 
-  static const double height = 52;
+  static const double height = 56;
 
   @override
   double get minExtent => height;

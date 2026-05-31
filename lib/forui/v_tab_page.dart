@@ -34,7 +34,10 @@ class VTabPage extends StatelessWidget {
     return FScaffold(
       header: resolvedHeader,
       footer: footer,
-      child: body,
+      child: Material(
+        type: MaterialType.transparency,
+        child: body,
+      ),
     );
   }
 }

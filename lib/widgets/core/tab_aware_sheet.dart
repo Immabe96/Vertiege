@@ -20,6 +20,28 @@ Future<T?> showTabAwareModalBottomSheet<T>({
     useRootNavigator: true,
     useSafeArea: useSafeArea,
     backgroundColor: backgroundColor,
-    builder: builder,
+    builder: (context) => Material(
+      color: Colors.transparent,
+      child: builder(context),
+    ),
+  ).whenComplete(overlay.release);
+}
+
+/// Alert dialog above tab-shell FAB (e.g. Nexus post edit).
+Future<T?> showTabAwareDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+}) {
+  final container = ProviderScope.containerOf(context);
+  final overlay = container.read(tabShellOverlayProvider.notifier);
+  overlay.acquire();
+  return showDialog<T>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    builder: (context) => Material(
+      type: MaterialType.transparency,
+      child: builder(context),
+    ),
   ).whenComplete(overlay.release);
 }

@@ -59,6 +59,7 @@ class BoostedWorldsRow extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           world.name,
@@ -74,18 +75,26 @@ class BoostedWorldsRow extends StatelessWidget {
                           children: [
                             const Icon(Icons.bolt, size: 12, color: VColors.tertiary),
                             const SizedBox(width: 2),
-                            Text(
-                              'Boosted',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: VColors.tertiary,
-                                fontWeight: VFontWeight.semiBold,
+                            Flexible(
+                              child: Text(
+                                'Boosted',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: VColors.tertiary,
+                                  fontWeight: VFontWeight.semiBold,
+                                ),
                               ),
                             ),
                             const SizedBox(width: VSpacing.sm),
-                            Text(
-                              '★ P${world.prestige}',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: VColors.onSurfaceVariant,
+                            Flexible(
+                              child: Text(
+                                '★ P${world.prestige}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: VColors.onSurfaceVariant,
+                                ),
                               ),
                             ),
                           ],

@@ -130,7 +130,7 @@ class _CompactShortcutsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 76,
+      height: 92,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(bottom: VSpacing.xs),
@@ -198,20 +198,25 @@ class _CompactShortcut extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: VSpacing.sm,
-                vertical: VSpacing.sm,
+                vertical: VSpacing.xs,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: VIconSize.lg, color: context.vPrimary),
+                  Icon(icon, size: VIconSize.md, color: context.vPrimary),
                   const SizedBox(height: VSpacing.xxs),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: VFontWeight.semiBold,
-                      color: context.vOnSurface,
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: VFontWeight.semiBold,
+                        color: context.vOnSurface,
+                        height: 1.15,
+                      ),
                     ),
                   ),
                 ],

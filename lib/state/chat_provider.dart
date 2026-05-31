@@ -90,8 +90,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
   @override
   ChatState build() {
-    ref.listen<ChatState>(chatProvider, (previous, next) {
-      if (previous == null) return;
+    listenSelf((previous, next) {
       unawaited(_persistMessages(next));
     });
     unawaited(_loadCachedMessages());

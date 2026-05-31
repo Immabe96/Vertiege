@@ -109,19 +109,19 @@ class PostNotifier extends Notifier<PostState> {
       _schedulerTimer?.cancel();
     });
 
-    ref.listen<PostState>(postProvider, (prev, next) {
-      if (prev == null) return;
+    listenSelf((prev, next) {
       final residentId = ref.read(residentProvider).resident?.id;
       if (residentId == null) return;
-      final prevIds = prev.posts.map((p) => p.id).toSet();
-      for (final post in next.posts) {
-        if (!prevIds.contains(post.id) && post.residentId == residentId) {
-          ref.read(residentProvider.notifier).addRep(post.worldId, 5);
-          _checkPostMilestones(post.residentId);
-          _triggerPrestigeUpdate(post.worldId);
-          break;
-        }
-      }
+      final prevIds = (prev?.posts ?? const <Post>[]).map((p) => p.id).toSet();
+      final added =
+          next.posts.where((p) => !prevIds.contains(p.id)).toList(growable: false);
+      // Ignore feed hydration (many posts at once), only react to a single new post.
+      if (added.length != 1) return;
+      final post = added.single;
+      if (post.residentId != residentId) return;
+      ref.read(residentProvider.notifier).addRep(post.worldId, 5);
+      _checkPostMilestones(post.residentId);
+      _triggerPrestigeUpdate(post.worldId);
     });
 
     _loadScheduledPosts();
@@ -346,6 +346,9 @@ class PostNotifier extends Notifier<PostState> {
           parameters: {'world_id': worldId},
         ),
       );
+      ref.read(residentProvider.notifier).addRep(worldId, 5);
+      _checkPostMilestones(residentId);
+      _triggerPrestigeUpdate(worldId);
     } else if (result.queued) {
       state = state.copyWith(
         isPosting: false,

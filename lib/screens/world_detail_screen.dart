@@ -1020,11 +1020,14 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
     required this.tabLabels,
   });
 
-  @override
-  double get minExtent => 56;
+  /// Room for [TabBar] plus top/bottom divider lines without sliver overflow.
+  static const double _tabBarHeight = 52;
 
   @override
-  double get maxExtent => 56;
+  double get minExtent => _tabBarHeight;
+
+  @override
+  double get maxExtent => _tabBarHeight;
 
   @override
   Widget build(
@@ -1038,33 +1041,36 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
     final dividerColor = isDark ? VColors.outlineDark : VColors.outline;
     final unselectedColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
 
-    return ColoredBox(
-      color: bgColor.withValues(alpha: 0.96),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: dividerColor),
-            top: BorderSide(
-              color: dividerColor.withValues(alpha: 0.6),
+    return SizedBox(
+      height: _tabBarHeight,
+      child: ColoredBox(
+        color: bgColor.withValues(alpha: 0.96),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: dividerColor),
+              top: BorderSide(
+                color: dividerColor.withValues(alpha: 0.6),
+              ),
             ),
           ),
-        ),
-        child: TabBar(
-          controller: controller,
-          labelColor: color,
-          unselectedLabelColor: unselectedColor,
-          indicatorColor: color,
-          labelStyle: TextStyle(
-            fontSize: VFontSize.labelSm,
-            fontWeight: VFontWeight.semiBold,
+          child: TabBar(
+            controller: controller,
+            labelColor: color,
+            unselectedLabelColor: unselectedColor,
+            indicatorColor: color,
+            labelStyle: TextStyle(
+              fontSize: VFontSize.labelSm,
+              fontWeight: VFontWeight.semiBold,
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: VFontSize.labelSm,
+              fontWeight: VFontWeight.regular,
+            ),
+            tabs: [
+              for (final label in tabLabels) Tab(text: label),
+            ],
           ),
-          unselectedLabelStyle: TextStyle(
-            fontSize: VFontSize.labelSm,
-            fontWeight: VFontWeight.regular,
-          ),
-          tabs: [
-            for (final label in tabLabels) Tab(text: label),
-          ],
         ),
       ),
     );

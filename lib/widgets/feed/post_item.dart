@@ -362,7 +362,7 @@ class PostItem extends ConsumerWidget {
 
   void _onEdit(BuildContext context, WidgetRef ref) {
     final ctrl = TextEditingController(text: post.content);
-    showDialog(
+    showTabAwareDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Edit post'),

@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/invite_service.dart';
 import '../../state/resident_provider.dart';
-import '../../widgets/core/fade_in.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../widgets/auth/auth_fields.dart';
 import '../../theme/v_colors.dart';
@@ -97,16 +96,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       }
     } on AuthException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.message;
-      });
+      setState(() => _errorMessage = e.message);
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _isLoading = false;
         _errorMessage = 'Something went wrong. Please try again.';
       });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -124,8 +121,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             children: [
               const SizedBox(height: 80),
 
-              FadeIn(
-                child: Container(
+              Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
@@ -148,22 +144,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ),
                   ),
                 ),
-              ),
               const SizedBox(height: VSpacing.lg),
-              FadeIn(
-                delayMs: 100,
-                child: Text(
+              Text(
                   'Vertiege',
                   style: theme.textTheme.headlineLarge?.copyWith(
                     fontWeight: VFontWeight.bold,
                     letterSpacing: 1.5,
                   ),
                 ),
-              ),
               const SizedBox(height: VSpacing.xs),
-              FadeIn(
-                delayMs: 150,
-                child: Text(
+              Text(
                   'Create your account',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDark
@@ -171,7 +161,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         : VColors.onSurfaceVariant,
                   ),
                 ),
-              ),
               const SizedBox(height: VSpacing.xxl),
 
               Container(
@@ -195,21 +184,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       const SizedBox(height: VSpacing.lg),
                     ],
 
-                    FadeIn(
-                      delayMs: 200,
-                      child: AuthEmailField(
+                    AuthEmailField(
                         controller: _emailController,
                         focusNode: _emailFocus,
                         enabled: !_isLoading,
                         onChanged: () => setState(() => _errorMessage = null),
                         onSubmit: (_) => _passwordFocus.requestFocus(),
                       ),
-                    ),
                     const SizedBox(height: VSpacing.md),
-
-                    FadeIn(
-                      delayMs: 250,
-                      child: AuthPasswordField(
+                    AuthPasswordField(
                         controller: _passwordController,
                         focusNode: _passwordFocus,
                         enabled: !_isLoading,
@@ -219,12 +202,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         onChanged: () => setState(() => _errorMessage = null),
                         onSubmit: (_) => _confirmPasswordFocus.requestFocus(),
                       ),
-                    ),
                     const SizedBox(height: VSpacing.md),
-
-                    FadeIn(
-                      delayMs: 300,
-                      child: AuthPasswordField(
+                    AuthPasswordField(
                         controller: _confirmPasswordController,
                         focusNode: _confirmPasswordFocus,
                         enabled: !_isLoading,
@@ -232,12 +211,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         onChanged: () => setState(() => _errorMessage = null),
                         onSubmit: _isValid ? (_) => _handleSignUp() : null,
                       ),
-                    ),
                     const SizedBox(height: VSpacing.xl),
-
-                    FadeIn(
-                      delayMs: 350,
-                      child: FilledButton.icon(
+                    FilledButton.icon(
                         onPressed: _isLoading || !_isValid
                             ? null
                             : _handleSignUp,
@@ -254,16 +229,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           _isLoading ? 'Creating account...' : 'Create Account',
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
 
               const SizedBox(height: VSpacing.lg),
 
-              FadeIn(
-                delayMs: 400,
-                child: Row(
+              Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
@@ -291,7 +263,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ),
                   ],
                 ),
-              ),
               const SizedBox(height: VSpacing.xxl),
             ],
           ),

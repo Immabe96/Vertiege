@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:forui/forui.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/notification.dart';
 import 'state/theme_provider.dart';
 import 'state/resident_provider.dart';
@@ -53,7 +52,7 @@ class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
 
 class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     with WidgetsBindingObserver {
-  bool _showSplash = true;
+  bool _showSplash = false;
   bool _isOnline = true;
   bool _supabaseBootstrapFailed = false;
   String? _maintenanceBanner;
@@ -104,37 +103,19 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   }
 
   Future<void> _startup() async {
-    // Never block the splash on network — bootstrap runs in parallel.
-    unawaited(_bootstrapServices());
-
-    final splashStarted = DateTime.now();
-    const minSplash = Duration(milliseconds: 1200);
-    const maxSplash = Duration(seconds: 8);
-
-    await Future<void>.delayed(minSplash);
-
-    final hasSession = maybeSupabase()?.auth.currentSession != null;
-    if (hasSession && mounted) {
-      while (mounted && ref.read(residentProvider).isLoading) {
-        if (DateTime.now().difference(splashStarted) >= maxSplash) {
-          break;
-        }
-        await Future.delayed(const Duration(milliseconds: 50));
-      }
-    }
-
     _refreshRemoteGates();
 
-    if (!mounted) return;
-    setState(() => _showSplash = false);
+    final hasSession = maybeSupabase()?.auth.currentSession != null;
+    if (!hasSession) return;
+
+    unawaited(_bootstrapServices());
     _attachRuntimeListeners();
     _flushPendingNotificationRoute();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Future<void>.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
-        _startBackgroundLoads();
+        _scheduleBackgroundLoads();
       });
     });
   }
@@ -177,37 +158,68 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     unawaited(ref.read(worldProvider.notifier).loadWorlds());
   }
 
-  /// Fire-and-forget secondary loads after login/home is visible.
-  void _startBackgroundLoads() {
-    unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
-    unawaited(
-      _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
-    );
-    unawaited(
-      _safeLoad(
-        'achievements',
-        ref.read(achievementProvider.notifier).loadAchievements,
-      ),
-    );
-    unawaited(_safeLoad('events', ref.read(eventProvider.notifier).loadEvents));
-    unawaited(_safeLoad('quests', ref.read(questProvider.notifier).loadQuests));
-    unawaited(_safeLoad('league', ref.read(leagueProvider.notifier).loadLeague));
-    unawaited(
-      _safeLoad(
-        'notifications',
-        ref.read(notificationProvider.notifier).loadNotifications,
-      ),
-    );
-    final residentId = ref.read(residentProvider).resident?.id;
-    if (residentId != null) {
+  /// Staggered secondary loads so Nexus stays responsive after sign-in.
+  void _scheduleBackgroundLoads() {
+    Future<void>.delayed(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
       unawaited(
         _safeLoad(
-          'dm_rooms',
-          () => ref.read(chatProvider.notifier).loadDmRooms(residentId),
+          'notifications',
+          ref.read(notificationProvider.notifier).loadNotifications,
         ),
       );
+    });
+    Future<void>.delayed(const Duration(milliseconds: 1400), () {
+      if (!mounted) return;
+      unawaited(
+        _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
+      );
+      unawaited(
+        _safeLoad(
+          'achievements',
+          ref.read(achievementProvider.notifier).loadAchievements,
+        ),
+      );
+    });
+    Future<void>.delayed(const Duration(milliseconds: 2000), () {
+      if (!mounted) return;
+      unawaited(_safeLoad('events', ref.read(eventProvider.notifier).loadEvents));
+      unawaited(_safeLoad('quests', ref.read(questProvider.notifier).loadQuests));
+      unawaited(_safeLoad('league', ref.read(leagueProvider.notifier).loadLeague));
+      final residentId = ref.read(residentProvider).resident?.id;
+      if (residentId != null) {
+        unawaited(
+          _safeLoad(
+            'dm_rooms',
+            () => ref.read(chatProvider.notifier).loadDmRooms(residentId),
+          ),
+        );
+      }
+      unawaited(_safeInitServices());
+    });
+  }
+
+  void _onResidentSignedIn() {
+    void afterReady() {
+      if (!mounted) return;
+      _attachRuntimeListeners();
+      _flushPendingNotificationRoute();
+      _scheduleBackgroundLoads();
     }
-    unawaited(_safeInitServices());
+
+    if (!FirebaseBootstrap.isInitialized) {
+      Future<void>.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        unawaited(_bootstrapServices().then((_) => afterReady()));
+      });
+    } else {
+      Future<void>.delayed(const Duration(milliseconds: 500), () => afterReady());
+    }
+    Future<void>.delayed(const Duration(milliseconds: 800), () {
+      final resident = ref.read(residentProvider).resident;
+      if (!mounted || resident == null) return;
+      unawaited(_initializeResidentServices(resident.id));
+    });
   }
 
   Future<void> _safeInitServices() async {
@@ -486,7 +498,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       final resident = next.resident;
       if (resident == null) return;
       if (previous?.resident?.id != resident.id) {
-        unawaited(_initializeResidentServices(resident.id));
+        _onResidentSignedIn();
         unawaited(ref.read(residentProvider.notifier).touchPresence());
         _checkDailyReward();
       }
@@ -577,13 +589,17 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     Widget child, {
     required bool isDark,
   }) {
+    final materialColor = Theme.of(context).colorScheme.surface;
     return FTheme(
       data: isDark ? VertiegeForuiTheme.dark : VertiegeForuiTheme.light,
       child: FToaster(
         child: FTooltipGroup(
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-            child: child,
+          child: Material(
+            color: materialColor,
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+              child: child,
+            ),
           ),
         ),
       ),

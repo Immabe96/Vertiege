@@ -49,6 +49,8 @@ class TabLayout extends ConsumerStatefulWidget {
 
 class _TabLayoutState extends ConsumerState<TabLayout>
     with TickerProviderStateMixin {
+  static const Duration _fabAnimDuration = VAnimation.normal;
+
   late AnimationController _fabController;
   late Animation<double> _fabScale;
   late Animation<double> _fabRotation;
@@ -58,7 +60,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
   void initState() {
     super.initState();
     _fabController = AnimationController(
-      duration: context.motionDuration(VAnimation.normal),
+      duration: _fabAnimDuration,
       vsync: this,
     );
     _fabScale = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -95,60 +97,78 @@ class _TabLayoutState extends ConsumerState<TabLayout>
       }
     }
 
-    return FScaffold(
-      footer: _MainBottomNav(
-        index: index,
-        unread: unread,
-        onTabTap: (i) {
-          VHaptics.lightImpact(context);
-          if (i == index) {
-            ref.read(scrollToTopProvider.notifier).increment();
-          }
-          widget.navigationShell.goBranch(
-            i,
-            initialLocation: i == index,
-          );
-        },
-      ),
-      child: Stack(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final footerBorder = isDark ? VColors.outlineDark : VColors.outline;
+
+    return ColoredBox(
+      color: isDark ? VColors.surfaceDark : VColors.surface,
+      child: Column(
         children: [
-          widget.navigationShell,
-          const _FloatingCampfireBar(),
-          if (fabConfig != null)
-            Positioned(
-              right: VSpacing.lg,
-              bottom: VSpacing.lg + MediaQuery.viewPaddingOf(context).bottom,
-              child: ScaleTransition(
-                scale: _fabScale,
-                child: RotationTransition(
-                  turns: _fabRotation,
-                  child: Semantics(
-                    label: 'Compose post',
-                    button: true,
-                    child: Material(
-                      elevation: 4,
-                      color: fabConfig.backgroundColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(VRadius.lg),
-                      ),
-                      child: InkWell(
-                        onTap: fabConfig.onPressed,
-                        borderRadius: BorderRadius.circular(VRadius.lg),
-                        child: SizedBox(
-                          width: 56,
-                          height: 56,
-                          child: Icon(
-                            fabConfig.icon,
-                            size: VIconSize.lg,
-                            color: fabConfig.foregroundColor,
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                widget.navigationShell,
+                const _FloatingCampfireBar(),
+                if (fabConfig != null)
+                  Positioned(
+                    right: VSpacing.lg,
+                    bottom: VSpacing.lg,
+                    child: ScaleTransition(
+                      scale: _fabScale,
+                      child: RotationTransition(
+                        turns: _fabRotation,
+                        child: Semantics(
+                          label: 'Compose post',
+                          button: true,
+                          child: Material(
+                            elevation: 4,
+                            color: fabConfig.backgroundColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(VRadius.lg),
+                            ),
+                            child: InkWell(
+                              onTap: fabConfig.onPressed,
+                              borderRadius:
+                                  BorderRadius.circular(VRadius.lg),
+                              child: SizedBox(
+                                width: 56,
+                                height: 56,
+                                child: Icon(
+                                  fabConfig.icon,
+                                  size: VIconSize.lg,
+                                  color: fabConfig.foregroundColor,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
+              ],
             ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: footerBorder)),
+            ),
+            child: _MainBottomNav(
+              index: index,
+              unread: unread,
+              onTabTap: (i) {
+                VHaptics.lightImpact(context);
+                if (i == index) {
+                  ref.read(scrollToTopProvider.notifier).increment();
+                }
+                widget.navigationShell.goBranch(
+                  i,
+                  initialLocation: i == index,
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

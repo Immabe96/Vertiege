@@ -96,10 +96,9 @@ final goRouterRefreshProvider = Provider<GoRouterRefresh>((ref) {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ref.watch(goRouterRefreshProvider);
-  final supabaseClient = maybeSupabase();
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/login',
     refreshListenable: refreshListenable,
     observers: AnalyticsService.navigatorObservers,
     errorBuilder: (context, state) => Scaffold(
@@ -138,8 +137,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Legacy admin URL → verifier portal
       if (location == '/admin/verifications') return '/verifier/review';
 
-      final hasSession = supabaseClient?.auth.currentSession != null;
-      final currentUser = supabaseClient?.auth.currentUser;
+      final client = maybeSupabase();
+      final hasSession = client?.auth.currentSession != null;
+      final currentUser = client?.auth.currentUser;
       final isVerifier = AdminAccessService.isVerifierUser(currentUser);
 
       // ── Verifier portal (staff review; same session as main app) ───

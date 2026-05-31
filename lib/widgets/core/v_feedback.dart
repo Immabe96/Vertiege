@@ -8,10 +8,9 @@ abstract final class VFeedback {
     String message, {
     Duration duration = const Duration(seconds: 4),
   }) {
-    showFToast(
-      context: context,
-      title: Text(message),
-      duration: duration,
+    if (_tryFToast(context, message, duration: duration)) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: duration),
     );
   }
 
@@ -20,12 +19,44 @@ abstract final class VFeedback {
     String message, {
     Duration duration = const Duration(seconds: 5),
   }) {
-    showFToast(
-      context: context,
-      variant: .destructive,
-      title: Text(message),
+    if (_tryFToast(
+      context,
+      message,
       duration: duration,
+      destructive: true,
+    )) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: duration),
     );
+  }
+
+  static bool _tryFToast(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+    bool destructive = false,
+  }) {
+    try {
+      if (destructive) {
+        showFToast(
+          context: context,
+          variant: .destructive,
+          title: Text(message),
+          duration: duration,
+        );
+      } else {
+        showFToast(
+          context: context,
+          title: Text(message),
+          duration: duration,
+        );
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static void showWithAction(

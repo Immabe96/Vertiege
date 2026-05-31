@@ -58,9 +58,10 @@ class AchievementNotifier extends Notifier<AchievementState> {
 
   @override
   AchievementState build() {
-    ref.listen<AchievementState>(achievementProvider, (prev, next) {
+    listenSelf((prev, next) {
       if (next.recentlyUnlockedIds.isNotEmpty &&
-          next.recentlyUnlockedIds != (prev?.recentlyUnlockedIds ?? const [])) {
+          next.recentlyUnlockedIds !=
+              (prev?.recentlyUnlockedIds ?? const [])) {
         ref.read(residentProvider.notifier).refreshGamificationFromServer();
       }
     });

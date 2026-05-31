@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
@@ -55,12 +57,18 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final postState = ref.read(postProvider);
-      if (postState.posts.isEmpty && !postState.isLoading) {
-        ref.read(postProvider.notifier).loadPosts();
-      }
-      _onNexusOpened();
+      unawaited(_loadFeedWhenReady());
+      unawaited(_onNexusOpened());
     });
+  }
+
+  Future<void> _loadFeedWhenReady() async {
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    if (!mounted) return;
+    final postState = ref.read(postProvider);
+    if (postState.posts.isEmpty && !postState.isLoading) {
+      await ref.read(postProvider.notifier).loadPosts();
+    }
   }
 
   Future<void> _onNexusOpened() async {
@@ -265,16 +273,21 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
               ),
         suffixes: headerActions,
       ),
-      body: RefreshIndicator(
-            onRefresh: () async {
-              await ref.read(postProvider.notifier).loadPosts();
-              await Future<void>.delayed(const Duration(milliseconds: 200));
-            },
-            child: Stack(
-              children: [
-                CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
+      body: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await ref.read(postProvider.notifier).loadPosts();
+                    await Future<void>.delayed(
+                      const Duration(milliseconds: 200),
+                    );
+                  },
+                  child: CustomScrollView(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
                     SliverToBoxAdapter(
                       child: NexusContextStrip(
                         showJoinWorldsCta: joinedRemoteWorlds == 0,
@@ -287,24 +300,19 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                             setState(() => _shortcutsExpanded = v),
                       ),
                     ),
-                    SliverPersistentHeader(
-                      pinned: true,
-                      delegate: NexusFeedHeaderDelegate(
-                        header: NexusFeedHeader(
-                          isDark: isDark,
-                          allSelected: _tab == _FeedTab.all,
-                          followingSelected: _tab == _FeedTab.following,
-                          announcementsSelected:
-                              _tab == _FeedTab.announcements,
-                          currentSort: _sort,
-                          onSortChanged: (s) => setState(() => _sort = s),
-                          onAllTap: () => setState(() => _tab = _FeedTab.all),
-                          onFollowingTap: () =>
-                              setState(() => _tab = _FeedTab.following),
-                          onAnnouncementsTap: () => setState(
-                            () => _tab = _FeedTab.announcements,
-                          ),
-                        ),
+                    SliverToBoxAdapter(
+                      child: NexusFeedHeader(
+                        isDark: isDark,
+                        allSelected: _tab == _FeedTab.all,
+                        followingSelected: _tab == _FeedTab.following,
+                        announcementsSelected: _tab == _FeedTab.announcements,
+                        currentSort: _sort,
+                        onSortChanged: (s) => setState(() => _sort = s),
+                        onAllTap: () => setState(() => _tab = _FeedTab.all),
+                        onFollowingTap: () =>
+                            setState(() => _tab = _FeedTab.following),
+                        onAnnouncementsTap: () =>
+                            setState(() => _tab = _FeedTab.announcements),
                       ),
                     ),
 
@@ -348,32 +356,35 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                           childCount: posts.length,
                         ),
                       ),
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: VSpacing.xxl),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: VSpacing.xxl +
+                            MediaQuery.paddingOf(context).bottom,
+                      ),
                     ),
                   ],
                 ),
-
-                if (_showScrollFab)
-                  Positioned(
-                    right: VSpacing.md,
-                    bottom: VSpacing.md,
-                    child: AnimatedScale(
-                      scale: _showScrollFab ? 1.0 : 0.0,
-                      duration: context.motionDuration(VAnimation.fast),
-                      curve: context.motionCurve,
-                      child: FloatingActionButton.small(
-                        onPressed: _scrollToTop,
-                        tooltip: 'Scroll to top',
-                        child: const Icon(
-                          Icons.keyboard_arrow_up,
-                          size: VIconSize.lg,
-                        ),
+              ),
+            ),
+              if (_showScrollFab)
+                Positioned(
+                  right: VSpacing.md,
+                  bottom: VSpacing.md,
+                  child: AnimatedScale(
+                    scale: _showScrollFab ? 1.0 : 0.0,
+                    duration: context.motionDuration(VAnimation.fast),
+                    curve: context.motionCurve,
+                    child: FloatingActionButton.small(
+                      onPressed: _scrollToTop,
+                      tooltip: 'Scroll to top',
+                      child: const Icon(
+                        Icons.keyboard_arrow_up,
+                        size: VIconSize.lg,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
     );
   }

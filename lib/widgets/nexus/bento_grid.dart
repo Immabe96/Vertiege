@@ -126,7 +126,7 @@ class _BentoRow extends StatelessWidget {
   }
 
   double _rowHeight(List<BentoCard> row) {
-    var maxH = 148.0;
+    var maxH = 164.0;
     for (final card in row) {
       maxH = maxH > _heightFor(card.size) ? maxH : _heightFor(card.size);
     }
@@ -134,10 +134,10 @@ class _BentoRow extends StatelessWidget {
   }
 
   double _heightFor(BentoSize size) => switch (size) {
-        BentoSize.small => 148,
-        BentoSize.medium => 168,
-        BentoSize.large => 200,
-        BentoSize.full => 200,
+        BentoSize.small => 164,
+        BentoSize.medium => 184,
+        BentoSize.large => 212,
+        BentoSize.full => 212,
       };
 }
 
@@ -154,12 +154,22 @@ class _BentoCardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final innerHeight = height - (VSpacing.md * 2);
     final child = SizedBox(
       width: width,
       height: height,
       child: VSurfacePanel(
         padding: const EdgeInsets.all(VSpacing.md),
-        child: card.child,
+        child: ClipRect(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: width - (VSpacing.md * 2),
+              height: innerHeight,
+              child: card.child,
+            ),
+          ),
+        ),
       ),
     );
 
