@@ -107,14 +107,16 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     // Never block the splash on network — bootstrap runs in parallel.
     unawaited(_bootstrapServices());
 
-    await Future<void>.delayed(const Duration(milliseconds: 1800));
+    final splashStarted = DateTime.now();
+    const minSplash = Duration(milliseconds: 1200);
+    const maxSplash = Duration(seconds: 8);
+
+    await Future<void>.delayed(minSplash);
 
     final hasSession = maybeSupabase()?.auth.currentSession != null;
     if (hasSession && mounted) {
-      final waitStart = DateTime.now();
       while (mounted && ref.read(residentProvider).isLoading) {
-        if (DateTime.now().difference(waitStart) >
-            const Duration(seconds: 6)) {
+        if (DateTime.now().difference(splashStarted) >= maxSplash) {
           break;
         }
         await Future.delayed(const Duration(milliseconds: 50));
@@ -161,7 +163,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       }),
     );
 
-    if (!Supabase.instance.isInitialized) {
+    if (!SupabaseBootstrap.isReady) {
       final result = await SupabaseBootstrap.initialize();
       if (result != SupabaseBootstrapResult.ready) {
         debugPrint('Supabase bootstrap not ready: $result');

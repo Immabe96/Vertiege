@@ -18,16 +18,15 @@ enum SupabaseBootstrapResult {
 /// Initializes Supabase from `.env` (bundled asset or local file).
 abstract final class SupabaseBootstrap {
   static SupabaseBootstrapResult _lastResult = SupabaseBootstrapResult.pending;
+  static bool _initialized = false;
 
   static SupabaseBootstrapResult get lastResult => _lastResult;
 
   static bool get isReady =>
-      _lastResult == SupabaseBootstrapResult.ready &&
-      Supabase.instance.isInitialized;
+      _initialized && _lastResult == SupabaseBootstrapResult.ready;
 
   static Future<SupabaseBootstrapResult> initialize() async {
-    if (Supabase.instance.isInitialized) {
-      _lastResult = SupabaseBootstrapResult.ready;
+    if (_initialized && _lastResult == SupabaseBootstrapResult.ready) {
       return _lastResult;
     }
 
@@ -52,6 +51,7 @@ abstract final class SupabaseBootstrap {
         anonKey: anonKey,
         httpClient: httpClient,
       ).timeout(const Duration(seconds: 15));
+      _initialized = true;
       _lastResult = SupabaseBootstrapResult.ready;
       debugPrint('SupabaseBootstrap: ready');
       return _lastResult;
