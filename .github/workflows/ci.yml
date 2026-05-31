@@ -156,11 +156,19 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release --no-tree-shake-icons
 
+      - name: Prune old APK artifacts (storage quota)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_KEEP_COUNT: '2'
+          ARTIFACT_PRUNE_MODE: aggressive
+        run: bash scripts/ci-prune-github-artifacts.sh
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: vertiege-apk-${{ github.run_id }}
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
-          retention-days: 90
-
+          retention-days: 14
+          compression-level: 9
+
