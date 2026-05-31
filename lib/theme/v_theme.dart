@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'v_colors.dart';
 import 'v_fonts.dart';
 import 'v_tokens.dart';
