@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'v_colors.dart';
+import 'v_fonts.dart';
 import 'v_tokens.dart';
 
 class VTheme {
@@ -14,7 +15,7 @@ class VTheme {
       useMaterial3: true,
       brightness: isDark ? Brightness.dark : Brightness.light,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: VColors.primary,
+        seedColor: VColors.brand,
         brightness: isDark ? Brightness.dark : Brightness.light,
         primary: isDark ? VColors.primaryLight : VColors.primary,
         onPrimary: VColors.onPrimary,
@@ -82,7 +83,7 @@ class VTheme {
             ? VColors.inversePrimaryDark
             : VColors.inversePrimary,
       ),
-      textTheme: _textTheme(isDark),
+      textTheme: VFonts.apply(_textTheme(isDark)),
       appBarTheme: _appBarTheme(isDark),
       navigationBarTheme: _navBarTheme(isDark),
       cardTheme: _cardTheme(isDark),
@@ -110,14 +111,14 @@ class VTheme {
     Color? color,
     double? height,
     FontStyle? fontStyle,
-  }) => TextStyle(
-    fontFamily: FTypography.defaultFontFamily,
-    fontSize: fontSize,
-    fontWeight: fontWeight,
-    color: color,
-    height: height,
-    fontStyle: fontStyle,
-  );
+  }) =>
+      VFonts.sans(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        height: height,
+        fontStyle: fontStyle,
+      );
 
   static TextTheme _textTheme(bool isDark) {
     final base = _font(

@@ -4,9 +4,12 @@ One Flutter UI — **no separate Cupertino shell**. Platform differences are lim
 
 ## Design system
 
+Visual direction: **[DESIGN_PRESTIGE_NOIR.md](DESIGN_PRESTIGE_NOIR.md)** (gold brand, charcoal dark, violet worlds).
+
 | Layer | Location |
 |-------|----------|
 | Colors | `lib/theme/v_colors.dart` |
+| Fonts | `lib/theme/v_fonts.dart` |
 | Spacing, type, radius | `lib/theme/v_tokens.dart` |
 | Material 3 theme | `lib/theme/v_theme.dart` → `AppTheme` |
 | Components | `lib/ui/`, `lib/widgets/`, Forui (`FScaffold`, `FTile`, …) |
@@ -18,7 +21,8 @@ One Flutter UI — **no separate Cupertino shell**. Platform differences are lim
 3. **Navigation pushes**: use `vGoRoute` in `app_router.dart` for full-screen routes (shared fade/slide).
 4. **Auth**: `AuthSocialButtons` — Apple only on iOS/macOS; Google on all mobile.
 5. **Empty states**: `AppEmptyState` with `assets/images/empty_states/` where possible.
-6. **Remote tuning**: Firebase `forui_strict_mode`, `minimum_build` (+ optional `minimum_build_ios` / `minimum_build_android`).
+6. **Accents**: `VColors.brand` (gold) for prestige UI; `VColors.secondary` (violet) for worlds; `VColors.link` for hyperlinks — not `tertiary` for links.
+7. **Remote tuning**: Firebase `forui_strict_mode`, `minimum_build` (+ optional `minimum_build_ios` / `minimum_build_android`).
 
 ## Version display
 

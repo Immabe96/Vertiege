@@ -21,6 +21,10 @@ class AppColors {
   static const onSecondary = VColors.onSecondary;
   static const onSecondaryContainer = VColors.onSecondaryContainer;
 
+  static const brand = VColors.brand;
+  static const link = VColors.link;
+  static const linkDark = VColors.linkDark;
+
   static const tertiary = VColors.tertiary;
   static const tertiaryLight = VColors.tertiaryLight;
   static const tertiaryDark = VColors.tertiaryDark;

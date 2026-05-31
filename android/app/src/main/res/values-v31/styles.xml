@@ -2,7 +2,7 @@
 <resources>
     <!-- Android 12+ splash — dark surface aligned with Flutter SplashScreen -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
-        <item name="android:windowSplashScreenBackground">#070910</item>
+        <item name="android:windowSplashScreenBackground">#0F1117</item>
         <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
     </style>
 </resources>

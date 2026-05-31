@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen>
                         .withValues(alpha: 0.72),
                     boxShadow: [
                       BoxShadow(
-                        color: VColors.tertiary.withValues(
+                        color: VColors.brand.withValues(
                           alpha: 0.45 * _iconScale.value,
                         ),
                         blurRadius: 32,
@@ -165,7 +165,7 @@ class _SplashScreenState extends State<SplashScreen>
                 'Your tier-gated social universe',
                 style: TextStyle(
                   fontSize: VFontSize.bodyMd,
-                  color: VColors.tertiary.withValues(alpha: 0.6),
+                  color: VColors.brand.withValues(alpha: 0.85),
                   letterSpacing: 0,
                 ),
               ),

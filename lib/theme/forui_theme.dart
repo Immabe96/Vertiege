@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 
 import 'v_colors.dart';
+import 'v_fonts.dart';
 
 class VertiegeForuiTheme {
   VertiegeForuiTheme._();
@@ -40,14 +41,14 @@ class VertiegeForuiTheme {
     );
 
     return FThemeData(
-      debugLabel: isDark ? 'Vertiege AMOLED Forui' : 'Vertiege White Forui',
+      debugLabel: isDark ? 'Vertiege Prestige Noir' : 'Vertiege Light Forui',
       colors: colors,
       touch: true,
       typography:
           FTypography.inherit(
             colors: colors,
             touch: false,
-            fontFamily: FTypography.defaultFontFamily,
+            fontFamily: VFonts.sansFamily,
           ).copyWith(
             xs3: const TextStyle(fontSize: 9, height: 1),
             xs2: const TextStyle(fontSize: 11, height: 1),
