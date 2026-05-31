@@ -23,6 +23,7 @@ import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../widgets/auth/auth_social_buttons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -497,61 +498,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   FadeIn(
                     delayMs: 350,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: isDark
-                                    ? VColors.outlineVariantDark
-                                    : VColors.outlineVariant,
-                              ),
-                            ),
-                            const SizedBox(width: VSpacing.md),
-                            Text(
-                              'or',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(width: VSpacing.md),
-                            Expanded(
-                              child: Divider(
-                                color: isDark
-                                    ? VColors.outlineVariantDark
-                                    : VColors.outlineVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: VSpacing.md),
-                        OutlinedButton.icon(
-                          onPressed: _isLoading ? null : _handleGoogleSignIn,
-                          icon: const Icon(Icons.g_mobiledata, size: VIconSize.lg),
-                          label: const Text('Continue with Google'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(VRadius.md),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: VSpacing.sm),
-                        OutlinedButton.icon(
-                          onPressed: _isLoading ? null : _handleAppleSignIn,
-                          icon: const Icon(Icons.apple, size: VIconSize.lg),
-                          label: const Text('Continue with Apple'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(VRadius.md),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: AuthSocialButtons(
+                      isLoading: _isLoading,
+                      isDark: isDark,
+                      onGoogle: _handleGoogleSignIn,
+                      onApple: _handleAppleSignIn,
                     ),
                   ),
 

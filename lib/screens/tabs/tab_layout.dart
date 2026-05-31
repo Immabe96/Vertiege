@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +10,7 @@ import '../../state/voice_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
+import '../../utils/v_haptics.dart';
 import '../../widgets/core/glass_sheet.dart';
 import '../../widgets/feed/post_input.dart';
 
@@ -100,7 +100,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
         index: index,
         unread: unread,
         onTabTap: (i) {
-          HapticFeedback.lightImpact();
+          VHaptics.lightImpact(context);
           if (i == index) {
             ref.read(scrollToTopProvider.notifier).increment();
           }
@@ -117,7 +117,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
           if (fabConfig != null)
             Positioned(
               right: VSpacing.lg,
-              bottom: VSpacing.lg,
+              bottom: VSpacing.lg + MediaQuery.viewPaddingOf(context).bottom,
               child: ScaleTransition(
                 scale: _fabScale,
                 child: RotationTransition(
@@ -160,7 +160,10 @@ class _TabLayoutState extends ConsumerState<TabLayout>
       icon: Icons.edit,
       backgroundColor: VColors.primary,
       foregroundColor: VColors.onPrimary,
-      onPressed: () => _showComposeModal(context),
+      onPressed: () {
+        VHaptics.mediumImpact(context);
+        _showComposeModal(context);
+      },
     );
   }
 

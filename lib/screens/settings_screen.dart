@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/build_info.dart';
+import '../config/platform_label.dart';
 import '../state/theme_provider.dart';
 import '../state/resident_provider.dart';
 import '../services/storage_service.dart';
@@ -895,6 +896,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     'Version $kAppVersionLabel',
                     style: TextStyle(
                       fontSize: VFontSize.bodySm,
+                      color: variantColor,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Build $kAppBuildNumber · $kPlatformBuildLabel',
+                    style: TextStyle(
+                      fontSize: VFontSize.caption,
                       color: variantColor,
                     ),
                   ),

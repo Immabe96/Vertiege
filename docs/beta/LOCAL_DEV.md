@@ -38,11 +38,28 @@ flutter build ios --simulator
 
 | Platform | Script | Output |
 |----------|--------|--------|
+| **Both stores** | `./scripts/build_release_all.sh` | `releases/*.aab` + `releases/*.ipa` (one `+N` bump) |
 | Android (Play) | `./scripts/build_release_appbundle.sh` | `releases/*.aab` |
 | Android (sideload) | `./scripts/build_release_apk.sh` | `releases/*.apk` |
 | iOS (TestFlight) | `./scripts/build_release_ios.sh` | `releases/*.ipa` |
 
-Bump `pubspec.yaml` build number (`+N`) for every build you ship. CI on `develop` still builds a signed **APK** only; iOS IPA is local until you add macOS runners or upload manually.
+Bump `pubspec.yaml` build number (`+N`) for every build you ship. Use **`build_release_all.sh`** so Play and TestFlight get the same build number.
+
+CI on `develop`: Ubuntu builds signed **APK**; macOS job builds **iOS simulator** (compile-only, no IPA).
+
+## UI / UX standards
+
+See [../UI_STANDARDS.md](../UI_STANDARDS.md). Design tokens and navigation are shared — do not fork per platform.
+
+## Device smoke matrix (before beta)
+
+| Check | Android emulator | iOS simulator |
+|-------|------------------|---------------|
+| Login (Google) | ✓ | ✓ |
+| Login (Apple) | n/a | ✓ |
+| Nexus feed loads | ✓ | ✓ |
+| Join Campfire + mic prompt | ✓ | ✓ |
+| Settings shows version + OS | ✓ | ✓ |
 
 ## Feature parity checklist
 

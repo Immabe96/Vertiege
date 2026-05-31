@@ -13,3 +13,7 @@ const String kAppVersionLabel = '1.1.0-beta.3+7';
 /// Release APK filename segment: vertiege-{name}+{build}-arm64-release.apk
 String get kReleaseApkBasename =>
     'vertiege-1.1.0-beta.3+7-arm64-release.apk';
+
+/// Release IPA filename segment: vertiege-{name}+{build}-release.ipa
+String get kReleaseIpaBasename =>
+    'vertiege-1.1.0-beta.3+7-release.ipa';

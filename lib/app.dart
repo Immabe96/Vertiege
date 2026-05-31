@@ -190,6 +190,21 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     unawaited(_safeLoad('events', ref.read(eventProvider.notifier).loadEvents));
     unawaited(_safeLoad('quests', ref.read(questProvider.notifier).loadQuests));
     unawaited(_safeLoad('league', ref.read(leagueProvider.notifier).loadLeague));
+    unawaited(
+      _safeLoad(
+        'notifications',
+        ref.read(notificationProvider.notifier).loadNotifications,
+      ),
+    );
+    final residentId = ref.read(residentProvider).resident?.id;
+    if (residentId != null) {
+      unawaited(
+        _safeLoad(
+          'dm_rooms',
+          () => ref.read(chatProvider.notifier).loadDmRooms(residentId),
+        ),
+      );
+    }
     unawaited(_safeInitServices());
   }
 
@@ -227,22 +242,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       }
       await PushService.initialize(userId: resident.id);
       unawaited(ref.read(allyProvider.notifier).loadAll(resident.id));
-      unawaited(
-        _safeLoad(
-          'notifications',
-          ref.read(notificationProvider.notifier).loadNotifications,
-        ),
-      );
-      unawaited(
-        _safeLoad(
-          'dm_rooms',
-          () => ref.read(chatProvider.notifier).loadDmRooms(residentId),
-        ),
-      );
-      unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
-      unawaited(
-        _safeLoad('bookmarks', ref.read(postProvider.notifier).loadBookmarks),
-      );
+      // Posts, bookmarks, notifications, DMs load after splash via _startBackgroundLoads.
 
       final fbOk = FirebaseBootstrap.isInitialized;
       unawaited(

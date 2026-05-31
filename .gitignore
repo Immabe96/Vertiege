@@ -87,3 +87,5 @@ scripts/missing_core_ids.json
 /AGENTS.md
 /CLAUDE.md
 /ruvector.db
+*.swiftpm/
+**/xcshareddata/swiftpm/

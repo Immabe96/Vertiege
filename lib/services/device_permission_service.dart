@@ -136,6 +136,26 @@ class DevicePermissionService {
     return false;
   }
 
+  /// Campfire / LiveKit voice — same flow on iOS and Android.
+  static Future<bool> requestMicrophoneAccess(BuildContext context) async {
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      status = await Permission.microphone.request();
+    }
+    if (status.isGranted) return true;
+    if (!context.mounted) return false;
+    if (status.isPermanentlyDenied || status.isDenied) {
+      await showPermissionDeniedSheet(
+        context,
+        title: 'Microphone access needed',
+        message:
+            'Vertiege needs microphone access for Campfire voice chat. '
+            'Enable it in system settings.',
+      );
+    }
+    return false;
+  }
+
   static Future<bool> requestGalleryAccess(BuildContext context) async {
     final permission = _galleryPermission();
     var status = await permission.status;

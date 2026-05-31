@@ -76,6 +76,27 @@ jobs:
       - name: Test
         run: flutter test
 
+  verify-ios:
+    needs: verify
+    if: needs.verify.result == 'success'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: CocoaPods
+        run: cd ios && pod install
+
+      - name: Build iOS (simulator, compile check)
+        run: flutter build ios --simulator --no-tree-shake-icons
+
   build-apk:
     needs: verify
     if: >

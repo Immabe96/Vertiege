@@ -11,6 +11,7 @@ import '../ui/icons/v_icons.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
+import '../services/device_permission_service.dart';
 
 class CampfireScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -34,19 +35,27 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _joinWithMicPermission());
+  }
+
+  Future<void> _joinWithMicPermission() async {
     final resident = ref.read(residentProvider).resident;
-    if (resident != null) {
-      ref
-          .read(voiceProvider.notifier)
-          .joinCampfire(
-            channelId: widget.channelId,
-            channelName: widget.channelName,
-            residentId: resident.id,
-            residentName: resident.name,
-            worldId: widget.worldId,
-            worldName: widget.worldName,
-          );
+    if (resident == null || !mounted) return;
+
+    final micOk = await DevicePermissionService.requestMicrophoneAccess(context);
+    if (!micOk || !mounted) {
+      ref.read(voiceProvider.notifier).leaveCampfire();
+      return;
     }
+
+    await ref.read(voiceProvider.notifier).joinCampfire(
+          channelId: widget.channelId,
+          channelName: widget.channelName,
+          residentId: resident.id,
+          residentName: resident.name,
+          worldId: widget.worldId,
+          worldName: widget.worldName,
+        );
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,7 +227,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 // ── Footer ────────────────────────────────────────
                 Center(
                   child: Text(
-                    'All subscriptions support the Vertiege realm.\nCancel anytime.',
+                    'Purchases are billed through your '
+                    '${defaultTargetPlatform == TargetPlatform.iOS ? 'App Store' : 'Google Play'} account.\n'
+                    'All subscriptions support the Vertiege realm. Cancel anytime.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark

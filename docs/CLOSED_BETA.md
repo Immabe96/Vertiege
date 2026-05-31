@@ -72,7 +72,16 @@ The app already initializes Firebase from **`lib/firebase_options.dart`**; the p
 ./scripts/check_beta_prereqs.sh
 ```
 
-Day-to-day dev on **both** platforms: [docs/beta/LOCAL_DEV.md](beta/LOCAL_DEV.md).
+Day-to-day dev on **both** platforms: [docs/beta/LOCAL_DEV.md](beta/LOCAL_DEV.md). UI rules: [UI_STANDARDS.md](UI_STANDARDS.md).
+
+### Versioning (both stores)
+
+- Single source: **`pubspec.yaml`** `version: 1.x.y-beta.z+N`
+- Run `./scripts/sync_app_version.sh` after every version change (release scripts do this automatically).
+- Ship the **same `+N`** to Play and TestFlight: `./scripts/build_release_all.sh`
+- Firebase Remote Config:
+  - `minimum_build` — global floor for both platforms
+  - `minimum_build_android` / `minimum_build_ios` — optional overrides if review cadence diverges
 
 ---
 

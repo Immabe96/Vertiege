@@ -33,6 +33,10 @@ const String kAppVersionLabel = '${name}+${build}';
 /// Release APK filename segment: vertiege-{name}+{build}-arm64-release.apk
 String get kReleaseApkBasename =>
     'vertiege-${name}+${build}-arm64-release.apk';
+
+/// Release IPA filename segment: vertiege-{name}+{build}-release.ipa
+String get kReleaseIpaBasename =>
+    'vertiege-${name}+${build}-release.ipa';
 EOF
 
 echo "Synced $OUT ← $name+$build"

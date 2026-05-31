@@ -69,6 +69,7 @@ import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
 import 'go_router_refresh.dart';
+import 'v_page_transitions.dart';
 
 /// Stable listenable — resident/auth changes refresh redirects only (no router rebuild).
 final goRouterRefreshProvider = Provider<GoRouterRefresh>((ref) {
@@ -377,11 +378,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(
+      vGoRoute(
         path: '/notifications',
         builder: (context, state) => const AlertsScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/residents/:id',
         builder: (context, state) => ResidentProfileScreen(
           residentId: state.pathParameters['id']!,
@@ -389,7 +390,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       // Full-screen DM from search/profile (outside shell — avoids white screen).
-      GoRoute(
+      vGoRoute(
         path: '/dm/:roomId',
         builder: (context, state) => ChatRoomScreen(
           roomId: state.pathParameters['roomId']!,
@@ -399,15 +400,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           initialDraft: state.uri.queryParameters['draft'],
         ),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/achievements',
         builder: (context, state) => const AchievementsIndexScreen(),
         routes: [
-          GoRoute(
+          vGoRoute(
             path: 'submit',
             builder: (context, state) => const SubmitAchievementScreen(),
           ),
-          GoRoute(
+          vGoRoute(
             path: ':category',
             builder: (context, state) => AchievementCategoryScreen(
               category: state.pathParameters['category']!,
@@ -415,56 +416,57 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(
+      vGoRoute(
         path: '/shop',
         builder: (context, state) => const CosmeticsShopScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/search',
         builder: (context, state) => const SearchScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/following',
         builder: (context, state) => const FollowingScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/allies',
         builder: (context, state) => const AlliesScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/season',
         builder: (context, state) => const SeasonScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/challenges',
         builder: (context, state) => const ChallengesScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/daily-quests',
         builder: (context, state) => const DailyQuestsScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/leagues',
         builder: (context, state) => const LeagueScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/hall-of-ascension',
         builder: (context, state) => const HallOfAscensionScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/ascension-path',
         builder: (context, state) => const AscensionPathScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/create-world',
         builder: (context, state) => const CreateWorldScreen(),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/campfire/:channelId',
+        slideUp: true,
         builder: (context, state) => CampfireScreen(
           channelId: state.pathParameters['channelId']!,
           channelName: state.uri.queryParameters['name'] ?? 'Campfire',
@@ -472,10 +474,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           worldName: state.uri.queryParameters['worldName'] ?? '',
         ),
       ),
-      GoRoute(
+      vGoRoute(
         path: '/thread/:messageId',
         builder: (context, state) {
-          // ThreadScreen needs a parent message — passed via extra
           final extra = state.extra as Map<String, dynamic>?;
           final parentMessage = extra?['message'] as ChannelMessage?;
           if (parentMessage == null) {
@@ -491,7 +492,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-      GoRoute(
+      vGoRoute(
         path: '/audit-log/:worldId',
         builder: (context, state) => AuditLogScreen(
           worldId: state.pathParameters['worldId']!,

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'remote_config_service.dart';
 
 /// Central feature flag lookup.
@@ -54,8 +56,17 @@ class FeatureFlags {
 
   // ── App ──
 
-  static int get minimumBuild =>
-      RemoteConfigService.getInt('minimum_build', fallback: 1);
+  /// Global minimum, unless `minimum_build_ios` / `minimum_build_android` is set.
+  static int get minimumBuild {
+    if (!kIsWeb) {
+      final platformKey = defaultTargetPlatform == TargetPlatform.iOS
+          ? 'minimum_build_ios'
+          : 'minimum_build_android';
+      final platformMin = RemoteConfigService.getInt(platformKey, fallback: 0);
+      if (platformMin > 0) return platformMin;
+    }
+    return RemoteConfigService.getInt('minimum_build', fallback: 1);
+  }
 
   static String get maintenanceBanner =>
       RemoteConfigService.getString('maintenance_banner', fallback: '');

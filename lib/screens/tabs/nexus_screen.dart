@@ -26,6 +26,8 @@ import '../../widgets/nexus/nexus_feed_header.dart';
 import '../../widgets/nexus/nexus_shortcuts_section.dart';
 import '../tabs/tab_layout.dart';
 import 'nexus_notifications_sheet.dart';
+import '../../services/notification_onboarding_prefs.dart';
+import '../../widgets/onboarding/notification_permission_sheet.dart';
 
 enum _FeedTab { all, following, announcements }
 
@@ -65,11 +67,16 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     await OnboardingFunnelPrefs.markOpenedNexus();
     if (!mounted) return;
     final welcome = await OnboardingFunnelPrefs.consumeJustFinishedOnboarding();
-    if (!mounted || !welcome) return;
-    VFeedback.showMessage(
-      context,
-      'Welcome! Your Nexus feed fills as you join worlds and submit proof.',
-    );
+    if (welcome && mounted) {
+      VFeedback.showMessage(
+        context,
+        'Welcome! Your Nexus feed fills as you join worlds and submit proof.',
+      );
+    }
+    if (!mounted) return;
+    if (await NotificationOnboardingPrefs.shouldPrompt()) {
+      await showNotificationPermissionSheet(context);
+    }
   }
 
   @override
