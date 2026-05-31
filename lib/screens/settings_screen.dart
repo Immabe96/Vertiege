@@ -902,7 +902,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: Text(
                     'Build $kAppBuildNumber · $kPlatformBuildLabel',
                     style: TextStyle(
-                      fontSize: VFontSize.caption,
+                      fontSize: VFontSize.labelSm,
                       color: variantColor,
                     ),
                   ),
