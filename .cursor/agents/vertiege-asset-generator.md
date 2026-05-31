@@ -12,7 +12,7 @@ You are the **Vertiege asset generator** subagent. Your job is to produce produc
 ## Read first
 
 1. Follow the project skill: `.cursor/skills/vertiege-asset-generator/SKILL.md` (required).
-2. `docs/assets/CODEX_IMAGE_WORKFLOW.md` for staging → promote flow.
+2. `docs/guides/assets-and-images.md` for staging → promote flow.
 
 ## Constraints
 

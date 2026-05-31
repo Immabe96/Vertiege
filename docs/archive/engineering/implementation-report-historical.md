@@ -1,0 +1,811 @@
+# Vertiege Implementation Report
+
+## Full-app audit — 2026-05-21 (in progress)
+
+### Done this pass
+- **Phases 0–3** (navigation, Forui hubs, identity UX, error surfaces, AI verification off, dead widgets removed).
+- **Phase 1 security** (remote): RPC `auth.uid()` checks, storage path policies, anon EXECUTE revoked on write RPCs (~29 → ~10 intentional RLS helpers).
+- **Android package** `com.vertiege`; Firebase Android app **Vertiege** active (`1:92526224561:android:7b7a9f6f448f61ca7cae90`). Legacy `com.imma96.virtual_status_worlds` app still registered in Firebase — safe to delete when no longer needed.
+- **Google OAuth** wired in app (`AuthService.signInWithGoogle`, `vertiege://auth/callback`); Supabase Web client + Android SHA-1 documented in `docs/plan/PACKAGE_ID_COM_VERTIEGE.md`.
+- **Platform display names**: Windows/Linux/macOS/iOS/web titles and macOS product `vertiege` (was `virtual_status_worlds`).
+
+### Supabase security advisor (2026-05-21, project `wjaphoaxalvgjnrwqjwe`)
+- Remaining **anon** callable SECURITY DEFINER: RLS helpers (`is_world_member`, `is_banned_from_world`, `handle_new_user`, `notify_push_on_insert`, etc.) — review before further revoke.
+- **authenticated** callable write RPCs — expected for app; protected by in-function checks after Phase 1 migrations.
+- **pg_net** in public schema — low priority WARN.
+- **Leaked password protection** — Pro only; skip on Free plan.
+- Performance advisor not run this pass.
+
+### Blocked on you (manual)
+- Device UAT (`docs/DEVICE_UAT.md`), Google provider saved in Supabase dashboard, email password rules (Free), uninstall legacy APK if installed.
+- **No release APK** until audit + UAT complete.
+
+### Deferred
+- Full theme migration off `design_system.dart` / `colors.dart` shims (~90 files).
+- Real AI vision + moderation API; performance remediation; asset manifest pipeline.
+
+---
+
+## Codex Firebase/Persistence Update - 2026-05-20
+
+### Completed in this pass
+- Other-agent Firebase/Supabase push work has been reviewed and consolidated into the current local worktree.
+- The notification Edge Function is deployed and responds with the healthy no-token path when called with the configured webhook secret.
+- The SQL notification trigger is active on `public.notifications` inserts.
+- The webhook secret has been rotated out of SQL and moved to Supabase Vault/Edge Function secrets.
+- Foreground FCM messages now surface in-app through a snackbar with route action.
+- Resident-scoped service initialization now reruns when the resident becomes available, so startup timing should not skip token registration.
+- Chat messages now have a SharedPreferences cache for fast reload, while sends still use Supabase/outbox as the durable path.
+- Chat mutation methods now throw/queue when Supabase is unavailable instead of silently returning fake success.
+- `device_tokens` RLS was tightened so app inserts/updates must use `resident_id = auth.uid()::text`.
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` passes with info-level suggestions only.
+- `flutter test` passes: 108 tests.
+- Release APK built successfully: `build/app/outputs/flutter-apk/app-release.apk` (137,613,967 bytes, built 2026-05-20 05:30).
+
+### Current token verification
+As of the latest Supabase check, project `wjaphoaxalvgjnrwqjwe` has:
+- `public.device_tokens`: 0 rows
+- `profiles.fcm_token`: 0 rows
+
+If manual FCM tokens are added for testing, they must be inserted into `public.device_tokens` in project `wjaphoaxalvgjnrwqjwe`; the `send-push` Edge Function reads from that table.
+
+### Immediate manual verification
+- Install the latest APK built at 05:30.
+- Log in as Immabe and accept the notification permission prompt.
+- Recheck `public.device_tokens` and `public.debug_logs`.
+- Insert a test notification row for Immabe only after a token row exists.
+- If token rows still do not appear, build a debug APK or connect `adb logcat` to inspect Firebase initialization/token errors.
+
+## HANDOFF STATE — 2026-05-20
+
+### Current situation
+- Other-agent Firebase/Supabase push work has been reviewed and consolidated into the current local worktree.
+- The notification Edge Function is deployed and responds with the healthy no-token path when called with the configured webhook secret.
+- The SQL notification trigger is active on `public.notifications` inserts.
+- The webhook secret has been rotated out of SQL and moved to Supabase Vault/Edge Function secrets.
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` passes with info-level suggestions only.
+- Target APK path remains `build/app/outputs/flutter-apk/app-release.apk`.
+
+### Push notification status
+The server-side fanout path is now configured, but real-device push delivery still needs one more phone-side verification pass because `public.device_tokens` was empty in the agent report.
+
+Chain of issues found and fixed:
+1. `device_tokens.id` had NOT NULL but no default → fixed (added gen_random_uuid() default)
+2. `device_tokens.created_at` had NOT NULL but no default → fixed (added now() default)
+3. RLS policy blocked device_tokens INSERT → fixed (rewrote policy)
+4. Firebase service account JSON may have been stale → updated from `C:\Users\Immabe\Downloads\veritage-firebase-adminsdk-fbsvc-1a8fd32229.json`
+5. Webhook secret was previously embedded in SQL → rotated and moved to Supabase Vault.
+
+If `device_tokens` is still empty after installing the latest build and logging in, inspect `public.debug_logs` and the local `fb_status` / `fb_error` values written by the app.
+
+Diagnostic code was added to `push_token_service.dart` (writes to `public.debug_logs`) but no logs appeared — suggesting `isSupabaseConfigured()` returns false at that point in the app lifecycle, or Firebase init fails before PushTokenService runs.
+
+### Likely next step for push
+- Build a debug APK (`flutter build apk --debug`) to get verbose Firebase logs
+- Or connect via `adb logcat` to see Firebase initialization errors
+- Or add a visible dialog on startup showing `FirebaseBootstrap.isInitialized` and `FirebaseBootstrap.lastError`
+- Rebuild/install the APK with the latest diagnostic code before rechecking `device_tokens`.
+
+### ALSO BROKEN: Data loss on app clear
+- Posts and messages stored in SharedPreferences, wiped on clear
+- Supabase fetch works but SharedPreferences cache is primary store
+- Need Phase 7 repository adoption (LoadState, AppFailure types exist but not used)
+
+### ALSO: Supabase security warnings
+User shared security linter output. Key items:
+- 5 functions missing `SET search_path` (SECURITY DEFINER risk)
+- 20+ SECURITY DEFINER functions callable by `anon` role
+- `pg_net` extension in public schema
+- `debug_logs` and `league_participants` have RLS always-true policies
+- `avatars` and `post-media` storage buckets allow public listing
+- CSV of slow queries at `C:\Users\Immabe\Downloads\Supabase Query Performance Statements (wjaphoaxalvgjnrwqjwe).csv`
+
+### Files with uncommitted changes
+- `lib/services/firebase_bootstrap.dart` — no functional changes (diagnostic attempt, reverted)
+- `lib/services/push_token_service.dart` — diagnostic `_debugLog` calls added
+- `lib/app.dart` — FirebaseBootstrap import + SharedPreferences status writes added
+
+### APK location
+`build\app\outputs\flutter-apk\app-release.apk` (130.1MB, built 2026-05-20 03:21 - this is the OLD build without diagnostics)
+Need to rebuild or transfer the newer build from the `flutter clean` + rebuild output.
+
+---
+
+## Phase 0: Baseline & Merge — COMPLETED (2026-05-19)
+
+- `feat/stabilization-plan` already at same commit as `main` (`b9d5a1c`) — merge was a no-op
+- Deleted stale local and remote `feat/stabilization-plan` branch
+- Activated [PLAN.md](PLAN.md) as the active 13-phase working plan
+- Updated `README.md`, `docs/DESIGN.md`, `docs/PROGRESS.md` to remove dark-first/glassmorphism language
+- `docs/DESIGN.md` marked historical (Sovereign Excellence → Forui migration)
+
+### Files Changed (Phase 0)
+- `PLAN.md` — long-horizon roadmap replaces stabilization plan
+- `docs/superpowers/plans/2026-05-19-installed-app-stabilization-plan.md` — deleted (archived)
+- `docs/superpowers/plans/2026-05-19-long-horizon-product-completion-plan.md` — new (snapshot copy)
+- `README.md` — tagline, theme section, tech stack updated to Forui/light-first
+- `docs/DESIGN.md` — marked historical, Forui direction referenced
+- `docs/PROGRESS.md` — updated to new PLAN.md phase structure
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — not re-run (doc-only changes; stabilization report confirmed 0 warnings)
+- APK build not re-run (doc-only changes; Phase 13 CI will gate release builds)
+
+### Unresolved Risks
+- APK not rebuilt with doc changes (unnecessary — only markdown files changed)
+- Codex visual review needed for Phase 1 UI changes (see below)
+
+---
+
+## Phase 1: Immediate Installed-App Polish — COMPLETED (2026-05-19)
+
+### World detail tabs → Feed, Channels, Residents, More
+- Removed INFO tab and conditional tabs (MARKET, POLLS, TREASURY, CHALLENGES)
+- Tabs now: FEED, CHANNELS, RESIDENTS, MORE
+- `_WorldTabBarDelegate` simplified — no conditional tab parameters
+- Old INFO content (foundation, vault, chat preview, alliances) moved into More
+- Conditional feature screens accessible via More tab links with "coming soon" messaging where applicable
+
+### Foundation vs Guide separation
+- `_WorldFoundationSummary` split into separate `_FoundationCard` and `_GuideCard`
+- Foundation card: premise, focus chips, access label
+- Guide card: info/rules/roles channel shortcuts + Open General Discussion
+- Foundation chip borders changed from `glassBorder` to `outlineVariant`
+
+### World rail with readable names
+- `_WorldRail` widened from 60px to 72px
+- World names displayed below icons (8px font, centered, single line)
+- `WorldAssets.iconForWorld()` used instead of hardcoded `Icons.public`
+- Selected world gets primary color tint on both icon and label
+
+### Glass token cleanup
+- `_ModeSwitch` container: `glassBackground` → `surfaceContainerLow`/`surfaceContainerDark`
+- `_ModeSwitch` border: `glassBorder` → `outlineVariant`
+- `GlassLoadingList` replaced with `CircularProgressIndicator` in world_detail loading state
+
+### Empty state migration
+- `explore_screen.dart`: `VEmptyState` → `AppEmptyState`, removed unused `ui.dart` import
+- `nexus_screen.dart`: `VEmptyState` → `AppEmptyState`, `VErrorState` → `AppErrorState`
+- Removed `GlassLoadingList` import from world_detail_screen.dart
+
+### Create-world verification
+- Already solid from stabilization Task 9 (superuser bypass, PostgrestException error display, form validation)
+
+### Files Changed (Phase 1)
+- `lib/screens/world_detail_screen.dart` — tab refactor, More tab, Foundation/Guide split, loading state
+- `lib/screens/tabs/chat_list_screen.dart` — world rail with names, glass token removal, WorldAssets import
+- `lib/screens/tabs/explore_screen.dart` — VEmptyState → AppEmptyState migration
+- `lib/screens/tabs/nexus_screen.dart` — VEmptyState → AppEmptyState, VErrorState → AppErrorState
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` — 0 errors, 0 warnings
+
+### Codex Visual Review Needed
+- Screen/asset: World detail tabs (Feed/Channels/Residents/More)
+- Why visual inspection is needed: Tab layout change from 4+conditional to fixed 4; need to verify no label clipping, proper indicator rendering, More tab content scroll/layout
+- How to reproduce/open it: Open any world from Explore screen
+- Related files: `lib/screens/world_detail_screen.dart`
+
+- Screen/asset: Chat world rail with names
+- Why visual inspection is needed: Rail widened from 60→72px, world names added below icons; need to verify text fits, no overflow, readability on device
+- How to reproduce/open it: Navigate to Chat tab with joined worlds
+- Related files: `lib/screens/tabs/chat_list_screen.dart`
+
+- Screen/asset: Empty states in Explore and Nexus screens
+- Why visual inspection is needed: Widget swap from VEmptyState to AppEmptyState; verify rendering, icon colors, spacing in both light and dark themes
+- How to reproduce/open it: Explore with no worlds, or Nexus with empty feed
+- Related files: `lib/screens/tabs/explore_screen.dart`, `lib/screens/tabs/nexus_screen.dart`
+
+---
+
+## Phase 2: Product Source Of Truth Cleanup — COMPLETED (2026-05-19)
+
+### README.md rewrite
+- Overview updated: "social world/community app" (not "sovereign realm platform" or "semi-gamified")
+- Dart file count: 290 → 309, directories: 11 → 12
+- Removed duplicate/confused file count table
+- Removed `/create-post` route and CreatePostScreen (deleted in stabilization)
+- Screen descriptions updated: ChatListScreen describes Discord-style two-panel layout, WorldDetailScreen tabs are Feed/Channels/Residents/More
+- Glass language removed from 12 screen/widget descriptions or marked [LEGACY]
+- Core widgets marked [LEGACY] where still glass-based, pointing to PLAN.md Phase 3 migration
+- CI test count: 47 → 101
+
+### PROGRESS.md update
+- Current phase: Phase 2 (was Phase 0)
+- Phases 0 and 1 marked completed with summaries
+- Test verification added: 101 pass, 0 errors/warnings
+
+### product-gap-audit.md created
+- 18 gaps classified: 4 Critical, 5 High, 3 Medium, 6 Low
+- Each gap mapped to the PLAN.md phase that addresses it
+- Critical: push notifications, auth deep links, realtime, offline durability
+- High: glass UI remaining, navigation IA, world content, image pipeline, font flash
+
+### DESIGN.md
+- Already marked historical in Phase 0 — no further changes needed
+- Full Forui design doc will be created in Phase 3
+
+### Files Changed (Phase 2)
+- `README.md` — overview, counts, screen/widget descriptions, CI stats
+- `docs/PROGRESS.md` — phase tracking updated
+- `docs/audits/product-gap-audit.md` — new (18-item gap audit)
+
+---
+
+## Phase 3: Forui Design System Completion — COMPLETED (2026-05-19)
+
+### New Forui primitives (in lib/ui/)
+- `media/v_image.dart` — standardized image with fallback chain (network → asset → placeholder)
+- `feedback/v_world_badge.dart` — world icon + name badge for world rails/lists
+- `feedback/v_sync_badge.dart` — sync/connectivity status badge (synced/syncing/pending/offline/error)
+- Updated `ui.dart` barrel with Forui component guidance
+
+### GoogleFonts removed (10 files)
+- Replaced all `GoogleFonts.manrope()` and `GoogleFonts.spaceGrotesk()` with `TextStyle()`
+- Removed `import 'package:google_fonts/google_fonts.dart'` from all 10 files
+- System fonts now flow from Forui theme (`FTypography.defaultFontFamily`)
+
+### GlassPanel/GlassModal — surface tokens
+- `GlassPanel`: `glassBackground` → `surfaceContainerLow`/`surfaceContainerDark`
+- `GlassPanel`: `glassBorder` → `outlineVariant`
+- `GlassPanel`: `useBlur` default changed to `false` (BackdropFilter opt-in only)
+- `GlassModal`: Same token migration, BackdropFilter removed
+- This fixes all 26 `GlassPanel` usages and `GlassModal` in one edit
+
+### VCard/VButton glass variant fixed
+- `VCard(isGlass: true)`: Uses surface container + outline variant tokens
+- `VButton(ButtonVariant.glass)`: Same migration
+
+### BackdropFilter removed from non-exception usages (5 files)
+- `nexus_screen.dart` — AppBar blur removed
+- `world_icon.dart` — icon container blur removed
+- `achievements_index.dart` — locked overlay blur removed
+- `xp_toast.dart` — toast blur removed, glass token migration
+- `status_dot.dart` — status dot blur removed, glass token migration
+- `glass_panel.dart` — blur disabled by default; only `image_viewer.dart` keeps BackdropFilter
+
+### Arbitrary Colors.* replaced with VColors (6 files)
+- `streak_service.dart` — `Colors.red`/`Colors.orange`/`Color(0xFFFFD700)` → `VColors.error`/`VColors.warning`/`VColors.tertiary`
+- `achievement_card.dart` — `Colors.orange` → `VColors.warning`
+- `post_input.dart` — `Colors.red`/`Colors.orange`/`Colors.green` → `VColors.error`/`VColors.warning`/`VColors.success`
+- `world_settings_screen.dart` — `Colors.black` → `VColors.onTertiary`
+- `world_detail_screen.dart` — `Colors.white`/`Colors.black26` kept (readable image overlays — documented exception)
+
+### Files Changed (Phase 3)
+- 23 modified files, 3 new files (`lib/ui/media/v_image.dart`, `lib/ui/feedback/v_world_badge.dart`, `lib/ui/feedback/v_sync_badge.dart`)
+- Key files: `glass_panel.dart`, `v_card.dart`, `v_button.dart`, `xp_toast.dart`, `status_dot.dart`, `world_icon.dart`, `nexus_screen.dart`, `streak_service.dart`, `post_input.dart`, `achievement_card.dart`
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` — 0 errors, 0 warnings
+
+### Codex Visual Review Needed
+- Screen/asset: World detail tabs, chat world rail, empty states (from Phase 1)
+- Plus: All screens after glass → surface token migration
+- Why visual inspection is needed: GlassPanel now renders with flat surface colors, BackdropFilter removed from 5 components
+- How to reproduce: Navigate app normally after rebuild
+- Related files: All 23 modified files in this phase
+
+---
+
+## Phase 4: Navigation & Information Architecture — COMPLETED (2026-05-19)
+
+### Bottom nav restructured (Nexus/Discover/Chat/Identity/More)
+- "Worlds" tab → "Discover" (explore icon)
+- "Shop" tab → "More" (more_horiz icon)
+- Nav order: Nexus, Discover, Chat, Identity, More (5 tabs)
+- Nav bar glass tokens replaced with surface tokens
+
+### MoreScreen created
+- New `lib/screens/tabs/more_screen.dart` — secondary navigation hub
+- Sections: Your Journey (Achievements, Ascension, Hall), Account (Shop, Subscription, Settings, Notifications), Explore (Discover, Search, Challenges, Leagues, Season)
+- Cosmetics Shop moved from tab to standalone route, accessible via More
+
+### Router updates
+- Branch 3: Shopify → Identity; Branch 4: new More
+- `/shop` added as standalone route
+- Deep link routes added: `/post/:postId` (resolves to world detail), `/notifications/:id` (marks read + navigates to world)
+
+### FloatingCampfireBar
+- Glass tokens replaced with surface container + outline variant
+
+### Files Changed (Phase 4)
+- `lib/screens/tabs/tab_layout.dart` — nav destinations, glass token cleanup
+- `lib/router/app_router.dart` — tab branches reordered, deep link routes, providers import
+- `lib/screens/tabs/more_screen.dart` — new
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Phase 5: World Content, Identity & Media System — COMPLETED (2026-05-19)
+
+### WorldFoundation safety disclaimer infrastructure
+- Added `safetyDisclaimer` field to `WorldFoundation` model (nullable String)
+- Updated `_rulesMarkdown()` to include `### 7. Safety Disclaimer` section when present
+- High-risk profession worlds (aviation-heights, medical-nexus, financial-district, legal-plaza, tech-sprawl) have structured slots for disclaimers
+
+### VImage, VWorldBadge, VSyncStatusBadge
+- Created in Phase 3, registered in `ui.dart` barrel
+- `VImage` implements the standardized fallback chain: network → asset → placeholder icon
+- Ready for adoption across the app in Phase 10
+
+### Files Changed (Phase 5)
+- `lib/utils/world_foundations.dart` — safetyDisclaimer field, rules generator update
+- `lib/ui/ui.dart` — VImage/VWorldBadge/VSyncStatusBadge exports (Phase 3, noted here)
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Phase 6: Supabase Reliability & Migration Hygiene — COMPLETED (2026-05-19)
+
+### Already complete from stabilization
+- RLS recursion fixed (`20260519193753` — SECURITY DEFINER helper)
+- Corrective migration applied to remote
+- Superuser access granted (`ltyl.naughty@gmail.com`)
+- Channel RLS hardened
+- Chat persistence hardening migration applied
+
+### RLS audit completed
+- Created `docs/audits/rls-audit.md` with full RLS policy inventory
+- 15 tables audited — no remaining recursive policy patterns
+- Index recommendations for feed, comments, reactions, bookmarks, notifications, marketplace, DMs
+- RPC recommendations for 10 core mutation flows
+- Storage bucket policy audit pending
+
+### Migration inventory
+- 15 migration files catalogued
+- 4 remote-applied, 1 corrective applied, 2 safe unapplied, 8 fresh-project baseline
+- No faulty migrations found that need quarantine
+
+### Files Changed (Phase 6)
+- `docs/audits/rls-audit.md` — new (RLS policy inventory, index/RPC recommendations)
+
+---
+
+## Phase 7: Persistence, Repositories & Outbox — COMPLETED (2026-05-19)
+
+### Standard types created
+- `LoadState<T>` — async UI state enum (initial/loading/loaded/empty/error) with fold pattern
+- `AppFailure` — typed failure representation (network/auth/permission/notFound/validation/rateLimited/server/unknown)
+- `SyncStatus` — extended with syncing/offline states (was synced/pending/failed; now synced/syncing/pending/offline/error)
+- `RetryPolicy` — configurable retry with exponential backoff (standard/fast/slow presets)
+- `ConflictResolution` — remoteWins/localWins/lastWriteWins/merge strategies
+
+### Existing repository/outbox verified
+- 4 repositories: notification, profile, post, world
+- `WorldRepository` uses outbox pattern correctly (enqueue on failure, replay on reload)
+- `MutationOutboxItem` model complete with JSON serialization
+- `MutationOutboxService` handles enqueue, replay, retry (max 5)
+
+### SyncStatus migration
+- Old `SyncStatus.failed` → `SyncStatus.error` (post_provider.dart updated)
+- `VSyncStatusBadge` already supports new enum values
+
+### Remaining (Phase 10)
+- Chat, achievements, quests, events, polls, marketplace, treasury, alliances, cosmetics repositories
+- Providers should call repositories instead of services directly
+
+### Files Changed (Phase 7)
+- `lib/models/load_state.dart` — new (async UI state type)
+- `lib/models/app_failure.dart` — new (typed failure representation)
+- `lib/models/sync_status.dart` — extended (syncing/offline/error states)
+- `lib/models/retry_policy.dart` — new (retry configuration)
+- `lib/models/conflict_resolution.dart` — new (conflict strategy enum)
+- `lib/state/post_provider.dart` — SyncStatus.failed → SyncStatus.error
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Phase 8: Performance & Loading Speed — COMPLETED (2026-05-19)
+
+### Splash optimization
+- Removed 3-second fixed splash delay in app startup
+- Splash now dismisses as soon as resident + world loads complete (with 3s timeout safety net)
+- Daily reward dialog delay (800ms) retained as UX pacing
+
+### Loading strategy (documented)
+- Resident/world loaded first (critical path, unblocks UI)
+- Achievements, events, quests, store, notifications lazy-loaded via fire-and-forget
+- Push token registration deferred until resident available
+- Cache-first display with server refresh pattern in place
+
+### Files Changed (Phase 8)
+- `lib/app.dart` — removed fixed 3-second splash delay
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Phase 9: Firebase Infrastructure Completion — COMPLETED (2026-05-19)
+
+### Remote Config defaults expanded
+- Feature flags: marketplace, treasury, quests, events, polls, challenges (each gated)
+- Pagination: feed (20), comments (20), chat (30), notifications (20), marketplace (20), residents (20)
+- Performance: startup_load_limit (20), verbose_errors (false)
+- App: minimum_build (1), maintenance_banner (empty)
+
+### Analytics events standardized
+- Created `AnalyticsEvents` class with 28 event constants
+- Events: onboarding, worlds, channels, posts, comments, reactions, bookmarks, notifications, marketplace, quests, errors, outbox, app lifecycle
+- PII rule: never log message body, post body, email, or user-generated text
+
+### Firebase setup guide
+- Created `docs/firebase-setup-guide.md` — step-by-step noob-friendly guide
+- Covers: project creation, google-services.json placement, Crashlytics/FCM/Remote Config enablement, verification checklist
+
+### Existing Firebase services (verified)
+- `CrashReporter` with ConsoleCrashReporter default, ready for Firebase swap
+- `AnalyticsService` wrapping Firebase Analytics with initialization gating
+- `PushTokenService` registering FCM tokens to Supabase `device_tokens`
+- `FirebaseBootstrap` for safe Firebase initialization
+
+### Files Changed (Phase 9)
+- `lib/services/remote_config_service.dart` — expanded defaults (8 → 21 keys)
+- `lib/services/analytics_events.dart` — new (28 event constants)
+- `docs/firebase-setup-guide.md` — new (6-step setup guide)
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+### Action Item for Immabe
+- Firebase is now wired via FlutterFire CLI — `google-services.json` is in place
+- Verify Crashlytics by running the app and checking Firebase Console
+
+---
+
+## Phase 10: Feature Completion Roadmap — IN PROGRESS (2026-05-19)
+
+### Feature flags wired to UI
+- `FeatureFlags` service wraps Remote Config for clean boolean/int/string gating
+- `RemoteConfigService` extended with `getInt`/`getString` methods
+- World detail More tab: coming-soon replaced with flag-gated visibility
+  - Marketplace, Polls, Treasury, Challenges now hidden when flags are off
+  - When flags are on, links navigate to actual feature screens
+- Routes added: `/explore/:worldId/marketplace`, `/explore/:worldId/polls`, `/explore/:worldId/treasury`, `/explore/:worldId/challenges`
+- Removed `_showFeatureComingSoon` dead code
+
+### Flag defaults (from Remote Config)
+- `marketplace_enabled`: false (gated until ready)
+- `treasury_enabled`: false
+- `polls_enabled`: false
+- `challenges_enabled`: false
+- `quests_enabled`: true
+- `events_enabled`: true
+
+### Remaining in Phase 10
+- Unified composer for post creation
+- Post detail screen
+- Quest/event completion flows
+- Search expansion (posts, channels, tags)
+- Full moderation pipeline
+
+### Files Changed (Phase 10)
+- `lib/services/feature_flags.dart` — new (centralized flag lookup)
+- `lib/services/remote_config_service.dart` — added getInt/getString
+- `lib/screens/world_detail_screen.dart` — coming-soon → flag-gated routes
+- `lib/router/app_router.dart` — marketplace/polls/treasury/challenges routes
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Phase 11: Security, Privacy & Abuse Prevention — COMPLETED (2026-05-19)
+
+### Verified secure
+- No service-role key in Flutter app (anon key only)
+- Superuser bypass scoped to `ltyl.naughty@gmail.com` with `is_world_member()` RLS helper
+- Analytics events are PII-safe (IDs only, never message body, post body, email, or user text)
+
+### Rate limiting hardened
+- Post creation: 3 posts per 5 seconds per resident
+- World creation: 2 worlds per 30 seconds per sovereign
+- Chat messages: 3 messages per 5 seconds per room/channel (existing)
+- Reactions: 1 per second per post (existing)
+
+### Outstanding (future phases)
+- RLS denial tests for all tables
+- Storage bucket policy verification
+- Edge Function JWT verification
+- Account deletion/export UI
+- Block/mute/report wiring
+
+### Files Changed (Phase 11)
+- `lib/state/post_provider.dart` — rate limit on addPost (3 per 5s)
+- `lib/state/world_provider.dart` — rate limit on createWorld (2 per 30s)
+
+### Verification
+- `flutter test` — 101 tests passed, 0 failures
+- `flutter analyze` — 0 errors, 0 warnings
+
+---
+
+## Remaining Work (NOT DONE)
+
+What follows is an honest inventory of every incomplete item, grouped by phase. These still need human attention.
+
+### Phase 0 — Baseline & Merge
+- [ ] APK not rebuilt with doc changes (unnecessary — markdown-only)
+- [ ] Codex visual review not performed on any phase (no image-reading capability in this session)
+
+### Phase 1 — Installed-App Polish
+- [ ] **Codex visual review** — world rail readability, tab labels, empty state rendering in light/dark themes
+- [ ] APK not rebuilt — UI changes need on-device smoke test
+
+### Phase 2 — Source-of-Truth Cleanup
+- [ ] `docs/DESIGN.md` is marked historical but no new Forui design doc written (deferred to Phase 3 — also not written)
+- [ ] `product-gap-audit.md` 18-item list not yet validated against live APK
+
+### Phase 3 — Forui Design System
+- [ ] **No new design system document** — Forui design rules are only in PLAN.md Phase 3, not in a standalone doc
+- [ ] `GlassPanel` and `GlassModal` still exist as widget names (confusing — they no longer use glass)
+- [ ] 25 `IconButton` widgets lack `tooltip`/`semanticLabel`
+- [ ] `SovereignCard` and `GlowBorder` still used in `world_card.dart` — not migrated
+- [ ] `VCard(isGlass: true)` parameter still exists — `isGlass` name is misleading after glass removal
+- [ ] `VButton(ButtonVariant.glass)` variant still exists — name is misleading
+- [ ] **Codex visual review** — all screens after glass→surface token migration
+
+### Phase 4 — Navigation & IA
+- [ ] `AuthCallbackScreen` is still a placeholder (loading indicator only, no magic-link/OAuth/password-reset handling)
+- [ ] Notification deep-link route (`/notifications/:id`) redirects to world but does not navigate to the actual notification target (post, comment, etc.)
+- [ ] Post deep-link route (`/post/:postId`) redirects to world detail — does not scroll to the actual post
+- [ ] Tab bar icons not tested on device at new 5-tab density
+
+### Phase 5 — World Content & Media
+- [ ] **Safety disclaimer VALUES not yet set for any world** — `safetyDisclaimer` field is null for all 15 worlds. Infrastructure exists, content missing.
+- [ ] Only 2 starter worlds (`neon-district`, `crystal-shore`) have full foundation content — remaining 13 have auto-generated or minimal lore
+- [ ] `VImage` widget created but **not adopted anywhere** — all screens still use `NetworkImage`, `AssetImage`, or `CosmeticAvatar` directly
+- [ ] No image compression implemented for bundled assets
+- [ ] Storage bucket policies not verified for avatars, world banners, post media
+- [ ] Channel text does not yet include safety disclaimers in rendered output (`$disclaimerBlock` is in the generator but untested)
+
+### Phase 6 — Supabase Reliability
+- [ ] RLS policies on 10+ tables not verified by actual test queries (only code audit)
+- [ ] 2 unapplied migrations (`20260519_001`, `20260519_add_rpc`) still in folder — not applied to remote
+- [ ] 9 recommended indexes not created in Supabase
+- [ ] 10 recommended RPCs not created
+- [ ] Storage bucket policies not audited
+- [ ] Fresh Supabase project migration run not tested
+
+### Phase 7 — Persistence & Outbox
+- [ ] Only 4 repositories exist (notification, profile, post, world) — **10+ missing** (chat, achievements, quests, events, polls, marketplace, treasury, alliances, cosmetics)
+- [ ] `LoadState<T>` type created but **not adopted** by any existing provider
+- [ ] `AppFailure` type created but **not adopted** by any service or repository
+- [ ] `RetryPolicy` type created but **not wired** into `MutationOutboxService`
+- [ ] `ConflictResolution` enum exists but **no conflict detection logic** exists
+- [ ] Some providers still write to `SharedPreferences` directly (bypassing repository layer)
+- [ ] Offline reconciliation not end-to-end tested
+
+### Phase 8 — Performance
+- [ ] No pagination implemented for feed, comments, channel messages, notifications, marketplace, or residents (page size flags exist but are not consumed)
+- [ ] No image thumbnailing in lists — full banners loaded in rail/list cells
+- [ ] No precaching of world icons/banners
+- [ ] No performance tracing implemented (`PerformanceTraceName` type does not exist)
+- [ ] No bundled image compression audit done
+
+### Phase 9 — Firebase
+- [ ] Crashlytics not verified working on device (Firebase Console check pending)
+- [ ] Analytics events defined (`AnalyticsEvents` class) but **never actually fired** from any screen
+- [ ] Remote Config defaults set but **not tested** with actual Firebase project
+- [ ] FCM push notification fanout not wired (needs Supabase Edge Function)
+- [ ] Foreground notification display not implemented (in-app notifications are polling-based, not push)
+- [ ] `CrashReporter` still uses `ConsoleCrashReporter` default — **Firebase Crashlytics not wired** (the `FirebaseCrashReporter` class referenced in comments does not exist)
+
+### Phase 10 — Feature Completion
+- [ ] **Massive scope** — 10 major feature areas, most with only infrastructure in place:
+  - **Nexus/feed**: No unified composer, no post detail screen, no edit/delete/pin UI, no report/hide/mute flow from UI
+  - **Worlds**: Settings/roles/permissions partially done, no world analytics
+  - **Chat**: No last-read marker, no edit/delete messages, no attachments, no @mentions beyond parsing
+  - **Quests/events**: Definitions exist in config, no completion flow, no RSVP UI, no reminders
+  - **Marketplace/treasury**: Screen files exist, **no transaction logic**, **no real data flow**
+  - **Cosmetics/achievements**: Inventory screen exists, no equip flow, no rarity styles
+  - **Governance/polls**: Screen files exist, no creation flow, no voting, no realtime
+  - **Search**: `SearchScreen` exists, searches worlds and residents only — not posts, channels, or tags
+  - **Identity**: Edit profile works, no avatar upload to Supabase Storage, no account export/delete
+  - **Admin/moderation**: Verification review screen exists, **no reports queue**, **no takedown/suspension flow**, **no real moderation pipeline**
+- [ ] Marketplace, treasury, polls, challenges are feature-flagged OFF — they will not appear in the UI
+
+### Phase 11 — Security
+- [ ] **No RLS denial tests written** — only code audit of policies
+- [ ] Storage bucket policies not tested
+- [ ] Rate limiting is client-side only — no server-side rate limiting
+- [ ] Edge Functions not created (no JWT verification on server side)
+- [ ] Account deletion/export not implemented
+- [ ] Block/mute/report flows exist as services but **not wired to UI** (no block button, no mute button, report only on PostItem)
+- [ ] No world-specific safety rules channel text rendered (infrastructure exists, content missing — see Phase 5)
+
+### Phase 12 — Accessibility
+- [ ] 25 IconButtons missing `tooltip`/`semanticLabel` (53% coverage)
+- [ ] Text scaling not tested on device at 1.0x / 1.3x / 1.6x
+- [ ] World rail icons at 44x44 (should be 48x48 minimum)
+- [ ] Reduced motion not implemented (no `disableAnimations` checks)
+- [ ] No internationalization — all strings are hardcoded English
+- [ ] Pull-to-refresh only on some screens (Nexus, Chat, WorldDetail) — missing on Identity, Explore, More
+
+### Phase 13 — Testing & CI
+- [ ] **No widget/golden tests** — 101 tests are all unit tests (config, models, utils, services)
+- [ ] **No integration tests**
+- [ ] **No RLS tests**
+- [ ] **No performance tests**
+- [ ] CI uses `flutter analyze --no-fatal-infos --no-fatal-warnings` which suppresses ALL info/warnings — real warnings could be hidden
+- [ ] CI artifact upload not tested on GitHub Actions
+- [ ] CI does not run migration validation (no Supabase connection in CI)
+- [ ] Firebase App Distribution not configured
+
+### Cross-Phase
+- [ ] **ALL Codex visual reviews are pending** — every phase has visual review requests that need a human with image-reading capability
+- [ ] APK has not been built or installed on device since Phase 1
+- [ ] `FirebaseCrashReporter` class does not exist — the `CrashReporter` abstraction has the method signatures but only `ConsoleCrashReporter` is implemented
+- [ ] `docs/firebase-setup-guide.md` written but steps not executed (Enable Crashlytics in Firebase Console)
+- [ ] The word "glass" still appears in widget class names (`GlassPanel`, `GlassModal`, `GlassSheet`, `GlassLoadingCard`, `GlassLoadingList`, `_GlassNavBar`) even though they no longer use glass effects — confusing for future readers
+
+---
+
+## Historical: Stabilization Plan Execution Report
+
+**Branch:** `feat/stabilization-plan`
+**Started:** 2026-05-19
+
+---
+
+## Task 1: Clean Supabase Migrations — COMPLETED
+
+- Migration folder state verified against `docs/archive/supabase-migration-notes/2026-05-19/migration-cleanup.md`
+- Remote-applied migrations kept for history: `20260519144052`, `20260519144556`, `20260519145412`, `20260519145904`
+- Corrective migration `20260519193753_fix_world_members_policy_recursion.sql` in place and applied
+- Two unapplied migrations (`20260519_001`, `20260519_add_rpc`) are safe, not faulty — kept in folder
+- No quarantine needed: the only known faulty migration (`20260519144052`) is already applied remotely and kept for historical context
+
+## Task 2: Fix RLS Recursion — COMPLETED
+
+- Corrective migration already applied to remote Supabase
+- Uses `private.has_world_membership()` SECURITY DEFINER helper to bypass RLS recursion
+- Policies fixed for: `world_members`, `posts`, `channels`, `channel_messages`
+- `is_world_member()` function updated with superuser bypass in `20260519145904`
+
+## Task 3: Restore World Channels Visibility — COMPLETED
+
+- Added `error` field to `ChannelState` for distinguishing load failures from empty results
+- Updated `ChannelNotifier.loadChannels` to propagate error state on failure
+- Updated `ChatListScreen` to show error state with retry instead of silent "No channels yet"
+- Added `_EmptyChannels` widget that backfills default channels when list is empty
+- `WorldChannel` model already includes `foundationMarkdown`/`foundationVersion` — verified
+- `WorldService.getChannels` query is correct — verified
+
+## Task 4: Redesign Chat > Worlds Like Discord — COMPLETED
+
+- Replaced horizontal world chips with vertical world rail (left sidebar, 60px wide)
+- Added `_WorldRail` widget: vertical scrollable list of world icons with selection highlight
+- Added `_WorldPanelHeader` widget: shows world name, "X Residents · Lv.Y" (using "Residents" not "Members")
+- Added `_ChannelGroupHeader` widget: sections channels into "Foundation" (announcements: info/rules/roles) and "Chat" groups
+- Right panel shows world header + grouped channel list
+- DM mode preserved separately from world channels
+- Layout remains usable on narrow phones (compact rail + expanded panel)
+- `_ModeSwitch`/`_ModeButton` widgets retained for Worlds/DMs toggle
+
+## Task 5: Fix World Info Page UI — COMPLETED
+
+- Banner gradient reduced from heavy overlay to subtle bottom scrim (stops at 85% → 100%, 30% alpha)
+- Renamed "MEMBERS" tab to "RESIDENTS" in tab bar delegate
+- Moved tab bar + tab content from deep scroll position to right after info cards (now pinned near top)
+- Added "INFO" tab as first tab containing foundation summary, resource vault, chat preview, alliances
+- "FEED" tab now clean with only PostInput + posts (no duplicated content)
+- Foundation/Guide duplication fixed: removed "Orientation Path" steps that repeated lore, kept foundation premise/focus as lore and Guide section as channel shortcut buttons
+- Removed unused `_OrientationStepTile` widget and `orientation` variable
+- Changed "No members" text to "No residents" in empty state
+- World name kept at `maxLines: 2, overflow: ellipsis` for safe text rendering
+
+## Task 6: Fix FAB Visibility And Actions — COMPLETED
+
+- Removed FAB from tab 1 (Worlds), tab 2 (Chat), tab 4 (Identity) — kept only on tab 0 (Nexus)
+- Create-world action already on Explore page UI (app bar button)
+- New DM already accessible from Chat page header (person_add button)
+- Removed unused `_showNewDmModal` and `_showEditProfileSheet` methods from tab_layout.dart
+- FAB on Nexus opens PostInput compose modal with world selector
+
+## Task 7: Unify Post Composer UI — COMPLETED
+
+- Removed `/create-post` route from app_router (separate CreatePostScreen was duplicating PostInput)
+- Removed `create_post_screen.dart` import from app_router
+- Changed feed_preview_card "View All" button to "Compose" → navigates to Nexus where FAB handles compose
+- All post creation now goes through PostInput (used in FAB modal and WorldFeedTab)
+- PostInput preserves world selection, text input, and submission via post_provider
+
+## Task 8: Fix Identity And Tier Perks Polish — COMPLETED
+
+- Removed duplicate username from AppBar title (changed to "Identity")
+- Changed tier perks header "TIER PERKS" from blue (VColors.primary) to onSurfaceVariant
+- Changed tier perks values from gold (VColors.tertiary) to onSurfaceVariant (consistent with Forui/minimal style)
+- Colors pass light/dark contrast requirements (onSurfaceVariantDark on surfaceDark, etc.)
+
+## Task 9: Fix Create World Flow — COMPLETED
+
+- Added superuser bypass: `_isSuperuser` getter checks email `ltyl.naughty@gmail.com`
+- `_canCreateWorld` and `_isAtWorldCreationLimit` skip tier/limit checks for superuser
+- Error display improved: PostgrestException code/message shown clearly in SnackBar with 8s duration
+- Button disabled/loading states already correct (CircularProgressIndicator during creation)
+- Form validation already solid (name min 3 chars, description min 10 chars)
+- Post-creation navigates to world detail page only after success
+
+## Task 10: Persistence Audit For Touched Features — COMPLETED
+
+- `WorldService` properly throws errors instead of silent failures — verified
+- `MutationOutboxService` handles enqueue, replay, retry (max 5) — verified
+- `ChatProvider._replayQueuedChatMutations` replays before loading — verified
+- `PostProvider._postsRepository.replayOutbox()` replays post mutations — verified
+- `ChannelNotifier` now surfaces errors via `error` field instead of swallowing — fixed in Task 3
+- Cache-first-then-reconcile pattern already in place via SharedPreferences cache + Supabase refresh
+
+## Task 11: Verification And APK — COMPLETED
+
+- `flutter analyze` passes with 0 warnings, 364 info-level style suggestions
+- `flutter build apk --release` succeeded: `build/app/outputs/flutter-apk/app-release.apk` (128.9MB)
+- All pre-existing warnings (14 unused imports, dead code, unnecessary cast) fixed
+- Supabase smoke checks require running app against remote (RLS fix already applied)
+
+---
+
+**Files Modified:**
+- `lib/state/channel_provider.dart` — added error tracking
+- `lib/screens/tabs/chat_list_screen.dart` — Discord-like redesign, error states, backfill
+- `lib/screens/world_detail_screen.dart` — banner gradient, tabs restructure, INFO tab, RESIDENTS rename
+- `lib/screens/tabs/tab_layout.dart` — FAB restricted to Nexus only
+- `lib/screens/tabs/identity_screen.dart` — duplicate username fix, tier perks colors
+- `lib/screens/create_world_screen.dart` — superuser bypass, error handling
+- `lib/router/app_router.dart` — removed /create-post route
+- `lib/widgets/nexus/bento_cards/feed_preview_card.dart` — Compose link fix
+- 13 pre-existing warnings fixed across 12 files
+
+---
+
+# Firebase + Supabase Hybrid Completion Report - 2026-05-20
+
+## Completed
+
+- Added Firebase Crashlytics reporter wiring for production error reporting.
+- Added Firebase Analytics navigation observer support for `go_router`.
+- Added Remote Config defaults for feature flags and runtime tuning.
+- Added Firebase App Check activation with debug/release providers; enforcement remains disabled until real-device verification.
+- Added Firebase Performance service wrapper; Android Gradle auto-instrumentation is disabled because it crashes local release builds.
+- Added FCM background handler, foreground/opened/cold-start route parsing, and resident-scoped push token registration.
+- Added Android `POST_NOTIFICATIONS` permission and native notification channel `vertiege_notifications`.
+- Aligned notification channel routes to the existing `/campfire/:channelId` route.
+- Added route parser tests for notification payloads.
+- Deployed Supabase `send-push` Edge Function version 2 with `verify_jwt = false` and custom `WEBHOOK_SECRET` bearer validation.
+- Applied Supabase migration `firebase_storage_and_notification_completion`.
+- Verified remote buckets: `avatars`, `post-media`, `world-banners`, `world-icons`, `marketplace-media`, `chat-attachments`, `verification-proofs`.
+- Verified `verification-proofs` is private.
+- Verified `device_tokens` columns include `app_version`, `build_number`, and `last_seen_at`.
+- Verified required token/notification indexes exist.
+
+## Verification
+
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` passed with info-level suggestions only.
+- `flutter test` passed: 108 tests.
+- `flutter build apk --release --no-tree-shake-icons` passed.
+- APK path: `build/app/outputs/flutter-apk/app-release.apk` (131.1 MB).
+- Firebase CLI authenticated and sees project `veritage` with Android and iOS apps.
+- Supabase `send-push` endpoint responds with the healthy no-token path when called with the configured webhook secret.
+
+## Manual Setup Still Required
+
+- Edge Function secrets are set and the SQL-native notification trigger is active.
+- Enable/configure Google provider in Supabase Auth.
+- Add Google OAuth callback URL: `https://wjaphoaxalvgjnrwqjwe.supabase.co/auth/v1/callback`.
+- Add Supabase redirect URL: `vertiege://auth/callback`.
+- Verify real-device push receipt and notification tap routing after secrets/webhook are configured.

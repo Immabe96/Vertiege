@@ -25,7 +25,7 @@ Versions `20260512070535` … `20260513144900` were applied on remote before thi
 npx supabase migration repair --status applied --linked <version>
 ```
 
-for each remote-only version listed in [docs/audits/2026-05-21-migration-reconciliation.md](../docs/audits/2026-05-21-migration-reconciliation.md).
+for each remote-only version listed in [docs/archive/audits/2026-05-21-migration-reconciliation.md](../docs/archive/audits/2026-05-21-migration-reconciliation.md).
 
 ## Rules
 

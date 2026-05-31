@@ -13,7 +13,7 @@ Generate **one image per turn** from `docs/assets/image-manifest.json`. Do not b
 
 ## Art rules (non-negotiable)
 
-Read `docs/plan/2026-05-22-image-asset-refresh.md` and `docs/assets/CODEX_IMAGE_WORKFLOW.md`.
+Read `docs/archive/plans/2026-05-22-image-asset-refresh.md` and `docs/guides/assets-and-images.md`.
 
 | Asset | Format | Background |
 |-------|--------|------------|

@@ -1,6 +1,6 @@
 # Wave status — 2026-05-30 (updated)
 
-Cross-reference: [`PLAN.md`](../../PLAN.md) (7–12), [`PERFECTION-BACKLOG.md`](./PERFECTION-BACKLOG.md) (0–6).
+Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md`](perfection-backlog.md) (0–6).
 
 **Apply new SQL before device testing:**  
 `20260530150000_lounge_campfire_channels.sql`, `20260530160000_waves_8_11_completion.sql`

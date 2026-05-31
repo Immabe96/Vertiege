@@ -8,7 +8,7 @@ Social world app — join realms, chat in channels, post, earn prestige, and cli
 
 Stable APKs: **[GitHub Releases](https://github.com/Immabe96/Vertiege/releases)** (`app-release.apk`).
 
-**Closed beta (Play + TestFlight):** **[docs/CLOSED_BETA.md](docs/CLOSED_BETA.md)** · tester copy: **[docs/beta/TESTER_GUIDE.md](docs/beta/TESTER_GUIDE.md)**
+**Closed beta (Play + TestFlight):** **[docs/guides/closed-beta.md](docs/guides/closed-beta.md)** · tester copy: **[docs/operations/beta/tester-guide.md](docs/operations/beta/tester-guide.md)**
 
 ## How we develop
 
@@ -24,7 +24,7 @@ Local workflow on your PC:
 | `fix/*`, `feature/*` | Your work branches |
 | `main` | Stable releases (automation only) |
 
-Details: **[docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md)**
+Details: **[docs/guides/development-workflow.md](docs/guides/development-workflow.md)**
 
 ## Local PC setup
 
@@ -54,13 +54,15 @@ flutter test
 
 ## Documentation
 
+**Index:** **[docs/README.md](docs/README.md)** · [documentation standards](docs/meta/documentation-standards.md)
+
 | Doc | Contents |
 |-----|----------|
-| [docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md) | Local + cloud workflow, CI, APK downloads |
-| [docs/FIREBASE_SUPABASE_HYBRID_SETUP.md](docs/FIREBASE_SUPABASE_HYBRID_SETUP.md) | Supabase + Firebase setup |
-| [docs/DESIGN.md](docs/DESIGN.md) | UI and design system |
-| [PLAN.md](PLAN.md) | Product roadmap |
-| [REPORT.md](REPORT.md) | Implementation status |
+| [docs/guides/development-workflow.md](docs/guides/development-workflow.md) | Local + cloud workflow, CI, APK downloads |
+| [docs/guides/firebase-and-supabase.md](docs/guides/firebase-and-supabase.md) | Supabase + Firebase setup |
+| [docs/reference/design-system.md](docs/reference/design-system.md) | UI and design system (current) |
+| [docs/product/roadmap.md](docs/product/roadmap.md) | Product roadmap |
+| [docs/product/planning/wave-status.md](docs/product/planning/wave-status.md) | Wave delivery status |
 
 ## Project layout
 

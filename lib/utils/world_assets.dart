@@ -226,7 +226,7 @@ class WorldAssets {
 
   /// Core catalog badge: `assets/generated/achievements/<id>.png`.
   ///
-  /// Generated assets use **two on-disk locations** (see `docs/achievements/CATALOG.md`):
+  /// Generated assets use **two on-disk locations** (see `docs/reference/achievements-catalog.md`):
   /// flat `assets/generated/*` via [_badgeImagePaths], and per-id files under
   /// `assets/generated/achievements/`. Lookup order is map → per-id folder → category PNG.
   static String? coreAchievementBadgeImage(String achievementId) {

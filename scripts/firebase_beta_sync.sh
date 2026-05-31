@@ -134,4 +134,4 @@ done
 firebase apps:android:sha:list "$ANDROID_APP_ID" --project "$PROJECT" 2>/dev/null || true
 
 echo ""
-echo "Done. Next: upload AAB / IPA per docs/CLOSED_BETA.md"
+echo "Done. Next: upload AAB / IPA per docs/guides/closed-beta.md"
