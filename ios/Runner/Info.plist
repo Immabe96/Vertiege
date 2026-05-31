@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Vertiege needs microphone access for Campfire voice chat</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Vertiege needs camera access for your profile photo</string>
 	<key>NSPhotoLibraryUsageDescription</key>

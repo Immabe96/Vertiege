@@ -1,6 +1,4 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
 
-// Release signing — fill in when iOS build is needed
-// DEVELOPMENT_TEAM = <your-team-id>
-// PROVISIONING_PROFILE_SPECIFIER = <your-profile-specifier>
+DEVELOPMENT_TEAM = UTJRWCQ63L

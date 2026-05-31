@@ -72,6 +72,8 @@ The app already initializes Firebase from **`lib/firebase_options.dart`**; the p
 ./scripts/check_beta_prereqs.sh
 ```
 
+Day-to-day dev on **both** platforms: [docs/beta/LOCAL_DEV.md](beta/LOCAL_DEV.md).
+
 ---
 
 ## 1. Environment & CI secrets

@@ -26,8 +26,9 @@ dependencies:
   envied: ^1.1.0
   in_app_purchase: ^3.2.0
   flutter_markdown: ^0.7.0
-  livekit_client: ^2.5.3
-  permission_handler: ^12.0.0
+  # Pin matches livekit_client 2.7.x (flutter_webrtc / WebRTC-SDK on iOS + Android).
+  livekit_client: ^2.7.0
+  permission_handler: ^12.0.2
   sign_in_with_apple: ^8.0.0
   cached_network_image: ^3.4.0
   flutter_animate: ^4.5.0
@@ -36,7 +37,7 @@ dependencies:
   json_annotation: ^4.11.0
   confetti: ^0.8.0
 
-  connectivity_plus: any
+  connectivity_plus: ^7.1.1
   forui: ^0.21.3
   flutter_localizations:
     sdk: flutter
@@ -49,6 +50,9 @@ dependencies:
   firebase_performance: ^0.11.4+1
   firebase_app_check: ^0.4.4+1
   flutter_local_notifications: ^19.4.0
+dependency_overrides:
+  flutter_webrtc: ^1.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

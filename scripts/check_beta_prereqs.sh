@@ -67,6 +67,37 @@ else
   bad "ios/Runner/Info.plist missing vertiege URL scheme"
 fi
 
+# iOS WebRTC embed (Campfire / livekit — simulator launch)
+if grep -q ':linkage => :static' ios/Podfile 2>/dev/null; then
+  ok "iOS Podfile static linkage (WebRTC)"
+else
+  warn "ios/Podfile missing static linkage — simulator may crash loading WebRTC"
+fi
+if [[ -x ios/scripts/embed_webrtc_framework.sh ]]; then
+  ok "iOS WebRTC embed script present"
+else
+  warn "ios/scripts/embed_webrtc_framework.sh missing or not executable"
+fi
+
+# Mic permission parity (Campfire)
+if grep -q 'NSMicrophoneUsageDescription' ios/Runner/Info.plist 2>/dev/null; then
+  ok "iOS microphone usage string"
+else
+  bad "ios/Runner/Info.plist missing NSMicrophoneUsageDescription"
+fi
+if grep -q 'RECORD_AUDIO' android/app/src/main/AndroidManifest.xml 2>/dev/null; then
+  ok "Android RECORD_AUDIO permission"
+else
+  bad "AndroidManifest missing RECORD_AUDIO"
+fi
+
+# iOS signing for local/TestFlight builds
+if grep -q '^DEVELOPMENT_TEAM = [A-Z0-9]' ios/Flutter/Release.xcconfig 2>/dev/null; then
+  ok "iOS DEVELOPMENT_TEAM in Release.xcconfig"
+else
+  warn "Set DEVELOPMENT_TEAM in ios/Flutter/Release.xcconfig for ipa builds"
+fi
+
 # Core assets (release script gate)
 if python3 scripts/check_core_achievement_assets.py >/dev/null 2>&1; then
   ok "Core achievement badge assets complete"

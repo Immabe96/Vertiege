@@ -51,6 +51,16 @@ android {
         }
     }
 
+    packaging {
+        jniLibs {
+            // livekit / flutter_webrtc: avoid duplicate native libs on some ABIs.
+            pickFirsts += listOf(
+                "**/libjingle_peerconnection_so.so",
+                "**/libwebrtc.so",
+            )
+        }
+    }
+
     buildTypes {
         release {
             signingConfig = if (keystorePropertiesFile.exists()) {
