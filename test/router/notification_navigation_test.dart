@@ -203,6 +203,17 @@ void main() {
       );
       expect(routeForNotification(n), '/identity');
     });
+
+    test('job application accepted routes to world jobs', () {
+      const n = AppNotification(
+        id: 'n-job-ok',
+        type: NotificationType.jobApplicationAccepted,
+        message: 'accepted',
+        worldId: 'neon-district',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), worldJobsPath('neon-district'));
+    });
   });
 
   group('notificationDeepLinkPath', () {

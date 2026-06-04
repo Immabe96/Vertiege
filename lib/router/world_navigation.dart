@@ -100,10 +100,17 @@ String worldMarketplacePath(String worldId, {required bool member}) {
   );
 }
 
-String worldPollsPath(String worldId, {bool admin = false}) {
+String worldPollsPath(
+  String worldId, {
+  bool admin = false,
+  bool create = false,
+}) {
   return _path(
     '/explore/${Uri.encodeComponent(worldId)}/polls',
-    admin ? const {'admin': 'true'} : null,
+    {
+      if (admin) 'admin': 'true',
+      if (create) 'create': 'true',
+    },
   );
 }
 

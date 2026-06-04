@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/post.dart';
+import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
@@ -11,6 +12,7 @@ import '../core/glass_panel.dart';
 import '../feed/post_input.dart';
 import '../feed/post_item.dart';
 import 'event_card.dart';
+import 'archive_world_banner.dart';
 import 'world_channel_shortcuts.dart';
 import 'world_feed_chat_teaser.dart';
 import '../../models/channel.dart';
@@ -54,6 +56,8 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
   final _highlightKey = GlobalKey();
   late final AnimationController _highlightFlash;
   bool _reportedMissingHighlight = false;
+  int _baselinePostCount = 0;
+  bool _showNewPostsPill = false;
 
   @override
   void initState() {
@@ -62,6 +66,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
       vsync: this,
       duration: VAnimation.slow,
     );
+    _baselinePostCount = widget.posts.length;
     if (widget.highlightPostId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToHighlight();
@@ -78,6 +83,9 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
   @override
   void didUpdateWidget(WorldFeedTab oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.posts.length > _baselinePostCount) {
+      _showNewPostsPill = true;
+    }
     if (widget.highlightPostId != oldWidget.highlightPostId ||
         widget.posts.length != oldWidget.posts.length) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -91,6 +99,21 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
   void dispose() {
     _highlightFlash.dispose();
     super.dispose();
+  }
+
+  void _scrollFeedToTop() {
+    final controller = PrimaryScrollController.maybeOf(context);
+    if (controller != null && controller.hasClients) {
+      controller.animateTo(
+        0,
+        duration: context.motionDuration(VAnimation.normal),
+        curve: context.motionCurve,
+      );
+    }
+    setState(() {
+      _baselinePostCount = widget.posts.length;
+      _showNewPostsPill = false;
+    });
   }
 
   void _scrollToHighlight() {
@@ -195,7 +218,9 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
         .where((p) => (p as dynamic).isEvent != true)
         .toList();
 
-    final postHeader = resident != null &&
+    final isArchive = world != null && world.isArchive;
+    final postHeader = !isArchive &&
+            resident != null &&
             world != null &&
             WorldPermissions.canPost(resident, worldId, world.sovereignId)
         ? PostInput(worldId: worldId, sovereignId: world.sovereignId)
@@ -282,6 +307,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (isArchive) const ArchiveWorldBanner(),
         postHeader,
         ...feedExtras,
         if (eventCarousel != null) eventCarousel,
@@ -302,6 +328,41 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
     }
 
     // Outer [NestedScrollView] tab scroll — no nested [ListView].
-    return body;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        body,
+        if (_showNewPostsPill)
+          Positioned(
+            top: VSpacing.sm,
+            left: VSpacing.md,
+            right: VSpacing.md,
+            child: Center(
+              child: Material(
+                elevation: 2,
+                borderRadius: BorderRadius.circular(VRadius.pill),
+                color: theme.colorScheme.primaryContainer,
+                child: InkWell(
+                  onTap: _scrollFeedToTop,
+                  borderRadius: BorderRadius.circular(VRadius.pill),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: VSpacing.md,
+                      vertical: VSpacing.sm,
+                    ),
+                    child: Text(
+                      '${widget.posts.length - _baselinePostCount} new posts — tap to view',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                        fontWeight: VFontWeight.semiBold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }

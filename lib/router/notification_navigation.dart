@@ -41,6 +41,12 @@ String? routeForNotification(AppNotification notification) {
         return exploreWorldPath(worldId, postId: postId);
       }
       return '/identity';
+    case NotificationType.jobApplicationAccepted:
+    case NotificationType.jobApplicationRejected:
+      if (worldId != null) {
+        return worldJobsPath(worldId);
+      }
+      return '/explore';
   }
 }
 

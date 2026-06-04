@@ -94,6 +94,15 @@ class WorldJobService {
     return ok == true;
   }
 
+  static Future<bool> rejectApplication(String applicationId) async {
+    if (!isSupabaseConfigured()) return false;
+    final ok = await getSupabase().rpc(
+      'reject_world_job_application',
+      params: {'p_application_id': applicationId},
+    );
+    return ok == true;
+  }
+
   static Future<List<WorldJobApplication>> fetchApplications(String jobId) async {
     if (!isSupabaseConfigured()) return [];
     final rows = await getSupabase()

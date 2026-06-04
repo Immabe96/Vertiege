@@ -2,6 +2,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../router/world_navigation.dart';
+import '../../services/feature_flags.dart';
 import '../../services/post_capabilities.dart';
 import '../../services/storage_service.dart';
 import '../../state/post_provider.dart';
@@ -409,6 +412,16 @@ class _PostInputState extends ConsumerState<PostInput>
           worldId: widget.worldId,
           sovereignId: widget.sovereignId,
         ).allowed;
+    final pollCap = resident != null
+        ? PostCapabilities.check(
+            capability: PostCapability.poll,
+            resident: resident,
+            worldId: widget.worldId,
+            sovereignId: widget.sovereignId,
+          )
+        : null;
+    final canLinkPoll =
+        pollCap?.allowed == true && FeatureFlags.polls && !widget.showWorldSelector;
 
     final charLength = _controller.text.length;
     final charColor = _charCountColor(charLength);
@@ -640,6 +653,18 @@ class _PostInputState extends ConsumerState<PostInput>
                 const SizedBox(width: VSpacing.sm),
                 Column(
                   children: [
+                    if (canLinkPoll)
+                      IconButton(
+                        icon: const Icon(Icons.poll_outlined),
+                        tooltip: 'Create poll in world polls',
+                        iconSize: VIconSize.md,
+                        color: theme.colorScheme.outline,
+                        onPressed: () {
+                          context.push(
+                            worldPollsPath(widget.worldId, create: true),
+                          );
+                        },
+                      ),
                     // Save draft button
                     IconButton(
                       icon: const Icon(Icons.drafts_outlined),

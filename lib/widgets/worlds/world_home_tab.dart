@@ -9,6 +9,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/empty_state.dart';
 import '../core/progression_help_button.dart';
+import 'archive_world_banner.dart';
 import 'world_growth_card.dart';
 
 /// Visitor-first Home tab — Facebook Group/Page style landing.
@@ -64,6 +65,7 @@ class WorldHomeTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (world.isArchive) const ArchiveWorldBanner(),
         const SizedBox(height: VSpacing.sm),
         _GroupMetaCard(world: world, isDark: isDark),
         WorldGrowthCard(world: world),

@@ -437,6 +437,8 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     NotificationType.allegianceRequest => 'Allegiance request',
     NotificationType.achievementApproved => 'Achievement verified',
     NotificationType.achievementRejected => 'Achievement review',
+    NotificationType.jobApplicationAccepted => 'Role application',
+    NotificationType.jobApplicationRejected => 'Role application',
   };
 
   String? _routeForNotification(AppNotification notification) =>

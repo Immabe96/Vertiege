@@ -104,4 +104,10 @@ class FeatureFlags {
         're_engagement_push_variant',
         fallback: 'calm',
       );
+
+  /// Nexus bento order: `default`, `quest_first`, or `social`.
+  static String get nexusBentoSegment => RemoteConfigService.getString(
+        'nexus_bento_segment',
+        fallback: 'default',
+      );
 }

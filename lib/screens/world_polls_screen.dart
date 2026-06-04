@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 import '../../forui/v_hub_page.dart';
 import '../../models/poll.dart';
 import '../../services/poll_service.dart';
@@ -39,6 +40,18 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     super.initState();
     _loadPolls();
     _loadCanCreate();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpenCreateFromRoute());
+  }
+
+  Future<void> _maybeOpenCreateFromRoute() async {
+    final create =
+        GoRouterState.of(context).uri.queryParameters['create'] == 'true';
+    if (!create) return;
+    await _loadCanCreate();
+    if (!mounted) return;
+    if (_canCreatePoll) {
+      _showCreatePollDialog();
+    }
   }
 
   Future<void> _loadCanCreate() async {

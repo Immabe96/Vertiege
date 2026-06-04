@@ -20,6 +20,8 @@ import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/new_user_context_hint.dart';
+import '../../widgets/core/quiet_gate_tile.dart';
+import '../../widgets/core/tab_aware_sheet.dart';
 import '../../ui/icons/v_icons.dart';
 
 class WorldMarketplaceScreen extends ConsumerStatefulWidget {
@@ -107,7 +109,7 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
   }
 
   void _openListingDetail(Listing listing) {
-    showModalBottomSheet(
+    showTabAwareModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -130,6 +132,13 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
           world,
           isJoined: widget.isMember,
         );
+    final browseBlock = world != null
+        ? WorldCapabilityMatrix.blockReasonBrowseMarketplace(
+            resident,
+            world,
+            isJoined: widget.isMember,
+          )
+        : null;
 
     return VHubPage(
       title: 'Marketplace',
@@ -148,6 +157,15 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
           NewUserContextHint(
             message: WorldCapabilityMatrix.marketplaceRepHint(),
           ),
+          if (browseBlock != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+              child: QuietGateTile.section(
+                icon: Icons.storefront_outlined,
+                label: 'Browse marketplace',
+                gate: browseBlock,
+              ),
+            ),
           if (world != null &&
               WorldCapabilityMatrix.blockReasonCreateListing(
                     resident,
@@ -159,7 +177,15 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
               message: WorldCapabilityMatrix.createListingGateHint(),
               icon: Icons.lock_outline,
             ),
-          Expanded(child: _buildBody(context)),
+          Expanded(
+            child: browseBlock != null
+                ? AppEmptyState(
+                    title: 'Marketplace locked',
+                    description: browseBlock,
+                    icon: Icons.lock_outline,
+                  )
+                : _buildBody(context),
+          ),
         ],
       ),
     );

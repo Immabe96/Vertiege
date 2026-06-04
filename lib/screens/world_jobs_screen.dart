@@ -294,29 +294,53 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
               Text(app.message),
             ],
             const SizedBox(height: VSpacing.sm),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton(
-                onPressed: () async {
-                  final accepted =
-                      await WorldJobService.acceptApplication(app.id);
-                  if (!context.mounted) return;
-                  if (accepted) {
-                    Navigator.pop(context);
-                    VFeedback.showMessage(
-                      context,
-                      'Application accepted — role marked filled',
-                    );
-                    _load();
-                  } else {
-                    VFeedback.showError(
-                      context,
-                      'Could not accept application',
-                    );
-                  }
-                },
-                child: const Text('Accept'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    final rejected =
+                        await WorldJobService.rejectApplication(app.id);
+                    if (!context.mounted) return;
+                    if (rejected) {
+                      Navigator.pop(context);
+                      VFeedback.showMessage(
+                        context,
+                        'Application declined',
+                      );
+                      _load();
+                    } else {
+                      VFeedback.showError(
+                        context,
+                        'Could not decline application',
+                      );
+                    }
+                  },
+                  child: const Text('Decline'),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                FilledButton(
+                  onPressed: () async {
+                    final accepted =
+                        await WorldJobService.acceptApplication(app.id);
+                    if (!context.mounted) return;
+                    if (accepted) {
+                      Navigator.pop(context);
+                      VFeedback.showMessage(
+                        context,
+                        'Application accepted — role marked filled',
+                      );
+                      _load();
+                    } else {
+                      VFeedback.showError(
+                        context,
+                        'Could not accept application',
+                      );
+                    }
+                  },
+                  child: const Text('Accept'),
+                ),
+              ],
             ),
             const Divider(height: VSpacing.lg),
           ],

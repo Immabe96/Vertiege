@@ -25,6 +25,8 @@ import 'alliance_section.dart';
 import 'resource_vault.dart';
 import 'world_growth_card.dart';
 import 'world_member_row.dart';
+import 'dossier_collapsible_section.dart';
+import 'world_constitution_sheet.dart';
 
 /// G4 realm dossier — About tab content (Forui sections).
 class WorldRealmDossier extends ConsumerStatefulWidget {
@@ -174,37 +176,47 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
             onLogTile: _logTile,
           ),
           const SizedBox(height: VSpacing.md),
-          _KnowledgeSection(
-            infoChannel: _infoChannel,
-            onOpenChannel: (name) {
-              _logTile(AnalyticsEvents.worldDossierKnowledgeLink);
-              widget.onOpenChannel(name);
-            },
+          DossierCollapsibleSection(
+            title: 'Knowledge',
+            child: _KnowledgeSection(
+              infoChannel: _infoChannel,
+              onOpenChannel: (name) {
+                _logTile(AnalyticsEvents.worldDossierKnowledgeLink);
+                widget.onOpenChannel(name);
+              },
+            ),
           ),
           const SizedBox(height: VSpacing.md),
-          _NewsSection(
-            posts: news,
-            isDark: isDark,
-            onOpenPost: (postId) {
-              _logTile(
-                AnalyticsEvents.worldDossierNewsOpen,
-                tile: postId,
-              );
-              context.push(
-                exploreWorldPath(widget.worldId, postId: postId),
-              );
-            },
+          DossierCollapsibleSection(
+            title: 'News & decrees',
+            initiallyExpanded: news.isNotEmpty,
+            child: _NewsSection(
+              posts: news,
+              isDark: isDark,
+              onOpenPost: (postId) {
+                _logTile(
+                  AnalyticsEvents.worldDossierNewsOpen,
+                  tile: postId,
+                );
+                context.push(
+                  exploreWorldPath(widget.worldId, postId: postId),
+                );
+              },
+            ),
           ),
           const SizedBox(height: VSpacing.md),
-          _OrientationSection(
-            world: widget.world,
-            onOpenChannel: (channel) {
-              _logTile(
-                AnalyticsEvents.worldDossierOrientationStep,
-                tile: channel,
-              );
-              widget.onOpenChannel(channel);
-            },
+          DossierCollapsibleSection(
+            title: 'Get started',
+            child: _OrientationSection(
+              world: widget.world,
+              onOpenChannel: (channel) {
+                _logTile(
+                  AnalyticsEvents.worldDossierOrientationStep,
+                  tile: channel,
+                );
+                widget.onOpenChannel(channel);
+              },
+            ),
           ),
           const SizedBox(height: VSpacing.md),
           _CouncilPreviewSection(
@@ -390,6 +402,13 @@ class _CharterSection extends StatelessWidget {
               _BulletBlock(title: 'Culture', items: foundation.culture),
             ] else ...[
               const SizedBox(height: VSpacing.md),
+              OutlinedButton(
+                onPressed: () {
+                  showWorldConstitutionPreview(context, world: world);
+                },
+                child: const Text('Preview charter'),
+              ),
+              const SizedBox(height: VSpacing.sm),
               FButton(
                 onPress: onJoin,
                 child: const Text('Join to read the full charter'),
@@ -772,26 +791,16 @@ class _KnowledgeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (infoChannel == null) {
-      return FCard.raw(
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: Text(
-            'Knowledge channels are being prepared.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ),
+      return Text(
+        'Knowledge channels are being prepared.',
+        style: Theme.of(context).textTheme.bodySmall,
       );
     }
 
-    return VSectionList(
-      title: 'Knowledge',
-      children: [
-        VSectionTile(
-          icon: Icons.menu_book_outlined,
-          label: 'Read charter in #${infoChannel!.name}',
-          onTap: () => onOpenChannel(infoChannel!.name),
-        ),
-      ],
+    return VSectionTile(
+      icon: Icons.menu_book_outlined,
+      label: 'Read charter in #${infoChannel!.name}',
+      onTap: () => onOpenChannel(infoChannel!.name),
     );
   }
 }
@@ -811,20 +820,10 @@ class _NewsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return FCard.raw(
-      child: Padding(
-        padding: const EdgeInsets.all(VSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'News & decrees',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: VFontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            if (posts.isEmpty)
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (posts.isEmpty)
               Text(
                 'No announcements yet. Check back when the sovereign posts.',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -874,9 +873,7 @@ class _NewsSection extends StatelessWidget {
                   ),
                 );
               }),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }
@@ -895,20 +892,10 @@ class _OrientationSection extends StatelessWidget {
     final theme = Theme.of(context);
     final steps = orientationStepsForWorld(world);
 
-    return FCard.raw(
-      child: Padding(
-        padding: const EdgeInsets.all(VSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Get started',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: VFontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            ...steps.asMap().entries.map((entry) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...steps.asMap().entries.map((entry) {
               final i = entry.key;
               final step = entry.value;
               return Padding(
@@ -975,10 +962,8 @@ class _OrientationSection extends StatelessWidget {
                   ),
                 ),
               );
-            }),
-          ],
-        ),
-      ),
+        }),
+      ],
     );
   }
 }

@@ -15,6 +15,7 @@ class WorldCapabilityMatrix {
   static const int minWorldPrestigeMarketplace = 30;
   static const int minWorldPrestigeTreasury = 25;
   static const int minStandingCreateListing = 3;
+  static const int minStandingBrowseMarketplace = 2;
   static const int minStandingManageTreasury = 7;
 
   static bool canCreateWorld(Resident? resident) {
@@ -74,6 +75,26 @@ class WorldCapabilityMatrix {
     if (resident.id == world.sovereignId) return true;
     return standingLevel(resident, world.id, world.sovereignId) >=
         minStandingManageTreasury;
+  }
+
+  static String? blockReasonBrowseMarketplace(
+    Resident? resident,
+    World world, {
+    required bool isJoined,
+  }) {
+    if (resident == null) return 'Sign in to browse the marketplace.';
+    if (!isJoined) return 'Join this world to browse listings.';
+    if (!worldHasMarketplace(world)) {
+      return 'Marketplace unlocks at world prestige $minWorldPrestigeMarketplace.';
+    }
+    final standing = getStanding(
+      resident.worldStandings[world.id]?.rep ?? 0,
+    );
+    if (standing.level < minStandingBrowseMarketplace) {
+      final needed = standingLevels[minStandingBrowseMarketplace - 1];
+      return 'Reach ${needed.title} standing (${needed.minRep} rep) to browse.';
+    }
+    return null;
   }
 
   static String? blockReasonCreateListing(

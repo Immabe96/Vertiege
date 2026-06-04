@@ -109,7 +109,30 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 | Display title on posts | Done — `author_display_title` + feed label |
 | Progression help sheets | Done — treasury, polls (+ glossary lounge/treasury/polls) |
 
-**Migration:** `20260616120000_onboarding_streak_tz.sql` (push to Supabase pending)
+**Migration:** `20260616120000_onboarding_streak_tz.sql` — pushed to Supabase
+
+---
+
+## Wave 17 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| Polls path from composer | Done — poll icon → `/polls?create=true` |
+| Thread replies Forui | Done — `FScaffold` + `AppErrorState` (existing) |
+| Reaction sheet tab-aware | Done — marketplace listing uses tab-aware sheet |
+| World dossier collapse | Done — collapsible Knowledge / News / Get started |
+| Member list search | Done (pre-existing) |
+| Marketplace rep-gated browse | Done — `blockReasonBrowseMarketplace` + quiet gate |
+| Job application push | Done — trigger + `reject_world_job_application` RPC |
+| Archive world banner | Done — home + feed read-only banner |
+| Constitution preview | Done — sheet before join + dossier preview |
+| Feed “new posts” pill | Done — tap scroll to top |
+| Cross-world DM from profile | Done (pre-existing Message CTA) |
+| Adaptive Nexus (RC) | Done — `nexus_bento_segment` |
+
+**Migration:** `20260617120000_job_application_notifications.sql` — pushed to Supabase
+
+**Tests:** 218 green locally.
 
 ---
 

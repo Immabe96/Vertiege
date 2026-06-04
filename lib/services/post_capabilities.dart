@@ -1,4 +1,5 @@
 import '../models/resident.dart';
+import 'feature_flags.dart';
 import 'permission_service.dart';
 
 /// Post types the unified composer may expose (UI + future server RPC).
@@ -69,9 +70,12 @@ class PostCapabilities {
                 'Pinning requires council or sovereign standing.',
               );
       case PostCapability.poll:
-        return const PostCapabilityResult.denied(
-          'Polls are not available from this composer yet.',
-        );
+        if (!FeatureFlags.polls) {
+          return const PostCapabilityResult.denied(
+            'Polls are not enabled for this world yet.',
+          );
+        }
+        return const PostCapabilityResult.allowed();
       case PostCapability.scheduled:
         return const PostCapabilityResult.denied(
           'Scheduled posts are not available yet.',

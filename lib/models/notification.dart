@@ -13,6 +13,8 @@ enum NotificationType {
   allegianceRequest,
   achievementApproved,
   achievementRejected,
+  jobApplicationAccepted,
+  jobApplicationRejected,
 }
 
 class AppNotification {
@@ -77,6 +79,10 @@ class AppNotification {
       'allegianceRequest' => NotificationType.allegianceRequest,
       'achievementApproved' => NotificationType.achievementApproved,
       'achievementRejected' => NotificationType.achievementRejected,
+      'jobApplicationAccepted' => NotificationType.jobApplicationAccepted,
+      'job_application_accepted' => NotificationType.jobApplicationAccepted,
+      'jobApplicationRejected' => NotificationType.jobApplicationRejected,
+      'job_application_rejected' => NotificationType.jobApplicationRejected,
       _ => NotificationType.like,
     };
   }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../router/world_navigation.dart';
 import '../../state/resident_provider.dart';
+import '../../services/nexus_bento_order.dart';
 import '../../services/nexus_shortcut_prefs.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -148,14 +149,7 @@ class _CompactShortcutsRow extends StatefulWidget {
 }
 
 class _CompactShortcutsRowState extends State<_CompactShortcutsRow> {
-  static const _defaultOrder = [
-    'season',
-    'quest',
-    'challenges',
-    'league',
-    'prestige',
-    'trending',
-  ];
+  static final _defaultOrder = NexusBentoOrder.defaultOrder;
 
   List<String> _order = _defaultOrder;
 
@@ -166,7 +160,8 @@ class _CompactShortcutsRowState extends State<_CompactShortcutsRow> {
   }
 
   Future<void> _loadOrder() async {
-    final ordered = await NexusShortcutPrefs.orderByRecency(_defaultOrder);
+    final segmentOrder = NexusBentoOrder.compactShortcutOrder(_defaultOrder);
+    final ordered = await NexusShortcutPrefs.orderByRecency(segmentOrder);
     if (mounted) setState(() => _order = ordered);
   }
 

@@ -22,6 +22,7 @@ import '../widgets/worlds/world_hero_banner.dart';
 import '../widgets/worlds/world_profile_header.dart';
 import '../widgets/worlds/world_realm_dossier.dart';
 import '../widgets/worlds/world_home_tab.dart';
+import '../widgets/worlds/world_constitution_sheet.dart';
 import '../widgets/worlds/world_shop_tab.dart';
 import '../widgets/worlds/world_tools_panel.dart';
 import '../widgets/core/sync_warning_banner.dart';
@@ -492,6 +493,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (isJoined) {
       _showLeaveConfirmation();
       return;
+    }
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    if (world != null) {
+      final agreed = await showWorldConstitutionPreview(context, world: world);
+      if (!mounted || agreed != true) return;
     }
     _animateJoinButton();
     await ref.read(residentProvider.notifier).joinWorld(widget.worldId);
