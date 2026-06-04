@@ -72,6 +72,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
     final rewardXpController = TextEditingController(text: '0');
     final rewardCurrencyController = TextEditingController(text: '0');
     String challengeType = 'individual';
+    String challengeScope = 'world';
 
     showDialog(
       context: context,
@@ -110,6 +111,26 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   children: const [
                     FSelectItem<String>(value: 'individual', title: Text('Individual')),
                     FSelectItem<String>(value: 'collective', title: Text('Collective')),
+                  ],
+                ),
+                const SizedBox(height: VSpacing.lg),
+                FSelect<String>.rich(
+                  format: (value) =>
+                      value == 'season' ? 'Season cohort' : 'World',
+                  control: FSelectControl.lifted(
+                    value: challengeScope,
+                    onChange: (v) {
+                      if (v != null) setDialogState(() => challengeScope = v);
+                    },
+                  ),
+                  label: const Text('Scope'),
+                  hint: 'Select scope',
+                  children: const [
+                    FSelectItem<String>(value: 'world', title: Text('World')),
+                    FSelectItem<String>(
+                      value: 'season',
+                      title: Text('Season cohort'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: VSpacing.lg),
@@ -168,6 +189,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   title: titleController.text.trim(),
                   description: descController.text.trim(),
                   challengeType: challengeType,
+                  scope: challengeScope,
                   targetValue: target,
                   rewardXp: int.tryParse(rewardXpController.text) ?? 0,
                   rewardCurrency: int.tryParse(rewardCurrencyController.text) ?? 0,

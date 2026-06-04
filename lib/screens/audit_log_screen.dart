@@ -78,19 +78,30 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'editChannel' => 'Edited a channel',
     'governance_proposal_approved' => 'Council approved a request',
     'governance_proposal_rejected' => 'Council rejected a request',
+    'governance_job_executed' => 'Published a role post',
+    'governance_rank_change_executed' => 'Changed a member rank',
+    'governance_treasury_withdrawal' => 'Withdrew from treasury',
     _ => action.replaceAll('_', ' '),
   };
 
   String? _governanceDetail(Map<String, dynamic>? details) {
     if (details == null) return null;
     final type = details['type'] as String?;
-    if (type == null || type.isEmpty) return null;
-    return switch (type) {
-      'treasury_withdrawal' => 'Treasury withdrawal',
-      'job_publish' => 'Role post',
-      'rank_change' => 'Rank change',
-      _ => type.replaceAll('_', ' '),
-    };
+    if (type != null && type.isNotEmpty) {
+      return switch (type) {
+        'treasury_withdrawal' => 'Treasury withdrawal',
+        'job_publish' => 'Role post',
+        'rank_change' => 'Rank change',
+        _ => type.replaceAll('_', ' '),
+      };
+    }
+    final title = details['title'] as String?;
+    if (title != null && title.isNotEmpty) return title;
+    final amount = details['amount'];
+    if (amount != null) return '$amount coins';
+    final action = details['action'] as String?;
+    if (action != null) return 'Rank ${action == 'assign' ? 'assigned' : 'removed'}';
+    return null;
   }
 
   String _actorLabel(String? actorId) {
@@ -106,7 +117,11 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'createRank' || 'deleteRank' => Icons.military_tech,
     'assignRank' || 'removeRank' => Icons.person_add,
     'editChannel' => Icons.edit,
-    'governance_proposal_approved' || 'governance_proposal_rejected' =>
+    'governance_proposal_approved' ||
+    'governance_proposal_rejected' ||
+    'governance_job_executed' ||
+    'governance_rank_change_executed' ||
+    'governance_treasury_withdrawal' =>
       Icons.gavel,
     _ => Icons.history,
   };

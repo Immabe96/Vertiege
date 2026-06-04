@@ -23,5 +23,9 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 | World feed | Posts load; post deep link opens thread |
 | Voice | Campfire mini-bar shows status; leave ends session |
 | Subscription | Sandbox purchase verifies; tier updates in settings |
+| Season cohort | Challenges screen shows cohort banner + season challenge |
+| Polls | Veteran+ creates poll; vote succeeds |
+
+Full Wave 6 checklist: [wave-6-signoff-checklist.md](wave-6-signoff-checklist.md).
 
 Log issues in [issue-log.md](issue-log.md).
