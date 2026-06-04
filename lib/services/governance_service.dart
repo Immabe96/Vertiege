@@ -33,6 +33,38 @@ class GovernanceProposal {
 }
 
 class GovernanceService {
+  static Future<Map<String, String>> _profileNames(Iterable<String> ids) async {
+    final unique = ids.where((id) => id.isNotEmpty).toSet().toList();
+    if (!isSupabaseConfigured() || unique.isEmpty) return {};
+    final data = await getSupabase()
+        .from('profiles')
+        .select('id, name')
+        .inFilter('id', unique);
+    final map = <String, String>{};
+    for (final row in data as List) {
+      final m = row as Map<String, dynamic>;
+      final id = m['id'] as String?;
+      if (id == null) continue;
+      map[id] = (m['name'] as String?)?.trim().isNotEmpty == true
+          ? (m['name'] as String).trim()
+          : 'Resident';
+    }
+    return map;
+  }
+
+  static Future<({List<GovernanceProposal> proposals, Map<String, String> names})>
+      listPendingEnriched(String worldId) async {
+    final proposals = await listPending(worldId);
+    final ids = <String>{
+      for (final p in proposals) p.requestedBy,
+      for (final p in proposals)
+        if (p.proposalType == 'rank_change')
+          p.payload['resident_id'] as String? ?? '',
+    };
+    final names = await _profileNames(ids);
+    return (proposals: proposals, names: names);
+  }
+
   static Future<List<GovernanceProposal>> listPending(String worldId) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
@@ -67,6 +99,62 @@ class GovernanceService {
     if (map['success'] != true) return map['error'] as String?;
     if (map['executed'] == true) return null;
     return 'pending';
+  }
+
+  static Future<({bool executed, String? error})> requestJobPublish({
+    required String worldId,
+    required String title,
+    required String description,
+    String roleLabel = 'Contributor',
+    int minStandingLevel = 3,
+    int minTier = 2,
+  }) async {
+    if (!isSupabaseConfigured()) {
+      return (executed: false, error: 'Supabase unavailable');
+    }
+    final result = await getSupabase().rpc(
+      'request_job_publish',
+      params: {
+        'p_world_id': worldId,
+        'p_title': title,
+        'p_description': description,
+        'p_role_label': roleLabel,
+        'p_min_standing_level': minStandingLevel,
+        'p_min_tier': minTier,
+      },
+    );
+    if (result is! Map) return (executed: false, error: 'Unexpected response');
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] != true) {
+      return (executed: false, error: map['error'] as String? ?? 'Request failed');
+    }
+    return (executed: map['executed'] == true, error: null);
+  }
+
+  static Future<({bool executed, String? error})> requestRankChange({
+    required String worldId,
+    required String residentId,
+    required String rankId,
+    required bool assign,
+  }) async {
+    if (!isSupabaseConfigured()) {
+      return (executed: false, error: 'Supabase unavailable');
+    }
+    final result = await getSupabase().rpc(
+      'request_rank_change',
+      params: {
+        'p_world_id': worldId,
+        'p_resident_id': residentId,
+        'p_rank_id': rankId,
+        'p_action': assign ? 'assign' : 'remove',
+      },
+    );
+    if (result is! Map) return (executed: false, error: 'Unexpected response');
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] != true) {
+      return (executed: false, error: map['error'] as String? ?? 'Request failed');
+    }
+    return (executed: map['executed'] == true, error: null);
   }
 
   static Future<String?> reviewProposal({

@@ -971,30 +971,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
             child: VSectionList(
-              title: 'Explore',
-              children: [
-                VSectionTile(
-                  icon: Icons.explore,
-                  label: 'Daily quests',
-                  onTap: () => context.push('/daily-quests'),
-                ),
-                VSectionTile(
-                  icon: Icons.leaderboard,
-                  label: 'Hall of Ascension',
-                  onTap: () => context.push('/hall-of-ascension'),
-                ),
-                VSectionTile(
-                  icon: Icons.leaderboard_outlined,
-                  label: 'Weekly league',
-                  onTap: () => context.push('/leagues'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: VSpacing.md),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-            child: VSectionList(
               title: 'Vault',
               children: [
                 VSectionTile(

@@ -12,6 +12,7 @@ Start here. All docs follow [documentation standards](meta/documentation-standar
 | Device UAT & APK from Actions | [guides/device-uat.md](guides/device-uat.md) |
 | Supabase + Firebase setup | [guides/firebase-and-supabase.md](guides/firebase-and-supabase.md) |
 | Design system (current) | [reference/design-system.md](reference/design-system.md) |
+| Quiet UX (no clutter) | [guides/quiet-ux-principles.md](guides/quiet-ux-principles.md) |
 | Product roadmap & waves | [product/roadmap.md](product/roadmap.md) · [planning/wave-status.md](product/planning/wave-status.md) |
 | UAT issue log | [operations/uat/issue-log.md](operations/uat/issue-log.md) |
 | Explore the codebase in Cursor | [guides/codebase-map.md](guides/codebase-map.md) |

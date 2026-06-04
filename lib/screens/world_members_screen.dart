@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../config/tiers.dart';
 import '../models/rank.dart';
+import '../services/permission_service.dart';
 import '../services/rank_service.dart';
 import '../services/world_service.dart';
 import '../state/resident_provider.dart';
@@ -97,8 +98,15 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = _filtered;
-    final currentResidentId = ref.watch(residentProvider).resident?.id;
-    final canManageRanks = currentResidentId == widget.sovereignId;
+    final currentResident = ref.watch(residentProvider).resident;
+    final currentResidentId = currentResident?.id;
+    final canManageRanks = currentResidentId == widget.sovereignId ||
+        (currentResident != null &&
+            WorldPermissions.canModerate(
+              currentResident,
+              widget.worldId,
+              widget.sovereignId,
+            ));
 
     return VHubPage(
       title: 'Members',
@@ -384,21 +392,32 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                       onPressed: () async {
                         final toAdd = selected.difference(original);
                         final toRemove = original.difference(selected);
+                        var pendingRankChanges = 0;
                         for (final rankId in toAdd) {
-                          await RankService.assignRank(
+                          final executed = await RankService.assignRank(
+                            worldId: widget.worldId,
                             residentId: residentId,
                             rankId: rankId,
                           );
+                          if (!executed) pendingRankChanges++;
                         }
                         for (final rankId in toRemove) {
-                          await RankService.removeRank(
+                          final executed = await RankService.removeRank(
+                            worldId: widget.worldId,
                             residentId: residentId,
                             rankId: rankId,
                           );
+                          if (!executed) pendingRankChanges++;
                         }
                         if (!ctx.mounted) return;
                         Navigator.pop(ctx);
                         if (!mounted) return;
+                        if (pendingRankChanges > 0) {
+                          VFeedback.showMessage(
+                            context,
+                            'Rank changes submitted for council review.',
+                          );
+                        }
                         await _load();
                       },
                       icon: const Icon(Icons.save_outlined),

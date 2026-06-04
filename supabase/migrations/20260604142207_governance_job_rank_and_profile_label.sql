@@ -1,0 +1,1 @@
+-- Placeholder migration (CLI scaffold). Logic lives in 20260604143000_*.

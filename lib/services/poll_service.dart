@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/poll.dart';
 import 'supabase.dart';
 
@@ -42,20 +44,29 @@ class PollService {
       throw StateError('Authentication required to create polls.');
     }
 
-    final result = await client
-        .from('world_polls')
-        .insert({
-          'world_id': worldId,
-          'question': question,
-          'options': options,
-          if (channelId != null) 'channel_id': channelId,
-          if (expiresAt != null) 'expires_at': expiresAt,
-          'created_by': userId,
-        })
-        .select()
-        .single();
+    try {
+      final result = await client
+          .from('world_polls')
+          .insert({
+            'world_id': worldId,
+            'question': question,
+            'options': options,
+            if (channelId != null) 'channel_id': channelId,
+            if (expiresAt != null) 'expires_at': expiresAt,
+            'created_by': userId,
+          })
+          .select()
+          .single();
 
-    return WorldPoll.fromSupabase(result);
+      return WorldPoll.fromSupabase(result);
+    } on PostgrestException catch (e) {
+      if (e.code == '42501' || e.message.contains('policy')) {
+        throw StateError(
+          'Polls require Veteran standing or council in this world.',
+        );
+      }
+      rethrow;
+    }
   }
 
   static Future<bool> voteOnPoll(String pollId, int optionIndex) async {

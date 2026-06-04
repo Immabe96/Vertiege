@@ -39,6 +39,8 @@ class VSectionTile extends FTile {
     Color? iconColor,
     Color? titleColor,
     Widget? trailing,
+    /// One-line muted context (e.g. lock reason). Avoids extra banners.
+    String? detail,
     bool enabled = true,
   }) : super(
          enabled: enabled,
@@ -56,11 +58,24 @@ class VSectionTile extends FTile {
              ),
            ),
          ),
+         details: detail == null
+             ? null
+             : Builder(
+                 builder: (context) => Text(
+                   detail,
+                   maxLines: 1,
+                   overflow: TextOverflow.ellipsis,
+                   style: TextStyle(
+                     color: context.theme.colors.mutedForeground,
+                     fontSize: 12,
+                   ),
+                 ),
+               ),
          suffix:
              trailing ??
              Builder(
                builder: (context) => Icon(
-                 FIcons.chevronRight,
+                 enabled ? FIcons.chevronRight : FIcons.lock,
                  color: context.theme.colors.mutedForeground,
                  size: 18,
                ),

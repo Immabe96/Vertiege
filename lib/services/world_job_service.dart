@@ -1,5 +1,6 @@
 import '../models/world_job.dart';
 import '../models/world_job_application.dart';
+import 'governance_service.dart';
 import 'supabase.dart';
 
 class WorldJobService {
@@ -35,21 +36,31 @@ class WorldJobService {
     final userId = getSupabase().auth.currentUser?.id;
     if (userId == null) throw StateError('Not authenticated');
 
-    final row = await getSupabase()
-        .from('world_jobs')
-        .insert({
-          'world_id': worldId,
-          'title': title,
-          'description': description,
-          'role_label': roleLabel,
-          'min_standing_level': minStandingLevel,
-          'min_tier': minTier,
-          'created_by': userId,
-        })
-        .select()
-        .single();
+    final outcome = await GovernanceService.requestJobPublish(
+      worldId: worldId,
+      title: title,
+      description: description,
+      roleLabel: roleLabel,
+      minStandingLevel: minStandingLevel,
+      minTier: minTier,
+    );
+    if (outcome.error != null) {
+      throw StateError(outcome.error!);
+    }
+    if (!outcome.executed) {
+      return null;
+    }
 
-    return WorldJob.fromSupabase(row);
+    final rows = await getSupabase()
+        .from('world_jobs')
+        .select()
+        .eq('world_id', worldId)
+        .eq('created_by', userId)
+        .order('created_at', ascending: false)
+        .limit(1);
+    final list = rows as List;
+    if (list.isEmpty) return null;
+    return WorldJob.fromSupabase(list.first as Map<String, dynamic>);
   }
 
   static Future<void> updateStatus(String jobId, WorldJobStatus status) async {

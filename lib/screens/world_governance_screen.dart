@@ -22,6 +22,7 @@ class WorldGovernanceScreen extends ConsumerStatefulWidget {
 
 class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
   List<GovernanceProposal> _proposals = [];
+  Map<String, String> _names = {};
   bool _loading = true;
 
   @override
@@ -32,12 +33,55 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final list = await GovernanceService.listPending(widget.worldId);
+    final enriched =
+        await GovernanceService.listPendingEnriched(widget.worldId);
     if (mounted) {
       setState(() {
-        _proposals = list;
+        _proposals = enriched.proposals;
+        _names = enriched.names;
         _loading = false;
       });
+    }
+  }
+
+  String _name(String? id) {
+    if (id == null || id.isEmpty) return 'Someone';
+    return _names[id] ?? 'Resident';
+  }
+
+  String _proposalTitle(GovernanceProposal p) {
+    switch (p.proposalType) {
+      case 'treasury_withdrawal':
+        return 'Treasury withdrawal';
+      case 'job_publish':
+        return 'Role post';
+      case 'rank_change':
+        return p.payload['action'] == 'remove' ? 'Remove rank' : 'Assign rank';
+      default:
+        return p.proposalType.replaceAll('_', ' ');
+    }
+  }
+
+  String _proposalSubtitle(GovernanceProposal p) {
+    final from = _name(p.requestedBy);
+    switch (p.proposalType) {
+      case 'treasury_withdrawal':
+        final amount = p.payload['amount'];
+        final desc = p.payload['description'] as String? ?? '';
+        final parts = <String>[
+          'From $from',
+          if (amount != null) '$amount coins',
+          if (desc.isNotEmpty) desc,
+        ];
+        return parts.join(' · ');
+      case 'job_publish':
+        final title = p.payload['title'] as String? ?? '';
+        return title.isEmpty ? 'From $from' : '$title · $from';
+      case 'rank_change':
+        final target = _name(p.payload['resident_id'] as String?);
+        return '$target · $from';
+      default:
+        return from;
     }
   }
 
@@ -53,7 +97,7 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
     }
     VFeedback.showMessage(
       context,
-      approve ? 'Proposal approved.' : 'Proposal rejected.',
+      approve ? 'Approved.' : 'Rejected.',
     );
     await _load();
   }
@@ -75,34 +119,39 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
               ? const AppEmptyState(
                   title: 'Queue is clear',
                   description:
-                      'Treasury withdrawals from council appear here when submitted. Only council and sovereign may withdraw.',
+                      'Withdrawals, role posts, and rank changes appear here when members request them.',
                   icon: Icons.gavel_outlined,
                 )
-              : ListView.separated(
+              : ListView.builder(
                   padding: const EdgeInsets.all(VSpacing.md),
                   itemCount: _proposals.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
                   itemBuilder: (context, index) {
                     final p = _proposals[index];
-                    final amount = p.payload['amount'];
-                    final desc = p.payload['description'] as String? ?? '';
                     return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(VSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p.proposalType.replaceAll('_', ' '),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      margin: const EdgeInsets.only(bottom: VSpacing.sm),
+                      clipBehavior: Clip.antiAlias,
+                      child: ExpansionTile(
+                        tilePadding: const EdgeInsets.symmetric(
+                          horizontal: VSpacing.md,
+                        ),
+                        title: Text(
+                          _proposalTitle(p),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          _proposalSubtitle(p),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              VSpacing.md,
+                              0,
+                              VSpacing.md,
+                              VSpacing.md,
                             ),
-                            if (amount != null)
-                              Text('Amount: $amount'),
-                            if (desc.isNotEmpty) Text(desc),
-                            const SizedBox(height: VSpacing.sm),
-                            Row(
+                            child: Row(
                               children: [
                                 Expanded(
                                   child: VButton(
@@ -120,8 +169,8 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   },

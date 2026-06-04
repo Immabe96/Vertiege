@@ -1,5 +1,6 @@
 import '../models/rank.dart';
 import '../utils/id_generator.dart';
+import 'governance_service.dart';
 import 'supabase.dart';
 
 class RankService {
@@ -66,27 +67,40 @@ class RankService {
 
   // ── Resident rank assignment ────────────────────────────
 
-  static Future<void> assignRank({
+  static Future<bool> assignRank({
+    required String worldId,
     required String residentId,
     required String rankId,
   }) async {
-    if (!isSupabaseConfigured()) return;
-    await getSupabase().from('resident_ranks').upsert({
-      'resident_id': residentId,
-      'rank_id': rankId,
-    });
+    if (!isSupabaseConfigured()) return false;
+    final outcome = await GovernanceService.requestRankChange(
+      worldId: worldId,
+      residentId: residentId,
+      rankId: rankId,
+      assign: true,
+    );
+    if (outcome.error != null) {
+      throw StateError(outcome.error!);
+    }
+    return outcome.executed;
   }
 
-  static Future<void> removeRank({
+  static Future<bool> removeRank({
+    required String worldId,
     required String residentId,
     required String rankId,
   }) async {
-    if (!isSupabaseConfigured()) return;
-    await getSupabase()
-        .from('resident_ranks')
-        .delete()
-        .eq('resident_id', residentId)
-        .eq('rank_id', rankId);
+    if (!isSupabaseConfigured()) return false;
+    final outcome = await GovernanceService.requestRankChange(
+      worldId: worldId,
+      residentId: residentId,
+      rankId: rankId,
+      assign: false,
+    );
+    if (outcome.error != null) {
+      throw StateError(outcome.error!);
+    }
+    return outcome.executed;
   }
 
   static Future<List<String>> fetchResidentRankIds(String residentId) async {

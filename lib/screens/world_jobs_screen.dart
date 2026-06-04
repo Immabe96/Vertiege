@@ -192,7 +192,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
     if (title.text.trim().isEmpty || desc.text.trim().isEmpty) return;
 
     try {
-      await WorldJobService.createJob(
+      final job = await WorldJobService.createJob(
         worldId: widget.worldId,
         title: title.text.trim(),
         description: desc.text.trim(),
@@ -201,7 +201,12 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
         minTier: minTier,
       );
       if (mounted) {
-        VFeedback.showMessage(context, 'Role posted');
+        VFeedback.showMessage(
+          context,
+          job == null
+              ? 'Role submitted for council review.'
+              : 'Role posted',
+        );
         _load();
       }
     } catch (e) {

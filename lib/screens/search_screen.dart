@@ -17,6 +17,7 @@ import '../state/world_provider.dart';
 import '../state/post_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/ally_provider.dart';
+import '../services/resident_search_service.dart';
 import '../services/world_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -47,8 +48,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _appliedRouteQuery = false;
   List<String> _recentSearches = [];
   List<_ResidentEntry> _allResidents = [];
+  List<_ResidentEntry> _globalFtsResidents = [];
   bool _loadingResidents = true;
+  bool _loadingGlobalSearch = false;
   String? _residentsLoadError;
+  Timer? _ftsDebounce;
 
   @override
   void initState() {
@@ -88,9 +92,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   void dispose() {
+    _ftsDebounce?.cancel();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _scheduleGlobalResidentSearch(String q) {
+    _ftsDebounce?.cancel();
+    if (_mode != _SearchMode.all || q.trim().length < 2) {
+      if (_globalFtsResidents.isNotEmpty || _loadingGlobalSearch) {
+        setState(() {
+          _globalFtsResidents = [];
+          _loadingGlobalSearch = false;
+        });
+      }
+      return;
+    }
+    _ftsDebounce = Timer(const Duration(milliseconds: 320), () async {
+      if (!mounted) return;
+      setState(() => _loadingGlobalSearch = true);
+      final hits = await ResidentSearchService.search(q.trim());
+      if (!mounted) return;
+      setState(() {
+        _loadingGlobalSearch = false;
+        _globalFtsResidents = hits
+            .map(
+              (h) => _ResidentEntry(
+                resident: Resident(
+                  id: h.id,
+                  name: h.name,
+                  tier: ResidentTier.hustlers,
+                  profession: h.bioSnippet,
+                  avatarUrl: h.avatarUrl ?? '',
+                ),
+                rep: 0,
+              ),
+            )
+            .toList();
+      });
+    });
   }
 
   Future<void> _loadRecentSearches() async {
@@ -223,12 +264,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
     worlds.sort((a, b) => a.name.compareTo(b.name));
 
+    final seenIds = <String>{};
+    if (_mode == _SearchMode.all) {
+      for (final entry in _globalFtsResidents) {
+        seenIds.add(entry.resident.id);
+        residents.add(entry);
+      }
+    }
     for (final entry in _allResidents) {
       final r = entry.resident;
+      if (seenIds.contains(r.id)) continue;
       if (r.name.toLowerCase().contains(lower) ||
           (r.profession != null &&
               r.profession!.toLowerCase().contains(lower))) {
         residents.add(entry);
+        seenIds.add(r.id);
       }
     }
     residents.sort((a, b) => a.resident.name.compareTo(b.resident.name));
@@ -278,6 +328,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ),
         onChanged: (v) {
           setState(() => _query = v);
+          _scheduleGlobalResidentSearch(v);
           if (v.isEmpty) {
             setState(() {});
           }

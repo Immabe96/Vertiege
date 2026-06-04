@@ -525,48 +525,60 @@ class _PostInputState extends ConsumerState<PostInput>
                 ),
               ),
 
-            // ── Announcement toggle ───────────────────────────
             if (canAnnounce)
-              Padding(
-                padding: const EdgeInsets.only(bottom: VSpacing.sm),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(VRadius.sm),
-                  onTap: () =>
-                      setState(() => _isAnnouncement = !_isAnnouncement),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.md,
-                      vertical: VSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(VRadius.sm),
-                      color: _isAnnouncement
-                          ? theme.colorScheme.primaryContainer
-                          : theme.colorScheme.surfaceContainerHighest,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.campaign,
-                          size: VIconSize.sm,
-                          color: _isAnnouncement
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline,
-                        ),
-                        const SizedBox(width: VSpacing.xs),
-                        Text(
-                          'Announcement',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: _isAnnouncement
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.outline,
-                            fontWeight: VFontWeight.bold,
-                          ),
-                        ),
-                      ],
+              Theme(
+                data: theme.copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: const EdgeInsets.only(bottom: VSpacing.sm),
+                  title: Text(
+                    _isAnnouncement ? 'Announcement on' : 'Post options',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.outline,
                     ),
                   ),
+                  trailing: Icon(
+                    _isAnnouncement ? Icons.campaign : Icons.tune,
+                    size: VIconSize.sm,
+                    color: _isAnnouncement
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline,
+                  ),
+                  initiallyExpanded: _isAnnouncement,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(VRadius.sm),
+                        onTap: () => setState(
+                          () => _isAnnouncement = !_isAnnouncement,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.sm,
+                            vertical: VSpacing.xs,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.campaign,
+                                size: VIconSize.sm,
+                                color: _isAnnouncement
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.outline,
+                              ),
+                              const SizedBox(width: VSpacing.xs),
+                              Text(
+                                'Mark as announcement',
+                                style: theme.textTheme.labelMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 

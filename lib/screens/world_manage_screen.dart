@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../config/world_capability_matrix.dart';
 import '../models/channel.dart';
 import '../forui/v_hub_page.dart';
-import '../models/world.dart';
 import '../router/world_navigation.dart';
 import '../services/feature_flags.dart';
 import '../services/world_channel_access_service.dart';
@@ -13,7 +12,7 @@ import '../state/resident_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/v_feedback.dart';
+import '../widgets/core/quiet_gate_tile.dart';
 import '../widgets/v_section_list.dart';
 import '../services/permission_service.dart';
 
@@ -106,8 +105,7 @@ class WorldManageScreen extends ConsumerWidget {
           VSectionList(
             title: 'Social',
             children: [
-              _manageTile(
-                context,
+              QuietGateTile.section(
                 icon: Icons.weekend_outlined,
                 label: 'Lounge',
                 gate: loungeGate,
@@ -121,8 +119,7 @@ class WorldManageScreen extends ConsumerWidget {
                         )
                     : null,
               ),
-              _manageTile(
-                context,
+              QuietGateTile.section(
                 icon: Icons.local_fire_department,
                 label: 'Campfire',
                 gate: campfireGate ??
@@ -171,8 +168,7 @@ class WorldManageScreen extends ConsumerWidget {
           VSectionList(
             title: 'Economy',
             children: [
-              _manageTile(
-                context,
+              QuietGateTile.section(
                 icon: Icons.account_balance_wallet,
                 label: 'Treasury',
                 gate: treasuryGate,
@@ -182,8 +178,7 @@ class WorldManageScreen extends ConsumerWidget {
                         )
                     : null,
               ),
-              _manageTile(
-                context,
+              QuietGateTile.section(
                 icon: Icons.storefront,
                 label: 'Marketplace',
                 gate: marketplaceGate,
@@ -224,21 +219,4 @@ class WorldManageScreen extends ConsumerWidget {
     );
   }
 
-  VSectionTile _manageTile(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    String? gate,
-    VoidCallback? onOpen,
-  }) {
-    final locked = gate != null;
-    return VSectionTile(
-      icon: icon,
-      label: label,
-      enabled: onOpen != null || locked,
-      onTap: locked
-          ? () => VFeedback.showMessage(context, gate!)
-          : onOpen,
-    );
-  }
 }
