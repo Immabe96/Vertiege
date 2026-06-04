@@ -51,4 +51,29 @@ class OnboardingFunnelPrefs {
     await prefs.setBool(justFinishedKey, false);
     return true;
   }
+
+  static Future<Map<String, dynamic>> readSnapshot() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'dismissed': prefs.getBool(dismissedKey) ?? false,
+      'opened_world': prefs.getBool(openedWorldKey) ?? false,
+      'opened_nexus': prefs.getBool(openedNexusKey) ?? false,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+  }
+
+  /// Remote wins for progress flags (never clears local true → false).
+  static Future<void> applyRemote(Map<String, dynamic> remote) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (remote['dismissed'] == true) {
+      await prefs.setBool(dismissedKey, true);
+    }
+    if (remote['opened_world'] == true) {
+      await prefs.setBool(openedWorldKey, true);
+    }
+    if (remote['opened_nexus'] == true) {
+      await prefs.setBool(openedNexusKey, true);
+    }
+  }
+
 }

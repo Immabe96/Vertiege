@@ -387,6 +387,8 @@ class PostRepository {
     'resident_name': post.residentName,
     'author_id': post.residentId,
     'author_name': post.residentName,
+    if (post.authorDisplayTitle != null && post.authorDisplayTitle!.isNotEmpty)
+      'author_display_title': post.authorDisplayTitle,
     'author_avatar': post.residentAvatar,
     'resident_avatar': post.residentAvatar,
     'content': post.content,

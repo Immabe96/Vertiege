@@ -98,4 +98,10 @@ class FeatureFlags {
         'beta_feedback_url',
         fallback: 'https://forms.gle/placeholder-vertiege-beta',
       );
+
+  /// Streak push copy: `calm` (default) or `direct` (legacy urgency).
+  static String get reEngagementPushVariant => RemoteConfigService.getString(
+        're_engagement_push_variant',
+        fallback: 'calm',
+      );
 }

@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router/world_navigation.dart';
+import '../../state/resident_provider.dart';
 import '../../services/nexus_shortcut_prefs.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -18,7 +20,7 @@ import 'bento_cards/spotlight_card.dart';
 import 'bento_cards/trending_card.dart';
 
 /// Collapsible Nexus shortcuts — compact row by default so the feed stays near the top.
-class NexusShortcutsSection extends StatelessWidget {
+class NexusShortcutsSection extends ConsumerWidget {
   final bool expanded;
   final ValueChanged<bool> onExpandedChanged;
 
@@ -29,8 +31,10 @@ class NexusShortcutsSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final hideLeague =
+        ref.watch(residentProvider).resident?.leaderboardOptOut == true;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -83,7 +87,7 @@ class NexusShortcutsSection extends StatelessWidget {
             crossFadeState: expanded
                 ? CrossFadeState.showSecond
                 : CrossFadeState.showFirst,
-            firstChild: const _CompactShortcutsRow(),
+            firstChild: _CompactShortcutsRow(hideLeague: hideLeague),
             secondChild: BentoGrid(
               cards: [
                 const BentoCard(
@@ -109,12 +113,13 @@ class NexusShortcutsSection extends StatelessWidget {
                   size: BentoSize.small,
                   onTap: () => _openShortcut(context, 'challenges', '/challenges'),
                 ),
-                BentoCard(
-                  child: const LeagueCard(),
-                  size: BentoSize.small,
-                  onTap: () =>
-                      _openShortcut(context, 'league', leaguesPath()),
-                ),
+                if (!hideLeague)
+                  BentoCard(
+                    child: const LeagueCard(),
+                    size: BentoSize.small,
+                    onTap: () =>
+                        _openShortcut(context, 'league', leaguesPath()),
+                  ),
                 const BentoCard(
                   child: TrendingCard(),
                   size: BentoSize.medium,
@@ -134,7 +139,9 @@ class NexusShortcutsSection extends StatelessWidget {
 }
 
 class _CompactShortcutsRow extends StatefulWidget {
-  const _CompactShortcutsRow();
+  final bool hideLeague;
+
+  const _CompactShortcutsRow({this.hideLeague = false});
 
   @override
   State<_CompactShortcutsRow> createState() => _CompactShortcutsRowState();
@@ -212,7 +219,8 @@ class _CompactShortcutsRowState extends State<_CompactShortcutsRow> {
     final byId = {for (final s in shortcuts) s.id: s};
     final ordered = [
       for (final id in _order)
-        if (byId.containsKey(id)) byId[id]!,
+        if (byId.containsKey(id) && !(widget.hideLeague && id == 'league'))
+          byId[id]!,
     ];
 
     return SizedBox(

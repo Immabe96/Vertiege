@@ -20,7 +20,9 @@ import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
 import '../utils/gamification_reconcile.dart';
 import '../utils/haptics.dart';
+import '../utils/local_date.dart';
 import '../utils/streak_check_in.dart';
+import '../services/onboarding_funnel_sync.dart';
 import 'achievement_provider.dart';
 import 'world_provider.dart';
 import 'post_provider.dart';
@@ -113,6 +115,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
       _lastJoinedWorldsCount = resident.joinedWorldIds.length;
       state = ResidentState(resident: resident, isLoading: false);
       unawaited(_syncGatePrefsFromProfile(resident));
+      unawaited(OnboardingFunnelSync.pullFromServer(userId));
+      unawaited(ProfileService.syncDeviceTimezone(userId));
       _persist();
       unawaited(_worldRepository.replayOutbox());
       return;
@@ -250,7 +254,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
     if (r == null) return null;
 
     final now = DateTime.now();
-    final today = dateYmd(now);
+    final today = localDateKey(now);
     if (r.lastCheckIn?.substring(0, 10) == today) return null;
 
     final serverResult = await ProfileService.recordDailyCheckIn();

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../router/world_navigation.dart';
+import '../services/world_service.dart';
 import '../state/resident_provider.dart';
 import '../widgets/core/v_feedback.dart';
 import 'analytics_events.dart';
@@ -28,6 +29,9 @@ Future<String> routeAfterAuth(
   );
 
   if (result.errorMessage != null) {
+    unawaited(
+      AnalyticsService.logEvent(AnalyticsEvents.inviteRedeemFailed),
+    );
     final ctx = feedbackContext;
     if (ctx != null && ctx.mounted) {
       VFeedback.showMessage(ctx, result.errorMessage!);
@@ -45,6 +49,14 @@ Future<String> routeAfterAuth(
       ),
     );
     return exploreWorldPath(worldId);
+  }
+
+  if (fallback == '/' || fallback == '/explore') {
+    for (final id in resident.joinedWorldIds) {
+      if (WorldService.isRemoteWorldId(id)) {
+        return exploreWorldPath(id);
+      }
+    }
   }
 
   return fallback;

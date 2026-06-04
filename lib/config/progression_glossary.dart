@@ -12,6 +12,9 @@ enum ProgressionFocus {
   worldPrestige,
   worldLevel,
   ascension,
+  loungeAccess,
+  worldTreasury,
+  worldPolls,
 }
 
 class ProgressionEntry {
@@ -94,6 +97,30 @@ class ProgressionGlossary {
       detail:
           'At max tier with 50,000+ XP you may ascend from the Hall of Ascension: tier '
           'resets to Hustler, XP resets, and you keep prestige stars as endgame flair.',
+    ),
+    ProgressionEntry(
+      focus: ProgressionFocus.loungeAccess,
+      title: 'Lounge',
+      oneLiner: 'A tier-gated voice channel for deeper conversation in a world.',
+      detail:
+          'Lounges unlock when your global tier and world standing meet the realm rules. '
+          'They are optional — join when you want focused discussion, not pressure.',
+    ),
+    ProgressionEntry(
+      focus: ProgressionFocus.worldTreasury,
+      title: 'Treasury',
+      oneLiner: 'Shared world funds for events, grants, and community projects.',
+      detail:
+          'Members with standing can donate coins; council and sovereign roles manage '
+          'payouts. Treasury activity is visible in the audit trail for transparency.',
+    ),
+    ProgressionEntry(
+      focus: ProgressionFocus.worldPolls,
+      title: 'Polls',
+      oneLiner: 'Structured votes on world decisions without spamming the feed.',
+      detail:
+          'Create polls from the world polls hub when your standing allows. Results '
+          'inform governance; they do not replace council votes on binding proposals.',
     ),
   ];
 

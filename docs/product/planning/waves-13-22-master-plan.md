@@ -1,7 +1,7 @@
 # Waves 13–22 — Master plan (124 items)
 
 **Created:** 2026-05-30  
-**Status:** Wave 13 code/docs shipped (2026-05-30); Wave 6 UAT deferred; migration push + CI verify pending.  
+**Status:** Wave 16 code shipped (2026-05-30); Wave 6 UAT deferred; `20260616120000` migration push pending.  
 **Baseline:** Waves 0–12 code largely shipped on `develop`; Wave 6 device UAT and live store receipts remain open.  
 **Cross-refs:** [wave-status.md](wave-status.md), [roadmap.md](../roadmap.md), [quiet-ux-principles.md](../../guides/quiet-ux-principles.md), [navigation-map.md](../../guides/navigation-map.md), [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
 

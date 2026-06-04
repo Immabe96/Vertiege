@@ -28,6 +28,7 @@ import 'services/storage_service.dart';
 import 'services/store_service.dart';
 import 'services/push_service.dart';
 import 'services/push_token_service.dart';
+import 'services/analytics_events.dart';
 import 'services/analytics_service.dart';
 import 'services/crash_reporter.dart';
 import 'config/build_info.dart';
@@ -491,12 +492,34 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     super.dispose();
   }
 
+  Future<void> _tryDailyStreakCheckIn() async {
+    final result = await ref.read(residentProvider.notifier).checkInToday();
+    if (!mounted || result == null) return;
+    final dialogContext = appRootNavigatorKey.currentContext;
+    if (dialogContext == null || !dialogContext.mounted) return;
+    if (result.shieldUsed) {
+      unawaited(
+        AnalyticsService.logEvent(AnalyticsEvents.streakShieldUsed),
+      );
+      VFeedback.showMessage(
+        dialogContext,
+        'Streak shield used — your streak continues.',
+      );
+    } else if (result.bonusXp > 0) {
+      VFeedback.showMessage(
+        dialogContext,
+        'Day ${result.streak} streak · +${result.bonusXp} XP',
+      );
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
         ref.read(residentProvider.notifier).checkStreakRisk();
+        unawaited(_tryDailyStreakCheckIn());
       }
     }
     if (state == AppLifecycleState.paused) {
@@ -515,6 +538,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         unawaited(ref.read(residentProvider.notifier).touchPresence());
         _checkDailyReward();
         _checkWhatsNew();
+        unawaited(_tryDailyStreakCheckIn());
       }
     });
     ref.listen<NotificationState>(

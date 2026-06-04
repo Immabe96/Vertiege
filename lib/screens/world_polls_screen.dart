@@ -8,6 +8,8 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/progression_help_button.dart';
+import '../../config/progression_glossary.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
 
@@ -168,14 +170,17 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     return VHubPage(
       title: 'Polls',
       showBack: true,
-      headerActions: _canCreatePoll
-          ? [
-              FHeaderAction(
-                icon: const Icon(VIcons.plus),
-                onPress: _showCreatePollDialog,
-              ),
-            ]
-          : const [],
+      headerActions: [
+        const ProgressionHelpButton(
+          focus: ProgressionFocus.worldPolls,
+          tooltip: 'How polls work',
+        ),
+        if (_canCreatePoll)
+          FHeaderAction(
+            icon: const Icon(VIcons.plus),
+            onPress: _showCreatePollDialog,
+          ),
+      ],
       body: _buildBody(context),
     );
   }

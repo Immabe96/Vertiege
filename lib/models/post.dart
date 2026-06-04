@@ -126,6 +126,7 @@ class Post {
   final String worldId;
   final String residentId;
   final String residentName;
+  final String? authorDisplayTitle;
   final String residentAvatar;
   final String content;
   final String? imageUri;
@@ -172,6 +173,7 @@ class Post {
     required this.worldId,
     required this.residentId,
     required this.residentName,
+    this.authorDisplayTitle,
     required this.residentAvatar,
     required this.content,
     this.imageUri,
@@ -211,11 +213,21 @@ class Post {
   bool get hasImages => allImageUris.isNotEmpty;
   bool get isEvent => eventTitle != null && eventStartsAt != null;
 
+  /// Feed header: name plus optional profile display title.
+  String get feedAuthorLabel {
+    final title = authorDisplayTitle?.trim();
+    if (title != null && title.isNotEmpty) {
+      return '$residentName · $title';
+    }
+    return residentName;
+  }
+
   Post copyWith({
     String? id,
     String? worldId,
     String? residentId,
     String? residentName,
+    String? authorDisplayTitle,
     String? residentAvatar,
     String? content,
     String? imageUri,
@@ -249,6 +261,7 @@ class Post {
     worldId: worldId ?? this.worldId,
     residentId: residentId ?? this.residentId,
     residentName: residentName ?? this.residentName,
+    authorDisplayTitle: authorDisplayTitle ?? this.authorDisplayTitle,
     residentAvatar: residentAvatar ?? this.residentAvatar,
     content: content ?? this.content,
     imageUri: imageUri ?? this.imageUri,

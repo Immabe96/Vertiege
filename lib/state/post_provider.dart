@@ -269,6 +269,7 @@ class PostNotifier extends Notifier<PostState> {
       worldId: worldId,
       residentId: residentId,
       residentName: residentName,
+      authorDisplayTitle: resident.title,
       residentAvatar: residentAvatar,
       content: content,
       imageUri: imageUri,
@@ -1115,6 +1116,9 @@ class PostNotifier extends Notifier<PostState> {
           json['resident_name'] ??
           json['author_name'] ??
           '',
+      authorDisplayTitle:
+          json['authorDisplayTitle'] ??
+          json['author_display_title'] as String?,
       residentAvatar:
           json['residentAvatar'] ??
           json['resident_avatar'] ??

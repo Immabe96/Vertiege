@@ -70,8 +70,12 @@ class AnalyticsEvents {
   static const signOut = 'sign_out';
   static const searchPerformed = 'search_performed';
 
-  // Funnels (Wave 13)
+  // Funnels (Wave 13–16)
+  static const inviteOpened = 'invite_opened';
+  static const inviteSavedPending = 'invite_saved_pending';
+  static const inviteRedeemFailed = 'invite_redeem_failed';
   static const inviteCompleted = 'invite_completed';
+  static const streakShieldUsed = 'streak_shield_used';
   static const subscriptionVerified = 'subscription_verified';
   static const voiceJoined = 'voice_joined';
 }

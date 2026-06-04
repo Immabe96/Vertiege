@@ -135,7 +135,7 @@ class PostItem extends ConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 LuminaryNameplate(
-                                  name: post.residentName,
+                                  name: post.feedAuthorLabel,
                                   tier: post.tierAtPosting.value,
                                   fontSize: VFontSize.bodyMd,
                                 ),
@@ -419,7 +419,7 @@ class PostItem extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 LuminaryNameplate(
-                  name: post.residentName,
+                  name: post.feedAuthorLabel,
                   tier: post.tierAtPosting.value,
                   fontSize: VFontSize.headlineMd,
                   textAlign: TextAlign.center,

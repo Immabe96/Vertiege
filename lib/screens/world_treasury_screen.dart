@@ -12,7 +12,9 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
-import '../widgets/core/new_user_context_hint.dart';
+import '../../widgets/core/new_user_context_hint.dart';
+import '../../widgets/core/progression_help_button.dart';
+import '../../config/progression_glossary.dart';
 
 class WorldTreasuryScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -215,6 +217,12 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
     return VHubPage(
       title: 'Treasury',
       showBack: true,
+      headerActions: const [
+        ProgressionHelpButton(
+          focus: ProgressionFocus.worldTreasury,
+          tooltip: 'How treasury works',
+        ),
+      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

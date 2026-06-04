@@ -5,6 +5,8 @@ import '../../../state/resident_provider.dart';
 import '../../../services/league_service.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
+import '../../../utils/calm_ranking.dart';
+
 class LeagueCard extends ConsumerWidget {
   const LeagueCard({super.key});
 
@@ -13,6 +15,11 @@ class LeagueCard extends ConsumerWidget {
     final leagueState = ref.watch(leagueProvider);
     final userLeague = leagueState.userLeague;
     final resident = ref.read(residentProvider).resident;
+    final lowPressure = resident?.leaderboardOptOut == true;
+
+    if (lowPressure) {
+      return const SizedBox.shrink();
+    }
 
     if (userLeague == null && resident != null && !leagueState.isLoading) {
       Future.microtask(() => ref.read(leagueProvider.notifier).loadLeague());
@@ -53,8 +60,12 @@ class LeagueCard extends ConsumerWidget {
       );
     }
 
-    final tierColor = LeagueService.getTierColor(userLeague.tier);
+    final tierColor = LeagueService.getTierColor(userLeague!.tier);
     final tierIcon = LeagueService.getTierIcon(userLeague.tier);
+    final calmLabel = CalmRanking.leagueBandLabel(
+      rank: userLeague.rank,
+      cohortSize: leagueState.standings.length,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,17 +103,21 @@ class LeagueCard extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: VSpacing.xs),
-            Text(
-              '#${userLeague.rank}',
-              style: const TextStyle(
-                fontSize: VFontSize.headlineMd,
-                fontWeight: VFontWeight.bold,
-                color: VColors.onSurface,
-              ),
-            ),
           ],
         ),
+        if (calmLabel != null) ...[
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            calmLabel,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: VFontSize.bodySm,
+              color: VColors.onSurface,
+              fontWeight: VFontWeight.semiBold,
+            ),
+          ),
+        ],
         const SizedBox(height: VSpacing.xs),
         Text(
           '${userLeague.weeklyXp} XP this week',

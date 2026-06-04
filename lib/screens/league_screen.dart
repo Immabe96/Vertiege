@@ -12,6 +12,7 @@ import '../../ui/media/v_avatar.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
+import '../../utils/calm_ranking.dart';
 
 class LeagueScreen extends ConsumerStatefulWidget {
   const LeagueScreen({super.key});
@@ -130,6 +131,19 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     );
   }
 
+  String _leagueRankLabel(WidgetRef ref, UserLeagueInfo userLeague) {
+    final lowPressure =
+        ref.read(residentProvider).resident?.leaderboardOptOut == true;
+    if (lowPressure) return 'Rankings hidden';
+    final leagueState = ref.read(leagueProvider);
+    final calm = CalmRanking.leagueBandLabel(
+      rank: userLeague.rank,
+      cohortSize: leagueState.standings.length,
+    );
+    if (calm != null) return calm;
+    return userLeague.rank > 0 ? 'Rank #${userLeague.rank}' : 'Unranked';
+  }
+
   Widget _buildLeagueHeader(LeagueState state, bool isDark) {
     final userLeague = state.userLeague;
     if (userLeague == null) {
@@ -160,7 +174,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                userLeague.rank > 0 ? 'Rank #${userLeague.rank}' : 'Unranked',
+                _leagueRankLabel(ref, userLeague),
                 style: TextStyle(
                   fontSize: VFontSize.bodyLg,
                   fontWeight: VFontWeight.semiBold,

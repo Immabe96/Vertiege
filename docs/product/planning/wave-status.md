@@ -93,6 +93,26 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## Wave 16 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| Gate → first world feed | Done — `routeAfterAuth` lands on first joined world |
+| First Steps persistence | Done — `profiles.onboarding_funnel` + sync service |
+| Streak timezone-aware | Done — `record_daily_check_in(p_local_date)` + `profiles.timezone` |
+| Streak shield UX | Done — daily quests banner + check-in toast |
+| Re-engagement push A/B | Done — `re_engagement_push_variant` RC (`calm` / `direct`) |
+| Invite funnel analytics | Done — opened / saved / failed / completed events |
+| Low-pressure league hide | Done — Nexus bento + compact shortcuts when opt-out |
+| Calm ranking UI | Done — league card + league screen percentile copy |
+| Social proof copy | Done — season snapshot active-residents line |
+| Display title on posts | Done — `author_display_title` + feed label |
+| Progression help sheets | Done — treasury, polls (+ glossary lounge/treasury/polls) |
+
+**Migration:** `20260616120000_onboarding_streak_tz.sql` (push to Supabase pending)
+
+---
+
 ## Waves 13–22 (master plan)
 
 **All 124 research backlog items** are sequenced in **[waves-13-22-master-plan.md](waves-13-22-master-plan.md)** — 10 waves, gates, migrations, and safe drop order (Wave 22).

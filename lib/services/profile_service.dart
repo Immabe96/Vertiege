@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/resident.dart';
+import '../utils/local_date.dart';
 import 'supabase.dart';
 import 'crash_reporter.dart';
 
@@ -51,12 +52,48 @@ class ProfileService {
     await client.from('profiles').update(patch).eq('id', userId);
   }
 
+  static Future<void> syncDeviceTimezone(String userId) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    await client.from('profiles').update({
+      'timezone': deviceTimezoneLabel(),
+    }).eq('id', userId);
+  }
+
+  static Future<void> patchOnboardingFunnel(
+    String userId,
+    Map<String, dynamic> funnel,
+  ) async {
+    if (!isSupabaseConfigured() || funnel.isEmpty) return;
+    final client = getSupabase();
+    await client.from('profiles').update({
+      'onboarding_funnel': funnel,
+    }).eq('id', userId);
+  }
+
+  static Future<Map<String, dynamic>?> getOnboardingFunnel(String userId) async {
+    if (!isSupabaseConfigured()) return null;
+    final client = getSupabase();
+    final row = await client
+        .from('profiles')
+        .select('onboarding_funnel')
+        .eq('id', userId)
+        .maybeSingle();
+    if (row == null) return null;
+    final raw = row['onboarding_funnel'];
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    return null;
+  }
+
   /// Server-side daily check-in (F31). Returns null if already checked in today.
   static Future<({int streak, int bonusXp, bool shieldUsed})?>
   recordDailyCheckIn() async {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
-    final raw = await client.rpc('record_daily_check_in');
+    final raw = await client.rpc(
+      'record_daily_check_in',
+      params: {'p_local_date': localDateKey()},
+    );
     if (raw is! Map) return null;
     final data = Map<String, dynamic>.from(raw);
     if (data['already_checked_in'] == true) return null;

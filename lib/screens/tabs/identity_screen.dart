@@ -43,6 +43,7 @@ import '../../widgets/shared/tier_icon.dart';
 import '../../widgets/identity/joined_worlds_row.dart';
 import '../../config/onboarding_funnel.dart';
 import '../../services/onboarding_funnel_prefs.dart';
+import '../../services/onboarding_funnel_sync.dart';
 import '../../widgets/onboarding/first_steps_card.dart';
 import '../../config/achievements.dart';
 import '../../config/progression_glossary.dart';
@@ -577,7 +578,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               openedWorld: _funnelOpenedWorld,
               openedNexus: _funnelOpenedNexus,
               onDismiss: () async {
-                await OnboardingFunnelPrefs.setDismissed(true);
+                final uid = resident.id;
+                await OnboardingFunnelSync.setDismissed(uid, true);
                 if (mounted) setState(() => _funnelDismissed = true);
               },
             ),

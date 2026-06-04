@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import '../state/resident_provider.dart';
 import '../state/notification_provider.dart';
 import '../state/post_provider.dart';
 import '../services/supabase.dart';
+import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
 import '../services/invite_service.dart';
 import '../services/chat_service.dart';
@@ -576,6 +579,12 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
   }
 
   Future<void> _accept() async {
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.inviteOpened,
+        parameters: {'has_code': widget.code.isNotEmpty},
+      ),
+    );
     final invite = await InviteService.validateInvite(widget.code);
     if (!mounted) return;
     if (invite == null || !invite.isValid) {
@@ -590,6 +599,9 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     if (!mounted) return;
     if (resident == null || !resident.gateCompleted) {
       await InviteService.savePendingInviteCode(widget.code);
+      unawaited(
+        AnalyticsService.logEvent(AnalyticsEvents.inviteSavedPending),
+      );
       if (!mounted) return;
       final hasSession = maybeSupabase()?.auth.currentSession != null;
       context.go(hasSession ? '/onboarding' : '/login');
@@ -603,6 +615,9 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     );
     if (!mounted) return;
     if (!result.succeeded) {
+      unawaited(
+        AnalyticsService.logEvent(AnalyticsEvents.inviteRedeemFailed),
+      );
       setState(() {
         _loading = false;
         _error = result.errorMessage ?? 'Something went wrong';
@@ -610,6 +625,12 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
       return;
     }
     await ref.read(residentProvider.notifier).joinWorld(result.worldId!);
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.inviteCompleted,
+        parameters: {'world_id': result.worldId!},
+      ),
+    );
     if (!mounted) return;
     context.go(exploreWorldPath(result.worldId!));
   }

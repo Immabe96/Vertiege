@@ -22,6 +22,7 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/feed/post_item.dart';
 import '../../widgets/nexus/feed_sort_dropdown.dart';
 import '../../services/onboarding_funnel_prefs.dart';
+import '../../services/onboarding_funnel_sync.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/nexus/nexus_context_strip.dart';
 import '../../widgets/nexus/nexus_feed_header.dart';
@@ -70,7 +71,12 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   }
 
   Future<void> _onNexusOpened() async {
-    await OnboardingFunnelPrefs.markOpenedNexus();
+    final residentId = ref.read(residentProvider).resident?.id;
+    if (residentId != null) {
+      await OnboardingFunnelSync.markOpenedNexus(residentId);
+    } else {
+      await OnboardingFunnelPrefs.markOpenedNexus();
+    }
     if (!mounted) return;
     final welcome = await OnboardingFunnelPrefs.consumeJustFinishedOnboarding();
     if (welcome && mounted) {

@@ -6,6 +6,7 @@ import '../services/storage_service.dart';
 import '../services/notification_service.dart';
 import '../services/push_service.dart';
 import '../services/quiet_hours_service.dart';
+import '../services/re_engagement_push_copy.dart';
 import '../utils/id_generator.dart';
 import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
@@ -249,9 +250,9 @@ class NotificationNotifier extends Notifier<NotificationState> {
     required int hoursLeft,
     required String residentName,
   }) {
-    final scheduleMsg = hoursLeft <= 1
-        ? 'Your streak expires in 1 hour! Open now to keep it.'
-        : 'Your streak expires in $hoursLeft hours! Open now to keep it.';
+    final scheduleMsg = ReEngagementPushCopy.streakReminderBody(
+      hoursLeft: hoursLeft,
+    );
     addNotification(
       type: NotificationType.streakReminder,
       message: scheduleMsg,

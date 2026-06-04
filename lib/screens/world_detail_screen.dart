@@ -32,6 +32,7 @@ import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
 import '../services/permission_service.dart';
 import '../services/onboarding_funnel_prefs.dart';
+import '../services/onboarding_funnel_sync.dart';
 import '../services/world_nav_prefs.dart';
 import '../services/world_service.dart';
 import '../state/event_provider.dart';
@@ -110,7 +111,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _maybeAutoJoin();
-      OnboardingFunnelPrefs.markOpenedWorld();
+      final residentId = ref.read(residentProvider).resident?.id;
+      if (residentId != null) {
+        unawaited(OnboardingFunnelSync.markOpenedWorld(residentId));
+      } else {
+        unawaited(OnboardingFunnelPrefs.markOpenedWorld());
+      }
       ref.read(questProvider.notifier).onWorldVisited();
       unawaited(
         AnalyticsService.logEvent(

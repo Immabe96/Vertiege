@@ -8,6 +8,7 @@ class PostService {
   static Future<String?> createPost({
     required String residentId,
     required String residentName,
+    String? authorDisplayTitle,
     required String worldId,
     required String content,
     String? imageUrl,
@@ -30,6 +31,8 @@ class PostService {
       'resident_name': residentName,
       'author_id': residentId,
       'author_name': residentName,
+      if (authorDisplayTitle != null && authorDisplayTitle.isNotEmpty)
+        'author_display_title': authorDisplayTitle,
       'author_avatar': residentAvatar,
       'content': content,
       'media': imageUrl == null ? <String>[] : <String>[imageUrl],

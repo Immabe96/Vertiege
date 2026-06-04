@@ -7,6 +7,7 @@ import '../../../state/resident_provider.dart';
 import '../../../state/world_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
+import '../../../utils/calm_ranking.dart';
 
 /// Nexus bento tile — Season 1 snapshot (tap handled by parent [BentoCard]).
 class SeasonSnapshotCard extends ConsumerWidget {
@@ -23,6 +24,10 @@ class SeasonSnapshotCard extends ConsumerWidget {
     final joinedCount = resident.joinedWorldIds.length;
     final unclaimed = SeasonService.unclaimedWorlds(worlds).length;
     final growing = SeasonService.growingWorldCount(worlds);
+    final activeResidents = worlds.fold<int>(
+      0,
+      (sum, w) => sum + w.memberCount,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,6 +79,16 @@ class SeasonSnapshotCard extends ConsumerWidget {
           style: const TextStyle(
             fontSize: VFontSize.labelSm,
             color: VColors.primary,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: VSpacing.xs),
+        Text(
+          CalmRanking.activeResidentsLabel(activeResidents),
+          style: const TextStyle(
+            fontSize: VFontSize.labelSm,
+            color: VColors.outline,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
