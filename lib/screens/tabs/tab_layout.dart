@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import '../../router/world_navigation.dart';
 import '../../state/notification_provider.dart';
 import '../../state/tab_shell_overlay_provider.dart';
 import '../../state/resident_provider.dart';
-import '../../state/voice_provider.dart';
+import '../../widgets/core/campfire_mini_bar.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
@@ -110,7 +109,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
               fit: StackFit.expand,
               children: [
                 widget.navigationShell,
-                const _FloatingCampfireBar(),
+                const CampfireMiniBar(),
                 if (fabConfig != null)
                   Positioned(
                     right: VSpacing.lg,
@@ -303,131 +302,6 @@ class _TabNavIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final selected = FBottomNavigationBarData.of(context).selected;
     return Icon(selected ? filled : outlined);
-  }
-}
-
-class _FloatingCampfireBar extends ConsumerWidget {
-  const _FloatingCampfireBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final voice = ref.watch(voiceProvider);
-    if (!voice.isConnected) return const SizedBox.shrink();
-
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Positioned(
-      top: VSpacing.xl,
-      left: VSpacing.lg,
-      right: VSpacing.lg,
-      child: SafeArea(
-        child: Material(
-          color: Colors.transparent,
-          child: GestureDetector(
-            onTap: () {
-              final campfireId = voice.activeCampfireId;
-              final campfireName = voice.activeCampfireName ?? 'Campfire';
-              if (campfireId != null) {
-                context.push(
-                  campfirePath(
-                    channelId: campfireId,
-                    name: campfireName,
-                    worldId: voice.activeWorldId,
-                    worldName: voice.activeWorldName,
-                  ),
-                );
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: VSpacing.md,
-                vertical: VSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(VRadius.pill),
-                border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark
-                      : VColors.outlineVariant,
-                ),
-                boxShadow: VShadow.lg,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: VColors.warning,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Flexible(
-                    child: Text(
-                      voice.activeCampfireName ?? 'Campfire',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: VFontWeight.semiBold,
-                        color: isDark
-                            ? VColors.onSurfaceDark
-                            : VColors.onSurface,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.xs,
-                      vertical: VSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: (isDark
-                              ? VColors.primaryContainerDark
-                              : VColors.primaryContainer)
-                          .withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(VRadius.pill),
-                    ),
-                    child: Text(
-                      '${voice.participants.length}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: VFontWeight.semiBold,
-                        color: isDark
-                            ? VColors.primaryLight
-                            : VColors.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  GestureDetector(
-                    onTap: () =>
-                        ref.read(voiceProvider.notifier).leaveCampfire(),
-                    child: Container(
-                      width: VTouchTarget.iconButton,
-                      height: VTouchTarget.iconButton,
-                      decoration: BoxDecoration(
-                        color: VColors.error.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.call_end,
-                        size: VIconSize.sm,
-                        color: VColors.error,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

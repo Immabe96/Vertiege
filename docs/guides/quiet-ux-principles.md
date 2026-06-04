@@ -26,10 +26,14 @@ Vertiege quality work should **not** add visible chrome by default. Use these ru
 | Global people search | `ResidentSearchService` + local world members |
 | Council review | `ExpansionTile` — title + one line; actions inside |
 
-## Wave 12 Forui batch (in progress)
+## Wave 12 batches
 
-- Create world: `FTextFormField`, `FSwitch`, `VSurfaceCard`, collapsed channels
-- Shop: `FCard` + `FButton` (no Material buy chips)
-- Settings: `VThemeSchemePicker` instead of `SegmentedButton`
+**Forui:** create world (`FTextFormField`, collapsed channels), shop (`FCard` + `FButton`), settings (`VThemeSchemePicker`).
+
+**Deep links & voice & season:**
+
+- Post/notification targets: `PostNotifier.ensurePostVisible` + feed scroll highlight
+- Campfire: `CampfireMiniBar` (connecting / connected / mute / leave) — no extra screens
+- Season: collapsed “How this season works”; low-pressure note only when opted in
 
 See also: [wave-status.md](../product/planning/wave-status.md), [perfection-backlog.md](../product/planning/perfection-backlog.md).

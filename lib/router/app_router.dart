@@ -789,11 +789,15 @@ class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
             .maybeSingle();
         final worldId = row?['world_id'] as String?;
         if (worldId != null && mounted) {
+          await ref.read(postProvider.notifier).ensurePostVisible(widget.postId);
+          if (!mounted) return;
           context.go(exploreWorldPath(worldId, postId: widget.postId));
           return;
         }
       }
       if (post != null && mounted) {
+        await ref.read(postProvider.notifier).ensurePostVisible(widget.postId);
+        if (!mounted) return;
         context.go(exploreWorldPath(post.worldId, postId: widget.postId));
         return;
       }

@@ -790,6 +790,31 @@ class PostNotifier extends Notifier<PostState> {
         );
   }
 
+  /// Loads a single post into the feed for deep links and notification targets.
+  Future<bool> ensurePostVisible(String postId) async {
+    if (state.posts.any((p) => p.id == postId)) return true;
+    if (!isSupabaseConfigured()) return false;
+    try {
+      final row = await getSupabase()
+          .from('posts')
+          .select()
+          .eq('id', postId)
+          .maybeSingle();
+      if (row == null) return false;
+      final post = _postFromJson(row as Map<String, dynamic>);
+      state = state.copyWith(
+        posts: [
+          post,
+          ...state.posts.where((p) => p.id != postId),
+        ],
+      );
+      _persist();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   List<Post> getPostsByWorld(String worldId) {
     return _sortPosts(state.posts.where((p) => p.worldId == worldId));
   }

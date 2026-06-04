@@ -27,7 +27,7 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 | **9** Commerce | **Done (MVP)** | `verify_subscription_purchase`, `purchase_cosmetic_with_coins`, pay-to-win SKUs disabled in shop |
 | **10** Governance | **Partial** | Council queue for treasury, role posts, rank changes; council/sovereign execute immediately |
 | **11** Progression | **Partial** | `scope` on challenges, leaderboard opt-out, profile `display_title`; season cohorts not built |
-| **12** Release | **Partial** | Invite deep links; Forui gaps remain; API 30 smoke not run here |
+| **12** Release | **Partial** | Forui create-world/shop/settings; post deep links; Campfire mini-bar; season guide collapsed |
 
 ---
 

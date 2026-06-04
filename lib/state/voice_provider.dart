@@ -59,7 +59,16 @@ class VoiceNotifier extends Notifier<VoiceState> {
 
   @override
   VoiceState build() {
+    VoiceService.onDisconnected = () {
+      if (state.activeCampfireId == null) return;
+      state = state.copyWith(
+        isConnected: false,
+        isConnecting: false,
+        error: 'Disconnected from Campfire',
+      );
+    };
     ref.onDispose(() {
+      VoiceService.onDisconnected = null;
       _sub?.cancel();
       VoiceService.dispose();
     });

@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/core/v_surface_card.dart';
 import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../models/season.dart';
@@ -31,7 +32,8 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final resident = ref.read(residentProvider).resident;
+    final resident = ref.watch(residentProvider).resident;
+    final lowPressure = resident?.leaderboardOptOut ?? false;
     final myWorlds = resident != null
         ? allWorlds
               .where(
@@ -61,8 +63,20 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                     growingCount: growing,
                   ),
                 ),
+                if (lowPressure)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        VSpacing.md,
+                        0,
+                        VSpacing.md,
+                        VSpacing.sm,
+                      ),
+                      child: _LowPressureNote(),
+                    ),
+                  ),
                 if (season.pillars.isNotEmpty)
-                  SliverToBoxAdapter(child: _SeasonPillars(season: season)),
+                  SliverToBoxAdapter(child: _SeasonGuideExpansion(season: season)),
                 SliverToBoxAdapter(child: _SeasonProgress(season: season)),
                 SliverToBoxAdapter(child: _CountdownBanner(season: season)),
                 if (rankings.isNotEmpty)
@@ -129,10 +143,41 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
   }
 }
 
-class _SeasonPillars extends StatelessWidget {
+class _LowPressureNote extends StatelessWidget {
+  const _LowPressureNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return VSurfaceCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: VSpacing.md,
+        vertical: VSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.self_improvement, size: 18, color: VColors.tertiary),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: Text(
+              'Low-pressure mode is on — rankings are hidden for you.',
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          TextButton(
+            onPressed: () => context.push('/settings'),
+            child: const Text('Settings'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeasonGuideExpansion extends StatelessWidget {
   final Season season;
 
-  const _SeasonPillars({required this.season});
+  const _SeasonGuideExpansion({required this.season});
 
   @override
   Widget build(BuildContext context) {
@@ -144,29 +189,71 @@ class _SeasonPillars extends StatelessWidget {
         VSpacing.md,
         VSpacing.md,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'This season',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: VSpacing.sm),
-          for (final pillar in season.pillars)
-            Padding(
-              padding: const EdgeInsets.only(bottom: VSpacing.xs),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.bolt, size: 16, color: VColors.tertiary),
-                  const SizedBox(width: VSpacing.xs),
-                  Expanded(child: Text(pillar, style: theme.textTheme.bodySmall)),
-                ],
+      child: VSurfaceCard(
+        padding: EdgeInsets.zero,
+        child: Theme(
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+            title: const Text('How this season works'),
+            subtitle: Text(
+              'World growth leaderboard — not a weekly XP grind league.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.outline,
               ),
             ),
-        ],
+            initiallyExpanded: false,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  VSpacing.md,
+                  0,
+                  VSpacing.md,
+                  VSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      season.narrative,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: VSpacing.sm),
+                    Text(
+                      'Score blends activity (×2), member growth (×10), and prestige (×5). '
+                      'Growth is earned in worlds — not bought.',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: VSpacing.sm),
+                    for (final pillar in season.pillars)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: VSpacing.xs),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.bolt,
+                              size: 16,
+                              color: VColors.tertiary,
+                            ),
+                            const SizedBox(width: VSpacing.xs),
+                            Expanded(
+                              child: Text(
+                                pillar,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

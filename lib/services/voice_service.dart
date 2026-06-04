@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'supabase.dart';
 import 'crash_reporter.dart';
@@ -9,6 +10,7 @@ class VoiceService {
   static final List<Participant> _participants = [];
   static bool _disposed = false;
   static bool _isDeafened = false;
+  static VoidCallback? onDisconnected;
 
   static Stream<List<Participant>> get participantsStream {
     if (_disposed || _participantsController == null || _participantsController!.isClosed) {
@@ -37,6 +39,7 @@ class VoiceService {
     await room.connect(token['livekitUrl'] as String, token['token'] as String);
 
     room.addListener(_onRoomUpdate);
+    room.addListener(_onConnectionChange);
     _currentRoom = room;
 
     if (_participantsController == null || _participantsController!.isClosed) {
@@ -77,6 +80,14 @@ class VoiceService {
     }
   }
 
+  static void _onConnectionChange() {
+    final room = _currentRoom;
+    if (room == null) return;
+    if (room.connectionState == ConnectionState.disconnected) {
+      onDisconnected?.call();
+    }
+  }
+
   static void _onRoomUpdate() {
     final room = _currentRoom;
     if (room == null) return;
@@ -90,6 +101,7 @@ class VoiceService {
   }
 
   static Future<void> leaveCampfire() async {
+    _currentRoom?.removeListener(_onConnectionChange);
     await _currentRoom?.disconnect();
     _currentRoom?.removeListener(_onRoomUpdate);
     _currentRoom = null;
@@ -126,6 +138,8 @@ class VoiceService {
 
   static void dispose() {
     _disposed = true;
+    onDisconnected = null;
+    _currentRoom?.removeListener(_onConnectionChange);
     _currentRoom?.removeListener(_onRoomUpdate);
     _currentRoom = null;
     _participants.clear();

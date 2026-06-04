@@ -253,16 +253,27 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (postId != null && postId.isNotEmpty) {
       _highlightPostId = postId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final w = ref.read(worldProvider).worlds[widget.worldId];
-        if (w == null || _tabController == null) return;
-        final duration = context.motionDuration(VAnimation.normal);
-        _tabController!.animateTo(
-          WorldPageIa.feedIndex(w),
-          duration: duration,
-        );
+        unawaited(_preparePostHighlight(postId));
       });
     }
+  }
+
+  Future<void> _preparePostHighlight(String postId) async {
+    final visible =
+        await ref.read(postProvider.notifier).ensurePostVisible(postId);
+    if (!mounted) return;
+    if (!visible) {
+      _onHighlightPostMissing();
+      return;
+    }
+    final w = ref.read(worldProvider).worlds[widget.worldId];
+    if (w == null || _tabController == null) return;
+    setState(() {});
+    final duration = context.motionDuration(VAnimation.normal);
+    _tabController!.animateTo(
+      WorldPageIa.feedIndex(w),
+      duration: duration,
+    );
   }
 
   Future<void> _loadNavPrefs() async {
@@ -448,8 +459,15 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     );
   }
 
-  void _onHighlightPostMissing() {
+  Future<void> _onHighlightPostMissing() async {
+    if (!mounted || _highlightPostId == null) return;
+    final id = _highlightPostId!;
+    final retry = await ref.read(postProvider.notifier).ensurePostVisible(id);
     if (!mounted) return;
+    if (retry) {
+      setState(() {});
+      return;
+    }
     setState(() => _highlightPostId = null);
     VFeedback.showMessage(context, 'That post is no longer available.');
   }

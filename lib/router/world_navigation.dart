@@ -22,6 +22,10 @@ String exploreWorldPath(
 
 String exploreDiscoverPath() => '/explore/discover';
 
+/// Channel thread deep link (loads parent message when [extra] is absent).
+String threadPath(String messageId) =>
+    '/thread/${Uri.encodeComponent(messageId)}';
+
 /// Opens [WorldChannelScreen]. Channel [name] must not be a [kReservedWorldSubRoutes]
 /// segment (see docs/vision/world-channel-routing.md).
 String worldChannelPath(String worldId, WorldChannel channel) {
