@@ -136,6 +136,48 @@ class DevicePermissionService {
     return false;
   }
 
+  /// Rationale sheet before the OS mic prompt (Wave 19 Campfire preflight).
+  static Future<bool> requestMicrophoneWithRationale(BuildContext context) async {
+    final proceed = await showFDialog<bool>(
+      context: context,
+      builder: (ctx, style, animation) => FDialog.raw(
+        builder: (context, dialogStyle) => Padding(
+          padding: const EdgeInsets.all(VSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Join Campfire voice?',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              const Text(
+                'Campfire uses your microphone so others in the channel can hear you. '
+                'You can mute or leave anytime.',
+              ),
+              const SizedBox(height: VSpacing.lg),
+              VButton(
+                label: 'Continue',
+                isFullWidth: true,
+                onPressed: () => Navigator.pop(ctx, true),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Not now'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (proceed != true || !context.mounted) return false;
+    return requestMicrophoneAccess(context);
+  }
+
   /// Campfire / LiveKit voice — same flow on iOS and Android.
   static Future<bool> requestMicrophoneAccess(BuildContext context) async {
     var status = await Permission.microphone.status;

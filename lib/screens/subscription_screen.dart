@@ -63,7 +63,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           purchaseToken: purchase.purchaseToken,
           storePayload: purchase.storePayload,
         );
-        if (error == null) verified++;
+        if (error == null) {
+          verified++;
+        } else if (mounted && restored.length == 1) {
+          setState(() => _purchaseMessage = error);
+        }
       }
       await _loadTier();
       if (!mounted) return;
@@ -128,13 +132,17 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           _purchaseMessage = 'Subscription active. Cosmetic perks unlocked.';
         });
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
+        final msg = e is StateError
+            ? SubscriptionService.userFacingPurchaseError(e.message) ??
+                e.message
+            : 'Purchase failed. Please try again.';
         setState(() {
           _purchasing = false;
-          _purchaseMessage = null;
+          _purchaseMessage = msg;
         });
-        VFeedback.showMessage(context, 'Purchase failed. Please try again.');
+        VFeedback.showMessage(context, msg);
       }
     }
   }
@@ -226,6 +234,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ),
                   ),
                 ],
+
+                const _SubscriptionBenefitsTable(),
+                const SizedBox(height: VSpacing.lg),
 
                 // ── Tier Cards ───────────────────────────────────
                 ...SubscriptionTier.values.map((tier) {
@@ -345,6 +356,79 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     );
 
     return features;
+  }
+}
+
+class _SubscriptionBenefitsTable extends StatelessWidget {
+  const _SubscriptionBenefitsTable();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final rows = <({String feature, String resident, String patrician, String elite})>[
+      (feature: 'Cosmetic slots', resident: 'Base', patrician: '+2', elite: '+6'),
+      (feature: 'Saved drafts', resident: '3', patrician: '10', elite: '25'),
+      (feature: 'Custom frame', resident: '—', patrician: 'Yes', elite: 'Yes'),
+      (feature: 'Gold name', resident: '—', patrician: '—', elite: 'Yes'),
+      (feature: 'Review visibility', resident: '—', patrician: 'Yes', elite: 'Yes'),
+      (feature: 'Analytics', resident: '—', patrician: '—', elite: 'Yes'),
+    ];
+
+    Widget cell(String text, {bool header = false}) => Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.xs,
+            vertical: VSpacing.xs,
+          ),
+          child: Text(
+            text,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: header ? VFontWeight.bold : VFontWeight.regular,
+              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            ),
+          ),
+        );
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: Table(
+        columnWidths: const {
+          0: FlexColumnWidth(2),
+          1: FlexColumnWidth(),
+          2: FlexColumnWidth(),
+          3: FlexColumnWidth(),
+        },
+        children: [
+          TableRow(
+            decoration: BoxDecoration(
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
+            ),
+            children: [
+              cell('Benefit', header: true),
+              cell('Resident', header: true),
+              cell('Patrician', header: true),
+              cell('Elite', header: true),
+            ],
+          ),
+          for (final row in rows)
+            TableRow(
+              children: [
+                cell(row.feature),
+                cell(row.resident),
+                cell(row.patrician),
+                cell(row.elite),
+              ],
+            ),
+        ],
+      ),
+    );
   }
 }
 

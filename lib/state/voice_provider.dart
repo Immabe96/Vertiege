@@ -7,6 +7,7 @@ class VoiceState {
   final List<Participant> participants;
   final bool isConnected;
   final bool isConnecting;
+  final bool isReconnecting;
   final bool isMuted;
   final bool isDeafened;
   final String? error;
@@ -19,6 +20,7 @@ class VoiceState {
     this.participants = const [],
     this.isConnected = false,
     this.isConnecting = false,
+    this.isReconnecting = false,
     this.isMuted = false,
     this.isDeafened = false,
     this.error,
@@ -32,6 +34,7 @@ class VoiceState {
     List<Participant>? participants,
     bool? isConnected,
     bool? isConnecting,
+    bool? isReconnecting,
     bool? isMuted,
     bool? isDeafened,
     String? error,
@@ -44,6 +47,7 @@ class VoiceState {
     participants: participants ?? this.participants,
     isConnected: isConnected ?? this.isConnected,
     isConnecting: isConnecting ?? this.isConnecting,
+    isReconnecting: isReconnecting ?? this.isReconnecting,
     isMuted: isMuted ?? this.isMuted,
     isDeafened: isDeafened ?? this.isDeafened,
     error: clearError ? null : error ?? this.error,
@@ -64,11 +68,29 @@ class VoiceNotifier extends Notifier<VoiceState> {
       state = state.copyWith(
         isConnected: false,
         isConnecting: false,
+        isReconnecting: false,
         error: 'Disconnected from Campfire',
+      );
+    };
+    VoiceService.onReconnecting = () {
+      if (state.activeCampfireId == null) return;
+      state = state.copyWith(
+        isReconnecting: true,
+        clearError: true,
+      );
+    };
+    VoiceService.onReconnected = () {
+      if (state.activeCampfireId == null) return;
+      state = state.copyWith(
+        isConnected: true,
+        isReconnecting: false,
+        clearError: true,
       );
     };
     ref.onDispose(() {
       VoiceService.onDisconnected = null;
+      VoiceService.onReconnecting = null;
+      VoiceService.onReconnected = null;
       _sub?.cancel();
       VoiceService.dispose();
     });

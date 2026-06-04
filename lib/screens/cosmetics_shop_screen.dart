@@ -14,6 +14,7 @@ import '../widgets/worlds/listing_card.dart';
 import '../widgets/core/shimmer.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/profile/cosmetic_avatar.dart';
 
 enum _ShopCategory { passes, seeds, boosts, cosmetics }
 
@@ -365,6 +366,7 @@ class _ShopCard extends ConsumerWidget {
 
     return GestureDetector(
       onTap: canAfford ? () => _buyItem(context, ref, item) : null,
+      onLongPress: () => _previewItem(context, item),
       child: FCard.raw(
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.md),
@@ -470,6 +472,47 @@ class _ShopCard extends ConsumerWidget {
             ),
           ),
         ),
+    );
+  }
+
+  void _previewItem(BuildContext context, _ShopItem item) {
+    final resident = ref.read(residentProvider).resident;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(VSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              item.name,
+              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                fontWeight: VFontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: VSpacing.md),
+            CosmeticAvatar(
+              imageUrl: resident?.avatarUrl,
+              size: 96,
+              borderColor: item.color,
+            ),
+            const SizedBox(height: VSpacing.sm),
+            Text(
+              item.description,
+              textAlign: TextAlign.center,
+              style: Theme.of(ctx).textTheme.bodySmall,
+            ),
+            const SizedBox(height: VSpacing.md),
+            Text(
+              '${item.price} coins · ${item.subtype}',
+              style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                color: VColors.tertiary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

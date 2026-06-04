@@ -11,7 +11,8 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 `20260607120000_governance_audit_season_challenge_seed` (immediate governance audit + season challenge seed),  
 `20260616120000_onboarding_streak_tz`,  
 `20260617120000_job_application_notifications`,  
-`20260618120000_progression_fairness` (cohort cron, velocity cap, coin ledger, last_active).
+`20260618120000_progression_fairness` (cohort cron, velocity cap, coin ledger, last_active),  
+`20260619120000_wave19_voice_governance_commerce` (voice presence, governance notify, coin packs).
 
 ---
 
@@ -158,6 +159,34 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 **Migration:** `20260618120000_progression_fairness.sql` — pushed to Supabase
 
 **Tests:** 220 green locally (Wave 18 cohort + coin ledger tests added).
+
+---
+
+## Wave 19 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| LiveKit reconnect backoff + banner | Done |
+| Mic permission rationale sheet | Done |
+| Voice channel occupancy | Done — heartbeat RPC + channel list badge |
+| Deafen vs mute clarity | Done — Campfire control copy |
+| Background audio (iOS/Android) | Partial — `audio`/`voip` background modes + FGS permissions; LiveKit speaker |
+| Live receipt verify (edge) | Done — Apple/Google live path in `store_verify_live.ts` (secrets required) |
+| `receipt_edge_verify` staging note | Done — ops doc |
+| Coin pack IAP RPC | Done — `grant_coin_pack_purchase` + `CoinPackService` |
+| Cosmetic try-before-buy | Done — long-press preview sheet |
+| Subscription benefits table | Done |
+| Restore “already owned” copy | Done — `userFacingPurchaseError` |
+| Audit log filter chips | Done — treasury / rank / job / poll |
+| Proposal notifications | Done — approve/reject notifies requester |
+| Treasury proposed vs executed | Done — audit action split + member proposals restored |
+| Poll moderation RPC | Done — `moderate_world_poll` |
+| Rank name in governance queue | Done — `world_ranks` join |
+| Export audit CSV | Done — share sheet |
+
+**Migration:** `20260619120000_wave19_voice_governance_commerce.sql` — pushed to Supabase
+
+**Tests:** 222 green locally.
 
 ---
 

@@ -6,6 +6,7 @@ import '../../models/channel.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
+import '../../services/voice_presence_service.dart';
 import '../../services/world_channel_access_service.dart';
 import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
@@ -27,6 +28,7 @@ class WorldChannelList extends ConsumerStatefulWidget {
 class _WorldChannelListState extends ConsumerState<WorldChannelList> {
   Map<String, bool> _wardExpanded = {};
   String? _lastActivityKey;
+  Map<String, int> _voiceOccupancy = {};
 
   static const String _prefsKey = 'ward_collapsed_state';
 
@@ -47,6 +49,16 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
   }
 
   Set<String> _collapsedState = {};
+  String? _lastVoiceKey;
+
+  Future<void> _loadVoiceOccupancy(List<String> channelIds) async {
+    final next = <String, int>{};
+    for (final id in channelIds) {
+      next[id] = await VoicePresenceService.occupancy(id);
+    }
+    if (!mounted) return;
+    setState(() => _voiceOccupancy = next);
+  }
 
   Future<void> _toggleWard(String wardId) async {
     final newState = !_isExpanded(wardId);
@@ -83,6 +95,15 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
       Future.microtask(
         () => ref.read(chatProvider.notifier).loadChannelActivity(activityIds),
       );
+    }
+    final voiceIds = channels
+        .where((c) => c.channelType == ChannelType.voice)
+        .map((c) => c.id)
+        .toList();
+    final voiceKey = voiceIds.join('|');
+    if (voiceKey.isNotEmpty && voiceKey != _lastVoiceKey) {
+      _lastVoiceKey = voiceKey;
+      Future.microtask(() => _loadVoiceOccupancy(voiceIds));
     }
     final theme = Theme.of(context);
     final world = ref.watch(worldProvider).worlds[widget.worldId];
@@ -152,6 +173,9 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
           );
     return _ChannelTile(
       channel: channel,
+      voiceOccupancy: channel.channelType == ChannelType.voice
+          ? _voiceOccupancy[channel.id]
+          : null,
       unreadCount: decision.canOpen && channel.channelType != ChannelType.voice
           ? ref.read(chatProvider.notifier).unreadCount(
                 channel.id,
@@ -228,12 +252,14 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
 class _ChannelTile extends StatelessWidget {
   final WorldChannel channel;
   final int unreadCount;
+  final int? voiceOccupancy;
   final VoidCallback? onTap;
   final String? lockedReason;
 
   const _ChannelTile({
     required this.channel,
     required this.unreadCount,
+    this.voiceOccupancy,
     required this.onTap,
     this.lockedReason,
   });
@@ -291,7 +317,15 @@ class _ChannelTile extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (unreadCount > 0)
+                        if (voiceOccupancy != null && voiceOccupancy! > 0)
+                          Text(
+                            '$voiceOccupancy in voice',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: VColors.warning,
+                              fontWeight: VFontWeight.semiBold,
+                            ),
+                          )
+                        else if (unreadCount > 0)
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 5,

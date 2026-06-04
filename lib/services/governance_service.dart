@@ -52,8 +52,35 @@ class GovernanceService {
     return map;
   }
 
-  static Future<({List<GovernanceProposal> proposals, Map<String, String> names})>
-      listPendingEnriched(String worldId) async {
+  static Future<Map<String, String>> _rankNames(
+    String worldId,
+    Iterable<String> rankIds,
+  ) async {
+    final unique = rankIds.where((id) => id.isNotEmpty).toSet().toList();
+    if (!isSupabaseConfigured() || unique.isEmpty) return {};
+    final data = await getSupabase()
+        .from('world_ranks')
+        .select('id, name')
+        .eq('world_id', worldId)
+        .inFilter('id', unique);
+    final map = <String, String>{};
+    for (final row in data as List) {
+      final m = row as Map<String, dynamic>;
+      final id = m['id'] as String?;
+      if (id == null) continue;
+      map[id] = (m['name'] as String?)?.trim().isNotEmpty == true
+          ? (m['name'] as String).trim()
+          : 'Rank';
+    }
+    return map;
+  }
+
+  static Future<
+      ({
+        List<GovernanceProposal> proposals,
+        Map<String, String> names,
+        Map<String, String> rankNames,
+      })> listPendingEnriched(String worldId) async {
     final proposals = await listPending(worldId);
     final ids = <String>{
       for (final p in proposals) p.requestedBy,
@@ -61,8 +88,29 @@ class GovernanceService {
         if (p.proposalType == 'rank_change')
           p.payload['resident_id'] as String? ?? '',
     };
+    final rankIds = <String>{
+      for (final p in proposals)
+        if (p.proposalType == 'rank_change')
+          p.payload['rank_id'] as String? ?? '',
+    };
     final names = await _profileNames(ids);
-    return (proposals: proposals, names: names);
+    final rankNames = await _rankNames(worldId, rankIds);
+    return (proposals: proposals, names: names, rankNames: rankNames);
+  }
+
+  static Future<String?> moderatePoll({
+    required String pollId,
+    required String action,
+  }) async {
+    if (!isSupabaseConfigured()) return 'Supabase unavailable';
+    final result = await getSupabase().rpc(
+      'moderate_world_poll',
+      params: {'p_poll_id': pollId, 'p_action': action},
+    );
+    if (result is! Map) return 'Unexpected response';
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] == true) return null;
+    return map['error'] as String? ?? 'Moderation failed';
   }
 
   static Future<List<GovernanceProposal>> listPending(String worldId) async {

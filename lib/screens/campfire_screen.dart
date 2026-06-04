@@ -13,6 +13,7 @@ import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../services/device_permission_service.dart';
 import '../services/feature_flags.dart';
+import '../widgets/voice/campfire_reconnect_banner.dart';
 
 class CampfireScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -43,7 +44,8 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null || !mounted) return;
 
-    final micOk = await DevicePermissionService.requestMicrophoneAccess(context);
+    final micOk =
+        await DevicePermissionService.requestMicrophoneWithRationale(context);
     if (!micOk || !mounted) {
       ref.read(voiceProvider.notifier).leaveCampfire();
       return;
@@ -106,6 +108,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
             : Colors.transparent,
         child: Column(
         children: [
+          const CampfireReconnectBanner(),
           if (!immersive) const SizedBox(height: VSpacing.xl),
           Expanded(
             child: resident == null
@@ -367,32 +370,50 @@ class _CampfireControls extends ConsumerWidget {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _ControlButton(
-            icon: voiceState.isMuted ? Icons.mic_off : Icons.mic,
-            label: voiceState.isMuted ? 'Unmute' : 'Mute',
-            active: !voiceState.isMuted,
-            onTap: () => notifier.toggleMute(),
+          Text(
+            'Mute stops your mic. Deafen mutes you and silences others.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
           ),
-          _ControlButton(
-            icon: voiceState.isDeafened
-                ? Icons.hearing_disabled
-                : Icons.hearing,
-            label: voiceState.isDeafened ? 'Undeafen' : 'Deafen',
-            active: !voiceState.isDeafened,
-            onTap: () => notifier.toggleDeafen(),
-          ),
-          _ControlButton(
-            icon: Icons.call_end,
-            label: 'Leave',
-            active: false,
-            color: VColors.error,
-            onTap: () {
-              notifier.leaveCampfire();
-              Navigator.of(context).pop();
-            },
+          const SizedBox(height: VSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _ControlButton(
+                icon: voiceState.isMuted ? Icons.mic_off : Icons.mic,
+                label: voiceState.isMuted ? 'Unmute' : 'Mute',
+                subtitle: 'Your microphone',
+                active: !voiceState.isMuted,
+                onTap: () => notifier.toggleMute(),
+              ),
+              _ControlButton(
+                icon: voiceState.isDeafened
+                    ? Icons.hearing_disabled
+                    : Icons.hearing,
+                label: voiceState.isDeafened ? 'Undeafen' : 'Deafen',
+                subtitle: 'Mic + incoming audio',
+                active: !voiceState.isDeafened,
+                onTap: () => notifier.toggleDeafen(),
+              ),
+              _ControlButton(
+                icon: Icons.call_end,
+                label: 'Leave',
+                subtitle: 'End session',
+                active: false,
+                color: VColors.error,
+                onTap: () {
+                  notifier.leaveCampfire();
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -403,6 +424,7 @@ class _CampfireControls extends ConsumerWidget {
 class _ControlButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String? subtitle;
   final bool active;
   final Color? color;
   final VoidCallback onTap;
@@ -410,6 +432,7 @@ class _ControlButton extends StatelessWidget {
   const _ControlButton({
     required this.icon,
     required this.label,
+    this.subtitle,
     required this.active,
     this.color,
     required this.onTap,
@@ -438,8 +461,17 @@ class _ControlButton extends StatelessWidget {
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: c,
+              fontWeight: VFontWeight.semiBold,
             ),
           ),
+          if (subtitle != null)
+            Text(
+              subtitle!,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontSize: 10,
+                color: c.withValues(alpha: 0.75),
+              ),
+            ),
         ],
       ),
     );

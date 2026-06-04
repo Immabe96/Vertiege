@@ -110,10 +110,14 @@ class SubscriptionService {
       if (response.status != 200) {
         final err = response.data;
         if (err is Map) {
-          return err['error'] as String? ??
-              'Receipt verification failed (${response.status})';
+          return userFacingPurchaseError(
+            err['error'] as String? ??
+                'Receipt verification failed (${response.status})',
+          );
         }
-        return 'Receipt verification failed (${response.status})';
+        return userFacingPurchaseError(
+          'Receipt verification failed (${response.status})',
+        );
       }
       if (response.data is! Map) return 'Unexpected response';
       map = Map<String, dynamic>.from(response.data as Map);
@@ -143,7 +147,33 @@ class SubscriptionService {
       );
       return null;
     }
-    return map['error'] as String? ?? 'Verification failed';
+    return userFacingPurchaseError(
+      map['error'] as String? ?? 'Verification failed',
+    );
+  }
+
+  /// Maps server / store errors to calm copy (Wave 19 restore flow).
+  static String? userFacingPurchaseError(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    final lower = raw.toLowerCase();
+    if (lower.contains('already redeemed')) {
+      return 'This purchase is already linked to a Vertiege account. '
+          'Sign in with the account that bought it, or contact support.';
+    }
+    if (lower.contains('not authenticated')) {
+      return 'Sign in to verify your purchase.';
+    }
+    if (lower.contains('unknown subscription') ||
+        lower.contains('unknown product')) {
+      return 'This product is not recognized. Update the app and try again.';
+    }
+    if (lower.contains('rate_limit')) {
+      return 'Too many verification attempts. Wait a few minutes and try again.';
+    }
+    if (lower.contains('live receipt verify not configured')) {
+      return 'Receipt verification is not available yet on this environment.';
+    }
+    return raw;
   }
 
   static SubscriptionTier _parseTier(String? value) {

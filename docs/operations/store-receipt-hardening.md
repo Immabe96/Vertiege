@@ -29,6 +29,7 @@ curl -sS "$SUPABASE_URL/functions/v1/verify-subscription-purchase" \
 1. Implement **live** path in the edge function (Apple App Store Server API + Google Play `purchases.subscriptionsv2.get`).
 2. Set secrets listed in the function README (`APPLE_*`, `GOOGLE_PLAY_*`).
 3. Set `STORE_RECEIPT_VERIFY_MODE=live` and enable client flag `receipt_edge_verify` (Remote Config) or `--dart-define=RECEIPT_EDGE_VERIFY=true`.
+   - **Staging only:** set Firebase Remote Config `receipt_edge_verify` = `true` on the staging project; keep production `false` until TestFlight / internal track sign-off (Wave 19).
 4. On store API success, call `verify_subscription_purchase` (dedupe on `purchase_token`).
 5. **Sandbox** — TestFlight / Play internal testing before prod keys.
 

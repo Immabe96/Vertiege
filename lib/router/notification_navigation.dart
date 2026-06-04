@@ -47,6 +47,12 @@ String? routeForNotification(AppNotification notification) {
         return worldJobsPath(worldId);
       }
       return '/explore';
+    case NotificationType.governanceProposalApproved:
+    case NotificationType.governanceProposalRejected:
+      if (worldId != null) {
+        return '/explore/${Uri.encodeComponent(worldId)}/governance';
+      }
+      return '/notifications';
   }
 }
 

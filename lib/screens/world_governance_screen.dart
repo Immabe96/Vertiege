@@ -32,6 +32,7 @@ class WorldGovernanceScreen extends ConsumerStatefulWidget {
 class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
   List<GovernanceProposal> _proposals = [];
   Map<String, String> _names = {};
+  Map<String, String> _rankNames = {};
   bool _loading = true;
   String? _loadError;
 
@@ -53,6 +54,7 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       setState(() {
         _proposals = enriched.proposals;
         _names = enriched.names;
+        _rankNames = enriched.rankNames;
         _loading = false;
       });
     } catch (e) {
@@ -99,7 +101,10 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
         return title.isEmpty ? 'From $from' : '$title · $from';
       case 'rank_change':
         final target = _name(p.payload['resident_id'] as String?);
-        return '$target · $from';
+        final rankId = p.payload['rank_id'] as String?;
+        final rankLabel = rankId != null ? (_rankNames[rankId] ?? 'rank') : 'rank';
+        final verb = p.payload['action'] == 'remove' ? 'Remove' : 'Assign';
+        return '$verb $rankLabel · $target · $from';
       default:
         return from;
     }

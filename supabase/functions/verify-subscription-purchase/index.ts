@@ -4,6 +4,7 @@
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { verifyWithStoreApis } from './store_verify_live.ts'
 
 type VerifyBody = {
   product_id?: string
@@ -188,16 +189,20 @@ serve(async (req: Request) => {
         503,
       )
     }
-    return json(
-      {
-        success: false,
-        error: 'Live Apple/Google verification is not implemented yet',
-        hint:
-          'Implement App Store Server API and Play purchases.subscriptionsv2.get, then call verify_subscription_purchase on success.',
-        env_documentation: requiredEnvDocs(),
-      },
-      501,
-    )
+    const liveResult = await verifyWithStoreApis({
+      product_id: body.product_id!.trim(),
+      purchase_token: body.purchase_token!.trim(),
+      platform: body.platform ?? 'unknown',
+      store_payload: body.store_payload ?? null,
+    })
+
+    if (!liveResult.ok) {
+      return json({ success: false, error: liveResult.error, mode: 'live' }, 400)
+    }
+
+    const rpcResponse = await verifyViaRpc(authHeader, body)
+    const rpcJson = await rpcResponse.json()
+    return json({ ...rpcJson, mode: 'live' }, rpcResponse.status)
   }
 
   return verifyViaRpc(authHeader, body)

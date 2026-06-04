@@ -41,6 +41,17 @@ class StoreService {
     sovereignEliteSubscriptionId,
   };
 
+  /// Consumable coin packs (Wave 19).
+  static const coinPackStarterId = 'coin_pack_starter';
+  static const coinPackValueId = 'coin_pack_value';
+  static const coinPackEliteId = 'coin_pack_elite';
+
+  static const coinPackProductIds = {
+    coinPackStarterId,
+    coinPackValueId,
+    coinPackEliteId,
+  };
+
   /// Product IDs for each wealth tier (2-5). Tier 1 is free.
   static const wealthTierProducts = {
     2: '${wealthTierPrefix}2',

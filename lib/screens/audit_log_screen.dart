@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../services/moderation_service.dart';
 import '../theme/v_colors.dart';
@@ -23,11 +24,14 @@ class AuditLogScreen extends ConsumerStatefulWidget {
   ConsumerState<AuditLogScreen> createState() => _AuditLogScreenState();
 }
 
+enum _AuditFilter { all, treasury, rank, job, poll }
+
 class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
   List<Map<String, dynamic>> _entries = [];
   Map<String, String> _actorNames = {};
   bool _loading = true;
   String? _error;
+  _AuditFilter _filter = _AuditFilter.all;
 
   @override
   void initState() {
@@ -78,6 +82,9 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'editChannel' => 'Edited a channel',
     'governance_proposal_approved' => 'Council approved a request',
     'governance_proposal_rejected' => 'Council rejected a request',
+    'governance_treasury_proposed' => 'Treasury withdrawal proposed',
+    'governance_treasury_executed' => 'Treasury withdrawal executed',
+    'poll_moderated' => 'Council moderated a poll',
     'governance_job_executed' => 'Published a role post',
     'governance_rank_change_executed' => 'Changed a member rank',
     'governance_treasury_withdrawal' => 'Withdrew from treasury',
@@ -121,10 +128,52 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'governance_proposal_rejected' ||
     'governance_job_executed' ||
     'governance_rank_change_executed' ||
-    'governance_treasury_withdrawal' =>
+    'governance_treasury_withdrawal' ||
+    'governance_treasury_proposed' ||
+    'governance_treasury_executed' =>
       Icons.gavel,
+    'poll_moderated' => Icons.poll,
     _ => Icons.history,
   };
+
+  bool _matchesFilter(Map<String, dynamic> entry) {
+    if (_filter == _AuditFilter.all) return true;
+    final action = entry['action'] as String? ?? '';
+    final details = entry['details'] as Map<String, dynamic>?;
+    final type = details?['type'] as String?;
+    return switch (_filter) {
+      _AuditFilter.treasury =>
+        action.contains('treasury') || type == 'treasury_withdrawal',
+      _AuditFilter.rank =>
+        action.contains('rank') || type == 'rank_change',
+      _AuditFilter.job =>
+        action.contains('job') || type == 'job_publish',
+      _AuditFilter.poll => action == 'poll_moderated',
+      _AuditFilter.all => true,
+    };
+  }
+
+  List<Map<String, dynamic>> get _filteredEntries =>
+      _entries.where(_matchesFilter).toList();
+
+  Future<void> _exportCsv() async {
+    final rows = _filteredEntries;
+    if (rows.isEmpty) return;
+    final buffer = StringBuffer('timestamp,action,actor,detail\n');
+    for (final entry in rows) {
+      final createdAt = DateTime.tryParse(entry['created_at']?.toString() ?? '');
+      final action = entry['action'] as String? ?? '';
+      final actor = _actorLabel(entry['actor_id'] as String?);
+      final detail = _governanceDetail(entry['details'] as Map<String, dynamic>?) ?? '';
+      buffer.writeln(
+        '"${createdAt?.toIso8601String() ?? ''}","$action","$actor","$detail"',
+      );
+    }
+    await Share.share(
+      buffer.toString(),
+      subject: '${widget.worldName} audit export',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +181,14 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     return VHubPage(
       title: 'Realm Audit',
       showBack: true,
+      headerActions: [
+        if (_filteredEntries.isNotEmpty)
+          IconButton(
+            tooltip: 'Export CSV',
+            icon: const Icon(Icons.ios_share),
+            onPressed: _exportCsv,
+          ),
+      ],
       body: _loading
           ? const ScreenLoading.list()
           : _error != null
@@ -150,9 +207,33 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
               },
               child: ListView.builder(
                 padding: const EdgeInsets.all(VSpacing.md),
-                itemCount: _entries.length,
+                itemCount: _filteredEntries.length + 1,
                 itemBuilder: (context, index) {
-                  final entry = _entries[index];
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: VSpacing.md),
+                      child: Wrap(
+                        spacing: VSpacing.xs,
+                        runSpacing: VSpacing.xs,
+                        children: _AuditFilter.values.map((f) {
+                          final selected = _filter == f;
+                          return FilterChip(
+                            label: Text(switch (f) {
+                              _AuditFilter.all => 'All',
+                              _AuditFilter.treasury => 'Treasury',
+                              _AuditFilter.rank => 'Rank',
+                              _AuditFilter.job => 'Jobs',
+                              _AuditFilter.poll => 'Polls',
+                            }),
+                            selected: selected,
+                            onSelected: (_) =>
+                                setState(() => _filter = f),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  }
+                  final entry = _filteredEntries[index - 1];
                   final action = entry['action'] as String? ?? '';
                   final details = entry['details'] as Map<String, dynamic>?;
                   final createdAt = DateTime.tryParse(
@@ -163,7 +244,9 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
 
                   return Padding(
                     padding: EdgeInsets.only(
-                      bottom: index < _entries.length - 1 ? VSpacing.sm : 0,
+                      bottom: index < _filteredEntries.length
+                          ? VSpacing.sm
+                          : 0,
                     ),
                     child: _Card(
                       padding: const EdgeInsets.all(VSpacing.md),
