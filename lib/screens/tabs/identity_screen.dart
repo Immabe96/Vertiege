@@ -568,10 +568,19 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
           ],
 
           _SectionHeader(
-            title: 'Honours & rep',
+            title: 'Honours',
             theme: theme,
-            trailing: const ProgressionHelpButton(
-              focus: ProgressionFocus.repAndStanding,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () => context.push('/achievements'),
+                  child: const Text('Hub'),
+                ),
+                const ProgressionHelpButton(
+                  focus: ProgressionFocus.repAndStanding,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -587,7 +596,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     value: '$verifiedAchievementCount',
                     label: 'Verified',
                     accent: VColors.tertiary,
-                    onTap: () => context.push('/achievements'),
                   ),
                 ),
                 const SizedBox(width: VSpacing.sm),
@@ -661,9 +669,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   ),
           ),
           const SizedBox(height: VSpacing.lg),
-
-          _SectionHeader(title: 'Honours', theme: theme),
-          const SizedBox(height: VSpacing.sm),
 
           AchievementQueueSummary(
             userAchievements: achievements.userAchievements,

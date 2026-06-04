@@ -52,7 +52,7 @@ class NexusShortcutsSection extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Achievements & progress',
+                      'Progress shortcuts',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: VFontWeight.semiBold,
                         color: context.vOnSurface,

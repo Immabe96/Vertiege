@@ -29,6 +29,15 @@ class FeatureFlags {
   static bool get challenges =>
       RemoteConfigService.getBool('challenges_enabled', fallback: false);
 
+  /// When true, subscriptions verify via the verify-subscription-purchase edge function.
+  static bool get receiptEdgeVerify => RemoteConfigService.getBool(
+        'receipt_edge_verify',
+        fallback: const bool.fromEnvironment(
+          'RECEIPT_EDGE_VERIFY',
+          defaultValue: false,
+        ),
+      );
+
   // ── UI knobs ──
 
   static bool get foruiStrictMode =>

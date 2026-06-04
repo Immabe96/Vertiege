@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart' show TargetPlatform;
 
+import '../services/feature_flags.dart';
 import '../services/supabase.dart';
 import '../theme/v_colors.dart';
 
@@ -88,18 +89,46 @@ class SubscriptionService {
   }) async {
     final client = maybeSupabase();
     if (client == null) return 'Sign in to verify purchase.';
-    final result = await client.rpc(
-      'verify_subscription_purchase',
-      params: {
-        'p_product_id': productId,
-        'p_purchase_token': purchaseToken,
-        'p_platform': platform ?? purchasePlatformKey(),
-        if (storePayload != null && storePayload.isNotEmpty)
-          'p_store_payload': storePayload,
-      },
-    );
-    if (result is! Map) return 'Unexpected response';
-    final map = Map<String, dynamic>.from(result);
+
+    final platformKey = platform ?? purchasePlatformKey();
+    final Map<String, dynamic> map;
+
+    if (FeatureFlags.receiptEdgeVerify) {
+      final response = await client.functions.invoke(
+        'verify-subscription-purchase',
+        body: {
+          'product_id': productId,
+          'purchase_token': purchaseToken,
+          'platform': platformKey,
+          if (storePayload != null && storePayload.isNotEmpty)
+            'store_payload': storePayload,
+        },
+      );
+      if (response.status != 200) {
+        final err = response.data;
+        if (err is Map) {
+          return err['error'] as String? ??
+              'Receipt verification failed (${response.status})';
+        }
+        return 'Receipt verification failed (${response.status})';
+      }
+      if (response.data is! Map) return 'Unexpected response';
+      map = Map<String, dynamic>.from(response.data as Map);
+    } else {
+      final result = await client.rpc(
+        'verify_subscription_purchase',
+        params: {
+          'p_product_id': productId,
+          'p_purchase_token': purchaseToken,
+          'p_platform': platformKey,
+          if (storePayload != null && storePayload.isNotEmpty)
+            'p_store_payload': storePayload,
+        },
+      );
+      if (result is! Map) return 'Unexpected response';
+      map = Map<String, dynamic>.from(result);
+    }
+
     if (map['success'] == true) {
       _cachedTier = null;
       _cachedUserId = null;

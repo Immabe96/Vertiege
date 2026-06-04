@@ -2,17 +2,31 @@
 
 Current behavior: the app calls `verify_subscription_purchase` with platform, purchase token, and optional receipt digest. The RPC dedupes tokens and grants tier — it does **not** call Apple App Store Server API or Google Play Developer API.
 
+## Edge function (scaffold)
+
+Deploy stub (RPC delegate, documents env vars):
+
+```bash
+supabase functions deploy verify-subscription-purchase
+supabase secrets set STORE_RECEIPT_VERIFY_MODE=stub
+```
+
+Details: [supabase/functions/verify-subscription-purchase/README.md](../../supabase/functions/verify-subscription-purchase/README.md).
+
+Health: `GET /functions/v1/verify-subscription-purchase` returns `mode` and `env_documentation`.
+
 ## Before production subscriptions
 
-1. **Apple** — App Store Server API (or legacy verifyReceipt) in a Supabase Edge Function; store `APPLE_ISSUER_ID`, key ID, and private key as secrets.
-2. **Google** — Play Developer API `purchases.subscriptionsv2.get`; service account JSON as secret.
-3. **RPC** — On success from store API, then insert `subscription_purchases` and update `profiles.subscription_tier` (keep dedupe on `purchase_token`).
-4. **Restore** — Client already re-verifies each restored SKU via RPC; edge function should accept restore tokens the same as purchase.
-5. **Sandbox** — TestFlight / Play internal testing against staging project before prod keys.
+1. Implement **live** path in the edge function (Apple App Store Server API + Google Play `purchases.subscriptionsv2.get`).
+2. Set secrets listed in the function README (`APPLE_*`, `GOOGLE_PLAY_*`).
+3. Set `STORE_RECEIPT_VERIFY_MODE=live` and enable client flag `receipt_edge_verify` (Remote Config) or `--dart-define=RECEIPT_EDGE_VERIFY=true`.
+4. On store API success, call `verify_subscription_purchase` (dedupe on `purchase_token`).
+5. **Sandbox** — TestFlight / Play internal testing before prod keys.
 
 ## Client (already shipped)
 
-- `SubscriptionService.verifyPurchase` sends `p_platform` and `p_store_payload`.
+- Default: direct RPC via `SubscriptionService.verifyPurchase`.
+- Optional: edge function when `FeatureFlags.receiptEdgeVerify` is true.
 - Restore purchases loops `StoreService.restorePurchasesAndWait()` then verifies each subscription.
 
 ## Dashboard (manual)

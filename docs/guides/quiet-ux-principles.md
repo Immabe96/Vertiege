@@ -12,7 +12,7 @@ Vertiege quality work should **not** add visible chrome by default. Use these ru
 
 ## Don’t
 
-- Duplicate the same link on Nexus, Identity, and More.
+- Duplicate the same link on Nexus, Identity, and More (see [navigation-map.md](navigation-map.md)).
 - Show lock copy **and** a yellow banner **and** a toast for the same gate.
 - Add onboarding tooltips on every screen; teach once in Gate or empty states.
 - Surface raw IDs, Postgrest codes, or JSON in council or error UI.

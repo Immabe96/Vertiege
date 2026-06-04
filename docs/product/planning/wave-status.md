@@ -36,7 +36,7 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ## Follow-ups (product / infra)
 
-1. **Store receipt validation** — RPC records platform + SHA-256 receipt digest and enforces token shape; Apple/Google API verify still TODO for production hardening.
+1. **Store receipt validation** — Edge function scaffold `verify-subscription-purchase` (stub → RPC); live Apple/Google verify TODO. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
 2. **Poll composer** — post feed still blocks inline polls (by design).
 3. **Wave 6** — run sign-off checklist on device / API 30 emulator.
 4. **Wave 12** — `develop` pushed; confirm CI green, then store build. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).

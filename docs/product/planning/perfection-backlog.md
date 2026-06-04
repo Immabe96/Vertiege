@@ -31,8 +31,8 @@ Living tracker for the six-wave “near perfection” pass. Source audits: [2026
 | — | League bento `onTap` | Done | `leaguesPath()` |
 | — | Tab-aware sheets (reactions, report, notifications) | Done | `showTabAwareModalBottomSheet` |
 | P2-2 | Dead `achievement_grid.dart` | Done | Removed |
-| P1-1 | Identity duplicate achievement links | Open | Low — product tidy |
-| P1-5 | Nexus / Identity / More overlap | Open | Product map |
+| P1-1 | Identity duplicate achievement links | Done | Single `/achievements` via Honours header + trophy wall |
+| P1-5 | Nexus / Identity / More overlap | Done | [navigation-map.md](../../guides/navigation-map.md); Nexus “Progress shortcuts” |
 
 ---
 
