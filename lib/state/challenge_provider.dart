@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/challenge.dart';
 import '../services/challenge_service.dart';
 import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
@@ -8,6 +9,7 @@ class ChallengeData {
   final String title;
   final String description;
   final String type;
+  final String scope;
   final int targetValue;
   final int xpReward;
   final String? cosmeticReward;
@@ -18,6 +20,7 @@ class ChallengeData {
     required this.title,
     required this.description,
     required this.type,
+    this.scope = 'world',
     required this.targetValue,
     required this.xpReward,
     this.cosmeticReward,
@@ -30,6 +33,7 @@ class ChallengeData {
       title: map['title'] as String? ?? '',
       description: map['description'] as String? ?? '',
       type: map['type'] as String? ?? '',
+      scope: map['scope'] as String? ?? 'world',
       targetValue: (map['target_value'] as int?) ?? 0,
       xpReward: (map['xp_reward'] as int?) ?? 0,
       cosmeticReward: map['cosmetic_reward'] as String?,
@@ -60,6 +64,7 @@ class ChallengeProgressData {
 
 class ChallengeState {
   final List<ChallengeData> activeChallenges;
+  final List<ChallengeData> seasonChallenges;
   final Map<String, ChallengeProgressData> userProgress;
   final bool isLoading;
   final String? loadError;
@@ -67,6 +72,7 @@ class ChallengeState {
 
   const ChallengeState({
     this.activeChallenges = const [],
+    this.seasonChallenges = const [],
     this.userProgress = const {},
     this.isLoading = false,
     this.loadError,
@@ -75,6 +81,7 @@ class ChallengeState {
 
   ChallengeState copyWith({
     List<ChallengeData>? activeChallenges,
+    List<ChallengeData>? seasonChallenges,
     Map<String, ChallengeProgressData>? userProgress,
     bool? isLoading,
     String? loadError,
@@ -83,6 +90,7 @@ class ChallengeState {
   }) {
     return ChallengeState(
       activeChallenges: activeChallenges ?? this.activeChallenges,
+      seasonChallenges: seasonChallenges ?? this.seasonChallenges,
       userProgress: userProgress ?? this.userProgress,
       isLoading: isLoading ?? this.isLoading,
       loadError: clearLoadError ? null : (loadError ?? this.loadError),
@@ -100,10 +108,17 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
   Future<void> loadChallengesForWorld(String worldId) async {
     state = state.copyWith(isLoading: true, clearLoadError: true);
     try {
-      final challenges = await ChallengeService.getChallenges(
+      final worldChallenges = await ChallengeService.getChallenges(
         worldId,
         activeOnly: true,
+        scope: 'world',
       );
+      final seasonChallenges = await ChallengeService.getChallenges(
+        worldId,
+        activeOnly: true,
+        scope: 'season',
+      );
+      final challenges = [...worldChallenges, ...seasonChallenges];
       final residentId = ref.read(residentProvider).resident?.id;
 
       Map<String, ChallengeProgressData> progress = {};
@@ -117,18 +132,24 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
         }
       }
 
-      final challengeData = challenges
-          .map((c) => ChallengeData.fromMap({
-            'id': c.id,
-            'title': c.title,
-            'description': c.description,
-            'type': c.challengeType,
-            'target_value': c.targetValue,
-            'xp_reward': c.rewardXp,
-            'sort_order': 0,
-          }))
-          .toList()
+      List<ChallengeData> mapChallenges(List<WorldChallenge> list) => list
+          .map(
+            (c) => ChallengeData.fromMap({
+              'id': c.id,
+              'title': c.title,
+              'description': c.description,
+              'type': c.challengeType,
+              'scope': c.scope,
+              'target_value': c.targetValue,
+              'xp_reward': c.rewardXp,
+              'sort_order': 0,
+            }),
+          )
+          .toList();
+
+      final challengeData = mapChallenges(worldChallenges)
         ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      final seasonData = mapChallenges(seasonChallenges);
 
       final completedIds = progress.entries
           .where((e) => e.value.completed)
@@ -137,6 +158,7 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
 
       state = state.copyWith(
         activeChallenges: challengeData,
+        seasonChallenges: seasonData,
         userProgress: progress,
         isLoading: false,
         clearLoadError: true,
@@ -157,7 +179,11 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
     final residentId = ref.read(residentProvider).resident?.id;
     if (residentId == null) return;
 
-    for (final challenge in state.activeChallenges) {
+    final allChallenges = [
+      ...state.activeChallenges,
+      ...state.seasonChallenges,
+    ];
+    for (final challenge in allChallenges) {
       if (challenge.type != eventType) {
         continue;
       }

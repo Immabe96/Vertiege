@@ -12,6 +12,8 @@ import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../models/season_cohort.dart';
+import '../../services/season_cohort_service.dart';
 
 class ChallengesScreen extends ConsumerStatefulWidget {
   const ChallengesScreen({super.key});
@@ -23,6 +25,7 @@ class ChallengesScreen extends ConsumerStatefulWidget {
 class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
   String? _worldId;
   String? _worldName;
+  SeasonCohortSummary? _cohort;
   bool _initializing = true;
 
   @override
@@ -55,9 +58,11 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
     });
 
     if (joinedWorldId != null) {
+      final cohort = await SeasonCohortService.ensureMembership(joinedWorldId);
       await ref
           .read(challengeProvider.notifier)
           .loadChallengesForWorld(joinedWorldId);
+      if (mounted) setState(() => _cohort = cohort);
     }
   }
 
@@ -66,7 +71,9 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       await _loadInitialChallenges();
       return;
     }
+    final cohort = await SeasonCohortService.ensureMembership(_worldId!);
     await ref.read(challengeProvider.notifier).loadChallengesForWorld(_worldId!);
+    if (mounted) setState(() => _cohort = cohort);
   }
 
   @override
@@ -93,36 +100,123 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
           : challengeState.isLoading
           ? const ScreenLoading.list()
           : challengeState.loadError != null &&
-                challengeState.activeChallenges.isEmpty
+                challengeState.activeChallenges.isEmpty &&
+                challengeState.seasonChallenges.isEmpty
               ? AppErrorState(
                   message: challengeState.loadError!,
                   onRetry: _refresh,
                 )
-              : challengeState.activeChallenges.isEmpty
+              : challengeState.activeChallenges.isEmpty &&
+                    challengeState.seasonChallenges.isEmpty
               ? const AppEmptyState(
-                  title: 'No active world challenges',
+                  title: 'No active challenges',
                   description:
-                      'Season 1: The Big Bang — world-scoped challenges appear as your realm grows.',
+                      'World and season cohort challenges appear as your realm grows.',
                   icon: Icons.emoji_events_outlined,
                 )
-              : ListView.builder(
+              : ListView(
                   padding: const EdgeInsets.all(VSpacing.md),
-                  itemCount: challengeState.activeChallenges.length,
-                  itemBuilder: (context, index) {
-                    final challenge = challengeState.activeChallenges[index];
-                    final progress =
-                        challengeState.userProgress[challenge.id];
-                    final isCompleted =
-                        challengeState.completedChallengeIds.contains(
-                          challenge.id,
+                  children: [
+                    if (_cohort != null) _CohortBanner(cohort: _cohort!),
+                    if (challengeState.activeChallenges.isNotEmpty) ...[
+                      const _SectionLabel(title: 'World'),
+                      ...challengeState.activeChallenges.map((challenge) {
+                        final progress =
+                            challengeState.userProgress[challenge.id];
+                        final isCompleted = challengeState.completedChallengeIds
+                            .contains(challenge.id);
+                        return _ChallengeCard(
+                          challenge: challenge,
+                          progress: progress,
+                          isCompleted: isCompleted,
                         );
-                    return _ChallengeCard(
-                      challenge: challenge,
-                      progress: progress,
-                      isCompleted: isCompleted,
-                    );
-                  },
+                      }),
+                    ],
+                    if (challengeState.seasonChallenges.isNotEmpty) ...[
+                      const SizedBox(height: VSpacing.md),
+                      const _SectionLabel(title: 'Season cohort'),
+                      ...challengeState.seasonChallenges.map((challenge) {
+                        final progress =
+                            challengeState.userProgress[challenge.id];
+                        final isCompleted = challengeState.completedChallengeIds
+                            .contains(challenge.id);
+                        return _ChallengeCard(
+                          challenge: challenge,
+                          progress: progress,
+                          isCompleted: isCompleted,
+                        );
+                      }),
+                    ],
+                  ],
                 ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String title;
+
+  const _SectionLabel({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          fontWeight: VFontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _CohortBanner extends StatelessWidget {
+  final SeasonCohortSummary cohort;
+
+  const _CohortBanner({required this.cohort});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: VSpacing.md),
+      padding: const EdgeInsets.all(VSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        border: Border.all(
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.groups_outlined, color: VColors.tertiary),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  cohort.displayName,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                  ),
+                ),
+                Text(
+                  '${cohort.memberCount} member${cohort.memberCount == 1 ? '' : 's'} this season',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -5,6 +5,7 @@ class ChallengeService {
   static Future<List<WorldChallenge>> getChallenges(
     String worldId, {
     bool activeOnly = false,
+    String? scope,
     int limit = 50,
   }) async {
     if (!isSupabaseConfigured()) return [];
@@ -13,6 +14,10 @@ class ChallengeService {
         .from('world_challenges')
         .select()
         .eq('world_id', worldId);
+
+    if (scope != null && scope.isNotEmpty) {
+      query = query.eq('scope', scope);
+    }
 
     if (activeOnly) {
       query = query.eq('is_active', true);

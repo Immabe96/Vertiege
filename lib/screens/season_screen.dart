@@ -5,6 +5,8 @@ import '../widgets/core/v_surface_card.dart';
 import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../models/season.dart';
+import '../models/season_cohort.dart';
+import '../services/season_cohort_service.dart';
 import '../services/season_service.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
@@ -22,6 +24,27 @@ class SeasonScreen extends ConsumerStatefulWidget {
 }
 
 class _SeasonScreenState extends ConsumerState<SeasonScreen> {
+  SeasonCohortSummary? _cohort;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCohort());
+  }
+
+  Future<void> _loadCohort() async {
+    final resident = ref.read(residentProvider).resident;
+    final worldId = resident?.joinedWorldIds.firstOrNull;
+    if (worldId == null) return;
+    final cohort = await SeasonCohortService.getSummary(worldId);
+    if (cohort == null) {
+      final ensured = await SeasonCohortService.ensureMembership(worldId);
+      if (mounted) setState(() => _cohort = ensured);
+      return;
+    }
+    if (mounted) setState(() => _cohort = cohort);
+  }
+
   @override
   Widget build(BuildContext context) {
     final worldState = ref.watch(worldProvider);
@@ -73,6 +96,18 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                         VSpacing.sm,
                       ),
                       child: _LowPressureNote(),
+                    ),
+                  ),
+                if (_cohort != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        VSpacing.md,
+                        0,
+                        VSpacing.md,
+                        VSpacing.sm,
+                      ),
+                      child: _SeasonCohortCard(cohort: _cohort!),
                     ),
                   ),
                 if (season.pillars.isNotEmpty)
@@ -138,6 +173,49 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
           ),
           child: const Pulse(borderRadius: 0),
         ),
+      ),
+    );
+  }
+}
+
+class _SeasonCohortCard extends StatelessWidget {
+  final SeasonCohortSummary cohort;
+
+  const _SeasonCohortCard({required this.cohort});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return VSurfaceCard(
+      padding: const EdgeInsets.all(VSpacing.md),
+      child: Row(
+        children: [
+          const Icon(Icons.groups_outlined, color: VColors.tertiary),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your cohort',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: VColors.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  cohort.displayName,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                  ),
+                ),
+                Text(
+                  '${cohort.memberCount} members competing in season challenges',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

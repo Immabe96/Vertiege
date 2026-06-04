@@ -1,9 +1,17 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../models/poll.dart';
 import 'supabase.dart';
 
 class PollService {
+  static Future<bool> canCreatePoll(String worldId) async {
+    if (!isSupabaseConfigured()) return false;
+    final client = getSupabase();
+    final result = await client.rpc(
+      'can_create_world_poll',
+      params: {'p_world_id': worldId},
+    );
+    return result == true;
+  }
+
   static Future<List<WorldPoll>> getPolls(
     String worldId, {
     bool activeOnly = false,
@@ -44,29 +52,32 @@ class PollService {
       throw StateError('Authentication required to create polls.');
     }
 
-    try {
-      final result = await client
-          .from('world_polls')
-          .insert({
-            'world_id': worldId,
-            'question': question,
-            'options': options,
-            if (channelId != null) 'channel_id': channelId,
-            if (expiresAt != null) 'expires_at': expiresAt,
-            'created_by': userId,
-          })
-          .select()
-          .single();
+    final result = await client.rpc(
+      'create_world_poll',
+      params: {
+        'p_world_id': worldId,
+        'p_question': question,
+        'p_options': options,
+        if (channelId != null) 'p_channel_id': channelId,
+        if (expiresAt != null) 'p_expires_at': expiresAt,
+      },
+    );
 
-      return WorldPoll.fromSupabase(result);
-    } on PostgrestException catch (e) {
-      if (e.code == '42501' || e.message.contains('policy')) {
-        throw StateError(
-          'Polls require Veteran standing or council in this world.',
-        );
-      }
-      rethrow;
+    if (result is! Map) {
+      throw StateError('Unexpected response creating poll.');
     }
+    final map = Map<String, dynamic>.from(result);
+    if (map['success'] != true) {
+      throw StateError(
+        map['error'] as String? ??
+            'Polls require Veteran standing or council in this world.',
+      );
+    }
+    final poll = map['poll'];
+    if (poll is! Map) {
+      throw StateError('Poll was not returned from the server.');
+    }
+    return WorldPoll.fromSupabase(Map<String, dynamic>.from(poll));
   }
 
   static Future<bool> voteOnPoll(String pollId, int optionIndex) async {

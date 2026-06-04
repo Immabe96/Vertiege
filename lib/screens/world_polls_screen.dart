@@ -30,11 +30,18 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
   bool _loading = true;
   String? _loadError;
   bool _showActiveOnly = true;
+  bool _canCreatePoll = false;
 
   @override
   void initState() {
     super.initState();
     _loadPolls();
+    _loadCanCreate();
+  }
+
+  Future<void> _loadCanCreate() async {
+    final allowed = await PollService.canCreatePoll(widget.worldId);
+    if (mounted) setState(() => _canCreatePoll = allowed);
   }
 
   Future<void> _loadPolls() async {
@@ -127,14 +134,26 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
                 final validOptions = options.where((o) => o.trim().isNotEmpty).toList();
                 if (validOptions.length < 2) return;
 
-                await PollService.createPoll(
-                  worldId: widget.worldId,
-                  question: questionController.text.trim(),
-                  options: validOptions,
-                );
-                if (context.mounted) {
-                  Navigator.of(ctx).pop();
-                  _loadPolls();
+                try {
+                  await PollService.createPoll(
+                    worldId: widget.worldId,
+                    question: questionController.text.trim(),
+                    options: validOptions,
+                  );
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                  if (context.mounted) _loadPolls();
+                } catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e is StateError
+                              ? e.message
+                              : 'Could not create poll.',
+                        ),
+                      ),
+                    );
+                  }
                 }
               },
             ),
@@ -149,7 +168,7 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     return VHubPage(
       title: 'Polls',
       showBack: true,
-      headerActions: widget.isSovereignOrCouncil
+      headerActions: _canCreatePoll
           ? [
               FHeaderAction(
                 icon: const Icon(VIcons.plus),
@@ -175,7 +194,7 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     if (_polls.isEmpty) {
       return AppEmptyState(
         title: 'No polls yet',
-        description: widget.isSovereignOrCouncil
+        description: _canCreatePoll
             ? 'Ask the world a question—create the first poll.'
             : 'No active polls right now. Check back when council posts one.',
         icon: Icons.how_to_vote_outlined,
