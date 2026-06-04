@@ -164,6 +164,15 @@ class _FeaturedRow extends StatelessWidget {
                           color: VColors.warning,
                         ),
                       ),
+                      if (e.story != null && e.story!.trim().isNotEmpty)
+                        Text(
+                          e.story!.trim(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                     ],
                   ),
                 ),

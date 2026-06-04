@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../router/world_navigation.dart';
 import '../forui/v_hub_page.dart';
 import '../models/resident.dart';
@@ -21,6 +22,7 @@ import '../widgets/profile/profile_achievement_showcase.dart';
 import '../services/profile_achievements_service.dart';
 import '../widgets/shared/profession_icon.dart';
 import '../widgets/shared/tier_icon.dart';
+import '../utils/profile_share.dart';
 
 class ResidentProfileScreen extends ConsumerStatefulWidget {
   final String residentId;
@@ -100,6 +102,26 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     return VHubPage(
       title: _profile?.name ?? 'Resident',
       showBack: true,
+      headerActions: _profile == null
+          ? null
+          : [
+              IconButton(
+                tooltip: 'Share profile',
+                icon: const Icon(Icons.share_outlined),
+                onPressed: () {
+                  final p = _profile!;
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text: ProfileShare.shareMessage(
+                        name: p.name,
+                        residentId: p.id,
+                        achievementId: widget.highlightAchievementId,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
       body: _loading
           ? const ScreenLoading.profile()
           : _error != null || _profile == null

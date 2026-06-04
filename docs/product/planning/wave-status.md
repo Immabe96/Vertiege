@@ -12,7 +12,8 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 `20260616120000_onboarding_streak_tz`,  
 `20260617120000_job_application_notifications`,  
 `20260618120000_progression_fairness` (cohort cron, velocity cap, coin ledger, last_active),  
-`20260619120000_wave19_voice_governance_commerce` (voice presence, governance notify, coin packs).
+`20260619120000_wave19_voice_governance_commerce` (voice presence, governance notify, coin packs),  
+`20260620120000_wave20_identity_achievements` (featured ids, stories, verifier metrics).
 
 ---
 
@@ -187,6 +188,29 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 **Migration:** `20260619120000_wave19_voice_governance_commerce.sql` — pushed to Supabase
 
 **Tests:** 222 green locally.
+
+---
+
+## Wave 20 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| Public profile share URL | Done — `vertiege://residents/:id` + share actions |
+| Featured achievements editor | Done — pick 3 verified; `featured_achievement_ids` as TEXT[] |
+| Proof upload compression | Done — `flutter_image_compress` before storage |
+| Verifier SLA dashboard | Done — `get_verifier_queue_metrics` + review banner |
+| Badge PNG CI gate | Done — `validate_assets.ps1` checks core set |
+| Trophy case bottom sheet | Done — tap opens sheet on Identity |
+| Allies vs following copy | Done — Connections screen headers |
+| Verifier compact mode | Done — denser achievement review cards |
+| Lounge & Campfire entry | Done — single manage row + picker sheet |
+| Achievement stories | Done — optional `achievement_story` on submit |
+| World charter templates | Done — create-world FilterChips |
+| Season narrative on Nexus | Done — `SeasonNexusBanner` from `global_seasons` |
+
+**Migration:** `20260620120000_wave20_identity_achievements.sql` — pushed to Supabase
+
+**Tests:** 226 green locally.
 
 ---
 

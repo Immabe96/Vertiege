@@ -134,6 +134,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final inviteRedirect = redirectInviteHostDeepLink(uri, location);
       if (inviteRedirect != null) return inviteRedirect;
 
+      final residentsRedirect = redirectResidentsHostDeepLink(uri, location);
+      if (residentsRedirect != null) return residentsRedirect;
+
       // Never interrupt deep-link auth callbacks or splash
       if (location == '/auth/callback' || location == '/splash') return null;
 

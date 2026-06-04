@@ -21,6 +21,17 @@ String? redirectVerifierHostDeepLink(Uri uri, String location) {
   return '/verifier$location';
 }
 
+/// Android intent: `vertiege://residents/UUID` → `/residents/UUID`.
+String? redirectResidentsHostDeepLink(Uri uri, String location) {
+  if (uri.host != 'residents' || location.startsWith('/residents')) {
+    return null;
+  }
+  final id = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+  if (id.isEmpty) return null;
+  final query = uri.hasQuery ? '?${uri.query}' : '';
+  return '/residents/${Uri.encodeComponent(id)}$query';
+}
+
 /// Android intent: `vertiege://invite/ABC123` → `/invite/ABC123`.
 String? redirectInviteHostDeepLink(Uri uri, String location) {
   if (uri.host != 'invite' || location.startsWith('/invite')) return null;

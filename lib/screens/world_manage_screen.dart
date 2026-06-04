@@ -161,33 +161,25 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
               title: 'Social',
               children: [
                 QuietGateTile.section(
-                  icon: Icons.weekend_outlined,
-                  label: 'Lounge',
-                  gate: loungeGate,
-                  onOpen: lounge != null && loungeGate == null
-                      ? () => context.push(
-                            worldChannelDestinationPath(
-                              worldId,
-                              lounge!,
-                              worldName: world.name,
-                            ),
-                          )
-                      : null,
-                ),
-                QuietGateTile.section(
-                  icon: Icons.local_fire_department,
-                  label: 'Campfire',
-                  gate: campfireGate ??
-                      (features.audioRooms
-                          ? null
-                          : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
-                  onOpen: campfire != null && campfireGate == null
-                      ? () => context.push(
-                            worldChannelDestinationPath(
-                              worldId,
-                              campfire!,
-                              worldName: world.name,
-                            ),
+                  icon: Icons.forum_outlined,
+                  label: 'Lounge & Campfire',
+                  gate: (lounge == null && campfire == null)
+                      ? 'No social channels in this world yet.'
+                      : (loungeGate != null && campfireGate != null)
+                          ? loungeGate ?? campfireGate
+                          : null,
+                  onOpen: (lounge != null || campfire != null)
+                      ? () => _openLoungeCampfirePicker(
+                            context,
+                            worldId: worldId,
+                            worldName: world.name,
+                            lounge: lounge,
+                            campfire: campfire,
+                            loungeGate: loungeGate,
+                            campfireGate: campfireGate ??
+                                (features.audioRooms
+                                    ? null
+                                    : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
                           )
                       : null,
                 ),
@@ -283,4 +275,69 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
       ),
     );
   }
+}
+
+void _openLoungeCampfirePicker(
+  BuildContext context, {
+  required String worldId,
+  required String worldName,
+  required WorldChannel? lounge,
+  required WorldChannel? campfire,
+  required String? loungeGate,
+  required String? campfireGate,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (lounge != null)
+            ListTile(
+              leading: const Icon(Icons.weekend_outlined),
+              title: const Text('Lounge (text)'),
+              subtitle: loungeGate != null
+                  ? Text(loungeGate)
+                  : const Text('Async chat channel'),
+              enabled: loungeGate == null,
+              onTap: loungeGate == null
+                  ? () {
+                      Navigator.pop(ctx);
+                      context.push(
+                        worldChannelDestinationPath(
+                          worldId,
+                          lounge,
+                          worldName: worldName,
+                        ),
+                      );
+                    }
+                  : null,
+            ),
+          if (campfire != null)
+            ListTile(
+              leading: const Icon(Icons.local_fire_department),
+              title: const Text('Campfire (voice)'),
+              subtitle: Text(
+                campfireGate ?? 'Live voice room for this world',
+              ),
+              enabled: campfireGate == null,
+              onTap: campfireGate == null
+                  ? () {
+                      Navigator.pop(ctx);
+                      context.push(
+                        worldChannelDestinationPath(
+                          worldId,
+                          campfire,
+                          worldName: worldName,
+                        ),
+                      );
+                    }
+                  : null,
+            ),
+          const SizedBox(height: VSpacing.md),
+        ],
+      ),
+    ),
+  );
 }

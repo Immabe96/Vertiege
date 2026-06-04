@@ -1,6 +1,7 @@
 import '../config/achievements.dart' as ach_config;
 import '../models/achievement.dart';
 import '../utils/achievement_proof_utils.dart';
+import 'profile_service.dart';
 import 'supabase.dart';
 
 /// Verified achievements visible on a resident's public profile.
@@ -8,11 +9,13 @@ class PublicAchievementEntry {
   final Achievement achievement;
   final UserAchievement userAchievement;
   final int? featuredOrder;
+  final String? story;
 
   const PublicAchievementEntry({
     required this.achievement,
     required this.userAchievement,
     this.featuredOrder,
+    this.story,
   });
 }
 
@@ -23,10 +26,12 @@ class ProfileAchievementsService {
     String residentId,
   ) async {
     if (!isSupabaseConfigured() || residentId.isEmpty) return [];
+    final featuredIds =
+        await ProfileService.getFeaturedAchievementIds(residentId);
     final rows = await getSupabase()
         .from('user_achievements')
         .select(
-          'achievement_id, status, proof_uri, proof_uris, verified_at, is_profile_visible, featured_order',
+          'achievement_id, status, proof_uri, proof_uris, verified_at, is_profile_visible, featured_order, achievement_story',
         )
         .eq('user_id', residentId)
         .eq('status', 'verified')
@@ -38,6 +43,8 @@ class ProfileAchievementsService {
       final id = map['achievement_id'] as String? ?? '';
       final def = ach_config.achievementForId(id);
       if (def == null) continue;
+      final featuredIdx = featuredIds.indexOf(id);
+      final legacyOrder = (map['featured_order'] as num?)?.toInt();
       entries.add(
         PublicAchievementEntry(
           achievement: def,
@@ -50,7 +57,10 @@ class ProfileAchievementsService {
             ),
             verifiedAt: _parseMillis(map['verified_at']),
           ),
-          featuredOrder: (map['featured_order'] as num?)?.toInt(),
+          featuredOrder: featuredIdx >= 0
+              ? featuredIdx + 1
+              : legacyOrder,
+          story: map['achievement_story'] as String?,
         ),
       );
     }

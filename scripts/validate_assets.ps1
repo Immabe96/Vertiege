@@ -53,6 +53,22 @@ if (Test-Path $manifestPath) {
     }
 }
 
+# ── Core achievement badge PNGs (Wave 20 CI gate) ─────────────────────────
+$coreIdsPath = Join-Path $root "lib\config\core_achievement_badge_ids.dart"
+$coreBadgeMissing = [System.Collections.Generic.List[string]]::new()
+if (Test-Path $coreIdsPath) {
+    $coreContent = Get-Content $coreIdsPath -Raw
+    [regex]::Matches($coreContent, "'([a-z0-9-]+)'") | ForEach-Object {
+        $id = $_.Groups[1].Value
+        if ($id.Length -lt 3) { return }
+        $rel = "assets/generated/achievements/$id.png"
+        $full = Join-Path $root ($rel -replace "/", "\")
+        if (-not (Test-Path $full)) {
+            $coreBadgeMissing.Add($rel.Replace("\", "/"))
+        }
+    }
+}
+
 # ── Unreferenced files (warn; optional strict) ───────────────────────────
 $allowUnreferenced = @(
     "bg-onboarding.jpg",
@@ -88,6 +104,15 @@ if ($manifestMissing.Count -gt 0) {
     $failed = $true
     Write-Host "MISSING — manifest approved finalPath ($($manifestMissing.Count)):" -ForegroundColor Red
     $manifestMissing | ForEach-Object { Write-Host "  $_" }
+}
+
+if ($coreBadgeMissing.Count -gt 0) {
+    $failed = $true
+    Write-Host "MISSING — core achievement badges ($($coreBadgeMissing.Count)):" -ForegroundColor Red
+    $coreBadgeMissing | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" }
+    if ($coreBadgeMissing.Count -gt 20) {
+        Write-Host "  ... and $($coreBadgeMissing.Count - 20) more"
+    }
 }
 
 if (-not $failed) {

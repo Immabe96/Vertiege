@@ -25,6 +25,7 @@ import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/onboarding_funnel_sync.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/nexus/nexus_context_strip.dart';
+import '../../widgets/nexus/season_nexus_banner.dart';
 import '../../widgets/nexus/nexus_feed_header.dart';
 import '../../widgets/nexus/nexus_shortcuts_section.dart';
 import '../tabs/tab_layout.dart';
@@ -257,6 +258,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
                       child: NexusContextStrip(
                         showJoinWorldsCta: joinedRemoteWorlds == 0,
                       ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: SeasonNexusBanner(),
                     ),
                     SliverToBoxAdapter(
                       child: NexusShortcutsSection(

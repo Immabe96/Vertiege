@@ -29,12 +29,20 @@ class _VerificationReviewScreenState
   List<PendingAchievementSubmission> _achievementSubmissions = [];
   bool _loading = true;
   bool _achievementsLoading = true;
+  bool _compactVerifierMode = false;
+  VerifierQueueMetrics? _queueMetrics;
 
   @override
   void initState() {
     super.initState();
     _load();
     _loadAchievements();
+    _loadMetrics();
+  }
+
+  Future<void> _loadMetrics() async {
+    final metrics = await AchievementReviewService.getQueueMetrics();
+    if (mounted) setState(() => _queueMetrics = metrics);
   }
 
   @override
@@ -401,28 +409,57 @@ class _VerificationReviewScreenState
   Widget _buildAchievementsTab(ThemeData theme) {
     if (_achievementsLoading) return const ScreenLoading.list();
     if (_achievementSubmissions.isEmpty) {
-      return const AppEmptyState(
-        title: 'No pending achievements',
-        description:
-            'Submitted achievement proofs (e.g. education, career) appear here.',
-        icon: Icons.emoji_events_outlined,
+      return Column(
+        children: [
+          if (_queueMetrics != null) _VerifierMetricsBar(metrics: _queueMetrics!),
+          const Expanded(
+            child: AppEmptyState(
+              title: 'No pending achievements',
+              description:
+                  'Submitted achievement proofs (e.g. education, career) appear here.',
+              icon: Icons.emoji_events_outlined,
+            ),
+          ),
+        ],
       );
     }
     return RefreshIndicator(
-      onRefresh: _loadAchievements,
+      onRefresh: () async {
+        await _loadAchievements();
+        await _loadMetrics();
+      },
       child: ListView.builder(
         padding: const EdgeInsets.all(VSpacing.md),
-        itemCount: _achievementSubmissions.length,
+        itemCount: _achievementSubmissions.length + 1,
         itemBuilder: (_, i) {
-          final s = _achievementSubmissions[i];
+          if (i == 0) {
+            return Column(
+              children: [
+                if (_queueMetrics != null)
+                  _VerifierMetricsBar(metrics: _queueMetrics!),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Compact review mode'),
+                  subtitle: const Text('Denser cards for faster triage'),
+                  value: _compactVerifierMode,
+                  onChanged: (v) => setState(() => _compactVerifierMode = v),
+                ),
+                const SizedBox(height: VSpacing.sm),
+              ],
+            );
+          }
+          final s = _achievementSubmissions[i - 1];
           return Padding(
             padding: EdgeInsets.only(
-              bottom: i < _achievementSubmissions.length - 1 ? VSpacing.sm : 0,
+              bottom: i < _achievementSubmissions.length ? VSpacing.sm : 0,
             ),
             child: _Card(
-              padding: const EdgeInsets.all(VSpacing.md),
+              padding: EdgeInsets.all(
+                _compactVerifierMode ? VSpacing.sm : VSpacing.md,
+              ),
               child: AchievementVerifierReviewCard(
                 submission: s,
+                compact: _compactVerifierMode,
                 onApprove: () => _approveAchievement(s),
                 onReject: () => _rejectAchievement(s),
               ),
@@ -561,6 +598,45 @@ class _VerificationReviewScreenState
           ),
         );
       },
+    );
+  }
+}
+
+class _VerifierMetricsBar extends StatelessWidget {
+  final VerifierQueueMetrics metrics;
+
+  const _VerifierMetricsBar({required this.metrics});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: VSpacing.sm),
+      padding: const EdgeInsets.all(VSpacing.md),
+      decoration: BoxDecoration(
+        color: VColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        border: Border.all(color: VColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Verifier queue',
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            '${metrics.pendingCount} pending · '
+            'median wait ${metrics.medianHoursPending.toStringAsFixed(1)}h · '
+            'median verify ${metrics.medianHoursToVerify.toStringAsFixed(1)}h (30d)',
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
+      ),
     );
   }
 }

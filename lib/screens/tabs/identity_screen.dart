@@ -34,6 +34,9 @@ import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/subscription_badge.dart';
 import '../../widgets/achievements/achievement_queue_summary.dart';
 import '../../widgets/profile/trophy_case.dart';
+import '../../widgets/profile/trophy_case_sheet.dart';
+import '../../widgets/profile/featured_achievements_sheet.dart';
+import '../../utils/profile_share.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/empty_state.dart';
@@ -701,10 +704,28 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             userAchievements: achievements.userAchievements,
           ),
 
-          TrophyCase(
-            resident: resident,
-            achievements: achievements.userAchievements,
-            totalXp: currentXp,
+          InkWell(
+            onTap: () => showTrophyCaseSheet(
+              context,
+              resident: resident,
+              achievements: achievements.userAchievements,
+              totalXp: currentXp,
+            ),
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            child: TrophyCase(
+              resident: resident,
+              achievements: achievements.userAchievements,
+              totalXp: currentXp,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: OutlinedButton.icon(
+              onPressed: () => showFeaturedAchievementsSheet(context, ref),
+              icon: const Icon(Icons.star_outline, size: VIconSize.sm),
+              label: const Text('Featured achievements'),
+            ),
           ),
           const SizedBox(height: VSpacing.lg),
 
@@ -860,7 +881,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       SharePlus.instance.share(
                         ShareParams(
                           text:
-                              'Join me on Vertiege! 🌟\n\n${resident.name} is inviting you.\n\nDownload Vertiege and use referral code: $referralCode',
+                              '${ProfileShare.shareMessage(name: resident.name, residentId: resident.id)}\n\n'
+                              'Or use referral code: $referralCode',
                         ),
                       );
                     },

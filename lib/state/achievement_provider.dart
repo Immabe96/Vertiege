@@ -71,8 +71,9 @@ class AchievementNotifier extends Notifier<AchievementState> {
 
   Future<void> submitAchievement(
     String achievementId,
-    List<String> proofUris,
-  ) async {
+    List<String> proofUris, {
+    String? story,
+  }) async {
     final existing = state.userAchievements
         .where((a) => a.achievementId == achievementId)
         .firstOrNull;
@@ -87,6 +88,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
       proofUris: proofUris,
       status: AchievementStatus.submitted,
       clearReviewerNotes: existing?.status == AchievementStatus.rejected,
+      story: story,
     );
 
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -121,6 +123,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
     required List<String> proofUris,
     required AchievementStatus status,
     bool clearReviewerNotes = false,
+    String? story,
   }) async {
     final userId =
         ref.read(residentProvider).resident?.id ??
@@ -137,6 +140,10 @@ class AchievementNotifier extends Notifier<AchievementState> {
       if (status == AchievementStatus.verified)
         'verified_at': DateTime.now().toIso8601String(),
       if (clearReviewerNotes) 'ai_notes': null,
+      if (story != null && story.trim().isNotEmpty)
+        'achievement_story': story.trim().length > 280
+            ? story.trim().substring(0, 280)
+            : story.trim(),
     }, onConflict: 'user_id,achievement_id');
   }
 

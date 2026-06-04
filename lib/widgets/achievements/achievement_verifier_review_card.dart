@@ -15,12 +15,14 @@ class AchievementVerifierReviewCard extends StatefulWidget {
   final PendingAchievementSubmission submission;
   final VoidCallback onApprove;
   final VoidCallback onReject;
+  final bool compact;
 
   const AchievementVerifierReviewCard({
     super.key,
     required this.submission,
     required this.onApprove,
     required this.onReject,
+    this.compact = false,
   });
 
   @override
@@ -129,7 +131,8 @@ class _AchievementVerifierReviewCardState
             ),
           ],
         ),
-        if (s.achievementDescription != null &&
+        if (!widget.compact &&
+            s.achievementDescription != null &&
             s.achievementDescription!.trim().isNotEmpty) ...[
           const SizedBox(height: VSpacing.sm),
           Text(
@@ -139,17 +142,19 @@ class _AchievementVerifierReviewCardState
             ),
           ),
         ],
-        if (definition != null) ...[
+        if (!widget.compact && definition != null) ...[
           const SizedBox(height: VSpacing.md),
           ProofRequirementsBanner(achievement: definition),
           const SizedBox(height: VSpacing.md),
           AchievementVerifierChecklist(achievement: definition),
         ],
-        const SizedBox(height: VSpacing.md),
-        _ResidentHistorySection(
-          loading: _historyLoading,
-          history: _history,
-        ),
+        if (!widget.compact) ...[
+          const SizedBox(height: VSpacing.md),
+          _ResidentHistorySection(
+            loading: _historyLoading,
+            history: _history,
+          ),
+        ],
         if (s.aiNotes != null && s.aiNotes!.trim().isNotEmpty) ...[
           const SizedBox(height: VSpacing.sm),
           Text(

@@ -1,9 +1,65 @@
 import '../config/season_catalog.dart';
 import '../models/season.dart';
 import '../models/world.dart';
+import 'supabase.dart';
+
+/// Active season copy from [global_seasons] (Wave 20 Nexus banner).
+class SeasonNarrativeSnapshot {
+  final String id;
+  final String name;
+  final String tagline;
+  final String narrative;
+
+  const SeasonNarrativeSnapshot({
+    required this.id,
+    required this.name,
+    this.tagline = '',
+    this.narrative = '',
+  });
+}
 
 class SeasonService {
   SeasonService._();
+
+  static Future<SeasonNarrativeSnapshot?> fetchActiveSeasonNarrative() async {
+    if (!isSupabaseConfigured()) {
+      final def = SeasonCatalog.active;
+      return SeasonNarrativeSnapshot(
+        id: def.id,
+        name: def.name,
+        tagline: def.tagline,
+        narrative: def.narrative,
+      );
+    }
+    try {
+      final row = await getSupabase()
+          .from('global_seasons')
+          .select('id, name, tagline, narrative')
+          .eq('is_active', true)
+          .order('starts_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      if (row == null) return null;
+      final narrative = (row['narrative'] as String?)?.trim() ?? '';
+      final tagline = (row['tagline'] as String?)?.trim() ?? '';
+      if (narrative.isEmpty && tagline.isEmpty) return null;
+      return SeasonNarrativeSnapshot(
+        id: row['id'] as String? ?? SeasonCatalog.active.id,
+        name: row['name'] as String? ?? SeasonCatalog.active.name,
+        tagline: tagline.isNotEmpty ? tagline : SeasonCatalog.active.tagline,
+        narrative:
+            narrative.isNotEmpty ? narrative : SeasonCatalog.active.narrative,
+      );
+    } catch (_) {
+      final def = SeasonCatalog.active;
+      return SeasonNarrativeSnapshot(
+        id: def.id,
+        name: def.name,
+        tagline: def.tagline,
+        narrative: def.narrative,
+      );
+    }
+  }
 
   /// Season 1 — The Big Bang: world growth leaderboard (not league brackets).
   static Season getCurrentSeason({List<World>? worlds}) {

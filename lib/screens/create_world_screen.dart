@@ -17,6 +17,7 @@ import '../widgets/worlds/dominion_type_picker.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/core/v_feedback.dart';
 import '../widgets/core/v_surface_card.dart';
+import '../config/world_charter_templates.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -49,6 +50,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
   late final TextEditingController _descController;
 
   String _selectedIcon = 'public';
+  String? _charterTemplateId;
   DominionType? _selectedDominionType;
   final Map<String, bool> _channelToggles = {
     for (final c in _defaultChannels) c.key: true,
@@ -412,6 +414,30 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                       }
                       return null;
                     },
+                  ),
+                  const SizedBox(height: VSpacing.md),
+                  Text('Charter template', style: theme.textTheme.labelLarge),
+                  const SizedBox(height: VSpacing.sm),
+                  Wrap(
+                    spacing: VSpacing.xs,
+                    runSpacing: VSpacing.xs,
+                    children: worldCharterTemplates.map((t) {
+                      final selected = _charterTemplateId == t.id;
+                      return FilterChip(
+                        label: Text(t.label),
+                        selected: selected,
+                        onSelected: (on) {
+                          setState(() {
+                            if (!on) {
+                              _charterTemplateId = null;
+                              return;
+                            }
+                            _charterTemplateId = t.id;
+                            _descController.text = t.descriptionSeed;
+                          });
+                        },
+                      );
+                    }).toList(),
                   ),
                   const SizedBox(height: VSpacing.md),
                   FTextFormField(

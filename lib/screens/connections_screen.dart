@@ -186,6 +186,25 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
             : ListView(
                 padding: const EdgeInsets.all(VSpacing.md),
                 children: [
+                  Text(
+                    widget.mode == ConnectionsMode.following
+                        ? 'Following'
+                        : 'Allies',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: VFontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.xs),
+                  Text(
+                    widget.mode == ConnectionsMode.following
+                        ? 'Residents you follow for feed priority — not the same as mutual allies.'
+                        : 'Mutual allegiance requests you accepted — stronger than a one-way follow.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.lg),
                   if (widget.mode == ConnectionsMode.allies &&
                       allyState.pendingRequests.isNotEmpty) ...[
                     Text(

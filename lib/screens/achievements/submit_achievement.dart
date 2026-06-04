@@ -31,6 +31,7 @@ class _SubmitAchievementScreenState
   String? _selectedId;
   final List<String> _proofImagePaths = [];
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _storyController = TextEditingController();
   bool _isUploading = false;
   AchievementCategory? _categoryFilter;
   String? _errorText;
@@ -39,6 +40,7 @@ class _SubmitAchievementScreenState
   @override
   void dispose() {
     _searchController.dispose();
+    _storyController.dispose();
     super.dispose();
   }
 
@@ -117,7 +119,11 @@ class _SubmitAchievementScreenState
 
       await ref
           .read(achievementProvider.notifier)
-          .submitAchievement(selectedId, proofUrls);
+          .submitAchievement(
+            selectedId,
+            proofUrls,
+            story: _storyController.text.trim(),
+          );
 
       if (mounted) {
         Navigator.pop(context);
@@ -359,6 +365,17 @@ class _SubmitAchievementScreenState
                 ),
               ),
             ],
+            const SizedBox(height: VSpacing.md),
+            TextField(
+              controller: _storyController,
+              maxLines: 3,
+              maxLength: 280,
+              decoration: const InputDecoration(
+                labelText: 'Your story (optional)',
+                hintText: 'A short note for your profile if approved',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: VSpacing.md),
             ProofRequirementsBanner(achievement: selectedAchievement),
             const SizedBox(height: VSpacing.md),

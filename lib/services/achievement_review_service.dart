@@ -59,9 +59,41 @@ class ResidentReviewHistory {
   bool get hasPriorRejections => rejectedCount > 0;
 }
 
+class VerifierQueueMetrics {
+  final int pendingCount;
+  final double medianHoursPending;
+  final double medianHoursToVerify;
+
+  const VerifierQueueMetrics({
+    this.pendingCount = 0,
+    this.medianHoursPending = 0,
+    this.medianHoursToVerify = 0,
+  });
+
+  factory VerifierQueueMetrics.fromJson(Map<String, dynamic> json) =>
+      VerifierQueueMetrics(
+        pendingCount: (json['pending_count'] as num?)?.toInt() ?? 0,
+        medianHoursPending:
+            (json['median_hours_pending'] as num?)?.toDouble() ?? 0,
+        medianHoursToVerify:
+            (json['median_hours_to_verify'] as num?)?.toDouble() ?? 0,
+      );
+}
+
 class AchievementReviewService {
   static Achievement? _definition(String achievementId) =>
       ach_config.achievementForId(achievementId);
+
+  static Future<VerifierQueueMetrics> getQueueMetrics() async {
+    if (!isSupabaseConfigured()) return const VerifierQueueMetrics();
+    try {
+      final raw = await getSupabase().rpc('get_verifier_queue_metrics');
+      if (raw is! Map) return const VerifierQueueMetrics();
+      return VerifierQueueMetrics.fromJson(Map<String, dynamic>.from(raw));
+    } catch (_) {
+      return const VerifierQueueMetrics();
+    }
+  }
 
   static Future<List<PendingAchievementSubmission>> getPending() async {
     if (!isSupabaseConfigured()) return [];
