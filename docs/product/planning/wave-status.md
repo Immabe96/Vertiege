@@ -3,7 +3,8 @@
 Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md`](perfection-backlog.md) (0–6).
 
 **Apply new SQL before device testing:**  
-`20260530150000_lounge_campfire_channels.sql`, `20260530160000_waves_8_11_completion.sql`
+`20260530150000_lounge_campfire_channels.sql`, `20260530160000_waves_8_11_completion.sql`,  
+`20260601120000_award_activity_xp_guard.sql` (daily quest XP log)
 
 ---
 
