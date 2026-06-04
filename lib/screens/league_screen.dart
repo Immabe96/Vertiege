@@ -15,7 +15,9 @@ import '../../widgets/core/screen_loading.dart';
 import '../../utils/calm_ranking.dart';
 
 class LeagueScreen extends ConsumerStatefulWidget {
-  const LeagueScreen({super.key});
+  final bool embedInHub;
+
+  const LeagueScreen({super.key, this.embedInHub = false});
 
   @override
   ConsumerState<LeagueScreen> createState() => _LeagueScreenState();
@@ -64,16 +66,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return VHubPage(
-      title: 'Ascension Leagues',
-      showBack: true,
-      headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
-          onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
-        ),
-      ],
-      body: leagueState.isLoading
+    final body = leagueState.isLoading
           ? const ScreenLoading.list()
           : leagueState.error != null
               ? AppErrorState(
@@ -127,7 +120,20 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                       ),
                     ],
                   ),
-                ),
+                );
+
+    if (widget.embedInHub) return body;
+
+    return VHubPage(
+      title: 'Ascension Leagues',
+      showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
+        ),
+      ],
+      body: body,
     );
   }
 
@@ -140,8 +146,13 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
       rank: userLeague.rank,
       cohortSize: leagueState.standings.length,
     );
-    if (calm != null) return calm;
-    return userLeague.rank > 0 ? 'Rank #${userLeague.rank}' : 'Unranked';
+    return calm ?? 'Building momentum in your league';
+  }
+
+  String _standingRankLabel(int rank, int cohortSize, bool lowPressure) {
+    if (lowPressure) return '—';
+    if (rank <= 3) return '#$rank';
+    return CalmRanking.leagueBandLabel(rank: rank, cohortSize: cohortSize) ?? '·';
   }
 
   Widget _buildLeagueHeader(LeagueState state, bool isDark) {
@@ -279,6 +290,8 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   Widget _buildStandingsList(LeagueState state, bool isDark) {
     final standings = state.standings;
     final residentId = ref.read(residentProvider).resident?.id;
+    final lowPressure =
+        ref.read(residentProvider).resident?.leaderboardOptOut == true;
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -296,6 +309,11 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             child: _buildStandingRow(
               participant: participant,
               rank: rank,
+              rankLabel: _standingRankLabel(
+                rank,
+                standings.length,
+                lowPressure,
+              ),
               isCurrentUser: isCurrentUser,
               isTop3: isTop3,
               isPromotionZone: isPromotionZone,
@@ -312,6 +330,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   Widget _buildStandingRow({
     required LeagueParticipant participant,
     required int rank,
+    required String rankLabel,
     required bool isCurrentUser,
     required bool isTop3,
     required bool isPromotionZone,
@@ -369,15 +388,17 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
       child: Row(
         children: [
           SizedBox(
-            width: 32,
+            width: 72,
             child: Text(
-              '#$rank',
+              rankLabel,
               style: TextStyle(
-                fontSize: VFontSize.bodyMd,
-                fontWeight: VFontWeight.bold,
+                fontSize: rank <= 3 ? VFontSize.bodyMd : VFontSize.labelSm,
+                fontWeight: rank <= 3 ? VFontWeight.bold : VFontWeight.medium,
                 color: rankColor,
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: VSpacing.sm),

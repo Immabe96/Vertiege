@@ -77,7 +77,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       title: 'Messages',
       headerActions: [
         VAccessibleHeaderAction(
-          label: 'New DM',
+          label: 'New direct message',
           icon: const Icon(FIcons.userPlus),
           onPress: () => openGlobalSearch(context),
         ),
@@ -316,9 +316,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Widget _buildEmptyDmState() {
     return AppEmptyState(
       title: 'No direct messages yet',
-      description: 'Find residents and start a conversation.',
-      icon: Icons.chat_bubble_outline,
-      actionLabel: 'Find Residents',
+      description:
+          'Search for a resident and open their profile to start a private chat.',
+      icon: Icons.mail_outline,
+      actionLabel: 'Find someone',
       onAction: () => openGlobalSearch(context),
     );
   }
@@ -422,9 +423,9 @@ class _ModeSwitch extends StatelessWidget {
           ),
           Expanded(
             child: _ModeButton(
-              label: 'DMs',
+              label: 'Direct',
               count: dmCount,
-              icon: Icons.forum,
+              icon: Icons.mail_outline,
               selected: mode == _ChatMode.dms,
               onTap: () => onChanged(_ChatMode.dms),
             ),

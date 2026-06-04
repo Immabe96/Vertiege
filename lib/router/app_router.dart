@@ -67,6 +67,9 @@ import '../screens/world_academy_screen.dart';
 import '../screens/world_sanctuary_screen.dart';
 import '../router/world_navigation.dart';
 import '../screens/league_screen.dart';
+import '../screens/progress_hub_screen.dart';
+import '../screens/coin_history_screen.dart';
+import 'progress_navigation.dart';
 import '../screens/world_discovery_screen.dart';
 import '../screens/twin_seal_setup_screen.dart';
 import '../models/message.dart';
@@ -464,20 +467,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AlliesScreen(),
       ),
       vGoRoute(
+        path: '/progress',
+        builder: (context, state) {
+          final tab =
+              ProgressTab.fromQuery(state.uri.queryParameters['tab']) ??
+              ProgressTab.quests;
+          return ProgressHubScreen(initialTab: tab);
+        },
+      ),
+      GoRoute(
         path: '/season',
-        builder: (context, state) => const SeasonScreen(),
+        redirect: (_, __) => progressPath(tab: ProgressTab.season),
       ),
-      vGoRoute(
+      GoRoute(
         path: '/challenges',
-        builder: (context, state) => const ChallengesScreen(),
+        redirect: (_, __) => progressPath(tab: ProgressTab.world),
       ),
-      vGoRoute(
+      GoRoute(
         path: '/daily-quests',
-        builder: (context, state) => const DailyQuestsScreen(),
+        redirect: (_, __) => progressPath(tab: ProgressTab.quests),
+      ),
+      GoRoute(
+        path: '/leagues',
+        redirect: (_, __) => progressPath(tab: ProgressTab.league),
       ),
       vGoRoute(
-        path: '/leagues',
-        builder: (context, state) => const LeagueScreen(),
+        path: '/coin-history',
+        builder: (context, state) => const CoinHistoryScreen(),
       ),
       vGoRoute(
         path: '/hall-of-ascension',

@@ -17,7 +17,9 @@ import '../widgets/core/fade_in.dart';
 import '../widgets/core/shimmer.dart';
 
 class SeasonScreen extends ConsumerStatefulWidget {
-  const SeasonScreen({super.key});
+  final bool embedInHub;
+
+  const SeasonScreen({super.key, this.embedInHub = false});
 
   @override
   ConsumerState<SeasonScreen> createState() => _SeasonScreenState();
@@ -73,11 +75,8 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
     final unclaimed = SeasonService.unclaimedWorlds(allWorlds);
     final growing = SeasonService.growingWorldCount(allWorlds);
 
-    return VHubPage(
-      title: 'Season 1',
-      showBack: true,
-      body: isLoaded
-          ? CustomScrollView(
+    final body = isLoaded
+        ? CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -162,7 +161,14 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                 ),
               ],
             )
-          : _buildLoading(isDark),
+        : _buildLoading(isDark);
+
+    if (widget.embedInHub) return body;
+
+    return VHubPage(
+      title: 'Season 1',
+      showBack: true,
+      body: body,
     );
   }
 

@@ -32,6 +32,7 @@ class StorageService {
     '@quests_data',
     '@alliances_data',
     '@scheduled_posts',
+    '@offline_queue',
     '@bookmarked_posts',
     '@cache_feed',
     '@cache_worlds',

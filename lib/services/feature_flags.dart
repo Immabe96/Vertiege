@@ -32,7 +32,7 @@ class FeatureFlags {
   /// Immersive Campfire UI (minimal chrome). Default off until device UAT.
   static bool get campfireImmersive => RemoteConfigService.getBool(
         'campfire_immersive',
-        fallback: false,
+        fallback: true,
       );
 
   /// When true, subscriptions verify via the verify-subscription-purchase edge function.
@@ -108,6 +108,6 @@ class FeatureFlags {
   /// Nexus bento order: `default`, `quest_first`, or `social`.
   static String get nexusBentoSegment => RemoteConfigService.getString(
         'nexus_bento_segment',
-        fallback: 'default',
+        fallback: 'quest_first',
       );
 }

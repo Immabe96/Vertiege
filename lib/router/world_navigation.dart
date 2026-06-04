@@ -160,7 +160,7 @@ String residentProfilePath(
   );
 }
 
-String leaguesPath() => '/leagues';
+String leaguesPath() => '/progress?tab=league';
 
 /// In-shell chat tab route (keeps bottom navigation).
 String chatShellPath(String roomId, {String? draft}) {

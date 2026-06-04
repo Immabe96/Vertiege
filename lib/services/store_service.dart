@@ -31,8 +31,6 @@ class RestoredSubscriptionPurchase {
 }
 
 class StoreService {
-  /// Legacy pay-to-win SKUs — not offered in v1 (PLAN.md Wave 9).
-  static const wealthTierPrefix = 'wealth_access_tier_';
   static const worldBoostId = 'world_boost';
   static const patricianSubscriptionId = 'subscription_patrician';
   static const sovereignEliteSubscriptionId = 'subscription_sovereign_elite';
@@ -50,14 +48,6 @@ class StoreService {
     coinPackStarterId,
     coinPackValueId,
     coinPackEliteId,
-  };
-
-  /// Product IDs for each wealth tier (2-5). Tier 1 is free.
-  static const wealthTierProducts = {
-    2: '${wealthTierPrefix}2',
-    3: '${wealthTierPrefix}3',
-    4: '${wealthTierPrefix}4',
-    5: '${wealthTierPrefix}5',
   };
 
   static final _store = InAppPurchase.instance;
@@ -116,12 +106,6 @@ class StoreService {
     } catch (_) {
       return _fallbackProducts();
     }
-  }
-
-  /// Purchase access to a wealth tier.
-  @Deprecated('Paid world access is disabled for v1; use achievements for tier.')
-  static Future<StorePurchaseState> buyWealthTier(int tier) async {
-    return StorePurchaseState.disabled;
   }
 
   static Future<StorePurchaseState> buyProduct(String productId) async {

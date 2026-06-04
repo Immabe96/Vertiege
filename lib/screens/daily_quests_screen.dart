@@ -16,7 +16,9 @@ import '../widgets/core/v_feedback.dart';
 
 /// Lists today's daily quests (distinct from seasonal `/challenges`).
 class DailyQuestsScreen extends ConsumerStatefulWidget {
-  const DailyQuestsScreen({super.key});
+  final bool embedInHub;
+
+  const DailyQuestsScreen({super.key, this.embedInHub = false});
 
   @override
   ConsumerState<DailyQuestsScreen> createState() => _DailyQuestsScreenState();
@@ -59,16 +61,7 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
     final resident = ref.watch(residentProvider).resident;
     final shields = resident?.streakShields ?? 0;
 
-    return VHubPage(
-      title: 'Daily Quests',
-      showBack: true,
-      headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
-          onPress: () => ref.read(questProvider.notifier).loadQuests(),
-        ),
-      ],
-      body: Column(
+    final body = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (shields > 0)
@@ -160,7 +153,20 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
                   ),
           ),
         ],
-      ),
+      );
+
+    if (widget.embedInHub) return body;
+
+    return VHubPage(
+      title: 'Daily Quests',
+      showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: () => ref.read(questProvider.notifier).loadQuests(),
+        ),
+      ],
+      body: body,
     );
   }
 }

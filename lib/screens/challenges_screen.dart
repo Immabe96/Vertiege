@@ -17,7 +17,9 @@ import '../../models/season_cohort.dart';
 import '../../services/season_cohort_service.dart';
 
 class ChallengesScreen extends ConsumerStatefulWidget {
-  const ChallengesScreen({super.key});
+  final bool embedInHub;
+
+  const ChallengesScreen({super.key, this.embedInHub = false});
 
   @override
   ConsumerState<ChallengesScreen> createState() => _ChallengesScreenState();
@@ -80,16 +82,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
   @override
   Widget build(BuildContext context) {
     final challengeState = ref.watch(challengeProvider);
-    return VHubPage(
-      title: _worldName == null ? 'World Challenges' : '$_worldName Challenges',
-      showBack: true,
-      headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
-          onPress: _refresh,
-        ),
-      ],
-      body: _initializing
+    final body = _initializing
           ? const ScreenLoading.list()
           : _worldId == null
           ? AppEmptyState(
@@ -158,7 +151,20 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                       }),
                     ],
                   ],
-                ),
+                );
+
+    if (widget.embedInHub) return body;
+
+    return VHubPage(
+      title: _worldName == null ? 'World Challenges' : '$_worldName Challenges',
+      showBack: true,
+      headerActions: [
+        FHeaderAction(
+          icon: const Icon(FIcons.rotateCw),
+          onPress: _refresh,
+        ),
+      ],
+      body: body,
     );
   }
 }

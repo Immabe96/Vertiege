@@ -98,12 +98,14 @@ class NexusShortcutsSection extends ConsumerWidget {
                 BentoCard(
                   child: const DailyQuestCard(),
                   size: BentoSize.small,
-                  onTap: () => _openShortcut(context, 'quest', '/daily-quests'),
+                  onTap: () =>
+                      _openShortcut(context, 'quest', '/progress?tab=quests'),
                 ),
                 BentoCard(
                   child: const SeasonSnapshotCard(),
                   size: BentoSize.small,
-                  onTap: () => _openShortcut(context, 'season', '/season'),
+                  onTap: () =>
+                      _openShortcut(context, 'season', '/progress?tab=season'),
                 ),
                 const BentoCard(
                   child: SpotlightCard(),
@@ -112,7 +114,8 @@ class NexusShortcutsSection extends ConsumerWidget {
                 BentoCard(
                   child: const ChallengesCard(),
                   size: BentoSize.small,
-                  onTap: () => _openShortcut(context, 'challenges', '/challenges'),
+                  onTap: () =>
+                      _openShortcut(context, 'challenges', '/progress?tab=world'),
                 ),
                 if (!hideLeague)
                   BentoCard(
@@ -177,19 +180,19 @@ class _CompactShortcutsRowState extends State<_CompactShortcutsRow> {
         id: 'season',
         icon: Icons.auto_awesome,
         label: 'Season 1',
-        onTap: () => context.push('/season'),
+        onTap: () => context.push('/progress?tab=season'),
       ),
       _ShortcutDef(
         id: 'quest',
         icon: Icons.flag_outlined,
         label: 'Quest',
-        onTap: () => context.push('/daily-quests'),
+        onTap: () => context.push('/progress?tab=quests'),
       ),
       _ShortcutDef(
         id: 'challenges',
         icon: Icons.emoji_events_outlined,
         label: 'Challenges',
-        onTap: () => context.push('/challenges'),
+        onTap: () => context.push('/progress?tab=world'),
       ),
       _ShortcutDef(
         id: 'league',

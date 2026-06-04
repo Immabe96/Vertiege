@@ -239,6 +239,27 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## Wave 22 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| Drop `PostComposer` / `CreatePostScreen` | Done — deleted (canonical `PostInput`) |
+| Drop `offline_queue.dart` | Done — removed; session clear includes legacy key |
+| Drop Boosts/Passes shop UI | Done — shop tabs: Cosmetics + Dominions only |
+| Progress hub `/progress` | Done — Quests / World / Season / League tabs |
+| Drop wealth tier SKUs | Done — removed from `StoreService` |
+| Coin history UI | Done — `/coin-history` + Settings entry |
+| High contrast text | Done — shipped label (was preview) |
+| Campfire immersive default | Done — RC fallback `true` |
+| Adaptive Nexus default | Done — `nexus_bento_segment` fallback `quest_first` |
+| Calm ranking default | Done — league bands; no raw `#rank` except top 3 |
+| DM entry polish | Done — Direct tab copy + empty state |
+| Inline polls | Skipped — RPC still requires poll composer |
+
+**Tests:** 230 green locally.
+
+---
+
 ## Waves 13–22 (master plan)
 
 **All 124 research backlog items** are sequenced in **[waves-13-22-master-plan.md](waves-13-22-master-plan.md)** — 10 waves, gates, migrations, and safe drop order (Wave 22).

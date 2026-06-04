@@ -16,7 +16,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_feedback.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 
-enum _ShopCategory { passes, seeds, boosts, cosmetics }
+enum _ShopCategory { cosmetics }
 
 class CosmeticsShopScreen extends ConsumerStatefulWidget {
   const CosmeticsShopScreen({super.key});
@@ -83,103 +83,10 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
             label: Text('Dominions'),
             child: _DominionsTab(),
           ),
-          const FTabEntry(
-            label: Text('Coming soon'),
-            child: _PayToWinComingSoonTab(),
-          ),
         ],
       ),
     );
   }
-
-  static const _passes = <_ShopItem>[
-    _ShopItem(
-      'Neon District Pass',
-      'Unlock Neon District wealth world',
-      200,
-      Icons.diamond,
-      VColors.tertiary,
-      'Pass',
-    ),
-    _ShopItem(
-      'Crystal Shore Pass',
-      'Unlock Crystal Shore wealth world',
-      150,
-      Icons.diamond,
-      VColors.primary,
-      'Pass',
-    ),
-    _ShopItem(
-      'Azure Coast Pass',
-      'Unlock Azure Coast wealth world',
-      300,
-      Icons.diamond,
-      VColors.success,
-      'Pass',
-    ),
-    _ShopItem(
-      'Tech Sprawl Pass',
-      'Unlock Tech Sprawl wealth world',
-      250,
-      Icons.diamond,
-      VColors.warning,
-      'Pass',
-    ),
-  ];
-
-  static const _seeds = <_ShopItem>[
-    _ShopItem(
-      'Seed of Creation',
-      'Create your own Dominion world',
-      500,
-      Icons.shield,
-      VColors.success,
-      'Seed',
-    ),
-    _ShopItem(
-      'Double Seed Bundle',
-      'Two Seeds of Creation at a discount',
-      850,
-      Icons.shield,
-      VColors.tertiary,
-      'Seed',
-    ),
-  ];
-
-  static const _boosts = <_ShopItem>[
-    _ShopItem(
-      'Profile Spotlight',
-      'Highlight your profile card for 24 hours',
-      100,
-      Icons.auto_awesome,
-      VColors.primary,
-      'Flair',
-    ),
-    _ShopItem(
-      'Draft Cabinet',
-      'Unlock an extra saved-draft slot',
-      150,
-      Icons.inventory_2_outlined,
-      VColors.tertiary,
-      'Convenience',
-    ),
-    _ShopItem(
-      'Reaction Pack',
-      'Add cosmetic reactions to your palette',
-      200,
-      Icons.add_reaction_outlined,
-      VColors.warning,
-      'Cosmetic',
-    ),
-    _ShopItem(
-      'Nameplate Spark',
-      'Add a subtle spark to your nameplate',
-      75,
-      Icons.auto_awesome,
-      VColors.success,
-      'Cosmetic',
-    ),
-  ];
 
   static const _cosmetics = <_ShopItem>[
     _ShopItem(
@@ -868,18 +775,3 @@ class _DominionListingDetailSheet extends StatelessWidget {
   }
 }
 
-class _PayToWinComingSoonTab extends StatelessWidget {
-  const _PayToWinComingSoonTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: AppEmptyState(
-        title: 'Passes, seeds & boosts',
-        description:
-            'Pay-to-win items stay out of v1. Cosmetics and dominions are available in other tabs.',
-        icon: Icons.lock_clock_outlined,
-      ),
-    );
-  }
-}

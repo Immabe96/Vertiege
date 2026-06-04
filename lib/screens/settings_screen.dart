@@ -754,7 +754,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: VSpacing.sm),
                   VSectionSwitchTile(
                     icon: Icons.contrast,
-                    label: 'High contrast preview',
+                    label: 'High contrast text',
                     value: highContrast,
                     onChanged: (enabled) {
                       ref.read(themeProvider.notifier).setTextSize(
@@ -840,6 +840,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: 'Twin Seal (2FA)',
                   iconColor: VColors.tertiary,
                   onTap: () => context.push('/twin-seal'),
+                ),
+                VSectionTile(
+                  icon: Icons.monetization_on_outlined,
+                  label: 'Coin history',
+                  onTap: () => context.push('/coin-history'),
                 ),
                 VSectionTile(
                   icon: Icons.delete_outline,
