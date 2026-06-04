@@ -25,6 +25,7 @@ class AuditLogScreen extends ConsumerStatefulWidget {
 
 class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
   List<Map<String, dynamic>> _entries = [];
+  Map<String, String> _actorNames = {};
   bool _loading = true;
   String? _error;
 
@@ -41,11 +42,16 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     });
     try {
       final entries = await ModerationService.getAuditLog(widget.worldId);
-      if (mounted)
+      final names = await ModerationService.resolveActorNames(
+        entries.map((e) => e['actor_id'] as String? ?? ''),
+      );
+      if (mounted) {
         setState(() {
           _entries = entries;
+          _actorNames = names;
           _loading = false;
         });
+      }
     } catch (_) {
       if (mounted)
         setState(() {
@@ -70,8 +76,27 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'assignRank' => 'Assigned a rank',
     'removeRank' => 'Removed a rank',
     'editChannel' => 'Edited a channel',
-    _ => action,
+    'governance_proposal_approved' => 'Council approved a request',
+    'governance_proposal_rejected' => 'Council rejected a request',
+    _ => action.replaceAll('_', ' '),
   };
+
+  String? _governanceDetail(Map<String, dynamic>? details) {
+    if (details == null) return null;
+    final type = details['type'] as String?;
+    if (type == null || type.isEmpty) return null;
+    return switch (type) {
+      'treasury_withdrawal' => 'Treasury withdrawal',
+      'job_publish' => 'Role post',
+      'rank_change' => 'Rank change',
+      _ => type.replaceAll('_', ' '),
+    };
+  }
+
+  String _actorLabel(String? actorId) {
+    if (actorId == null || actorId.isEmpty) return '';
+    return _actorNames[actorId] ?? 'Resident';
+  }
 
   IconData _actionIcon(String action) => switch (action) {
     'ban' || 'kick' => Icons.gavel,
@@ -81,6 +106,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'createRank' || 'deleteRank' => Icons.military_tech,
     'assignRank' || 'removeRank' => Icons.person_add,
     'editChannel' => Icons.edit,
+    'governance_proposal_approved' || 'governance_proposal_rejected' =>
+      Icons.gavel,
     _ => Icons.history,
   };
 
@@ -97,7 +124,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
           : _entries.isEmpty
           ? const AppEmptyState(
               title: 'No audit entries',
-              description: 'Moderation actions will appear here.',
+              description:
+                  'Moderation and council decisions will appear here.',
               icon: Icons.history,
             )
           : RefreshIndicator(
@@ -160,10 +188,22 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                         : VColors.onSurface,
                                   ),
                                 ),
+                                final govDetail =
+                                    _governanceDetail(details);
+                                if (govDetail != null)
+                                  Text(
+                                    govDetail,
+                                    style: TextStyle(
+                                      fontSize: VFontSize.labelSm,
+                                      color: isDark
+                                          ? VColors.onSurfaceVariantDark
+                                          : VColors.onSurfaceVariant,
+                                    ),
+                                  ),
                                 if (entry['actor_id'] is String &&
                                     (entry['actor_id'] as String).isNotEmpty)
                                   Text(
-                                    'by ${entry['actor_id']}',
+                                    'by ${_actorLabel(entry['actor_id'] as String)}',
                                     style: TextStyle(
                                       fontSize: VFontSize.labelSm,
                                       color: isDark

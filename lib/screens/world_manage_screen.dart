@@ -197,7 +197,9 @@ class WorldManageScreen extends ConsumerWidget {
                 VSectionTile(
                   icon: Icons.gavel,
                   label: 'Approval queue',
-                  onTap: () => context.push(worldGovernancePath(worldId)),
+                  onTap: () => context.push(
+                    worldGovernancePath(worldId, worldName: world.name),
+                  ),
                 ),
                 VSectionTile(
                   icon: Icons.history,

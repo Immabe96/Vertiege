@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 
 import '../forui/v_hub_page.dart';
+import '../router/world_navigation.dart';
 import '../services/governance_service.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
@@ -12,8 +14,13 @@ import '../ui/buttons/v_button.dart';
 
 class WorldGovernanceScreen extends ConsumerStatefulWidget {
   final String worldId;
+  final String? worldName;
 
-  const WorldGovernanceScreen({super.key, required this.worldId});
+  const WorldGovernanceScreen({
+    super.key,
+    required this.worldId,
+    this.worldName,
+  });
 
   @override
   ConsumerState<WorldGovernanceScreen> createState() =>
@@ -124,8 +131,23 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(VSpacing.md),
-                  itemCount: _proposals.length,
+                  itemCount: _proposals.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == _proposals.length) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: VSpacing.md),
+                        child: VButton(
+                          label: 'View realm audit',
+                          variant: ButtonVariant.text,
+                          onPressed: () => context.push(
+                            auditLogPath(
+                              widget.worldId,
+                              worldName: widget.worldName ?? 'World',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                     final p = _proposals[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: VSpacing.sm),

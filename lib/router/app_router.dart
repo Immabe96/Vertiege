@@ -311,6 +311,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'governance',
                         builder: (context, state) => WorldGovernanceScreen(
                           worldId: state.pathParameters['worldId']!,
+                          worldName: state.uri.queryParameters['name'],
                         ),
                       ),
                       GoRoute(

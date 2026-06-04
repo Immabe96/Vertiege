@@ -24,6 +24,27 @@ class ModerationService {
     });
   }
 
+  static Future<Map<String, String>> resolveActorNames(
+    Iterable<String> actorIds,
+  ) async {
+    final unique = actorIds.where((id) => id.isNotEmpty).toSet().toList();
+    if (!isSupabaseConfigured() || unique.isEmpty) return {};
+    final data = await getSupabase()
+        .from('profiles')
+        .select('id, name')
+        .inFilter('id', unique);
+    final map = <String, String>{};
+    for (final row in data as List) {
+      final m = row as Map<String, dynamic>;
+      final id = m['id'] as String?;
+      if (id == null) continue;
+      map[id] = (m['name'] as String?)?.trim().isNotEmpty == true
+          ? (m['name'] as String).trim()
+          : 'Resident';
+    }
+    return map;
+  }
+
   static Future<List<Map<String, dynamic>>> getAuditLog(
     String worldId, {
     int limit = 100,

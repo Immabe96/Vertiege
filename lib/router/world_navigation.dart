@@ -134,8 +134,12 @@ String worldArchivePath(String worldId) =>
 String worldManagePath(String worldId) =>
     '/explore/${Uri.encodeComponent(worldId)}/manage';
 
-String worldGovernancePath(String worldId) =>
-    '/explore/${Uri.encodeComponent(worldId)}/governance';
+String worldGovernancePath(String worldId, {String? worldName}) {
+  return _path(
+    '/explore/${Uri.encodeComponent(worldId)}/governance',
+    worldName != null && worldName.isNotEmpty ? {'name': worldName} : null,
+  );
+}
 
 String residentProfilePath(
   String residentId, {

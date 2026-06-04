@@ -18,6 +18,18 @@ class StoreProduct {
 
 enum StorePurchaseState { idle, loading, purchased, error, disabled }
 
+class RestoredSubscriptionPurchase {
+  final String productId;
+  final String purchaseToken;
+  final String? storePayload;
+
+  const RestoredSubscriptionPurchase({
+    required this.productId,
+    required this.purchaseToken,
+    this.storePayload,
+  });
+}
+
 class StoreService {
   /// Legacy pay-to-win SKUs — not offered in v1 (PLAN.md Wave 9).
   static const wealthTierPrefix = 'wealth_access_tier_';
@@ -42,9 +54,14 @@ class StoreService {
   static bool _available = false;
   static StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   static final Map<String, Completer<StorePurchaseState>> _pendingPurchases = {};
+  static Completer<void>? _restoreSync;
+  static Timer? _restoreDebounce;
   static String? lastPurchaseToken;
   static String? lastStoreVerificationPayload;
   static String? lastPurchasedProductId;
+
+  /// Subscription restores collected during [restorePurchasesAndWait].
+  static final List<RestoredSubscriptionPurchase> restoredSubscriptions = [];
 
   /// Whether the store is available on this device.
   static bool get isEnabled => _available;
@@ -139,16 +156,75 @@ class StoreService {
     await _store.restorePurchases();
   }
 
+  /// Restores purchases and waits briefly for subscription events on the stream.
+  static Future<List<RestoredSubscriptionPurchase>> restorePurchasesAndWait() async {
+    if (!isEnabled) return [];
+    restoredSubscriptions.clear();
+    _restoreSync = Completer<void>();
+    await _store.restorePurchases();
+    _restoreDebounce?.cancel();
+    _restoreDebounce = Timer(const Duration(milliseconds: 800), () {
+      if (_restoreSync != null && !_restoreSync!.isCompleted) {
+        _restoreSync!.complete();
+      }
+    });
+    try {
+      await _restoreSync!.future.timeout(const Duration(seconds: 12));
+    } catch (_) {
+      // Store may return no active subscriptions.
+    } finally {
+      _restoreDebounce?.cancel();
+      _restoreDebounce = null;
+      _restoreSync = null;
+    }
+    return List<RestoredSubscriptionPurchase>.from(restoredSubscriptions);
+  }
+
+  static void _recordSubscriptionPurchase(PurchaseDetails purchase) {
+    final token = purchase.purchaseID ??
+        purchase.verificationData.serverVerificationData;
+    if (token.isEmpty) return;
+    lastStoreVerificationPayload =
+        purchase.verificationData.serverVerificationData;
+    lastPurchaseToken = token;
+    lastPurchasedProductId = purchase.productID;
+    restoredSubscriptions.add(
+      RestoredSubscriptionPurchase(
+        productId: purchase.productID,
+        purchaseToken: token,
+        storePayload: purchase.verificationData.serverVerificationData,
+      ),
+    );
+    _restoreDebounce?.cancel();
+    _restoreDebounce = Timer(const Duration(milliseconds: 600), () {
+      if (_restoreSync != null && !_restoreSync!.isCompleted) {
+        _restoreSync!.complete();
+      }
+    });
+  }
+
   static void _onPurchaseUpdate(List<PurchaseDetails> details) {
     for (final purchase in details) {
       final completer = _pendingPurchases[purchase.productID];
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
-        lastStoreVerificationPayload =
-            purchase.verificationData.serverVerificationData;
-        lastPurchaseToken = purchase.purchaseID ??
-            purchase.verificationData.serverVerificationData;
-        lastPurchasedProductId = purchase.productID;
+        if (subscriptionProductIds.contains(purchase.productID)) {
+          if (_restoreSync != null) {
+            _recordSubscriptionPurchase(purchase);
+          } else {
+            lastStoreVerificationPayload =
+                purchase.verificationData.serverVerificationData;
+            lastPurchaseToken = purchase.purchaseID ??
+                purchase.verificationData.serverVerificationData;
+            lastPurchasedProductId = purchase.productID;
+          }
+        } else {
+          lastStoreVerificationPayload =
+              purchase.verificationData.serverVerificationData;
+          lastPurchaseToken = purchase.purchaseID ??
+              purchase.verificationData.serverVerificationData;
+          lastPurchasedProductId = purchase.productID;
+        }
         InAppPurchase.instance.completePurchase(purchase);
         completer?.complete(StorePurchaseState.purchased);
         _pendingPurchases.remove(purchase.productID);

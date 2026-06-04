@@ -49,6 +49,44 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     }
   }
 
+  Future<void> _restorePurchases() async {
+    setState(() {
+      _purchasing = true;
+      _purchaseMessage = null;
+    });
+    try {
+      final restored = await StoreService.restorePurchasesAndWait();
+      var verified = 0;
+      for (final purchase in restored) {
+        final error = await SubscriptionService.verifyPurchase(
+          productId: purchase.productId,
+          purchaseToken: purchase.purchaseToken,
+          storePayload: purchase.storePayload,
+        );
+        if (error == null) verified++;
+      }
+      await _loadTier();
+      if (!mounted) return;
+      final message = verified > 0
+          ? 'Restored $verified subscription${verified == 1 ? '' : 's'}.'
+          : restored.isEmpty
+              ? 'No active subscriptions found for this store account.'
+              : 'Could not verify restored purchases. Try again or contact support.';
+      setState(() {
+        _purchasing = false;
+        _purchaseMessage = message;
+      });
+      VFeedback.showMessage(context, message);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _purchasing = false;
+          _purchaseMessage = 'Restore failed. Try again.';
+        });
+      }
+    }
+  }
+
   Future<void> _purchase(SubscriptionTier tier) async {
     setState(() {
       _purchasing = true;
@@ -247,13 +285,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 Center(
                   child: VButton(
                     label: 'Restore Purchases',
-                    onPressed: () async {
-                      await StoreService.restorePurchases();
-                      await _loadTier();
-                      if (mounted) {
-                        VFeedback.showMessage(context, 'Purchases restored');
-                      }
-                    },
+                    onPressed: _restorePurchases,
                     variant: ButtonVariant.text,
                   ),
                 ),
