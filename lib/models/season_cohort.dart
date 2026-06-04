@@ -4,6 +4,7 @@ class SeasonCohortSummary {
   final String worldId;
   final String displayName;
   final int memberCount;
+  final String? matchBand;
 
   const SeasonCohortSummary({
     required this.id,
@@ -11,6 +12,7 @@ class SeasonCohortSummary {
     required this.worldId,
     required this.displayName,
     required this.memberCount,
+    this.matchBand,
   });
 
   factory SeasonCohortSummary.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class SeasonCohortSummary {
       worldId: json['world_id'] as String,
       displayName: json['display_name'] as String? ?? 'Cohort',
       memberCount: (json['member_count'] as num?)?.toInt() ?? 0,
+      matchBand: json['match_band'] as String?,
     );
   }
 }

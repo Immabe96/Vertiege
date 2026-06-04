@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../models/channel.dart';
 import '../models/message.dart';
 import '../services/permission_service.dart';
+import '../services/world_activity_service.dart';
 import '../state/channel_provider.dart';
 import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
@@ -69,6 +70,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     notifier.subscribeToChannel(widget.channelId);
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      unawaited(WorldActivityService.touchWorld(widget.worldId));
       final resident = ref.read(residentProvider).resident;
       if (resident == null) return;
       if (!ref.read(chatProvider).channelReads.containsKey(widget.channelId)) {

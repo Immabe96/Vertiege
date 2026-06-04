@@ -5,6 +5,7 @@ import '../../theme/v_tokens.dart';
 class StreakDisplay extends StatelessWidget {
   final int streakCount;
   final int streakShields;
+  final String? questNudge;
 
   static const _milestones = [3, 7, 14, 30, 60, 90, 180, 365];
 
@@ -12,6 +13,7 @@ class StreakDisplay extends StatelessWidget {
     super.key,
     required this.streakCount,
     this.streakShields = 0,
+    this.questNudge,
   });
 
   int? _nextMilestone() {
@@ -177,6 +179,17 @@ class StreakDisplay extends StatelessWidget {
                         fontWeight: VFontWeight.semiBold,
                       ),
                     ),
+                  if (questNudge != null && questNudge!.isNotEmpty) ...[
+                    const SizedBox(height: VSpacing.xs),
+                    Text(
+                      questNudge!,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

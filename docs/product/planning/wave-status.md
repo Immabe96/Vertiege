@@ -8,7 +8,10 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 `20260604143000_governance_job_rank_and_profile_label` (profile labels, job/rank governance),  
 `20260605150000_subscription_verify_platform` (platform + receipt digest),  
 `20260606120000_poll_rpc_season_cohorts` (create_world_poll RPC, season cohort tables),  
-`20260607120000_governance_audit_season_challenge_seed` (immediate governance audit + season challenge seed).
+`20260607120000_governance_audit_season_challenge_seed` (immediate governance audit + season challenge seed),  
+`20260616120000_onboarding_streak_tz`,  
+`20260617120000_job_application_notifications`,  
+`20260618120000_progression_fairness` (cohort cron, velocity cap, coin ledger, last_active).
 
 ---
 
@@ -133,6 +136,28 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 **Migration:** `20260617120000_job_application_notifications.sql` — pushed to Supabase
 
 **Tests:** 218 green locally.
+
+---
+
+## Wave 18 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| `world_members.last_active_at` + touch RPC | Done — channel open, post, join |
+| Season cohort weekly cron + MV refresh | Done — migration + pg_cron (staging) |
+| Fair matchmaking `match_band` | Done — `ensure_season_cohort_membership` |
+| League vs season copy | Done — challenges + season headers |
+| Collective challenge labels | Done — “World goal” + world progress copy |
+| Daily quest ↔ streak nudge | Done — `StreakDisplay.questNudge` on identity |
+| XP velocity flag + soft daily cap | Done — `award_activity_xp` |
+| Hall of Ascension season narrative | Done — banner + link to `/season` |
+| `featured_achievement_ids` + RPC | Done — `ProfileService` read/set |
+| Coin ledger (`coin_transactions`) | Done — `CoinLedgerService` |
+| `season_cohort_scores` MV | Done |
+
+**Migration:** `20260618120000_progression_fairness.sql` — pushed to Supabase
+
+**Tests:** 220 green locally (Wave 18 cohort + coin ledger tests added).
 
 ---
 

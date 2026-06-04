@@ -80,6 +80,25 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
           ? CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      VSpacing.md,
+                      VSpacing.md,
+                      VSpacing.md,
+                      0,
+                    ),
+                    child: Text(
+                      'Season ranks worlds by growth — not the same as weekly Ascension Leagues (personal XP ladders).',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
                   child: _SeasonHero(
                     season: season,
                     unclaimedCount: unclaimed.length,
@@ -209,7 +228,8 @@ class _SeasonCohortCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${cohort.memberCount} members competing in season challenges',
+                  '${cohort.memberCount} members competing in season challenges'
+                  '${cohort.matchBand != null ? ' · ${cohort.matchBand} band' : ''}',
                   style: theme.textTheme.bodySmall,
                 ),
               ],

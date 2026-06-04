@@ -20,6 +20,7 @@ import '../services/storage_service.dart';
 import '../services/media_service.dart';
 import '../services/post_service.dart';
 import '../services/world_service.dart';
+import '../services/world_activity_service.dart';
 import '../repositories/post_repository.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
@@ -348,6 +349,7 @@ class PostNotifier extends Notifier<PostState> {
         ),
       );
       ref.read(residentProvider.notifier).addRep(worldId, 5);
+      unawaited(WorldActivityService.touchWorld(worldId));
       _checkPostMilestones(residentId);
       _triggerPrestigeUpdate(worldId);
     } else if (result.queued) {

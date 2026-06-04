@@ -23,6 +23,7 @@ import '../utils/haptics.dart';
 import '../utils/local_date.dart';
 import '../utils/streak_check_in.dart';
 import '../services/onboarding_funnel_sync.dart';
+import '../services/world_activity_service.dart';
 import 'achievement_provider.dart';
 import 'world_provider.dart';
 import 'post_provider.dart';
@@ -766,6 +767,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       residentId: r.id,
       residentName: r.name,
     );
+    unawaited(WorldActivityService.touchWorld(worldId));
     await _worldRepository.saveProfileMembership(updatedResident);
 
     worldNotifier.incrementMemberCount(worldId);

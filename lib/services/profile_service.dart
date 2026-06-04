@@ -71,6 +71,31 @@ class ProfileService {
     }).eq('id', userId);
   }
 
+  static Future<List<String>> getFeaturedAchievementIds(String userId) async {
+    if (!isSupabaseConfigured()) return [];
+    final client = getSupabase();
+    final row = await client
+        .from('profiles')
+        .select('featured_achievement_ids')
+        .eq('id', userId)
+        .maybeSingle();
+    if (row == null) return [];
+    final raw = row['featured_achievement_ids'];
+    if (raw is! List) return [];
+    return raw.map((e) => e.toString()).toList();
+  }
+
+  static Future<List<String>> setFeaturedAchievements(List<String> ids) async {
+    if (!isSupabaseConfigured()) return [];
+    final trimmed = ids.take(3).toList();
+    final raw = await getSupabase().rpc(
+      'set_featured_achievements',
+      params: {'p_ids': trimmed},
+    );
+    if (raw is! List) return trimmed;
+    return raw.map((e) => e.toString()).toList();
+  }
+
   static Future<Map<String, dynamic>?> getOnboardingFunnel(String userId) async {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();

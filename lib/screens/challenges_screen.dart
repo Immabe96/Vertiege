@@ -122,6 +122,11 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
               : ListView(
                   padding: const EdgeInsets.all(VSpacing.md),
                   children: [
+                    const _ProgressionScopeNote(
+                      title: 'World & season challenges',
+                      body:
+                          'World challenges are per-realm goals. Season cohort challenges are shared with everyone in your world\'s active season group — different from weekly Ascension Leagues.',
+                    ),
                     if (_cohort != null) _CohortBanner(cohort: _cohort!),
                     if (challengeState.activeChallenges.isNotEmpty) ...[
                       const _SectionLabel(title: 'World'),
@@ -154,6 +159,37 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                     ],
                   ],
                 ),
+    );
+  }
+}
+
+class _ProgressionScopeNote extends StatelessWidget {
+  final String title;
+  final String body;
+
+  const _ProgressionScopeNote({required this.title, required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: VSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: VFontWeight.semiBold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            body,
+            style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -210,7 +246,8 @@ class _CohortBanner extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${cohort.memberCount} member${cohort.memberCount == 1 ? '' : 's'} this season',
+                  '${cohort.memberCount} member${cohort.memberCount == 1 ? '' : 's'} this season'
+                  '${cohort.matchBand != null ? ' · ${cohort.matchBand} band' : ''}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: isDark
                         ? VColors.onSurfaceVariantDark
@@ -246,6 +283,7 @@ class _ChallengeCard extends ConsumerWidget {
     final progressPercent = targetValue > 0
         ? (currentValue / targetValue).clamp(0.0, 1.0)
         : 0.0;
+    final isCollective = challenge.type == 'collective';
 
     return Container(
       margin: const EdgeInsets.only(bottom: VSpacing.md),
@@ -286,11 +324,35 @@ class _ChallengeCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        challenge.title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: VFontWeight.semiBold,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              challenge.title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: VFontWeight.semiBold,
+                              ),
+                            ),
+                          ),
+                          if (isCollective)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: VSpacing.sm,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: VColors.tertiary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(VRadius.pill),
+                              ),
+                              child: Text(
+                                'World goal',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: VColors.tertiary,
+                                  fontWeight: VFontWeight.semiBold,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       Text(
                         challenge.description,
@@ -324,7 +386,9 @@ class _ChallengeCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '$currentValue / $targetValue',
+                  isCollective
+                      ? 'World progress $currentValue / $targetValue'
+                      : '$currentValue / $targetValue',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: isDark
                         ? VColors.onSurfaceVariantDark

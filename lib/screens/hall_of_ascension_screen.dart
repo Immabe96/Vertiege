@@ -53,6 +53,17 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
       ],
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.sm,
+              VSpacing.md,
+              0,
+            ),
+            child: _SeasonNarrativeBanner(
+              onOpenSeason: () => context.push('/season'),
+            ),
+          ),
           if (resident != null) ...[
             _PrestigeHeader(
               resident: resident,
@@ -70,6 +81,52 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
                 FTabEntry(label: const Text('ACHIEVEMENTS'), child: _AchievementLeaderboard()),
                 FTabEntry(label: const Text('REFERRALS'), child: _ReferralLeaderboard()),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeasonNarrativeBanner extends StatelessWidget {
+  final VoidCallback onOpenSeason;
+
+  const _SeasonNarrativeBanner({required this.onOpenSeason});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(VSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        border: Border.all(
+          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Season 1 is live',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: VFontWeight.semiBold,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            'Ascension Leagues track your weekly XP against peers. Season cohorts track your world\'s growth together — different ladders, same journey.',
+            style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: onOpenSeason,
+              child: const Text('View season standings'),
             ),
           ),
         ],

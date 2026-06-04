@@ -15,6 +15,7 @@ import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../state/achievement_provider.dart';
+import '../../state/quest_provider.dart';
 import '../../state/post_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -222,6 +223,12 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final residentState = ref.watch(residentProvider);
     final resident = residentState.resident;
     final achievements = ref.watch(achievementProvider);
+    final questState = ref.watch(questProvider);
+    final incompleteQuests =
+        questState.quests.where((q) => !q.isComplete).length;
+    final questNudge = incompleteQuests > 0
+        ? 'Finish today\'s daily quests to keep momentum.'
+        : null;
     if (!_funnelOpenedWorld || !_funnelOpenedNexus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _loadFunnelPrefs();
@@ -659,6 +666,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ? StreakDisplay(
                     streakCount: resident.streakCount,
                     streakShields: resident.streakShields,
+                    questNudge: questNudge,
                   )
                 : Row(
                     children: [

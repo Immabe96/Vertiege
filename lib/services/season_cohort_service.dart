@@ -40,6 +40,7 @@ class SeasonCohortService {
       worldId: map['world_id'] as String? ?? '',
       displayName: map['display_name'] as String? ?? 'Cohort',
       memberCount: (map['member_count'] as num?)?.toInt() ?? 0,
+      matchBand: map['match_band'] as String?,
     );
   }
 }
