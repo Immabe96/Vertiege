@@ -273,7 +273,7 @@ class _ShopCard extends ConsumerWidget {
 
     return GestureDetector(
       onTap: canAfford ? () => _buyItem(context, ref, item) : null,
-      onLongPress: () => _previewItem(context, item),
+      onLongPress: () => _previewItem(context, ref, item),
       child: FCard.raw(
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.md),
@@ -382,7 +382,7 @@ class _ShopCard extends ConsumerWidget {
     );
   }
 
-  void _previewItem(BuildContext context, _ShopItem item) {
+  void _previewItem(BuildContext context, WidgetRef ref, _ShopItem item) {
     final resident = ref.read(residentProvider).resident;
     showModalBottomSheet<void>(
       context: context,
@@ -399,10 +399,16 @@ class _ShopCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: VSpacing.md),
-            CosmeticAvatar(
-              imageUrl: resident?.avatarUrl,
-              size: 96,
-              borderColor: item.color,
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: item.color, width: 3),
+              ),
+              child: CosmeticAvatar(
+                imageUrl: resident?.avatarUrl,
+                seed: resident?.id,
+                size: 96,
+              ),
             ),
             const SizedBox(height: VSpacing.sm),
             Text(
@@ -428,16 +434,6 @@ class _ShopCard extends ConsumerWidget {
     WidgetRef ref,
     _ShopItem item,
   ) async {
-    if (category == _ShopCategory.boosts || category == _ShopCategory.passes) {
-      if (context.mounted) {
-        VFeedback.showMessage(
-          context,
-          'Paid progression and world access are disabled in v1.',
-        );
-      }
-      return;
-    }
-
     if (category == _ShopCategory.cosmetics) {
       final cosmeticId = item.name.toLowerCase().replaceAll(' ', '_');
       final error = await CosmeticPurchaseService.purchaseWithCoins(

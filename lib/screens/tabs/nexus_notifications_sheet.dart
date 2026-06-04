@@ -268,6 +268,10 @@ class NotificationList extends ConsumerWidget {
       NotificationType.allegianceRequest => VColors.tertiary,
       NotificationType.achievementApproved => VColors.success,
       NotificationType.achievementRejected => VColors.error,
+      NotificationType.jobApplicationAccepted => VColors.success,
+      NotificationType.jobApplicationRejected => VColors.error,
+      NotificationType.governanceProposalApproved => VColors.success,
+      NotificationType.governanceProposalRejected => VColors.error,
     };
   }
 
@@ -287,6 +291,10 @@ class NotificationList extends ConsumerWidget {
       NotificationType.allegianceRequest => Icons.handshake,
       NotificationType.achievementApproved => Icons.verified,
       NotificationType.achievementRejected => Icons.cancel_outlined,
+      NotificationType.jobApplicationAccepted => Icons.work_outline,
+      NotificationType.jobApplicationRejected => Icons.work_off_outlined,
+      NotificationType.governanceProposalApproved => Icons.how_to_vote,
+      NotificationType.governanceProposalRejected => Icons.block,
     };
   }
 }

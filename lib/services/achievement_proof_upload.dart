@@ -56,7 +56,8 @@ class AchievementProofUpload {
     final userId = maybeSupabase()?.auth.currentUser?.id;
     if (userId == null) return null;
     final client = getSupabase();
-    final compressed = await _compressForUpload(filePath);
+    final compressed =
+        await _compressForUpload(filePath) ?? filePath;
     final ext = 'jpg';
     final fileName =
         '$userId/$achievementId/${DateTime.now().millisecondsSinceEpoch}.$ext';

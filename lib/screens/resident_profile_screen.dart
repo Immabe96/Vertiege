@@ -103,7 +103,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       title: _profile?.name ?? 'Resident',
       showBack: true,
       headerActions: _profile == null
-          ? null
+          ? const []
           : [
               IconButton(
                 tooltip: 'Share profile',

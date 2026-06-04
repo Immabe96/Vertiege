@@ -440,6 +440,8 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     NotificationType.achievementRejected => 'Achievement review',
     NotificationType.jobApplicationAccepted => 'Role application',
     NotificationType.jobApplicationRejected => 'Role application',
+    NotificationType.governanceProposalApproved => 'Proposal approved',
+    NotificationType.governanceProposalRejected => 'Proposal declined',
   };
 
   String? _routeForNotification(AppNotification notification) =>

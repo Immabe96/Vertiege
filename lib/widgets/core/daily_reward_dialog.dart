@@ -58,13 +58,11 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _iconScale =
-        TweenSequence<double>([
-          TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.5), weight: 60),
-          TweenSequenceItem(tween: Tween(begin: 1.5, end: 1.0), weight: 40),
-        ]).animate(
-          CurvedAnimation(parent: _iconController, curve: Curves.elasticOut),
-        );
+    // TweenSequence requires t in [0, 1]; elastic curves can overshoot — keep parent linear.
+    _iconScale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.5), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 1.5, end: 1.0), weight: 40),
+    ]).animate(_iconController);
 
     // Start the icon animation after a brief delay
     Future.delayed(const Duration(milliseconds: 150), () {

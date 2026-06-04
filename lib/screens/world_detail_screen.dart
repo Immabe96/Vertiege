@@ -504,12 +504,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     _animateJoinButton();
     await ref.read(residentProvider.notifier).joinWorld(widget.worldId);
     if (!mounted) return;
-    final world = ref.read(worldProvider).worlds[widget.worldId];
-    if (world == null) return;
-    await _maybePromptFeedDefault(world);
+    final joinedWorld = ref.read(worldProvider).worlds[widget.worldId];
+    if (joinedWorld == null) return;
+    await _maybePromptFeedDefault(joinedWorld);
     if (!mounted) return;
     setState(() => _defaultTabApplied = false);
-    _applyDefaultTabIfNeeded(world, true);
+    _applyDefaultTabIfNeeded(joinedWorld, true);
   }
 
   Future<void> _maybePromptFeedDefault(World world) async {
