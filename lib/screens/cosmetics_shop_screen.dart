@@ -459,8 +459,10 @@ class _ShopCard extends ConsumerWidget {
                     ),
                     const Spacer(),
                     FButton(
-                      variant: canAfford ? .primary : .outline,
-                      size: .sm,
+                      variant: canAfford
+                          ? FButtonVariant.primary
+                          : FButtonVariant.outline,
+                      size: FButtonSizeVariant.sm,
                       onPress: canAfford
                           ? () => _buyItem(context, ref, item)
                           : null,
@@ -472,7 +474,6 @@ class _ShopCard extends ConsumerWidget {
             ),
           ),
         ),
-      ),
     );
   }
 

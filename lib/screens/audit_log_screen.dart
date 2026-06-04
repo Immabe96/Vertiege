@@ -159,6 +159,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                     entry['created_at'] ?? '',
                   );
                   final count = details?['count'] as int?;
+                  final govDetail = _governanceDetail(details);
 
                   return Padding(
                     padding: EdgeInsets.only(
@@ -203,8 +204,6 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                                         : VColors.onSurface,
                                   ),
                                 ),
-                                final govDetail =
-                                    _governanceDetail(details);
                                 if (govDetail != null)
                                   Text(
                                     govDetail,
