@@ -5,6 +5,15 @@ import '../models/invite.dart';
 import '../utils/id_generator.dart';
 import 'supabase.dart';
 
+class InviteRedeemResult {
+  final String? worldId;
+  final String? errorMessage;
+
+  const InviteRedeemResult({this.worldId, this.errorMessage});
+
+  bool get succeeded => worldId != null;
+}
+
 class InviteService {
   static const _pendingInviteCodeKey = 'pending_invite_code';
 
@@ -20,12 +29,54 @@ class InviteService {
     await prefs.setString(_pendingInviteCodeKey, normalized);
   }
 
-  static Future<String?> takePendingInvitePath() async {
+  static Future<String?> _consumePendingCode() async {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString(_pendingInviteCodeKey);
     if (code == null || code.trim().isEmpty) return null;
     await prefs.remove(_pendingInviteCodeKey);
-    return invitePath(code);
+    return code.trim();
+  }
+
+  /// Accepts a saved invite code after onboarding and returns the joined world.
+  static Future<InviteRedeemResult> redeemPendingInvite({
+    required String residentId,
+    required String residentName,
+  }) async {
+    final code = await _consumePendingCode();
+    if (code == null) return const InviteRedeemResult();
+    return redeemInviteCode(
+      code: code,
+      residentId: residentId,
+      residentName: residentName,
+    );
+  }
+
+  /// Validates and accepts an invite code without persisting it.
+  static Future<InviteRedeemResult> redeemInviteCode({
+    required String code,
+    required String residentId,
+    required String residentName,
+  }) async {
+    if (!isSupabaseConfigured()) {
+      return const InviteRedeemResult(
+        errorMessage: 'Sign in to accept this invite.',
+      );
+    }
+
+    final invite = await validateInvite(code);
+    if (invite == null || !invite.isValid) {
+      return const InviteRedeemResult(
+        errorMessage: 'Invalid or expired invite code.',
+      );
+    }
+
+    await acceptInvite(
+      invite.id,
+      invite.worldId,
+      residentId,
+      residentName: residentName,
+    );
+    return InviteRedeemResult(worldId: invite.worldId);
   }
 
   static Future<WorldInvite?> createInvite({

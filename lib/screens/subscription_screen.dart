@@ -77,6 +77,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       final verifyError = await SubscriptionService.verifyPurchase(
         productId: productId,
         purchaseToken: token,
+        storePayload: StoreService.lastStoreVerificationPayload,
       );
       if (verifyError != null) {
         throw StateError(verifyError);
@@ -229,7 +230,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   child: Text(
                     'Purchases are billed through your '
                     '${defaultTargetPlatform == TargetPlatform.iOS ? 'App Store' : 'Google Play'} account.\n'
-                    'All subscriptions support the Vertiege realm. Cancel anytime.',
+                    'All subscriptions support the Vertiege realm. Cancel anytime.\n'
+                    'Entitlements are verified on our servers after each purchase.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark

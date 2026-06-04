@@ -43,6 +43,7 @@ class StoreService {
   static StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   static final Map<String, Completer<StorePurchaseState>> _pendingPurchases = {};
   static String? lastPurchaseToken;
+  static String? lastStoreVerificationPayload;
   static String? lastPurchasedProductId;
 
   /// Whether the store is available on this device.
@@ -143,6 +144,8 @@ class StoreService {
       final completer = _pendingPurchases[purchase.productID];
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
+        lastStoreVerificationPayload =
+            purchase.verificationData.serverVerificationData;
         lastPurchaseToken = purchase.purchaseID ??
             purchase.verificationData.serverVerificationData;
         lastPurchasedProductId = purchase.productID;

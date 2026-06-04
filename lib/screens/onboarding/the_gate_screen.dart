@@ -8,7 +8,7 @@ import '../../config/professions.dart';
 import '../../router/world_navigation.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
-import '../../services/invite_service.dart';
+import '../../services/invite_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../state/world_provider.dart';
@@ -280,13 +280,15 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
         duration: const Duration(seconds: 3),
       );
 
-      final invitePath = await InviteService.takePendingInvitePath();
-      context.go(
-        invitePath ??
-            (_joinedStarterWorldId == null
-                ? '/'
-                : exploreWorldPath(_joinedStarterWorldId!)),
+      final fallback = _joinedStarterWorldId == null
+          ? '/'
+          : exploreWorldPath(_joinedStarterWorldId!);
+      final route = await routeAfterAuth(
+        ref,
+        fallback: fallback,
+        feedbackContext: context,
       );
+      context.go(route);
     }
   }
 

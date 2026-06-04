@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/invite_service.dart';
+import '../../services/invite_navigation.dart';
 import '../../services/admin_access_service.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
@@ -118,9 +118,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    final invitePath = await InviteService.takePendingInvitePath();
+    final route = await routeAfterAuth(ref, feedbackContext: context);
     if (!mounted) return;
-    context.go(invitePath ?? '/');
+    context.go(route);
   }
 
   String? _bootstrapMessage(SupabaseBootstrapResult bootstrap) {

@@ -577,16 +577,22 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
       return;
     }
 
-    await InviteService.acceptInvite(
-      invite.id,
-      invite.worldId,
-      resident.id,
+    final result = await InviteService.redeemInviteCode(
+      code: widget.code,
+      residentId: resident.id,
       residentName: resident.name,
     );
     if (!mounted) return;
-    await ref.read(residentProvider.notifier).joinWorld(invite.worldId);
+    if (!result.succeeded) {
+      setState(() {
+        _loading = false;
+        _error = result.errorMessage ?? 'Something went wrong';
+      });
+      return;
+    }
+    await ref.read(residentProvider.notifier).joinWorld(result.worldId!);
     if (!mounted) return;
-    context.go(exploreWorldPath(invite.worldId));
+    context.go(exploreWorldPath(result.worldId!));
   }
 
   @override

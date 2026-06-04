@@ -1,4 +1,9 @@
-﻿import '../services/supabase.dart';
+﻿import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
+import 'package:flutter/material.dart' show TargetPlatform;
+
+import '../services/supabase.dart';
 import '../theme/v_colors.dart';
 
 enum SubscriptionTier { resident, patrician, sovereignElite }
@@ -65,10 +70,21 @@ class SubscriptionService {
     _cachedUserId = null;
   }
 
+  static String purchasePlatformKey() {
+    if (kIsWeb) return 'unknown';
+    if (!kIsWeb && Platform.isIOS) return 'ios';
+    if (!kIsWeb && Platform.isAndroid) return 'android';
+    if (defaultTargetPlatform == TargetPlatform.iOS) return 'ios';
+    if (defaultTargetPlatform == TargetPlatform.android) return 'android';
+    return 'unknown';
+  }
+
   /// Receipt-backed entitlement (Wave 9). [purchaseToken] from the store purchase.
   static Future<String?> verifyPurchase({
     required String productId,
     required String purchaseToken,
+    String? storePayload,
+    String? platform,
   }) async {
     final client = maybeSupabase();
     if (client == null) return 'Sign in to verify purchase.';
@@ -77,6 +93,9 @@ class SubscriptionService {
       params: {
         'p_product_id': productId,
         'p_purchase_token': purchaseToken,
+        'p_platform': platform ?? purchasePlatformKey(),
+        if (storePayload != null && storePayload.isNotEmpty)
+          'p_store_payload': storePayload,
       },
     );
     if (result is! Map) return 'Unexpected response';

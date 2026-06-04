@@ -12,7 +12,7 @@ import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
-import '../../services/invite_service.dart';
+import '../../services/invite_navigation.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
@@ -179,8 +179,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await OnboardingFunnelPrefs.markJustFinishedOnboarding();
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.onboardingCompleted));
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.gateCompleted));
-    final invitePath = await InviteService.takePendingInvitePath();
-    if (mounted) context.go(invitePath ?? '/');
+    final route = await routeAfterAuth(ref, feedbackContext: context);
+    if (mounted) context.go(route);
   }
 
   @override
