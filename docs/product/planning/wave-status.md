@@ -36,7 +36,7 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ## Follow-ups (product / infra)
 
-1. **Store receipt validation** — Edge function scaffold `verify-subscription-purchase` (stub → RPC); live Apple/Google verify TODO. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
+1. **Store receipt validation** — Edge function deployed (stub → RPC); live Apple/Google verify TODO. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
 2. **Poll composer** — post feed still blocks inline polls (by design).
 3. **Wave 6** — run sign-off checklist on device / API 30 emulator.
-4. **Wave 12** — `develop` pushed; confirm CI green, then store build. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
+4. **Wave 12** — `develop` on origin; CI verify + APK green; iOS job uses Xcode 26.1+ for `device_info_plus`. Device UAT + store build remain.

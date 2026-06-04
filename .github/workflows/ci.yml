@@ -85,7 +85,8 @@ jobs:
 
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.4'
+          # device_info_plus 12.4+ requires iOS 26.1 SDK (isiOSAppOnVision).
+          xcode-version: '26.1'
 
       - uses: subosito/flutter-action@v2
         with:

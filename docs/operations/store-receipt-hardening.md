@@ -4,16 +4,25 @@ Current behavior: the app calls `verify_subscription_purchase` with platform, pu
 
 ## Edge function (scaffold)
 
-Deploy stub (RPC delegate, documents env vars):
+**Status (project `wjaphoaxalvgjnrwqjwe`):** deployed `verify-subscription-purchase` (ACTIVE), secret `STORE_RECEIPT_VERIFY_MODE=stub`, health `GET` returns `"mode":"stub"`.
+
+Deploy / rotate:
 
 ```bash
+supabase login   # paste sbp_… token in terminal only — never in chat
 supabase functions deploy verify-subscription-purchase
 supabase secrets set STORE_RECEIPT_VERIFY_MODE=stub
 ```
 
 Details: [supabase/functions/verify-subscription-purchase/README.md](../../supabase/functions/verify-subscription-purchase/README.md).
 
-Health: `GET /functions/v1/verify-subscription-purchase` returns `mode` and `env_documentation`.
+Health (uses `.env` anon key):
+
+```bash
+curl -sS "$SUPABASE_URL/functions/v1/verify-subscription-purchase" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $SUPABASE_ANON_KEY"
+```
 
 ## Before production subscriptions
 
