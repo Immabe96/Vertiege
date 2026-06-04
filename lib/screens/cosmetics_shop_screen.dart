@@ -367,24 +367,12 @@ class _ShopCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: canAfford ? () => _buyItem(context, ref, item) : null,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? VColors.glassBackgroundDark
-                : VColors.glassBackground,
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(VSpacing.md),
-            child: Column(
+    return GestureDetector(
+      onTap: canAfford ? () => _buyItem(context, ref, item) : null,
+      child: FCard.raw(
+        child: Padding(
+          padding: const EdgeInsets.all(VSpacing.md),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -470,34 +458,13 @@ class _ShopCard extends ConsumerWidget {
                       ),
                     ),
                     const Spacer(),
-                    SizedBox(
-                      height: 28,
-                      child: FilledButton(
-                        onPressed: canAfford
-                            ? () => _buyItem(context, ref, item)
-                            : null,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: canAfford
-                              ? VColors.tertiary
-                              : (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant),
-                          foregroundColor: canAfford
-                              ? VColors.onTertiary
-                              : (isDark
-                                  ? VColors.surfaceDark
-                                  : VColors.surface),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: VSpacing.sm,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          textStyle: const TextStyle(
-                            fontSize: VFontSize.labelSm,
-                          ),
-                        ),
-                        child: Text(canAfford ? 'BUY' : 'LOCKED'),
-                      ),
+                    FButton(
+                      variant: canAfford ? .primary : .outline,
+                      size: .sm,
+                      onPress: canAfford
+                          ? () => _buyItem(context, ref, item)
+                          : null,
+                      child: Text(canAfford ? 'Buy' : 'Locked'),
                     ),
                   ],
                 ),

@@ -26,4 +26,10 @@ Vertiege quality work should **not** add visible chrome by default. Use these ru
 | Global people search | `ResidentSearchService` + local world members |
 | Council review | `ExpansionTile` — title + one line; actions inside |
 
+## Wave 12 Forui batch (in progress)
+
+- Create world: `FTextFormField`, `FSwitch`, `VSurfaceCard`, collapsed channels
+- Shop: `FCard` + `FButton` (no Material buy chips)
+- Settings: `VThemeSchemePicker` instead of `SegmentedButton`
+
 See also: [wave-status.md](../product/planning/wave-status.md), [perfection-backlog.md](../product/planning/perfection-backlog.md).

@@ -16,6 +16,7 @@ import '../state/achievement_provider.dart';
 import '../widgets/worlds/dominion_type_picker.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/core/v_surface_card.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -205,7 +206,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: ListView(
         padding: const EdgeInsets.all(VSpacing.md),
         children: [
-          _Card(
+          VSurfaceCard(
             padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
@@ -278,7 +279,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: ListView(
         padding: const EdgeInsets.all(VSpacing.md),
         children: [
-          _Card(
+          VSurfaceCard(
             padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
@@ -388,47 +389,18 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
           padding: const EdgeInsets.all(VSpacing.md),
           children: [
             // ── World Details ──────────────────────────────────────
-            _Card(
-              padding: const EdgeInsets.all(VSpacing.md),
+            VSurfaceCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(VIcons.globe, color: VColors.primary, size: 20),
-                      const SizedBox(width: VSpacing.sm),
-                      Text('World Details', style: theme.textTheme.titleMedium),
-                    ],
-                  ),
+                  Text('World details', style: theme.textTheme.titleMedium),
                   const SizedBox(height: VSpacing.md),
-                  TextFormField(
-                    controller: _nameController,
-                    style: TextStyle(
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  FTextFormField(
+                    control: FTextFieldControl.managed(
+                      controller: _nameController,
                     ),
-                    decoration: InputDecoration(
-                      labelText: 'World Name',
-                      hintText: 'Enter a name for your world',
-                      hintStyle: TextStyle(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                      border: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: VColors.glassBorder),
-                      ),
-                      enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: VColors.glassBorder),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: VColors.primary),
-                      ),
-                      prefixIcon: const Icon(VIcons.edit),
-                      filled: true,
-                      fillColor: isDark
-                          ? VColors.glassBackgroundDark
-                          : VColors.glassBackground,
-                    ),
+                    label: const Text('World name'),
+                    hint: 'At least 3 characters',
                     textCapitalization: TextCapitalization.words,
                     maxLength: 50,
                     validator: (value) {
@@ -442,34 +414,12 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     },
                   ),
                   const SizedBox(height: VSpacing.md),
-                  TextFormField(
-                    controller: _descController,
-                    style: TextStyle(
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  FTextFormField(
+                    control: FTextFieldControl.managed(
+                      controller: _descController,
                     ),
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      hintText: 'What is your world about?',
-                      hintStyle: TextStyle(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                      border: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: VColors.glassBorder),
-                      ),
-                      enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: VColors.glassBorder),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: VColors.primary),
-                      ),
-                      prefixIcon: const Icon(Icons.description),
-                      filled: true,
-                      fillColor: isDark
-                          ? VColors.glassBackgroundDark
-                          : VColors.glassBackground,
-                    ),
+                    label: const Text('Description'),
+                    hint: 'What is your world about?',
                     textCapitalization: TextCapitalization.sentences,
                     maxLines: 3,
                     maxLength: 500,
@@ -484,51 +434,18 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     },
                   ),
                   const SizedBox(height: VSpacing.md),
-                  Text('Choose an Icon', style: theme.textTheme.labelLarge),
+                  Text('Icon', style: theme.textTheme.labelLarge),
                   const SizedBox(height: VSpacing.sm),
                   Wrap(
-                    spacing: VSpacing.sm,
-                    runSpacing: VSpacing.sm,
+                    spacing: VSpacing.xs,
+                    runSpacing: VSpacing.xs,
                     children: _iconChoices.map((choice) {
                       final isSelected = _selectedIcon == choice.id;
-                      return ChoiceChip(
-                        label: Icon(
-                          choice.icon,
-                          size: 24,
-                          color: isSelected
-                              ? VColors.onPrimaryContainer
-                              : (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant),
-                        ),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => _selectedIcon = choice.id);
-                          }
-                        },
-                        avatar: isSelected
-                            ? Icon(
-                                Icons.check_circle,
-                                size: 16,
-                                color: VColors.onPrimaryContainer,
-                              )
-                            : null,
-                        selectedColor: isDark
-                            ? VColors.primaryContainerDark
-                            : VColors.primaryContainer,
-                        backgroundColor: isDark
-                            ? VColors.glassBackgroundDark
-                            : VColors.glassBackground,
-                        side: BorderSide(
-                          color: isSelected
-                              ? VColors.primary
-                              : (isDark
-                                  ? VColors.glassBorderDark
-                                  : VColors.glassBorder),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.all(VSpacing.sm),
+                      return FButton.icon(
+                        variant: isSelected ? .primary : .outline,
+                        onPress: () =>
+                            setState(() => _selectedIcon = choice.id),
+                        child: Icon(choice.icon, size: 22),
                       );
                     }).toList(),
                   ),
@@ -538,9 +455,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: VSpacing.md),
 
-            // ── Dominion Type ────────────────────────────────────────
-            _Card(
-              padding: const EdgeInsets.all(VSpacing.md),
+            VSurfaceCard(
               child: DominionTypePicker(
                 selected: _selectedDominionType,
                 onSelected: (type) => setState(() => _selectedDominionType = type),
@@ -549,47 +464,43 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: VSpacing.md),
 
-            // ── Channels ───────────────────────────────────────────
-            _Card(
-              padding: const EdgeInsets.all(VSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(VIcons.tag, color: VColors.primary, size: 20),
-                      const SizedBox(width: VSpacing.sm),
-                      Text(
-                        'Default Channels',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                    ],
+            VSurfaceCard(
+              child: Theme(
+                data: theme.copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Text(
+                    'Starting channels',
+                    style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: VSpacing.xs),
-                  Text(
-                    'These channels will be created for your world.',
+                  subtitle: Text(
+                    '${_channelToggles.values.where((v) => v).length} selected',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark
                           ? VColors.onSurfaceVariantDark
                           : VColors.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: VSpacing.sm),
-                  ..._defaultChannels.map(
-                    (channel) => SwitchListTile(
-                      title: Text(channel.label),
-                      value: _channelToggles[channel.key]!,
-                      onChanged: (value) {
-                        setState(() => _channelToggles[channel.key] = value);
-                      },
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      activeTrackColor: isDark
-                          ? VColors.primaryContainerDark
-                          : VColors.primaryContainer,
-                    ),
-                  ),
-                ],
+                  initiallyExpanded: false,
+                  children: _defaultChannels
+                      .map(
+                        (channel) => Padding(
+                          padding: const EdgeInsets.only(bottom: VSpacing.xs),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text(channel.label)),
+                              FSwitch(
+                                value: _channelToggles[channel.key]!,
+                                onChange: (v) => setState(
+                                  () => _channelToggles[channel.key] = v,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
             ),
 
@@ -625,29 +536,6 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Card extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-
-  const _Card({required this.child, this.padding});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
-      decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
-      ),
-      child: child,
     );
   }
 }

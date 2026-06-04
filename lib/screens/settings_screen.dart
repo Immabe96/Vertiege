@@ -28,6 +28,7 @@ import '../ui/buttons/v_button.dart';
 import '../forui/v_hub_page.dart';
 import '../widgets/v_section_list.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/core/v_theme_scheme_picker.dart';
 import '../widgets/core/v_dialog.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
@@ -822,28 +823,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
           const SizedBox(height: VSpacing.sm),
-          SegmentedButton<ThemeScheme>(
-            segments: const [
-              ButtonSegment(
-                value: ThemeScheme.system,
-                label: Text('Auto'),
-                icon: Icon(Icons.brightness_auto, size: VIconSize.sm),
-              ),
-              ButtonSegment(
-                value: ThemeScheme.light,
-                label: Text('Light'),
-                icon: Icon(Icons.light_mode, size: VIconSize.sm),
-              ),
-              ButtonSegment(
-                value: ThemeScheme.dark,
-                label: Text('Dark'),
-                icon: Icon(Icons.dark_mode, size: VIconSize.sm),
-              ),
-            ],
-            selected: {scheme},
-            onSelectionChanged: (selected) {
-              ref.read(themeProvider.notifier).setScheme(selected.first);
-            },
+          VThemeSchemePicker(
+            scheme: scheme,
+            onChanged: (s) => ref.read(themeProvider.notifier).setScheme(s),
           ),
           const SizedBox(height: VSpacing.md),
           Row(
