@@ -257,7 +257,7 @@ class _ChannelTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.sm,
-            vertical: VSpacing.xs,
+            vertical: VSpacing.sm,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

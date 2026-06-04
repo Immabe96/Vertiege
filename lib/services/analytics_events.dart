@@ -69,4 +69,9 @@ class AnalyticsEvents {
   static const signIn = 'sign_in';
   static const signOut = 'sign_out';
   static const searchPerformed = 'search_performed';
+
+  // Funnels (Wave 13)
+  static const inviteCompleted = 'invite_completed';
+  static const subscriptionVerified = 'subscription_verified';
+  static const voiceJoined = 'voice_joined';
 }

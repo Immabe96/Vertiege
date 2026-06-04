@@ -99,10 +99,28 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                           ),
                         ),
                       ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-                        sliver: _buildStandingsList(leagueState, isDark),
-                      ),
+                      if (!leagueState.isLoading && leagueState.standings.isEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(VSpacing.md),
+                            child: AppEmptyState(
+                              title: 'No standings yet',
+                              description:
+                                  'Earn XP this week to appear in your league cohort.',
+                              icon: Icons.leaderboard_outlined,
+                              actionLabel: 'Refresh',
+                              onAction: () =>
+                                  ref.read(leagueProvider.notifier).loadLeague(),
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.md,
+                          ),
+                          sliver: _buildStandingsList(leagueState, isDark),
+                        ),
                       const SliverToBoxAdapter(
                         child: SizedBox(height: VSpacing.xxl),
                       ),

@@ -390,18 +390,25 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 const SizedBox(height: VSpacing.md),
 
                 // Name with tier badge
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LuminaryNameplate(
-                      name: resident.name,
-                      tier: resident.tier.value,
-                      fontSize: VFontSize.headlineMd,
-                      textAlign: TextAlign.center,
-                      title: resident.title,
-                    ),
-                    const SizedBox(width: VSpacing.sm),
-                    Material(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.center,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            LuminaryNameplate(
+                              name: resident.name,
+                              tier: resident.tier.value,
+                              fontSize: VFontSize.headlineMd,
+                              textAlign: TextAlign.center,
+                              title: resident.title,
+                            ),
+                            const SizedBox(width: VSpacing.sm),
+                            Material(
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () => context.push('/ascension-path'),
@@ -441,7 +448,11 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         ),
                       ),
                     ),
-                  ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
                 // Top X% indicator

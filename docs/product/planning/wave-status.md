@@ -34,9 +34,68 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## Wave 13 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| Deep link matrix doc | Done — [deep-link-matrix.md](../../operations/deep-link-matrix.md) |
+| Notification routing tests (all types) | Done — 19 tests |
+| RLS + edge rate limits migration | Done — `20260613130000_wave13_rate_limits_rls.sql` (push to remote pending) |
+| Edge rate limits (verify + livekit) | Done — code in functions |
+| Service role CI grep | Done — `scripts/check_no_service_role_in_lib.sh` |
+| Local Supabase integration doc | Done |
+| Webhook rotation doc | Done — [store-receipt-hardening.md](../../operations/store-receipt-hardening.md) |
+| Funnel analytics + voice breadcrumbs | Done |
+| What's new + beta feedback | Done — Remote Config + Settings |
+| Tab Worlds label, error states | Done |
+| Wave 6 device UAT | **Deferred** — run when ready |
+| CI green verify | Ongoing on `develop` |
+
+**Tests:** 210 green locally.
+
+---
+
+## Wave 14 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| World detail scroll contract doc | Done |
+| World “You are here” subtitle | Done — `WorldHereSubtitleText` |
+| Nexus compact shortcuts last-visited order | Done — `NexusShortcutPrefs` |
+| Empty states one CTA | Done — challenges, league |
+| Haptics (council approve, voice join) | Done |
+| Touch targets 48dp | Done — channels, council actions, shortcuts |
+| Identity dynamic type (tier row) | Done — `FittedBox` |
+| High contrast preview | Done — Settings switch → large text |
+| Forui shells (world/chat/thread/campfire) | Already on `FScaffold` / `VHubPage` |
+| Feed post highlight | Already in `world_feed_tab` |
+
+**Release APK:** `build/app/outputs/flutter-apk/app-release.apk` (164 MB)
+
+---
+
+## Waves 13–22 (master plan)
+
+**All 124 research backlog items** are sequenced in **[waves-13-22-master-plan.md](waves-13-22-master-plan.md)** — 10 waves, gates, migrations, and safe drop order (Wave 22).
+
+| Wave | Theme |
+|------|--------|
+| **13** | Stabilize: UAT deferred; rest shipped in repo |
+| **14** | Design shell: Forui migration, tokens, a11y, empty states |
+| **15** | Nav & quiet UX: IA, orphans, RC trim, manage anchors |
+| **16** | Retention: gate, streaks, invites, calm ranking |
+| **17** | Worlds & feed: dossier, jobs notify, polls path, DM |
+| **18** | Progression DB: cohort cron, anti-cheat, coin ledger, featured achievements |
+| **19** | Voice + governance + live receipts |
+| **20** | Identity & achievements + lounge entry |
+| **21** | Platform: staging, scheduled posts, indexes, offline, App Check |
+| **22** | Drops & consolidation + RC defaults + release regression |
+
+---
+
 ## Follow-ups (product / infra)
 
-1. **Store receipt validation** — Edge function deployed (stub → RPC); live Apple/Google verify TODO. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
-2. **Poll composer** — post feed still blocks inline polls (by design).
-3. **Wave 6** — run sign-off checklist on device / API 30 emulator.
+1. **Store receipt validation** — Edge function deployed (stub → RPC); live Apple/Google verify in **Wave 19**. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
+2. **Poll composer** — link-out in **Wave 17**; optional inline in **Wave 22** if RPC ready.
+3. **Wave 6** — run sign-off checklist on device / API 30 emulator (**Wave 13** gate).
 4. **Wave 12** — `develop` on origin; CI verify + APK green; iOS job uses Xcode 26.1+ for `device_info_plus`. Device UAT + store build remain.

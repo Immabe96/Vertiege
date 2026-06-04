@@ -23,6 +23,34 @@ const productTiers: Record<string, string> = {
   subscription_sovereign_elite: 'sovereign_elite',
 }
 
+const VERIFY_RATE_MAX = 30
+const VERIFY_RATE_WINDOW_SEC = 3600
+
+async function assertRateLimit(
+  userId: string,
+): Promise<Response | null> {
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim()
+  if (!serviceKey) return null
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    serviceKey,
+  )
+  const { error } = await admin.rpc('assert_edge_rate_limit', {
+    p_scope: 'verify_subscription_purchase',
+    p_subject: userId,
+    p_max: VERIFY_RATE_MAX,
+    p_window_seconds: VERIFY_RATE_WINDOW_SEC,
+  })
+  if (error?.message?.includes('rate_limit_exceeded')) {
+    return json(
+      { success: false, error: 'Too many verification attempts. Try again later.' },
+      429,
+    )
+  }
+  return null
+}
+
 function requiredEnvDocs(): Record<string, string> {
   return {
     STORE_RECEIPT_VERIFY_MODE:
@@ -75,6 +103,9 @@ async function verifyViaRpc(
   if (authError || !user) {
     return json({ success: false, error: 'Not authenticated' }, 401)
   }
+
+  const rateLimited = await assertRateLimit(user.id)
+  if (rateLimited != null) return rateLimited
 
   const validationError = validateBody(body)
   if (validationError) {

@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../router/world_navigation.dart';
 import '../state/resident_provider.dart';
 import '../widgets/core/v_feedback.dart';
+import 'analytics_events.dart';
+import 'analytics_service.dart';
 import 'invite_service.dart';
 
 /// Resolves the post-auth route: redeems a pending invite when possible,
@@ -34,6 +38,12 @@ Future<String> routeAfterAuth(
   final worldId = result.worldId;
   if (worldId != null) {
     await ref.read(residentProvider.notifier).joinWorld(worldId);
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.inviteCompleted,
+        parameters: {'world_id': worldId},
+      ),
+    );
     return exploreWorldPath(worldId);
   }
 

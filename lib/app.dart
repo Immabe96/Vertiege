@@ -39,6 +39,7 @@ import 'services/firebase_messaging_handlers.dart';
 import 'services/local_notification_service.dart';
 import 'services/chat_notification_scope.dart';
 import 'widgets/core/daily_reward_dialog.dart';
+import 'widgets/core/whats_new_dialog.dart';
 import 'widgets/core/offline_banner.dart';
 import 'widgets/core/v_app_banner.dart';
 import 'widgets/core/v_feedback.dart';
@@ -440,6 +441,15 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   String? _routeForNotification(AppNotification notification) =>
       routeForNotification(notification);
 
+  void _checkWhatsNew() {
+    Future.delayed(const Duration(milliseconds: 1200), () async {
+      if (!mounted) return;
+      final dialogContext = appRootNavigatorKey.currentContext;
+      if (dialogContext == null) return;
+      await showWhatsNewDialogIfNeeded(dialogContext);
+    });
+  }
+
   void _checkDailyReward() {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
@@ -504,6 +514,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         _onResidentSignedIn();
         unawaited(ref.read(residentProvider.notifier).touchPresence());
         _checkDailyReward();
+        _checkWhatsNew();
       }
     });
     ref.listen<NotificationState>(

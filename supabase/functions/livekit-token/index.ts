@@ -2,6 +2,39 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { AccessToken } from 'https://esm.sh/livekit-server-sdk@2'
 
+const TOKEN_RATE_MAX = 60
+const TOKEN_RATE_WINDOW_SEC = 3600
+const CHANNEL_RATE_MAX = 12
+const CHANNEL_RATE_WINDOW_SEC = 60
+
+async function assertRateLimit(
+  scope: string,
+  subject: string,
+  max: number,
+  windowSeconds: number,
+): Promise<Response | null> {
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim()
+  if (!serviceKey) return null
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    serviceKey,
+  )
+  const { error } = await admin.rpc('assert_edge_rate_limit', {
+    p_scope: scope,
+    p_subject: subject,
+    p_max: max,
+    p_window_seconds: windowSeconds,
+  })
+  if (error?.message?.includes('rate_limit_exceeded')) {
+    return new Response(
+      JSON.stringify({ error: 'Too many voice token requests. Try again later.' }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } },
+    )
+  }
+  return null
+}
+
 serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -47,6 +80,22 @@ serve(async (req: Request) => {
         headers: { 'Content-Type': 'application/json' },
       })
     }
+
+    const userLimited = await assertRateLimit(
+      'livekit_token_user',
+      user.id,
+      TOKEN_RATE_MAX,
+      TOKEN_RATE_WINDOW_SEC,
+    )
+    if (userLimited != null) return userLimited
+
+    const channelLimited = await assertRateLimit(
+      'livekit_token_channel',
+      channelId,
+      CHANNEL_RATE_MAX,
+      CHANNEL_RATE_WINDOW_SEC,
+    )
+    if (channelLimited != null) return channelLimited
 
     const admin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',

@@ -30,6 +30,12 @@ Set secrets:
 supabase secrets set STORE_RECEIPT_VERIFY_MODE=stub
 ```
 
+## Rate limiting (Wave 13)
+
+When `SUPABASE_SERVICE_ROLE_KEY` is set, each authenticated user is limited to **30** verification POSTs per hour via `assert_edge_rate_limit` (migration `20260613130000_wave13_rate_limits_rls.sql`). Returns HTTP **429** when exceeded.
+
+---
+
 ## Health check
 
 ```bash

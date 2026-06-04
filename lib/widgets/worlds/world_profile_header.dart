@@ -10,6 +10,7 @@ import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'world_banner.dart';
+import 'world_here_subtitle.dart';
 import 'world_icon.dart';
 
 /// Minimal world identity block — contained banner, typography on surface.
@@ -114,6 +115,12 @@ class WorldProfileHeader extends StatelessWidget {
                             fontWeight: VFontWeight.bold,
                             height: 1.15,
                           ),
+                        ),
+                        const SizedBox(height: VSpacing.xxs),
+                        WorldHereSubtitleText(
+                          world: world,
+                          isJoined: isJoined,
+                          tierLabel: tierLabel,
                         ),
                       ],
                     ),

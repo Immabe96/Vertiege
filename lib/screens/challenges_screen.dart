@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../forui/v_hub_page.dart';
 import '../../state/challenge_provider.dart';
 import '../../state/resident_provider.dart';
@@ -91,11 +92,13 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       body: _initializing
           ? const ScreenLoading.list()
           : _worldId == null
-          ? const AppEmptyState(
+          ? AppEmptyState(
               title: 'Join a world to see challenges',
               description:
                   'Challenges are scoped to worlds and seasons, not a permanent global board.',
               icon: Icons.emoji_events_outlined,
+              actionLabel: 'Browse worlds',
+              onAction: () => context.go('/explore'),
             )
           : challengeState.isLoading
           ? const ScreenLoading.list()
@@ -108,11 +111,13 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                 )
               : challengeState.activeChallenges.isEmpty &&
                     challengeState.seasonChallenges.isEmpty
-              ? const AppEmptyState(
+              ? AppEmptyState(
                   title: 'No active challenges',
                   description:
                       'World and season cohort challenges appear as your realm grows.',
                   icon: Icons.emoji_events_outlined,
+                  actionLabel: 'Refresh',
+                  onAction: _refresh,
                 )
               : ListView(
                   padding: const EdgeInsets.all(VSpacing.md),

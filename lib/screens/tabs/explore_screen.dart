@@ -13,6 +13,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../utils/provider_errors.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/explore/shimmer_world_card.dart';
@@ -131,22 +132,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     VSpacing.md,
                     0,
                   ),
-                  child: Material(
-                    color: isDark
-                        ? VColors.errorContainerDark
-                        : VColors.errorContainer,
-                    borderRadius: BorderRadius.circular(VRadius.lg),
-                    child: Padding(
-                      padding: const EdgeInsets.all(VSpacing.md),
-                      child: Text(
-                        state.loadError!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? VColors.onErrorContainerDark
-                              : VColors.onErrorContainer,
-                        ),
-                      ),
+                  child: AppErrorState(
+                    message: userFacingLoadError(
+                      state.loadError ?? 'Could not load worlds.',
                     ),
+                    onRetry: () =>
+                        ref.read(worldProvider.notifier).loadWorlds(),
                   ),
                 ),
               ),

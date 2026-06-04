@@ -221,8 +221,8 @@ class _MainBottomNav extends StatelessWidget {
     (
       icon: Icons.explore_outlined,
       activeIcon: Icons.explore,
-      label: 'Discover',
-      semanticsLabel: 'Discover',
+      label: 'Worlds',
+      semanticsLabel: 'Worlds',
     ),
     (
       icon: Icons.chat_bubble_outline,

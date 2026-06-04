@@ -79,4 +79,17 @@ class FeatureFlags {
 
   static String get maintenanceBanner =>
       RemoteConfigService.getString('maintenance_banner', fallback: '');
+
+  /// When > 0 and message non-empty, show one-shot What's New after splash.
+  static int get whatsNewBuild =>
+      RemoteConfigService.getInt('whats_new_build', fallback: 0);
+
+  static String get whatsNewMessage =>
+      RemoteConfigService.getString('whats_new_message', fallback: '');
+
+  /// Beta feedback form URL (Settings).
+  static String get betaFeedbackUrl => RemoteConfigService.getString(
+        'beta_feedback_url',
+        fallback: 'https://forms.gle/placeholder-vertiege-beta',
+      );
 }

@@ -30,11 +30,36 @@ void main() {
       expect(routeForNotification(n), '/notifications');
     });
 
+    test('comment with world and post uses exploreWorldPath', () {
+      const n = AppNotification(
+        id: 'n-comment',
+        type: NotificationType.comment,
+        message: 'commented',
+        worldId: 'world-a',
+        postId: 'post-9',
+        createdAt: 0,
+      );
+      expect(
+        routeForNotification(n),
+        exploreWorldPath('world-a', postId: 'post-9'),
+      );
+    });
+
     test('achievement approved routes to achievements', () {
       const n = AppNotification(
         id: 'n3',
         type: NotificationType.achievementApproved,
         message: 'approved',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/achievements');
+    });
+
+    test('achievement rejected routes to achievements', () {
+      const n = AppNotification(
+        id: 'n3b',
+        type: NotificationType.achievementRejected,
+        message: 'rejected',
         createdAt: 0,
       );
       expect(routeForNotification(n), '/achievements');
@@ -81,6 +106,102 @@ void main() {
         createdAt: 0,
       );
       expect(routeForNotification(n), exploreWorldPath('world-a'));
+    });
+
+    test('mention without world falls back to notifications', () {
+      const n = AppNotification(
+        id: 'n5b',
+        type: NotificationType.mention,
+        message: 'mention',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/notifications');
+    });
+
+    test('worldUnlocked with world uses exploreWorldPath', () {
+      const n = AppNotification(
+        id: 'n6',
+        type: NotificationType.worldUnlocked,
+        message: 'unlocked',
+        worldId: 'world-b',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), exploreWorldPath('world-b'));
+    });
+
+    test('tierUpgrade routes to identity', () {
+      const n = AppNotification(
+        id: 'n7',
+        type: NotificationType.tierUpgrade,
+        message: 'tier up',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/identity');
+    });
+
+    test('streakReminder routes to identity', () {
+      const n = AppNotification(
+        id: 'n8',
+        type: NotificationType.streakReminder,
+        message: 'streak',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/identity');
+    });
+
+    test('welcome routes to explore', () {
+      const n = AppNotification(
+        id: 'n9',
+        type: NotificationType.welcome,
+        message: 'welcome',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/explore');
+    });
+
+    test('modAction routes to settings', () {
+      const n = AppNotification(
+        id: 'n10',
+        type: NotificationType.modAction,
+        message: 'mod',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/settings');
+    });
+
+    test('ranking routes to season', () {
+      const n = AppNotification(
+        id: 'n11',
+        type: NotificationType.ranking,
+        message: 'rank',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/season');
+    });
+
+    test('reactionMilestone with post routes to world feed', () {
+      const n = AppNotification(
+        id: 'n12',
+        type: NotificationType.reactionMilestone,
+        message: 'milestone',
+        worldId: 'world-c',
+        postId: 'post-2',
+        createdAt: 0,
+      );
+      expect(
+        routeForNotification(n),
+        exploreWorldPath('world-c', postId: 'post-2'),
+      );
+    });
+
+    test('reactionMilestone without post routes to identity', () {
+      const n = AppNotification(
+        id: 'n13',
+        type: NotificationType.reactionMilestone,
+        message: 'milestone',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/identity');
     });
   });
 

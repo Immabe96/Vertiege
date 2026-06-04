@@ -22,6 +22,12 @@ Research anchors:
 - Gamification research warns against simplistic leaderboards and recommends designs that support autonomy, competence, and relatedness: [Springer SDT gamification paper](https://link.springer.com/article/10.1007/s11528-024-00968-9).
 - Google Play target API requirements require modern target SDKs while still allowing older runtime support: [Android target API requirements](https://developer.android.com/google/play/requirements/target-sdk).
 
+## Waves 13–22 (execution plan)
+
+Full sequencing of the 124-item research backlog: **[planning/waves-13-22-master-plan.md](planning/waves-13-22-master-plan.md)**. Execute in order; schema and drops are gated to avoid breaking `develop`.
+
+---
+
 ## Already addressed (baseline — do not re-plan)
 
 Tracked in detail: [perfection-backlog.md](planning/perfection-backlog.md) (Waves 0–6), [issue-log.md](../operations/uat/issue-log.md) (device UAT).

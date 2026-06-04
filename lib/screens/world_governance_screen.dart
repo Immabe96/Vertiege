@@ -7,6 +7,8 @@ import '../forui/v_hub_page.dart';
 import '../router/world_navigation.dart';
 import '../services/governance_service.dart';
 import '../theme/v_tokens.dart';
+import '../utils/haptics.dart';
+import '../utils/provider_errors.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_feedback.dart';
@@ -31,6 +33,7 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
   List<GovernanceProposal> _proposals = [];
   Map<String, String> _names = {};
   bool _loading = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -39,13 +42,23 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
-    final enriched =
-        await GovernanceService.listPendingEnriched(widget.worldId);
-    if (mounted) {
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
+    try {
+      final enriched =
+          await GovernanceService.listPendingEnriched(widget.worldId);
+      if (!mounted) return;
       setState(() {
         _proposals = enriched.proposals;
         _names = enriched.names;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadError = userFacingLoadError(e);
         _loading = false;
       });
     }
@@ -102,6 +115,7 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       VFeedback.showMessage(context, error);
       return;
     }
+    if (approve) Haptics.medium();
     VFeedback.showMessage(
       context,
       approve ? 'Approved.' : 'Rejected.',
@@ -120,7 +134,9 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
           onPress: _load,
         ),
       ],
-      body: _loading
+      body: _loadError != null
+          ? AppErrorState(message: _loadError!, onRetry: _load)
+          : _loading
           ? const ScreenLoading.list()
           : _proposals.isEmpty
               ? const AppEmptyState(
@@ -176,17 +192,23 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: VButton(
-                                    label: 'Reject',
-                                    variant: ButtonVariant.outlined,
-                                    onPressed: () => _review(p, false),
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: VButton(
+                                      label: 'Reject',
+                                      variant: ButtonVariant.outlined,
+                                      onPressed: () => _review(p, false),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: VSpacing.sm),
                                 Expanded(
-                                  child: VButton(
-                                    label: 'Approve',
-                                    onPressed: () => _review(p, true),
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: VButton(
+                                      label: 'Approve',
+                                      onPressed: () => _review(p, true),
+                                    ),
                                   ),
                                 ),
                               ],

@@ -38,6 +38,23 @@ curl -sS "$SUPABASE_URL/functions/v1/verify-subscription-purchase" \
 - Optional: edge function when `FeatureFlags.receiptEdgeVerify` is true.
 - Restore purchases loops `StoreService.restorePurchasesAndWait()` then verifies each subscription.
 
+## Webhook secret rotation (`send-push`)
+
+The `send-push` edge function validates `WEBHOOK_SECRET` on every database webhook call.
+
+**Rotate without downtime:**
+
+1. Generate a new secret: `openssl rand -hex 32`
+2. In Supabase Dashboard → **Edge Functions** → `send-push` → Secrets, add `WEBHOOK_SECRET_NEW` (temporary) or update `WEBHOOK_SECRET` during a maintenance window.
+3. Update the Database Webhook header in **Database** → **Webhooks** → your `notifications` INSERT webhook: `Authorization: Bearer <new secret>` (match whatever header `send-push` expects — see [send-push/index.ts](../../supabase/functions/send-push/index.ts)).
+4. Deploy: `supabase functions deploy send-push`
+5. Send a test notification row in staging; confirm FCM delivery.
+6. Revoke the old secret value from the dashboard.
+
+**Never** commit `WEBHOOK_SECRET` to git. Store only in Supabase secrets and team vault.
+
+---
+
 ## Dashboard (manual)
 
 - Supabase **Pro**: enable leaked-password protection (HIBP) under Auth settings.

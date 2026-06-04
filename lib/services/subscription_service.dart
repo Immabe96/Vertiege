@@ -1,8 +1,11 @@
-﻿import 'dart:io' show Platform;
+﻿import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart' show TargetPlatform;
 
+import '../services/analytics_events.dart';
+import '../services/analytics_service.dart';
 import '../services/feature_flags.dart';
 import '../services/supabase.dart';
 import '../theme/v_colors.dart';
@@ -132,6 +135,12 @@ class SubscriptionService {
     if (map['success'] == true) {
       _cachedTier = null;
       _cachedUserId = null;
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.subscriptionVerified,
+          parameters: {'product_id': productId, 'platform': platformKey},
+        ),
+      );
       return null;
     }
     return map['error'] as String? ?? 'Verification failed';

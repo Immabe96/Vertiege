@@ -1,8 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:livekit_client/livekit_client.dart';
-import 'supabase.dart';
+import '../utils/haptics.dart';
+import 'analytics_events.dart';
+import 'analytics_service.dart';
 import 'crash_reporter.dart';
+import 'supabase.dart';
 
 class VoiceService {
   static Room? _currentRoom;
@@ -32,11 +36,23 @@ class VoiceService {
   }) async {
     if (_currentRoom != null) await leaveCampfire();
 
+    CrashReporter.instance.setCustomKey('voice_world_id', worldId);
+    CrashReporter.instance.setCustomKey('voice_channel_id', channelId);
+
     final token = await _fetchToken(channelId, worldId, residentId);
     if (token == null) return false;
 
     final room = Room();
-    await room.connect(token['livekitUrl'] as String, token['token'] as String);
+    try {
+      await room.connect(token['livekitUrl'] as String, token['token'] as String);
+    } catch (e, st) {
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'voice_service room connect',
+      );
+      return false;
+    }
 
     room.addListener(_onRoomUpdate);
     room.addListener(_onConnectionChange);
@@ -47,6 +63,17 @@ class VoiceService {
       _disposed = false;
     }
     _onRoomUpdate();
+    Haptics.medium();
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.voiceJoined,
+        parameters: {'world_id': worldId, 'channel_id': channelId},
+      ),
+    );
+    CrashReporter.instance.addBreadcrumb(
+      'campfire_connected',
+      category: 'voice',
+    );
     return true;
   }
 
@@ -71,6 +98,8 @@ class VoiceService {
       );
       return res.data as Map<String, dynamic>?;
     } catch (e, st) {
+      CrashReporter.instance.setCustomKey('voice_world_id', worldId);
+      CrashReporter.instance.setCustomKey('voice_channel_id', channelId);
       CrashReporter.instance.recordError(
         e,
         st,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +17,7 @@ import '../services/admin_access_service.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
 import '../services/device_permission_service.dart';
+import '../services/feature_flags.dart';
 import '../services/firebase_bootstrap.dart';
 import '../services/push_token_service.dart';
 import '../services/mutation_outbox_service.dart';
@@ -146,6 +148,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (mounted) {
       VFeedback.showMessage(context, 'Image cache cleared');
     }
+  }
+
+  Future<void> _openBetaFeedback() async {
+    final url = Uri.tryParse(FeatureFlags.betaFeedbackUrl.trim());
+    if (url == null || !await canLaunchUrl(url)) {
+      if (!mounted) return;
+      VFeedback.showMessage(context, 'Could not open feedback form.');
+      return;
+    }
+    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   void _showCreditsDialog() {
@@ -851,7 +863,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Consumer(
             builder: (context, ref, _) {
               final textSize = ref.watch(themeProvider).textSize;
-              return FSelect<TextSize>.rich(
+              final highContrast = textSize == TextSize.large ||
+                  textSize == TextSize.xlarge;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FSelect<TextSize>.rich(
                 format: (value) =>
                     value.name[0].toUpperCase() + value.name.substring(1),
                 control: FSelectControl.lifted(
@@ -872,6 +889,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     )
                     .toList(),
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  VSectionSwitchTile(
+                    icon: Icons.contrast,
+                    label: 'High contrast preview',
+                    value: highContrast,
+                    onChanged: (enabled) {
+                      ref.read(themeProvider.notifier).setTextSize(
+                            enabled ? TextSize.large : TextSize.medium,
+                          );
+                    },
+                  ),
+                ],
               );
             },
           ),
@@ -921,6 +951,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.celebration,
                   label: 'Credits',
                   onTap: _showCreditsDialog,
+                ),
+                VSectionTile(
+                  icon: Icons.feedback_outlined,
+                  label: 'Beta feedback',
+                  onTap: _openBetaFeedback,
                 ),
               ],
             ),

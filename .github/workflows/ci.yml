@@ -58,6 +58,9 @@ jobs:
       - name: Validate assets
         run: bash scripts/validate_assets.sh
 
+      - name: Security — no service_role in lib/
+        run: bash scripts/check_no_service_role_in_lib.sh
+
       - name: Create CI .env from secrets
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

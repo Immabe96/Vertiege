@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router/world_navigation.dart';
+import '../../services/nexus_shortcut_prefs.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
@@ -90,12 +93,12 @@ class NexusShortcutsSection extends StatelessWidget {
                 BentoCard(
                   child: const DailyQuestCard(),
                   size: BentoSize.small,
-                  onTap: () => context.push('/daily-quests'),
+                  onTap: () => _openShortcut(context, 'quest', '/daily-quests'),
                 ),
                 BentoCard(
                   child: const SeasonSnapshotCard(),
                   size: BentoSize.small,
-                  onTap: () => context.push('/season'),
+                  onTap: () => _openShortcut(context, 'season', '/season'),
                 ),
                 const BentoCard(
                   child: SpotlightCard(),
@@ -104,12 +107,13 @@ class NexusShortcutsSection extends StatelessWidget {
                 BentoCard(
                   child: const ChallengesCard(),
                   size: BentoSize.small,
-                  onTap: () => context.push('/challenges'),
+                  onTap: () => _openShortcut(context, 'challenges', '/challenges'),
                 ),
                 BentoCard(
                   child: const LeagueCard(),
                   size: BentoSize.small,
-                  onTap: () => context.push(leaguesPath()),
+                  onTap: () =>
+                      _openShortcut(context, 'league', leaguesPath()),
                 ),
                 const BentoCard(
                   child: TrendingCard(),
@@ -122,53 +126,125 @@ class NexusShortcutsSection extends StatelessWidget {
       ),
     );
   }
+
+  static void _openShortcut(BuildContext context, String id, String route) {
+    unawaited(NexusShortcutPrefs.recordVisit(id));
+    context.push(route);
+  }
 }
 
-class _CompactShortcutsRow extends StatelessWidget {
+class _CompactShortcutsRow extends StatefulWidget {
   const _CompactShortcutsRow();
 
   @override
+  State<_CompactShortcutsRow> createState() => _CompactShortcutsRowState();
+}
+
+class _CompactShortcutsRowState extends State<_CompactShortcutsRow> {
+  static const _defaultOrder = [
+    'season',
+    'quest',
+    'challenges',
+    'league',
+    'prestige',
+    'trending',
+  ];
+
+  List<String> _order = _defaultOrder;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrder();
+  }
+
+  Future<void> _loadOrder() async {
+    final ordered = await NexusShortcutPrefs.orderByRecency(_defaultOrder);
+    if (mounted) setState(() => _order = ordered);
+  }
+
+  void _go(String id, VoidCallback onTap) {
+    unawaited(NexusShortcutPrefs.recordVisit(id));
+    onTap();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final shortcuts = <_ShortcutDef>[
+      _ShortcutDef(
+        id: 'season',
+        icon: Icons.auto_awesome,
+        label: 'Season 1',
+        onTap: () => context.push('/season'),
+      ),
+      _ShortcutDef(
+        id: 'quest',
+        icon: Icons.flag_outlined,
+        label: 'Quest',
+        onTap: () => context.push('/daily-quests'),
+      ),
+      _ShortcutDef(
+        id: 'challenges',
+        icon: Icons.emoji_events_outlined,
+        label: 'Challenges',
+        onTap: () => context.push('/challenges'),
+      ),
+      _ShortcutDef(
+        id: 'league',
+        icon: Icons.trending_up,
+        label: 'League',
+        onTap: () => context.push(leaguesPath()),
+      ),
+      _ShortcutDef(
+        id: 'prestige',
+        icon: Icons.bolt_outlined,
+        label: 'Prestige',
+        onTap: () => context.push('/hall-of-ascension'),
+      ),
+      _ShortcutDef(
+        id: 'trending',
+        icon: Icons.public,
+        label: 'Trending',
+        onTap: () => context.push(exploreDiscoverPath()),
+      ),
+    ];
+
+    final byId = {for (final s in shortcuts) s.id: s};
+    final ordered = [
+      for (final id in _order)
+        if (byId.containsKey(id)) byId[id]!,
+    ];
+
     return SizedBox(
       height: 92,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(bottom: VSpacing.xs),
         children: [
-          _CompactShortcut(
-            icon: Icons.auto_awesome,
-            label: 'Season 1',
-            onTap: () => context.push('/season'),
-          ),
-          _CompactShortcut(
-            icon: Icons.flag_outlined,
-            label: 'Quest',
-            onTap: () => context.push('/daily-quests'),
-          ),
-          _CompactShortcut(
-            icon: Icons.emoji_events_outlined,
-            label: 'Challenges',
-            onTap: () => context.push('/challenges'),
-          ),
-          _CompactShortcut(
-            icon: Icons.trending_up,
-            label: 'League',
-            onTap: () => context.push(leaguesPath()),
-          ),
-          _CompactShortcut(
-            icon: Icons.bolt_outlined,
-            label: 'Prestige',
-            onTap: () => context.push('/hall-of-ascension'),
-          ),
-          _CompactShortcut(
-            icon: Icons.public,
-            label: 'Trending',
-            onTap: () => context.push(exploreDiscoverPath()),
-          ),
+          for (final s in ordered)
+            _CompactShortcut(
+              icon: s.icon,
+              label: s.label,
+              onTap: () => _go(s.id, s.onTap),
+            ),
         ],
       ),
     );
   }
+}
+
+class _ShortcutDef {
+  final String id;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ShortcutDef({
+    required this.id,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 }
 
 class _CompactShortcut extends StatelessWidget {
@@ -193,12 +269,12 @@ class _CompactShortcut extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(VRadius.lg),
-          child: SizedBox(
-            width: 96,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 96, minHeight: 48),
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: VSpacing.sm,
-                vertical: VSpacing.xs,
+                vertical: VSpacing.sm,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
