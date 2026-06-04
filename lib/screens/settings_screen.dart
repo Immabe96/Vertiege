@@ -19,6 +19,7 @@ import '../services/device_permission_service.dart';
 import '../services/firebase_bootstrap.dart';
 import '../services/push_token_service.dart';
 import '../services/mutation_outbox_service.dart';
+import '../services/notification_preferences_service.dart';
 import '../services/supabase.dart';
 import '../services/world_nav_prefs.dart';
 import '../theme/v_colors.dart';
@@ -78,6 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _loadPrefs() async {
+    await NotificationPreferencesService.pullFromServer();
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
@@ -97,6 +99,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (key == _kPrefPushEnabled) {
       await StorageService.setString(_kPrefPushEnabled, value ? 'true' : 'false');
     }
+    await _syncNotificationPrefToServer(key, value);
+  }
+
+  Future<void> _syncNotificationPrefToServer(String key, bool value) async {
+    await NotificationPreferencesService.pushToServer(
+      likesEnabled: key == _kPrefLikesEnabled ? value : null,
+      commentsEnabled: key == _kPrefCommentsEnabled ? value : null,
+      worldInvitesEnabled: key == _kPrefWorldInvitesEnabled ? value : null,
+      tierUpgradesEnabled: key == _kPrefTierUpgradesEnabled ? value : null,
+      pushEnabled: key == _kPrefPushEnabled ? value : null,
+    );
   }
 
   Future<void> _onPushToggleChanged(bool enabled) async {

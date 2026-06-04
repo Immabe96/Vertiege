@@ -13,7 +13,8 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 `20260617120000_job_application_notifications`,  
 `20260618120000_progression_fairness` (cohort cron, velocity cap, coin ledger, last_active),  
 `20260619120000_wave19_voice_governance_commerce` (voice presence, governance notify, coin packs),  
-`20260620120000_wave20_identity_achievements` (featured ids, stories, verifier metrics).
+`20260620120000_wave20_identity_achievements` (featured ids, stories, verifier metrics),  
+`20260621120000_platform_scheduled_prefs_indexes` (scheduled posts, notification prefs, cursor RPC).
 
 ---
 
@@ -211,6 +212,30 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 **Migration:** `20260620120000_wave20_identity_achievements.sql` — pushed to Supabase
 
 **Tests:** 226 green locally.
+
+---
+
+## Wave 21 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| Staging Supabase doc | Done — `docs/operations/staging-environment.md` |
+| `scheduled_posts` + worker | Done — table + `publish_due_scheduled_posts` + pg_cron |
+| `notification_preferences` | Done — table + RPCs; settings sync |
+| Index pass | Done — `world_members`, `posts` composites |
+| Migration history doc | Done — `docs/operations/migration-history-notes.md` |
+| HIBP doc | Done — existing `manual-remaining.md` (Pro gate) |
+| App Check notes | Done — `docs/operations/app-check.md` + `supabase_app_check.dart` |
+| Integration smoke script | Done — `scripts/integration_supabase_smoke.sh` |
+| Image cache policy | Done — `ImageCachePolicy` in `main.dart` |
+| Feed keyset pagination | Done — `list_posts_cursor` + repository fallback |
+| Realtime per active world | Done — scope on world detail; pause on background |
+| Mutation outbox banner | Done — `MutationOutboxSyncBanner` in app shell |
+| APK deferred assets | Deferred — Wave 22 optional |
+
+**Migration:** `20260621120000_platform_scheduled_prefs_indexes.sql` — push to Supabase
+
+**Tests:** 228+ green locally.
 
 ---
 

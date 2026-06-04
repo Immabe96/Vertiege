@@ -96,6 +96,8 @@ class PostState {
 class PostNotifier extends Notifier<PostState> {
   final PostRepository _postsRepository = const PostRepository();
   RealtimeChannel? _realtimeChannel;
+  String? _realtimeWorldId;
+  bool _realtimePaused = false;
   Timer? _schedulerTimer;
   final Map<String, Set<String>> _userReactions = {};
   int _lastPersistedCount = 0;
@@ -288,8 +290,44 @@ class PostNotifier extends Notifier<PostState> {
     );
 
     if (scheduledFor != null && scheduledFor.isAfter(DateTime.now())) {
+      String? cloudImageUrl = imageUri;
+      if (imageUri != null && !imageUri.startsWith('http')) {
+        cloudImageUrl = await MediaService.uploadPostImage(imageUri, residentId);
+        if (cloudImageUrl == null) {
+          state = state.copyWith(
+            isPosting: false,
+            lastError: 'Image upload failed',
+          );
+          return;
+        }
+      }
+      final scheduledPost = post.copyWith(
+        imageUri: cloudImageUrl,
+        imageUris:
+            imageUris ?? (cloudImageUrl == null ? null : [cloudImageUrl]),
+      );
+      if (isSupabaseConfigured()) {
+        final result = await _postsRepository.createPost(scheduledPost);
+        if (result.isSuccess && result.data != null) {
+          state = state.copyWith(
+            scheduledPosts: [...state.scheduledPosts, result.data!],
+            isPosting: false,
+            clearLastError: true,
+          );
+          _persistScheduled();
+          Haptics.medium();
+          return;
+        }
+        if (!result.queued) {
+          state = state.copyWith(
+            isPosting: false,
+            lastError: result.error?.toString() ?? 'Could not schedule post',
+          );
+          return;
+        }
+      }
       state = state.copyWith(
-        scheduledPosts: [...state.scheduledPosts, post],
+        scheduledPosts: [...state.scheduledPosts, scheduledPost],
         isPosting: false,
       );
       _persistScheduled();
@@ -923,7 +961,6 @@ class PostNotifier extends Notifier<PostState> {
         hasMorePosts: false,
       );
       _persist();
-      unawaited(_subscribeRealtime());
     } catch (e) {
       final joinedResult = await _loadPostsFromJoinedWorlds();
       if (joinedResult != null) {
@@ -934,7 +971,6 @@ class PostNotifier extends Notifier<PostState> {
           isLoading: false,
         );
         _persist();
-        unawaited(_subscribeRealtime());
         return;
       }
 
@@ -1013,18 +1049,55 @@ class PostNotifier extends Notifier<PostState> {
     }
   }
 
+  /// Subscribe to post changes for [worldId] only; pass null to unsubscribe.
+  Future<void> setRealtimeWorldScope(String? worldId) async {
+    _realtimeWorldId = worldId;
+    if (worldId == null) {
+      await clearRealtimeSubscriptions();
+      return;
+    }
+    if (!_realtimePaused) {
+      await _subscribeRealtime();
+    }
+  }
+
+  Future<void> setRealtimePaused(bool paused) async {
+    _realtimePaused = paused;
+    if (paused) {
+      await clearRealtimeSubscriptions();
+    } else if (_realtimeWorldId != null) {
+      await _subscribeRealtime();
+    }
+  }
+
+  Future<void> clearRealtimeSubscriptions() async {
+    await _realtimeChannel?.unsubscribe();
+    _realtimeChannel = null;
+  }
+
   Future<void> _subscribeRealtime() async {
     final client = maybeSupabase();
-    if (client == null) return;
+    if (client == null || _realtimePaused) return;
+
+    final worldId = _realtimeWorldId;
+    if (worldId == null) {
+      await clearRealtimeSubscriptions();
+      return;
+    }
 
     await _realtimeChannel?.unsubscribe();
 
     _realtimeChannel = client
-        .channel('posts_realtime')
+        .channel('posts_realtime_$worldId')
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
           table: 'posts',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'world_id',
+            value: worldId,
+          ),
           callback: (payload) {
             final newPost = _postFromJson(payload.newRecord);
             if (state.posts.any((p) => p.id == newPost.id)) return;
@@ -1037,6 +1110,11 @@ class PostNotifier extends Notifier<PostState> {
           event: PostgresChangeEvent.update,
           schema: 'public',
           table: 'posts',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'world_id',
+            value: worldId,
+          ),
           callback: (payload) {
             final updated = _postFromJson(payload.newRecord);
             final posts = state.posts.map((p) {
@@ -1051,6 +1129,11 @@ class PostNotifier extends Notifier<PostState> {
           event: PostgresChangeEvent.delete,
           schema: 'public',
           table: 'posts',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'world_id',
+            value: worldId,
+          ),
           callback: (payload) {
             final deletedId = payload.oldRecord['id'] as String?;
             if (deletedId == null) return;

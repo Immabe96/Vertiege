@@ -54,6 +54,14 @@ class PostRepository {
       return const PaginatedResult(items: [], hasMore: false);
     }
 
+    if (worldId != null) {
+      try {
+        return await _loadPostsViaCursor(worldId, cursor, limit);
+      } catch (_) {
+        // Fall back to direct table query if RPC unavailable.
+      }
+    }
+
     final client = getSupabase();
     var query = worldId != null
         ? client.from('posts').select().eq('world_id', worldId)
@@ -73,6 +81,42 @@ class PostRepository {
       items: items,
       hasMore: hasMore,
       nextCursor: items.isNotEmpty ? items.last['created_at'] as String? : null,
+    );
+  }
+
+  Future<PaginatedResult<Map<String, dynamic>>> _loadPostsViaCursor(
+    String worldId,
+    String? cursor,
+    int limit,
+  ) async {
+    final client = getSupabase();
+    final raw = await client.rpc(
+      'list_posts_cursor',
+      params: {
+        'p_world_id': worldId,
+        if (cursor != null) 'p_cursor': cursor,
+        'p_limit': limit,
+      },
+    );
+    if (raw is! Map) {
+      throw StateError('Unexpected list_posts_cursor response');
+    }
+    final map = Map<String, dynamic>.from(raw);
+    if (map['success'] != true) {
+      throw StateError(map['error'] as String? ?? 'Could not load posts');
+    }
+    final itemsRaw = map['items'];
+    final list = itemsRaw is List
+        ? itemsRaw
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList()
+        : <Map<String, dynamic>>[];
+    final hasMore = map['has_more'] == true;
+    final nextCursor = map['next_cursor']?.toString();
+    return PaginatedResult(
+      items: list,
+      hasMore: hasMore,
+      nextCursor: nextCursor,
     );
   }
 
@@ -115,6 +159,16 @@ class PostRepository {
     final map = Map<String, dynamic>.from(result);
     if (map['success'] != true) {
       throw StateError(map['error'] as String? ?? 'Could not create post');
+    }
+    if (map['scheduled'] == true) {
+      final scheduledFor = map['scheduled_for'];
+      return post.copyWith(
+        syncStatus: SyncStatus.synced,
+        clearSyncError: true,
+        scheduledFor: scheduledFor is String
+            ? DateTime.tryParse(scheduledFor)?.toLocal()
+            : post.scheduledFor,
+      );
     }
     final postId = map['post_id'] as String? ?? post.id;
     return post.copyWith(id: postId);

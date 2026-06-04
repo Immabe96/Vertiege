@@ -86,6 +86,11 @@ class MutationOutboxService {
     await StorageService.remove(_key);
   }
 
+  static Future<int> pendingCount() async {
+    final items = await getAll();
+    return items.where((item) => item.retryCount < maxRetries).length;
+  }
+
   static Future<List<MutationOutboxItem>> getFailed() async {
     final items = await getAll();
     return items.where((item) => item.retryCount >= maxRetries).toList();

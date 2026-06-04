@@ -67,4 +67,4 @@ Suggested local RPC checks (manual until automated):
 
 ## Staging project (Wave 21)
 
-Production project: linked in dashboard. Create a **second** Supabase project for staging before pushing risky migrations (`20260618+`). Document URLs in team password manager — not in git.
+See **[staging-environment.md](staging-environment.md)** for setup, soak checklist, and env switching. Create a second Supabase project before pushing `20260621+` platform migrations.

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
+import 'config/image_cache_policy.dart';
 import 'theme/theme_prefs.dart';
 import 'services/crash_reporter.dart';
 import 'services/firebase_messaging_handlers.dart';
@@ -12,6 +13,7 @@ bool _handlingFlutterError = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ImageCachePolicy.apply();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   FlutterError.onError = (details) {

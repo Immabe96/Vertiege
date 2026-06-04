@@ -41,6 +41,7 @@ import 'services/local_notification_service.dart';
 import 'services/chat_notification_scope.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/whats_new_dialog.dart';
+import 'widgets/core/mutation_outbox_sync_banner.dart';
 import 'widgets/core/offline_banner.dart';
 import 'widgets/core/v_app_banner.dart';
 import 'widgets/core/v_feedback.dart';
@@ -518,6 +519,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      unawaited(ref.read(postProvider.notifier).setRealtimePaused(false));
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
         ref.read(residentProvider.notifier).checkStreakRisk();
@@ -525,6 +527,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       }
     }
     if (state == AppLifecycleState.paused) {
+      unawaited(ref.read(postProvider.notifier).setRealtimePaused(true));
       StorageService.flush();
     }
   }
@@ -600,6 +603,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
                     child: const Text('Retry'),
                   ),
                 ),
+              const MutationOutboxSyncBanner(),
               Expanded(
                 child: OfflineBanner(
                   show: !_isOnline,
