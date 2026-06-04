@@ -74,6 +74,25 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## Wave 15 (2026-05-30)
+
+| Item | Status |
+|------|--------|
+| More → Help & legal | Done — privacy, terms, licenses, beta feedback |
+| Settings legal | Moved to More (link tile only) |
+| Unified search | Done — Nexus, Identity, Chat → `/search` |
+| World manage section anchors | Done — Social / Economy / Governance chips |
+| Orphan routes | Done — `/explore/:id/academy`, `/sanctuary` |
+| Shop tabs | Cosmetics + Dominions + Coming soon (no P2W tabs) |
+| Campfire immersive flag | Done — `campfire_immersive` RC (default off) |
+| Feature flag defaults | marketplace/treasury/polls/challenges → true |
+| safeBack tests | Done |
+| Stale `docs/plan` | Archived → `docs/archive/plan-PERFECTION-BACKLOG.md` |
+
+**Tests:** 212 green locally.
+
+---
+
 ## Waves 13–22 (master plan)
 
 **All 124 research backlog items** are sequenced in **[waves-13-22-master-plan.md](waves-13-22-master-plan.md)** — 10 waves, gates, migrations, and safe drop order (Wave 22).

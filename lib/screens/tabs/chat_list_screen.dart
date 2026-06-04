@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../forui/v_tab_page.dart';
 
 import '../../models/channel.dart';
+import '../../router/search_navigation.dart';
 import '../../router/world_navigation.dart';
 import '../../models/world.dart';
 import '../../state/channel_provider.dart';
@@ -78,7 +79,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         VAccessibleHeaderAction(
           label: 'New DM',
           icon: const Icon(FIcons.userPlus),
-          onPress: () => context.push('/search'),
+          onPress: () => openGlobalSearch(context),
         ),
       ],
       body: RefreshIndicator(
@@ -318,7 +319,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       description: 'Find residents and start a conversation.',
       icon: Icons.chat_bubble_outline,
       actionLabel: 'Find Residents',
-      onAction: () => context.push('/search'),
+      onAction: () => openGlobalSearch(context),
     );
   }
 

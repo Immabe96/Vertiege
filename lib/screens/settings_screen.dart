@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +16,6 @@ import '../services/admin_access_service.dart';
 import '../services/auth_service.dart';
 import '../services/backup_service.dart';
 import '../services/device_permission_service.dart';
-import '../services/feature_flags.dart';
 import '../services/firebase_bootstrap.dart';
 import '../services/push_token_service.dart';
 import '../services/mutation_outbox_service.dart';
@@ -148,16 +146,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (mounted) {
       VFeedback.showMessage(context, 'Image cache cleared');
     }
-  }
-
-  Future<void> _openBetaFeedback() async {
-    final url = Uri.tryParse(FeatureFlags.betaFeedbackUrl.trim());
-    if (url == null || !await canLaunchUrl(url)) {
-      if (!mounted) return;
-      VFeedback.showMessage(context, 'Could not open feedback form.');
-      return;
-    }
-    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   void _showCreditsDialog() {
@@ -532,146 +520,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showPrivacyPolicyDialog() {
-    final theme = Theme.of(context);
-    showVDialog(
-      context: context,
-      title: 'Privacy Policy',
-      scrollContent: true,
-      content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Last updated: May 2025', style: theme.textTheme.bodySmall),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'Information We Collect',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'We collect information you provide directly, such as your profile data, posts, and interactions.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'How We Use Your Data',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'Your data is used to provide and improve Vertiege services, personalize your experience, '
-                'and communicate important updates. We never sell your personal data.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'Data Storage & Security',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'Data is stored securely using Supabase infrastructure with encryption at rest and in transit.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                'Contact',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text('privacy@vertiege.app'),
-            ],
-          ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Close',
-            onPressed: () => Navigator.pop(context),
-            variant: ButtonVariant.text,
-          ),
-        ]),
-      ],
-    );
-  }
-
-  void _showTermsDialog() {
-    final theme = Theme.of(context);
-    showVDialog(
-      context: context,
-      title: 'Terms of Service',
-      scrollContent: true,
-      content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Last updated: May 2025', style: theme.textTheme.bodySmall),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                '1. Acceptance of Terms',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'By using Vertiege, you agree to these terms. If you do not agree, do not use the service.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                '2. User Conduct',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'Users must follow community guidelines within each world. Harassment, spam, '
-                'and illegal content are prohibited.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                '3. Content Ownership',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'You retain ownership of content you create. By posting, you grant Vertiege a license '
-                'to display and distribute your content within the platform.',
-              ),
-              const SizedBox(height: VSpacing.md),
-              Text(
-                '4. Limitation of Liability',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              const Text(
-                'Vertiege is provided "as is" without warranties. We are not liable for damages '
-                'arising from use of the service.',
-              ),
-            ],
-          ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Close',
-            onPressed: () => Navigator.pop(context),
-            variant: ButtonVariant.text,
-          ),
-        ]),
-      ],
-    );
-  }
-
   void _showRestoreBackupDialog() {
     final controller = TextEditingController();
     String? validationError;
@@ -952,11 +800,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: 'Credits',
                   onTap: _showCreditsDialog,
                 ),
-                VSectionTile(
-                  icon: Icons.feedback_outlined,
-                  label: 'Beta feedback',
-                  onTap: _openBetaFeedback,
-                ),
               ],
             ),
             const SizedBox(height: VSpacing.md),
@@ -1167,27 +1010,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: VSpacing.md),
             VSectionList(
-              title: 'Privacy & Legal',
+              title: 'Help & legal',
               children: [
                 VSectionTile(
-                  icon: Icons.privacy_tip_outlined,
-                  label: 'Privacy Policy',
-                  onTap: _showPrivacyPolicyDialog,
-                ),
-                VSectionTile(
-                  icon: VIcons.gavel,
-                  label: 'Terms of Service',
-                  onTap: _showTermsDialog,
-                ),
-                VSectionTile(
-                  icon: Icons.article_outlined,
-                  label: 'Open Source Licenses',
-                  onTap: () => showLicensePage(
-                    context: context,
-                    applicationName: 'Vertiege',
-                    applicationVersion: kAppVersionLabel,
-                    applicationLegalese: 'Copyright 2025 Vertiege',
-                  ),
+                  icon: Icons.info_outline,
+                  label: 'Privacy, terms & licenses',
+                  detail: 'Open the More tab',
+                  onTap: () => context.go('/more'),
                 ),
               ],
             ),

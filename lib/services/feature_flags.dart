@@ -12,10 +12,10 @@ class FeatureFlags {
   // ── Feature gates ──
 
   static bool get marketplace =>
-      RemoteConfigService.getBool('marketplace_enabled', fallback: false);
+      RemoteConfigService.getBool('marketplace_enabled', fallback: true);
 
   static bool get treasury =>
-      RemoteConfigService.getBool('treasury_enabled', fallback: false);
+      RemoteConfigService.getBool('treasury_enabled', fallback: true);
 
   static bool get quests =>
       RemoteConfigService.getBool('quests_enabled', fallback: true);
@@ -24,10 +24,16 @@ class FeatureFlags {
       RemoteConfigService.getBool('events_enabled', fallback: true);
 
   static bool get polls =>
-      RemoteConfigService.getBool('polls_enabled', fallback: false);
+      RemoteConfigService.getBool('polls_enabled', fallback: true);
 
   static bool get challenges =>
-      RemoteConfigService.getBool('challenges_enabled', fallback: false);
+      RemoteConfigService.getBool('challenges_enabled', fallback: true);
+
+  /// Immersive Campfire UI (minimal chrome). Default off until device UAT.
+  static bool get campfireImmersive => RemoteConfigService.getBool(
+        'campfire_immersive',
+        fallback: false,
+      );
 
   /// When true, subscriptions verify via the verify-subscription-purchase edge function.
   static bool get receiptEdgeVerify => RemoteConfigService.getBool(

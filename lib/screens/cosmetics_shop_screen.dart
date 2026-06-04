@@ -12,6 +12,7 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/worlds/listing_card.dart';
 import '../widgets/core/shimmer.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_feedback.dart';
 
 enum _ShopCategory { passes, seeds, boosts, cosmetics }
@@ -69,27 +70,22 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
         expands: true,
         control: const FTabControl.managed(),
         children: [
-          FTabEntry(label: const Text('Passes'), child: _ShopGrid(
-            category: _ShopCategory.passes,
-            items: _passes,
-            coins: coins,
-          )),
-          FTabEntry(label: const Text('Seeds'), child: _ShopGrid(
-            category: _ShopCategory.seeds,
-            items: _seeds,
-            coins: coins,
-          )),
-          FTabEntry(label: const Text('Boosts'), child: _ShopGrid(
-            category: _ShopCategory.boosts,
-            items: _boosts,
-            coins: coins,
-          )),
-          FTabEntry(label: const Text('Cosmetics'), child: _ShopGrid(
-            category: _ShopCategory.cosmetics,
-            items: _cosmetics,
-            coins: coins,
-          )),
-          FTabEntry(label: const Text('Dominions'), child: const _DominionsTab()),
+          FTabEntry(
+            label: const Text('Cosmetics'),
+            child: _ShopGrid(
+              category: _ShopCategory.cosmetics,
+              items: _cosmetics,
+              coins: coins,
+            ),
+          ),
+          const FTabEntry(
+            label: Text('Dominions'),
+            child: _DominionsTab(),
+          ),
+          const FTabEntry(
+            label: Text('Coming soon'),
+            child: _PayToWinComingSoonTab(),
+          ),
         ],
       ),
     );
@@ -824,6 +820,22 @@ class _DominionListingDetailSheet extends StatelessWidget {
             const SizedBox(height: VSpacing.md),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PayToWinComingSoonTab extends StatelessWidget {
+  const _PayToWinComingSoonTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: AppEmptyState(
+        title: 'Passes, seeds & boosts',
+        description:
+            'Pay-to-win items stay out of v1. Cosmetics and dominions are available in other tabs.',
+        icon: Icons.lock_clock_outlined,
       ),
     );
   }

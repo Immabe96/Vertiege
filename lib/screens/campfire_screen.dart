@@ -12,6 +12,7 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../services/device_permission_service.dart';
+import '../services/feature_flags.dart';
 
 class CampfireScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -65,6 +66,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
     final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final immersive = FeatureFlags.campfireImmersive;
 
     return FScaffold(
       header: FHeader.nested(
@@ -98,9 +100,13 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
           ],
         ),
       ),
-      child: Column(
+      child: ColoredBox(
+        color: immersive
+            ? (isDark ? VColors.surfaceDark : Colors.black)
+            : Colors.transparent,
+        child: Column(
         children: [
-          const SizedBox(height: VSpacing.xl),
+          if (!immersive) const SizedBox(height: VSpacing.xl),
           Expanded(
             child: resident == null
                 ? const AppEmptyState(
@@ -156,7 +162,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                     ),
                   )
                 : GridView.builder(
-                    padding: const EdgeInsets.all(VSpacing.md),
+                    padding: EdgeInsets.all(immersive ? VSpacing.lg : VSpacing.md),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
@@ -171,6 +177,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
           ),
           const _CampfireControls(),
         ],
+        ),
       ),
     );
   }

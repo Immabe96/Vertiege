@@ -60,6 +60,8 @@ import '../screens/world_governance_screen.dart';
 import '../screens/world_challenges_screen.dart';
 import '../screens/world_jobs_screen.dart';
 import '../screens/world_archive_screen.dart';
+import '../screens/world_academy_screen.dart';
+import '../screens/world_sanctuary_screen.dart';
 import '../router/world_navigation.dart';
 import '../screens/league_screen.dart';
 import '../screens/world_discovery_screen.dart';
@@ -299,6 +301,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'archive',
                         builder: (context, state) => WorldArchiveScreen(
                           worldId: state.pathParameters['worldId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'academy',
+                        builder: (context, state) => WorldAcademyScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          isSovereignOrCouncil:
+                              state.uri.queryParameters['admin'] == 'true',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'sanctuary',
+                        builder: (context, state) => WorldSanctuaryScreen(
+                          worldId: state.pathParameters['worldId']!,
+                          isSovereignOrCouncil:
+                              state.uri.queryParameters['admin'] == 'true',
                         ),
                       ),
                       GoRoute(

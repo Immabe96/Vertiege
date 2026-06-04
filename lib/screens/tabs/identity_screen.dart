@@ -27,6 +27,7 @@ import '../../widgets/profile/badge_display.dart';
 import '../../widgets/profile/edit_profile_sheet.dart';
 import '../../state/ally_provider.dart';
 import '../../widgets/shared/progress_bar.dart';
+import '../../router/search_navigation.dart';
 import '../../widgets/profile/streak_display.dart';
 import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/subscription_badge.dart';
@@ -312,6 +313,11 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     return VHubPage(
       title: 'Wall of Honour',
       headerActions: [
+        VAccessibleHeaderAction(
+          label: 'Search residents',
+          icon: const Icon(FIcons.search),
+          onPress: () => openGlobalSearch(context),
+        ),
         VAccessibleHeaderAction(
           label: 'Refresh honour wall',
           icon: const Icon(FIcons.rotateCw),

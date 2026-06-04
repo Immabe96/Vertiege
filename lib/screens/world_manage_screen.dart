@@ -17,13 +17,41 @@ import '../widgets/v_section_list.dart';
 import '../services/permission_service.dart';
 
 /// Manage / Participate hub (Wave 10) with visible gate reasons.
-class WorldManageScreen extends ConsumerWidget {
+class WorldManageScreen extends ConsumerStatefulWidget {
   final String worldId;
 
   const WorldManageScreen({super.key, required this.worldId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorldManageScreen> createState() => _WorldManageScreenState();
+}
+
+class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
+  final _scrollController = ScrollController();
+  final _socialKey = GlobalKey();
+  final _economyKey = GlobalKey();
+  final _governanceKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _jumpTo(GlobalKey key) async {
+    final ctx = key.currentContext;
+    if (ctx == null) return;
+    await Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      alignment: 0.05,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final worldId = widget.worldId;
     final world = ref.watch(worldProvider).worlds[worldId];
     final resident = ref.watch(residentProvider).resident;
     if (world == null) {
@@ -90,6 +118,7 @@ class WorldManageScreen extends ConsumerWidget {
       title: 'Manage & participate',
       showBack: true,
       body: ListView(
+        controller: _scrollController,
         padding: const EdgeInsets.all(VSpacing.md),
         children: [
           if (!isJoined)
@@ -102,123 +131,156 @@ class WorldManageScreen extends ConsumerWidget {
                 icon: Icons.group_add_outlined,
               ),
             ),
-          VSectionList(
-            title: 'Social',
-            children: [
-              QuietGateTile.section(
-                icon: Icons.weekend_outlined,
-                label: 'Lounge',
-                gate: loungeGate,
-                onOpen: lounge != null && loungeGate == null
-                    ? () => context.push(
-                          worldChannelDestinationPath(
-                            worldId,
-                            lounge!,
-                            worldName: world.name,
-                          ),
-                        )
-                    : null,
-              ),
-              QuietGateTile.section(
-                icon: Icons.local_fire_department,
-                label: 'Campfire',
-                gate: campfireGate ??
-                    (features.audioRooms
-                        ? null
-                        : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
-                onOpen: campfire != null && campfireGate == null
-                    ? () => context.push(
-                          worldChannelDestinationPath(
-                            worldId,
-                            campfire!,
-                            worldName: world.name,
-                          ),
-                        )
-                    : null,
-              ),
-              if (FeatureFlags.polls)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ActionChip(
+                  label: const Text('Social'),
+                  onPressed: () => _jumpTo(_socialKey),
+                ),
+                const SizedBox(width: VSpacing.xs),
+                ActionChip(
+                  label: const Text('Economy'),
+                  onPressed: () => _jumpTo(_economyKey),
+                ),
+                if (isCouncil) ...[
+                  const SizedBox(width: VSpacing.xs),
+                  ActionChip(
+                    label: const Text('Governance'),
+                    onPressed: () => _jumpTo(_governanceKey),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: VSpacing.md),
+          KeyedSubtree(
+            key: _socialKey,
+            child: VSectionList(
+              title: 'Social',
+              children: [
+                QuietGateTile.section(
+                  icon: Icons.weekend_outlined,
+                  label: 'Lounge',
+                  gate: loungeGate,
+                  onOpen: lounge != null && loungeGate == null
+                      ? () => context.push(
+                            worldChannelDestinationPath(
+                              worldId,
+                              lounge!,
+                              worldName: world.name,
+                            ),
+                          )
+                      : null,
+                ),
+                QuietGateTile.section(
+                  icon: Icons.local_fire_department,
+                  label: 'Campfire',
+                  gate: campfireGate ??
+                      (features.audioRooms
+                          ? null
+                          : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
+                  onOpen: campfire != null && campfireGate == null
+                      ? () => context.push(
+                            worldChannelDestinationPath(
+                              worldId,
+                              campfire!,
+                              worldName: world.name,
+                            ),
+                          )
+                      : null,
+                ),
+                if (FeatureFlags.polls)
+                  VSectionTile(
+                    icon: Icons.how_to_vote,
+                    label: 'Polls',
+                    onTap: isJoined
+                        ? () => context.push(
+                              worldPollsPath(worldId, admin: isCouncil),
+                            )
+                        : null,
+                    enabled: isJoined,
+                  ),
                 VSectionTile(
-                  icon: Icons.how_to_vote,
-                  label: 'Polls',
+                  icon: Icons.work_outline,
+                  label: 'Role board',
                   onTap: isJoined
                       ? () => context.push(
-                            worldPollsPath(worldId, admin: isCouncil),
+                            worldJobsPath(worldId, admin: isCouncil),
                           )
                       : null,
                   enabled: isJoined,
                 ),
-              VSectionTile(
-                icon: Icons.work_outline,
-                label: 'Role board',
-                onTap: isJoined
-                    ? () => context.push(
-                          worldJobsPath(worldId, admin: isCouncil),
-                        )
-                    : null,
-                enabled: isJoined,
-              ),
-              VSectionTile(
-                icon: Icons.menu_book_outlined,
-                label: 'Archive',
-                onTap: isJoined ? () => context.push(worldArchivePath(worldId)) : null,
-                enabled: isJoined,
-              ),
-            ],
-          ),
-          VSectionList(
-            title: 'Economy',
-            children: [
-              QuietGateTile.section(
-                icon: Icons.account_balance_wallet,
-                label: 'Treasury',
-                gate: treasuryGate,
-                onOpen: treasuryGate == null
-                    ? () => context.push(
-                          worldTreasuryPath(worldId, admin: isCouncil),
-                        )
-                    : null,
-              ),
-              QuietGateTile.section(
-                icon: Icons.storefront,
-                label: 'Marketplace',
-                gate: marketplaceGate,
-                onOpen: marketplaceGate == null
-                    ? () => context.push(
-                          worldMarketplacePath(worldId, member: isJoined),
-                        )
-                    : null,
-              ),
-            ],
-          ),
-          if (isCouncil) ...[
-            VSectionList(
-              title: 'Governance',
-              children: [
                 VSectionTile(
-                  icon: Icons.gavel,
-                  label: 'Approval queue',
-                  onTap: () => context.push(
-                    worldGovernancePath(worldId, worldName: world.name),
-                  ),
-                ),
-                VSectionTile(
-                  icon: Icons.history,
-                  label: 'Audit log',
-                  onTap: () => context.push(
-                    auditLogPath(worldId, worldName: world.name),
-                  ),
-                ),
-                VSectionTile(
-                  icon: Icons.settings,
-                  label: 'World settings',
-                  onTap: () => context.push(worldSettingsPath(worldId)),
+                  icon: Icons.menu_book_outlined,
+                  label: 'Archive',
+                  onTap: isJoined
+                      ? () => context.push(worldArchivePath(worldId))
+                      : null,
+                  enabled: isJoined,
                 ),
               ],
             ),
-          ],
+          ),
+          KeyedSubtree(
+            key: _economyKey,
+            child: VSectionList(
+              title: 'Economy',
+              children: [
+                QuietGateTile.section(
+                  icon: Icons.account_balance_wallet,
+                  label: 'Treasury',
+                  gate: treasuryGate,
+                  onOpen: treasuryGate == null
+                      ? () => context.push(
+                            worldTreasuryPath(worldId, admin: isCouncil),
+                          )
+                      : null,
+                ),
+                QuietGateTile.section(
+                  icon: Icons.storefront,
+                  label: 'Marketplace',
+                  gate: marketplaceGate,
+                  onOpen: marketplaceGate == null
+                      ? () => context.push(
+                            worldMarketplacePath(worldId, member: isJoined),
+                          )
+                      : null,
+                ),
+              ],
+            ),
+          ),
+          if (isCouncil)
+            KeyedSubtree(
+              key: _governanceKey,
+              child: VSectionList(
+                title: 'Governance',
+                children: [
+                  VSectionTile(
+                    icon: Icons.gavel,
+                    label: 'Approval queue',
+                    onTap: () => context.push(
+                      worldGovernancePath(worldId, worldName: world.name),
+                    ),
+                  ),
+                  VSectionTile(
+                    icon: Icons.history,
+                    label: 'Audit log',
+                    onTap: () => context.push(
+                      auditLogPath(worldId, worldName: world.name),
+                    ),
+                  ),
+                  VSectionTile(
+                    icon: Icons.settings,
+                    label: 'World settings',
+                    onTap: () => context.push(worldSettingsPath(worldId)),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
-
 }

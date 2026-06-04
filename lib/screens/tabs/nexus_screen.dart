@@ -30,6 +30,7 @@ import '../tabs/tab_layout.dart';
 import 'nexus_notifications_sheet.dart';
 import '../../services/notification_onboarding_prefs.dart';
 import '../../widgets/onboarding/notification_permission_sheet.dart';
+import '../../router/search_navigation.dart';
 
 enum _FeedTab { all, following, announcements }
 
@@ -45,10 +46,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   FeedSort _sort = FeedSort.latest;
   late final ScrollController _scrollController;
   bool _showScrollFab = false;
-  bool _searchExpanded = false;
   bool _shortcutsExpanded = false;
-  final _searchController = TextEditingController();
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -91,7 +89,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -108,19 +105,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
       duration: VAnimation.normal,
       curve: VAnimation.standard,
     );
-  }
-
-  void _toggleSearch() {
-    setState(() {
-      _searchExpanded = !_searchExpanded;
-      if (!_searchExpanded) {
-        _searchController.clear();
-        _searchQuery = '';
-      }
-    });
-    if (_searchExpanded) {
-      FocusScope.of(context).unfocus();
-    }
   }
 
   void _showNotifications() {
@@ -167,17 +151,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
               .toList(),
         };
 
-        if (_searchQuery.isNotEmpty) {
-          final q = _searchQuery.toLowerCase();
-          filtered = filtered
-              .where(
-                (p) =>
-                    p.content.toLowerCase().contains(q) ||
-                    p.residentName.toLowerCase().contains(q),
-              )
-              .toList();
-        }
-
         return _sortPosts(filtered, _sort);
       }),
     );
@@ -199,9 +172,9 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
-        label: _searchExpanded ? 'Close search' : 'Search',
-        icon: Icon(_searchExpanded ? FIcons.x : FIcons.search),
-        onPress: _toggleSearch,
+        label: 'Search residents and worlds',
+        icon: const Icon(FIcons.search),
+        onPress: () => openGlobalSearch(context),
       ),
       VAccessibleHeaderAction(
         label: 'Notifications',
@@ -251,26 +224,12 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
     return VTabPage(
       header: FHeader(
-        title: _searchExpanded
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                style: context.vBodyTextStyle,
-                decoration: InputDecoration(
-                  hintText: 'Search posts, residents...',
-                  hintStyle: context.vHintTextStyle,
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onChanged: (v) => setState(() => _searchQuery = v),
-              )
-            : Text(
-                'Vertiege',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: VFontWeight.semiBold,
-                ),
-              ),
+        title: Text(
+          'Vertiege',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: VFontWeight.semiBold,
+          ),
+        ),
         suffixes: headerActions,
       ),
       body: Stack(
@@ -395,13 +354,6 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
             .any(WorldService.isRemoteWorldId) ??
         false;
 
-    if (_searchQuery.isNotEmpty) {
-      return AppEmptyState(
-        title: 'No results for "$_searchQuery"',
-        description: 'Try a different search term',
-        icon: Icons.search_off,
-      );
-    }
     switch (_tab) {
       case _FeedTab.following:
         return const AppEmptyState(
