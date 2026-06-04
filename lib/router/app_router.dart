@@ -69,6 +69,7 @@ import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
 import '../screens/splash_screen.dart';
 import 'go_router_refresh.dart';
+import 'navigation_keys.dart';
 import 'v_page_transitions.dart';
 
 /// Stable listenable — resident/auth changes refresh redirects only (no router rebuild).
@@ -98,6 +99,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ref.watch(goRouterRefreshProvider);
 
   return GoRouter(
+    navigatorKey: appRootNavigatorKey,
     initialLocation: '/login',
     refreshListenable: refreshListenable,
     observers: AnalyticsService.navigatorObservers,

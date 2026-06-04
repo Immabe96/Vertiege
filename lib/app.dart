@@ -20,6 +20,7 @@ import 'state/chat_provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
+import 'router/navigation_keys.dart';
 import 'router/notification_navigation.dart';
 import 'screens/splash_screen.dart';
 import 'services/daily_reward_service.dart';
@@ -449,10 +450,12 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
       Future.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
+        final dialogContext = appRootNavigatorKey.currentContext;
+        if (dialogContext == null) return;
         final reward = DailyRewardService.getDailyReward(resident.id);
 
         DailyRewardDialog.show(
-          context,
+          dialogContext,
           reward: reward,
           onCollect: () {
             StorageService.setString(todayKey, 'true');

@@ -106,9 +106,10 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     );
     _loadMembers();
     _loadNavPrefs();
-    _maybeAutoJoin();
     _runGovernanceChecks();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _maybeAutoJoin();
       OnboardingFunnelPrefs.markOpenedWorld();
       ref.read(questProvider.notifier).onWorldVisited();
       unawaited(
@@ -118,10 +119,13 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         ),
       );
     });
-    final resident = ref.read(residentProvider).resident;
-    if (resident != null) {
-      ref.read(chatProvider.notifier).loadChannelReads(resident.id);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final resident = ref.read(residentProvider).resident;
+      if (resident != null) {
+        ref.read(chatProvider.notifier).loadChannelReads(resident.id);
+      }
+    });
   }
 
   void _maybeAutoJoin() {

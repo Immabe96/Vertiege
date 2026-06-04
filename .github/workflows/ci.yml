@@ -79,9 +79,13 @@ jobs:
   verify-ios:
     needs: verify
     if: needs.verify.result == 'success'
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -154,7 +158,11 @@ jobs:
         run: bash scripts/ci-setup-android-signing.sh
 
       - name: Build release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
+        run: >-
+          flutter build apk --release --no-tree-shake-icons
+          --target-platform android-arm64
 
       - name: Prune old APK artifacts (storage quota)
         env:
@@ -167,7 +175,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vertiege-apk-${{ github.run_id }}
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           if-no-files-found: error
           retention-days: 14
           compression-level: 9
