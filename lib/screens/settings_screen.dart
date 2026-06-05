@@ -973,10 +973,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Appearance',
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FTile.raw(
+                _SettingsSectionLabel(title: 'Appearance'),
+                Card(
+                  margin: EdgeInsets.zero,
+                  elevation: 0,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    side: BorderSide(
+                      color: isDark
+                          ? VColors.outlineVariantDark
+                          : VColors.outlineVariant,
+                    ),
+                  ),
                   child: _appearancePanel(
                     theme: theme,
                     isDark: isDark,
@@ -1132,6 +1145,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Matches [VSectionList] uppercase section labels.
+class _SettingsSectionLabel extends StatelessWidget {
+  final String title;
+
+  const _SettingsSectionLabel({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    return Padding(
+      padding: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
+      child: Text(
+        title.toUpperCase(),
+        style: theme.typography.sm.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colors.mutedForeground,
+          letterSpacing: 0.5,
         ),
       ),
     );
