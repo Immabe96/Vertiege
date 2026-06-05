@@ -279,6 +279,23 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## UI migration track (parallel, `develop` frozen)
+
+**Plan:** [shadcn-migration-plan.md](shadcn-migration-plan.md) on branch `docs/shadcn-migration-plan`.
+
+| Gate | Status |
+|------|--------|
+| Legacy docs consolidated | Done — [consolidated-legacy-plans.md](../../archive/consolidated-legacy-plans.md) |
+| Migration plan + inventory | **In progress** — polish on docs branch |
+| Wave 0 spike (`feature/ui-wave-0-spike`) | **Not started** — blocked until plan merges |
+| Wave A–F (Forui removal) | **Not started** — blocked until Wave 0 decision |
+
+**Policy:** No UI package changes on `develop` until Wave 0 passes. Product waves (23+) and bug fixes on `develop` continue separately when explicitly requested.
+
+**Baseline (2026-05-30):** 65 `lib/` files import Forui; target is `V*` wrappers in `lib/ui/` with zero Forui imports after Wave F.
+
+---
+
 ## Follow-ups (product / infra)
 
 1. **Store receipt validation** — Edge function deployed (stub → RPC); live Apple/Google verify in **Wave 19**. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).
