@@ -1,42 +1,42 @@
-# Vertiege UI migration: unified design system (Forui out)
+# Vertiege UI migration: unified design system
 
-**Status:** Active — **Wave 0 spike implemented** (on-device scoring pending)  
-**Branch:** `feature/ui-wave-0-spike` — docs + spike; PR to `develop` when scored.  
-**Spike route (debug):** `/debug/ui-spike` · Settings → Developer → UI Wave 0 spike  
-**Snapshot:** 2026-05-30 — 65 `lib/` files import Forui; 35 of 54 screen files import Forui directly.
-
-**Goal:** One visible design system behind Vertiege `V*` wrappers. **Forui is removed gradually**, not in a big-bang rewrite.
+**Status:** **Wave 0 passed — Plan B (`forui-0.21`)**  
+**Decision (2026-06-05):** On-device spike — **Forui baseline looks best.** No `shadcn_ui` swap; no Forui removal.  
+**Revised goal:** **Wrapper consolidation** — one import path (`lib/ui/*`), Forui stays at `0.21.3` behind `V*` facades.  
+**Branch / PR:** `feature/ui-wave-0-spike` → `develop` ([PR #32](https://github.com/Immabe96/Vertiege/pull/32))  
+**Spike route (debug):** `/debug/ui-spike` — keep for regression; baseline is the chosen direction.  
+**Snapshot:** 66 `lib/` files import Forui; 35 of 54 screen files import Forui directly.
 
 **Historical plans & audits:** [consolidated-legacy-plans.md](../../archive/consolidated-legacy-plans.md) · [consolidated-legacy-audits.md](../../archive/consolidated-legacy-audits.md)  
 **Widget mapping:** [ui-widget-mapping.md](ui-widget-mapping.md) — Forui symbol inventory, per-package mapping, theme bridge.
 
 ---
 
-## Decision (2026-06-05)
+## Decision (2026-06-05) — **locked: Forui 0.21**
 
-After comparing options online and against the current codebase:
+Wave 0 spike on Android emulator; product owner picked **Forui baseline** over `shadcn_ui` and Material 3.
 
 | Candidate | Verdict |
 |-----------|---------|
-| **`shadcn_ui`** ([pub.dev](https://pub.dev/packages/shadcn_ui), [docs](https://mariuti.com/flutter-shadcn-ui/)) | **Primary target** if Wave 0 passes — mature releases (v0.54+), MIT, good docs, shadcn/ui port |
-| **`shadcn_flutter`** ([pub.dev](https://pub.dev/packages/shadcn_flutter)) | **Fallback** only if `shadcn_ui` gaps block shell/dialog/sheet on Android |
-| **Forui 0.21 finish + wrappers** | **Baseline** in Wave 0 spike; **Plan B** if both shadcn ports lose on fit or SDK friction |
-| **Material 3 + `V*` only** | **Plan C** — lowest third-party risk, highest build cost; use if shadcn ports add weight without UX win |
+| **Forui 0.21 + `V*` wrappers** | **Chosen** — best visual fit on device |
+| **`shadcn_ui`** | Rejected after spike — shell/leaf feel weaker than baseline |
+| **Material 3 + `V*` only** | Rejected — less polished than Forui for Vertiege chrome |
+| **`shadcn_flutter`** | Not trialed — not needed after baseline win |
 
-**Do not add a UI package to `develop` until Wave 0 spike PR is reviewed.** The wrapper facade (`VPage`, `VDialog`, …) is implemented **once**, with the backing library chosen in Wave 0.
+**Do not add `shadcn_ui` to production paths.** Wrapper facade (`VPage`, `VDialog`, …) is implemented **once**, backed by **Forui** inside `lib/ui/` and `lib/forui/`.
 
 ---
 
-## Why leave Forui
+## Why stay on Forui (post–Wave 0)
 
-| | Forui (current `0.21.3`) | Target (wrapper-backed) |
-|---|--------------------------|-------------------------|
-| Today | `VHubPage` / `VTabPage`, uneven leaf screens mixing Material | One import path: `lib/ui/*` |
-| Ecosystem | shadcn-inspired, ~40+ widgets ([forui.dev](https://forui.dev/docs)) | shadcn-style primitives + Vertiege tokens |
-| Upgrade cliff | **Forui 0.22+ requires Flutter 3.44+** ([forui pub](https://pub.dev/packages/forui)); app on SDK `^3.11.0` | Spike must record min Flutter/SDK for chosen package |
-| Fragmentation | Forui + Material + raw `ListTile` / `AlertDialog` | Forbidden: direct `package:forui` in feature screens after Wave A |
+| | Today | Wrapper consolidation target |
+|---|-------|------------------------------|
+| Shell | `VHubPage` / `VTabPage` | Rename/move to `lib/ui/shell/` — **still Forui inside** |
+| Leaf screens | Forui + Material + raw `ListTile` mixed | One import path: `lib/ui/*` for feature code |
+| Upgrade | Pinned `0.21.3` until a deliberate Flutter/Forui bump wave | **Do not** jump to Forui 0.22+ without a dedicated compat spike |
+| Layout pitfalls | e.g. `FTile.raw` + `Expanded` (Settings Appearance — fixed) | Document patterns in [design-system.md](../../reference/design-system.md) |
 
-**Policy (effective after Wave 0 merge):** No new `import 'package:forui/forui.dart'` in feature screens. New UI goes through `lib/ui/*`. When a screen is touched, migrate its Forui/Material leaks in the same PR.
+**Policy (effective now):** No new `import 'package:forui/forui.dart'` in feature screens. New UI goes through `lib/ui/*`. When a screen is touched, route Forui/Material leaks through wrappers in the same PR. **Forui is not removed from `pubspec.yaml`.**
 
 ---
 
@@ -223,7 +223,47 @@ Optional **Candidate C** (`shadcn_flutter`) only if A fails on dialog/sheet but 
 
 ---
 
-## Forui removal ladder (after Wave 0 selects shadcn or M3)
+## ~~Forui removal ladder~~ — **cancelled (Plan B)**
+
+_Waves A–F below are **historical** — kept for inventory only. Do not execute Forui removal._
+
+---
+
+## Wrapper consolidation ladder (active track)
+
+Same screen groupings as the old ladder, but **Forui remains the backing library** inside `lib/ui/` / `lib/forui/`. No `pubspec` swap.
+
+### W1 — Shell & layout patterns (highest leverage)
+
+- Move `VHubPage` → `VPage`, `VTabPage` → `VTabShell` under `lib/ui/shell/` (re-export from `ui.dart`).
+- Document **do not** use `FTile.raw` for wide panels with `Expanded` children — use `Card` + full width (Settings Appearance pattern).
+- Tab roots unchanged visually; fix any remaining grey-void UAT #2 issues.
+
+### W2 — Auth & onboarding
+
+- Splash, login, signup, callback, onboarding, The Gate — inherit shell tokens; `VButton` only.
+
+### W3 — World system
+
+- World detail, manage, governance, channels, marketplace, dossier widgets — batch wrapper imports.
+
+### W4 — Progression & identity
+
+- Progress hub, achievements, league, profile, ascension.
+
+### W5 — Commerce & social
+
+- Shop, subscription, chat, thread, Campfire, search.
+
+### W6 — Hygiene (not removal)
+
+- `rg "package:forui" lib/screens` trending down via wrappers; **keep** `forui` in `pubspec`.
+- Optional: drop `shadcn_ui` dep + shadcn spike backend after PR merge (debug baseline-only).
+- Update [design-system.md](../../reference/design-system.md) — “Forui behind V* wrappers”, not “migrate to shadcn”.
+
+---
+
+## Historical: Forui removal ladder (pre–Wave 0, do not run)
 
 Each step must leave `flutter test` green and UAT gates intact. **One wave per PR** preferred; max two related screens if they share a wrapper change.
 
@@ -405,23 +445,22 @@ Already on `develop`: Wave 22 drops, progress hub, daily reward `TweenSequence` 
 - Migration is **visual and consistency**, not product behavior.
 - **Incremental adoption** only through wrappers.
 - **Android release** remains primary UAT surface until iOS parity is explicit.
-- Two shadcn Flutter packages exist; **standardize on one** after Wave 0 — default **`shadcn_ui`**.
+- Wave 0 **rejected** shadcn ports for production; spike artifacts may remain debug-only until cleanup.
 
 ---
 
 ## Wave 0 decision record
 
-_Fill in when spike PR merges._
-
 | Field | Value |
 |-------|-------|
-| Date | 2026-05-30 (spike landed; scores TBD on device) |
-| Chosen backing | **Provisional: `shadcn_ui`** — pending emulator scorecard |
-| Flutter SDK bump required | **No** — Flutter 3.44.0 / Dart 3.11 meets `shadcn_ui` 0.54 floor |
-| APK size delta (vs baseline) | _Measure before merge_ |
-| Spike PR | `feature/ui-wave-0-spike` → `develop` |
-| Forui file count at spike start | 66 (`check_no_forui_in_lib.sh --report`) |
-| Notes | Leaf widgets + theme bridge validated in CI (`flutter test` 231). Tab shell still custom (Material `Scaffold` + `ShadTheme`). Score all three backends on `/debug/ui-spike` before Wave A. |
+| Date | 2026-06-05 |
+| Chosen backing | **`forui-0.21`** (Plan B — wrapper consolidation) |
+| Runner-up | `shadcn_ui`, Material 3 — visually weaker on emulator |
+| Flutter SDK bump required | **No** for current pin |
+| APK size delta (vs baseline) | Not blocking — no shadcn production dep |
+| Spike PR | [#32](https://github.com/Immabe96/Vertiege/pull/32) |
+| Forui file count at spike start | 66 |
+| Notes | Product owner: **“Forui baseline looks best.”** Settings scroll bugs fixed during spike (Appearance `Card` layout). Next: W1 shell rename, not Forui removal. |
 
 ---
 
@@ -433,3 +472,4 @@ _Fill in when spike PR merges._
 | 2026-05-30 | Inventory baseline, screen matrix, spike folder layout, PR template, enforcement |
 | 2026-05-30 | Widget mapping doc, theme bridge, `check_no_forui_in_lib.sh` |
 | 2026-05-30 | Wave 0 spike implemented (`lib/ui_spike/`, debug route, `shadcn_ui` dep) |
+| 2026-06-05 | **Wave 0 decision: Forui 0.21 (Plan B)** — wrapper consolidation track |

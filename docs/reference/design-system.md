@@ -1,7 +1,7 @@
 # Design system reference
 
 > **Status: Current** — Prestige Noir + Forui (2026).  
-> **Migration:** [shadcn-migration-plan.md](../product/planning/shadcn-migration-plan.md) + [ui-widget-mapping.md](../product/planning/ui-widget-mapping.md) (Wave 0 gate; `develop` unchanged until spike passes).  
+> **Migration:** [shadcn-migration-plan.md](../product/planning/shadcn-migration-plan.md) — Wave 0 chose **Forui 0.21**; wrapper consolidation (not shadcn swap).  
 > Historical glassmorphism spec: [archive/design-sovereign-excellence-historical.md](../archive/design-sovereign-excellence-historical.md).
 
 ## Stack
