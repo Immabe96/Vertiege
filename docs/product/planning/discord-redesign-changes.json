@@ -1,0 +1,1949 @@
+{
+  "schema_version": "1.0.0",
+  "project": "Vertiege Commune UX (Discord++)",
+  "created": "2026-06-05",
+  "research_sources": [
+    "https://discord.com/blog/how-discord-made-android-in-app-navigation-easier",
+    "https://support.discord.com/hc/en-us/articles/12654190110999",
+    "https://github.com/Khalidabdi1/design-ai/blob/main/design-md/discord/DESIGN.md"
+  ],
+  "core_features_preserved": [
+    "tier_gating",
+    "worlds_and_channels",
+    "dms_threads_campfire",
+    "nexus_feed",
+    "achievements_xp",
+    "governance_marketplace_jobs",
+    "season_league",
+    "verifier_staff_tools",
+    "cosmetics_economy"
+  ],
+  "waves": [
+    {
+      "id": 1,
+      "name": "IA & navigation",
+      "changes": 24
+    },
+    {
+      "id": 2,
+      "name": "Commune theme",
+      "changes": 18
+    },
+    {
+      "id": 3,
+      "name": "Chat & messaging",
+      "changes": 26
+    },
+    {
+      "id": 4,
+      "name": "World / server UI",
+      "changes": 18
+    },
+    {
+      "id": 5,
+      "name": "Nexus / feed",
+      "changes": 12
+    },
+    {
+      "id": 6,
+      "name": "You / identity",
+      "changes": 12
+    },
+    {
+      "id": 7,
+      "name": "Components & polish",
+      "changes": 14
+    },
+    {
+      "id": 8,
+      "name": "Performance & a11y",
+      "changes": 10
+    },
+    {
+      "id": 9,
+      "name": "Vertiege differentiators",
+      "changes": 10
+    }
+  ],
+  "total_changes": 144,
+  "changes": [
+    {
+      "id": "DCX-001",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Unify Home: worlds + DMs in one tab",
+      "description": "Merge Explore chat modes and server rail into Discord-style Home with overlapping panels",
+      "files": [
+        "lib/screens/tabs/tab_layout.dart",
+        "lib/screens/tabs/chat_list_screen.dart"
+      ],
+      "discord_ref": "Home tab servers + Messages",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-002",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Collapse bottom nav inside active channel",
+      "description": "Hide tab bar when user is in world channel or DM; show on back",
+      "files": [
+        "lib/screens/tabs/tab_layout.dart",
+        "lib/router/app_router.dart"
+      ],
+      "discord_ref": "Navbar disappears in server",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-003",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "OverlappingPanelsLayout for world\u2192channel",
+      "description": "Custom panel: server list | channel list | chat (Material easing, no drawer+tabs)",
+      "files": [
+        "lib/ui/shell/v_overlapping_panels.dart"
+      ],
+      "discord_ref": "Android panels blog",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-004",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Rename Identity tab to You",
+      "description": "Profile, status, friends, settings entry \u2014 Discord You tab pattern",
+      "files": [
+        "lib/screens/tabs/identity_screen.dart",
+        "lib/ui/navigation/v_bottom_nav.dart"
+      ],
+      "discord_ref": "You tab",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-005",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Fold More into You tab",
+      "description": "Remove 5th hub tab; relocate links to You settings groups",
+      "files": [
+        "lib/screens/tabs/more_screen.dart",
+        "lib/screens/tabs/identity_screen.dart"
+      ],
+      "discord_ref": "You tab settings",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-006",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Reduce primary tabs to 3",
+      "description": "Home | Notifications | You (Nexus feed becomes Home sub-view)",
+      "files": [
+        "lib/router/app_router.dart"
+      ],
+      "discord_ref": "3-tab mobile layout",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-007",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Nexus feed as Home default center panel",
+      "description": "Feed remains first-class inside Home, not separate mental model",
+      "files": [
+        "lib/screens/tabs/nexus_screen.dart"
+      ],
+      "discord_ref": "Activity/home blend",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-008",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "World discovery via Home search",
+      "description": "Global + in-server search with inline filter chips",
+      "files": [
+        "lib/screens/search_screen.dart"
+      ],
+      "discord_ref": "Search filters",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-009",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Eliminate dual DM routes",
+      "description": "Single /chat/:roomId; fix white-screen pushes from search/profile",
+      "files": [
+        "lib/router/app_router.dart"
+      ],
+      "discord_ref": "Consistent DM routing",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-010",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Channel header tap opens details sheet",
+      "description": "Members, pins, media, threads \u2014 not swipe-from-right",
+      "files": [
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "Tap channel name",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-011",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Swipe-to-reply on messages",
+      "description": "Right-to-left gesture on bubble triggers reply composer",
+      "files": [
+        "lib/widgets/chat/"
+      ],
+      "discord_ref": "Mobile reply gesture",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-012",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Favorite channels per world",
+      "description": "Pin channels to top of list with star affordance",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "Favorite channels",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-013",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Server (world) icon rail",
+      "description": "Fixed left rail of circular world icons with unread badges",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Server list rail",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-014",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Unread pill on world icons",
+      "description": "White pill count on server icon; suppress when muted",
+      "files": [
+        "lib/utils/chat_unread.dart"
+      ],
+      "discord_ref": "Unread badges",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-015",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Back stack: Home\u2192Channels\u2192Chat hierarchy",
+      "description": "Panels animate with fixed duration; no ambiguous drawer overlay",
+      "files": [
+        "lib/ui/shell/v_overlapping_panels.dart"
+      ],
+      "discord_ref": "Home\u2192Channels\u2192Chat",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-016",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Deep links preserve panel state",
+      "description": "World/channel deep links open correct panel without blank tab",
+      "files": [
+        "lib/router/app_router.dart"
+      ],
+      "discord_ref": "Deep link parity",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-017",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Campfire entry from voice row in channel list",
+      "description": "Voice channels grouped; tap joins voice UI full-screen",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "Voice channels",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-018",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Thread preview inline in channel",
+      "description": "Thread summary row under parent message",
+      "files": [
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "Threads in channel",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-019",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Breadcrumb in nested world admin",
+      "description": "Secondary routes show world name + section; back to channel list",
+      "files": [
+        "lib/screens/world_*_screen.dart"
+      ],
+      "discord_ref": "Wayfinding",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-020",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Quick switcher between worlds",
+      "description": "Long-press server rail or search to jump worlds",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Quick server switch",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-021",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Persist last channel per world",
+      "description": "Resume where user left off on re-enter",
+      "files": [
+        "lib/state/chat_provider.dart"
+      ],
+      "discord_ref": "Resume channel",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-022",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Notifications tab or sheet",
+      "description": "Alerts accessible without leaving chat context",
+      "files": [
+        "lib/screens/tabs/alerts_screen.dart"
+      ],
+      "discord_ref": "Notification center",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-023",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Remove FAB on Nexus; composer in feed header",
+      "description": "Discord-style inline compose, not floating +",
+      "files": [
+        "lib/screens/tabs/tab_layout.dart"
+      ],
+      "discord_ref": "Inline compose",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-024",
+      "wave": 1,
+      "category": "navigation",
+      "priority": "P0",
+      "title": "Explore worlds as Home panel slide",
+      "description": "Discover worlds without dedicated bottom tab",
+      "files": [
+        "lib/screens/tabs/explore_screen.dart"
+      ],
+      "discord_ref": "Discovery in Home",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-025",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Commune dark surface ladder",
+      "description": "Add Discord-like elevation tokens: primary/secondary/tertiary/floating",
+      "files": [
+        "lib/theme/v_colors.dart"
+      ],
+      "discord_ref": "#313338 ladder",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-026",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Vertiege accent on interactive only",
+      "description": "Gold/violet reserved for CTAs, mentions, active states \u2014 not backgrounds",
+      "files": [
+        "lib/theme/v_colors.dart"
+      ],
+      "discord_ref": "Blurple accent discipline",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-027",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Message text tokens",
+      "description": "text-normal, text-muted, header-primary for chat typography",
+      "files": [
+        "lib/theme/v_tokens.dart",
+        "lib/theme/v_fonts.dart"
+      ],
+      "discord_ref": "Text roles",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-028",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Modifier hover/active/selected rgba",
+      "description": "List row states without hard borders",
+      "files": [
+        "lib/theme/v_colors.dart"
+      ],
+      "discord_ref": "background-modifier-*",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-029",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "8px card radius; pill buttons",
+      "description": "Discord-friendly radii across VCard/VButton",
+      "files": [
+        "lib/theme/v_tokens.dart"
+      ],
+      "discord_ref": "8px radius",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-030",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Remove gold wash on chat surfaces",
+      "description": "Chat areas use neutral dark only; prestige accents in headers",
+      "files": [
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "Neutral chat bg",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-031",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Elevation via lightness not shadow",
+      "description": "Dark theme depth without drop shadows on lists",
+      "files": [
+        "lib/ui/cards/v_surface_card.dart"
+      ],
+      "discord_ref": "Surface elevation",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-032",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Desaturated body text on dark",
+      "description": "Avoid pure white body; #dbdee1 equivalent",
+      "files": [
+        "lib/theme/v_colors.dart"
+      ],
+      "discord_ref": "text-normal",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-033",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Status color system",
+      "description": "Online/idle/dnd/offline dots unified",
+      "files": [
+        "lib/utils/presence_utils.dart"
+      ],
+      "discord_ref": "Status colors",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-034",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Mention and link colors",
+      "description": "Distinct link blue for URLs; accent for @mentions",
+      "files": [
+        "lib/widgets/chat/"
+      ],
+      "discord_ref": "text-link",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-035",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Theme scheme picker: Commune default",
+      "description": "New default dark preset; keep Prestige as optional",
+      "files": [
+        "lib/widgets/core/v_theme_scheme_picker.dart"
+      ],
+      "discord_ref": "Theme options",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-036",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Saturation/contrast accessibility sliders",
+      "description": "Discord-style a11y theme controls in Settings",
+      "files": [
+        "lib/screens/settings_screen.dart"
+      ],
+      "discord_ref": "A11y sliders",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-037",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Sync Forui theme to Commune ladder",
+      "description": "VertiegeForuiTheme maps new surface tokens",
+      "files": [
+        "lib/theme/forui_theme.dart"
+      ],
+      "discord_ref": "Forui bridge",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-038",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Icon size scale for dense lists",
+      "description": "20/16/14 icon steps for channel rows",
+      "files": [
+        "lib/theme/v_tokens.dart"
+      ],
+      "discord_ref": "Dense icons",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-039",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Divider tokens \u2014 subtle 1px",
+      "description": "channel-group separators at 10% white",
+      "files": [
+        "lib/theme/v_colors.dart"
+      ],
+      "discord_ref": "Subtle dividers",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-040",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Blur/glass removal in chat shell",
+      "description": "Solid surfaces in messaging; glass only for modals",
+      "files": [
+        "lib/widgets/core/glass_panel.dart"
+      ],
+      "discord_ref": "Solid chat chrome",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-041",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "Light mode Commune variant",
+      "description": "Optional light theme with same IA",
+      "files": [
+        "lib/theme/v_theme.dart"
+      ],
+      "discord_ref": "Light parity",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-042",
+      "wave": 2,
+      "category": "theme",
+      "priority": "P0",
+      "title": "DESIGN.md commune spec",
+      "description": "Living design doc for agents",
+      "files": [
+        "docs/reference/DESIGN.md"
+      ],
+      "discord_ref": "design-md skill",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-043",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Extract VMessageBubble widget",
+      "description": "Single shared bubble for DM + world channel",
+      "files": [
+        "lib/widgets/chat/v_message_bubble.dart"
+      ],
+      "discord_ref": "Unified bubbles",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-044",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Group consecutive messages by author",
+      "description": "Avatar only on first in group; tighter vertical rhythm",
+      "files": [
+        "lib/widgets/chat/chat_message_grouper.dart"
+      ],
+      "discord_ref": "Message grouping",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-045",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Compact message density option",
+      "description": "Settings toggle: cozy vs compact",
+      "files": [
+        "lib/screens/settings_screen.dart"
+      ],
+      "discord_ref": "Density toggle",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-046",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Username + timestamp inline header",
+      "description": "header-primary name, muted time on same row",
+      "files": [
+        "lib/widgets/chat/v_message_bubble.dart"
+      ],
+      "discord_ref": "Message header",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-047",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Reaction row on long-press",
+      "description": "Emoji picker overlay on message",
+      "files": [
+        "lib/widgets/chat/v_message_reactions.dart"
+      ],
+      "discord_ref": "Reactions",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-048",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Reply quote block in composer",
+      "description": "Quoted message preview above input",
+      "files": [
+        "lib/widgets/chat/chat_input_bar.dart"
+      ],
+      "discord_ref": "Reply UI",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-049",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Thread indicator chip on messages",
+      "description": "N replies \u00b7 tap opens thread",
+      "files": [
+        "lib/widgets/chat/v_message_bubble.dart"
+      ],
+      "discord_ref": "Threads",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-050",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Markdown rendering parity",
+      "description": "Bold, italic, code blocks, spoilers in chat",
+      "files": [
+        "lib/widgets/chat/v_message_content.dart"
+      ],
+      "discord_ref": "Markdown",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-051",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Link embed preview cards",
+      "description": "URL unfurl below message when available",
+      "files": [
+        "lib/widgets/chat/v_link_embed.dart"
+      ],
+      "discord_ref": "Embeds",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-052",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Image grid in messages",
+      "description": "1/2/3+ image layouts like Discord media",
+      "files": [
+        "lib/widgets/chat/chat_image.dart"
+      ],
+      "discord_ref": "Media grid",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-053",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "GIF/sticker picker sheet",
+      "description": "Bottom sheet picker; tier-gated stickers preserved",
+      "files": [
+        "lib/widgets/chat/v_media_picker.dart"
+      ],
+      "discord_ref": "GIF picker",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-054",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Typing indicator in channel list",
+      "description": "X is typing\u2026 on channel row",
+      "files": [
+        "lib/screens/tabs/chat_list_screen.dart"
+      ],
+      "discord_ref": "Typing in list",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-055",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Jump to present FAB",
+      "description": "Show when scrolled up; badge for new messages",
+      "files": [
+        "lib/widgets/chat/scroll_fab.dart"
+      ],
+      "discord_ref": "Jump to present",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-056",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Date separator style",
+      "description": "Floating pill dividers between days",
+      "files": [
+        "lib/widgets/chat/chat_date_separator.dart"
+      ],
+      "discord_ref": "Date separators",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-057",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "New messages divider",
+      "description": "Red line / pill for unread boundary",
+      "files": [
+        "lib/widgets/chat/new_since_visit_divider.dart"
+      ],
+      "discord_ref": "Unread divider",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-058",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Composer grows multi-line",
+      "description": "Shift+enter newline; max height cap",
+      "files": [
+        "lib/widgets/chat/chat_input_bar.dart"
+      ],
+      "discord_ref": "Multiline input",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-059",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Attachment tray",
+      "description": "+ button: image, file, achievement share",
+      "files": [
+        "lib/widgets/chat/chat_input_bar.dart"
+      ],
+      "discord_ref": "Attachments",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-060",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Slash command hint bar",
+      "description": "/pin /thread /tier for power users",
+      "files": [
+        "lib/widgets/chat/v_slash_commands.dart"
+      ],
+      "discord_ref": "Slash commands",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-061",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Message actions context menu",
+      "description": "Copy, reply, react, report, delete (role-gated)",
+      "files": [
+        "lib/widgets/chat/v_message_actions.dart"
+      ],
+      "discord_ref": "Context menu",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-062",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Pin message banner",
+      "description": "Pinned messages accessible from channel header",
+      "files": [
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "Pins",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-063",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Search in channel",
+      "description": "Header search opens in:channel filter UI",
+      "files": [
+        "lib/screens/search_screen.dart"
+      ],
+      "discord_ref": "In-channel search",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-064",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Member list sidebar sheet",
+      "description": "Avatars + roles; tap to DM",
+      "files": [
+        "lib/widgets/chat/v_member_list_sheet.dart"
+      ],
+      "discord_ref": "Member list",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-065",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Role color on usernames",
+      "description": "World roles tint display names in chat",
+      "files": [
+        "lib/widgets/chat/v_message_bubble.dart"
+      ],
+      "discord_ref": "Role colors",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-066",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "System message style",
+      "description": "Centered muted pills for joins/leaves/tier ups",
+      "files": [
+        "lib/widgets/chat/v_system_message.dart"
+      ],
+      "discord_ref": "System messages",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-067",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Voice connected bar",
+      "description": "Green bar when in Campfire; tap return",
+      "files": [
+        "lib/widgets/voice/campfire_mini_bar.dart"
+      ],
+      "discord_ref": "Voice connected",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-068",
+      "wave": 3,
+      "category": "chat",
+      "priority": "P0",
+      "title": "Eliminate duplicate _MessageBubble code",
+      "description": "Delete private classes from channel/DM screens",
+      "files": [
+        "lib/screens/chat_room_screen.dart",
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "DRY chat",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-069",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Rewrite world_detail as server home",
+      "description": "Channels-first layout; tabs demoted to overflow",
+      "files": [
+        "lib/screens/world_detail_screen.dart"
+      ],
+      "discord_ref": "Server layout",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-070",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Channel list categories collapsible",
+      "description": "Text / Voice / Announcement groups",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "Channel categories",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-071",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "World header compact",
+      "description": "Icon + name + chevron; no hero banner on chat path",
+      "files": [
+        "lib/widgets/worlds/world_profile_header.dart"
+      ],
+      "discord_ref": "Compact server header",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-072",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Member count in channel header",
+      "description": "Online/total in subtitle",
+      "files": [
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "Member count",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-073",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "World settings gear in rail context menu",
+      "description": "Long-press world icon for settings/mute/leave",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Server menu",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-074",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Invite button in channel list header",
+      "description": "Prominent invite friends CTA",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "Invite",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-075",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "World unread state on rail",
+      "description": "Bold white dot vs number pill",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Unread server",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-076",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Demote marketplace/jobs to server menu",
+      "description": "Keep features; not primary tabs",
+      "files": [
+        "lib/config/world_page_ia.dart"
+      ],
+      "discord_ref": "Feature discoverability",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-077",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Feed tab optional per world",
+      "description": "Worlds with feed enable tab; default off for chat-first",
+      "files": [
+        "lib/widgets/worlds/world_feed_tab.dart"
+      ],
+      "discord_ref": "Optional feed",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-078",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "World icon 48dp circle",
+      "description": "Consistent server avatar in rail and headers",
+      "files": [
+        "lib/widgets/worlds/world_icon.dart"
+      ],
+      "discord_ref": "Server icons",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-079",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Boost/featured worlds row in discover panel",
+      "description": "Horizontal scroll discovery",
+      "files": [
+        "lib/widgets/explore/boosted_worlds_row.dart"
+      ],
+      "discord_ref": "Discovery",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-080",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Create world CTA at rail bottom",
+      "description": "+ icon like Discord add server",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Add server",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-081",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "World tooltips on long press",
+      "description": "Name + member count preview",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Server tooltip",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-082",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Governance behind mod tools",
+      "description": "Keep governance; access via settings > moderation",
+      "files": [
+        "lib/screens/world_governance_screen.dart"
+      ],
+      "discord_ref": "Mod tools",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-083",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Treasury/academy as server submenu",
+      "description": "Preserve RPG features without tab clutter",
+      "files": [
+        "lib/screens/world_treasury_screen.dart"
+      ],
+      "discord_ref": "Server submenu",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-084",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "World welcome modal on first join",
+      "description": "Quick channel picks + rules",
+      "files": [
+        "lib/widgets/worlds/world_welcome_flow.dart"
+      ],
+      "discord_ref": "Welcome flow",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-085",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Channel create inline",
+      "description": "+ channel row at category bottom",
+      "files": [
+        "lib/widgets/worlds/world_settings_channels.dart"
+      ],
+      "discord_ref": "Create channel",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-086",
+      "wave": 4,
+      "category": "world",
+      "priority": "P1",
+      "title": "Slow mode / tier gate indicators on channel row",
+      "description": "Preserve tier gating visibly on row",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "Channel metadata",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-087",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Feed cards flatter \u2014 less bento chrome",
+      "description": "Discord-activity style rows not heavy cards",
+      "files": [
+        "lib/widgets/nexus/bento_grid.dart"
+      ],
+      "discord_ref": "Activity feed",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-088",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Inline reactions on posts",
+      "description": "Emoji bar under post without sheet",
+      "files": [
+        "lib/widgets/feed/reaction_bar.dart"
+      ],
+      "discord_ref": "Inline reactions",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-089",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Post composer sticky top",
+      "description": "Single-line expand like Discord status/post",
+      "files": [
+        "lib/widgets/feed/post_input.dart"
+      ],
+      "discord_ref": "Composer",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-090",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Reduce Nexus shortcuts grid",
+      "description": "3 primary shortcuts; rest in overflow",
+      "files": [
+        "lib/widgets/nexus/nexus_shortcuts_section.dart"
+      ],
+      "discord_ref": "Shortcuts",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-091",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Context strip as horizontal chips",
+      "description": "World/season context as filter chips",
+      "files": [
+        "lib/widgets/nexus/nexus_context_strip.dart"
+      ],
+      "discord_ref": "Filter chips",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-092",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Comment thread sheet \u2192 full screen push",
+      "description": "Comments feel like thread channel",
+      "files": [
+        "lib/widgets/feed/comment_sheet.dart"
+      ],
+      "discord_ref": "Thread UX",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-093",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Achievement unlock toast Discord-style",
+      "description": "Bottom toast with badge art, not modal",
+      "files": [
+        "lib/widgets/core/v_feedback.dart"
+      ],
+      "discord_ref": "Toast notifications",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-094",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Merge season/league into You progression",
+      "description": "Feed focuses social; progression in profile",
+      "files": [
+        "lib/screens/tabs/nexus_screen.dart"
+      ],
+      "discord_ref": "Progression relocation",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-095",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Media grid in posts \u2014 edge to edge",
+      "description": "Full-bleed images in feed",
+      "files": [
+        "lib/widgets/feed/media_grid.dart"
+      ],
+      "discord_ref": "Media feed",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-096",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Share achievement to channel from feed",
+      "description": "Cross-post achievement to world channel",
+      "files": [
+        "lib/widgets/feed/post_action_bar.dart"
+      ],
+      "discord_ref": "Cross-post",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-097",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Mute world from feed card menu",
+      "description": "Notification controls per world",
+      "files": [
+        "lib/widgets/feed/post_item.dart"
+      ],
+      "discord_ref": "Mute controls",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-098",
+      "wave": 5,
+      "category": "feed",
+      "priority": "P1",
+      "title": "Skeleton loaders match chat list",
+      "description": "Unified shimmer components",
+      "files": [
+        "lib/widgets/core/shimmer.dart"
+      ],
+      "discord_ref": "Loading parity",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-099",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "You tab: profile card top",
+      "description": "Avatar, display name, status picker, custom status",
+      "files": [
+        "lib/screens/tabs/identity_screen.dart"
+      ],
+      "discord_ref": "You profile",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-100",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Friends / allies list section",
+      "description": "Horizontal online friends row",
+      "files": [
+        "lib/screens/connections_screen.dart"
+      ],
+      "discord_ref": "Friends list",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-101",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Settings entry from You only",
+      "description": "Gear opens settings; no duplicate in More",
+      "files": [
+        "lib/screens/settings_screen.dart"
+      ],
+      "discord_ref": "Settings in You",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-102",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Progression as collapsible section",
+      "description": "XP, tier, achievements \u2014 expandable, not wall",
+      "files": [
+        "lib/screens/tabs/identity_screen.dart"
+      ],
+      "discord_ref": "Progression section",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-103",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Trophy wall grid denser",
+      "description": "Smaller cells; tap for detail sheet",
+      "files": [
+        "lib/widgets/profile/achievement_trophy_wall.dart"
+      ],
+      "discord_ref": "Trophy grid",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-104",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Profile banner optional/minimal",
+      "description": "Reduce hero height; focus avatar + name",
+      "files": [
+        "lib/screens/resident_profile_screen.dart"
+      ],
+      "discord_ref": "Profile layout",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-105",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Status: online/idle/dnd/custom",
+      "description": "Presence picker like Discord",
+      "files": [
+        "lib/widgets/profile/status_picker.dart"
+      ],
+      "discord_ref": "Custom status",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-106",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Edit profile inline sheet",
+      "description": "Not full-screen form",
+      "files": [
+        "lib/widgets/profile/edit_profile_sheet.dart"
+      ],
+      "discord_ref": "Edit profile",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-107",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Tier badge on avatar ring",
+      "description": "Preserve tier gating visually on avatar",
+      "files": [
+        "lib/ui/media/v_avatar.dart"
+      ],
+      "discord_ref": "Tier ring",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-108",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Coin balance in You wallet row",
+      "description": "Economy visible but not dominant",
+      "files": [
+        "lib/screens/tabs/identity_screen.dart"
+      ],
+      "discord_ref": "Wallet row",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-109",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "Featured achievements showcase strip",
+      "description": "Horizontal scroll under profile",
+      "files": [
+        "lib/widgets/profile/profile_achievement_showcase.dart"
+      ],
+      "discord_ref": "Featured badges",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-110",
+      "wave": 6,
+      "category": "profile",
+      "priority": "P1",
+      "title": "DM user from profile primary action",
+      "description": "Message button prominent",
+      "files": [
+        "lib/screens/resident_profile_screen.dart"
+      ],
+      "discord_ref": "Message CTA",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-111",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VListTile dense variant",
+      "description": "Channel row component: icon, name, badge, mute",
+      "files": [
+        "lib/ui/lists/v_channel_tile.dart"
+      ],
+      "discord_ref": "Channel row",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-112",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VAvatar with status dot",
+      "description": "Bottom-right presence indicator",
+      "files": [
+        "lib/ui/media/v_avatar.dart"
+      ],
+      "discord_ref": "Avatar status",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-113",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VSearchBar with filter chips",
+      "description": "Search component for global/in-server",
+      "files": [
+        "lib/ui/inputs/v_search_bar.dart"
+      ],
+      "discord_ref": "Search bar",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-114",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VContextMenu",
+      "description": "Long-press menus unified",
+      "files": [
+        "lib/ui/overlays/v_context_menu.dart"
+      ],
+      "discord_ref": "Context menus",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-115",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VTooltip for icon buttons",
+      "description": "Accessibility labels + tooltips",
+      "files": [
+        "lib/ui/buttons/v_icon_button.dart"
+      ],
+      "discord_ref": "Tooltips",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-116",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VEmptyState commune illustrations",
+      "description": "Use new empty state art",
+      "files": [
+        "lib/widgets/core/empty_state.dart"
+      ],
+      "discord_ref": "Empty states",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-117",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "VSheet \u2192 side panel variant",
+      "description": "Member list as side sheet on tablet",
+      "files": [
+        "lib/ui/overlays/v_sheet.dart"
+      ],
+      "discord_ref": "Side panels",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-118",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Remove showModalBottomSheet usages",
+      "description": "Migrate 12 files to VSheet",
+      "files": [
+        "lib/widgets/core/glass_sheet.dart"
+      ],
+      "discord_ref": "Sheet migration",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-119",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Haptic on reaction add",
+      "description": "Light impact on emoji select",
+      "files": [
+        "lib/utils/haptics.dart"
+      ],
+      "discord_ref": "Micro haptics",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-120",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Page transitions: panel slide not fade",
+      "description": "Chat navigation uses horizontal slide",
+      "files": [
+        "lib/router/v_page_transitions.dart"
+      ],
+      "discord_ref": "Panel transitions",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-121",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Voice Campfire full-bleed UI",
+      "description": "Rewrite campfire_screen commune dark",
+      "files": [
+        "lib/screens/campfire_screen.dart"
+      ],
+      "discord_ref": "Voice UI",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-122",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Auth screens commune theme",
+      "description": "Login/signup match new dark ladder",
+      "files": [
+        "lib/screens/auth/"
+      ],
+      "discord_ref": "Auth polish",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-123",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Onboarding 3-step max",
+      "description": "Gate \u2192 pick worlds \u2192 done",
+      "files": [
+        "lib/screens/onboarding/"
+      ],
+      "discord_ref": "Onboarding",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-124",
+      "wave": 7,
+      "category": "components",
+      "priority": "P1",
+      "title": "Achievement flows use hub sheets not hubs",
+      "description": "Category list as settings-style rows",
+      "files": [
+        "lib/screens/achievements/"
+      ],
+      "discord_ref": "Achievement IA",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-125",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "ListView.builder everywhere in chat",
+      "description": "No shrinkWrap nested scroll in channels",
+      "files": [
+        "lib/screens/world_channel_screen.dart"
+      ],
+      "discord_ref": "List perf",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-126",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "RepaintBoundary on message bubbles",
+      "description": "Reduce jank on scroll",
+      "files": [
+        "lib/widgets/chat/v_message_bubble.dart"
+      ],
+      "discord_ref": "Scroll perf",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-127",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "Channel list cache extent",
+      "description": "Prefetch off-screen rows",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "List cache",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-128",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "Image cache width discipline",
+      "description": "Consistent cacheWidth in chat images",
+      "files": [
+        "lib/widgets/chat/chat_image.dart"
+      ],
+      "discord_ref": "Image perf",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-129",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "Reduce rebuild scope in chat providers",
+      "description": "Selective Riverpod watches",
+      "files": [
+        "lib/state/chat_provider.dart"
+      ],
+      "discord_ref": "State perf",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-130",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "Semantics on all icon-only buttons",
+      "description": "aria labels for screen readers",
+      "files": [
+        "lib/ui/buttons/v_icon_button.dart"
+      ],
+      "discord_ref": "A11y",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-131",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "44dp min touch targets on rail",
+      "description": "Server icons meet touch guidelines",
+      "files": [
+        "lib/ui/navigation/v_server_rail.dart"
+      ],
+      "discord_ref": "Touch targets",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-132",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "Reduce motion setting",
+      "description": "Respect system reduce motion",
+      "files": [
+        "lib/theme/v_animation.dart"
+      ],
+      "discord_ref": "Reduce motion",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-133",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "High contrast mode",
+      "description": "Toggle increases text contrast",
+      "files": [
+        "lib/screens/settings_screen.dart"
+      ],
+      "discord_ref": "High contrast",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-134",
+      "wave": 8,
+      "category": "performance",
+      "priority": "P2",
+      "title": "Focus order in panels",
+      "description": "Keyboard/tab order for panels",
+      "files": [
+        "lib/ui/shell/v_overlapping_panels.dart"
+      ],
+      "discord_ref": "Focus order",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-135",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Tier-gated channels visible but locked",
+      "description": "Show lock + tier requirement on row",
+      "files": [
+        "lib/widgets/worlds/world_channel_list.dart"
+      ],
+      "discord_ref": "Vertiege tier UX",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-136",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Achievement reactions in chat",
+      "description": "Share verified badge as rich attachment",
+      "files": [
+        "lib/widgets/chat/"
+      ],
+      "discord_ref": "Achievement share",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-137",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "World treasury widget in server menu",
+      "description": "RPG economy glance without leaving chat",
+      "files": [
+        "lib/screens/world_treasury_screen.dart"
+      ],
+      "discord_ref": "Treasury glance",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-138",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Season progress chip in You tab",
+      "description": "Competitive season without cluttering chat",
+      "files": [
+        "lib/screens/season_screen.dart"
+      ],
+      "discord_ref": "Season chip",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-139",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Verifier queue in staff section",
+      "description": "Staff tools grouped; not public nav",
+      "files": [
+        "lib/screens/verification_review_screen.dart"
+      ],
+      "discord_ref": "Staff tools",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-140",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "AI achievement proof in thread UI",
+      "description": "Proof review inline in achievement submit",
+      "files": [
+        "lib/screens/achievements/submit_achievement.dart"
+      ],
+      "discord_ref": "Proof flow",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-141",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Cross-world DM from unified search",
+      "description": "Search residents + messages + worlds",
+      "files": [
+        "lib/screens/search_screen.dart"
+      ],
+      "discord_ref": "Unified search",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-142",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Campfire + text channel split view",
+      "description": "Voice while reading text (picture-in-picture bar)",
+      "files": [
+        "lib/screens/campfire_screen.dart"
+      ],
+      "discord_ref": "Voice+text",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-143",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "Reputation/tier on member hover card",
+      "description": "Rich member card on tap in list",
+      "files": [
+        "lib/widgets/chat/v_member_card.dart"
+      ],
+      "discord_ref": "Member card",
+      "status": "planned"
+    },
+    {
+      "id": "DCX-144",
+      "wave": 9,
+      "category": "differentiator",
+      "priority": "P1",
+      "title": "World constitution pinned in rules channel",
+      "description": "Governance as first-class rules message",
+      "files": [
+        "lib/widgets/worlds/constitution_editor.dart"
+      ],
+      "discord_ref": "Rules channel",
+      "status": "planned"
+    }
+  ]
+}

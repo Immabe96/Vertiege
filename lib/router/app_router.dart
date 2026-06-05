@@ -19,11 +19,11 @@ import '../screens/subscription_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/tabs/tab_layout.dart';
+import '../screens/tabs/commune_home_screen.dart';
 import '../screens/tabs/nexus_screen.dart';
 import '../screens/tabs/explore_screen.dart';
 import '../screens/tabs/chat_list_screen.dart';
-import '../screens/tabs/identity_screen.dart';
-import '../screens/tabs/more_screen.dart';
+import '../screens/tabs/you_screen.dart';
 import '../ui_spike/spike_settings_page.dart';
 
 import '../screens/tabs/alerts_screen.dart';
@@ -237,7 +237,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const NexusScreen(),
+                builder: (context, state) => const CommuneHomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'feed',
+                    builder: (context, state) => const NexusScreen(),
+                  ),
+                ],
               ),
             ],
           ),
@@ -400,24 +406,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/identity',
-                builder: (context, state) => const IdentityScreen(),
+                path: '/you',
+                builder: (context, state) => const YouScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/more',
-                builder: (context, state) => const MoreScreen(),
+                path: '/notifications',
+                builder: (context, state) => const AlertsScreen(),
               ),
             ],
           ),
         ],
       ),
-      vGoRoute(
-        path: '/notifications',
-        builder: (context, state) => const AlertsScreen(),
+      GoRoute(
+        path: '/identity',
+        redirect: (context, state) => '/you',
+      ),
+      GoRoute(
+        path: '/more',
+        redirect: (context, state) => '/you',
       ),
       vGoRoute(
         path: '/residents/:id',
