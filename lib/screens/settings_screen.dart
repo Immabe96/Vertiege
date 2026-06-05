@@ -677,6 +677,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Padding(
       padding: const EdgeInsets.all(VSpacing.md),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -730,6 +731,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               final highContrast =
                   textSize == TextSize.large || textSize == TextSize.xlarge;
               return Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FSelect<TextSize>.rich(
@@ -755,17 +757,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         .toList(),
                   ),
                   const SizedBox(height: VSpacing.sm),
-                  VSectionSwitchTile(
-                    icon: Icons.contrast,
-                    label: 'High contrast text',
-                    value: highContrast,
-                    onChanged: (enabled) {
-                      ref
-                          .read(themeProvider.notifier)
-                          .setTextSize(
-                            enabled ? TextSize.large : TextSize.medium,
-                          );
-                    },
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.contrast,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: VSpacing.md),
+                      Expanded(
+                        child: Text(
+                          'High contrast text',
+                          style: TextStyle(
+                            fontSize: VFontSize.bodyMd,
+                            color: isDark
+                                ? VColors.onSurfaceDark
+                                : VColors.onSurface,
+                          ),
+                        ),
+                      ),
+                      FSwitch(
+                        value: highContrast,
+                        onChange: (enabled) {
+                          ref
+                              .read(themeProvider.notifier)
+                              .setTextSize(
+                                enabled ? TextSize.large : TextSize.medium,
+                              );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -793,6 +815,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onRefresh: () async => _loadPrefs(),
         child: ListView(
           padding: const EdgeInsets.all(VSpacing.md),
+          physics: const AlwaysScrollableScrollPhysics(),
           children: [
             VSectionList(
               title: 'About',
@@ -977,6 +1000,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 final hasVote = resident.tier.value >= 4;
 
                 return Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: VSpacing.md),
                     VSectionList(
