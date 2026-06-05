@@ -12,7 +12,7 @@ Start here. All docs follow [documentation standards](meta/documentation-standar
 | Device UAT & APK from Actions | [guides/device-uat.md](guides/device-uat.md) |
 | Supabase + Firebase setup | [guides/firebase-and-supabase.md](guides/firebase-and-supabase.md) |
 | Design system (current) | [reference/design-system.md](reference/design-system.md) |
-| UI migration (shadcn, drop Forui) | [product/planning/shadcn-migration-plan.md](product/planning/shadcn-migration-plan.md) |
+| UI migration (Wave 0 gate, drop Forui) | [product/planning/shadcn-migration-plan.md](product/planning/shadcn-migration-plan.md) |
 | Quiet UX (no clutter) | [guides/quiet-ux-principles.md](guides/quiet-ux-principles.md) |
 | Product roadmap & waves | [product/roadmap.md](product/roadmap.md) · [planning/wave-status.md](product/planning/wave-status.md) |
 | UAT issue log | [operations/uat/issue-log.md](operations/uat/issue-log.md) |
@@ -39,7 +39,7 @@ docs/
 - [Wave status](product/planning/wave-status.md) — current wave checklist
 - [Perfection backlog](product/planning/perfection-backlog.md) — polish waves 0–6
 - [Manual remaining](product/planning/manual-remaining.md) — dashboard / infra tasks
-- [shadcn migration](product/planning/shadcn-migration-plan.md) — gradual Forui removal
+- [UI migration plan](product/planning/shadcn-migration-plan.md) — Wave 0 spike, then gradual Forui removal
 - [Legacy plans (archive)](archive/consolidated-legacy-plans.md) · [Legacy audits (archive)](archive/consolidated-legacy-audits.md)
 - [Vision](product/vision/) — worlds, gamification, onboarding, channels
 
