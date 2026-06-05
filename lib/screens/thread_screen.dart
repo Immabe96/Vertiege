@@ -173,33 +173,33 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                         .loadThreadMessages(threadId),
                   )
                 : messages.isEmpty
-                    ? AppEmptyState(
-                        title: 'No replies yet',
-                        description: 'Be the first to reply in this thread',
-                        icon: Icons.chat_bubble_outline,
-                      )
-                    : Stack(
-                        children: [
-                          ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: VSpacing.sm,
-                              vertical: VSpacing.sm,
-                            ),
-                            itemCount: displayItems.length,
-                            itemBuilder: (context, index) {
-                              final item = displayItems[index];
-                              return _buildItem(item, resident?.id ?? '');
-                            },
-                          ),
-                          if (_showScrollFab)
-                            Positioned(
-                              right: VSpacing.md,
-                              bottom: VSpacing.sm,
-                              child: ChatScrollFab(onTap: _scrollToBottom),
-                            ),
-                        ],
+                ? AppEmptyState(
+                    title: 'No replies yet',
+                    description: 'Be the first to reply in this thread',
+                    icon: Icons.chat_bubble_outline,
+                  )
+                : Stack(
+                    children: [
+                      ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: VSpacing.sm,
+                          vertical: VSpacing.sm,
+                        ),
+                        itemCount: displayItems.length,
+                        itemBuilder: (context, index) {
+                          final item = displayItems[index];
+                          return _buildItem(item, resident?.id ?? '');
+                        },
                       ),
+                      if (_showScrollFab)
+                        Positioned(
+                          right: VSpacing.md,
+                          bottom: VSpacing.sm,
+                          child: ChatScrollFab(onTap: _scrollToBottom),
+                        ),
+                    ],
+                  ),
           ),
           ChatInputBar(
             controller: _controller,
@@ -264,8 +264,8 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                   color: isMe
                       ? VColors.primary
                       : (isDark
-                          ? VColors.surfaceContainerDark
-                          : VColors.surfaceContainerLow),
+                            ? VColors.surfaceContainerDark
+                            : VColors.surfaceContainerLow),
                   borderRadius: isMe
                       ? const BorderRadius.only(
                           topLeft: Radius.circular(VRadius.xl),
@@ -292,9 +292,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                   styleSheet: _markdownStyle(
                     textColor: isMe
                         ? VColors.onPrimary
-                        : (isDark
-                            ? VColors.onSurfaceDark
-                            : VColors.onSurface),
+                        : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
                     isDark: isDark,
                   ),
                 ),
@@ -339,9 +337,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             : VColors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(VRadius.md),
         border: Border.all(
-          color: isDark
-              ? VColors.outlineVariantDark
-              : VColors.outlineVariant,
+          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
         ),
       ),
       a: TextStyle(
@@ -371,9 +367,7 @@ class _ParentMessageCard extends StatelessWidget {
             : VColors.surfaceContainerLow,
         border: Border(
           bottom: BorderSide(
-            color: isDark
-                ? VColors.outlineVariantDark
-                : VColors.outlineVariant,
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
           ),
         ),
       ),

@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -334,8 +334,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                           color: i <= _stage - 1
                               ? VColors.tertiary
                               : (isDark
-                                  ? VColors.glassBorderDark
-                                  : VColors.glassBorder),
+                                    ? VColors.glassBorderDark
+                                    : VColors.glassBorder),
                           borderRadius: BorderRadius.circular(VRadius.sm),
                         ),
                       );
@@ -673,9 +673,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                             height: 46,
                             decoration: BoxDecoration(
                               color: accent.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(
-                                VRadius.lg,
-                              ),
+                              borderRadius: BorderRadius.circular(VRadius.lg),
                             ),
                             child: Icon(
                               WorldAssets.iconForWorld(world.assetKey),
@@ -766,7 +764,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                             ?.joinedWorldIds
                             .contains(world.id);
                         if (joined != true) {
-                          VFeedback.showMessage(context, 'World entry is still syncing. Try again.',);
+                          VFeedback.showMessage(
+                            context,
+                            'World entry is still syncing. Try again.',
+                          );
                           return;
                         }
                       }
@@ -919,8 +920,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 color: _selectedGoal != null
                     ? VColors.tertiary
                     : (isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant),
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant),
               ),
             ),
           ),
@@ -1086,7 +1087,7 @@ class _InterestCard extends StatelessWidget {
   });
 
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - VSpacing.lg * 2 - VSpacing.sm) / 2;
@@ -1101,7 +1102,9 @@ class _InterestCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? glow.withValues(alpha: 0.12)
-              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
+              : (isDark
+                    ? VColors.glassBackgroundDark
+                    : VColors.glassBackground),
           borderRadius: BorderRadius.circular(VRadius.md),
           border: Border.all(
             color: isSelected
@@ -1149,7 +1152,11 @@ class _InterestCard extends StatelessWidget {
                   fontWeight: isSelected
                       ? VFontWeight.bold
                       : VFontWeight.semiBold,
-                  color: isSelected ? glow : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+                  color: isSelected
+                      ? glow
+                      : (isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant),
                 ),
               ),
               const SizedBox(height: VSpacing.xs),
@@ -1159,7 +1166,9 @@ class _InterestCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: VFontSize.labelMd,
-                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                   height: 1.2,
                 ),
               ),
@@ -1191,7 +1200,7 @@ class _GoalCard extends StatelessWidget {
   });
 
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
@@ -1201,7 +1210,9 @@ class _GoalCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? VColors.tertiary.withValues(alpha: 0.12)
-              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
+              : (isDark
+                    ? VColors.glassBackgroundDark
+                    : VColors.glassBackground),
           borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(
             color: isSelected

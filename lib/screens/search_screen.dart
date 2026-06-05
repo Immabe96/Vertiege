@@ -1,10 +1,10 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../utils/provider_errors.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/sync_warning_banner.dart';
@@ -73,8 +73,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final q = params['q'];
     if (q != null && q.isNotEmpty) {
       final decoded = Uri.decodeComponent(q);
-      final normalized =
-          decoded.startsWith('#') ? decoded.substring(1) : decoded;
+      final normalized = decoded.startsWith('#')
+          ? decoded.substring(1)
+          : decoded;
       _controller.text = normalized;
       _query = normalized;
     }
@@ -225,10 +226,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final resident = ref.read(residentProvider).resident;
     if (_mode == _SearchMode.following && resident != null && q.length < 2) {
       final followingIds = resident.following.toSet();
-      final residents = _allResidents
-          .where((e) => followingIds.contains(e.resident.id))
-          .toList()
-        ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
+      final residents =
+          _allResidents
+              .where((e) => followingIds.contains(e.resident.id))
+              .toList()
+            ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
       return _SearchResults(residents: residents);
     }
     if (_mode == _SearchMode.allies && q.length < 2) {
@@ -241,10 +243,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           );
         }
       }
-      final residents = _allResidents
-          .where((e) => allyIds.contains(e.resident.id))
-          .toList()
-        ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
+      final residents =
+          _allResidents.where((e) => allyIds.contains(e.resident.id)).toList()
+            ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
       return _SearchResults(residents: residents);
     }
 
@@ -436,10 +437,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   : VColors.onSurfaceVariant,
             ),
             const SizedBox(height: VSpacing.sm),
-            Text(
-              'No results for "$_query"',
-              style: theme.textTheme.bodyLarge,
-            ),
+            Text('No results for "$_query"', style: theme.textTheme.bodyLarge),
           ],
         ),
       );
@@ -804,9 +802,8 @@ class _PostTile extends StatelessWidget {
               : VColors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(VRadius.lg),
           child: InkWell(
-            onTap: () => context.push(
-              exploreWorldPath(post.worldId, postId: post.id),
-            ),
+            onTap: () =>
+                context.push(exploreWorldPath(post.worldId, postId: post.id)),
             borderRadius: BorderRadius.circular(VRadius.lg),
             child: ListTile(
               leading: CosmeticAvatar(

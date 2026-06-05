@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import '../services/auth_service.dart';
 import '../theme/v_colors.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
 import '../ui/buttons/v_button.dart';
@@ -45,7 +45,8 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
         });
       } else {
         setState(() {
-          _error = 'Failed to generate 2FA secret. Ensure the Supabase edge function is deployed.';
+          _error =
+              'Failed to generate 2FA secret. Ensure the Supabase edge function is deployed.';
         });
       }
     } catch (e) {
@@ -156,11 +157,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
     return Center(
       child: Column(
         children: [
-          const Icon(
-            Icons.check_circle,
-            size: 64,
-            color: VColors.success,
-          ),
+          const Icon(Icons.check_circle, size: 64, color: VColors.success),
           const SizedBox(height: VSpacing.md),
           Text(
             'Twin Seal Enabled!',
@@ -219,7 +216,9 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                 color: isDark ? VColors.surfaceDark : VColors.surface,
                 borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
-                  color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+                  color: isDark
+                      ? VColors.outlineVariantDark
+                      : VColors.outlineVariant,
                 ),
               ),
               child: Column(
@@ -279,27 +278,24 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             letterSpacing: 8,
           ),
           maxLength: 6,
-            decoration: InputDecoration(
-              hintText: '000000',
-              counterText: '',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(VRadius.xl),
-              ),
-              filled: true,
-              fillColor: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainer,
+          decoration: InputDecoration(
+            hintText: '000000',
+            counterText: '',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(VRadius.xl),
             ),
+            filled: true,
+            fillColor: isDark
+                ? VColors.surfaceContainerDark
+                : VColors.surfaceContainer,
           ),
-          const SizedBox(height: VSpacing.lg),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: VSpacing.md),
-              child: Text(
-                _error!,
-                style: const TextStyle(color: VColors.error),
-              ),
-            ),
+        ),
+        const SizedBox(height: VSpacing.lg),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: VSpacing.md),
+            child: Text(_error!, style: const TextStyle(color: VColors.error)),
+          ),
         VButton(
           label: 'Verify & Enable',
           onPressed: _verifyAndEnroll,
@@ -333,10 +329,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
         if (_error != null)
           Padding(
             padding: const EdgeInsets.only(bottom: VSpacing.md),
-            child: Text(
-              _error!,
-              style: const TextStyle(color: VColors.error),
-            ),
+            child: Text(_error!, style: const TextStyle(color: VColors.error)),
           ),
         FilledButton.icon(
           onPressed: _isLoading ? null : _generateSecret,

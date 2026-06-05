@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
 import '../../config/achievements.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/achievement.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
@@ -53,8 +53,7 @@ class _AchievementCategoryScreenState
     final notifier = ref.read(achievementProvider.notifier);
     final progress = notifier.getCategoryProgress(cat.name);
 
-    final allInCategory =
-        achievements.where((a) => a.category == cat).toList();
+    final allInCategory = achievements.where((a) => a.category == cat).toList();
 
     final query = _searchQuery.trim().toLowerCase();
     final filtered = allInCategory.where((achievement) {
@@ -67,12 +66,9 @@ class _AchievementCategoryScreenState
       final status = notifier.getAchievementStatus(achievement.id);
       return switch (_filter) {
         _AchievementFilter.all => true,
-        _AchievementFilter.verified =>
-          status == AchievementStatus.verified,
-        _AchievementFilter.pending =>
-          status == AchievementStatus.submitted,
-        _AchievementFilter.rejected =>
-          status == AchievementStatus.rejected,
+        _AchievementFilter.verified => status == AchievementStatus.verified,
+        _AchievementFilter.pending => status == AchievementStatus.submitted,
+        _AchievementFilter.rejected => status == AchievementStatus.rejected,
         _AchievementFilter.available => status == AchievementStatus.locked,
       };
     }).toList();
@@ -170,9 +166,7 @@ class _AchievementCategoryScreenState
                           .firstOrNull;
                       return Padding(
                         padding: EdgeInsets.only(
-                          bottom: index < filtered.length - 1
-                              ? VSpacing.xs
-                              : 0,
+                          bottom: index < filtered.length - 1 ? VSpacing.xs : 0,
                         ),
                         child: AchievementListTile(
                           achievement: achievement,

@@ -1,11 +1,11 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
 import '../../config/achievements.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/achievement.dart';
 import '../../services/achievement_proof_upload.dart';
 import '../../state/achievement_provider.dart';
@@ -54,9 +54,7 @@ class _SubmitAchievementScreenState
   }
 
   Future<void> _pickProofImages() async {
-    final ach = achievements
-        .where((a) => a.id == _selectedId)
-        .firstOrNull;
+    final ach = achievements.where((a) => a.id == _selectedId).firstOrNull;
     if (ach == null) return;
     final max = ach.effectiveMaxImages - _proofImagePaths.length;
     if (max <= 0) return;
@@ -145,8 +143,7 @@ class _SubmitAchievementScreenState
   List<Achievement> _visibleAchievements(AchievementNotifier notifier) {
     final q = _searchQuery.trim().toLowerCase();
     return achievements.where((achievement) {
-      if (_categoryFilter != null &&
-          achievement.category != _categoryFilter) {
+      if (_categoryFilter != null && achievement.category != _categoryFilter) {
         return false;
       }
       if (notifier.getAchievementStatus(achievement.id) !=
@@ -164,7 +161,9 @@ class _SubmitAchievementScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final muted = isDark
+        ? VColors.onSurfaceVariantDark
+        : VColors.onSurfaceVariant;
     final achievementNotifier = ref.read(achievementProvider.notifier);
     final visibleAchievements = _visibleAchievements(achievementNotifier);
     final selectedAchievement = achievements
@@ -306,7 +305,7 @@ class _SubmitAchievementScreenState
               description: _searchQuery.isNotEmpty
                   ? 'Try another search or clear the category filter.'
                   : 'Achievements you already submitted appear under '
-                      'Achievements with a pending or verified status.',
+                        'Achievements with a pending or verified status.',
               icon: Icons.emoji_events_outlined,
             )
           else
@@ -331,9 +330,7 @@ class _SubmitAchievementScreenState
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      suffix: Radio<String>(
-                        value: achievement.id,
-                      ),
+                      suffix: Radio<String>(value: achievement.id),
                     ),
                   );
                 }).toList(),
@@ -385,7 +382,8 @@ class _SubmitAchievementScreenState
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _proofImagePaths.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: VSpacing.sm),
                   itemBuilder: (_, i) => Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -424,7 +422,8 @@ class _SubmitAchievementScreenState
               ),
             const SizedBox(height: VSpacing.sm),
             OutlinedButton.icon(
-              onPressed: _proofImagePaths.length >=
+              onPressed:
+                  _proofImagePaths.length >=
                       selectedAchievement.effectiveMaxImages
                   ? null
                   : _pickProofImages,

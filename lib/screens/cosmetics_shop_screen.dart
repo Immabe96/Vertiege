@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +7,7 @@ import '../models/listing.dart';
 import '../services/marketplace_service.dart';
 import '../services/cosmetic_purchase_service.dart';
 import '../state/resident_provider.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/worlds/listing_card.dart';
@@ -27,8 +27,6 @@ class CosmeticsShopScreen extends ConsumerStatefulWidget {
 }
 
 class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
-
-
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
@@ -79,10 +77,7 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
               coins: coins,
             ),
           ),
-          const FTabEntry(
-            label: Text('Dominions'),
-            child: _DominionsTab(),
-          ),
+          const FTabEntry(label: Text('Dominions'), child: _DominionsTab()),
         ],
       ),
     );
@@ -278,107 +273,103 @@ class _ShopCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: VSpacing.xs,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: item.color.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(VRadius.pill),
-                      ),
-                      child: Text(
-                        item.subtype,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: item.color,
-                          fontWeight: VFontWeight.semiBold,
-                        ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: VSpacing.xs,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: item.color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                    ),
+                    child: Text(
+                      item.subtype,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: item.color,
+                        fontWeight: VFontWeight.semiBold,
                       ),
                     ),
-                    const Spacer(),
-                    if (!canAfford)
-                      Icon(
-                        Icons.lock_outline,
-                        size: VIconSize.xs,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                  ],
-                ),
-                const Spacer(),
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: item.color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(VRadius.lg),
                   ),
-                  child: Icon(
-                    item.icon,
-                    size: VIconSize.lg,
-                    color: item.color,
-                  ),
-                ),
-                const SizedBox(height: VSpacing.sm),
-                Text(
-                  item.name,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: VFontWeight.semiBold,
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.description,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Spacer(),
-                Row(
-                  children: [
+                  const Spacer(),
+                  if (!canAfford)
                     Icon(
-                      Icons.monetization_on,
+                      Icons.lock_outline,
                       size: VIconSize.xs,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                ],
+              ),
+              const Spacer(),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: item.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(VRadius.lg),
+                ),
+                child: Icon(item.icon, size: VIconSize.lg, color: item.color),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              Text(
+                item.name,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                item.description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  Icon(
+                    Icons.monetization_on,
+                    size: VIconSize.xs,
+                    color: VColors.tertiary,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    '${item.price}',
+                    style: const TextStyle(
+                      fontSize: VFontSize.labelSm,
+                      fontWeight: VFontWeight.bold,
                       color: VColors.tertiary,
                     ),
-                    const SizedBox(width: 2),
-                    Text(
-                      '${item.price}',
-                      style: const TextStyle(
-                        fontSize: VFontSize.labelSm,
-                        fontWeight: VFontWeight.bold,
-                        color: VColors.tertiary,
-                      ),
-                    ),
-                    const Spacer(),
-                    FButton(
-                      variant: canAfford
-                          ? FButtonVariant.primary
-                          : FButtonVariant.outline,
-                      size: FButtonSizeVariant.sm,
-                      onPress: canAfford
-                          ? () => _buyItem(context, ref, item)
-                          : null,
-                      child: Text(canAfford ? 'Buy' : 'Locked'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  const Spacer(),
+                  FButton(
+                    variant: canAfford
+                        ? FButtonVariant.primary
+                        : FButtonVariant.outline,
+                    size: FButtonSizeVariant.sm,
+                    onPress: canAfford
+                        ? () => _buyItem(context, ref, item)
+                        : null,
+                    child: Text(canAfford ? 'Buy' : 'Locked'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 
@@ -394,9 +385,9 @@ class _ShopCard extends ConsumerWidget {
           children: [
             Text(
               item.name,
-              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                fontWeight: VFontWeight.bold,
-              ),
+              style: Theme.of(
+                ctx,
+              ).textTheme.titleMedium?.copyWith(fontWeight: VFontWeight.bold),
             ),
             const SizedBox(height: VSpacing.md),
             Container(
@@ -419,9 +410,9 @@ class _ShopCard extends ConsumerWidget {
             const SizedBox(height: VSpacing.md),
             Text(
               '${item.price} coins · ${item.subtype}',
-              style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
-                color: VColors.tertiary,
-              ),
+              style: Theme.of(
+                ctx,
+              ).textTheme.labelMedium?.copyWith(color: VColors.tertiary),
             ),
           ],
         ),
@@ -687,11 +678,7 @@ class _DominionListingDetailSheet extends StatelessWidget {
             if (listing.price != null)
               Row(
                 children: [
-                  Icon(
-                    Icons.sell,
-                    size: VIconSize.sm,
-                    color: VColors.tertiary,
-                  ),
+                  Icon(Icons.sell, size: VIconSize.sm, color: VColors.tertiary),
                   const SizedBox(width: VSpacing.xs),
                   Text(
                     listing.price!,
@@ -770,4 +757,3 @@ class _DominionListingDetailSheet extends StatelessWidget {
     );
   }
 }
-

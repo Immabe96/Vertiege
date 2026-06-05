@@ -10,7 +10,7 @@ import '../services/achievement_review_service.dart';
 import '../widgets/achievements/achievement_verifier_review_card.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
@@ -157,7 +157,10 @@ class _VerificationReviewScreenState
             label: const Text('Achievements'),
             child: _buildAchievementsTab(theme),
           ),
-          FTabEntry(label: const Text('Flagged Posts'), child: _buildFlaggedPostsTab(theme)),
+          FTabEntry(
+            label: const Text('Flagged Posts'),
+            child: _buildFlaggedPostsTab(theme),
+          ),
         ],
       ),
     );
@@ -198,13 +201,12 @@ class _VerificationReviewScreenState
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: (isDark
-                                    ? VColors.primaryContainerDark
-                                    : VColors.primaryContainer)
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(
-                              VRadius.pill,
-                            ),
+                            color:
+                                (isDark
+                                        ? VColors.primaryContainerDark
+                                        : VColors.primaryContainer)
+                                    .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(VRadius.pill),
                           ),
                           child: Icon(
                             Icons.badge_outlined,
@@ -236,18 +238,12 @@ class _VerificationReviewScreenState
                           ),
                         ),
                         IconButton(
-                          icon: Icon(
-                            Icons.close,
-                            color: VColors.error,
-                          ),
+                          icon: Icon(Icons.close, color: VColors.error),
                           tooltip: 'Reject',
                           onPressed: () => _reject(s),
                         ),
                         IconButton(
-                          icon: Icon(
-                            Icons.check,
-                            color: VColors.success,
-                          ),
+                          icon: Icon(Icons.check, color: VColors.success),
                           tooltip: 'Approve',
                           onPressed: () => _approve(s),
                         ),
@@ -266,13 +262,12 @@ class _VerificationReviewScreenState
                             height: 96,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: (isDark
-                                      ? VColors.surfaceContainerDark
-                                      : VColors.surfaceContainerLow)
-                                  .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(
-                                VRadius.pill,
-                              ),
+                              color:
+                                  (isDark
+                                          ? VColors.surfaceContainerDark
+                                          : VColors.surfaceContainerLow)
+                                      .withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(VRadius.pill),
                             ),
                             child: Icon(
                               Icons.broken_image_outlined,
@@ -359,7 +354,8 @@ class _VerificationReviewScreenState
                         ),
                       )
                       .toList(),
-                  onChanged: (v) => setLocal(() => reasonCode = v ?? reasonCode),
+                  onChanged: (v) =>
+                      setLocal(() => reasonCode = v ?? reasonCode),
                 ),
                 const SizedBox(height: VSpacing.md),
                 TextField(
@@ -411,7 +407,8 @@ class _VerificationReviewScreenState
     if (_achievementSubmissions.isEmpty) {
       return Column(
         children: [
-          if (_queueMetrics != null) _VerifierMetricsBar(metrics: _queueMetrics!),
+          if (_queueMetrics != null)
+            _VerifierMetricsBar(metrics: _queueMetrics!),
           const Expanded(
             child: AppEmptyState(
               title: 'No pending achievements',
@@ -531,8 +528,8 @@ class _VerificationReviewScreenState
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: post.status == 'pending_review'
                                   ? (isDark
-                                      ? VColors.warningContainerDark
-                                      : VColors.warning)
+                                        ? VColors.warningContainerDark
+                                        : VColors.warning)
                                   : VColors.error,
                               fontWeight: FontWeight.bold,
                             ),
@@ -540,26 +537,26 @@ class _VerificationReviewScreenState
                         ],
                       ),
                     ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              Icons.delete_outline,
-                              color: VColors.error,
-                            ),
-                            tooltip: 'Remove post',
-                            onPressed: () => _removePost(post),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: VColors.error,
                           ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.check_circle_outline,
-                              color: VColors.success,
-                            ),
-                            tooltip: 'Approve post',
-                            onPressed: () => _approvePost(post),
+                          tooltip: 'Remove post',
+                          onPressed: () => _removePost(post),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.check_circle_outline,
+                            color: VColors.success,
                           ),
-                        ],
-                      ),
+                          tooltip: 'Approve post',
+                          onPressed: () => _approvePost(post),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: VSpacing.sm),
@@ -576,9 +573,7 @@ class _VerificationReviewScreenState
                   child: Text(
                     post.content,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceDark
-                          : VColors.onSurface,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
@@ -653,7 +648,9 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,

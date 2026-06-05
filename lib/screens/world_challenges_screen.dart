@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/challenge.dart';
 import '../../services/challenge_service.dart';
 import '../../theme/v_colors.dart';
@@ -101,16 +101,25 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                 ),
                 const SizedBox(height: VSpacing.lg),
                 FSelect<String>.rich(
-                  format: (value) => value == 'individual' ? 'Individual' : 'Collective',
+                  format: (value) =>
+                      value == 'individual' ? 'Individual' : 'Collective',
                   control: FSelectControl.lifted(
                     value: challengeType,
-                    onChange: (v) { if (v != null) setDialogState(() => challengeType = v); },
+                    onChange: (v) {
+                      if (v != null) setDialogState(() => challengeType = v);
+                    },
                   ),
                   label: const Text('Type'),
                   hint: 'Select type',
                   children: const [
-                    FSelectItem<String>(value: 'individual', title: Text('Individual')),
-                    FSelectItem<String>(value: 'collective', title: Text('Collective')),
+                    FSelectItem<String>(
+                      value: 'individual',
+                      title: Text('Individual'),
+                    ),
+                    FSelectItem<String>(
+                      value: 'collective',
+                      title: Text('Collective'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: VSpacing.lg),
@@ -192,7 +201,8 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   scope: challengeScope,
                   targetValue: target,
                   rewardXp: int.tryParse(rewardXpController.text) ?? 0,
-                  rewardCurrency: int.tryParse(rewardCurrencyController.text) ?? 0,
+                  rewardCurrency:
+                      int.tryParse(rewardCurrencyController.text) ?? 0,
                 );
                 if (context.mounted) {
                   Navigator.of(ctx).pop();
@@ -242,8 +252,9 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
             : 'No active challenges right now. Join in when council launches one.',
         icon: Icons.flag_outlined,
         actionLabel: widget.isSovereignOrCouncil ? 'Create Challenge' : null,
-        onAction:
-            widget.isSovereignOrCouncil ? _showCreateChallengeDialog : null,
+        onAction: widget.isSovereignOrCouncil
+            ? _showCreateChallengeDialog
+            : null,
       );
     }
 
@@ -327,7 +338,10 @@ class _ChallengeCard extends StatelessWidget {
               ),
               if (isCompleted)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.xs,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: VColors.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(VRadius.pill),
@@ -347,7 +361,9 @@ class _ChallengeCard extends StatelessWidget {
           Text(
             challenge.description,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),

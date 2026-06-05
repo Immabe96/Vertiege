@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
 import '../config/tiers.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../models/resident.dart';
 import '../models/world_job.dart';
 import '../models/world_job_application.dart';
@@ -94,8 +94,8 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                 Text(
                   'Post a role',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: VFontWeight.bold,
-                      ),
+                    fontWeight: VFontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: VSpacing.md),
                 ConstrainedBox(
@@ -203,9 +203,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       if (mounted) {
         VFeedback.showMessage(
           context,
-          job == null
-              ? 'Role submitted for council review.'
-              : 'Role posted',
+          job == null ? 'Role submitted for council review.' : 'Role posted',
         );
         _load();
       }
@@ -285,9 +283,9 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
           for (final app in pending) ...[
             Text(
               app.applicantId,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: VFontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: VFontWeight.bold),
             ),
             if (app.message.isNotEmpty) ...[
               const SizedBox(height: VSpacing.xs),
@@ -299,15 +297,13 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
               children: [
                 TextButton(
                   onPressed: () async {
-                    final rejected =
-                        await WorldJobService.rejectApplication(app.id);
+                    final rejected = await WorldJobService.rejectApplication(
+                      app.id,
+                    );
                     if (!context.mounted) return;
                     if (rejected) {
                       Navigator.pop(context);
-                      VFeedback.showMessage(
-                        context,
-                        'Application declined',
-                      );
+                      VFeedback.showMessage(context, 'Application declined');
                       _load();
                     } else {
                       VFeedback.showError(
@@ -321,8 +317,9 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                 const SizedBox(width: VSpacing.sm),
                 FilledButton(
                   onPressed: () async {
-                    final accepted =
-                        await WorldJobService.acceptApplication(app.id);
+                    final accepted = await WorldJobService.acceptApplication(
+                      app.id,
+                    );
                     if (!context.mounted) return;
                     if (accepted) {
                       Navigator.pop(context);

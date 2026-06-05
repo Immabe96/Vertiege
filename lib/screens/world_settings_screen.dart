@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../state/world_provider.dart';
@@ -192,10 +192,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         .read(residentProvider.notifier)
         .muteResident(widget.worldId, residentId, durationHours: hours);
     if (mounted) {
-      VFeedback.showMessage(
-        context,
-        '$name muted for $hours hour(s)',
-      );
+      VFeedback.showMessage(context, '$name muted for $hours hour(s)');
     }
   }
 
@@ -213,10 +210,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
             onPressed: () => Navigator.pop(ctx, false),
             variant: ButtonVariant.text,
           ),
-          VButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            label: 'Ban',
-          ),
+          VButton(onPressed: () => Navigator.pop(ctx, true), label: 'Ban'),
         ],
       ),
     );
@@ -376,10 +370,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
             onPressed: () => Navigator.pop(ctx, false),
             variant: ButtonVariant.text,
           ),
-          VButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            label: 'Delete',
-          ),
+          VButton(onPressed: () => Navigator.pop(ctx, true), label: 'Delete'),
         ],
       ),
     );
@@ -651,7 +642,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         SizedBox(
                           width: double.infinity,
                           height: VTouchTarget.minimum,
-                            child: FilledButton.icon(
+                          child: FilledButton.icon(
                             onPressed: _isSaving ? null : _saveSettings,
                             icon: _isSaving
                                 ? const SizedBox(
@@ -723,9 +714,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: VSpacing.md),
 
                   // ── Lounge Settings (tier-gated) ─────────────
-                  if (ref.watch(residentProvider.select(
-                        (s) => s.resident != null && s.resident!.tier.value >= 3,
-                      )))
+                  if (ref.watch(
+                    residentProvider.select(
+                      (s) => s.resident != null && s.resident!.tier.value >= 3,
+                    ),
+                  ))
                     _Card(
                       padding: const EdgeInsets.all(VSpacing.lg),
                       child: Column(
@@ -753,15 +746,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         ],
                       ),
                     ),
-                  if (ref.watch(residentProvider.select(
-                        (s) => s.resident != null && s.resident!.tier.value >= 3,
-                      )))
+                  if (ref.watch(
+                    residentProvider.select(
+                      (s) => s.resident != null && s.resident!.tier.value >= 3,
+                    ),
+                  ))
                     const SizedBox(height: VSpacing.md),
 
                   // ── Governance (tier-gated) ─────────────────
-                  if (ref.watch(residentProvider.select(
-                        (s) => s.resident != null && s.resident!.tier.value >= 4,
-                      )))
+                  if (ref.watch(
+                    residentProvider.select(
+                      (s) => s.resident != null && s.resident!.tier.value >= 4,
+                    ),
+                  ))
                     _Card(
                       padding: const EdgeInsets.all(VSpacing.lg),
                       child: Column(
@@ -787,9 +784,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         ],
                       ),
                     ),
-                  if (ref.watch(residentProvider.select(
-                        (s) => s.resident != null && s.resident!.tier.value >= 4,
-                      )))
+                  if (ref.watch(
+                    residentProvider.select(
+                      (s) => s.resident != null && s.resident!.tier.value >= 4,
+                    ),
+                  ))
                     const SizedBox(height: VSpacing.md),
 
                   const SizedBox(height: VSpacing.md),
@@ -858,9 +857,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               ),
                               child: _Card(
                                 padding: const EdgeInsets.all(VSpacing.md),
-                                borderRadius: BorderRadius.circular(
-                                  VRadius.xl,
-                                ),
+                                borderRadius: BorderRadius.circular(VRadius.xl),
                                 child: Row(
                                   children: [
                                     CircleAvatar(
@@ -885,41 +882,42 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                       .textTheme
                                                       .bodyMedium
                                                       ?.copyWith(
-                                                        fontWeight:
-                                                            VFontWeight.semiBold,
+                                                        fontWeight: VFontWeight
+                                                            .semiBold,
                                                         color: isDark
-                                                            ? VColors.onSurfaceDark
+                                                            ? VColors
+                                                                  .onSurfaceDark
                                                             : VColors.onSurface,
                                                       ),
-                                                    ),
-                                                  ),
-                                                if (isSovereign) ...[
-                                                  const SizedBox(
-                                                    width: VSpacing.sm,
-                                                  ),
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: VSpacing.sm,
-                                                          vertical: 2,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: VColors.tertiary,
+                                                ),
+                                              ),
+                                              if (isSovereign) ...[
+                                                const SizedBox(
+                                                  width: VSpacing.sm,
+                                                ),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: VSpacing.sm,
+                                                        vertical: 2,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: VColors.tertiary,
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                           VRadius.pill,
                                                         ),
                                                   ),
-                                                    child: Text(
-                                                      'SOVEREIGN',
-                                                      style: theme
-                                                          .textTheme
-                                                          .labelSmall
-                                                          ?.copyWith(
-                                                            color: VColors
-                                                                .onTertiary,
-                                                          ),
-                                                    ),
+                                                  child: Text(
+                                                    'SOVEREIGN',
+                                                    style: theme
+                                                        .textTheme
+                                                        .labelSmall
+                                                        ?.copyWith(
+                                                          color: VColors
+                                                              .onTertiary,
+                                                        ),
+                                                  ),
                                                 ),
                                               ],
                                             ],
@@ -955,16 +953,18 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                       ),
                                                 ),
                                               ),
-                                              const SizedBox(width: VSpacing.sm),
-                                            Text(
-                                              'Rep $rep',
-                                              style: theme
-                                                  .textTheme
-                                                  .labelSmall
-                                                  ?.copyWith(
-                                                    color: VColors.tertiary,
-                                                  ),
-                                            ),
+                                              const SizedBox(
+                                                width: VSpacing.sm,
+                                              ),
+                                              Text(
+                                                'Rep $rep',
+                                                style: theme
+                                                    .textTheme
+                                                    .labelSmall
+                                                    ?.copyWith(
+                                                      color: VColors.tertiary,
+                                                    ),
+                                              ),
                                             ],
                                           ),
                                         ],
@@ -972,13 +972,13 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                     ),
                                     if (!isCurrentUser && canMod)
                                       PopupMenuButton<String>(
-                                      icon: Icon(
-                                        Icons.more_vert,
-                                        size: 18,
-                                        color: isDark
-                                            ? VColors.outlineVariantDark
-                                            : VColors.outlineVariant,
-                                      ),
+                                        icon: Icon(
+                                          Icons.more_vert,
+                                          size: 18,
+                                          color: isDark
+                                              ? VColors.outlineVariantDark
+                                              : VColors.outlineVariant,
+                                        ),
                                         onSelected: (action) {
                                           switch (action) {
                                             case 'mute1':
@@ -1048,8 +1048,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               ),
                               Switch(
                                 value: _quietHours.enabled,
-                                onChanged: (v) =>
-                                    _saveQuietHours(enabled: v),
+                                onChanged: (v) => _saveQuietHours(enabled: v),
                                 activeThumbColor: VColors.tertiary,
                               ),
                             ],
@@ -1066,21 +1065,28 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                       Text(
                                         'Start',
                                         style: theme.textTheme.labelSmall
-                                            ?.copyWith(
-                                          color: VColors.tertiary,
-                                        ),
+                                            ?.copyWith(color: VColors.tertiary),
                                       ),
                                       const SizedBox(height: VSpacing.xs),
                                       FSelect<int>.rich(
-                                        format: (value) => '${value.toString().padLeft(2, '0')}:00',
+                                        format: (value) =>
+                                            '${value.toString().padLeft(2, '0')}:00',
                                         control: FSelectControl.lifted(
                                           value: _quietHours.startHour,
-                                          onChange: (v) { if (v != null) _saveQuietHours(startHour: v); },
+                                          onChange: (v) {
+                                            if (v != null)
+                                              _saveQuietHours(startHour: v);
+                                          },
                                         ),
-                                        children: List.generate(24, (i) => FSelectItem<int>(
-                                          value: i,
-                                          title: Text('${i.toString().padLeft(2, '0')}:00'),
-                                        )),
+                                        children: List.generate(
+                                          24,
+                                          (i) => FSelectItem<int>(
+                                            value: i,
+                                            title: Text(
+                                              '${i.toString().padLeft(2, '0')}:00',
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -1094,21 +1100,28 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                       Text(
                                         'End',
                                         style: theme.textTheme.labelSmall
-                                            ?.copyWith(
-                                          color: VColors.tertiary,
-                                        ),
+                                            ?.copyWith(color: VColors.tertiary),
                                       ),
                                       const SizedBox(height: VSpacing.xs),
                                       FSelect<int>.rich(
-                                        format: (value) => '${value.toString().padLeft(2, '0')}:00',
+                                        format: (value) =>
+                                            '${value.toString().padLeft(2, '0')}:00',
                                         control: FSelectControl.lifted(
                                           value: _quietHours.endHour,
-                                          onChange: (v) { if (v != null) _saveQuietHours(endHour: v); },
+                                          onChange: (v) {
+                                            if (v != null)
+                                              _saveQuietHours(endHour: v);
+                                          },
                                         ),
-                                        children: List.generate(24, (i) => FSelectItem<int>(
-                                          value: i,
-                                          title: Text('${i.toString().padLeft(2, '0')}:00'),
-                                        )),
+                                        children: List.generate(
+                                          24,
+                                          (i) => FSelectItem<int>(
+                                            value: i,
+                                            title: Text(
+                                              '${i.toString().padLeft(2, '0')}:00',
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -1159,32 +1172,29 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         borderRadius: BorderRadius.circular(VRadius.xl),
                       ),
                       onTap: () => context.push(
-                        auditLogPath(
-                          widget.worldId,
-                          worldName: world.name,
-                        ),
+                        auditLogPath(widget.worldId, worldName: world.name),
                       ),
                     ),
                   ListTile(
-                      leading: const Icon(
-                        Icons.menu_book_outlined,
-                        color: VColors.primary,
-                      ),
-                      title: const Text('World archive'),
-                      subtitle: const Text(
-                        'Lore, rules, and recorded history channels',
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: isDark
-                            ? VColors.outlineVariantDark
-                            : VColors.outlineVariant,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(VRadius.xl),
-                      ),
-                      onTap: () => context.push(worldArchivePath(widget.worldId)),
+                    leading: const Icon(
+                      Icons.menu_book_outlined,
+                      color: VColors.primary,
                     ),
+                    title: const Text('World archive'),
+                    subtitle: const Text(
+                      'Lore, rules, and recorded history channels',
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: isDark
+                          ? VColors.outlineVariantDark
+                          : VColors.outlineVariant,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(VRadius.xl),
+                    ),
+                    onTap: () => context.push(worldArchivePath(widget.worldId)),
+                  ),
 
                   const SizedBox(height: VSpacing.md),
 
@@ -1444,7 +1454,10 @@ class _BoostWorldCard extends ConsumerWidget {
               : 'Boost applied! +${World.boostActivityPoints} activity points.',
         );
       case StorePurchaseState.error:
-        VFeedback.showMessage(context, 'Boost purchase failed. Please try again.');
+        VFeedback.showMessage(
+          context,
+          'Boost purchase failed. Please try again.',
+        );
       case StorePurchaseState.disabled:
         break;
       default:
@@ -1608,7 +1621,9 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,

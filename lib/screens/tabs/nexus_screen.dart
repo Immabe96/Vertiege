@@ -1,10 +1,10 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import '../../forui/v_tab_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../state/resident_provider.dart';
 import '../../services/world_service.dart';
 import '../../state/post_provider.dart';
@@ -133,48 +133,46 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
     final posts = ref.watch(
       postProvider.select((postState) {
-        final joinedIds = resident?.joinedWorldIds
+        final joinedIds =
+            resident?.joinedWorldIds
                 .where(WorldService.isRemoteWorldId)
                 .toSet() ??
             {};
         var filtered = switch (_tab) {
-          _FeedTab.all => postState.posts
-              .where((p) => joinedIds.isEmpty || joinedIds.contains(p.worldId))
-              .toList(),
+          _FeedTab.all =>
+            postState.posts
+                .where(
+                  (p) => joinedIds.isEmpty || joinedIds.contains(p.worldId),
+                )
+                .toList(),
           _FeedTab.following => postState.posts.where((p) {
             if (!joinedIds.contains(p.worldId)) return false;
-            final inMutual =
-                postState.mutualWorldResidentIds.contains(p.residentId);
-            final follows =
-                resident?.following.contains(p.residentId) ?? false;
+            final inMutual = postState.mutualWorldResidentIds.contains(
+              p.residentId,
+            );
+            final follows = resident?.following.contains(p.residentId) ?? false;
             return inMutual && follows;
           }).toList(),
-          _FeedTab.announcements => postState.posts
-              .where(
-                (p) =>
-                    p.isAnnouncement &&
-                    (joinedIds.isEmpty || joinedIds.contains(p.worldId)),
-              )
-              .toList(),
+          _FeedTab.announcements =>
+            postState.posts
+                .where(
+                  (p) =>
+                      p.isAnnouncement &&
+                      (joinedIds.isEmpty || joinedIds.contains(p.worldId)),
+                )
+                .toList(),
         };
 
         return _sortPosts(filtered, _sort);
       }),
     );
 
-    final postError = ref.watch(
-      postProvider.select((s) => s.error),
-    );
-    final postHasError = ref.watch(
-      postProvider.select((s) => s.hasError),
-    );
-    final postIsLoading = ref.watch(
-      postProvider.select((s) => s.isLoading),
-    );
+    final postError = ref.watch(postProvider.select((s) => s.error));
+    final postHasError = ref.watch(postProvider.select((s) => s.hasError));
+    final postIsLoading = ref.watch(postProvider.select((s) => s.isLoading));
 
-    final joinedRemoteWorlds = resident?.joinedWorldIds
-            .where(WorldService.isRemoteWorldId)
-            .length ??
+    final joinedRemoteWorlds =
+        resident?.joinedWorldIds.where(WorldService.isRemoteWorldId).length ??
         0;
 
     final headerActions = <Widget>[
@@ -240,143 +238,132 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
         suffixes: headerActions,
       ),
       body: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    await ref.read(postProvider.notifier).loadPosts();
-                    await Future<void>.delayed(
-                      const Duration(milliseconds: 200),
-                    );
-                  },
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                    SliverToBoxAdapter(
-                      child: NexusContextStrip(
-                        showJoinWorldsCta: joinedRemoteWorlds == 0,
-                      ),
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await ref.read(postProvider.notifier).loadPosts();
+                await Future<void>.delayed(const Duration(milliseconds: 200));
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: NexusContextStrip(
+                      showJoinWorldsCta: joinedRemoteWorlds == 0,
                     ),
-                    const SliverToBoxAdapter(
-                      child: SeasonNexusBanner(),
+                  ),
+                  const SliverToBoxAdapter(child: SeasonNexusBanner()),
+                  SliverToBoxAdapter(
+                    child: NexusShortcutsSection(
+                      expanded: _shortcutsExpanded,
+                      onExpandedChanged: (v) =>
+                          setState(() => _shortcutsExpanded = v),
                     ),
-                    SliverToBoxAdapter(
-                      child: NexusShortcutsSection(
-                        expanded: _shortcutsExpanded,
-                        onExpandedChanged: (v) =>
-                            setState(() => _shortcutsExpanded = v),
-                      ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: NexusFeedHeader(
+                      isDark: isDark,
+                      allSelected: _tab == _FeedTab.all,
+                      followingSelected: _tab == _FeedTab.following,
+                      announcementsSelected: _tab == _FeedTab.announcements,
+                      currentSort: _sort,
+                      onSortChanged: (s) => setState(() => _sort = s),
+                      onAllTap: () => setState(() => _tab = _FeedTab.all),
+                      onFollowingTap: () =>
+                          setState(() => _tab = _FeedTab.following),
+                      onAnnouncementsTap: () =>
+                          setState(() => _tab = _FeedTab.announcements),
                     ),
-                    SliverToBoxAdapter(
-                      child: NexusFeedHeader(
-                        isDark: isDark,
-                        allSelected: _tab == _FeedTab.all,
-                        followingSelected: _tab == _FeedTab.following,
-                        announcementsSelected: _tab == _FeedTab.announcements,
-                        currentSort: _sort,
-                        onSortChanged: (s) => setState(() => _sort = s),
-                        onAllTap: () => setState(() => _tab = _FeedTab.all),
-                        onFollowingTap: () =>
-                            setState(() => _tab = _FeedTab.following),
-                        onAnnouncementsTap: () =>
-                            setState(() => _tab = _FeedTab.announcements),
-                      ),
-                    ),
+                  ),
 
-                    if (postHasError && posts.isEmpty)
-                      SliverToBoxAdapter(
-                        child: AppErrorState(
-                          message: postError ?? 'Something went wrong',
+                  if (postHasError && posts.isEmpty)
+                    SliverToBoxAdapter(
+                      child: AppErrorState(
+                        message: postError ?? 'Something went wrong',
+                        onRetry: () =>
+                            ref.read(postProvider.notifier).loadPosts(),
+                      ),
+                    )
+                  else if (postHasError && posts.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          VSpacing.md,
+                          VSpacing.sm,
+                          VSpacing.md,
+                          0,
+                        ),
+                        child: SyncWarningBanner(
+                          message: postError!,
                           onRetry: () =>
                               ref.read(postProvider.notifier).loadPosts(),
                         ),
-                      )
-                    else if (postHasError && posts.isNotEmpty)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            VSpacing.md,
-                            VSpacing.sm,
-                            VSpacing.md,
-                            0,
-                          ),
-                          child: SyncWarningBanner(
-                            message: postError!,
-                            onRetry: () =>
-                                ref.read(postProvider.notifier).loadPosts(),
-                          ),
-                        ),
-                      )
-                    else if (postIsLoading && posts.isEmpty)
-                      const SliverToBoxAdapter(
-                        child: ScreenLoading.feed(),
-                      )
-                    else if (posts.isEmpty)
-                      SliverToBoxAdapter(
-                        child: _buildEmptyState(),
-                      )
-                    else
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) =>
-                              PostItem(post: posts[index], index: index),
-                          childCount: posts.length,
-                        ),
                       ),
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: VSpacing.xxl +
-                            MediaQuery.paddingOf(context).bottom,
+                    )
+                  else if (postIsLoading && posts.isEmpty)
+                    const SliverToBoxAdapter(child: ScreenLoading.feed())
+                  else if (posts.isEmpty)
+                    SliverToBoxAdapter(child: _buildEmptyState())
+                  else
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) =>
+                            PostItem(post: posts[index], index: index),
+                        childCount: posts.length,
                       ),
                     ),
-                  ],
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height:
+                          VSpacing.xxl + MediaQuery.paddingOf(context).bottom,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_showScrollFab)
+            Positioned(
+              right: VSpacing.md,
+              bottom: VSpacing.md,
+              child: AnimatedScale(
+                scale: _showScrollFab ? 1.0 : 0.0,
+                duration: context.motionDuration(VAnimation.fast),
+                curve: context.motionCurve,
+                child: FloatingActionButton.small(
+                  onPressed: _scrollToTop,
+                  tooltip: 'Scroll to top',
+                  child: const Icon(
+                    Icons.keyboard_arrow_up,
+                    size: VIconSize.lg,
+                  ),
                 ),
               ),
             ),
-              if (_showScrollFab)
-                Positioned(
-                  right: VSpacing.md,
-                  bottom: VSpacing.md,
-                  child: AnimatedScale(
-                    scale: _showScrollFab ? 1.0 : 0.0,
-                    duration: context.motionDuration(VAnimation.fast),
-                    curve: context.motionCurve,
-                    child: FloatingActionButton.small(
-                      onPressed: _scrollToTop,
-                      tooltip: 'Scroll to top',
-                      child: const Icon(
-                        Icons.keyboard_arrow_up,
-                        size: VIconSize.lg,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+        ],
+      ),
     );
   }
 
   Widget _buildEmptyState() {
     final resident = ref.read(residentProvider).resident;
-    final hasJoinedWorlds = resident?.joinedWorldIds
-            .any(WorldService.isRemoteWorldId) ??
-        false;
+    final hasJoinedWorlds =
+        resident?.joinedWorldIds.any(WorldService.isRemoteWorldId) ?? false;
 
     switch (_tab) {
       case _FeedTab.following:
         return const AppEmptyState(
           title: 'No posts from people you follow',
-          description:
-              'Follow members in your worlds to see their posts here',
+          description: 'Follow members in your worlds to see their posts here',
           icon: Icons.people_outline,
         );
       case _FeedTab.announcements:
         return const AppEmptyState(
           title: 'No announcements yet',
-          description:
-              'Admin announcements from your worlds will appear here',
+          description: 'Admin announcements from your worlds will appear here',
           icon: Icons.campaign_outlined,
         );
       case _FeedTab.all:
@@ -420,9 +407,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
         });
         break;
       case FeedSort.top:
-        sorted.sort(
-          (a, b) => b.comments.length.compareTo(a.comments.length),
-        );
+        sorted.sort((a, b) => b.comments.length.compareTo(a.comments.length));
         break;
     }
     return sorted;

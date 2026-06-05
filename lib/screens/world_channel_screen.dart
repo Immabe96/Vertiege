@@ -64,8 +64,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   void initState() {
     super.initState();
     final notifier = ref.read(chatProvider.notifier);
-    _visitDividerAnchor =
-        ref.read(chatProvider).channelReads[widget.channelId];
+    _visitDividerAnchor = ref.read(chatProvider).channelReads[widget.channelId];
     notifier.loadChannelMessages(widget.channelId, force: true);
     notifier.subscribeToChannel(widget.channelId);
     _scrollController.addListener(_onScroll);
@@ -77,8 +76,9 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
         await notifier.loadChannelReads(resident.id);
         if (mounted && _visitDividerAnchor == null) {
           setState(() {
-            _visitDividerAnchor =
-                ref.read(chatProvider).channelReads[widget.channelId];
+            _visitDividerAnchor = ref
+                .read(chatProvider)
+                .channelReads[widget.channelId];
           });
         }
       }
@@ -154,8 +154,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final resident = ref.watch(residentProvider).resident;
     final chatState = ref.watch(chatProvider);
     final messages = chatState.channelMessages[widget.channelId] ?? [];
-    final messagesLoadError =
-        chatState.messagesLoadErrorFor(widget.channelId);
+    final messagesLoadError = chatState.messagesLoadErrorFor(widget.channelId);
     final isLoading = !chatState.channelMessages.containsKey(widget.channelId);
 
     final pinnedMessages = messages.where((m) => m.isPinned).toList();
@@ -361,8 +360,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     return AppEmptyState(
       icon: Icons.chat_bubble_outline,
       title: 'No messages yet',
-      description:
-          'Be the first to say something in #${widget.channelName}',
+      description: 'Be the first to say something in #${widget.channelName}',
     );
   }
 
@@ -798,9 +796,9 @@ class _MessageBubbleState extends State<_MessageBubble>
       children: [
         Container(
           padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.md + VSpacing.xxs,
-      ),
+            horizontal: VSpacing.md,
+            vertical: VSpacing.md + VSpacing.xxs,
+          ),
           decoration: const BoxDecoration(
             color: VColors.primary,
             borderRadius: _sentRadius,
@@ -902,9 +900,9 @@ class _MessageBubbleState extends State<_MessageBubble>
         ],
         Container(
           padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.md + VSpacing.xxs,
-      ),
+            horizontal: VSpacing.md,
+            vertical: VSpacing.md + VSpacing.xxs,
+          ),
           decoration: BoxDecoration(
             color: isDark
                 ? VColors.glassBackgroundDark

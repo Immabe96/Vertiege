@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../router/progress_navigation.dart';
 import '../state/league_provider.dart';
 import '../state/quest_provider.dart';
@@ -15,10 +15,7 @@ import 'season_screen.dart';
 class ProgressHubScreen extends ConsumerStatefulWidget {
   final ProgressTab initialTab;
 
-  const ProgressHubScreen({
-    super.key,
-    this.initialTab = ProgressTab.quests,
-  });
+  const ProgressHubScreen({super.key, this.initialTab = ProgressTab.quests});
 
   @override
   ConsumerState<ProgressHubScreen> createState() => _ProgressHubScreenState();

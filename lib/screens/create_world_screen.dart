@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +7,7 @@ import '../models/world.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/admin_access_service.dart';
 import '../services/subscription_service.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../state/world_provider.dart';
@@ -105,18 +105,27 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
   Future<void> _submit() async {
     if (_selectedDominionType == null) {
-      VFeedback.showMessage(context, 'Choose a dominion type before creating your world.');
+      VFeedback.showMessage(
+        context,
+        'Choose a dominion type before creating your world.',
+      );
       return;
     }
 
     if (!_formKey.currentState!.validate()) {
-      VFeedback.showMessage(context, 'Check world name and description — fix any errors above.');
+      VFeedback.showMessage(
+        context,
+        'Check world name and description — fix any errors above.',
+      );
       return;
     }
 
     final resident = ref.read(residentProvider).resident;
     if (resident == null) {
-      VFeedback.showMessage(context, 'No resident profile found. Please create one first.');
+      VFeedback.showMessage(
+        context,
+        'No resident profile found. Please create one first.',
+      );
       return;
     }
 
@@ -212,11 +221,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
-                Icon(
-                  Icons.diamond_outlined,
-                  size: 64,
-                  color: VColors.tertiary,
-                ),
+                Icon(Icons.diamond_outlined, size: 64, color: VColors.tertiary),
                 const SizedBox(height: VSpacing.md),
                 Text(
                   'World Limit Reached',
@@ -484,7 +489,8 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             VSurfaceCard(
               child: DominionTypePicker(
                 selected: _selectedDominionType,
-                onSelected: (type) => setState(() => _selectedDominionType = type),
+                onSelected: (type) =>
+                    setState(() => _selectedDominionType = type),
               ),
             ),
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -58,10 +58,11 @@ class _NexusNotificationsSheetState
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: (isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant)
-                            .withValues(alpha: 0.3),
+                        color:
+                            (isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant)
+                                .withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(VRadius.pill),
                       ),
                     ),
@@ -78,9 +79,7 @@ class _NexusNotificationsSheetState
                         label: 'Mark all read',
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          ref
-                              .read(notificationProvider.notifier)
-                              .markAllRead();
+                          ref.read(notificationProvider.notifier).markAllRead();
                         },
                         variant: ButtonVariant.text,
                       ),
@@ -214,11 +213,11 @@ class NotificationList extends ConsumerWidget {
                                   : VFontWeight.regular,
                               color: unread
                                   ? (isDark
-                                      ? VColors.onSurfaceDark
-                                      : VColors.onSurface)
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface)
                                   : (isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant),
+                                        ? VColors.onSurfaceVariantDark
+                                        : VColors.onSurfaceVariant),
                             ),
                           ),
                           const SizedBox(height: VSpacing.xxs),

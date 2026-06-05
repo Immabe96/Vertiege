@@ -4,7 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../services/moderation_service.dart';
 import '../theme/v_colors.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../utils/date_format.dart';
 import '../widgets/core/screen_loading.dart';
@@ -107,7 +107,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     final amount = details['amount'];
     if (amount != null) return '$amount coins';
     final action = details['action'] as String?;
-    if (action != null) return 'Rank ${action == 'assign' ? 'assigned' : 'removed'}';
+    if (action != null)
+      return 'Rank ${action == 'assign' ? 'assigned' : 'removed'}';
     return null;
   }
 
@@ -130,8 +131,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     'governance_rank_change_executed' ||
     'governance_treasury_withdrawal' ||
     'governance_treasury_proposed' ||
-    'governance_treasury_executed' =>
-      Icons.gavel,
+    'governance_treasury_executed' => Icons.gavel,
     'poll_moderated' => Icons.poll,
     _ => Icons.history,
   };
@@ -144,10 +144,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     return switch (_filter) {
       _AuditFilter.treasury =>
         action.contains('treasury') || type == 'treasury_withdrawal',
-      _AuditFilter.rank =>
-        action.contains('rank') || type == 'rank_change',
-      _AuditFilter.job =>
-        action.contains('job') || type == 'job_publish',
+      _AuditFilter.rank => action.contains('rank') || type == 'rank_change',
+      _AuditFilter.job => action.contains('job') || type == 'job_publish',
       _AuditFilter.poll => action == 'poll_moderated',
       _AuditFilter.all => true,
     };
@@ -161,10 +159,13 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     if (rows.isEmpty) return;
     final buffer = StringBuffer('timestamp,action,actor,detail\n');
     for (final entry in rows) {
-      final createdAt = DateTime.tryParse(entry['created_at']?.toString() ?? '');
+      final createdAt = DateTime.tryParse(
+        entry['created_at']?.toString() ?? '',
+      );
       final action = entry['action'] as String? ?? '';
       final actor = _actorLabel(entry['actor_id'] as String?);
-      final detail = _governanceDetail(entry['details'] as Map<String, dynamic>?) ?? '';
+      final detail =
+          _governanceDetail(entry['details'] as Map<String, dynamic>?) ?? '';
       buffer.writeln(
         '"${createdAt?.toIso8601String() ?? ''}","$action","$actor","$detail"',
       );
@@ -196,8 +197,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
           : _entries.isEmpty
           ? const AppEmptyState(
               title: 'No audit entries',
-              description:
-                  'Moderation and council decisions will appear here.',
+              description: 'Moderation and council decisions will appear here.',
               icon: Icons.history,
             )
           : RefreshIndicator(
@@ -226,8 +226,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                               _AuditFilter.poll => 'Polls',
                             }),
                             selected: selected,
-                            onSelected: (_) =>
-                                setState(() => _filter = f),
+                            onSelected: (_) => setState(() => _filter = f),
                           );
                         }).toList(),
                       ),
@@ -244,9 +243,7 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
 
                   return Padding(
                     padding: EdgeInsets.only(
-                      bottom: index < _filteredEntries.length
-                          ? VSpacing.sm
-                          : 0,
+                      bottom: index < _filteredEntries.length ? VSpacing.sm : 0,
                     ),
                     child: _Card(
                       padding: const EdgeInsets.all(VSpacing.md),
@@ -256,13 +253,12 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: (isDark
-                                      ? VColors.surfaceContainerHighestDark
-                                      : VColors.surfaceContainerHighest)
-                                  .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(
-                                VRadius.md,
-                              ),
+                              color:
+                                  (isDark
+                                          ? VColors.surfaceContainerHighestDark
+                                          : VColors.surfaceContainerHighest)
+                                      .withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(VRadius.md),
                             ),
                             child: Icon(
                               _actionIcon(action),
@@ -354,7 +350,9 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,

@@ -6,7 +6,7 @@ import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/screen_loading.dart';
 import '../ui/icons/v_icons.dart';
@@ -74,8 +74,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       final message = verified > 0
           ? 'Restored $verified subscription${verified == 1 ? '' : 's'}.'
           : restored.isEmpty
-              ? 'No active subscriptions found for this store account.'
-              : 'Could not verify restored purchases. Try again or contact support.';
+          ? 'No active subscriptions found for this store account.'
+          : 'Could not verify restored purchases. Try again or contact support.';
       setState(() {
         _purchasing = false;
         _purchaseMessage = message;
@@ -136,7 +136,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       if (mounted) {
         final msg = e is StateError
             ? SubscriptionService.userFacingPurchaseError(e.message) ??
-                e.message
+                  e.message
             : 'Purchase failed. Please try again.';
         setState(() {
           _purchasing = false;
@@ -169,9 +169,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         height: 64,
                         decoration: BoxDecoration(
                           color: VColors.tertiary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(
-                            VRadius.md,
-                          ),
+                          borderRadius: BorderRadius.circular(VRadius.md),
                         ),
                         child: const Icon(
                           Icons.diamond_outlined,
@@ -185,7 +183,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         style: TextStyle(
                           fontSize: VFontSize.headlineLg,
                           fontWeight: VFontWeight.bold,
-                          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
                         ),
                       ),
                       const SizedBox(height: VSpacing.xs),
@@ -326,24 +326,25 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     );
 
     features.add(
-      _TierFeature(
-        label: 'Up to $savedDrafts saved drafts',
-        included: true,
-      ),
+      _TierFeature(label: 'Up to $savedDrafts saved drafts', included: true),
     );
 
     features.add(
       const _TierFeature(label: 'Gold profile frame', included: true),
     );
 
-    features.add(_TierFeature(
-      label: 'Review queue status visibility',
-      included: priorityV,
-    ));
+    features.add(
+      _TierFeature(
+        label: 'Review queue status visibility',
+        included: priorityV,
+      ),
+    );
 
     features.add(_TierFeature(label: 'Gold name treatment', included: goldN));
 
-    features.add(_TierFeature(label: 'Custom profile frame', included: customFrame));
+    features.add(
+      _TierFeature(label: 'Custom profile frame', included: customFrame),
+    );
 
     features.add(
       _TierFeature(label: 'Analytics dashboard', included: analytics),
@@ -366,28 +367,49 @@ class _SubscriptionBenefitsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final rows = <({String feature, String resident, String patrician, String elite})>[
-      (feature: 'Cosmetic slots', resident: 'Base', patrician: '+2', elite: '+6'),
-      (feature: 'Saved drafts', resident: '3', patrician: '10', elite: '25'),
-      (feature: 'Custom frame', resident: '—', patrician: 'Yes', elite: 'Yes'),
-      (feature: 'Gold name', resident: '—', patrician: '—', elite: 'Yes'),
-      (feature: 'Review visibility', resident: '—', patrician: 'Yes', elite: 'Yes'),
-      (feature: 'Analytics', resident: '—', patrician: '—', elite: 'Yes'),
-    ];
+    final rows =
+        <({String feature, String resident, String patrician, String elite})>[
+          (
+            feature: 'Cosmetic slots',
+            resident: 'Base',
+            patrician: '+2',
+            elite: '+6',
+          ),
+          (
+            feature: 'Saved drafts',
+            resident: '3',
+            patrician: '10',
+            elite: '25',
+          ),
+          (
+            feature: 'Custom frame',
+            resident: '—',
+            patrician: 'Yes',
+            elite: 'Yes',
+          ),
+          (feature: 'Gold name', resident: '—', patrician: '—', elite: 'Yes'),
+          (
+            feature: 'Review visibility',
+            resident: '—',
+            patrician: 'Yes',
+            elite: 'Yes',
+          ),
+          (feature: 'Analytics', resident: '—', patrician: '—', elite: 'Yes'),
+        ];
 
     Widget cell(String text, {bool header = false}) => Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: VSpacing.xs,
-            vertical: VSpacing.xs,
-          ),
-          child: Text(
-            text,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: header ? VFontWeight.bold : VFontWeight.regular,
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-            ),
-          ),
-        );
+      padding: const EdgeInsets.symmetric(
+        horizontal: VSpacing.xs,
+        vertical: VSpacing.xs,
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontWeight: header ? VFontWeight.bold : VFontWeight.regular,
+          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+        ),
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -527,8 +549,7 @@ class _TierCard extends StatelessWidget {
                     pricePeriod,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: isDark
-                          ? VColors.onSurfaceVariantDark
-                              .withValues(alpha: 0.5)
+                          ? VColors.onSurfaceVariantDark.withValues(alpha: 0.5)
                           : VColors.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
                   ),
@@ -560,8 +581,9 @@ class _TierCard extends StatelessWidget {
                     color: feature.included
                         ? VColors.success
                         : (isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant).withValues(alpha: 0.4),
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant)
+                              .withValues(alpha: 0.4),
                   ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
@@ -570,13 +592,12 @@ class _TierCard extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: feature.included
                             ? (isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant)
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant)
                             : (isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant).withValues(
-                                alpha: 0.5,
-                              ),
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant)
+                                  .withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -635,7 +656,9 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.xl),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,

@@ -1,10 +1,10 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../config/tiers.dart';
@@ -88,7 +88,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   bool _isSovereignOrCouncil(Resident? resident, World world) {
     if (resident == null) return false;
     if (resident.id == world.sovereignId) return true;
-    final member = _members.where((m) => m.resident.id == resident.id).firstOrNull;
+    final member = _members
+        .where((m) => m.resident.id == resident.id)
+        .firstOrNull;
     return member != null && member.rep >= 5000;
   }
 
@@ -267,8 +269,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   }
 
   Future<void> _preparePostHighlight(String postId) async {
-    final visible =
-        await ref.read(postProvider.notifier).ensurePostVisible(postId);
+    final visible = await ref
+        .read(postProvider.notifier)
+        .ensurePostVisible(postId);
     if (!mounted) return;
     if (!visible) {
       _onHighlightPostMissing();
@@ -278,10 +281,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (w == null || _tabController == null) return;
     setState(() {});
     final duration = context.motionDuration(VAnimation.normal);
-    _tabController!.animateTo(
-      WorldPageIa.feedIndex(w),
-      duration: duration,
-    );
+    _tabController!.animateTo(WorldPageIa.feedIndex(w), duration: duration);
   }
 
   Future<void> _loadNavPrefs() async {
@@ -297,8 +297,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (_defaultTabApplied || _tabController == null || !_navPrefsLoaded) {
       return;
     }
-    final hasPost =
-        _highlightPostId != null && _highlightPostId!.isNotEmpty;
+    final hasPost = _highlightPostId != null && _highlightPostId!.isNotEmpty;
     final index = WorldPageIa.defaultTabIndex(
       world: world,
       isJoined: isJoined,
@@ -337,8 +336,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         onSettings: onSettings,
         onOpenRealmGuide: () => _showRealmGuideSheet(
           world,
-          channels: ref.read(channelProvider).channelsByWorld[widget.worldId] ?? [],
-          posts: ref.read(postProvider.notifier).getPostsByWorld(widget.worldId),
+          channels:
+              ref.read(channelProvider).channelsByWorld[widget.worldId] ?? [],
+          posts: ref
+              .read(postProvider.notifier)
+              .getPostsByWorld(widget.worldId),
           resident: ref.read(residentProvider).resident,
           isJoined: isJoined,
           onSettings: onSettings,
@@ -393,8 +395,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         return channels.isEmpty
             ? AppEmptyState(
                 title: 'Preparing channels',
-                description:
-                    'This world is getting its starter channels.',
+                description: 'This world is getting its starter channels.',
                 icon: Icons.forum_outlined,
                 actionLabel: 'Retry',
                 onAction: () => ref
@@ -527,9 +528,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
             children: [
               Text(
                 'You joined ${world.name}',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: VFontWeight.bold),
               ),
               const SizedBox(height: VSpacing.sm),
               const Text(
@@ -607,7 +608,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     return VColors.tierHustler;
   }
 
-
   void _openChannelByName(String channelName, List<WorldChannel> channels) {
     final normalized = channelName.toLowerCase();
     final channel = channels
@@ -646,7 +646,11 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               onPressed: () => Navigator.of(ctx).pop(),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+                style: TextStyle(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -748,7 +752,9 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
         ? () => context.push(worldSettingsPath(widget.worldId))
         : null;
 
-    final tabLabels = WorldPageIa.tabsFor(world).map(WorldPageIa.tabLabel).toList();
+    final tabLabels = WorldPageIa.tabsFor(
+      world,
+    ).map(WorldPageIa.tabLabel).toList();
     final isAdminOrCouncil = _isSovereignOrCouncil(resident, world);
 
     return WorldAccessGuard(
@@ -864,8 +870,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                         SliverOverlapInjector(
                           handle:
                               NestedScrollView.sliverOverlapAbsorberHandleFor(
-                            context,
-                          ),
+                                context,
+                              ),
                         ),
                         SliverToBoxAdapter(
                           child: Padding(
@@ -1007,38 +1013,38 @@ class _StatChip extends StatelessWidget {
           button: onTap != null,
           label: onTap != null ? '$label, $value' : null,
           child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: VSpacing.sm,
-              vertical: VSpacing.md,
-            ),
-            child: Column(
-              children: [
-                Icon(icon, size: VIconSize.md, color: VColors.primary),
-                const SizedBox(height: VSpacing.xs),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: VFontSize.headlineSm,
-                    fontWeight: VFontWeight.bold,
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: VSpacing.sm,
+                vertical: VSpacing.md,
+              ),
+              child: Column(
+                children: [
+                  Icon(icon, size: VIconSize.md, color: VColors.primary),
+                  const SizedBox(height: VSpacing.xs),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: VFontSize.headlineSm,
+                      fontWeight: VFontWeight.bold,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    ),
                   ),
-                ),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: VFontSize.labelMd,
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: VFontSize.labelMd,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -1075,7 +1081,9 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
     final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark ? VColors.surfaceDark : VColors.surface;
     final dividerColor = isDark ? VColors.outlineDark : VColors.outline;
-    final unselectedColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final unselectedColor = isDark
+        ? VColors.onSurfaceVariantDark
+        : VColors.onSurfaceVariant;
 
     return SizedBox(
       height: _tabBarHeight,
@@ -1085,9 +1093,7 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(color: dividerColor),
-              top: BorderSide(
-                color: dividerColor.withValues(alpha: 0.6),
-              ),
+              top: BorderSide(color: dividerColor.withValues(alpha: 0.6)),
             ),
           ),
           child: TabBar(
@@ -1103,9 +1109,7 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
               fontSize: VFontSize.labelSm,
               fontWeight: VFontWeight.regular,
             ),
-            tabs: [
-              for (final label in tabLabels) Tab(text: label),
-            ],
+            tabs: [for (final label in tabLabels) Tab(text: label)],
           ),
         ),
       ),

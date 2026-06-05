@@ -19,7 +19,8 @@ class VerifierLoginScreen extends ConsumerStatefulWidget {
   const VerifierLoginScreen({super.key});
 
   @override
-  ConsumerState<VerifierLoginScreen> createState() => _VerifierLoginScreenState();
+  ConsumerState<VerifierLoginScreen> createState() =>
+      _VerifierLoginScreenState();
 }
 
 class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {

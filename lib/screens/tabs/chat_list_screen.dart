@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import '../../forui/v_tab_page.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../models/channel.dart';
 import '../../router/search_navigation.dart';
@@ -50,10 +50,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final joinedWorlds = resident == null
         ? <World>[]
         : (resident.joinedWorldIds
-                  .map((id) => worldState.worlds[id])
-                  .whereType<World>()
-                  .toList()
-              ..sort((a, b) => a.name.compareTo(b.name)));
+              .map((id) => worldState.worlds[id])
+              .whereType<World>()
+              .toList()
+            ..sort((a, b) => a.name.compareTo(b.name)));
 
     if (residentId != null && !_didTriggerDmLoad) {
       _didTriggerDmLoad = true;
@@ -105,7 +105,14 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             }
           }
         },
-        child: _buildBody(context, theme, isDark, residentId, joinedWorlds, chatState),
+        child: _buildBody(
+          context,
+          theme,
+          isDark,
+          residentId,
+          joinedWorlds,
+          chatState,
+        ),
       ),
     );
   }
@@ -173,17 +180,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           child: _mode == _ChatMode.worlds
               ? _buildWorldChats(joinedWorlds)
               : chatState.roomsLoadError != null
-                  ? _buildDmLoadError(theme, isDark, chatState.roomsLoadError!)
-                  : chatState.isLoadingRooms
-                      ? const ScreenLoading.list()
-                      : chatState.dmRooms.isEmpty
-                          ? _buildEmptyDmState()
-                          : _buildRoomList(
-                              theme,
-                              isDark,
-                              chatState.dmRooms,
-                              residentId,
-                            ),
+              ? _buildDmLoadError(theme, isDark, chatState.roomsLoadError!)
+              : chatState.isLoadingRooms
+              ? const ScreenLoading.list()
+              : chatState.dmRooms.isEmpty
+              ? _buildEmptyDmState()
+              : _buildRoomList(theme, isDark, chatState.dmRooms, residentId),
         ),
       ],
     );
@@ -206,15 +208,16 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     );
     final currentUserId = ref.read(residentProvider).resident?.id;
     final channelState = ref.watch(channelProvider);
-    final allChannels =
-        channelState.channelsByWorld[selectedWorld.id] ?? [];
+    final allChannels = channelState.channelsByWorld[selectedWorld.id] ?? [];
     final channelError = channelState.error;
     final channelLoading = channelState.isLoading;
 
-    final announcementChannels =
-        allChannels.where((c) => c.channelType == ChannelType.announcement).toList();
-    final chatChannels =
-        allChannels.where((c) => c.channelType != ChannelType.announcement).toList();
+    final announcementChannels = allChannels
+        .where((c) => c.channelType == ChannelType.announcement)
+        .toList();
+    final chatChannels = allChannels
+        .where((c) => c.channelType != ChannelType.announcement)
+        .toList();
 
     final world = ref.watch(worldProvider).worlds[selectedWorld.id];
     final residentCount = world?.memberCount ?? 0;
@@ -247,52 +250,53 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                 child: channelLoading
                     ? const ScreenLoading.list()
                     : channelError != null
-                        ? AppErrorState(
-                            message: 'Failed to load channels',
-                            onRetry: () => ref
-                                .read(channelProvider.notifier)
-                                .loadChannels(selectedWorld.id, force: true),
-                          )
-                        : allChannels.isEmpty
-                            ? _EmptyChannels(worldId: selectedWorld.id)
-                            : ListView(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: VSpacing.sm),
-                                children: [
-                                  if (announcementChannels.isNotEmpty) ...[
-                                    _ChannelGroupHeader(label: 'Foundation'),
-                                    ...announcementChannels.map((channel) {
-                                      final unreadCount = ref
-                                          .read(chatProvider.notifier)
-                                          .unreadCount(
-                                            channel.id,
-                                            currentUserId: currentUserId,
-                                          );
-                                      return _ChannelTile(
-                                        channel: channel,
-                                        world: selectedWorld,
-                                        unreadCount: unreadCount,
-                                      );
-                                    }),
-                                  ],
-                                  if (chatChannels.isNotEmpty) ...[
-                                    _ChannelGroupHeader(label: 'Chat'),
-                                    ...chatChannels.map((channel) {
-                                      final unreadCount = ref
-                                          .read(chatProvider.notifier)
-                                          .unreadCount(
-                                            channel.id,
-                                            currentUserId: currentUserId,
-                                          );
-                                      return _ChannelTile(
-                                        channel: channel,
-                                        world: selectedWorld,
-                                        unreadCount: unreadCount,
-                                      );
-                                    }),
-                                  ],
-                                ],
-                              ),
+                    ? AppErrorState(
+                        message: 'Failed to load channels',
+                        onRetry: () => ref
+                            .read(channelProvider.notifier)
+                            .loadChannels(selectedWorld.id, force: true),
+                      )
+                    : allChannels.isEmpty
+                    ? _EmptyChannels(worldId: selectedWorld.id)
+                    : ListView(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: VSpacing.sm,
+                        ),
+                        children: [
+                          if (announcementChannels.isNotEmpty) ...[
+                            _ChannelGroupHeader(label: 'Foundation'),
+                            ...announcementChannels.map((channel) {
+                              final unreadCount = ref
+                                  .read(chatProvider.notifier)
+                                  .unreadCount(
+                                    channel.id,
+                                    currentUserId: currentUserId,
+                                  );
+                              return _ChannelTile(
+                                channel: channel,
+                                world: selectedWorld,
+                                unreadCount: unreadCount,
+                              );
+                            }),
+                          ],
+                          if (chatChannels.isNotEmpty) ...[
+                            _ChannelGroupHeader(label: 'Chat'),
+                            ...chatChannels.map((channel) {
+                              final unreadCount = ref
+                                  .read(chatProvider.notifier)
+                                  .unreadCount(
+                                    channel.id,
+                                    currentUserId: currentUserId,
+                                  );
+                              return _ChannelTile(
+                                channel: channel,
+                                world: selectedWorld,
+                                unreadCount: unreadCount,
+                              );
+                            }),
+                          ],
+                        ],
+                      ),
               ),
             ],
           ),
@@ -479,8 +483,8 @@ class _ModeButton extends StatelessWidget {
               color: selected
                   ? VColors.primary
                   : (isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant),
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant),
             ),
             const SizedBox(width: VSpacing.xs),
             Text(
@@ -489,8 +493,8 @@ class _ModeButton extends StatelessWidget {
                 color: selected
                     ? VColors.primary
                     : (isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant),
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant),
                 fontWeight: selected
                     ? VFontWeight.semiBold
                     : VFontWeight.regular,
@@ -544,11 +548,7 @@ class _ChannelTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push(
-          worldChannelDestinationPath(
-            world.id,
-            channel,
-            worldName: world.name,
-          ),
+          worldChannelDestinationPath(world.id, channel, worldName: world.name),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -563,8 +563,8 @@ class _ChannelTile extends StatelessWidget {
                 color: unreadCount > 0
                     ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
                     : (isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant),
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant),
               ),
               const SizedBox(width: VSpacing.sm),
               Expanded(
@@ -580,13 +580,16 @@ class _ChannelTile extends StatelessWidget {
                             ? VFontWeight.semiBold
                             : VFontWeight.regular,
                         color: unreadCount > 0
-                            ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                            ? (isDark
+                                  ? VColors.onSurfaceDark
+                                  : VColors.onSurface)
                             : (isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant),
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant),
                       ),
                     ),
-                    if (channel.description != null && channel.description!.isNotEmpty)
+                    if (channel.description != null &&
+                        channel.description!.isNotEmpty)
                       Text(
                         channel.description!,
                         maxLines: 2,
@@ -602,7 +605,10 @@ class _ChannelTile extends StatelessWidget {
               ),
               if (unreadCount > 0)
                 Container(
-                  constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                  constraints: const BoxConstraints(
+                    minWidth: 20,
+                    minHeight: 20,
+                  ),
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   decoration: BoxDecoration(
                     color: VColors.primary,
@@ -646,9 +652,7 @@ class _WorldRail extends StatelessWidget {
       width: 88,
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceDark : VColors.surface,
-        border: Border(
-          right: BorderSide(color: theme.dividerColor),
-        ),
+        border: Border(right: BorderSide(color: theme.dividerColor)),
       ),
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
@@ -662,56 +666,58 @@ class _WorldRail extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 48),
                 child: Container(
-                width: 80,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: VSpacing.xs,
-                  vertical: VSpacing.xs,
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? VColors.primary.withValues(alpha: 0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  border: isSelected
-                      ? Border.all(
-                          color: VColors.primary.withValues(alpha: 0.4))
-                      : null,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    WorldIcon(
-                      worldId: world.assetKey,
-                      size: 36,
-                      useGlassContainer: false,
-                      tintColor: isSelected
-                          ? VColors.primary
-                          : (isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      world.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight:
-                            isSelected ? VFontWeight.semiBold : VFontWeight.regular,
-                        color: isSelected
+                  width: 80,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.xs,
+                    vertical: VSpacing.xs,
+                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? VColors.primary.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    border: isSelected
+                        ? Border.all(
+                            color: VColors.primary.withValues(alpha: 0.4),
+                          )
+                        : null,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      WorldIcon(
+                        worldId: world.assetKey,
+                        size: 36,
+                        useGlassContainer: false,
+                        tintColor: isSelected
                             ? VColors.primary
                             : (isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant),
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        world.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isSelected
+                              ? VFontWeight.semiBold
+                              : VFontWeight.regular,
+                          color: isSelected
+                              ? VColors.primary
+                              : (isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
           );
         }).toList(),
@@ -819,11 +825,7 @@ class _EmptyChannels extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.tag,
-            size: 48,
-            color: VColors.onSurfaceVariant,
-          ),
+          const Icon(Icons.tag, size: 48, color: VColors.onSurfaceVariant),
           const SizedBox(height: VSpacing.md),
           const Text(
             'No channels yet',
@@ -867,10 +869,7 @@ class _DmRoomTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push(
-          '/chat/${room['id']}',
-          extra: presence,
-        ),
+        onTap: () => context.push('/chat/${room['id']}', extra: presence),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.md,
@@ -880,10 +879,7 @@ class _DmRoomTile extends StatelessWidget {
             children: [
               Stack(
                 children: [
-                  CosmeticAvatar(
-                    imageUrl: otherAvatar,
-                    size: 48,
-                  ),
+                  CosmeticAvatar(imageUrl: otherAvatar, size: 48),
                   Positioned(
                     right: 0,
                     bottom: 0,
@@ -896,10 +892,7 @@ class _DmRoomTile extends StatelessWidget {
                           width: 2,
                         ),
                       ),
-                      child: StatusDot(
-                        presence: presence,
-                        size: 10,
-                      ),
+                      child: StatusDot(presence: presence, size: 10),
                     ),
                   ),
                 ],
@@ -919,8 +912,12 @@ class _DmRoomTile extends StatelessWidget {
                                   ? VFontWeight.semiBold
                                   : VFontWeight.regular,
                               color: unreadCount > 0
-                                  ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
-                                  : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
+                                  ? (isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface)
+                                  : (isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -947,10 +944,12 @@ class _DmRoomTile extends StatelessWidget {
                                 : 'No messages yet',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: unreadCount > 0
-                                  ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                                  ? (isDark
+                                        ? VColors.onSurfaceDark
+                                        : VColors.onSurface)
                                   : (isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant),
+                                        ? VColors.onSurfaceVariantDark
+                                        : VColors.onSurfaceVariant),
                               fontWeight: unreadCount > 0
                                   ? VFontWeight.semiBold
                                   : VFontWeight.regular,

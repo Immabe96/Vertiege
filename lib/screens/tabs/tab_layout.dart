@@ -65,9 +65,10 @@ class _TabLayoutState extends ConsumerState<TabLayout>
     _fabScale = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fabController, curve: Curves.easeOutBack),
     );
-    _fabRotation = Tween<double>(begin: 0.0, end: 0.25).animate(
-      CurvedAnimation(parent: _fabController, curve: Curves.easeOut),
-    );
+    _fabRotation = Tween<double>(
+      begin: 0.0,
+      end: 0.25,
+    ).animate(CurvedAnimation(parent: _fabController, curve: Curves.easeOut));
     _fabController.forward();
   }
 
@@ -86,8 +87,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
         .length;
     final index = widget.navigationShell.currentIndex;
     final overlayBlocksFab = ref.watch(tabShellOverlayProvider) > 0;
-    final fabConfig =
-        overlayBlocksFab ? null : _fabForTab(index, ref);
+    final fabConfig = overlayBlocksFab ? null : _fabForTab(index, ref);
 
     if (index != _previousIndex) {
       _previousIndex = index;
@@ -129,8 +129,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
                             ),
                             child: InkWell(
                               onTap: fabConfig.onPressed,
-                              borderRadius:
-                                  BorderRadius.circular(VRadius.lg),
+                              borderRadius: BorderRadius.circular(VRadius.lg),
                               child: SizedBox(
                                 width: 56,
                                 height: 56,
@@ -161,10 +160,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
                 if (i == index) {
                   ref.read(scrollToTopProvider.notifier).increment();
                 }
-                widget.navigationShell.goBranch(
-                  i,
-                  initialLocation: i == index,
-                );
+                widget.navigationShell.goBranch(i, initialLocation: i == index);
               },
             ),
           ),
@@ -264,7 +260,13 @@ class _MainBottomNav extends StatelessWidget {
   }
 
   Widget _navItem({
-    required ({IconData icon, IconData activeIcon, String label, String semanticsLabel}) dest,
+    required ({
+      IconData icon,
+      IconData activeIcon,
+      String label,
+      String semanticsLabel,
+    })
+    dest,
     required bool showBadge,
     required int badgeCount,
     required IconData outlined,

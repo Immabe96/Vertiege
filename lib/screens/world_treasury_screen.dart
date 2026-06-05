@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../config/world_capability_matrix.dart';
 import '../../models/treasury.dart';
 import '../../services/treasury_service.dart';
@@ -50,7 +50,9 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
     });
     try {
       final treasury = await TreasuryService.getTreasury(widget.worldId);
-      final transactions = await TreasuryService.getTransactions(widget.worldId);
+      final transactions = await TreasuryService.getTransactions(
+        widget.worldId,
+      );
       if (mounted) {
         setState(() {
           _treasury = treasury;
@@ -227,10 +229,11 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           NewUserContextHint(
-            message: donateBlock ??
+            message:
+                donateBlock ??
                 'Treasury unlocks at world prestige '
-                '${WorldCapabilityMatrix.minWorldPrestigeTreasury}. '
-                'Marketplace sales feed tax here.',
+                    '${WorldCapabilityMatrix.minWorldPrestigeTreasury}. '
+                    'Marketplace sales feed tax here.',
             icon: Icons.account_balance_outlined,
           ),
           Expanded(child: _buildBody(context)),
@@ -366,7 +369,8 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
           child: _transactions.isEmpty
               ? AppEmptyState(
                   title: 'No transactions yet',
-                  description: 'Donations, withdrawals, and rewards show up here.',
+                  description:
+                      'Donations, withdrawals, and rewards show up here.',
                   icon: Icons.receipt_long_outlined,
                   actionLabel: 'Donate',
                   onAction: _showDonateDialog,
@@ -418,7 +422,9 @@ class _StatCard extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+            color: isDark
+                ? VColors.onSurfaceVariantDark
+                : VColors.onSurfaceVariant,
           ),
         ),
       ],
@@ -448,7 +454,9 @@ class _TransactionTile extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _txColor(transaction.transactionType).withValues(alpha: 0.15),
+              color: _txColor(
+                transaction.transactionType,
+              ).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(VRadius.sm),
             ),
             child: Icon(
@@ -472,7 +480,9 @@ class _TransactionTile extends StatelessWidget {
                     transaction.description,
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

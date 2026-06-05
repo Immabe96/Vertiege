@@ -13,7 +13,7 @@ import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 import '../../theme/v_colors.dart';
@@ -138,9 +138,8 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
               ),
               child: SyncWarningBanner(
                 message: notifState.error!,
-                onRetry: () => ref
-                    .read(notificationProvider.notifier)
-                    .loadNotifications(),
+                onRetry: () =>
+                    ref.read(notificationProvider.notifier).loadNotifications(),
               ),
             ),
           Expanded(
@@ -152,18 +151,13 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
                     variant: EmptyStateVariant.default_,
                   )
                 : notifications.isEmpty
-                    ? Center(
-                        child: Text(
-                          notifState.error ?? 'No notifications',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      )
-                    : _buildNotificationList(
-                        context,
-                        notifications,
-                        ref,
-                        theme,
-                      ),
+                ? Center(
+                    child: Text(
+                      notifState.error ?? 'No notifications',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  )
+                : _buildNotificationList(context, notifications, ref, theme),
           ),
         ],
       ),
@@ -448,7 +442,11 @@ class _SwipeBackground extends StatelessWidget {
       ),
       alignment: alignment,
       padding: padding,
-      child: Icon(icon, color: isDark ? VColors.onSurfaceDark : VColors.onSurface, size: VIconSize.lg),
+      child: Icon(
+        icon,
+        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+        size: VIconSize.lg,
+      ),
     );
   }
 }
@@ -515,9 +513,7 @@ class _NotificationCard extends StatelessWidget {
                               height: 36,
                               decoration: BoxDecoration(
                                 color: typeColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  VRadius.md,
-                                ),
+                                borderRadius: BorderRadius.circular(VRadius.md),
                               ),
                               child: Icon(
                                 _iconForTypeStatic(n.type),
@@ -538,11 +534,11 @@ class _NotificationCard extends StatelessWidget {
                                       : VFontWeight.regular,
                                   color: unread
                                       ? (isDark
-                                          ? VColors.onSurfaceDark
-                                          : VColors.onSurface)
+                                            ? VColors.onSurfaceDark
+                                            : VColors.onSurface)
                                       : (isDark
-                                          ? VColors.onSurfaceVariantDark
-                                          : VColors.onSurfaceVariant),
+                                            ? VColors.onSurfaceVariantDark
+                                            : VColors.onSurfaceVariant),
                                   height: VLineHeight.body,
                                 ),
                               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/listing.dart';
 import '../../router/world_navigation.dart';
 import '../../services/chat_service.dart';
@@ -39,7 +39,8 @@ class WorldMarketplaceScreen extends ConsumerStatefulWidget {
       _WorldMarketplaceScreenState();
 }
 
-class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen> {
+class _WorldMarketplaceScreenState
+    extends ConsumerState<WorldMarketplaceScreen> {
   List<Listing> _listings = [];
   bool _loading = true;
   String? _error;
@@ -126,7 +127,8 @@ class _WorldMarketplaceScreenState extends ConsumerState<WorldMarketplaceScreen>
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
     final world = ref.watch(worldProvider).worlds[widget.worldId];
-    final canList = world != null &&
+    final canList =
+        world != null &&
         WorldCapabilityMatrix.canCreateListing(
           resident,
           world,
@@ -253,10 +255,7 @@ class _CategoryChips extends StatelessWidget {
   final ListingCategory? selected;
   final ValueChanged<ListingCategory?> onSelected;
 
-  const _CategoryChips({
-    required this.selected,
-    required this.onSelected,
-  });
+  const _CategoryChips({required this.selected, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -370,11 +369,8 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
     );
     if (!context.mounted || room == null) return;
 
-    final draft =
-        'Hi — I\'m interested in your listing "${listing.title}".';
-    context.push(
-      dmPath(room['id'] as String, draft: draft),
-    );
+    final draft = 'Hi — I\'m interested in your listing "${listing.title}".';
+    context.push(dmPath(room['id'] as String, draft: draft));
   }
 
   Future<void> _purchase() async {
@@ -422,7 +418,8 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
     final resident = ref.watch(residentProvider).resident;
     final world = ref.watch(worldProvider).worlds[widget.worldId];
     final isOwner = resident?.id == listing.sellerId;
-    final canBuy = widget.isMember &&
+    final canBuy =
+        widget.isMember &&
         !isOwner &&
         listing.status == ListingStatus.active &&
         listing.coinPrice != null &&
@@ -434,7 +431,9 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? VColors.surfaceContainerDark : VColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(VRadius.xl)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(VRadius.xl),
+        ),
       ),
       padding: const EdgeInsets.all(VSpacing.lg),
       child: SingleChildScrollView(

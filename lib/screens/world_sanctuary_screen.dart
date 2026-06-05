@@ -20,7 +20,8 @@ class WorldSanctuaryScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WorldSanctuaryScreen> createState() => _WorldSanctuaryScreenState();
+  ConsumerState<WorldSanctuaryScreen> createState() =>
+      _WorldSanctuaryScreenState();
 }
 
 class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
@@ -100,10 +101,15 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
                     ),
                   );
                 }),
-                VButton(label: 'Add Option', onPressed: () {
-                  options.add('');
-                  setDialogState(() {});
-                }, icon: const Icon(VIcons.plus), variant: ButtonVariant.text),
+                VButton(
+                  label: 'Add Option',
+                  onPressed: () {
+                    options.add('');
+                    setDialogState(() {});
+                  },
+                  icon: const Icon(VIcons.plus),
+                  variant: ButtonVariant.text,
+                ),
               ],
             ),
           ),
@@ -113,21 +119,26 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
               onPressed: () => Navigator.of(ctx).pop(),
               variant: ButtonVariant.text,
             ),
-            VButton(label: 'Create', onPressed: () async {
-              if (questionController.text.trim().isEmpty) return;
-              final validOptions = options.where((o) => o.trim().isNotEmpty).toList();
-              if (validOptions.length < 2) return;
+            VButton(
+              label: 'Create',
+              onPressed: () async {
+                if (questionController.text.trim().isEmpty) return;
+                final validOptions = options
+                    .where((o) => o.trim().isNotEmpty)
+                    .toList();
+                if (validOptions.length < 2) return;
 
-              await PollService.createPoll(
-                worldId: widget.worldId,
-                question: questionController.text.trim(),
-                options: validOptions,
-              );
-              if (context.mounted) {
-                Navigator.of(ctx).pop();
-                _loadPolls();
-              }
-            }),
+                await PollService.createPoll(
+                  worldId: widget.worldId,
+                  question: questionController.text.trim(),
+                  options: validOptions,
+                );
+                if (context.mounted) {
+                  Navigator.of(ctx).pop();
+                  _loadPolls();
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -148,7 +159,9 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
             margin: const EdgeInsets.only(bottom: VSpacing.sm),
             padding: const EdgeInsets.all(VSpacing.md),
             decoration: BoxDecoration(
-              color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainer,
               borderRadius: BorderRadius.circular(VRadius.lg),
             ),
             child: const Column(
@@ -193,7 +206,11 @@ class _WorldSanctuaryScreenState extends ConsumerState<WorldSanctuaryScreen> {
               ),
               const Spacer(),
               if (widget.isSovereignOrCouncil)
-                VButton(label: 'New Reflection', onPressed: _showCreatePollDialog, icon: const Icon(VIcons.plus)),
+                VButton(
+                  label: 'New Reflection',
+                  onPressed: _showCreatePollDialog,
+                  icon: const Icon(VIcons.plus),
+                ),
             ],
           ),
         ),
@@ -251,7 +268,9 @@ class _PollCardState extends State<_PollCard> {
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isActive ? Colors.transparent : VColors.outline.withValues(alpha: 0.3),
+          color: isActive
+              ? Colors.transparent
+              : VColors.outline.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -269,7 +288,10 @@ class _PollCardState extends State<_PollCard> {
               ),
               if (!isActive)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.xs,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: VColors.outline.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(VRadius.pill),
@@ -278,7 +300,9 @@ class _PollCardState extends State<_PollCard> {
                     widget.poll.isClosed ? 'Closed' : 'Expired',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -332,7 +356,9 @@ class _PollCardState extends State<_PollCard> {
                             child: Text(
                               e.value,
                               style: TextStyle(
-                                fontWeight: isSelected ? VFontWeight.semiBold : VFontWeight.regular,
+                                fontWeight: isSelected
+                                    ? VFontWeight.semiBold
+                                    : VFontWeight.regular,
                               ),
                             ),
                           ),
@@ -340,7 +366,9 @@ class _PollCardState extends State<_PollCard> {
                             '$pct%',
                             style: TextStyle(
                               fontSize: VFontSize.labelSm,
-                              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -356,16 +384,22 @@ class _PollCardState extends State<_PollCard> {
             '${widget.poll.totalVotes} vote${widget.poll.totalVotes == 1 ? '' : 's'}',
             style: TextStyle(
               fontSize: VFontSize.labelSm,
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           if (widget.isSovereignOrCouncil && isActive)
             Padding(
               padding: const EdgeInsets.only(top: VSpacing.sm),
-              child: VButton(label: 'Close Poll', onPressed: () async {
-                await PollService.closePoll(widget.poll.id);
-                widget.onClose();
-              }, variant: ButtonVariant.text),
+              child: VButton(
+                label: 'Close Poll',
+                onPressed: () async {
+                  await PollService.closePoll(widget.poll.id);
+                  widget.onClose();
+                },
+                variant: ButtonVariant.text,
+              ),
             ),
         ],
       ),

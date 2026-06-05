@@ -238,7 +238,8 @@ Same screen groupings as the old ladder, but **Forui remains the backing library
 - [x] `VPage` / `VTabShell` in `lib/ui/shell/`; `VHubPage` / `VTabPage` typedefs for compat.
 - [x] `ui.dart` exports shell; `shadcn_ui` removed; debug spike = Forui baseline only.
 - [x] Settings Appearance `Card` layout fix; design-system layout rules documented.
-- [ ] Migrate feature screens to `import 'package:vertiege/ui/ui.dart'` (incremental).
+- [x] Migrate `lib/screens/` to `import 'package:vertiege/ui/ui.dart'` (shell).
+- [ ] Migrate remaining `lib/widgets/` forui shell imports (incremental).
 - [ ] Tab roots grey-void UAT #2 pass.
 
 ### W2 — Auth & onboarding

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
 import '../state/quest_provider.dart';
@@ -38,9 +38,7 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
     final result = await ref.read(residentProvider.notifier).checkInToday();
     if (!mounted || result == null) return;
     if (result.shieldUsed) {
-      unawaited(
-        AnalyticsService.logEvent(AnalyticsEvents.streakShieldUsed),
-      );
+      unawaited(AnalyticsService.logEvent(AnalyticsEvents.streakShieldUsed));
       VFeedback.showMessage(
         context,
         'Streak shield used — your streak continues.',
@@ -62,98 +60,94 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
     final shields = resident?.streakShields ?? 0;
 
     final body = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (shields > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                VSpacing.md,
-                VSpacing.md,
-                VSpacing.md,
-                0,
-              ),
-              child: FCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(VSpacing.md),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.shield,
-                        color: VColors.primary,
-                        size: VIconSize.lg,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (shields > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.md,
+              0,
+            ),
+            child: FCard(
+              child: Padding(
+                padding: const EdgeInsets.all(VSpacing.md),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.shield,
+                      color: VColors.primary,
+                      size: VIconSize.lg,
+                    ),
+                    const SizedBox(width: VSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        shields == 1
+                            ? '1 streak shield — covers one missed day'
+                            : '$shields streak shields — each covers one missed day',
+                        style: theme.textTheme.bodySmall,
                       ),
-                      const SizedBox(width: VSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          shields == 1
-                              ? '1 streak shield — covers one missed day'
-                              : '$shields streak shields — each covers one missed day',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          Expanded(
-            child: quests.isEmpty
-                ? const AppEmptyState(
-                    title: 'Loading today\'s quests',
-                    description: 'If this stays empty, pull to refresh.',
-                    icon: Icons.flag_outlined,
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.all(VSpacing.md),
-                    itemCount: quests.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: VSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final q = quests[index];
-                      final progress =
-                          q.target > 0 ? q.progress / q.target : 0.0;
-                      return FCard(
-                        child: Padding(
-                          padding: const EdgeInsets.all(VSpacing.md),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                q.label,
-                                style: theme.textTheme.titleSmall,
-                              ),
-                              const SizedBox(height: VSpacing.xs),
-                              LinearProgressIndicator(
-                                value: progress.clamp(0.0, 1.0),
-                              ),
-                              const SizedBox(height: VSpacing.xs),
-                              Text(
-                                '${q.progress}/${q.target} · ${q.xpReward} XP',
-                                style: theme.textTheme.bodySmall,
-                              ),
-                              if (q.isComplete && !q.claimed)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: VSpacing.sm,
-                                  ),
-                                  child: FButton(
-                                    onPress: () async {
-                                      await ref
-                                          .read(questProvider.notifier)
-                                          .claimQuest(q.id);
-                                    },
-                                    child: const Text('Claim reward'),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
           ),
-        ],
-      );
+        Expanded(
+          child: quests.isEmpty
+              ? const AppEmptyState(
+                  title: 'Loading today\'s quests',
+                  description: 'If this stays empty, pull to refresh.',
+                  icon: Icons.flag_outlined,
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(VSpacing.md),
+                  itemCount: quests.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: VSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final q = quests[index];
+                    final progress = q.target > 0 ? q.progress / q.target : 0.0;
+                    return FCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(VSpacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(q.label, style: theme.textTheme.titleSmall),
+                            const SizedBox(height: VSpacing.xs),
+                            LinearProgressIndicator(
+                              value: progress.clamp(0.0, 1.0),
+                            ),
+                            const SizedBox(height: VSpacing.xs),
+                            Text(
+                              '${q.progress}/${q.target} · ${q.xpReward} XP',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            if (q.isComplete && !q.claimed)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: VSpacing.sm,
+                                ),
+                                child: FButton(
+                                  onPress: () async {
+                                    await ref
+                                        .read(questProvider.notifier)
+                                        .claimQuest(q.id);
+                                  },
+                                  child: const Text('Claim reward'),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
 
     if (widget.embedInHub) return body;
 

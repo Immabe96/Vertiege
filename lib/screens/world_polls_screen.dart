@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/poll.dart';
 import '../../services/poll_service.dart';
 import '../../theme/v_colors.dart';
@@ -40,7 +40,9 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     super.initState();
     _loadPolls();
     _loadCanCreate();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpenCreateFromRoute());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _maybeOpenCreateFromRoute(),
+    );
   }
 
   Future<void> _maybeOpenCreateFromRoute() async {
@@ -146,7 +148,9 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
               label: 'Create',
               onPressed: () async {
                 if (questionController.text.trim().isEmpty) return;
-                final validOptions = options.where((o) => o.trim().isNotEmpty).toList();
+                final validOptions = options
+                    .where((o) => o.trim().isNotEmpty)
+                    .toList();
                 if (validOptions.length < 2) return;
 
                 try {
@@ -295,7 +299,9 @@ class _PollCardState extends State<_PollCard> {
         color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isActive ? Colors.transparent : VColors.outline.withValues(alpha: 0.3),
+          color: isActive
+              ? Colors.transparent
+              : VColors.outline.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -313,7 +319,10 @@ class _PollCardState extends State<_PollCard> {
               ),
               if (!isActive)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.xs,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: VColors.outline.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(VRadius.pill),
@@ -322,7 +331,9 @@ class _PollCardState extends State<_PollCard> {
                     widget.poll.isClosed ? 'Closed' : 'Expired',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -376,7 +387,9 @@ class _PollCardState extends State<_PollCard> {
                             child: Text(
                               e.value,
                               style: TextStyle(
-                                fontWeight: isSelected ? VFontWeight.semiBold : VFontWeight.regular,
+                                fontWeight: isSelected
+                                    ? VFontWeight.semiBold
+                                    : VFontWeight.regular,
                               ),
                             ),
                           ),
@@ -384,7 +397,9 @@ class _PollCardState extends State<_PollCard> {
                             '$pct%',
                             style: TextStyle(
                               fontSize: VFontSize.labelSm,
-                              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -400,7 +415,9 @@ class _PollCardState extends State<_PollCard> {
             '${widget.poll.totalVotes} vote${widget.poll.totalVotes == 1 ? '' : 's'}',
             style: TextStyle(
               fontSize: VFontSize.labelSm,
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           if (widget.isSovereignOrCouncil && isActive)

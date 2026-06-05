@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,8 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       unawaited(_onOAuthResidentReady());
     });
     if (maybeSupabase() == null &&
-        SupabaseBootstrap.lastResult ==
-            SupabaseBootstrapResult.missingConfig) {
+        SupabaseBootstrap.lastResult == SupabaseBootstrapResult.missingConfig) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
@@ -201,7 +200,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!await _ensureSupabaseReady()) {
         if (!mounted) return;
         setState(() {
-          _errorMessage = _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+          _errorMessage =
+              _bootstrapMessage(SupabaseBootstrap.lastResult) ??
               'Cloud sign-in is unavailable.';
         });
         return;
@@ -238,7 +238,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!await _ensureSupabaseReady()) {
         if (!mounted) return;
         setState(() {
-          _errorMessage = _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+          _errorMessage =
+              _bootstrapMessage(SupabaseBootstrap.lastResult) ??
               'Cloud sign-in is unavailable.';
         });
         return;
@@ -293,7 +294,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(color: VColors.primary, width: 2),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
+                  ),
                 ),
                 isDense: true,
               ),
@@ -319,12 +323,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (client != null) {
           await client.auth.resetPasswordForEmail(emailController.text.trim());
           if (mounted) {
-            VFeedback.showMessage(context, 'Password reset link sent. Check your email.');
+            VFeedback.showMessage(
+              context,
+              'Password reset link sent. Check your email.',
+            );
           }
         }
       } catch (e) {
         if (mounted) {
-          VFeedback.showMessage(context, 'Failed to send reset link. Please try again.');
+          VFeedback.showMessage(
+            context,
+            'Failed to send reset link. Please try again.',
+          );
         }
       }
     }
@@ -468,7 +478,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const Text("Don't have an account? "),
                       TextButton(
-                        onPressed: _isLoading ? null : () => context.go('/signup'),
+                        onPressed: _isLoading
+                            ? null
+                            : () => context.go('/signup'),
                         child: const Text('Sign Up'),
                       ),
                     ],

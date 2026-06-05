@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../router/world_navigation.dart';
 import '../services/governance_service.dart';
 import '../theme/v_tokens.dart';
@@ -48,8 +48,9 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       _loadError = null;
     });
     try {
-      final enriched =
-          await GovernanceService.listPendingEnriched(widget.worldId);
+      final enriched = await GovernanceService.listPendingEnriched(
+        widget.worldId,
+      );
       if (!mounted) return;
       setState(() {
         _proposals = enriched.proposals;
@@ -102,7 +103,9 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       case 'rank_change':
         final target = _name(p.payload['resident_id'] as String?);
         final rankId = p.payload['rank_id'] as String?;
-        final rankLabel = rankId != null ? (_rankNames[rankId] ?? 'rank') : 'rank';
+        final rankLabel = rankId != null
+            ? (_rankNames[rankId] ?? 'rank')
+            : 'rank';
         final verb = p.payload['action'] == 'remove' ? 'Remove' : 'Assign';
         return '$verb $rankLabel · $target · $from';
       default:
@@ -121,10 +124,7 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       return;
     }
     if (approve) Haptics.medium();
-    VFeedback.showMessage(
-      context,
-      approve ? 'Approved.' : 'Rejected.',
-    );
+    VFeedback.showMessage(context, approve ? 'Approved.' : 'Rejected.');
     await _load();
   }
 
@@ -134,96 +134,93 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       title: 'Council queue',
       showBack: true,
       headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
-          onPress: _load,
-        ),
+        FHeaderAction(icon: const Icon(FIcons.rotateCw), onPress: _load),
       ],
       body: _loadError != null
           ? AppErrorState(message: _loadError!, onRetry: _load)
           : _loading
           ? const ScreenLoading.list()
           : _proposals.isEmpty
-              ? const AppEmptyState(
-                  title: 'Queue is clear',
-                  description:
-                      'Withdrawals, role posts, and rank changes appear here when members request them.',
-                  icon: Icons.gavel_outlined,
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(VSpacing.md),
-                  itemCount: _proposals.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == _proposals.length) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: VSpacing.md),
-                        child: VButton(
-                          label: 'View realm audit',
-                          variant: ButtonVariant.text,
-                          onPressed: () => context.push(
-                            auditLogPath(
-                              widget.worldId,
-                              worldName: widget.worldName ?? 'World',
-                            ),
-                          ),
+          ? const AppEmptyState(
+              title: 'Queue is clear',
+              description:
+                  'Withdrawals, role posts, and rank changes appear here when members request them.',
+              icon: Icons.gavel_outlined,
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(VSpacing.md),
+              itemCount: _proposals.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _proposals.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: VSpacing.md),
+                    child: VButton(
+                      label: 'View realm audit',
+                      variant: ButtonVariant.text,
+                      onPressed: () => context.push(
+                        auditLogPath(
+                          widget.worldId,
+                          worldName: widget.worldName ?? 'World',
                         ),
-                      );
-                    }
-                    final p = _proposals[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: VSpacing.sm),
-                      clipBehavior: Clip.antiAlias,
-                      child: ExpansionTile(
-                        tilePadding: const EdgeInsets.symmetric(
-                          horizontal: VSpacing.md,
-                        ),
-                        title: Text(
-                          _proposalTitle(p),
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          _proposalSubtitle(p),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              VSpacing.md,
-                              0,
-                              VSpacing.md,
-                              VSpacing.md,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 48,
-                                    child: VButton(
-                                      label: 'Reject',
-                                      variant: ButtonVariant.outlined,
-                                      onPressed: () => _review(p, false),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: VSpacing.sm),
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 48,
-                                    child: VButton(
-                                      label: 'Approve',
-                                      onPressed: () => _review(p, true),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }
+                final p = _proposals[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: VSpacing.sm),
+                  clipBehavior: Clip.antiAlias,
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: VSpacing.md,
+                    ),
+                    title: Text(
+                      _proposalTitle(p),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      _proposalSubtitle(p),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          VSpacing.md,
+                          0,
+                          VSpacing.md,
+                          VSpacing.md,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 48,
+                                child: VButton(
+                                  label: 'Reject',
+                                  variant: ButtonVariant.outlined,
+                                  onPressed: () => _review(p, false),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: VSpacing.sm),
+                            Expanded(
+                              child: SizedBox(
+                                height: 48,
+                                child: VButton(
+                                  label: 'Approve',
+                                  onPressed: () => _review(p, true),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }

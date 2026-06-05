@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../config/achievements.dart' as config;
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../state/achievement_provider.dart';
@@ -41,13 +41,15 @@ class AchievementsIndexScreen extends ConsumerWidget {
     final currentTier = config.getTierForXp(totalXp);
     final nextTierInfo = _computeNextTier(totalXp, currentTier);
 
-    final recentVerified = state.userAchievements
-        .where((a) => a.status == AchievementStatus.verified)
-        .toList()
-      ..sort(
-        (a, b) => (b.verifiedAt ?? b.submittedAt ?? 0)
-            .compareTo(a.verifiedAt ?? a.submittedAt ?? 0),
-      );
+    final recentVerified =
+        state.userAchievements
+            .where((a) => a.status == AchievementStatus.verified)
+            .toList()
+          ..sort(
+            (a, b) => (b.verifiedAt ?? b.submittedAt ?? 0).compareTo(
+              a.verifiedAt ?? a.submittedAt ?? 0,
+            ),
+          );
 
     final categoryEntries = achievementCategoryMeta.entries
         .where((e) => e.key != AchievementCategory.inApp)
@@ -94,10 +96,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
             ],
             if (nextTierInfo != null) ...[
               const SizedBox(height: VSpacing.md),
-              _NextTierProgress(
-                info: nextTierInfo,
-                currentTier: currentTier,
-              ),
+              _NextTierProgress(info: nextTierInfo, currentTier: currentTier),
             ],
             if (recentVerified.isNotEmpty) ...[
               const SizedBox(height: VSpacing.lg),
@@ -113,7 +112,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: recentVerified.take(8).length,
-                  separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: VSpacing.sm),
                   itemBuilder: (context, index) {
                     final ua = recentVerified[index];
                     final ach = config.achievements
@@ -134,7 +134,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
                     category: entry.key,
                     meta: entry.value,
                     progress: notifier.getCategoryProgress(entry.key.name),
-                    onTap: () => context.push('/achievements/${entry.key.name}'),
+                    onTap: () =>
+                        context.push('/achievements/${entry.key.name}'),
                   ),
               ],
             ),
@@ -340,7 +341,9 @@ class _NextTierProgress extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: info.progress,
                 minHeight: 8,
-                valueColor: const AlwaysStoppedAnimation<Color>(VColors.warning),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  VColors.warning,
+                ),
                 backgroundColor: isDark
                     ? VColors.surfaceContainerHighDark
                     : VColors.surfaceContainerHigh,
@@ -386,12 +389,14 @@ class _CategoryTile extends FTile {
            categoryName: category.name,
            icon: meta.icon,
            color: meta.color,
-           accentRing: category == AchievementCategory.funny ||
+           accentRing:
+               category == AchievementCategory.funny ||
                category == AchievementCategory.creative,
          ),
          title: Text(
            meta.label,
-           style: category == AchievementCategory.funny ||
+           style:
+               category == AchievementCategory.funny ||
                    category == AchievementCategory.creative
                ? const TextStyle(color: VColors.tertiary)
                : null,
@@ -525,9 +530,7 @@ class _RecentVerifiedChip extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontSize: VFontSize.labelSm,
-                  color: isDark
-                      ? VColors.onSurfaceDark
-                      : VColors.onSurface,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                 ),
               ),
             ],
