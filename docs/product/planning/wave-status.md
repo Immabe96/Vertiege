@@ -288,12 +288,13 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 | Legacy docs consolidated | Done — [consolidated-legacy-plans.md](../../archive/consolidated-legacy-plans.md) |
 | Migration plan + widget mapping | **In progress** — polish on docs branch |
 | `check_no_forui_in_lib.sh` | Done (report mode); CI enforce after Wave A |
-| Wave 0 spike (`feature/ui-wave-0-spike`) | **Code done** — `/debug/ui-spike`; device scorecard pending |
-| Wave A–F (Forui removal) | **Not started** — blocked until Wave 0 scored + merged |
+| Wave 0 spike | **Done** — Forui baseline chosen on emulator |
+| Wave 0 decision | **Plan B: `forui-0.21`** — wrapper consolidation, no Forui removal |
+| Wrapper waves W1–W6 | **Not started** — shell rename + import hygiene (see migration plan) |
 
 **Policy:** No UI package changes on `develop` until Wave 0 passes. Product waves (23+) and bug fixes on `develop` continue separately when explicitly requested.
 
-**Baseline (2026-05-30):** 65 `lib/` files import Forui; target is `V*` wrappers in `lib/ui/` with zero Forui imports after Wave F.
+**Baseline (2026-06-05):** 66 `lib/` files import Forui; target is `V*` wrappers in `lib/ui/` with **Forui kept** as backing library (not removed from `pubspec`).
 
 ---
 
