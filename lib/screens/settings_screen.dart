@@ -1124,8 +1124,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   VSectionTile(
                     icon: Icons.science_outlined,
-                    label: 'UI Wave 0 spike',
-                    detail: 'Forui / shadcn_ui / Material 3',
+                    label: 'UI reference (Forui)',
+                    detail: 'Debug wrapper smoke',
                     onTap: () => context.push('/debug/ui-spike'),
                   ),
                 ],

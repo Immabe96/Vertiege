@@ -1,125 +1,97 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import '../../forui/v_hub_page.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../ui/shell/v_page.dart';
 import '../../widgets/core/v_dialog.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/v_section_list.dart';
-import '../spike_backend.dart';
-import '../spike_settings_model.dart';
 
-/// Forui 0.21 baseline — current production wrappers.
-class BaselineSpikePage extends StatelessWidget {
-  final SpikeSettingsModel model;
-  final ValueChanged<SpikeBackend> onBackendChanged;
-  final SpikeBackend backend;
+/// Forui 0.21 baseline — production wrapper reference (Wave 0 chosen).
+class BaselineSpikePage extends StatefulWidget {
+  const BaselineSpikePage({super.key});
 
-  const BaselineSpikePage({
-    super.key,
-    required this.model,
-    required this.onBackendChanged,
-    required this.backend,
-  });
+  @override
+  State<BaselineSpikePage> createState() => _BaselineSpikePageState();
+}
+
+class _BaselineSpikePageState extends State<BaselineSpikePage> {
+  bool _notifications = true;
+  bool _haptics = false;
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: model,
-      builder: (context, _) {
-        return VHubPage(
-          title: 'UI Spike',
-          showBack: true,
-          body: ListView(
-            padding: const EdgeInsets.all(VSpacing.md),
+    return VPage(
+      title: 'UI reference',
+      showBack: true,
+      body: ListView(
+        padding: const EdgeInsets.all(VSpacing.md),
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          VSectionList(
+            title: 'About',
             children: [
-              _backendPicker(context),
-              const SizedBox(height: VSpacing.md),
-              VSectionList(
-                title: 'About',
-                children: [
-                  FTile(
-                    title: const Text('Wave 0 baseline'),
-                    details: const Text('Forui 0.21 + VHubPage / VSectionList'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: VSpacing.md),
-              VSectionList(
-                title: 'Account',
-                children: [
-                  VSectionTile(
-                    icon: Icons.person_outline,
-                    label: 'Profile preview',
-                    detail: 'Opens confirm dialog',
-                    onTap: () => _showDialog(context),
-                  ),
-                  VSectionTile(
-                    icon: Icons.palette_outlined,
-                    label: 'Appearance sheet',
-                    onTap: () => _showSheet(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: VSpacing.md),
-              VSectionList(
-                title: 'Preferences',
-                children: [
-                  VSectionSwitchTile(
-                    icon: Icons.notifications_outlined,
-                    label: 'Notifications',
-                    value: model.notificationsEnabled,
-                    onChanged: model.setNotifications,
-                  ),
-                  VSectionSwitchTile(
-                    icon: Icons.vibration,
-                    label: 'Haptics',
-                    value: model.hapticsEnabled,
-                    onChanged: model.setHaptics,
-                  ),
-                ],
-              ),
-              const SizedBox(height: VSpacing.md),
-              VButton(
-                label: 'Show toast',
-                isFullWidth: true,
-                onPressed: () => VFeedback.showMessage(
-                  context,
-                  'Baseline toast via VFeedback',
-                ),
+              FTile(
+                title: const Text('Forui 0.21 baseline'),
+                details: const Text('VPage + VSectionList + showVDialog'),
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  Widget _backendPicker(BuildContext context) {
-    return VSectionList(
-      title: 'Backend',
-      children: [
-        for (final candidate in SpikeBackend.values)
-          VSectionTile(
-            icon: Icons.layers_outlined,
-            label: candidate.label,
-            trailing: backend == candidate
-                ? Icon(Icons.check, color: context.theme.colors.primary)
-                : null,
-            onTap: () => onBackendChanged(candidate),
+          const SizedBox(height: VSpacing.md),
+          VSectionList(
+            title: 'Account',
+            children: [
+              VSectionTile(
+                icon: Icons.person_outline,
+                label: 'Profile preview',
+                detail: 'Opens confirm dialog',
+                onTap: _showDialog,
+              ),
+              VSectionTile(
+                icon: Icons.palette_outlined,
+                label: 'Appearance sheet',
+                onTap: _showSheet,
+              ),
+            ],
           ),
-      ],
+          const SizedBox(height: VSpacing.md),
+          VSectionList(
+            title: 'Preferences',
+            children: [
+              VSectionSwitchTile(
+                icon: Icons.notifications_outlined,
+                label: 'Notifications',
+                value: _notifications,
+                onChanged: (v) => setState(() => _notifications = v),
+              ),
+              VSectionSwitchTile(
+                icon: Icons.vibration,
+                label: 'Haptics',
+                value: _haptics,
+                onChanged: (v) => setState(() => _haptics = v),
+              ),
+            ],
+          ),
+          const SizedBox(height: VSpacing.md),
+          VButton(
+            label: 'Show toast',
+            isFullWidth: true,
+            onPressed: () => VFeedback.showMessage(
+              context,
+              'Forui baseline toast via VFeedback',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Future<void> _showDialog(BuildContext context) {
+  Future<void> _showDialog() {
     return showVDialog<void>(
       context: context,
-      title: 'Spike dialog',
-      content: const Text(
-        'Baseline uses showVDialog → FDialog.raw with Vertiege padding.',
-      ),
+      title: 'Reference dialog',
+      content: const Text('showVDialog → FDialog.raw'),
       actions: [
         vDialogActionsRow([
           VButton(
@@ -132,7 +104,7 @@ class BaselineSpikePage extends StatelessWidget {
     );
   }
 
-  Future<void> _showSheet(BuildContext context) {
+  Future<void> _showSheet() {
     return showFSheet(
       context: context,
       side: FLayout.btt,
@@ -142,9 +114,9 @@ class BaselineSpikePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Appearance', style: Theme.of(context).textTheme.titleMedium),
+            Text('Sheet', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: VSpacing.sm),
-            const Text('Baseline bottom sheet via FSheet.'),
+            const Text('Bottom sheet via FSheet.'),
             const SizedBox(height: VSpacing.md),
             VButton(
               label: 'Done',

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -64,7 +64,9 @@ class VInput extends StatelessWidget {
             label!,
             style: theme.textTheme.labelMedium?.copyWith(
               fontWeight: VFontWeight.medium,
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),

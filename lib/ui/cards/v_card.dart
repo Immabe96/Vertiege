@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -33,13 +33,13 @@ class VCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final defaultBg = backgroundColor ?? (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow);
+    final defaultBg =
+        backgroundColor ??
+        (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow);
 
     final defaultBorder = isGlass
         ? Border.all(
-            color: isDark
-                ? VColors.outlineVariantDark
-                : VColors.outlineVariant,
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
           )
         : Border.all(
             color: isDark
@@ -82,10 +82,7 @@ class VCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (leading != null) ...[
-          leading!,
-          const SizedBox(width: VSpacing.md),
-        ],
+        if (leading != null) ...[leading!, const SizedBox(width: VSpacing.md)],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
