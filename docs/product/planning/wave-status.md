@@ -279,6 +279,30 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## UI migration track (parallel, `develop` frozen)
+
+**Plan:** [shadcn-migration-plan.md](shadcn-migration-plan.md) on branch `docs/shadcn-migration-plan`.
+
+| Gate | Status |
+|------|--------|
+| Legacy docs consolidated | Done — [consolidated-legacy-plans.md](../../archive/consolidated-legacy-plans.md) |
+| Migration plan + widget mapping | **In progress** — polish on docs branch |
+| `check_no_forui_in_lib.sh` | Done (report mode); CI enforce after Wave A |
+| Wave 0 spike | **Done** — Forui baseline chosen on emulator |
+| Wave 0 decision | **Plan B: `forui-0.21`** — wrapper consolidation, no Forui removal |
+| W1 shell + lists + dialogs | **Done** — `VPage`/`VTabShell`, `VSectionList`, `showVDialog`; screens → `ui.dart` |
+| W2 auth & onboarding | **Done** — overlay/feedback facades; auth + onboarding `VButton`; `VGateCta` for Gate ritual |
+| W3 world system | **Done** — all world screens + dossier widgets off direct forui |
+| W4 progression & identity | **Done** — progress hub, achievements, league, identity tab |
+| W5 commerce & social | **Done** — shop, subscription, chat/thread/Campfire, search, tab bar |
+| W6 hygiene | **Done** — all `lib/screens/` off direct forui; design-system doc updated |
+
+**Policy:** No UI package changes on `develop` until Wave 0 passes. Product waves (23+) and bug fixes on `develop` continue separately when explicitly requested.
+
+**Baseline (2026-06-05):** 66 `lib/` files import Forui; target is `V*` wrappers in `lib/ui/` with **Forui kept** as backing library (not removed from `pubspec`).
+
+---
+
 ## Follow-ups (product / infra)
 
 1. **Store receipt validation** — Edge function deployed (stub → RPC); live Apple/Google verify in **Wave 19**. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).

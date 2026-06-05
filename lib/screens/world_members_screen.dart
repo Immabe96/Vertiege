@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../config/tiers.dart';
@@ -10,7 +9,7 @@ import '../services/rank_service.dart';
 import '../services/world_service.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../utils/tier_utils.dart';
 import '../services/crash_reporter.dart';
@@ -100,7 +99,8 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     final filtered = _filtered;
     final currentResident = ref.watch(residentProvider).resident;
     final currentResidentId = currentResident?.id;
-    final canManageRanks = currentResidentId == widget.sovereignId ||
+    final canManageRanks =
+        currentResidentId == widget.sovereignId ||
         (currentResident != null &&
             WorldPermissions.canModerate(
               currentResident,
@@ -112,7 +112,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
       title: 'Members',
       showBack: true,
       headerActions: [
-        FHeaderAction(
+        VHeaderAction(
           icon: const Icon(VIcons.search),
           onPress: () => _showSearch(context),
         ),
@@ -159,7 +159,8 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                         padding: const EdgeInsets.all(VSpacing.md),
                         borderRadius: BorderRadius.circular(VRadius.xl),
                         child: InkWell(
-                          onTap: () => context.push(residentProfilePath(residentId)),
+                          onTap: () =>
+                              context.push(residentProfilePath(residentId)),
                           borderRadius: BorderRadius.circular(VRadius.xl),
                           child: Row(
                             children: [
@@ -461,10 +462,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
             },
             variant: ButtonVariant.text,
           ),
-          VButton(
-            label: 'Done',
-            onPressed: () => Navigator.pop(ctx),
-          ),
+          VButton(label: 'Done', onPressed: () => Navigator.pop(ctx)),
         ],
       ),
     );
@@ -505,9 +503,7 @@ class _MoreRanksChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.glassBackgroundDark
-            : VColors.glassBackground,
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
         borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(
           color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
@@ -515,10 +511,10 @@ class _MoreRanksChip extends StatelessWidget {
       ),
       child: Text(
         '+$count',
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(
-          color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: isDark
+              ? VColors.onSurfaceVariantDark
+              : VColors.onSurfaceVariant,
         ),
       ),
     );
@@ -562,7 +558,9 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,

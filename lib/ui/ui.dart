@@ -1,12 +1,33 @@
+export 'icons/v_icons.dart';
 export 'buttons/v_button.dart';
+export 'buttons/v_gate_cta.dart';
+export 'buttons/v_icon_button.dart';
 export 'cards/v_card.dart';
+export 'cards/v_surface_card.dart';
 export 'inputs/v_input.dart';
+export 'inputs/v_select.dart';
+export 'inputs/v_text_form_field.dart';
+export 'inputs/v_switch.dart';
+export 'navigation/v_tabs.dart';
+export 'navigation/v_bottom_nav.dart';
 export 'feedback/v_states.dart';
 export 'feedback/v_badge.dart';
 export 'media/v_avatar.dart';
 export 'media/v_image.dart';
 export 'feedback/v_world_badge.dart';
 export 'feedback/v_sync_badge.dart';
-// Forui (shadcn-style): see lib/forui/README.md and package widgets under forui-0.21.3/lib/widgets/.
-// Prefer FScaffold, FHeader, FTileGroup, FTile, FCard, FButton over raw Material on new UI.
-export '../forui/v_hub_page.dart';
+// Shell + Forui-backed primitives — see lib/forui/README.md.
+export 'shell/v_page.dart';
+export 'shell/v_tab_shell.dart';
+export 'shell/v_header_action.dart';
+export 'shell/v_scaffold.dart';
+export 'shell/v_nested_header.dart';
+export 'shell/v_header.dart';
+export 'lists/v_section_list.dart';
+export 'lists/v_tile.dart';
+export 'lists/v_achievement_category_tile.dart';
+export 'lists/v_perk_tile.dart';
+export 'overlays/v_dialog.dart';
+export 'overlays/v_sheet.dart';
+export 'feedback/v_feedback.dart';
+export 'feedback/v_alert.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../theme/v_tokens.dart';
 
@@ -19,7 +19,7 @@ class DossierCollapsibleSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return FCard.raw(
+    return VSurfaceCard(
       child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(

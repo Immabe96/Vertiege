@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../config/world_capability_matrix.dart';
 import '../models/channel.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../router/world_navigation.dart';
 import '../services/feature_flags.dart';
 import '../services/world_channel_access_service.dart';
@@ -13,7 +13,6 @@ import '../state/world_provider.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/quiet_gate_tile.dart';
-import '../widgets/v_section_list.dart';
 import '../services/permission_service.dart';
 
 /// Manage / Participate hub (Wave 10) with visible gate reasons.
@@ -65,7 +64,8 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
     final features = ref.read(worldProvider.notifier).featuresForWorld(worldId);
     final channels = ref.watch(channelProvider).channelsByWorld[worldId] ?? [];
     final isJoined = resident?.joinedWorldIds.contains(worldId) ?? false;
-    final isCouncil = resident != null &&
+    final isCouncil =
+        resident != null &&
         WorldPermissions.canManageSettings(
           resident,
           worldId,
@@ -166,21 +166,22 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                   gate: (lounge == null && campfire == null)
                       ? 'No social channels in this world yet.'
                       : (loungeGate != null && campfireGate != null)
-                          ? loungeGate ?? campfireGate
-                          : null,
+                      ? loungeGate ?? campfireGate
+                      : null,
                   onOpen: (lounge != null || campfire != null)
                       ? () => _openLoungeCampfirePicker(
-                            context,
-                            worldId: worldId,
-                            worldName: world.name,
-                            lounge: lounge,
-                            campfire: campfire,
-                            loungeGate: loungeGate,
-                            campfireGate: campfireGate ??
-                                (features.audioRooms
-                                    ? null
-                                    : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
-                          )
+                          context,
+                          worldId: worldId,
+                          worldName: world.name,
+                          lounge: lounge,
+                          campfire: campfire,
+                          loungeGate: loungeGate,
+                          campfireGate:
+                              campfireGate ??
+                              (features.audioRooms
+                                  ? null
+                                  : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
+                        )
                       : null,
                 ),
                 if (FeatureFlags.polls)
@@ -189,8 +190,8 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                     label: 'Polls',
                     onTap: isJoined
                         ? () => context.push(
-                              worldPollsPath(worldId, admin: isCouncil),
-                            )
+                            worldPollsPath(worldId, admin: isCouncil),
+                          )
                         : null,
                     enabled: isJoined,
                   ),
@@ -199,8 +200,8 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                   label: 'Role board',
                   onTap: isJoined
                       ? () => context.push(
-                            worldJobsPath(worldId, admin: isCouncil),
-                          )
+                          worldJobsPath(worldId, admin: isCouncil),
+                        )
                       : null,
                   enabled: isJoined,
                 ),
@@ -226,8 +227,8 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                   gate: treasuryGate,
                   onOpen: treasuryGate == null
                       ? () => context.push(
-                            worldTreasuryPath(worldId, admin: isCouncil),
-                          )
+                          worldTreasuryPath(worldId, admin: isCouncil),
+                        )
                       : null,
                 ),
                 QuietGateTile.section(
@@ -236,8 +237,8 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                   gate: marketplaceGate,
                   onOpen: marketplaceGate == null
                       ? () => context.push(
-                            worldMarketplacePath(worldId, member: isJoined),
-                          )
+                          worldMarketplacePath(worldId, member: isJoined),
+                        )
                       : null,
                 ),
               ],
@@ -318,9 +319,7 @@ void _openLoungeCampfirePicker(
             ListTile(
               leading: const Icon(Icons.local_fire_department),
               title: const Text('Campfire (voice)'),
-              subtitle: Text(
-                campfireGate ?? 'Live voice room for this world',
-              ),
+              subtitle: Text(campfireGate ?? 'Live voice room for this world'),
               enabled: campfireGate == null,
               onTap: campfireGate == null
                   ? () {

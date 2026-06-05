@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -26,10 +26,7 @@ class VAvatar extends StatelessWidget {
     Widget avatar = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: fallbackColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: fallbackColor, shape: BoxShape.circle),
       child: Center(
         child: Text(
           _initials(fallbackSeed),
@@ -58,10 +55,7 @@ class VAvatar extends StatelessWidget {
     }
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: avatar,
-      );
+      return GestureDetector(onTap: onTap, child: avatar);
     }
 
     return avatar;

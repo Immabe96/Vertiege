@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
 import 'the_gate_screen.dart';
-import '../../widgets/core/v_feedback.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/world_service.dart';
 
@@ -110,13 +110,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         .key;
 
     // Get user ID from Supabase auth directly (resident may not exist yet for new users)
-    final userId = ref.read(residentProvider).resident?.id ??
+    final userId =
+        ref.read(residentProvider).resident?.id ??
         maybeSupabase()?.auth.currentUser?.id ??
         '';
     if (userId.isEmpty) {
       setState(() => _gateSubmitting = false);
       if (mounted) {
-        VFeedback.showMessage(context, 'Session expired. Please sign in again.');
+        VFeedback.showMessage(
+          context,
+          'Session expired. Please sign in again.',
+        );
       }
       return;
     }
@@ -125,9 +129,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final worldState = ref.read(worldProvider);
     if (worldState.worlds.isEmpty && worldState.isLoading) {
       try {
-        await ref.read(worldProvider.notifier).loadWorlds().timeout(
-              const Duration(seconds: 10),
-            );
+        await ref
+            .read(worldProvider.notifier)
+            .loadWorlds()
+            .timeout(const Duration(seconds: 10));
       } catch (_) {
         // Continue with whatever worlds are available
       }
@@ -145,13 +150,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // If no default worlds found in remote config, fall back to config defaults
     if (starterWorlds.isEmpty) {
       starterWorlds.addAll(
-        worldsConfig.values
-            .where((w) => w.isDefault)
-            .map((w) => w.id),
+        worldsConfig.values.where((w) => w.isDefault).map((w) => w.id),
       );
     }
 
-    ref.read(residentProvider.notifier).setResident(
+    ref
+        .read(residentProvider.notifier)
+        .setResident(
           Resident(
             id: userId,
             name: _nameController.text.trim(),
@@ -202,9 +207,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: _prevStep,
-                      color: isDark
-                          ? VColors.onSurfaceDark
-                          : VColors.onSurface,
+                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
@@ -215,8 +218,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           _currentStep == 0
                               ? 'Create your identity'
                               : _currentStep == 1
-                                  ? 'Find your path'
-                                  : 'Welcome in',
+                              ? 'Find your path'
+                              : 'Welcome in',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: VFontWeight.bold,
                           ),
@@ -284,8 +287,8 @@ class _ProgressDots extends StatelessWidget {
               color: isActive
                   ? (isDark ? VColors.primaryLight : VColors.primary)
                   : (isDark
-                      ? VColors.surfaceContainerHighDark
-                      : VColors.surfaceContainerHigh),
+                        ? VColors.surfaceContainerHighDark
+                        : VColors.surfaceContainerHigh),
               borderRadius: BorderRadius.circular(VRadius.xxs),
             ),
           ),
@@ -339,10 +342,7 @@ class _ProfileTab extends StatelessWidget {
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: VColors.tertiary,
-                        width: 3,
-                      ),
+                      border: Border.all(color: VColors.tertiary, width: 3),
                       boxShadow: [
                         BoxShadow(
                           color: VColors.tertiary.withValues(alpha: 0.25),
@@ -358,8 +358,8 @@ class _ProfileTab extends StatelessWidget {
                           : null,
                       color: avatarFile == null
                           ? (isDark
-                              ? VColors.surfaceContainerDark
-                              : VColors.surfaceContainer)
+                                ? VColors.surfaceContainerDark
+                                : VColors.surfaceContainer)
                           : null,
                     ),
                     child: avatarFile == null
@@ -471,9 +471,7 @@ class _ProfileTab extends StatelessWidget {
                 labelStyle: TextStyle(
                   color: selected
                       ? (isDark ? VColors.primaryLight : VColors.primary)
-                      : (isDark
-                          ? VColors.onSurfaceDark
-                          : VColors.onSurface),
+                      : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
                   fontWeight: selected ? VFontWeight.semiBold : null,
                 ),
                 backgroundColor: isDark
@@ -482,11 +480,11 @@ class _ProfileTab extends StatelessWidget {
                 side: BorderSide(
                   color: selected
                       ? (isDark
-                          ? VColors.primaryLight.withValues(alpha: 0.4)
-                          : VColors.primary.withValues(alpha: 0.4))
+                            ? VColors.primaryLight.withValues(alpha: 0.4)
+                            : VColors.primary.withValues(alpha: 0.4))
                       : (isDark
-                          ? VColors.outlineVariantDark
-                          : VColors.outlineVariant),
+                            ? VColors.outlineVariantDark
+                            : VColors.outlineVariant),
                 ),
               );
             }).toList(),
@@ -494,9 +492,10 @@ class _ProfileTab extends StatelessWidget {
           const SizedBox(height: VSpacing.xxl),
 
           // Next button
-          FilledButton(
+          VButton(
+            label: 'Continue to The Gate',
+            isFullWidth: true,
             onPressed: isValid ? onNext : null,
-            child: const Text('Continue to The Gate'),
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
@@ -693,10 +692,11 @@ class _GateTabState extends State<_GateTab> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: (isDark
-                                    ? VColors.primaryContainerDark
-                                    : VColors.primaryContainer)
-                                .withValues(alpha: 0.3),
+                            color:
+                                (isDark
+                                        ? VColors.primaryContainerDark
+                                        : VColors.primaryContainer)
+                                    .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(VRadius.md),
                           ),
                           child: Icon(
@@ -729,15 +729,11 @@ class _GateTabState extends State<_GateTab> {
 
           // Submit button (shown on last question)
           if (_currentIndex == _questions.length - 1)
-            FilledButton(
+            VButton(
+              label: 'Reveal Your World',
+              isFullWidth: true,
+              isLoading: widget.isSubmitting,
               onPressed: widget.isSubmitting ? null : widget.onSubmit,
-              child: widget.isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Reveal Your World'),
             ),
         ],
       ),
@@ -784,10 +780,11 @@ class _WorldTab extends ConsumerWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: (isDark
-                      ? VColors.primaryContainerDark
-                      : VColors.primaryContainer)
-                  .withValues(alpha: 0.3),
+              color:
+                  (isDark
+                          ? VColors.primaryContainerDark
+                          : VColors.primaryContainer)
+                      .withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -818,10 +815,11 @@ class _WorldTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: VSpacing.lg),
-          FilledButton.icon(
-            onPressed: onEnter,
+          VButton(
+            label: 'Open Nexus',
+            isFullWidth: true,
             icon: const Icon(Icons.home_outlined),
-            label: const Text('Open Nexus'),
+            onPressed: onEnter,
           ),
           const SizedBox(height: VSpacing.sm),
           OutlinedButton.icon(

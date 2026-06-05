@@ -39,9 +39,7 @@ class VWorldBadge extends StatelessWidget {
     );
 
     if (!showName) {
-      return onTap != null
-          ? GestureDetector(onTap: onTap, child: icon)
-          : icon;
+      return onTap != null ? GestureDetector(onTap: onTap, child: icon) : icon;
     }
 
     final row = Row(
@@ -56,8 +54,9 @@ class VWorldBadge extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              fontWeight:
-                  isSelected ? VFontWeight.semiBold : VFontWeight.regular,
+              fontWeight: isSelected
+                  ? VFontWeight.semiBold
+                  : VFontWeight.regular,
               color: isSelected
                   ? VColors.primary
                   : (isDark ? VColors.onSurfaceDark : VColors.onSurface),

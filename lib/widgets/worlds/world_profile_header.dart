@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../config/progression_glossary.dart';
@@ -52,9 +52,7 @@ class WorldProfileHeader extends StatelessWidget {
         VSpacing.md,
         VSpacing.xs,
       ),
-      child: FCard.raw(
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
+      child: VSurfaceCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -196,24 +194,21 @@ class WorldProfileHeader extends StatelessWidget {
               const SizedBox(height: VSpacing.xs),
               ScaleTransition(
                 scale: scaleAnimation,
-                child: FButton(
+                child: VButton(
                   key: joinButtonKey,
-                  onPress: onJoin,
+                  onPressed: onJoin,
                   variant: isJoined
-                      ? FButtonVariant.outline
-                      : FButtonVariant.primary,
-                  child: Text(
-                    isJoined
-                        ? 'Leave world'
-                        : world.isUnclaimed
-                        ? 'Join & claim admin'
-                        : 'Join world',
-                  ),
+                      ? ButtonVariant.outlined
+                      : ButtonVariant.filled,
+                  label: isJoined
+                      ? 'Leave world'
+                      : world.isUnclaimed
+                      ? 'Join & claim admin'
+                      : 'Join world',
                 ),
               ),
             ],
           ),
-        ),
       ),
     );
   }

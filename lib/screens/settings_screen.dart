@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,13 +23,8 @@ import '../services/supabase.dart';
 import '../services/world_nav_prefs.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
-import '../ui/icons/v_icons.dart';
-import '../ui/buttons/v_button.dart';
-import '../forui/v_hub_page.dart';
-import '../widgets/v_section_list.dart';
-import '../widgets/core/v_feedback.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../widgets/core/v_theme_scheme_picker.dart';
-import '../widgets/core/v_dialog.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -97,7 +91,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
     if (key == _kPrefPushEnabled) {
-      await StorageService.setString(_kPrefPushEnabled, value ? 'true' : 'false');
+      await StorageService.setString(
+        _kPrefPushEnabled,
+        value ? 'true' : 'false',
+      );
     }
     await _syncNotificationPrefToServer(key, value);
   }
@@ -297,97 +294,97 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       title: 'Change Password',
       content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: oldController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Current password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: oldController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Current password',
+                prefixIcon: const Icon(Icons.lock_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
                   ),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: VSpacing.sm),
-              TextFormField(
-                controller: newController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'New password',
-                  prefixIcon: const Icon(VIcons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
                   ),
                 ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Required';
-                  if (v.length < 8) return 'At least 8 characters';
-                  return null;
-                },
               ),
-              const SizedBox(height: VSpacing.sm),
-              TextFormField(
-                controller: confirmController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm new password',
-                  prefixIcon: const Icon(VIcons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
+              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+            ),
+            const SizedBox(height: VSpacing.sm),
+            TextFormField(
+              controller: newController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'New password',
+                prefixIcon: const Icon(VIcons.lock),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
                   ),
                 ),
-                validator: (v) {
-                  if (v != newController.text) return 'Passwords do not match';
-                  return null;
-                },
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
+                  ),
+                ),
               ),
-            ],
-          ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (v.length < 8) return 'At least 8 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: VSpacing.sm),
+            TextFormField(
+              controller: confirmController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Confirm new password',
+                prefixIcon: const Icon(VIcons.lock),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
+                  ),
+                ),
+              ),
+              validator: (v) {
+                if (v != newController.text) return 'Passwords do not match';
+                return null;
+              },
+            ),
+          ],
         ),
+      ),
       actions: [
         vDialogActionsRow([
           VButton(
@@ -415,7 +412,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
                 if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
-                  VFeedback.showMessage(context, 'Password changed successfully');
+                  VFeedback.showMessage(
+                    context,
+                    'Password changed successfully',
+                  );
                 }
               } catch (e) {
                 if (context.mounted) Navigator.pop(context);
@@ -439,9 +439,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       title: 'Delete Account',
       titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: VFontWeight.bold,
-            color: VColors.error,
-          ),
+        fontWeight: VFontWeight.bold,
+        color: VColors.error,
+      ),
       content: StatefulBuilder(
         builder: (ctx, setDialogState) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -473,10 +473,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.error,
-                    width: 2,
-                  ),
+                  borderSide: const BorderSide(color: VColors.error, width: 2),
                 ),
               ),
               onChanged: (v) => setDialogState(() => confirmText = v),
@@ -605,8 +602,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     final parsed = jsonDecode(raw);
                     if (parsed is! Map<String, dynamic>) {
                       setDialogState(
-                        () =>
-                            validationError = 'Invalid JSON: expected an object',
+                        () => validationError =
+                            'Invalid JSON: expected an object',
                       );
                       return;
                     }
@@ -651,17 +648,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showResetDataDialog() {
     final router = GoRouter.of(context);
-    showFDialog(
+    showVDialog<void>(
       context: context,
-      builder: (ctx, style, animation) => FDialog.raw(
-        builder: (context, dialogStyle) => _ResetDataConfirmationDialog(
-          onConfirmed: () async {
-            await StorageService.clearAll();
-            if (ctx.mounted) Navigator.pop(ctx);
-            ref.read(themeProvider.notifier).setScheme(ThemeScheme.system);
-            router.go('/onboarding');
-          },
-        ),
+      title: 'Reset all data?',
+      titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+        color: VColors.error,
+        fontWeight: VFontWeight.bold,
+      ),
+      content: _ResetDataConfirmationDialog(
+        onConfirmed: () async {
+          await StorageService.clearAll();
+          if (context.mounted) Navigator.pop(context);
+          ref.read(themeProvider.notifier).setScheme(ThemeScheme.system);
+          router.go('/onboarding');
+        },
       ),
     );
   }
@@ -674,6 +674,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Padding(
       padding: const EdgeInsets.all(VSpacing.md),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -724,43 +725,65 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Consumer(
             builder: (context, ref, _) {
               final textSize = ref.watch(themeProvider).textSize;
-              final highContrast = textSize == TextSize.large ||
-                  textSize == TextSize.xlarge;
+              final highContrast =
+                  textSize == TextSize.large || textSize == TextSize.xlarge;
               return Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FSelect<TextSize>.rich(
-                format: (value) =>
-                    value.name[0].toUpperCase() + value.name.substring(1),
-                control: FSelectControl.lifted(
-                  value: textSize,
-                  onChange: (v) {
-                    if (v != null) {
-                      ref.read(themeProvider.notifier).setTextSize(v);
-                    }
-                  },
-                ),
-                children: TextSize.values
-                    .map(
-                      (t) => FSelectItem<TextSize>(
-                        value: t,
-                        title: Text(
-                          t.name[0].toUpperCase() + t.name.substring(1),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                  VSelect<TextSize>(
+                    value: textSize,
+                    hint: 'Text size',
+                    onChanged: (v) {
+                      if (v != null) {
+                        ref.read(themeProvider.notifier).setTextSize(v);
+                      }
+                    },
+                    format: (value) =>
+                        value.name[0].toUpperCase() + value.name.substring(1),
+                    items: TextSize.values
+                        .map(
+                          (t) => VSelectItem<TextSize>(
+                            value: t,
+                            title: Text(
+                              t.name[0].toUpperCase() + t.name.substring(1),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: VSpacing.sm),
-                  VSectionSwitchTile(
-                    icon: Icons.contrast,
-                    label: 'High contrast text',
-                    value: highContrast,
-                    onChanged: (enabled) {
-                      ref.read(themeProvider.notifier).setTextSize(
-                            enabled ? TextSize.large : TextSize.medium,
-                          );
-                    },
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.contrast,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: VSpacing.md),
+                      Expanded(
+                        child: Text(
+                          'High contrast text',
+                          style: TextStyle(
+                            fontSize: VFontSize.bodyMd,
+                            color: isDark
+                                ? VColors.onSurfaceDark
+                                : VColors.onSurface,
+                          ),
+                        ),
+                      ),
+                      VSwitch(
+                        value: highContrast,
+                        onChanged: (enabled) {
+                          ref
+                              .read(themeProvider.notifier)
+                              .setTextSize(
+                                enabled ? TextSize.large : TextSize.medium,
+                              );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -788,11 +811,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onRefresh: () async => _loadPrefs(),
         child: ListView(
           padding: const EdgeInsets.all(VSpacing.md),
+          physics: const AlwaysScrollableScrollPhysics(),
           children: [
             VSectionList(
               title: 'About',
               children: [
-                FTile(
+                VTile(
                   title: Text(
                     'Version $kAppVersionLabel',
                     style: TextStyle(
@@ -918,7 +942,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 VSectionSwitchTile(
                   icon: Icons.leaderboard_outlined,
                   label: 'Low-pressure mode',
-                  value: ref.watch(residentProvider).resident?.leaderboardOptOut ??
+                  value:
+                      ref.watch(residentProvider).resident?.leaderboardOptOut ??
                       false,
                   onChanged: (v) {
                     ref.read(residentProvider.notifier).setLeaderboardOptOut(v);
@@ -944,10 +969,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Appearance',
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FTile.raw(
+                const VSectionLabel(title: 'Appearance'),
+                Card(
+                  margin: EdgeInsets.zero,
+                  elevation: 0,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    side: BorderSide(
+                      color: isDark
+                          ? VColors.outlineVariantDark
+                          : VColors.outlineVariant,
+                    ),
+                  ),
                   child: _appearancePanel(
                     theme: theme,
                     isDark: isDark,
@@ -971,54 +1009,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 final hasVote = resident.tier.value >= 4;
 
                 return Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: VSpacing.md),
                     VSectionList(
                       title: 'Tier Perks',
                       children: [
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.trending_up,
                           title: 'XP Multiplier',
                           value: 'x${multiplier.toStringAsFixed(2)}',
-
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.monetization_on,
                           title: 'Daily Coin Bonus',
                           value: '+$coinBonus',
-
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.emoji_emotions,
                           title: 'Custom Reactions',
                           value: '$reactionSlots slots',
-
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.push_pin,
                           title: 'Post Pins',
                           value: pinLimit > 0
                               ? '$pinLimit available'
                               : 'Locked',
-
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.language,
                           title: 'World Creation',
                           value: '$worldLimit worlds',
-
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.local_bar,
                           title: 'Lounge Access',
                           value: hasLounge ? 'Unlocked' : 'Locked',
-
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.how_to_vote,
                           title: 'Governance Vote',
                           value: hasVote ? 'Unlocked' : 'Locked',
-
                         ),
                       ],
                     ),
@@ -1048,7 +1080,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: () async {
                     await BackupService.createBackup();
                     if (context.mounted) {
-                      VFeedback.showMessage(context, 'Backup created successfully');
+                      VFeedback.showMessage(
+                        context,
+                        'Backup created successfully',
+                      );
                     }
                   },
                 ),
@@ -1083,6 +1118,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         : 'Firebase: ${FirebaseBootstrap.lastError ?? "offline"}',
                     enabled: false,
                   ),
+                  VSectionTile(
+                    icon: Icons.science_outlined,
+                    label: 'UI reference (Forui)',
+                    detail: 'Debug wrapper smoke',
+                    onTap: () => context.push('/debug/ui-spike'),
+                  ),
                 ],
               ),
             ],
@@ -1104,41 +1145,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
-}
-
-class _PerkTile extends FTile {
-  _PerkTile({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) : super(
-         prefix: Builder(
-           builder: (context) => Icon(
-             icon,
-             color: context.theme.colors.mutedForeground,
-           ),
-         ),
-         title: Builder(
-           builder: (context) => Text(
-             title,
-             style: TextStyle(color: context.theme.colors.foreground),
-           ),
-         ),
-         details: Builder(
-           builder: (context) {
-             final valueColor = value.contains('Locked')
-                 ? context.theme.colors.mutedForeground
-                 : VColors.tertiary;
-             return Text(
-               value,
-               style: TextStyle(
-                 color: valueColor,
-                 fontWeight: FontWeight.w600,
-               ),
-             );
-           },
-         ),
-       );
 }
 
 class _ResetDataConfirmationDialog extends StatefulWidget {
@@ -1175,27 +1181,11 @@ class _ResetDataConfirmationDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.all(VSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.warning_amber_rounded, color: VColors.error),
-              const SizedBox(width: VSpacing.sm),
-              Text(
-                'Reset all data?',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: VColors.error,
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.sm),
-          if (_step == 0)
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_step == 0)
             const Text(
               'This will permanently delete all local data including posts, notifications, '
               'achievements, and preferences. Your account will not be deleted, but all cached data will be gone.\n\n'
@@ -1241,33 +1231,32 @@ class _ResetDataConfirmationDialogState
                 ),
               ],
             ),
-          const SizedBox(height: VSpacing.lg),
-          vDialogActionsRow(
-            _step == 0
-                ? [
-                    VButton(
-                      label: 'Cancel',
-                      onPressed: () => Navigator.pop(context),
-                      variant: ButtonVariant.text,
-                    ),
-                    VButton(label: 'Continue', onPressed: _goToStep2),
-                  ]
-                : [
-                    VButton(
-                      label: 'Back',
-                      onPressed: _goBack,
-                      variant: ButtonVariant.text,
-                    ),
-                    VButton(
-                      label: 'Reset Everything',
-                      onPressed: _typedText.trim() == 'RESET'
-                          ? widget.onConfirmed
-                          : null,
-                    ),
-                  ],
-          ),
-        ],
-      ),
+        const SizedBox(height: VSpacing.lg),
+        vDialogActionsRow(
+          _step == 0
+              ? [
+                  VButton(
+                    label: 'Cancel',
+                    onPressed: () => Navigator.pop(context),
+                    variant: ButtonVariant.text,
+                  ),
+                  VButton(label: 'Continue', onPressed: _goToStep2),
+                ]
+              : [
+                  VButton(
+                    label: 'Back',
+                    onPressed: _goBack,
+                    variant: ButtonVariant.text,
+                  ),
+                  VButton(
+                    label: 'Reset Everything',
+                    onPressed: _typedText.trim() == 'RESET'
+                        ? widget.onConfirmed
+                        : null,
+                  ),
+                ],
+        ),
+      ],
     );
   }
 }

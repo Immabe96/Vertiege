@@ -177,7 +177,7 @@ class AchievementShareCard extends StatelessWidget {
                 AchievementBadgeAvatar(
                   achievement: achievement,
                   accentColor: _categoryColor,
-                  size: 56,
+                  size: VBadgeSize.avatarSheet,
                   showEarnedBadge: true,
                 ),
                 const SizedBox(height: VSpacing.md),

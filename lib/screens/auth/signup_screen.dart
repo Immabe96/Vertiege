@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/brand_assets.dart';
 import '../../ui/icons/v_icons.dart';
+import 'package:vertiege/ui/ui.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -122,45 +123,45 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               const SizedBox(height: 80),
 
               Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? VColors.glassBackgroundDark
+                      : VColors.glassBackground,
+                  borderRadius: BorderRadius.circular(VRadius.xl),
+                  border: Border.all(
                     color: isDark
-                        ? VColors.glassBackgroundDark
-                        : VColors.glassBackground,
-                    borderRadius: BorderRadius.circular(VRadius.xl),
-                    border: Border.all(
-                      color: isDark
-                          ? VColors.glassBorderDark
-                          : VColors.glassBorder,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(VSpacing.xs),
-                    child: Image.asset(
-                      brandMarkAsset(context),
-                      fit: BoxFit.contain,
-                      cacheWidth: 128,
-                    ),
+                        ? VColors.glassBorderDark
+                        : VColors.glassBorder,
                   ),
                 ),
+                child: Padding(
+                  padding: const EdgeInsets.all(VSpacing.xs),
+                  child: Image.asset(
+                    brandMarkAsset(context),
+                    fit: BoxFit.contain,
+                    cacheWidth: 128,
+                  ),
+                ),
+              ),
               const SizedBox(height: VSpacing.lg),
               Text(
-                  'Vertiege',
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: VFontWeight.bold,
-                    letterSpacing: 1.5,
-                  ),
+                'Vertiege',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                  letterSpacing: 1.5,
                 ),
+              ),
               const SizedBox(height: VSpacing.xs),
               Text(
-                  'Create your account',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
-                  ),
+                'Create your account',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
                 ),
+              ),
               const SizedBox(height: VSpacing.xxl),
 
               Container(
@@ -185,50 +186,40 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ],
 
                     AuthEmailField(
-                        controller: _emailController,
-                        focusNode: _emailFocus,
-                        enabled: !_isLoading,
-                        onChanged: () => setState(() => _errorMessage = null),
-                        onSubmit: (_) => _passwordFocus.requestFocus(),
-                      ),
+                      controller: _emailController,
+                      focusNode: _emailFocus,
+                      enabled: !_isLoading,
+                      onChanged: () => setState(() => _errorMessage = null),
+                      onSubmit: (_) => _passwordFocus.requestFocus(),
+                    ),
                     const SizedBox(height: VSpacing.md),
                     AuthPasswordField(
-                        controller: _passwordController,
-                        focusNode: _passwordFocus,
-                        enabled: !_isLoading,
-                        textInputAction: TextInputAction.next,
-                        hint: 'At least 8 characters',
-                        error: _passwordError(),
-                        onChanged: () => setState(() => _errorMessage = null),
-                        onSubmit: (_) => _confirmPasswordFocus.requestFocus(),
-                      ),
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      enabled: !_isLoading,
+                      textInputAction: TextInputAction.next,
+                      hint: 'At least 8 characters',
+                      error: _passwordError(),
+                      onChanged: () => setState(() => _errorMessage = null),
+                      onSubmit: (_) => _confirmPasswordFocus.requestFocus(),
+                    ),
                     const SizedBox(height: VSpacing.md),
                     AuthPasswordField(
-                        controller: _confirmPasswordController,
-                        focusNode: _confirmPasswordFocus,
-                        enabled: !_isLoading,
-                        error: _confirmPasswordError(),
-                        onChanged: () => setState(() => _errorMessage = null),
-                        onSubmit: _isValid ? (_) => _handleSignUp() : null,
-                      ),
+                      controller: _confirmPasswordController,
+                      focusNode: _confirmPasswordFocus,
+                      enabled: !_isLoading,
+                      error: _confirmPasswordError(),
+                      onChanged: () => setState(() => _errorMessage = null),
+                      onSubmit: _isValid ? (_) => _handleSignUp() : null,
+                    ),
                     const SizedBox(height: VSpacing.xl),
-                    FilledButton.icon(
-                        onPressed: _isLoading || !_isValid
-                            ? null
-                            : _handleSignUp,
-                        icon: _isLoading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(VIcons.arrowLeft),
-                        label: Text(
-                          _isLoading ? 'Creating account...' : 'Create Account',
-                        ),
-                      ),
+                    VButton(
+                      label: 'Create Account',
+                      isFullWidth: true,
+                      isLoading: _isLoading,
+                      icon: const Icon(VIcons.arrowLeft),
+                      onPressed: _isValid ? _handleSignUp : null,
+                    ),
                   ],
                 ),
               ),
@@ -236,33 +227,33 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               const SizedBox(height: VSpacing.lg),
 
               Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already have an account? ',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _isLoading ? null : () => context.go('/login'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'Sign In',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: VColors.tertiary,
+                        fontWeight: VFontWeight.bold,
                       ),
                     ),
-                    TextButton(
-                      onPressed: _isLoading ? null : () => context.go('/login'),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'Sign In',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: VColors.tertiary,
-                          fontWeight: VFontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               const SizedBox(height: VSpacing.xxl),
             ],
           ),

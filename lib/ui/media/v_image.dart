@@ -38,7 +38,8 @@ class VImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: placeholderColor?.withValues(alpha: 0.12) ??
+        color:
+            placeholderColor?.withValues(alpha: 0.12) ??
             (isDark
                 ? VColors.surfaceContainerHighestDark.withValues(alpha: 0.3)
                 : VColors.surfaceContainerHighest.withValues(alpha: 0.3)),
@@ -49,7 +50,8 @@ class VImage extends StatelessWidget {
         size: (width != null && height != null)
             ? (width! < height! ? width! * 0.4 : height! * 0.4)
             : 32,
-        color: placeholderColor ??
+        color:
+            placeholderColor ??
             (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
       ),
     );

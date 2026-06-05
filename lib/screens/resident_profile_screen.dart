@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../router/world_navigation.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../models/resident.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
@@ -125,47 +125,42 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       body: _loading
           ? const ScreenLoading.profile()
           : _error != null || _profile == null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.person_off,
-                        size: VIconSize.xl,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: VSpacing.md),
-                      Text(
-                        _error ?? 'Resident not found',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: VSpacing.lg),
-                      FilledButton.icon(
-                        onPressed: _loadProfile,
-                        icon: const Icon(VIcons.arrowLeft),
-                        label: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.person_off,
+                    size: VIconSize.xl,
+                    color: isDark
+                        ? VColors.onSurfaceVariantDark
+                        : VColors.onSurfaceVariant,
                   ),
-                )
-              : _buildBody(theme, achievements, isDark),
+                  const SizedBox(height: VSpacing.md),
+                  Text(
+                    _error ?? 'Resident not found',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.lg),
+                  FilledButton.icon(
+                    onPressed: _loadProfile,
+                    icon: const Icon(VIcons.arrowLeft),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            )
+          : _buildBody(theme, achievements, isDark),
     );
   }
 
-  Widget _buildBody(
-    ThemeData theme,
-    dynamic achievements,
-    bool isDark,
-  ) {
+  Widget _buildBody(ThemeData theme, dynamic achievements, bool isDark) {
     final resident = _profile!;
-    final isOwnProfile =
-        resident.id == ref.read(residentProvider).resident?.id;
+    final isOwnProfile = resident.id == ref.read(residentProvider).resident?.id;
     final totalXp = resident.totalXp;
 
     return ListView(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
 import '../../theme/v_context_colors.dart';
@@ -88,11 +88,7 @@ class _ButtonLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const SizedBox(
-        width: 20,
-        height: 20,
-        child: FCircularProgress(),
-      );
+      return const SizedBox(width: 20, height: 20, child: FCircularProgress());
     }
 
     if (icon == null) return Text(label);
@@ -164,4 +160,5 @@ class _GlassButton extends StatelessWidget {
 }
 
 enum ButtonVariant { filled, outlined, text, tonal, glass }
+
 enum ButtonSize { small, medium, large }

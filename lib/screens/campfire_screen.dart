@@ -1,13 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/ui/ui.dart';
 import 'package:livekit_client/livekit_client.dart';
 import '../state/resident_provider.dart';
 import '../state/voice_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
-import '../ui/icons/v_icons.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
@@ -37,21 +36,26 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _joinWithMicPermission());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _joinWithMicPermission(),
+    );
   }
 
   Future<void> _joinWithMicPermission() async {
     final resident = ref.read(residentProvider).resident;
     if (resident == null || !mounted) return;
 
-    final micOk =
-        await DevicePermissionService.requestMicrophoneWithRationale(context);
+    final micOk = await DevicePermissionService.requestMicrophoneWithRationale(
+      context,
+    );
     if (!micOk || !mounted) {
       ref.read(voiceProvider.notifier).leaveCampfire();
       return;
     }
 
-    await ref.read(voiceProvider.notifier).joinCampfire(
+    await ref
+        .read(voiceProvider.notifier)
+        .joinCampfire(
           channelId: widget.channelId,
           channelName: widget.channelName,
           residentId: resident.id,
@@ -70,12 +74,12 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final immersive = FeatureFlags.campfireImmersive;
 
-    return FScaffold(
-      header: FHeader.nested(
+    return VScaffold(
+      header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
             label: 'Leave voice channel',
-            icon: const Icon(FIcons.chevronLeft),
+            icon: Icon(VIcons.chevronLeft),
             onPress: () {
               if (context.canPop()) context.pop();
             },
@@ -107,79 +111,82 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
             ? (isDark ? VColors.surfaceDark : Colors.black)
             : Colors.transparent,
         child: Column(
-        children: [
-          const CampfireReconnectBanner(),
-          if (!immersive) const SizedBox(height: VSpacing.xl),
-          Expanded(
-            child: resident == null
-                ? const AppEmptyState(
-                    title: 'Sign in to join Campfire',
-                    description: 'Voice rooms are reserved for eligible residents.',
-                    icon: Icons.lock_outline,
-                  )
-                : voiceState.error != null
-                    ? AppEmptyState(
-                        title: 'Could not join Campfire',
-                        description: voiceState.error,
-                        icon: Icons.volume_off_outlined,
-                        variant: EmptyStateVariant.error,
-                      )
-                    : voiceState.isConnecting
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const FCircularProgress(),
-                                const SizedBox(height: VSpacing.lg),
-                                Text(
-                                  'Joining Campfire...',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: isDark
-                                        ? VColors.onSurfaceVariantDark
-                                        : VColors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
+          children: [
+            const CampfireReconnectBanner(),
+            if (!immersive) const SizedBox(height: VSpacing.xl),
+            Expanded(
+              child: resident == null
+                  ? const AppEmptyState(
+                      title: 'Sign in to join Campfire',
+                      description:
+                          'Voice rooms are reserved for eligible residents.',
+                      icon: Icons.lock_outline,
+                    )
+                  : voiceState.error != null
+                  ? AppEmptyState(
+                      title: 'Could not join Campfire',
+                      description: voiceState.error,
+                      icon: Icons.volume_off_outlined,
+                      variant: EmptyStateVariant.error,
+                    )
+                  : voiceState.isConnecting
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(strokeWidth: 2),
+                          const SizedBox(height: VSpacing.lg),
+                          Text(
+                            'Joining Campfire...',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
                             ),
-                          )
-                        : participants.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.local_fire_department,
-                          size: 64,
-                          color: VColors.warning,
-                        ),
-                        const SizedBox(height: VSpacing.lg),
-                        Text(
-                          'Waiting for others to join...',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    )
+                  : participants.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.local_fire_department,
+                            size: 64,
+                            color: VColors.warning,
+                          ),
+                          const SizedBox(height: VSpacing.lg),
+                          Text(
+                            'Waiting for others to join...',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: EdgeInsets.all(
+                        immersive ? VSpacing.lg : VSpacing.md,
+                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: VSpacing.sm,
+                            crossAxisSpacing: VSpacing.sm,
+                            childAspectRatio: 0.85,
+                          ),
+                      itemCount: participants.length,
+                      itemBuilder: (_, i) =>
+                          _ParticipantTile(participant: participants[i]),
                     ),
-                  )
-                : GridView.builder(
-                    padding: EdgeInsets.all(immersive ? VSpacing.lg : VSpacing.md),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: VSpacing.sm,
-                          crossAxisSpacing: VSpacing.sm,
-                          childAspectRatio: 0.85,
-                        ),
-                    itemCount: participants.length,
-                    itemBuilder: (_, i) =>
-                        _ParticipantTile(participant: participants[i]),
-                  ),
-          ),
-          const _CampfireControls(),
-        ],
+            ),
+            const _CampfireControls(),
+          ],
         ),
       ),
     );
@@ -364,9 +371,7 @@ class _CampfireControls extends ConsumerWidget {
             : VColors.surfaceContainerLow,
         border: Border(
           top: BorderSide(
-            color: isDark
-                ? VColors.outlineVariantDark
-                : VColors.outlineVariant,
+            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
           ),
         ),
       ),
@@ -441,7 +446,13 @@ class _ControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = color ?? (active ? VColors.primary : (theme.brightness == Brightness.dark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant));
+    final c =
+        color ??
+        (active
+            ? VColors.primary
+            : (theme.brightness == Brightness.dark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant));
     return GestureDetector(
       onTap: onTap,
       child: Column(

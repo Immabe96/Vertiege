@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/v_tokens.dart';
 import '../../utils/asset_image_decode.dart';
 
-/// Renders badge/achievement PNGs with optional light-matte removal on dark UI.
+/// Renders badge/achievement PNGs inside a normalized square frame.
+///
+/// Sizes raster art to [VBadgeSize.artFillFraction] of [size] for consistent
+/// optical weight without shrinking the emblem too much.
 class BadgeAssetImage extends StatelessWidget {
   final String imagePath;
   final double size;
   final BoxFit fit;
 
-  /// When true (default), light PNG mattes are softened on dark theme without crushing colors.
-  final bool adaptDarkBackground;
   final ImageErrorWidgetBuilder? errorBuilder;
 
   const BadgeAssetImage({
@@ -17,21 +19,29 @@ class BadgeAssetImage extends StatelessWidget {
     required this.imagePath,
     required this.size,
     this.fit = BoxFit.contain,
-    this.adaptDarkBackground = true,
     this.errorBuilder,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Parent should supply a tinted circle; never multiply-blend on dark UI.
-    return Image.asset(
-      imagePath,
+    final inset = VBadgeSize.artInset(size);
+    final inner = VBadgeSize.artInner(size);
+
+    return SizedBox(
       width: size,
       height: size,
-      fit: fit,
-      filterQuality: FilterQuality.high,
-      cacheWidth: assetCachePx(context, size),
-      errorBuilder: errorBuilder,
+      child: Padding(
+        padding: EdgeInsets.all(inset),
+        child: Image.asset(
+          imagePath,
+          width: inner,
+          height: inner,
+          fit: fit,
+          filterQuality: FilterQuality.high,
+          cacheWidth: assetCachePx(context, inner),
+          errorBuilder: errorBuilder,
+        ),
+      ),
     );
   }
 }

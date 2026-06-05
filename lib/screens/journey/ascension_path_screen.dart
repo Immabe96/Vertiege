@@ -6,7 +6,7 @@ import '../../models/achievement.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/glass_panel.dart';
@@ -52,170 +52,170 @@ class AscensionPathScreen extends ConsumerWidget {
       title: 'Ascension Path',
       showBack: true,
       body: SingleChildScrollView(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: Column(
-            children: [
-              // Title
-              Text(
-                'Ascension Path',
-                style: TextStyle(
-                  fontSize: VFontSize.displayXl,
-                  fontWeight: VFontWeight.bold,
-                  color: VColors.tertiary,
-                  letterSpacing: 0,
-                ),
-                textAlign: TextAlign.center,
+        padding: const EdgeInsets.all(VSpacing.md),
+        child: Column(
+          children: [
+            // Title
+            Text(
+              'Ascension Path',
+              style: TextStyle(
+                fontSize: VFontSize.displayXl,
+                fontWeight: VFontWeight.bold,
+                color: VColors.tertiary,
+                letterSpacing: 0,
               ),
-              const SizedBox(height: VSpacing.xs),
-              Text(
-                'Your journey through the tiers',
-                style: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: VSpacing.xs),
+            Text(
+              'Your journey through the tiers',
+              style: TextStyle(
+                fontSize: VFontSize.bodyMd,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
-              const SizedBox(height: VSpacing.xl),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: VSpacing.xl),
 
-              // Progress Trail
-              Center(child: ProgressTrail(currentTier: tierNum)),
-              const SizedBox(height: VSpacing.lg),
+            // Progress Trail
+            Center(child: ProgressTrail(currentTier: tierNum)),
+            const SizedBox(height: VSpacing.lg),
 
-              // XP Stats
-              VSurfacePanel(
-                useBlur: false,
-                padding: const EdgeInsets.all(VSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'EXPERIENCE',
-                      style: TextStyle(
-                        fontSize: VFontSize.labelSm,
-                        fontWeight: VFontWeight.semiBold,
-                        letterSpacing: 0,
+            // XP Stats
+            VSurfacePanel(
+              useBlur: false,
+              padding: const EdgeInsets.all(VSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'EXPERIENCE',
+                    style: TextStyle(
+                      fontSize: VFontSize.labelSm,
+                      fontWeight: VFontWeight.semiBold,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Total XP',
+                        style: TextStyle(fontSize: VFontSize.bodyMd),
                       ),
-                    ),
-                    const SizedBox(height: VSpacing.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total XP',
-                          style: TextStyle(fontSize: VFontSize.bodyMd),
-                        ),
-                        Text(
-                          '$totalXp',
-                          style: const TextStyle(
-                            fontSize: VFontSize.headlineMd,
-                            fontWeight: VFontWeight.bold,
-                            color: VColors.tertiary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: VSpacing.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Current Tier',
-                          style: TextStyle(fontSize: VFontSize.bodyMd),
-                        ),
-                        Text(
-                          currentTier.label,
-                          style: TextStyle(
-                            fontSize: VFontSize.bodyMd,
-                            fontWeight: VFontWeight.bold,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: VSpacing.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          tierNum < 5 ? 'Next Tier' : 'Max Tier',
-                          style: TextStyle(fontSize: VFontSize.bodyMd),
-                        ),
-                        Text(
-                          tierNum < 5 ? '$xpToNext XP needed' : 'Sovereign',
-                          style: TextStyle(
-                            fontSize: VFontSize.bodyMd,
-                            fontWeight: VFontWeight.bold,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: VSpacing.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Verified Achievements',
-                          style: TextStyle(fontSize: VFontSize.bodyMd),
-                        ),
-                        Text(
-                          '$verifiedCount${submittedCount > 0 ? ' (+$submittedCount pending)' : ''}',
-                          style: TextStyle(
-                            fontSize: VFontSize.bodyMd,
-                            fontWeight: VFontWeight.bold,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (verifiedCount > 0 && tierNum < 5) ...[
-                      const SizedBox(height: VSpacing.sm),
                       Text(
-                        '$verifiedCount of ${{1: 0, 2: 500, 3: 2000, 4: 10000, 5: 50000}[tierNum + 1] ?? 0} XP from achievements',
-                        style: TextStyle(
-                          fontSize: VFontSize.labelSm,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                        '$totalXp',
+                        style: const TextStyle(
+                          fontSize: VFontSize.headlineMd,
+                          fontWeight: VFontWeight.bold,
+                          color: VColors.tertiary,
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: VSpacing.lg),
-
-              // Button to Hall of Ascension
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () => context.push('/hall-of-ascension'),
-                  icon: const Icon(VIcons.chart, size: VIconSize.md),
-                  label: const Text(
-                    'View Hall of Ascension',
-                    style: TextStyle(
-                      fontSize: VFontSize.bodyMd,
-                      fontWeight: VFontWeight.semiBold,
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Current Tier',
+                        style: TextStyle(fontSize: VFontSize.bodyMd),
+                      ),
+                      Text(
+                        currentTier.label,
+                        style: TextStyle(
+                          fontSize: VFontSize.bodyMd,
+                          fontWeight: VFontWeight.bold,
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        tierNum < 5 ? 'Next Tier' : 'Max Tier',
+                        style: TextStyle(fontSize: VFontSize.bodyMd),
+                      ),
+                      Text(
+                        tierNum < 5 ? '$xpToNext XP needed' : 'Sovereign',
+                        style: TextStyle(
+                          fontSize: VFontSize.bodyMd,
+                          fontWeight: VFontWeight.bold,
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Verified Achievements',
+                        style: TextStyle(fontSize: VFontSize.bodyMd),
+                      ),
+                      Text(
+                        '$verifiedCount${submittedCount > 0 ? ' (+$submittedCount pending)' : ''}',
+                        style: TextStyle(
+                          fontSize: VFontSize.bodyMd,
+                          fontWeight: VFontWeight.bold,
+                          color: isDark
+                              ? VColors.onSurfaceDark
+                              : VColors.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (verifiedCount > 0 && tierNum < 5) ...[
+                    const SizedBox(height: VSpacing.sm),
+                    Text(
+                      '$verifiedCount of ${{1: 0, 2: 500, 3: 2000, 4: 10000, 5: 50000}[tierNum + 1] ?? 0} XP from achievements',
+                      style: TextStyle(
+                        fontSize: VFontSize.labelSm,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: VColors.tertiary,
-                    foregroundColor: VColors.onTertiary,
-                    padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: VSpacing.lg),
+
+            // Button to Hall of Ascension
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push('/hall-of-ascension'),
+                icon: const Icon(VIcons.chart, size: VIconSize.md),
+                label: const Text(
+                  'View Hall of Ascension',
+                  style: TextStyle(
+                    fontSize: VFontSize.bodyMd,
+                    fontWeight: VFontWeight.semiBold,
                   ),
                 ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: VColors.tertiary,
+                  foregroundColor: VColors.onTertiary,
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }

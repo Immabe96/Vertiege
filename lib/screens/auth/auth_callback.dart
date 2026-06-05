@@ -1,14 +1,13 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/auth_service.dart';
 import '../../services/invite_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
-import 'package:forui/forui.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/brand_assets.dart';
-import '../../ui/buttons/v_button.dart';
+import 'package:vertiege/ui/ui.dart';
 
 class AuthCallbackScreen extends ConsumerStatefulWidget {
   const AuthCallbackScreen({super.key});
@@ -88,13 +87,12 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: (isDark
-                            ? VColors.glassBackgroundDark
-                            : VColors.glassBackground)
-                        .withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(
-                      VRadius.md,
-                    ),
+                    color:
+                        (isDark
+                                ? VColors.glassBackgroundDark
+                                : VColors.glassBackground)
+                            .withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(VRadius.md),
                     border: Border.all(
                       color: isDark
                           ? VColors.glassBorderDark
@@ -124,7 +122,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   const SizedBox(
                     width: VIconSize.lg,
                     height: VIconSize.lg,
-                    child: FCircularProgress(),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 else
                   Icon(

@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -92,10 +92,12 @@ class _SplashScreenState extends State<SplashScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    (isDark ? VColors.surfaceDark : VColors.surface)
-                        .withValues(alpha: 0.65),
-                    (isDark ? VColors.surfaceDark : VColors.surface)
-                        .withValues(alpha: 0.8),
+                    (isDark ? VColors.surfaceDark : VColors.surface).withValues(
+                      alpha: 0.65,
+                    ),
+                    (isDark ? VColors.surfaceDark : VColors.surface).withValues(
+                      alpha: 0.8,
+                    ),
                     isDark ? VColors.surfaceDark : VColors.surface,
                   ],
                 ),
@@ -119,10 +121,11 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: (isDark
-                            ? VColors.glassBackgroundDark
-                            : VColors.glassBackground)
-                        .withValues(alpha: 0.72),
+                    color:
+                        (isDark
+                                ? VColors.glassBackgroundDark
+                                : VColors.glassBackground)
+                            .withValues(alpha: 0.72),
                     boxShadow: [
                       BoxShadow(
                         color: VColors.brand.withValues(
@@ -151,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen>
                   'Vertiege',
                   style: TextStyle(
                     fontSize: VFontSize.displayXl,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: VFontWeight.bold,
                     color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     letterSpacing: 0,
                   ),
@@ -161,14 +164,14 @@ class _SplashScreenState extends State<SplashScreen>
               // Tagline — gold tint
               Opacity(
                 opacity: _taglineFade.value,
-              child: Text(
-                'Your tier-gated social universe',
-                style: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  color: VColors.brand.withValues(alpha: 0.85),
-                  letterSpacing: 0,
+                child: Text(
+                  'Your tier-gated social universe',
+                  style: TextStyle(
+                    fontSize: VFontSize.bodyMd,
+                    color: VColors.brand.withValues(alpha: 0.85),
+                    letterSpacing: 0,
+                  ),
                 ),
-              ),
               ),
               const SizedBox(height: VSpacing.xxl + VSpacing.lg),
               // Loading indicator — gold accent
@@ -177,12 +180,12 @@ class _SplashScreenState extends State<SplashScreen>
                 child: SizedBox(
                   width: 28,
                   height: 28,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation(
-                    VColors.tertiary.withValues(alpha: 0.8),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation(
+                      VColors.tertiary.withValues(alpha: 0.8),
+                    ),
                   ),
-                ),
                 ),
               ),
             ],
@@ -201,45 +204,45 @@ class _SplashScreenState extends State<SplashScreen>
           Positioned(
             top: -120,
             right: -80,
-          child: _DecoShape(
-            size: 400,
-            rotation: 0.4,
-            color: VColors.tertiary,
-            opacity: 0.08,
-          ),
+            child: _DecoShape(
+              size: 400,
+              rotation: 0.4,
+              color: VColors.tertiary,
+              opacity: 0.08,
+            ),
           ),
           // Bottom-left medium shape — primary violet
           Positioned(
             bottom: -100,
             left: -60,
-          child: _DecoShape(
-            size: 300,
-            rotation: -0.6,
-            color: VColors.primary,
-            opacity: 0.07,
-          ),
+            child: _DecoShape(
+              size: 300,
+              rotation: -0.6,
+              color: VColors.primary,
+              opacity: 0.07,
+            ),
           ),
           // Top-left small shape — gold
           Positioned(
             top: 80,
             left: -40,
-          child: _DecoShape(
-            size: 200,
-            rotation: 0.8,
-            color: VColors.secondary,
-            opacity: 0.06,
-          ),
+            child: _DecoShape(
+              size: 200,
+              rotation: 0.8,
+              color: VColors.secondary,
+              opacity: 0.06,
+            ),
           ),
           // Bottom-right small shape — violet
           Positioned(
             bottom: 180,
             right: -50,
-          child: _DecoShape(
-            size: 180,
-            rotation: -0.3,
-            color: VColors.primary,
-            opacity: 0.06,
-          ),
+            child: _DecoShape(
+              size: 180,
+              rotation: -0.3,
+              color: VColors.primary,
+              opacity: 0.06,
+            ),
           ),
         ],
       ),

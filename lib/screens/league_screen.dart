@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../state/league_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../services/league_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/media/v_avatar.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../utils/calm_ranking.dart';
@@ -67,60 +64,58 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final body = leagueState.isLoading
-          ? const ScreenLoading.list()
-          : leagueState.error != null
-              ? AppErrorState(
-                  message: leagueState.error,
-                  onRetry: () => ref.read(leagueProvider.notifier).loadLeague(),
-                )
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    await ref.read(leagueProvider.notifier).loadLeague();
-                  },
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(VSpacing.md),
-                          child: Column(
-                            children: [
-                              _buildLeagueHeader(leagueState, isDark),
-                              const SizedBox(height: VSpacing.md),
-                              _buildCountdown(isDark),
-                              const SizedBox(height: VSpacing.md),
-                              _buildPromotionInfo(isDark),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (!leagueState.isLoading && leagueState.standings.isEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(VSpacing.md),
-                            child: AppEmptyState(
-                              title: 'No standings yet',
-                              description:
-                                  'Earn XP this week to appear in your league cohort.',
-                              icon: Icons.leaderboard_outlined,
-                              actionLabel: 'Refresh',
-                              onAction: () =>
-                                  ref.read(leagueProvider.notifier).loadLeague(),
-                            ),
-                          ),
-                        )
-                      else
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: VSpacing.md,
-                          ),
-                          sliver: _buildStandingsList(leagueState, isDark),
-                        ),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: VSpacing.xxl),
-                      ),
-                    ],
+        ? const ScreenLoading.list()
+        : leagueState.error != null
+        ? AppErrorState(
+            message: leagueState.error,
+            onRetry: () => ref.read(leagueProvider.notifier).loadLeague(),
+          )
+        : RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(leagueProvider.notifier).loadLeague();
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(VSpacing.md),
+                    child: Column(
+                      children: [
+                        _buildLeagueHeader(leagueState, isDark),
+                        const SizedBox(height: VSpacing.md),
+                        _buildCountdown(isDark),
+                        const SizedBox(height: VSpacing.md),
+                        _buildPromotionInfo(isDark),
+                      ],
+                    ),
                   ),
-                );
+                ),
+                if (!leagueState.isLoading && leagueState.standings.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(VSpacing.md),
+                      child: AppEmptyState(
+                        title: 'No standings yet',
+                        description:
+                            'Earn XP this week to appear in your league cohort.',
+                        icon: Icons.leaderboard_outlined,
+                        actionLabel: 'Refresh',
+                        onAction: () =>
+                            ref.read(leagueProvider.notifier).loadLeague(),
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: VSpacing.md,
+                    ),
+                    sliver: _buildStandingsList(leagueState, isDark),
+                  ),
+                const SliverToBoxAdapter(child: SizedBox(height: VSpacing.xxl)),
+              ],
+            ),
+          );
 
     if (widget.embedInHub) return body;
 
@@ -128,8 +123,8 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
       title: 'Ascension Leagues',
       showBack: true,
       headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
+        VHeaderAction(
+          icon: Icon(VIcons.rotateCw),
           onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
         ),
       ],
@@ -152,7 +147,8 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   String _standingRankLabel(int rank, int cohortSize, bool lowPressure) {
     if (lowPressure) return '—';
     if (rank <= 3) return '#$rank';
-    return CalmRanking.leagueBandLabel(rank: rank, cohortSize: cohortSize) ?? '·';
+    return CalmRanking.leagueBandLabel(rank: rank, cohortSize: cohortSize) ??
+        '·';
   }
 
   Widget _buildLeagueHeader(LeagueState state, bool isDark) {
@@ -228,7 +224,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             'Reset in ',
             style: TextStyle(
               fontSize: VFontSize.labelMd,
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           Text(
@@ -294,36 +292,30 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         ref.read(residentProvider).resident?.leaderboardOptOut == true;
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (index >= standings.length) return const SizedBox.shrink();
-          final participant = standings[index];
-          final rank = index + 1;
-          final isCurrentUser = participant.userId == residentId;
-          final isTop3 = rank <= 3;
-          final isPromotionZone = rank <= LeagueService.promotionCount;
-          final isDemotionZone = rank > (standings.length - LeagueService.demotionCount);
+      delegate: SliverChildBuilderDelegate((context, index) {
+        if (index >= standings.length) return const SizedBox.shrink();
+        final participant = standings[index];
+        final rank = index + 1;
+        final isCurrentUser = participant.userId == residentId;
+        final isTop3 = rank <= 3;
+        final isPromotionZone = rank <= LeagueService.promotionCount;
+        final isDemotionZone =
+            rank > (standings.length - LeagueService.demotionCount);
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: VSpacing.xs),
-            child: _buildStandingRow(
-              participant: participant,
-              rank: rank,
-              rankLabel: _standingRankLabel(
-                rank,
-                standings.length,
-                lowPressure,
-              ),
-              isCurrentUser: isCurrentUser,
-              isTop3: isTop3,
-              isPromotionZone: isPromotionZone,
-              isDemotionZone: isDemotionZone,
-              isDark: isDark,
-            ),
-          );
-        },
-        childCount: standings.length,
-      ),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: VSpacing.xs),
+          child: _buildStandingRow(
+            participant: participant,
+            rank: rank,
+            rankLabel: _standingRankLabel(rank, standings.length, lowPressure),
+            isCurrentUser: isCurrentUser,
+            isTop3: isTop3,
+            isPromotionZone: isPromotionZone,
+            isDemotionZone: isDemotionZone,
+            isDark: isDark,
+          ),
+        );
+      }, childCount: standings.length),
     );
   }
 
@@ -367,10 +359,14 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           rankColor = const Color(0xFFCD7F32);
           break;
         default:
-          rankColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+          rankColor = isDark
+              ? VColors.onSurfaceVariantDark
+              : VColors.onSurfaceVariant;
       }
     } else {
-      rankColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+      rankColor = isDark
+          ? VColors.onSurfaceVariantDark
+          : VColors.onSurfaceVariant;
     }
 
     return Container(
@@ -403,7 +399,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           ),
           const SizedBox(width: VSpacing.sm),
           VAvatar(
-            imageUrl: participant.avatarUrl.isNotEmpty ? participant.avatarUrl : null,
+            imageUrl: participant.avatarUrl.isNotEmpty
+                ? participant.avatarUrl
+                : null,
             fallbackSeed: participant.name,
             size: 32,
           ),
@@ -413,7 +411,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
               participant.name,
               style: TextStyle(
                 fontSize: VFontSize.bodyMd,
-                fontWeight: isCurrentUser ? VFontWeight.semiBold : VFontWeight.regular,
+                fontWeight: isCurrentUser
+                    ? VFontWeight.semiBold
+                    : VFontWeight.regular,
                 color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
               ),
               overflow: TextOverflow.ellipsis,
@@ -425,7 +425,9 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             style: TextStyle(
               fontSize: VFontSize.labelMd,
               fontWeight: VFontWeight.semiBold,
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           if (isDemotionZone && !isCurrentUser) ...[
@@ -451,7 +453,9 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,

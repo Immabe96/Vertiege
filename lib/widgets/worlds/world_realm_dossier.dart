@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../config/tiers.dart';
 import '../../config/world_capability_matrix.dart';
@@ -19,8 +19,6 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_foundations.dart';
-import '../../widgets/core/v_feedback.dart';
-import '../../widgets/v_section_list.dart';
 import 'alliance_section.dart';
 import 'resource_vault.dart';
 import 'world_growth_card.dart';
@@ -295,7 +293,7 @@ class _TypeLeadSection extends StatelessWidget {
         ? 'Verified ${world.requiredProfession}'
         : 'Tier ${world.requiredTier ?? 1} · ${tierNames[world.requiredTier ?? 1] ?? 'Open'}';
 
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -367,7 +365,7 @@ class _CharterSection extends StatelessWidget {
         ? 'Verified ${world.requiredProfession} residents'
         : 'Tier ${world.requiredTier ?? 1} ${tierNames[world.requiredTier ?? 1] ?? ''}';
 
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -409,9 +407,9 @@ class _CharterSection extends StatelessWidget {
                 child: const Text('Preview charter'),
               ),
               const SizedBox(height: VSpacing.sm),
-              FButton(
-                onPress: onJoin,
-                child: const Text('Join to read the full charter'),
+              VButton(
+                label: 'Join to read the full charter',
+                onPressed: onJoin,
               ),
             ],
           ],
@@ -441,7 +439,7 @@ class _SafetyDisclaimerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Row(
@@ -543,7 +541,7 @@ class _StandingSection extends StatelessWidget {
         : null;
     final current = rep != null ? getStanding(rep) : null;
 
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -648,7 +646,7 @@ class _EconomySection extends StatelessWidget {
       isJoined: isJoined,
     );
 
-    final tiles = <FTileMixin>[];
+    final tiles = <VSectionTile>[];
     if (showTreasury) {
       tiles.add(_economyTile(
         context,
@@ -953,7 +951,7 @@ class _OrientationSection extends StatelessWidget {
                           ),
                         ),
                         Icon(
-                          FIcons.chevronRight,
+                          VIcons.chevronRight,
                           size: 18,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -1009,7 +1007,7 @@ class _CouncilPreviewSection extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final leaders = _leaders();
 
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -1118,7 +1116,7 @@ class _CouncilPreviewSection extends StatelessWidget {
                             ),
                           ),
                           Icon(
-                            FIcons.chevronRight,
+                            VIcons.chevronRight,
                             size: 18,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -1211,7 +1209,7 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
               child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
             )
           else if (_activePoll != null)
-            FCard.raw(
+            VSurfaceCard(
               child: Padding(
                 padding: const EdgeInsets.all(VSpacing.md),
                 child: Column(
@@ -1265,9 +1263,8 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
               ),
             )
           else
-            FAlert(
-              variant: FAlertVariant.primary,
-              icon: const Icon(FIcons.info),
+            VAlert(
+              icon: Icon(VIcons.info),
               title: const Text('Governance voting'),
               subtitle: Text(
                 'No active polls. Council and sovereign can create votes when needed.',
@@ -1290,9 +1287,8 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
             ],
           ),
         ] else
-          FAlert(
-            variant: FAlertVariant.primary,
-            icon: const Icon(FIcons.info),
+          VAlert(
+            icon: Icon(VIcons.info),
             title: const Text('Governance voting'),
             subtitle: Text(
               widget.isJoined

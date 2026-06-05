@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/achievement.dart';
@@ -7,7 +6,7 @@ import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
@@ -25,30 +24,24 @@ class HallOfAscensionScreen extends ConsumerStatefulWidget {
 }
 
 class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
-
-
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
-    final canAscend = ref.watch(residentProvider.select((s) {
-      final r = s.resident;
-      return r != null && r.tier.value >= 5 && r.totalXp >= 50000;
-    }));
+    final canAscend = ref.watch(
+      residentProvider.select((s) {
+        final r = s.resident;
+        return r != null && r.tier.value >= 5 && r.totalXp >= 50000;
+      }),
+    );
 
     return VHubPage(
       title: 'Hall of Ascension',
       showBack: true,
       headerActions: [
-        FButton(
-          onPress: () => context.push('/ascension-path'),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.map, size: VIconSize.sm),
-              SizedBox(width: VSpacing.xs),
-              Text('Journey'),
-            ],
-          ),
+        VButton(
+          label: 'Journey',
+          icon: const Icon(Icons.map, size: VIconSize.sm),
+          onPressed: () => context.push('/ascension-path'),
         ),
       ],
       body: Column(
@@ -65,21 +58,28 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
             ),
           ),
           if (resident != null) ...[
-            _PrestigeHeader(
-              resident: resident,
-              canAscend: canAscend,
-            ),
+            _PrestigeHeader(resident: resident, canAscend: canAscend),
           ],
           Expanded(
-            child: FTabs(
-              expands: true,
+            child: VTabs(
               scrollable: true,
-              control: const FTabControl.managed(),
-              children: [
-                FTabEntry(label: const Text('TOTAL XP'), child: _XpLeaderboard()),
-                FTabEntry(label: const Text('WORLD PRESTIGE'), child: _PrestigeLeaderboard()),
-                FTabEntry(label: const Text('ACHIEVEMENTS'), child: _AchievementLeaderboard()),
-                FTabEntry(label: const Text('REFERRALS'), child: _ReferralLeaderboard()),
+              tabs: [
+                VTabEntry(
+                  label: const Text('TOTAL XP'),
+                  child: _XpLeaderboard(),
+                ),
+                VTabEntry(
+                  label: const Text('WORLD PRESTIGE'),
+                  child: _PrestigeLeaderboard(),
+                ),
+                VTabEntry(
+                  label: const Text('ACHIEVEMENTS'),
+                  child: _AchievementLeaderboard(),
+                ),
+                VTabEntry(
+                  label: const Text('REFERRALS'),
+                  child: _ReferralLeaderboard(),
+                ),
               ],
             ),
           ),
@@ -155,81 +155,87 @@ class _PrestigeHeader extends ConsumerWidget {
       padding: const EdgeInsets.all(VSpacing.md),
       child: _Card(
         padding: const EdgeInsets.all(VSpacing.lg),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              ...List.generate(
-                prestigeStars,
-                (i) => Padding(
-                  padding: EdgeInsets.only(right: i < prestigeStars - 1 ? 4 : 0),
-                  child: const Icon(Icons.star, color: VColors.tertiary, size: 24),
-                ),
-              ),
-              if (prestigeStars == 0)
-                const Icon(
-                  Icons.star_border,
-                  color: VColors.tertiary,
-                  size: 24,
-                ),
-              const SizedBox(width: VSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      prestigeTitle,
-                      style: TextStyle(
-                        fontSize: VFontSize.headlineLg,
-                        fontWeight: VFontWeight.bold,
-                        color: VColors.tertiary,
-                      ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                ...List.generate(
+                  prestigeStars,
+                  (i) => Padding(
+                    padding: EdgeInsets.only(
+                      right: i < prestigeStars - 1 ? 4 : 0,
                     ),
-                    Text(
-                      prestigeStars == 0
-                          ? 'Reach 50,000 XP to ascend'
-                          : 'Prestige Level $prestigeStars',
-                      style: TextStyle(
-                        fontSize: VFontSize.bodySm,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                      ),
+                    child: const Icon(
+                      Icons.star,
+                      color: VColors.tertiary,
+                      size: 24,
                     ),
-                  ],
+                  ),
+                ),
+                if (prestigeStars == 0)
+                  const Icon(
+                    Icons.star_border,
+                    color: VColors.tertiary,
+                    size: 24,
+                  ),
+                const SizedBox(width: VSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        prestigeTitle,
+                        style: TextStyle(
+                          fontSize: VFontSize.headlineLg,
+                          fontWeight: VFontWeight.bold,
+                          color: VColors.tertiary,
+                        ),
+                      ),
+                      Text(
+                        prestigeStars == 0
+                            ? 'Reach 50,000 XP to ascend'
+                            : 'Prestige Level $prestigeStars',
+                        style: TextStyle(
+                          fontSize: VFontSize.bodySm,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (canAscend) ...[
+              const SizedBox(height: VSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    final success = await ref
+                        .read(residentProvider.notifier)
+                        .ascendToPrestige();
+                    if (success && context.mounted) {
+                      PrestigeUpDialog.show(
+                        context,
+                        prestigeLevel: 1,
+                        newPrestigeStars: prestigeStars + 1,
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('ASCEND TO PRESTIGE'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: VColors.tertiary,
+                    foregroundColor: VColors.onTertiary,
+                    padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+                  ),
                 ),
               ),
             ],
-          ),
-          if (canAscend) ...[
-            const SizedBox(height: VSpacing.md),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () async {
-                  final success = await ref
-                      .read(residentProvider.notifier)
-                      .ascendToPrestige();
-                  if (success && context.mounted) {
-                    PrestigeUpDialog.show(
-                      context,
-                      prestigeLevel: 1,
-                      newPrestigeStars: prestigeStars + 1,
-                    );
-                  }
-                },
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('ASCEND TO PRESTIGE'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: VColors.tertiary,
-                  foregroundColor: VColors.onTertiary,
-                  padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
-                ),
-              ),
-            ),
           ],
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -416,9 +422,7 @@ Widget _buildLeaderboardList(
           child: _Card(
             padding: const EdgeInsets.all(VSpacing.md),
             border: isTop3
-                ? Border.all(
-                    color: glowColor.withValues(alpha: 0.4),
-                  )
+                ? Border.all(color: glowColor.withValues(alpha: 0.4))
                 : null,
             child: Container(
               decoration: isTop3
@@ -439,8 +443,10 @@ Widget _buildLeaderboardList(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: _rankColor(rank, isDark: isDark)
-                          .withValues(alpha: 0.15),
+                      color: _rankColor(
+                        rank,
+                        isDark: isDark,
+                      ).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(VRadius.sm),
                       border: isTop3
                           ? Border.all(
@@ -506,11 +512,17 @@ class _Card extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: border ?? Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
+        border:
+            border ??
+            Border.all(
+              color: isDark
+                  ? VColors.outlineVariantDark
+                  : VColors.outlineVariant,
+            ),
       ),
       child: child,
     );

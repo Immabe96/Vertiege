@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
@@ -10,7 +9,7 @@ import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../widgets/worlds/world_card.dart';
 
 class WorldDiscoveryScreen extends ConsumerStatefulWidget {
@@ -92,16 +91,11 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
       footer: canCreateWorld
           ? Padding(
               padding: const EdgeInsets.all(VSpacing.md),
-              child: FButton(
-                onPress: () => context.push('/create-world'),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(FIcons.plus, size: 18),
-                    SizedBox(width: VSpacing.sm),
-                    Text('Create World'),
-                  ],
-                ),
+              child: VButton(
+                label: 'Create World',
+                isFullWidth: true,
+                icon: Icon(VIcons.plus, size: 18),
+                onPressed: () => context.push('/create-world'),
               ),
             )
           : null,
@@ -123,14 +117,14 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
               decoration: InputDecoration(
                 hintText: 'Search worlds...',
                 prefixIcon: Icon(
-                  FIcons.search,
+                  VIcons.search,
                   color: isDark
                       ? VColors.onSurfaceVariantDark
                       : VColors.onSurfaceVariant,
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(FIcons.x, size: 18),
+                        icon: Icon(VIcons.x, size: 18),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {});
@@ -219,7 +213,9 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
                     label: type.displayName,
                     selected: _selectedDominionType == type.name,
                     onTap: () => setState(() {
-                      _selectedDominionType = _selectedDominionType == type.name ? null : type.name;
+                      _selectedDominionType = _selectedDominionType == type.name
+                          ? null
+                          : type.name;
                       _loadData();
                     }),
                   );
@@ -228,13 +224,20 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
             ),
           const SizedBox(height: VSpacing.sm),
           Expanded(
-            child: FTabs(
-              expands: true,
-              control: const FTabControl.managed(),
-              children: [
-                FTabEntry(label: const Text('Browse'), child: _WorldList(worlds: _worlds, loading: _loading)),
-                FTabEntry(label: const Text('Trending'), child: _WorldList(worlds: _trending, loading: _loading)),
-                FTabEntry(label: const Text('Featured'), child: _WorldList(worlds: _featured, loading: _loading)),
+            child: VTabs(
+              tabs: [
+                VTabEntry(
+                  label: const Text('Browse'),
+                  child: _WorldList(worlds: _worlds, loading: _loading),
+                ),
+                VTabEntry(
+                  label: const Text('Trending'),
+                  child: _WorldList(worlds: _trending, loading: _loading),
+                ),
+                VTabEntry(
+                  label: const Text('Featured'),
+                  child: _WorldList(worlds: _featured, loading: _loading),
+                ),
               ],
             ),
           ),
@@ -263,7 +266,9 @@ class _WorldList extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: VSpacing.sm),
             height: 120,
             decoration: BoxDecoration(
-              color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainer,
               borderRadius: BorderRadius.circular(VRadius.lg),
             ),
             child: const Pulse(),
@@ -277,7 +282,11 @@ class _WorldList extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.explore_outlined, size: 48, color: VColors.onSurfaceVariant),
+            Icon(
+              Icons.explore_outlined,
+              size: 48,
+              color: VColors.onSurfaceVariant,
+            ),
             const SizedBox(height: VSpacing.md),
             const Text(
               'No worlds found',
@@ -308,19 +317,30 @@ class _FilterChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md, vertical: VSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: VSpacing.md,
+          vertical: VSpacing.xs,
+        ),
         decoration: BoxDecoration(
-          color: selected ? VColors.primary.withValues(alpha: 0.15) : Colors.transparent,
+          color: selected
+              ? VColors.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
-            color: selected ? VColors.primary : VColors.outline.withValues(alpha: 0.3),
+            color: selected
+                ? VColors.primary
+                : VColors.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(

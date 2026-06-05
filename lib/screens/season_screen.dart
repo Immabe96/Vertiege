@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/core/v_surface_card.dart';
 import '../router/world_navigation.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../models/season.dart';
 import '../models/season_cohort.dart';
 import '../services/season_cohort_service.dart';
@@ -77,99 +77,93 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
 
     final body = isLoaded
         ? CustomScrollView(
-              slivers: [
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    VSpacing.md,
+                    VSpacing.md,
+                    VSpacing.md,
+                    0,
+                  ),
+                  child: Text(
+                    'Season ranks worlds by growth — not the same as weekly Ascension Leagues (personal XP ladders).',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _SeasonHero(
+                  season: season,
+                  unclaimedCount: unclaimed.length,
+                  growingCount: growing,
+                ),
+              ),
+              if (lowPressure)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      VSpacing.md,
+                      0,
+                      VSpacing.md,
+                      VSpacing.sm,
+                    ),
+                    child: _LowPressureNote(),
+                  ),
+                ),
+              if (_cohort != null)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       VSpacing.md,
-                      VSpacing.md,
-                      VSpacing.md,
                       0,
+                      VSpacing.md,
+                      VSpacing.sm,
                     ),
-                    child: Text(
-                      'Season ranks worlds by growth — not the same as weekly Ascension Leagues (personal XP ladders).',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                        height: 1.35,
-                      ),
-                    ),
+                    child: _SeasonCohortCard(cohort: _cohort!),
                   ),
                 ),
+              if (season.pillars.isNotEmpty)
                 SliverToBoxAdapter(
-                  child: _SeasonHero(
-                    season: season,
-                    unclaimedCount: unclaimed.length,
-                    growingCount: growing,
-                  ),
+                  child: _SeasonGuideExpansion(season: season),
                 ),
-                if (lowPressure)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        VSpacing.md,
-                        0,
-                        VSpacing.md,
-                        VSpacing.sm,
-                      ),
-                      child: _LowPressureNote(),
-                    ),
-                  ),
-                if (_cohort != null)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        VSpacing.md,
-                        0,
-                        VSpacing.md,
-                        VSpacing.sm,
-                      ),
-                      child: _SeasonCohortCard(cohort: _cohort!),
-                    ),
-                  ),
-                if (season.pillars.isNotEmpty)
-                  SliverToBoxAdapter(child: _SeasonGuideExpansion(season: season)),
-                SliverToBoxAdapter(child: _SeasonProgress(season: season)),
-                SliverToBoxAdapter(child: _CountdownBanner(season: season)),
-                if (rankings.isNotEmpty)
-                  SliverToBoxAdapter(child: _PodiumSection(rankings: rankings)),
-                if (rankings.length > 3)
-                  SliverToBoxAdapter(
-                    child: _SectionHeader(title: 'Full Rankings'),
-                  ),
-                if (rankings.length > 3)
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final score = rankings[index + 3];
-                      return _RankingRow(score: score, index: index + 3);
-                    }, childCount: rankings.length - 3),
-                  ),
-                if (myRankedWorlds.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: _SectionHeader(title: 'Your Worlds'),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final score = myRankedWorlds[index];
-                      return _RankingRow(score: score, index: index);
-                    }, childCount: myRankedWorlds.length),
-                  ),
-                ],
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: VSpacing.xxl),
+              SliverToBoxAdapter(child: _SeasonProgress(season: season)),
+              SliverToBoxAdapter(child: _CountdownBanner(season: season)),
+              if (rankings.isNotEmpty)
+                SliverToBoxAdapter(child: _PodiumSection(rankings: rankings)),
+              if (rankings.length > 3)
+                SliverToBoxAdapter(
+                  child: _SectionHeader(title: 'Full Rankings'),
+                ),
+              if (rankings.length > 3)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final score = rankings[index + 3];
+                    return _RankingRow(score: score, index: index + 3);
+                  }, childCount: rankings.length - 3),
+                ),
+              if (myRankedWorlds.isNotEmpty) ...[
+                SliverToBoxAdapter(child: _SectionHeader(title: 'Your Worlds')),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final score = myRankedWorlds[index];
+                    return _RankingRow(score: score, index: index);
+                  }, childCount: myRankedWorlds.length),
                 ),
               ],
-            )
+              const SliverToBoxAdapter(child: SizedBox(height: VSpacing.xxl)),
+            ],
+          )
         : _buildLoading(isDark);
 
     if (widget.embedInHub) return body;
 
-    return VHubPage(
-      title: 'Season 1',
-      showBack: true,
-      body: body,
-    );
+    return VHubPage(title: 'Season 1', showBack: true, body: body);
   }
 
   Widget _buildLoading(bool isDark) {
@@ -318,10 +312,7 @@ class _SeasonGuideExpansion extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      season.narrative,
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(season.narrative, style: theme.textTheme.bodySmall),
                     const SizedBox(height: VSpacing.sm),
                     Text(
                       'Score blends activity (×2), member growth (×10), and prestige (×5). '
@@ -512,9 +503,7 @@ class _SeasonProgress extends StatelessWidget {
               backgroundColor: isDark
                   ? VColors.surfaceContainerHighDark
                   : VColors.surfaceContainerHigh,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                VColors.tertiary,
-              ),
+              valueColor: const AlwaysStoppedAnimation<Color>(VColors.tertiary),
             ),
           ),
         ],
@@ -541,9 +530,7 @@ class _CountdownBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: VColors.tertiary.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(VRadius.xl),
-          border: Border.all(
-            color: VColors.tertiary.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: VColors.tertiary.withValues(alpha: 0.2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -811,8 +798,8 @@ class _RankingRow extends StatelessWidget {
                     color: score.rank <= 3
                         ? VColors.tertiary
                         : (isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant),
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant),
                   ),
                 ),
               ),
@@ -838,7 +825,9 @@ class _RankingRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: VFontWeight.bold,
-                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                        color: isDark
+                            ? VColors.onSurfaceDark
+                            : VColors.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),

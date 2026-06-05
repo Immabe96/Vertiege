@@ -12,10 +12,7 @@ import '../../state/channel_provider.dart';
 class WorldArchiveScreen extends ConsumerStatefulWidget {
   final String worldId;
 
-  const WorldArchiveScreen({
-    super.key,
-    required this.worldId,
-  });
+  const WorldArchiveScreen({super.key, required this.worldId});
 
   @override
   ConsumerState<WorldArchiveScreen> createState() => _WorldArchiveScreenState();
@@ -28,11 +25,22 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
     final channels = (channelState.channelsByWorld[widget.worldId] ?? []);
 
     // Archive specifically targets informational channels like lore, rules, info
-    const archiveChannelNames = {'info', 'rules', 'roles', 'lore', 'history', 'documents'};
-    final archiveChannels = channels
-        .where((channel) => archiveChannelNames.contains(channel.name.toLowerCase()))
-        .toList()
-      ..sort((a, b) => a.position.compareTo(b.position));
+    const archiveChannelNames = {
+      'info',
+      'rules',
+      'roles',
+      'lore',
+      'history',
+      'documents',
+    };
+    final archiveChannels =
+        channels
+            .where(
+              (channel) =>
+                  archiveChannelNames.contains(channel.name.toLowerCase()),
+            )
+            .toList()
+          ..sort((a, b) => a.position.compareTo(b.position));
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -40,7 +48,8 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
     if (archiveChannels.isEmpty) {
       return AppEmptyState(
         title: 'Empty Archive',
-        description: 'No lore or documents have been recorded in this archive yet.',
+        description:
+            'No lore or documents have been recorded in this archive yet.',
         icon: Icons.menu_book_outlined,
       );
     }
@@ -65,16 +74,20 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
             child: Text(
               'Explore the foundational knowledge and history of this dominion.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
           ),
-          ...archiveChannels.map((channel) => _ArchiveItem(
-                channel: channel,
-                onTap: () => context.push(
-                      worldChannelDestinationPath(widget.worldId, channel),
-                    ),
-              )),
+          ...archiveChannels.map(
+            (channel) => _ArchiveItem(
+              channel: channel,
+              onTap: () => context.push(
+                worldChannelDestinationPath(widget.worldId, channel),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -108,9 +121,15 @@ class _ArchiveItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(VSpacing.md),
           decoration: BoxDecoration(
-            color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.64),
+            color:
+                (isDark
+                        ? VColors.surfaceContainerDark
+                        : VColors.surfaceContainer)
+                    .withValues(alpha: 0.64),
             borderRadius: BorderRadius.circular(VRadius.md),
-            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
+            border: Border.all(
+              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            ),
           ),
           child: Row(
             children: [
@@ -118,7 +137,8 @@ class _ArchiveItem extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: (isDark ? VColors.primaryDark : VColors.primary).withValues(alpha: 0.12),
+                  color: (isDark ? VColors.primaryDark : VColors.primary)
+                      .withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(VRadius.md),
                 ),
                 child: Icon(
@@ -137,12 +157,15 @@ class _ArchiveItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                        color: isDark
+                            ? VColors.onSurfaceDark
+                            : VColors.onSurface,
                         fontWeight: VFontWeight.bold,
                         letterSpacing: 0.5,
                       ),
                     ),
-                    if (channel.description != null && channel.description!.isNotEmpty)
+                    if (channel.description != null &&
+                        channel.description!.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
@@ -150,7 +173,9 @@ class _ArchiveItem extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
                             fontSize: VFontSize.labelSm,
                           ),
                         ),
@@ -160,7 +185,9 @@ class _ArchiveItem extends StatelessWidget {
               ),
               Icon(
                 VIcons.chevronRight,
-                color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+                color: isDark
+                    ? VColors.outlineVariantDark
+                    : VColors.outlineVariant,
                 size: 24,
               ),
             ],

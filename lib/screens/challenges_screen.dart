@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../state/challenge_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/v_feedback.dart';
@@ -75,7 +73,9 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       return;
     }
     final cohort = await SeasonCohortService.ensureMembership(_worldId!);
-    await ref.read(challengeProvider.notifier).loadChallengesForWorld(_worldId!);
+    await ref
+        .read(challengeProvider.notifier)
+        .loadChallengesForWorld(_worldId!);
     if (mounted) setState(() => _cohort = cohort);
   }
 
@@ -83,75 +83,70 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
   Widget build(BuildContext context) {
     final challengeState = ref.watch(challengeProvider);
     final body = _initializing
-          ? const ScreenLoading.list()
-          : _worldId == null
-          ? AppEmptyState(
-              title: 'Join a world to see challenges',
-              description:
-                  'Challenges are scoped to worlds and seasons, not a permanent global board.',
-              icon: Icons.emoji_events_outlined,
-              actionLabel: 'Browse worlds',
-              onAction: () => context.go('/explore'),
-            )
-          : challengeState.isLoading
-          ? const ScreenLoading.list()
-          : challengeState.loadError != null &&
-                challengeState.activeChallenges.isEmpty &&
-                challengeState.seasonChallenges.isEmpty
-              ? AppErrorState(
-                  message: challengeState.loadError!,
-                  onRetry: _refresh,
-                )
-              : challengeState.activeChallenges.isEmpty &&
-                    challengeState.seasonChallenges.isEmpty
-              ? AppEmptyState(
-                  title: 'No active challenges',
-                  description:
-                      'World and season cohort challenges appear as your realm grows.',
-                  icon: Icons.emoji_events_outlined,
-                  actionLabel: 'Refresh',
-                  onAction: _refresh,
-                )
-              : ListView(
-                  padding: const EdgeInsets.all(VSpacing.md),
-                  children: [
-                    const _ProgressionScopeNote(
-                      title: 'World & season challenges',
-                      body:
-                          'World challenges are per-realm goals. Season cohort challenges are shared with everyone in your world\'s active season group — different from weekly Ascension Leagues.',
-                    ),
-                    if (_cohort != null) _CohortBanner(cohort: _cohort!),
-                    if (challengeState.activeChallenges.isNotEmpty) ...[
-                      const _SectionLabel(title: 'World'),
-                      ...challengeState.activeChallenges.map((challenge) {
-                        final progress =
-                            challengeState.userProgress[challenge.id];
-                        final isCompleted = challengeState.completedChallengeIds
-                            .contains(challenge.id);
-                        return _ChallengeCard(
-                          challenge: challenge,
-                          progress: progress,
-                          isCompleted: isCompleted,
-                        );
-                      }),
-                    ],
-                    if (challengeState.seasonChallenges.isNotEmpty) ...[
-                      const SizedBox(height: VSpacing.md),
-                      const _SectionLabel(title: 'Season cohort'),
-                      ...challengeState.seasonChallenges.map((challenge) {
-                        final progress =
-                            challengeState.userProgress[challenge.id];
-                        final isCompleted = challengeState.completedChallengeIds
-                            .contains(challenge.id);
-                        return _ChallengeCard(
-                          challenge: challenge,
-                          progress: progress,
-                          isCompleted: isCompleted,
-                        );
-                      }),
-                    ],
-                  ],
-                );
+        ? const ScreenLoading.list()
+        : _worldId == null
+        ? AppEmptyState(
+            title: 'Join a world to see challenges',
+            description:
+                'Challenges are scoped to worlds and seasons, not a permanent global board.',
+            icon: Icons.emoji_events_outlined,
+            actionLabel: 'Browse worlds',
+            onAction: () => context.go('/explore'),
+          )
+        : challengeState.isLoading
+        ? const ScreenLoading.list()
+        : challengeState.loadError != null &&
+              challengeState.activeChallenges.isEmpty &&
+              challengeState.seasonChallenges.isEmpty
+        ? AppErrorState(message: challengeState.loadError!, onRetry: _refresh)
+        : challengeState.activeChallenges.isEmpty &&
+              challengeState.seasonChallenges.isEmpty
+        ? AppEmptyState(
+            title: 'No active challenges',
+            description:
+                'World and season cohort challenges appear as your realm grows.',
+            icon: Icons.emoji_events_outlined,
+            actionLabel: 'Refresh',
+            onAction: _refresh,
+          )
+        : ListView(
+            padding: const EdgeInsets.all(VSpacing.md),
+            children: [
+              const _ProgressionScopeNote(
+                title: 'World & season challenges',
+                body:
+                    'World challenges are per-realm goals. Season cohort challenges are shared with everyone in your world\'s active season group — different from weekly Ascension Leagues.',
+              ),
+              if (_cohort != null) _CohortBanner(cohort: _cohort!),
+              if (challengeState.activeChallenges.isNotEmpty) ...[
+                const _SectionLabel(title: 'World'),
+                ...challengeState.activeChallenges.map((challenge) {
+                  final progress = challengeState.userProgress[challenge.id];
+                  final isCompleted = challengeState.completedChallengeIds
+                      .contains(challenge.id);
+                  return _ChallengeCard(
+                    challenge: challenge,
+                    progress: progress,
+                    isCompleted: isCompleted,
+                  );
+                }),
+              ],
+              if (challengeState.seasonChallenges.isNotEmpty) ...[
+                const SizedBox(height: VSpacing.md),
+                const _SectionLabel(title: 'Season cohort'),
+                ...challengeState.seasonChallenges.map((challenge) {
+                  final progress = challengeState.userProgress[challenge.id];
+                  final isCompleted = challengeState.completedChallengeIds
+                      .contains(challenge.id);
+                  return _ChallengeCard(
+                    challenge: challenge,
+                    progress: progress,
+                    isCompleted: isCompleted,
+                  );
+                }),
+              ],
+            ],
+          );
 
     if (widget.embedInHub) return body;
 
@@ -159,10 +154,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       title: _worldName == null ? 'World Challenges' : '$_worldName Challenges',
       showBack: true,
       headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
-          onPress: _refresh,
-        ),
+        VHeaderAction(icon: Icon(VIcons.rotateCw), onPress: _refresh),
       ],
       body: body,
     );
@@ -190,10 +182,7 @@ class _ProgressionScopeNote extends StatelessWidget {
             ),
           ),
           const SizedBox(height: VSpacing.xs),
-          Text(
-            body,
-            style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
-          ),
+          Text(body, style: theme.textTheme.bodySmall?.copyWith(height: 1.35)),
         ],
       ),
     );
@@ -211,9 +200,9 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: VSpacing.sm),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          fontWeight: VFontWeight.bold,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: VFontWeight.bold),
       ),
     );
   }
@@ -231,7 +220,9 @@ class _CohortBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: VSpacing.md),
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+        color: isDark
+            ? VColors.surfaceContainerDark
+            : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
@@ -348,7 +339,9 @@ class _ChallengeCard extends ConsumerWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: VColors.tertiary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(VRadius.pill),
+                                borderRadius: BorderRadius.circular(
+                                  VRadius.pill,
+                                ),
                               ),
                               child: Text(
                                 'World goal',
@@ -451,10 +444,7 @@ class _ChallengeCard extends ConsumerWidget {
                           ref
                               .read(challengeProvider.notifier)
                               .claimReward(challenge.id);
-                          VFeedback.showMessage(
-                            context,
-                            'Reward claimed!',
-                          );
+                          VFeedback.showMessage(context, 'Reward claimed!');
                         }
                       : null,
                   icon: const Icon(VIcons.gavel, size: VIconSize.md),

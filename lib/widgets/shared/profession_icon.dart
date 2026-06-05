@@ -33,17 +33,26 @@ class ProfessionIcon extends StatelessWidget {
       );
     }
 
-    return Image.asset(
-      cosmetic.iconAsset,
+    final inset = VBadgeSize.artInset(size);
+    final inner = VBadgeSize.artInner(size);
+    return SizedBox(
       width: size,
       height: size,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      cacheWidth: assetCachePx(context, size),
-      errorBuilder: (_, _, _) => Icon(
-        Icons.work_outline,
-        size: size,
-        color: fallbackColor ?? cosmetic.color,
+      child: Padding(
+        padding: EdgeInsets.all(inset),
+        child: Image.asset(
+          cosmetic.iconAsset,
+          width: inner,
+          height: inner,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          cacheWidth: assetCachePx(context, inner),
+          errorBuilder: (_, _, _) => Icon(
+            Icons.work_outline,
+            size: inner * VBadgeSize.fallbackIconFraction,
+            color: fallbackColor ?? cosmetic.color,
+          ),
+        ),
       ),
     );
   }

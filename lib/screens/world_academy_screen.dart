@@ -1,14 +1,12 @@
-import '../../ui/icons/v_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/challenge.dart';
 import '../../services/challenge_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
-import '../../ui/buttons/v_button.dart';
 
 class WorldAcademyScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -21,8 +19,7 @@ class WorldAcademyScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WorldAcademyScreen> createState() =>
-      _WorldAcademyScreenState();
+  ConsumerState<WorldAcademyScreen> createState() => _WorldAcademyScreenState();
 }
 
 class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
@@ -98,17 +95,24 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: VSpacing.lg),
-                FSelect<String>.rich(
-                  format: (value) => value == 'individual' ? 'Individual' : 'Collective',
-                  control: FSelectControl.lifted(
-                    value: challengeType,
-                    onChange: (v) { if (v != null) setDialogState(() => challengeType = v); },
-                  ),
+                VSelect<String>(
+                  value: challengeType,
+                  onChanged: (v) {
+                    if (v != null) setDialogState(() => challengeType = v);
+                  },
+                  format: (value) =>
+                      value == 'individual' ? 'Individual' : 'Collective',
                   label: const Text('Type'),
                   hint: 'Select type',
-                  children: const [
-                    FSelectItem<String>(value: 'individual', title: Text('Individual')),
-                    FSelectItem<String>(value: 'collective', title: Text('Collective')),
+                  items: const [
+                    VSelectItem(
+                      value: 'individual',
+                      title: Text('Individual'),
+                    ),
+                    VSelectItem(
+                      value: 'collective',
+                      title: Text('Collective'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: VSpacing.lg),
@@ -155,25 +159,29 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
               onPressed: () => Navigator.of(ctx).pop(),
               variant: ButtonVariant.text,
             ),
-            VButton(label: 'Create', onPressed: () async {
-              if (titleController.text.trim().isEmpty) return;
-              final target = int.tryParse(targetController.text);
-              if (target == null || target <= 0) return;
+            VButton(
+              label: 'Create',
+              onPressed: () async {
+                if (titleController.text.trim().isEmpty) return;
+                final target = int.tryParse(targetController.text);
+                if (target == null || target <= 0) return;
 
-              await ChallengeService.createChallenge(
-                worldId: widget.worldId,
-                title: titleController.text.trim(),
-                description: descController.text.trim(),
-                challengeType: challengeType,
-                targetValue: target,
-                rewardXp: int.tryParse(rewardXpController.text) ?? 0,
-                rewardCurrency: int.tryParse(rewardCurrencyController.text) ?? 0,
-              );
-              if (context.mounted) {
-                Navigator.of(ctx).pop();
-                _loadChallenges();
-              }
-            }),
+                await ChallengeService.createChallenge(
+                  worldId: widget.worldId,
+                  title: titleController.text.trim(),
+                  description: descController.text.trim(),
+                  challengeType: challengeType,
+                  targetValue: target,
+                  rewardXp: int.tryParse(rewardXpController.text) ?? 0,
+                  rewardCurrency:
+                      int.tryParse(rewardCurrencyController.text) ?? 0,
+                );
+                if (context.mounted) {
+                  Navigator.of(ctx).pop();
+                  _loadChallenges();
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -194,7 +202,9 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
             margin: const EdgeInsets.only(bottom: VSpacing.sm),
             padding: const EdgeInsets.all(VSpacing.md),
             decoration: BoxDecoration(
-              color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainer,
               borderRadius: BorderRadius.circular(VRadius.lg),
             ),
             child: const Column(
@@ -221,7 +231,9 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
             : 'No active assignments in this world.',
         icon: Icons.school_outlined,
         actionLabel: widget.isSovereignOrCouncil ? 'Create Assignment' : null,
-        onAction: widget.isSovereignOrCouncil ? _showCreateChallengeDialog : null,
+        onAction: widget.isSovereignOrCouncil
+            ? _showCreateChallengeDialog
+            : null,
       );
     }
 
@@ -239,7 +251,11 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
               ),
               const Spacer(),
               if (widget.isSovereignOrCouncil)
-                VButton(label: 'New Assignment', onPressed: _showCreateChallengeDialog, icon: const Icon(VIcons.plus)),
+                VButton(
+                  label: 'New Assignment',
+                  onPressed: _showCreateChallengeDialog,
+                  icon: const Icon(VIcons.plus),
+                ),
             ],
           ),
         ),
@@ -303,7 +319,10 @@ class _ChallengeCard extends StatelessWidget {
               ),
               if (isCompleted)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.xs,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: VColors.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(VRadius.pill),
@@ -323,7 +342,9 @@ class _ChallengeCard extends StatelessWidget {
           Text(
             challenge.description,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -364,13 +385,17 @@ class _ChallengeCard extends StatelessWidget {
           if (isSovereignOrCouncil && !isCompleted)
             Padding(
               padding: const EdgeInsets.only(top: VSpacing.sm),
-              child: VButton(label: challenge.isActive ? 'Pause' : 'Resume', onPressed: () async {
-                await ChallengeService.toggleChallenge(
-                  challenge.id,
-                  !challenge.isActive,
-                );
-                onToggle();
-              }, variant: ButtonVariant.text),
+              child: VButton(
+                label: challenge.isActive ? 'Pause' : 'Resume',
+                onPressed: () async {
+                  await ChallengeService.toggleChallenge(
+                    challenge.id,
+                    !challenge.isActive,
+                  );
+                  onToggle();
+                },
+                variant: ButtonVariant.text,
+              ),
             ),
         ],
       ),

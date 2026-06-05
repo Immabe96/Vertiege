@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
-import '../forui/v_hub_page.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../models/ally.dart';
 import '../models/resident.dart';
 import '../state/ally_provider.dart';
@@ -122,10 +122,11 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
       List<_ResidentRow> rows;
       if (widget.mode == ConnectionsMode.following) {
         final followingIds = resident.following.toSet();
-        rows = allMembers.values
-            .where((e) => followingIds.contains(e.resident.id))
-            .toList()
-          ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
+        rows =
+            allMembers.values
+                .where((e) => followingIds.contains(e.resident.id))
+                .toList()
+              ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
       } else {
         final allies = ref.read(allyProvider).allies;
         final allyIds = <String>{};
@@ -134,10 +135,11 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
             a.requesterId == resident.id ? a.receiverId : a.requesterId,
           );
         }
-        rows = allMembers.values
-            .where((e) => allyIds.contains(e.resident.id))
-            .toList()
-          ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
+        rows =
+            allMembers.values
+                .where((e) => allyIds.contains(e.resident.id))
+                .toList()
+              ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
       }
 
       if (mounted) {
@@ -179,9 +181,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(VSpacing.md),
-                children: [
-                  AppErrorState(message: _loadError, onRetry: _load),
-                ],
+                children: [AppErrorState(message: _loadError, onRetry: _load)],
               )
             : ListView(
                 padding: const EdgeInsets.all(VSpacing.md),
@@ -217,7 +217,8 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                     ),
                     const SizedBox(height: VSpacing.sm),
                     ...allyState.pendingRequests.map(
-                      (a) => _PendingAllyTile(ally: a, residentId: resident?.id),
+                      (a) =>
+                          _PendingAllyTile(ally: a, residentId: resident?.id),
                     ),
                     const SizedBox(height: VSpacing.lg),
                   ],
@@ -324,15 +325,13 @@ class _PendingAllyTile extends ConsumerWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.check, color: VColors.primary),
-                    onPressed: () => ref
-                        .read(allyProvider.notifier)
-                        .acceptRequest(ally.id),
+                    onPressed: () =>
+                        ref.read(allyProvider.notifier).acceptRequest(ally.id),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, color: VColors.error),
-                    onPressed: () => ref
-                        .read(allyProvider.notifier)
-                        .declineRequest(ally.id),
+                    onPressed: () =>
+                        ref.read(allyProvider.notifier).declineRequest(ally.id),
                   ),
                 ],
               )

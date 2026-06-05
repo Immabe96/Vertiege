@@ -1,6 +1,7 @@
 # Design system reference
 
 > **Status: Current** — Prestige Noir + Forui (2026).  
+> **Migration:** [shadcn-migration-plan.md](../product/planning/shadcn-migration-plan.md) — Wave 0 chose **Forui 0.21**; wrapper consolidation (not shadcn swap).  
 > Historical glassmorphism spec: [archive/design-sovereign-excellence-historical.md](../archive/design-sovereign-excellence-historical.md).
 
 ## Stack
@@ -45,10 +46,12 @@ Use `context.vOnSurface`, `context.vPrimary`, etc. from `v_context_colors.dart` 
 
 ## UI conventions
 
-1. **Tab screens** — `VTabPage` / `FScaffold` + `FHeader` (`lib/forui/v_tab_page.dart`).
-2. **Hub sub-pages** — `VHubPage` pattern (`lib/forui/v_hub_page.dart`).
-3. **Ink / tooltips** — ensure a `Material` ancestor (`Material(transparency)` on tab bodies).
-4. **Prefer Forui** over raw `Scaffold` / `ListTile` on new screens — see [lib/forui/README.md](../../lib/forui/README.md).
+1. **Tab screens** — `VTabShell` (`lib/ui/shell/v_tab_shell.dart`) — Forui `FScaffold` + `FHeader` inside.
+2. **Hub sub-pages** — `VPage` (`lib/ui/shell/v_page.dart`).
+3. **Import path** — feature screens use `package:vertiege/ui/ui.dart`; **no** `import 'package:forui/forui.dart'` in `lib/screens/`. Forui stays inside `lib/ui/` wrappers and legacy `lib/widgets/` re-exports.
+4. **Wide panels** — use `Card` + full width, not `FTile.raw` with `Expanded` rows (Settings Appearance).
+5. **Ink / tooltips** — `Material(transparency)` ancestor on tab bodies.
+6. See [lib/forui/README.md](../../lib/forui/README.md).
 
 ## Prestige Noir direction
 
@@ -66,7 +69,7 @@ Dark base surface `#0F1117` with stepped containers — avoid pure `#000000` for
 ## Cross-platform UI rules
 
 1. One Flutter UI — no separate Cupertino shell.
-2. Prefer `VButton`, `FTile`, theme text styles over ad-hoc `Material` + `InkWell`.
+2. Prefer `VButton`, `VTile` / `VSectionTile`, theme text styles over ad-hoc `Material` + `InkWell`.
 3. Motion: `context.motionDuration()` / `VHaptics` (reduced motion).
 4. Full-screen routes: `vGoRoute` in `app_router.dart`.
 5. Auth: `AuthSocialButtons` — Apple on iOS/macOS; Google on mobile.
