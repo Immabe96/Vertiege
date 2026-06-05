@@ -46,10 +46,12 @@ Use `context.vOnSurface`, `context.vPrimary`, etc. from `v_context_colors.dart` 
 
 ## UI conventions
 
-1. **Tab screens** — `VTabPage` / `FScaffold` + `FHeader` (`lib/forui/v_tab_page.dart`).
-2. **Hub sub-pages** — `VHubPage` pattern (`lib/forui/v_hub_page.dart`).
-3. **Ink / tooltips** — ensure a `Material` ancestor (`Material(transparency)` on tab bodies).
-4. **Prefer Forui** over raw `Scaffold` / `ListTile` on new screens — see [lib/forui/README.md](../../lib/forui/README.md).
+1. **Tab screens** — `VTabShell` (`lib/ui/shell/v_tab_shell.dart`) — Forui `FScaffold` + `FHeader` inside.
+2. **Hub sub-pages** — `VPage` (`lib/ui/shell/v_page.dart`).
+3. **Import path** — feature code uses `package:vertiege/ui/ui.dart`; Forui only inside `lib/ui/` and `lib/widgets/`.
+4. **Wide panels** — use `Card` + full width, not `FTile.raw` with `Expanded` rows (Settings Appearance).
+5. **Ink / tooltips** — `Material(transparency)` ancestor on tab bodies.
+6. See [lib/forui/README.md](../../lib/forui/README.md).
 
 ## Prestige Noir direction
 

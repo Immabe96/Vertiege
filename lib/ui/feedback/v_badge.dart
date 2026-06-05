@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -55,11 +55,7 @@ class VDotBadge extends StatelessWidget {
   final Color color;
   final double size;
 
-  const VDotBadge({
-    super.key,
-    required this.color,
-    this.size = 8,
-  });
+  const VDotBadge({super.key, required this.color, this.size = 8});
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +65,7 @@ class VDotBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: VColors.surfaceBright,
-          width: 1.5,
-        ),
+        border: Border.all(color: VColors.surfaceBright, width: 1.5),
       ),
     );
   }

@@ -1,29 +1,33 @@
-# Forui components (Vertiege)
+# Forui wrappers (Vertiege)
 
-Vertiege uses **[Forui](https://forui.dev)** (`forui: ^0.21.3`) — Flutter widgets modeled after **shadcn/ui**.
+Vertiege uses **[Forui](https://forui.dev)** (`forui: ^0.21.3`) behind **`V*` facades** in `lib/ui/`.
 
-## Package widget index
+Wave 0 (2026-06-05): **Forui baseline kept** — wrapper consolidation, not library swap.
 
-Installed source (browse when implementing):
+## Public shell API
 
-`%LOCALAPPDATA%\Pub\Cache\hosted\pub.dev\forui-0.21.3\lib\widgets\`
+| Type | File | Backing |
+|------|------|---------|
+| `VPage` | `lib/ui/shell/v_page.dart` | `FScaffold` + `FHeader` |
+| `VTabShell` | `lib/ui/shell/v_tab_shell.dart` | `FScaffold` + `FHeader` |
+
+Legacy names `VHubPage` / `VTabPage` are typedefs — prefer `VPage` / `VTabShell`.
+
+Import: `package:vertiege/ui/ui.dart` or `lib/ui/shell/*.dart`.
+
+## Forui primitives (inside wrappers only)
 
 | Area | Widgets |
 |------|---------|
 | Layout | `FScaffold`, `FHeader`, `FHeader.nested`, `FHeaderAction` |
-| Navigation | `FTabs`, `FBottomNavigationBar`, `FBreadcrumb` |
-| Lists (shadcn “settings” rows) | `FTile`, `FTileGroup` |
-| Data | `FCard`, `FBadge`, `FAvatar` |
-| Forms | `FButton`, `FTextField`, `FSelect`, `FSwitch`, `FCheckbox`, `FRadio` |
-| Feedback | `FAlert`, `FDialog`, `FSheet`, `FToast`, `FProgress` |
+| Navigation | `FTabs`, `FBottomNavigationBar` |
+| Lists | `FTile`, `FTileGroup` — see `lib/widgets/v_section_list.dart` |
+| Forms | `FButton`, `FSelect`, `FSwitch`, `FTextField` |
+| Feedback | `FDialog`, `FSheet`, `FToast` |
 
-Theme: `lib/theme/forui_theme.dart` (`VertiegeForuiTheme`), wrapped in `app.dart` via `FTheme`.
+Theme: `lib/theme/forui_theme.dart` → `FTheme` in `app.dart`.
 
-## Project wrappers
+## Layout rules
 
-| File | Purpose |
-|------|---------|
-| `lib/widgets/v_section_list.dart` | Settings/More section lists → `FTileGroup` + `FTile` |
-| `lib/forui/v_hub_page.dart` | Hub sub-pages → `FScaffold` + `FHeader` |
-
-Prefer **Forui** over raw `ListTile` / `AppBar` / `FilledButton` on new UI. Legacy `lib/ui/*` bridges older screens until migrated.
+- **Do not** put `Expanded` / full-width `Row` children inside `FTile.raw` — use a `Card` with bounded width (Settings Appearance pattern).
+- Feature screens: **no** `import 'package:forui/forui.dart'` — use `lib/ui/*` and `VSectionList`.

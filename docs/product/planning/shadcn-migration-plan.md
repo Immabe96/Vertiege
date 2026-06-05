@@ -233,11 +233,13 @@ _Waves A–F below are **historical** — kept for inventory only. Do not execut
 
 Same screen groupings as the old ladder, but **Forui remains the backing library** inside `lib/ui/` / `lib/forui/`. No `pubspec` swap.
 
-### W1 — Shell & layout patterns (highest leverage)
+### W1 — Shell & layout patterns (highest leverage) — **in progress**
 
-- Move `VHubPage` → `VPage`, `VTabPage` → `VTabShell` under `lib/ui/shell/` (re-export from `ui.dart`).
-- Document **do not** use `FTile.raw` for wide panels with `Expanded` children — use `Card` + full width (Settings Appearance pattern).
-- Tab roots unchanged visually; fix any remaining grey-void UAT #2 issues.
+- [x] `VPage` / `VTabShell` in `lib/ui/shell/`; `VHubPage` / `VTabPage` typedefs for compat.
+- [x] `ui.dart` exports shell; `shadcn_ui` removed; debug spike = Forui baseline only.
+- [x] Settings Appearance `Card` layout fix; design-system layout rules documented.
+- [ ] Migrate feature screens to `import 'package:vertiege/ui/ui.dart'` (incremental).
+- [ ] Tab roots grey-void UAT #2 pass.
 
 ### W2 — Auth & onboarding
 
