@@ -26,7 +26,8 @@
 
 ## Wave 1 shipped (partial)
 
-- [x] DCX-001–003: `CommuneHomeScreen`, `VOverlappingPanels`, `VServerRail`
+- [x] DCX-001–003: `CommuneHomeScreen`, `VOverlappingPanels`, `VWorldRail`
+- [x] Vertiege lexicon locked (worlds, residents, achievements — no server/member copy)
 - [x] DCX-004–006: 3-tab shell (Home / Alerts / You)
 - [x] DCX-002: `hideBottomNavProvider` hides bar in channel/DM/campfire
 - [x] DCX-111–112: `VChannelTile`, server rail

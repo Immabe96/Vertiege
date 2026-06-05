@@ -10,7 +10,7 @@ export 'inputs/v_text_form_field.dart';
 export 'inputs/v_switch.dart';
 export 'navigation/v_tabs.dart';
 export 'navigation/v_bottom_nav.dart';
-export 'navigation/v_server_rail.dart';
+export 'navigation/v_world_rail.dart';
 export 'feedback/v_states.dart';
 export 'feedback/v_badge.dart';
 export 'media/v_avatar.dart';

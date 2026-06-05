@@ -20,7 +20,7 @@
     {"id": "DRA-001", "category": "icon", "name": "tab-home", "path": "assets/ui/commune/tab_home.png", "size_dp": 24, "status": "pending", "notes": "Outlined home for bottom nav"},
     {"id": "DRA-002", "category": "icon", "name": "tab-notifications", "path": "assets/ui/commune/tab_notifications.png", "size_dp": 24, "status": "pending"},
     {"id": "DRA-003", "category": "icon", "name": "tab-you", "path": "assets/ui/commune/tab_you.png", "size_dp": 24, "status": "pending"},
-    {"id": "DRA-004", "category": "icon", "name": "server-add", "path": "assets/ui/commune/server_add.png", "size_dp": 28, "status": "pending", "notes": "Plus on server rail"},
+    {"id": "DRA-004", "category": "icon", "name": "world-add", "path": "assets/ui/commune/world_add.png", "size_dp": 28, "status": "pending", "notes": "Plus on world rail — discover worlds"},
     {"id": "DRA-005", "category": "icon", "name": "channel-text", "path": "assets/ui/commune/channel_text.png", "size_dp": 20, "status": "pending"},
     {"id": "DRA-006", "category": "icon", "name": "channel-voice", "path": "assets/ui/commune/channel_voice.png", "size_dp": 20, "status": "pending"},
     {"id": "DRA-007", "category": "icon", "name": "channel-announcement", "path": "assets/ui/commune/channel_announcement.png", "size_dp": 20, "status": "pending"},

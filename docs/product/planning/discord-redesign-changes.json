@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "project": "Vertiege Commune UX (Discord++)",
+  "project": "Vertiege Commune UX (Commune UX)",
   "created": "2026-06-05",
   "research_sources": [
     "https://discord.com/blog/how-discord-made-android-in-app-navigation-easier",
@@ -36,7 +36,7 @@
     },
     {
       "id": 4,
-      "name": "World / server UI",
+      "name": "World UI",
       "changes": 18
     },
     {
@@ -73,7 +73,7 @@
       "category": "navigation",
       "priority": "P0",
       "title": "Unify Home: worlds + DMs in one tab",
-      "description": "Merge Explore chat modes and server rail into Discord-style Home with overlapping panels",
+      "description": "Merge Explore chat modes and world rail into Chat-native Home with overlapping panels",
       "files": [
         "lib/screens/tabs/tab_layout.dart",
         "lib/screens/tabs/chat_list_screen.dart"
@@ -101,7 +101,7 @@
       "category": "navigation",
       "priority": "P0",
       "title": "OverlappingPanelsLayout for world\u2192channel",
-      "description": "Custom panel: server list | channel list | chat (Material easing, no drawer+tabs)",
+      "description": "Custom panel: world list | channel list | chat (Material easing, no drawer+tabs)",
       "files": [
         "lib/ui/shell/v_overlapping_panels.dart"
       ],
@@ -114,7 +114,7 @@
       "category": "navigation",
       "priority": "P0",
       "title": "Rename Identity tab to You",
-      "description": "Profile, status, friends, settings entry \u2014 Discord You tab pattern",
+      "description": "Profile, status, friends, settings entry \u2014 Reference app You tab pattern",
       "files": [
         "lib/screens/tabs/identity_screen.dart",
         "lib/ui/navigation/v_bottom_nav.dart"
@@ -168,7 +168,7 @@
       "category": "navigation",
       "priority": "P0",
       "title": "World discovery via Home search",
-      "description": "Global + in-server search with inline filter chips",
+      "description": "Global + in-world search with inline filter chips",
       "files": [
         "lib/screens/search_screen.dart"
       ],
@@ -235,9 +235,9 @@
       "title": "Server (world) icon rail",
       "description": "Fixed left rail of circular world icons with unread badges",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
-      "discord_ref": "Server list rail",
+      "discord_ref": "World list rail",
       "status": "planned"
     },
     {
@@ -324,9 +324,9 @@
       "category": "navigation",
       "priority": "P0",
       "title": "Quick switcher between worlds",
-      "description": "Long-press server rail or search to jump worlds",
+      "description": "Long-press world rail or search to jump worlds",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "Quick server switch",
       "status": "planned"
@@ -363,7 +363,7 @@
       "category": "navigation",
       "priority": "P0",
       "title": "Remove FAB on Nexus; composer in feed header",
-      "description": "Discord-style inline compose, not floating +",
+      "description": "Chat-native inline compose, not floating +",
       "files": [
         "lib/screens/tabs/tab_layout.dart"
       ],
@@ -442,7 +442,7 @@
       "category": "theme",
       "priority": "P0",
       "title": "8px card radius; pill buttons",
-      "description": "Discord-friendly radii across VCard/VButton",
+      "description": "Commune radii across VCard/VButton",
       "files": [
         "lib/theme/v_tokens.dart"
       ],
@@ -533,7 +533,7 @@
       "category": "theme",
       "priority": "P0",
       "title": "Saturation/contrast accessibility sliders",
-      "description": "Discord-style a11y theme controls in Settings",
+      "description": "Chat-native a11y theme controls in Settings",
       "files": [
         "lib/screens/settings_screen.dart"
       ],
@@ -741,7 +741,7 @@
       "category": "chat",
       "priority": "P0",
       "title": "Image grid in messages",
-      "description": "1/2/3+ image layouts like Discord media",
+      "description": "1/2/3+ image layouts chat-native media",
       "files": [
         "lib/widgets/chat/chat_image.dart"
       ],
@@ -896,12 +896,12 @@
       "wave": 3,
       "category": "chat",
       "priority": "P0",
-      "title": "Member list sidebar sheet",
+      "title": "Resident list sidebar sheet",
       "description": "Avatars + roles; tap to DM",
       "files": [
         "lib/widgets/chat/v_member_list_sheet.dart"
       ],
-      "discord_ref": "Member list",
+      "discord_ref": "Resident list",
       "status": "planned"
     },
     {
@@ -962,12 +962,12 @@
       "wave": 4,
       "category": "world",
       "priority": "P1",
-      "title": "Rewrite world_detail as server home",
+      "title": "Rewrite world_detail as world home",
       "description": "Channels-first layout; tabs demoted to overflow",
       "files": [
         "lib/screens/world_detail_screen.dart"
       ],
-      "discord_ref": "Server layout",
+      "discord_ref": "World layout",
       "status": "planned"
     },
     {
@@ -993,7 +993,7 @@
       "files": [
         "lib/widgets/worlds/world_profile_header.dart"
       ],
-      "discord_ref": "Compact server header",
+      "discord_ref": "Compact world header",
       "status": "planned"
     },
     {
@@ -1017,9 +1017,9 @@
       "title": "World settings gear in rail context menu",
       "description": "Long-press world icon for settings/mute/leave",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
-      "discord_ref": "Server menu",
+      "discord_ref": "World menu",
       "status": "planned"
     },
     {
@@ -1043,9 +1043,9 @@
       "title": "World unread state on rail",
       "description": "Bold white dot vs number pill",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
-      "discord_ref": "Unread server",
+      "discord_ref": "Unread world",
       "status": "planned"
     },
     {
@@ -1053,7 +1053,7 @@
       "wave": 4,
       "category": "world",
       "priority": "P1",
-      "title": "Demote marketplace/jobs to server menu",
+      "title": "Demote marketplace/jobs to world menu",
       "description": "Keep features; not primary tabs",
       "files": [
         "lib/config/world_page_ia.dart"
@@ -1080,11 +1080,11 @@
       "category": "world",
       "priority": "P1",
       "title": "World icon 48dp circle",
-      "description": "Consistent server avatar in rail and headers",
+      "description": "Consistent world icon in rail and headers",
       "files": [
         "lib/widgets/worlds/world_icon.dart"
       ],
-      "discord_ref": "Server icons",
+      "discord_ref": "World icons",
       "status": "planned"
     },
     {
@@ -1106,11 +1106,11 @@
       "category": "world",
       "priority": "P1",
       "title": "Create world CTA at rail bottom",
-      "description": "+ icon like Discord add server",
+      "description": "+ icon chat-native add server",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
-      "discord_ref": "Add server",
+      "discord_ref": "Discover worlds",
       "status": "planned"
     },
     {
@@ -1119,11 +1119,11 @@
       "category": "world",
       "priority": "P1",
       "title": "World tooltips on long press",
-      "description": "Name + member count preview",
+      "description": "Name + resident count preview",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
-      "discord_ref": "Server tooltip",
+      "discord_ref": "World tooltip",
       "status": "planned"
     },
     {
@@ -1223,7 +1223,7 @@
       "category": "feed",
       "priority": "P1",
       "title": "Post composer sticky top",
-      "description": "Single-line expand like Discord status/post",
+      "description": "Single-line expand chat-native status/post",
       "files": [
         "lib/widgets/feed/post_input.dart"
       ],
@@ -1274,7 +1274,7 @@
       "wave": 5,
       "category": "feed",
       "priority": "P1",
-      "title": "Achievement unlock toast Discord-style",
+      "title": "Achievement unlock toast Chat-native",
       "description": "Bottom toast with badge art, not modal",
       "files": [
         "lib/widgets/core/v_feedback.dart"
@@ -1431,7 +1431,7 @@
       "category": "profile",
       "priority": "P1",
       "title": "Status: online/idle/dnd/custom",
-      "description": "Presence picker like Discord",
+      "description": "Presence picker chat-native",
       "files": [
         "lib/widgets/profile/status_picker.dart"
       ],
@@ -1535,7 +1535,7 @@
       "category": "components",
       "priority": "P1",
       "title": "VSearchBar with filter chips",
-      "description": "Search component for global/in-server",
+      "description": "Search component for global/in-world",
       "files": [
         "lib/ui/inputs/v_search_bar.dart"
       ],
@@ -1587,7 +1587,7 @@
       "category": "components",
       "priority": "P1",
       "title": "VSheet \u2192 side panel variant",
-      "description": "Member list as side sheet on tablet",
+      "description": "Resident list as side sheet on tablet",
       "files": [
         "lib/ui/overlays/v_sheet.dart"
       ],
@@ -1769,9 +1769,9 @@
       "category": "performance",
       "priority": "P2",
       "title": "44dp min touch targets on rail",
-      "description": "Server icons meet touch guidelines",
+      "description": "World icons meet touch guidelines",
       "files": [
-        "lib/ui/navigation/v_server_rail.dart"
+        "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "Touch targets",
       "status": "planned"
@@ -1846,7 +1846,7 @@
       "wave": 9,
       "category": "differentiator",
       "priority": "P1",
-      "title": "World treasury widget in server menu",
+      "title": "World treasury widget in world menu",
       "description": "RPG economy glance without leaving chat",
       "files": [
         "lib/screens/world_treasury_screen.dart"
@@ -1924,12 +1924,12 @@
       "wave": 9,
       "category": "differentiator",
       "priority": "P1",
-      "title": "Reputation/tier on member hover card",
+      "title": "Reputation/tier on resident hover card",
       "description": "Rich member card on tap in list",
       "files": [
         "lib/widgets/chat/v_member_card.dart"
       ],
-      "discord_ref": "Member card",
+      "discord_ref": "Resident card",
       "status": "planned"
     },
     {

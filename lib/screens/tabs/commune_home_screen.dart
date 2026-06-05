@@ -11,6 +11,7 @@ import '../../state/channel_provider.dart';
 import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/presence_utils.dart';
@@ -20,7 +21,7 @@ import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 
-/// Discord-style Home: server rail | channels/DMs | feed placeholder.
+/// Vertiege Home: world rail | channels/DMs | feed — fast chat IA, Vertiege lexicon.
 class CommuneHomeScreen extends ConsumerStatefulWidget {
   const CommuneHomeScreen({super.key});
 
@@ -80,13 +81,14 @@ class _CommuneHomeScreenState extends ConsumerState<CommuneHomeScreen> {
             _HomeTopBar(
               onSearch: () => openGlobalSearch(context),
               onFeed: () => context.push('/feed'),
+              onAchievements: () => context.push('/achievements'),
             ),
             Expanded(
               child: VOverlappingPanels(
                 showSecondary: _showChannelPanel && !_showDmList,
                 onSecondaryDismissed: () =>
                     setState(() => _showChannelPanel = false),
-                primary: VServerRail(
+                primary: VWorldRail(
                   worlds: joinedWorlds,
                   selectedWorldId: _selectedWorldId,
                   unreadByWorldId: unreadByWorld,
@@ -153,8 +155,13 @@ class _CommuneHomeScreenState extends ConsumerState<CommuneHomeScreen> {
 class _HomeTopBar extends StatelessWidget {
   final VoidCallback onSearch;
   final VoidCallback onFeed;
+  final VoidCallback onAchievements;
 
-  const _HomeTopBar({required this.onSearch, required this.onFeed});
+  const _HomeTopBar({
+    required this.onSearch,
+    required this.onFeed,
+    required this.onAchievements,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -181,9 +188,17 @@ class _HomeTopBar extends StatelessWidget {
             icon: const Icon(Icons.search, color: VCommuneColors.textMuted),
           ),
           TextButton.icon(
+            onPressed: onAchievements,
+            icon: const Icon(Icons.emoji_events_outlined, size: 18),
+            label: const Text('Achievements'),
+            style: TextButton.styleFrom(
+              foregroundColor: VColors.tertiary,
+            ),
+          ),
+          TextButton.icon(
             onPressed: onFeed,
             icon: const Icon(Icons.dynamic_feed, size: 18),
-            label: const Text('Feed'),
+            label: const Text('Nexus'),
             style: TextButton.styleFrom(
               foregroundColor: VCommuneColors.textLink,
             ),

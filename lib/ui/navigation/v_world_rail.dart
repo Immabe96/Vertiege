@@ -6,8 +6,8 @@ import '../../theme/v_tokens.dart';
 import '../../widgets/worlds/world_icon.dart';
 import '../shell/v_overlapping_panels.dart';
 
-/// Fixed left rail of circular world icons (Discord server list pattern).
-class VServerRail extends StatelessWidget {
+/// Fixed left rail of joined **world** icons (fast-switch pattern; Vertiege lexicon).
+class VWorldRail extends StatelessWidget {
   final List<World> worlds;
   final String? selectedWorldId;
   final ValueChanged<World> onWorldSelected;
@@ -17,7 +17,7 @@ class VServerRail extends StatelessWidget {
   static const double railWidth = 48;
   static const double iconSize = 40;
 
-  const VServerRail({
+  const VWorldRail({
     super.key,
     required this.worlds,
     required this.selectedWorldId,
@@ -84,8 +84,8 @@ class _WorldRailItem extends StatelessWidget {
       selected: selected,
       label: world.name,
       child: SizedBox(
-        width: VServerRail.railWidth,
-        height: VServerRail.iconSize + VSpacing.xs,
+        width: VWorldRail.railWidth,
+        height: VWorldRail.iconSize + VSpacing.xs,
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.center,
@@ -116,7 +116,7 @@ class _WorldRailItem extends StatelessWidget {
                 child: ClipOval(
                   child: WorldIcon(
                     worldId: world.assetKey,
-                    size: VServerRail.iconSize,
+                    size: VWorldRail.iconSize,
                     useGlassContainer: false,
                   ),
                 ),
@@ -174,7 +174,7 @@ class _AddWorldButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Add world',
+      label: 'Discover worlds',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -183,8 +183,8 @@ class _AddWorldButton extends StatelessWidget {
           splashColor: VCommuneColors.modifierActive,
           highlightColor: VCommuneColors.modifierHover,
           child: Container(
-            width: VServerRail.iconSize,
-            height: VServerRail.iconSize,
+            width: VWorldRail.iconSize,
+            height: VWorldRail.iconSize,
             decoration: const BoxDecoration(
               color: VCommuneColors.surfaceSecondary,
               shape: BoxShape.circle,

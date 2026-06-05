@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 
-/// Discord-style three-panel shell: server rail | channel list | main content.
+/// Three-panel shell: world rail | channel list | main content.
 ///
 /// On narrow viewports the [primary] rail stays fixed; [content] fills the rest.
 /// [secondary] slides in from the left over [content] when [showSecondary] is true.
