@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -349,8 +348,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       headerActions: [
         if (_controller.text.isNotEmpty)
-          FHeaderAction(
-            icon: const Icon(VIcons.x),
+          VHeaderAction(
+            icon: Icon(VIcons.x),
             onPress: () {
               _controller.clear();
               setState(() => _query = '');

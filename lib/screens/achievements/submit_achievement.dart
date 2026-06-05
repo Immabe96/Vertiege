@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
-
 import '../../config/achievements.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../models/achievement.dart';
@@ -11,7 +9,6 @@ import '../../services/achievement_proof_upload.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/achievements/proof_requirements_banner.dart';
@@ -176,23 +173,12 @@ class _SubmitAchievementScreenState
       showBack: true,
       footer: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
-        child: FButton(
-          onPress: canSubmit ? _submit : null,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_isUploading)
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              else
-                const Icon(VIcons.upload, size: 18),
-              const SizedBox(width: VSpacing.sm),
-              Text(_isUploading ? 'Uploading…' : 'Submit for review'),
-            ],
-          ),
+        child: VButton(
+          label: _isUploading ? 'Uploading…' : 'Submit for review',
+          isFullWidth: true,
+          isLoading: _isUploading,
+          icon: Icon(VIcons.upload, size: 18),
+          onPressed: canSubmit ? _submit : null,
         ),
       ),
       body: ListView(
@@ -203,9 +189,7 @@ class _SubmitAchievementScreenState
           VSpacing.xxl,
         ),
         children: [
-          FCard.raw(
-            child: Padding(
-              padding: const EdgeInsets.all(VSpacing.md),
+          VSurfaceCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -236,7 +220,6 @@ class _SubmitAchievementScreenState
                   ),
                 ],
               ),
-            ),
           ),
           const SizedBox(height: VSpacing.md),
           TextField(
@@ -317,7 +300,7 @@ class _SubmitAchievementScreenState
                   final meta = metaForCategory(achievement.category);
                   return Padding(
                     padding: const EdgeInsets.only(bottom: VSpacing.xs),
-                    child: FTile(
+                    child: VTile(
                       onPress: () => _selectAchievement(achievement.id),
                       prefix: AchievementBadgeAvatar(
                         achievement: achievement,
@@ -437,9 +420,7 @@ class _SubmitAchievementScreenState
           ],
           if (_errorText != null) ...[
             const SizedBox(height: VSpacing.md),
-            FCard.raw(
-              child: Padding(
-                padding: const EdgeInsets.all(VSpacing.md),
+            VSurfaceCard(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -456,7 +437,6 @@ class _SubmitAchievementScreenState
                     ),
                   ],
                 ),
-              ),
             ),
           ],
         ],

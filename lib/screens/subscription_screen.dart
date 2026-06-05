@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
@@ -9,9 +8,6 @@ import '../theme/v_colors.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/screen_loading.dart';
-import '../ui/icons/v_icons.dart';
-import '../ui/buttons/v_button.dart';
-import '../widgets/core/v_feedback.dart';
 
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
@@ -618,7 +614,7 @@ class _TierCard extends StatelessWidget {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: FCircularProgress(),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(VIcons.sparkles),
                 label: Text(isLoading ? 'Activating...' : 'UPGRADE'),

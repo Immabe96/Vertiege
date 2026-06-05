@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../state/resident_provider.dart';
@@ -178,7 +177,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
         label: 'Search residents and worlds',
-        icon: const Icon(FIcons.search),
+        icon: Icon(VIcons.search),
         onPress: () => openGlobalSearch(context),
       ),
       VAccessibleHeaderAction(
@@ -193,7 +192,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
             return Stack(
               clipBehavior: Clip.none,
               children: [
-                const Icon(FIcons.bell),
+                Icon(VIcons.bell),
                 if (unread > 0)
                   Positioned(
                     right: -4,
@@ -228,7 +227,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     ];
 
     return VTabPage(
-      header: FHeader(
+      header: VHeader(
         title: Text(
           'Vertiege',
           style: theme.textTheme.headlineMedium?.copyWith(

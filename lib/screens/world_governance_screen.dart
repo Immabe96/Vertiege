@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:vertiege/ui/ui.dart';
 import '../router/world_navigation.dart';
 import '../services/governance_service.dart';
@@ -11,8 +9,6 @@ import '../utils/haptics.dart';
 import '../utils/provider_errors.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
-import '../widgets/core/v_feedback.dart';
-import '../ui/buttons/v_button.dart';
 
 class WorldGovernanceScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -134,7 +130,10 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
       title: 'Council queue',
       showBack: true,
       headerActions: [
-        FHeaderAction(icon: const Icon(FIcons.rotateCw), onPress: _load),
+        VHeaderAction(
+          icon: const Icon(VIcons.rotateCw),
+          onPress: _load,
+        ),
       ],
       body: _loadError != null
           ? AppErrorState(message: _loadError!, onRetry: _load)

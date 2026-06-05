@@ -290,7 +290,12 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 | `check_no_forui_in_lib.sh` | Done (report mode); CI enforce after Wave A |
 | Wave 0 spike | **Done** — Forui baseline chosen on emulator |
 | Wave 0 decision | **Plan B: `forui-0.21`** — wrapper consolidation, no Forui removal |
-| Wrapper waves W1–W6 | **Not started** — shell rename + import hygiene (see migration plan) |
+| W1 shell + lists + dialogs | **Done** — `VPage`/`VTabShell`, `VSectionList`, `showVDialog`; screens → `ui.dart` |
+| W2 auth & onboarding | **Done** — overlay/feedback facades; auth + onboarding `VButton`; `VGateCta` for Gate ritual |
+| W3 world system | **Done** — all world screens + dossier widgets off direct forui |
+| W4 progression & identity | **Done** — progress hub, achievements, league, identity tab |
+| W5 commerce & social | **Done** — shop, subscription, chat/thread/Campfire, search, tab bar |
+| W6 hygiene | **Done** — all `lib/screens/` off direct forui; design-system doc updated |
 
 **Policy:** No UI package changes on `develop` until Wave 0 passes. Product waves (23+) and bug fixes on `develop` continue separately when explicitly requested.
 

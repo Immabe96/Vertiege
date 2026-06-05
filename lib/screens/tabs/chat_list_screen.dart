@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 
@@ -78,7 +77,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       headerActions: [
         VAccessibleHeaderAction(
           label: 'New direct message',
-          icon: const Icon(FIcons.userPlus),
+          icon: Icon(VIcons.userPlus),
           onPress: () => openGlobalSearch(context),
         ),
       ],

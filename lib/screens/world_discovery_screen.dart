@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/world.dart';
@@ -92,16 +91,11 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
       footer: canCreateWorld
           ? Padding(
               padding: const EdgeInsets.all(VSpacing.md),
-              child: FButton(
-                onPress: () => context.push('/create-world'),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(FIcons.plus, size: 18),
-                    SizedBox(width: VSpacing.sm),
-                    Text('Create World'),
-                  ],
-                ),
+              child: VButton(
+                label: 'Create World',
+                isFullWidth: true,
+                icon: Icon(VIcons.plus, size: 18),
+                onPressed: () => context.push('/create-world'),
               ),
             )
           : null,
@@ -123,14 +117,14 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
               decoration: InputDecoration(
                 hintText: 'Search worlds...',
                 prefixIcon: Icon(
-                  FIcons.search,
+                  VIcons.search,
                   color: isDark
                       ? VColors.onSurfaceVariantDark
                       : VColors.onSurfaceVariant,
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(FIcons.x, size: 18),
+                        icon: Icon(VIcons.x, size: 18),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {});
@@ -230,19 +224,17 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
             ),
           const SizedBox(height: VSpacing.sm),
           Expanded(
-            child: FTabs(
-              expands: true,
-              control: const FTabControl.managed(),
-              children: [
-                FTabEntry(
+            child: VTabs(
+              tabs: [
+                VTabEntry(
                   label: const Text('Browse'),
                   child: _WorldList(worlds: _worlds, loading: _loading),
                 ),
-                FTabEntry(
+                VTabEntry(
                   label: const Text('Trending'),
                   child: _WorldList(worlds: _trending, loading: _loading),
                 ),
-                FTabEntry(
+                VTabEntry(
                   label: const Text('Featured'),
                   child: _WorldList(worlds: _featured, loading: _loading),
                 ),

@@ -243,27 +243,43 @@ Same screen groupings as the old ladder, but **Forui remains the backing library
 - [ ] Product widgets (`world_realm_dossier`, etc.) — forui OK until W3 touch.
 - [ ] Tab roots grey-void UAT #2 pass.
 
-### W2 — Auth & onboarding
+### W2 — Auth & onboarding — **done**
 
-- Splash, login, signup, callback, onboarding, The Gate — inherit shell tokens; `VButton` only.
+- [x] `v_feedback` + `showVSheet` → `lib/ui/feedback/`, `lib/ui/overlays/`; legacy `widgets/core/*` re-export.
+- [x] Login, signup, verifier, callback — `package:vertiege/ui/ui.dart`; primary CTAs → `VButton`; callback drops direct `forui`.
+- [x] Onboarding — profile + gate quiz + nexus entry CTAs → `VButton`; `VFeedback` via `ui.dart`.
+- [x] The Gate ritual CTAs → `VGateCta` (`lib/ui/buttons/v_gate_cta.dart`) — gold filled + outlined variants.
+- [x] Splash — Material-only; `VFontWeight` token pass (no Forui).
+- [x] Login forgot-password → `showVDialog` + `VButton` actions.
 
-### W3 — World system
+### W3 — World system — **done**
 
-- World detail, manage, governance, channels, marketplace, dossier widgets — batch wrapper imports.
+- [x] `VHeaderAction`, `VScaffold`, `VSelect`, `VTabs`, `VSurfaceCard`, `VTextFormField`, `VSwitch`, `VIconButton`, `VAlert`.
+- [x] All `lib/screens/*world*` routes off direct `forui`.
+- [x] Dossier widgets (`world_realm_dossier`, `world_card`, `world_hero_banner`, …) off direct `forui`.
+- [ ] W1 open: tab roots grey-void UAT #2.
 
-### W4 — Progression & identity
+### W4 — Progression & identity — **done**
 
-- Progress hub, achievements, league, profile, ascension.
+- [x] `VTile`, `VAchievementCategoryTile`; `VTabs.scrollable`.
+- [x] Progress hub, daily quests, challenges, league, coin history, hall of ascension.
+- [x] Achievements index / category / submit proof.
+- [x] Identity tab (Wall of Honour header actions via `VIcons`).
 
-### W5 — Commerce & social
+### W5 — Commerce & social — **done**
 
-- Shop, subscription, chat, thread, Campfire, search.
+- [x] `VNestedHeader`, `VHeader`, `VBottomNavigationBar` + items.
+- [x] Cosmetics shop, subscription, search.
+- [x] Chat room, thread, Campfire (`VScaffold` + nested header).
+- [x] Tab roots: `tab_layout`, nexus, explore, chat list.
 
-### W6 — Hygiene (not removal)
+### W6 — Hygiene (not removal) — **done**
 
-- `rg "package:forui" lib/screens` trending down via wrappers; **keep** `forui` in `pubspec`.
-- Optional: drop `shadcn_ui` dep + shadcn spike backend after PR merge (debug baseline-only).
-- Update [design-system.md](../../reference/design-system.md) — “Forui behind V* wrappers”, not “migrate to shadcn”.
+- [x] `settings_screen`, `verification_review_screen`, `twin_seal_setup_screen` — last `lib/screens/` files off direct forui.
+- [x] `VSectionLabel`, `VPerkTile` for settings-only patterns.
+- [x] [design-system.md](../../reference/design-system.md) — import path + `V*` preference updated.
+- [ ] `rg "package:forui" lib/screens` → **zero** (verify in CI).
+- **Keep** `forui` in `pubspec`; wrappers live in `lib/ui/`.
 
 ---
 

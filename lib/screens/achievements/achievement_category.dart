@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../config/achievements.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -86,9 +86,7 @@ class _AchievementCategoryScreenState
               VSpacing.md,
               0,
             ),
-            child: FCard.raw(
-              child: Padding(
-                padding: const EdgeInsets.all(VSpacing.md),
+            child: VSurfaceCard(
                 child: Text(
                   '${progress.earned} verified · ${progress.total - progress.earned} remaining · ${progress.xp} XP in this category',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -97,7 +95,6 @@ class _AchievementCategoryScreenState
                         : VColors.onSurfaceVariant,
                   ),
                 ),
-              ),
             ),
           ),
           if (allInCategory.length > 12) ...[

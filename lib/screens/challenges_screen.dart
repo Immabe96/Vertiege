@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -9,7 +8,6 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/v_feedback.dart';
@@ -156,7 +154,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       title: _worldName == null ? 'World Challenges' : '$_worldName Challenges',
       showBack: true,
       headerActions: [
-        FHeaderAction(icon: const Icon(FIcons.rotateCw), onPress: _refresh),
+        VHeaderAction(icon: Icon(VIcons.rotateCw), onPress: _refresh),
       ],
       body: body,
     );

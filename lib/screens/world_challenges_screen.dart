@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../models/challenge.dart';
@@ -8,8 +7,6 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
-import '../../ui/icons/v_icons.dart';
-import '../ui/buttons/v_button.dart';
 
 class WorldChallengesScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -100,43 +97,39 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: VSpacing.lg),
-                FSelect<String>.rich(
+                VSelect<String>(
+                  value: challengeType,
+                  onChanged: (v) {
+                    if (v != null) setDialogState(() => challengeType = v);
+                  },
                   format: (value) =>
                       value == 'individual' ? 'Individual' : 'Collective',
-                  control: FSelectControl.lifted(
-                    value: challengeType,
-                    onChange: (v) {
-                      if (v != null) setDialogState(() => challengeType = v);
-                    },
-                  ),
                   label: const Text('Type'),
                   hint: 'Select type',
-                  children: const [
-                    FSelectItem<String>(
+                  items: const [
+                    VSelectItem(
                       value: 'individual',
                       title: Text('Individual'),
                     ),
-                    FSelectItem<String>(
+                    VSelectItem(
                       value: 'collective',
                       title: Text('Collective'),
                     ),
                   ],
                 ),
                 const SizedBox(height: VSpacing.lg),
-                FSelect<String>.rich(
+                VSelect<String>(
+                  value: challengeScope,
+                  onChanged: (v) {
+                    if (v != null) setDialogState(() => challengeScope = v);
+                  },
                   format: (value) =>
                       value == 'season' ? 'Season cohort' : 'World',
-                  control: FSelectControl.lifted(
-                    value: challengeScope,
-                    onChange: (v) {
-                      if (v != null) setDialogState(() => challengeScope = v);
-                    },
-                  ),
                   label: const Text('Scope'),
                   hint: 'Select scope',
-                  children: const [
-                    FSelectItem<String>(value: 'world', title: Text('World')),
-                    FSelectItem<String>(
+                  items: const [
+                    VSelectItem(value: 'world', title: Text('World')),
+                    VSelectItem(
                       value: 'season',
                       title: Text('Season cohort'),
                     ),
@@ -223,7 +216,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
       showBack: true,
       headerActions: widget.isSovereignOrCouncil
           ? [
-              FHeaderAction(
+              VHeaderAction(
                 icon: const Icon(VIcons.plus),
                 onPress: _showCreateChallengeDialog,
               ),

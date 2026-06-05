@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -326,17 +325,17 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       headerActions: [
         VAccessibleHeaderAction(
           label: 'Search residents',
-          icon: const Icon(FIcons.search),
+          icon: Icon(VIcons.search),
           onPress: () => openGlobalSearch(context),
         ),
         VAccessibleHeaderAction(
           label: 'Refresh honour wall',
-          icon: const Icon(FIcons.rotateCw),
+          icon: Icon(VIcons.rotateCw),
           onPress: refreshHonourWall,
         ),
         VAccessibleHeaderAction(
           label: 'Settings',
-          icon: const Icon(FIcons.settings),
+          icon: Icon(VIcons.settings),
           onPress: () => context.push('/settings'),
         ),
       ],

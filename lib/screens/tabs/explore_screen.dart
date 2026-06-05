@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -96,7 +95,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
         label: 'Discover Worlds',
-        icon: const Icon(FIcons.compass),
+        icon: Icon(VIcons.compass),
         onPress: () => context.push(exploreDiscoverPath()),
       ),
       if (AdminAccessService.canCreateWorld(
@@ -104,7 +103,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       ))
         VAccessibleHeaderAction(
           label: 'Create World',
-          icon: const Icon(FIcons.plus),
+          icon: Icon(VIcons.plus),
           onPress: () => context.push('/create-world'),
         ),
     ];

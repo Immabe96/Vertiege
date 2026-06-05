@@ -5,7 +5,6 @@ import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import 'achievement_category_meta.dart';
 import '../shared/badge_asset_image.dart';
-import 'achievement_avatar_surface.dart';
 
 IconData achievementIconData(String iconName) {
   return switch (iconName) {
@@ -117,7 +116,6 @@ class AchievementBadgeAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
     final imagePath = WorldAssets.achievementEmblemForDisplay(
       achievementId: achievement.id,
       category: achievement.category,
@@ -126,41 +124,24 @@ class AchievementBadgeAvatar extends StatelessWidget {
     final materialFallback = achievement.category == AchievementCategory.profession
         ? achievementIconData(achievement.icon)
         : metaForCategory(achievement.category).icon;
-    final hasRaster = imagePath != null;
-    final fill = achievementBadgeContainerColor(
-      hasRasterAsset: hasRaster,
-      accent: accentColor,
-      brightness: brightness,
+
+    Widget emblem() => Icon(
+      materialFallback,
+      size: size * VBadgeSize.fallbackIconFraction,
+      color: accentColor,
     );
-
-    Widget fallback() =>
-        Icon(materialFallback, size: size * 0.45, color: accentColor);
-
-    if (!hasRaster) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: fill),
-        child: Center(child: fallback()),
-      );
-    }
 
     return SizedBox(
       width: size,
       height: size,
-      child: BadgeAssetImage(
-        imagePath: imagePath,
-        size: size,
-        adaptDarkBackground: false,
-        errorBuilder: (_, _, _) => Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: achievementAvatarFill(accentColor, brightness),
-          ),
-          child: Center(child: fallback()),
-        ),
+      child: Center(
+        child: imagePath != null
+            ? BadgeAssetImage(
+                imagePath: imagePath,
+                size: size,
+                errorBuilder: (_, _, _) => emblem(),
+              )
+            : emblem(),
       ),
     );
   }

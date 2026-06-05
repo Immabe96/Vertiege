@@ -15,7 +15,7 @@ import '../../services/supabase_bootstrap.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/core/v_feedback.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../widgets/auth/auth_social_buttons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -266,55 +266,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final result = await showDialog<bool>(
+    final result = await showVDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Enter your email address. We will send you a password reset link.',
-            ),
-            const SizedBox(height: VSpacing.md),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'you@example.com',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: BorderSide(
-                    color: isDark ? VColors.outlineDark : VColors.outline,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.primary,
-                    width: 2,
-                  ),
-                ),
-                isDense: true,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      title: 'Reset password',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Enter your email address. We will send you a password reset link.',
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Send reset link'),
+          const SizedBox(height: VSpacing.md),
+          TextField(
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'you@example.com',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(VRadius.md),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(VRadius.md),
+                borderSide: BorderSide(
+                  color: isDark ? VColors.outlineDark : VColors.outline,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(VRadius.md),
+                borderSide: const BorderSide(
+                  color: VColors.primary,
+                  width: 2,
+                ),
+              ),
+              isDense: true,
+            ),
           ),
         ],
       ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            variant: ButtonVariant.text,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          VButton(
+            label: 'Send reset link',
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ]),
+      ],
     );
 
     if (result == true && emailController.text.trim().isNotEmpty) {
@@ -447,15 +449,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: VSpacing.lg),
-                  FilledButton(
-                    onPressed: _isLoading || !_isValid ? null : _handleLogin,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Sign In'),
+                  VButton(
+                    label: 'Sign In',
+                    isFullWidth: true,
+                    isLoading: _isLoading,
+                    onPressed: _isValid ? _handleLogin : null,
                   ),
                   const SizedBox(height: VSpacing.sm),
                   Align(

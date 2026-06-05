@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
@@ -52,7 +52,7 @@ class WorldHeroBanner extends StatelessWidget {
       foregroundColor: fg,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(FIcons.chevronLeft),
+        icon: Icon(VIcons.chevronLeft),
         tooltip: 'Back',
         onPressed: onBack,
       ),
@@ -78,18 +78,18 @@ class WorldHeroBanner extends StatelessWidget {
       actions: [
         if (onOpenTools != null)
           IconButton(
-            icon: const Icon(FIcons.ellipsis),
+            icon: Icon(VIcons.ellipsis),
             tooltip: 'World tools',
             onPressed: onOpenTools,
           ),
         IconButton(
-          icon: const Icon(FIcons.share),
+          icon: Icon(VIcons.share),
           tooltip: 'Share world',
           onPressed: onShare,
         ),
         if (onSettings != null)
           IconButton(
-            icon: const Icon(FIcons.settings),
+            icon: Icon(VIcons.settings),
             tooltip: 'World settings',
             onPressed: onSettings,
           ),

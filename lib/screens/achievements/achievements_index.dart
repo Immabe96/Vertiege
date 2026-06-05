@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,10 +11,7 @@ import '../../state/resident_provider.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/shared/badge_asset_image.dart';
-import '../../utils/world_assets.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
-import '../../widgets/achievements/achievement_avatar_surface.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/core/sync_warning_banner.dart';
 
@@ -58,8 +54,8 @@ class AchievementsIndexScreen extends ConsumerWidget {
       title: 'Achievements',
       showBack: true,
       headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.plus),
+        VHeaderAction(
+          icon: Icon(VIcons.plus),
           onPress: () => context.push('/achievements/submit'),
         ),
       ],
@@ -129,7 +125,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
               title: 'Browse by category',
               children: [
                 for (final entry in categoryEntries)
-                  _CategoryTile(
+                  VAchievementCategoryTile(
                     category: entry.key,
                     meta: entry.value,
                     progress: notifier.getCategoryProgress(entry.key.name),
@@ -204,8 +200,7 @@ class _StatsHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return FCard.raw(
-      child: Padding(
+    return VSurfaceCard(
         padding: const EdgeInsets.symmetric(
           horizontal: VSpacing.lg,
           vertical: VSpacing.md,
@@ -271,7 +266,6 @@ class _StatsHeroCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -322,9 +316,7 @@ class _NextTierProgress extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return FCard.raw(
-      child: Padding(
-        padding: const EdgeInsets.all(VSpacing.md),
+    return VSurfaceCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -371,129 +363,6 @@ class _NextTierProgress extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CategoryTile extends FTile {
-  _CategoryTile({
-    required AchievementCategory category,
-    required AchievementCategoryMeta meta,
-    required ({int earned, int total, int xp}) progress,
-    required VoidCallback onTap,
-  }) : super(
-         onPress: onTap,
-         prefix: _CategoryAvatar(
-           categoryName: category.name,
-           icon: meta.icon,
-           color: meta.color,
-           accentRing:
-               category == AchievementCategory.funny ||
-               category == AchievementCategory.creative,
-         ),
-         title: Text(
-           meta.label,
-           style:
-               category == AchievementCategory.funny ||
-                   category == AchievementCategory.creative
-               ? const TextStyle(color: VColors.tertiary)
-               : null,
-         ),
-         subtitle: Text(
-           '${progress.earned} of ${progress.total} verified · ${progress.xp} XP earned',
-           maxLines: 1,
-           overflow: TextOverflow.ellipsis,
-         ),
-         suffix: Column(
-           mainAxisAlignment: MainAxisAlignment.center,
-           crossAxisAlignment: CrossAxisAlignment.end,
-           children: [
-             Text(
-               progress.total > 0
-                   ? '${((progress.earned / progress.total) * 100).round()}%'
-                   : '0%',
-               style: const TextStyle(
-                 fontWeight: VFontWeight.bold,
-                 fontSize: VFontSize.labelMd,
-               ),
-             ),
-             const SizedBox(height: 4),
-             SizedBox(
-               width: 48,
-               child: ClipRRect(
-                 borderRadius: BorderRadius.circular(VRadius.sm),
-                 child: LinearProgressIndicator(
-                   value: progress.total > 0
-                       ? (progress.earned / progress.total).clamp(0.0, 1.0)
-                       : 0,
-                   minHeight: 4,
-                   valueColor: AlwaysStoppedAnimation<Color>(meta.color),
-                 ),
-               ),
-             ),
-           ],
-         ),
-       );
-}
-
-class _CategoryAvatar extends StatelessWidget {
-  final String categoryName;
-  final IconData icon;
-  final Color color;
-  final bool accentRing;
-
-  const _CategoryAvatar({
-    required this.categoryName,
-    required this.icon,
-    required this.color,
-    this.accentRing = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final imagePath = WorldAssets.achievementCategoryImage(categoryName);
-    final hasRaster = imagePath != null;
-    final fill = achievementBadgeContainerColor(
-      hasRasterAsset: hasRaster,
-      accent: color,
-      brightness: brightness,
-    );
-    final border = accentRing
-        ? Border.all(color: VColors.tertiary, width: 2)
-        : null;
-    const avatarSize = VBadgeSize.categoryAvatar;
-
-    Widget iconChild() => Icon(icon, color: color, size: 22);
-
-    if (!hasRaster) {
-      return Container(
-        width: avatarSize,
-        height: avatarSize,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: fill,
-          border: border,
-        ),
-        child: Center(child: iconChild()),
-      );
-    }
-
-    return Container(
-      width: avatarSize,
-      height: avatarSize,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: fill,
-        border: border,
-      ),
-      child: BadgeAssetImage(
-        imagePath: imagePath,
-        size: avatarSize,
-        adaptDarkBackground: false,
-        errorBuilder: (_, _, _) => Center(child: iconChild()),
-      ),
     );
   }
 }
@@ -509,8 +378,7 @@ class _RecentVerifiedChip extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     return SizedBox(
       width: 88,
-      child: FCard.raw(
-        child: Padding(
+      child: VSurfaceCard(
           padding: const EdgeInsets.all(VSpacing.sm),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -534,7 +402,6 @@ class _RecentVerifiedChip extends StatelessWidget {
               ),
             ],
           ),
-        ),
       ),
     );
   }

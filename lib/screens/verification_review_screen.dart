@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../config/achievement_reject_reasons.dart';
@@ -10,7 +10,6 @@ import '../services/achievement_review_service.dart';
 import '../widgets/achievements/achievement_verifier_review_card.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
-import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
@@ -145,19 +144,17 @@ class _VerificationReviewScreenState
     return VHubPage(
       title: 'Staff review',
       showBack: true,
-      body: FTabs(
-        expands: true,
-        control: const FTabControl.managed(),
-        children: [
-          FTabEntry(
+      body: VTabs(
+        tabs: [
+          VTabEntry(
             label: const Text('Professions'),
             child: _buildVerificationsTab(theme),
           ),
-          FTabEntry(
+          VTabEntry(
             label: const Text('Achievements'),
             child: _buildAchievementsTab(theme),
           ),
-          FTabEntry(
+          VTabEntry(
             label: const Text('Flagged Posts'),
             child: _buildFlaggedPostsTab(theme),
           ),

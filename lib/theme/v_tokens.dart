@@ -38,13 +38,31 @@ class VIconSize {
 /// Raster profession / achievement badge display sizes (~10% above legacy defaults).
 class VBadgeSize {
   VBadgeSize._();
-  static const double avatar = 44;
-  static const double avatarCompact = 40;
-  static const double avatarSheet = 57;
-  static const double categoryAvatar = 44;
-  static const double profession = 22;
-  static const double professionInline = 18;
-  static const double decorationChip = 24;
+
+  /// Default list / profile / unlock row badge.
+  static const double avatar = 52;
+
+  /// Dense grids (reaction picker, recent chips).
+  static const double avatarCompact = 48;
+
+  /// Proof / detail sheet / share card hero badge.
+  static const double avatarSheet = 72;
+
+  static const double categoryAvatar = 52;
+  static const double profession = 28;
+  static const double professionInline = 24;
+  static const double decorationChip = 28;
+
+  /// Fraction of the slot used for raster art (rest is even padding).
+  static const double artFillFraction = 0.94;
+
+  /// Material icon fallback inside the badge slot.
+  static const double fallbackIconFraction = 0.58;
+
+  static double artInset(double size) =>
+      size * (1 - artFillFraction) / 2;
+
+  static double artInner(double size) => size * artFillFraction;
 }
 
 class VAnimation {

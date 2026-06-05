@@ -154,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen>
                   'Vertiege',
                   style: TextStyle(
                     fontSize: VFontSize.displayXl,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: VFontWeight.bold,
                     color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                     letterSpacing: 0,
                   ),

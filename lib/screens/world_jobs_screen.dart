@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
-
 import '../config/tiers.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../models/resident.dart';
@@ -15,9 +13,7 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
-import '../widgets/core/v_feedback.dart';
 import '../widgets/core/new_user_context_hint.dart';
-import '../ui/icons/v_icons.dart';
 
 class WorldJobsScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -80,111 +76,88 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
     var minStanding = 3;
     var minTier = 2;
 
-    final ok = await showFDialog<bool>(
+    final ok = await showVDialog<bool>(
       context: context,
-      builder: (ctx, style, animation) => FDialog.raw(
-        builder: (context, dialogStyle) => StatefulBuilder(
-          builder: (ctx, setLocal) => Padding(
-            padding: const EdgeInsets.all(VSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Post a role',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: VFontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: VSpacing.md),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 360),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: title,
-                          decoration: const InputDecoration(
-                            labelText: 'Title',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: VSpacing.sm),
-                        TextField(
-                          controller: desc,
-                          decoration: const InputDecoration(
-                            labelText: 'Description',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 3,
-                        ),
-                        const SizedBox(height: VSpacing.sm),
-                        TextField(
-                          controller: role,
-                          decoration: const InputDecoration(
-                            labelText: 'Role label',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: VSpacing.sm),
-                        DropdownButtonFormField<int>(
-                          value: minStanding,
-                          decoration: const InputDecoration(
-                            labelText: 'Min standing',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: standingLevels
-                              .map(
-                                (s) => DropdownMenuItem(
-                                  value: s.level,
-                                  child: Text(s.title),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) =>
-                              setLocal(() => minStanding = v ?? 3),
-                        ),
-                        DropdownButtonFormField<int>(
-                          value: minTier,
-                          decoration: const InputDecoration(
-                            labelText: 'Min global tier',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: tierNames.entries
-                              .map(
-                                (e) => DropdownMenuItem(
-                                  value: e.key,
-                                  child: Text(e.value),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setLocal(() => minTier = v ?? 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: VSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: VSpacing.sm),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Post'),
-                    ),
-                  ],
-                ),
-              ],
+      title: 'Post a role',
+      scrollContent: true,
+      maxContentHeight: 360,
+      content: StatefulBuilder(
+        builder: (ctx, setLocal) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: title,
+              decoration: const InputDecoration(
+                labelText: 'Title',
+                border: OutlineInputBorder(),
+              ),
             ),
-          ),
+            const SizedBox(height: VSpacing.sm),
+            TextField(
+              controller: desc,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: VSpacing.sm),
+            TextField(
+              controller: role,
+              decoration: const InputDecoration(
+                labelText: 'Role label',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            DropdownButtonFormField<int>(
+              value: minStanding,
+              decoration: const InputDecoration(
+                labelText: 'Min standing',
+                border: OutlineInputBorder(),
+              ),
+              items: standingLevels
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s.level,
+                      child: Text(s.title),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) => setLocal(() => minStanding = v ?? 3),
+            ),
+            DropdownButtonFormField<int>(
+              value: minTier,
+              decoration: const InputDecoration(
+                labelText: 'Min global tier',
+                border: OutlineInputBorder(),
+              ),
+              items: tierNames.entries
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e.key,
+                      child: Text(e.value),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) => setLocal(() => minTier = v ?? 2),
+            ),
+          ],
         ),
       ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            variant: ButtonVariant.text,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          VButton(
+            label: 'Post',
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ]),
+      ],
     );
 
     if (ok != true) return;
@@ -360,8 +333,8 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       showBack: true,
       headerActions: widget.canManage
           ? [
-              FHeaderAction(
-                icon: const Icon(VIcons.plus),
+              VHeaderAction(
+                icon: Icon(VIcons.plus),
                 onPress: _showCreateDialog,
               ),
             ]
@@ -418,9 +391,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
           final eligible = _isEligible(resident, world, job);
           final myStatus = _myApplicationByJob[job.id];
           final hasApplied = myStatus != null;
-          return FCard.raw(
-            child: Padding(
-              padding: const EdgeInsets.all(VSpacing.md),
+          return VSurfaceCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -520,7 +491,6 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                   ],
                 ],
               ),
-            ),
           );
         },
       ),

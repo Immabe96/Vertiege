@@ -1,14 +1,12 @@
-import '../../ui/icons/v_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../models/challenge.dart';
 import '../../services/challenge_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import '../../widgets/core/empty_state.dart';
-import '../../ui/buttons/v_button.dart';
 
 class WorldAcademyScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -97,23 +95,21 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: VSpacing.lg),
-                FSelect<String>.rich(
+                VSelect<String>(
+                  value: challengeType,
+                  onChanged: (v) {
+                    if (v != null) setDialogState(() => challengeType = v);
+                  },
                   format: (value) =>
                       value == 'individual' ? 'Individual' : 'Collective',
-                  control: FSelectControl.lifted(
-                    value: challengeType,
-                    onChange: (v) {
-                      if (v != null) setDialogState(() => challengeType = v);
-                    },
-                  ),
                   label: const Text('Type'),
                   hint: 'Select type',
-                  children: const [
-                    FSelectItem<String>(
+                  items: const [
+                    VSelectItem(
                       value: 'individual',
                       title: Text('Individual'),
                     ),
-                    FSelectItem<String>(
+                    VSelectItem(
                       value: 'collective',
                       title: Text('Collective'),
                     ),

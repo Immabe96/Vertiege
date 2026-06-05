@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../state/league_provider.dart';
@@ -8,8 +7,6 @@ import '../../state/resident_provider.dart';
 import '../../services/league_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/media/v_avatar.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../utils/calm_ranking.dart';
@@ -126,8 +123,8 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
       title: 'Ascension Leagues',
       showBack: true,
       headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
+        VHeaderAction(
+          icon: Icon(VIcons.rotateCw),
           onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
         ),
       ],

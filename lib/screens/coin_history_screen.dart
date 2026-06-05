@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
-
 import 'package:vertiege/ui/ui.dart';
 import '../services/coin_ledger_service.dart';
 import '../theme/v_colors.dart';
@@ -57,7 +55,7 @@ class _CoinHistoryScreenState extends State<CoinHistoryScreen> {
       title: 'Coin history',
       showBack: true,
       headerActions: [
-        FHeaderAction(icon: const Icon(FIcons.rotateCw), onPress: _load),
+        VHeaderAction(icon: Icon(VIcons.rotateCw), onPress: _load),
       ],
       body: _loading
           ? const ScreenLoading.list()

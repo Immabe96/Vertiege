@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
@@ -65,11 +64,9 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
           ),
         ),
       ],
-      body: FTabs(
-        expands: true,
-        control: const FTabControl.managed(),
-        children: [
-          FTabEntry(
+      body: VTabs(
+        tabs: [
+          VTabEntry(
             label: const Text('Cosmetics'),
             child: _ShopGrid(
               category: _ShopCategory.cosmetics,
@@ -77,7 +74,7 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
               coins: coins,
             ),
           ),
-          const FTabEntry(label: Text('Dominions'), child: _DominionsTab()),
+          const VTabEntry(label: Text('Dominions'), child: _DominionsTab()),
         ],
       ),
     );
@@ -269,9 +266,7 @@ class _ShopCard extends ConsumerWidget {
     return GestureDetector(
       onTap: canAfford ? () => _buyItem(context, ref, item) : null,
       onLongPress: () => _previewItem(context, ref, item),
-      child: FCard.raw(
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
+      child: VSurfaceCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -354,21 +349,20 @@ class _ShopCard extends ConsumerWidget {
                     ),
                   ),
                   const Spacer(),
-                  FButton(
+                  VButton(
+                    label: canAfford ? 'Buy' : 'Locked',
+                    size: ButtonSize.small,
                     variant: canAfford
-                        ? FButtonVariant.primary
-                        : FButtonVariant.outline,
-                    size: FButtonSizeVariant.sm,
-                    onPress: canAfford
+                        ? ButtonVariant.filled
+                        : ButtonVariant.outlined,
+                    onPressed: canAfford
                         ? () => _buyItem(context, ref, item)
                         : null,
-                    child: Text(canAfford ? 'Buy' : 'Locked'),
                   ),
                 ],
               ),
             ],
           ),
-        ),
       ),
     );
   }

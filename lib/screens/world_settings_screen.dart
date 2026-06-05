@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,12 +14,10 @@ import '../services/quiet_hours_service.dart';
 import '../services/invite_service.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
-import '../ui/buttons/v_button.dart';
 import '../services/store_service.dart';
 import '../models/world.dart';
 import '../config/tiers.dart';
 import '../models/invite.dart';
-import '../ui/icons/v_icons.dart';
 import '../state/channel_provider.dart';
 import '../utils/tier_utils.dart';
 import '../widgets/core/loading_state.dart';
@@ -648,7 +645,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: FCircularProgress(),
+                                    child: CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : const Icon(Icons.save),
                             label: Text(
@@ -775,11 +772,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             ),
                           ),
                           const SizedBox(height: VSpacing.md),
-                          FButton(
-                            onPress: () => context.push(
+                          VButton(
+                            label: 'Manage polls',
+                            onPressed: () => context.push(
                               worldPollsPath(widget.worldId, admin: true),
                             ),
-                            child: const Text('Manage polls'),
                           ),
                         ],
                       ),
@@ -1068,19 +1065,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                             ?.copyWith(color: VColors.tertiary),
                                       ),
                                       const SizedBox(height: VSpacing.xs),
-                                      FSelect<int>.rich(
+                                      VSelect<int>(
+                                        value: _quietHours.startHour,
+                                        onChanged: (v) {
+                                          if (v != null) {
+                                            _saveQuietHours(startHour: v);
+                                          }
+                                        },
                                         format: (value) =>
                                             '${value.toString().padLeft(2, '0')}:00',
-                                        control: FSelectControl.lifted(
-                                          value: _quietHours.startHour,
-                                          onChange: (v) {
-                                            if (v != null)
-                                              _saveQuietHours(startHour: v);
-                                          },
-                                        ),
-                                        children: List.generate(
+                                        hint: 'Start hour',
+                                        items: List.generate(
                                           24,
-                                          (i) => FSelectItem<int>(
+                                          (i) => VSelectItem<int>(
                                             value: i,
                                             title: Text(
                                               '${i.toString().padLeft(2, '0')}:00',
@@ -1103,19 +1100,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                             ?.copyWith(color: VColors.tertiary),
                                       ),
                                       const SizedBox(height: VSpacing.xs),
-                                      FSelect<int>.rich(
+                                      VSelect<int>(
+                                        value: _quietHours.endHour,
+                                        onChanged: (v) {
+                                          if (v != null) {
+                                            _saveQuietHours(endHour: v);
+                                          }
+                                        },
                                         format: (value) =>
                                             '${value.toString().padLeft(2, '0')}:00',
-                                        control: FSelectControl.lifted(
-                                          value: _quietHours.endHour,
-                                          onChange: (v) {
-                                            if (v != null)
-                                              _saveQuietHours(endHour: v);
-                                          },
-                                        ),
-                                        children: List.generate(
+                                        hint: 'End hour',
+                                        items: List.generate(
                                           24,
-                                          (i) => FSelectItem<int>(
+                                          (i) => VSelectItem<int>(
                                             value: i,
                                             title: Text(
                                               '${i.toString().padLeft(2, '0')}:00',

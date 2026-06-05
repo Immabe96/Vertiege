@@ -29,11 +29,7 @@ class Badge extends StatelessWidget {
           : const Icon(VIcons.sparkles, size: 16),
       label: Text(label, style: const TextStyle(fontSize: VFontSize.labelSm)),
       backgroundColor: hasRaster ? Colors.transparent : chipBg,
-      side: hasRaster
-          ? BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
-            )
-          : BorderSide.none,
+      side: BorderSide.none,
       padding: const EdgeInsets.all(4),
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../models/poll.dart';
@@ -11,8 +10,6 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/progression_help_button.dart';
 import '../../config/progression_glossary.dart';
-import '../ui/buttons/v_button.dart';
-import '../ui/icons/v_icons.dart';
 
 class WorldPollsScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -193,7 +190,7 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
           tooltip: 'How polls work',
         ),
         if (_canCreatePoll)
-          FHeaderAction(
+          VHeaderAction(
             icon: const Icon(VIcons.plus),
             onPress: _showCreatePollDialog,
           ),

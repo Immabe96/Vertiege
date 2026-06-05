@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:forui/forui.dart';
 import '../services/auth_service.dart';
 import '../theme/v_colors.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
-import '../ui/icons/v_icons.dart';
-import '../ui/buttons/v_button.dart';
-import '../widgets/core/v_feedback.dart';
 
 class TwinSealSetupScreen extends StatefulWidget {
   const TwinSealSetupScreen({super.key});
@@ -331,16 +327,12 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             padding: const EdgeInsets.only(bottom: VSpacing.md),
             child: Text(_error!, style: const TextStyle(color: VColors.error)),
           ),
-        FilledButton.icon(
-          onPressed: _isLoading ? null : _generateSecret,
-          icon: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: FCircularProgress(),
-                )
-              : const Icon(VIcons.shield),
-          label: const Text('Generate Secret'),
+        VButton(
+          label: 'Generate Secret',
+          isFullWidth: true,
+          isLoading: _isLoading,
+          icon: Icon(VIcons.shield),
+          onPressed: _generateSecret,
         ),
       ],
     );

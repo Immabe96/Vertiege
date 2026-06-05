@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../config/tiers.dart';
@@ -113,7 +112,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
       title: 'Members',
       showBack: true,
       headerActions: [
-        FHeaderAction(
+        VHeaderAction(
           icon: const Icon(VIcons.search),
           onPress: () => _showSearch(context),
         ),

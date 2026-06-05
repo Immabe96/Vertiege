@@ -11,7 +11,7 @@ import '../../services/invite_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/buttons/v_button.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../widgets/auth/auth_error_card.dart';
 
 /// Staff sign-in (same Supabase account as the player app).

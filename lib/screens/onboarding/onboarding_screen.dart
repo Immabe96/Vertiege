@@ -20,7 +20,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
 import 'the_gate_screen.dart';
-import '../../widgets/core/v_feedback.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/world_service.dart';
 
@@ -492,9 +492,10 @@ class _ProfileTab extends StatelessWidget {
           const SizedBox(height: VSpacing.xxl),
 
           // Next button
-          FilledButton(
+          VButton(
+            label: 'Continue to The Gate',
+            isFullWidth: true,
             onPressed: isValid ? onNext : null,
-            child: const Text('Continue to The Gate'),
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
@@ -728,15 +729,11 @@ class _GateTabState extends State<_GateTab> {
 
           // Submit button (shown on last question)
           if (_currentIndex == _questions.length - 1)
-            FilledButton(
+            VButton(
+              label: 'Reveal Your World',
+              isFullWidth: true,
+              isLoading: widget.isSubmitting,
               onPressed: widget.isSubmitting ? null : widget.onSubmit,
-              child: widget.isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Reveal Your World'),
             ),
         ],
       ),
@@ -818,10 +815,11 @@ class _WorldTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: VSpacing.lg),
-          FilledButton.icon(
-            onPressed: onEnter,
+          VButton(
+            label: 'Open Nexus',
+            isFullWidth: true,
             icon: const Icon(Icons.home_outlined),
-            label: const Text('Open Nexus'),
+            onPressed: onEnter,
           ),
           const SizedBox(height: VSpacing.sm),
           OutlinedButton.icon(

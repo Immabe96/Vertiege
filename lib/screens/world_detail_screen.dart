@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -517,40 +516,27 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (await WorldNavPrefs.hasAskedFeedDefault()) return;
     if (!mounted) return;
 
-    final openFeed = await showFDialog<bool>(
+    final openFeed = await showVDialog<bool>(
       context: context,
-      builder: (ctx, style, animation) => FDialog.raw(
-        builder: (context, dialogStyle) => Padding(
-          padding: const EdgeInsets.all(VSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'You joined ${world.name}',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: VFontWeight.bold),
-              ),
-              const SizedBox(height: VSpacing.sm),
-              const Text(
-                'When you open worlds you\'ve joined, start on the Feed tab? '
-                'You can change this anytime in Settings.',
-              ),
-              const SizedBox(height: VSpacing.lg),
-              FButton(
-                onPress: () => Navigator.pop(ctx, true),
-                child: const Text('Yes, open on Feed'),
-              ),
-              const SizedBox(height: VSpacing.sm),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Start on Home instead'),
-              ),
-            ],
-          ),
-        ),
+      title: 'You joined ${world.name}',
+      content: const Text(
+        'When you open worlds you\'ve joined, start on the Feed tab? '
+        'You can change this anytime in Settings.',
       ),
+      actions: [
+        VButton(
+          label: 'Yes, open on Feed',
+          isFullWidth: true,
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        const SizedBox(height: VSpacing.sm),
+        VButton(
+          label: 'Start on Home instead',
+          variant: ButtonVariant.text,
+          isFullWidth: true,
+          onPressed: () => Navigator.pop(context, false),
+        ),
+      ],
     );
 
     final preferFeed = openFeed ?? true;
@@ -759,7 +745,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
     return WorldAccessGuard(
       worldId: widget.worldId,
-      child: FScaffold(
+      child: VScaffold(
         childPad: false,
         child: RefreshIndicator(
           onRefresh: () async {
@@ -1006,7 +992,11 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FCard.raw(
+    return VSurfaceCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: VSpacing.sm,
+        vertical: VSpacing.md,
+      ),
       child: Material(
         color: Colors.transparent,
         child: Semantics(
@@ -1015,12 +1005,7 @@ class _StatChip extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(VRadius.lg),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: VSpacing.sm,
-                vertical: VSpacing.md,
-              ),
-              child: Column(
+            child: Column(
                 children: [
                   Icon(icon, size: VIconSize.md, color: VColors.primary),
                   const SizedBox(height: VSpacing.xs),
@@ -1046,7 +1031,6 @@ class _StatChip extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

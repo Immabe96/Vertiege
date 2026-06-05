@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:vertiege/ui/ui.dart';
@@ -70,9 +69,7 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
               VSpacing.md,
               0,
             ),
-            child: FCard(
-              child: Padding(
-                padding: const EdgeInsets.all(VSpacing.md),
+            child: VSurfaceCard(
                 child: Row(
                   children: [
                     const Icon(
@@ -91,7 +88,6 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
                     ),
                   ],
                 ),
-              ),
             ),
           ),
         Expanded(
@@ -109,9 +105,7 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
                   itemBuilder: (context, index) {
                     final q = quests[index];
                     final progress = q.target > 0 ? q.progress / q.target : 0.0;
-                    return FCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(VSpacing.md),
+                    return VSurfaceCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -130,18 +124,17 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
                                 padding: const EdgeInsets.only(
                                   top: VSpacing.sm,
                                 ),
-                                child: FButton(
-                                  onPress: () async {
+                                child: VButton(
+                                  label: 'Claim reward',
+                                  onPressed: () async {
                                     await ref
                                         .read(questProvider.notifier)
                                         .claimQuest(q.id);
                                   },
-                                  child: const Text('Claim reward'),
                                 ),
                               ),
                           ],
                         ),
-                      ),
                     );
                   },
                 ),
@@ -155,8 +148,8 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
       title: 'Daily Quests',
       showBack: true,
       headerActions: [
-        FHeaderAction(
-          icon: const Icon(FIcons.rotateCw),
+        VHeaderAction(
+          icon: Icon(VIcons.rotateCw),
           onPress: () => ref.read(questProvider.notifier).loadQuests(),
         ),
       ],

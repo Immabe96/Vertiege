@@ -17,7 +17,7 @@ import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../utils/world_foundations.dart';
-import '../../widgets/core/v_feedback.dart';
+import 'package:vertiege/ui/ui.dart';
 
 /// Key used to track whether the resident has completed The Gate.
 const gateCompletedKey = 'the_gate_completed';
@@ -450,26 +450,11 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const Spacer(flex: 2),
 
-          // ── ENTER THE GATE button ─────────────────────────
-          SizedBox(
-            height: 56,
-            child: FilledButton.icon(
-              onPressed: _nextStage,
-              icon: const Icon(VIcons.chevronRight),
-              label: const Text('ENTER THE GATE'),
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.tertiary,
-                foregroundColor: VColors.onTertiary,
-                textStyle: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  fontWeight: VFontWeight.bold,
-                  letterSpacing: 0,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-              ),
-            ),
+          VGateCta(
+            label: 'ENTER THE GATE',
+            size: VGateCtaSize.tall,
+            icon: const Icon(VIcons.chevronRight),
+            onPressed: _nextStage,
           ),
 
           const Spacer(),
@@ -547,28 +532,10 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const SizedBox(height: VSpacing.lg),
 
-          // ── CONTINUE button ───────────────────────────────
-          SizedBox(
-            height: 48,
-            child: FilledButton.icon(
-              onPressed: _selectedInterests.isEmpty ? null : _nextStage,
-              icon: const Icon(VIcons.arrowLeft),
-              label: const Text('CONTINUE'),
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.tertiary,
-                foregroundColor: VColors.onTertiary,
-                disabledBackgroundColor: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainerLow,
-                textStyle: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  fontWeight: VFontWeight.bold,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-              ),
-            ),
+          VGateCta(
+            label: 'CONTINUE',
+            icon: const Icon(VIcons.arrowLeft),
+            onPressed: _selectedInterests.isEmpty ? null : _nextStage,
           ),
           const SizedBox(height: VSpacing.sm),
           Center(
@@ -743,74 +710,43 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const Spacer(),
 
-          // ── JOIN WORLD button ──────────────────────────────
-          SizedBox(
-            height: 48,
-            child: FilledButton.icon(
-              onPressed: world.id.isEmpty
-                  ? null
-                  : () async {
-                      final resident = ref.read(residentProvider).resident;
-                      if (resident != null &&
-                          world.id.isNotEmpty &&
-                          !resident.joinedWorldIds.contains(world.id)) {
-                        await ref
-                            .read(residentProvider.notifier)
-                            .joinWorld(world.id);
-                        if (!mounted) return;
-                        final joined = ref
-                            .read(residentProvider)
-                            .resident
-                            ?.joinedWorldIds
-                            .contains(world.id);
-                        if (joined != true) {
-                          VFeedback.showMessage(
-                            context,
-                            'World entry is still syncing. Try again.',
-                          );
-                          return;
-                        }
+          VGateCta(
+            label: world.id.isEmpty ? 'LOADING WORLD' : 'ENTER THIS WORLD',
+            icon: const Icon(VIcons.logOut),
+            onPressed: world.id.isEmpty
+                ? null
+                : () async {
+                    final resident = ref.read(residentProvider).resident;
+                    if (resident != null &&
+                        world.id.isNotEmpty &&
+                        !resident.joinedWorldIds.contains(world.id)) {
+                      await ref
+                          .read(residentProvider.notifier)
+                          .joinWorld(world.id);
+                      if (!mounted) return;
+                      final joined = ref
+                          .read(residentProvider)
+                          .resident
+                          ?.joinedWorldIds
+                          .contains(world.id);
+                      if (joined != true) {
+                        VFeedback.showMessage(
+                          context,
+                          'World entry is still syncing. Try again.',
+                        );
+                        return;
                       }
-                      _joinedStarterWorldId = world.id;
-                      _nextStage();
-                    },
-              icon: const Icon(VIcons.logOut),
-              label: Text(
-                world.id.isEmpty ? 'LOADING WORLD' : 'ENTER THIS WORLD',
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.tertiary,
-                foregroundColor: VColors.onTertiary,
-                textStyle: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  fontWeight: VFontWeight.bold,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-              ),
-            ),
+                    }
+                    _joinedStarterWorldId = world.id;
+                    _nextStage();
+                  },
           ),
           const SizedBox(height: VSpacing.sm),
-          // CHOOSE ANOTHER button
-          SizedBox(
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: _nextStage,
-              icon: const Icon(VIcons.globe),
-              label: const Text('EXPLORE FIRST'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-                side: BorderSide(
-                  color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-              ),
-            ),
+          VGateCta(
+            label: 'EXPLORE FIRST',
+            variant: VGateCtaVariant.outlined,
+            icon: const Icon(VIcons.globe),
+            onPressed: _nextStage,
           ),
           const SizedBox(height: VSpacing.md),
         ],
@@ -880,34 +816,12 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
           const SizedBox(height: VSpacing.lg),
 
-          // ── BEGIN YOUR JOURNEY button ─────────────────────
-          SizedBox(
-            height: 56,
-            child: FilledButton.icon(
-              onPressed: _completing ? null : _complete,
-              icon: _completing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: VColors.onTertiary,
-                      ),
-                    )
-                  : const Icon(VIcons.trophy),
-              label: Text(_completing ? 'Entering Realm...' : 'OPEN THE REALM'),
-              style: FilledButton.styleFrom(
-                backgroundColor: VColors.tertiary,
-                foregroundColor: VColors.onTertiary,
-                textStyle: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  fontWeight: VFontWeight.bold,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                ),
-              ),
-            ),
+          VGateCta(
+            label: _completing ? 'Entering Realm...' : 'OPEN THE REALM',
+            size: VGateCtaSize.tall,
+            icon: const Icon(VIcons.trophy),
+            isLoading: _completing,
+            onPressed: _completing ? null : _complete,
           ),
           const SizedBox(height: VSpacing.sm),
           Center(

@@ -1,6 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
+import '../../theme/v_tokens.dart';
+
+/// Uppercase section label matching [VSectionList] / Forui tile groups.
+class VSectionLabel extends StatelessWidget {
+  final String title;
+
+  const VSectionLabel({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    return Padding(
+      padding: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
+      child: Text(
+        title.toUpperCase(),
+        style: theme.typography.sm.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colors.mutedForeground,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
 /// Grouped settings-style sections using Forui [FTileGroup].
 class VSectionList extends StatelessWidget {
   final String title;

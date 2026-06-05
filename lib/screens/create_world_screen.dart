@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../models/world.dart';
@@ -14,9 +13,6 @@ import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../widgets/worlds/dominion_type_picker.dart';
-import '../ui/icons/v_icons.dart';
-import '../widgets/core/v_feedback.dart';
-import '../widgets/core/v_surface_card.dart';
 import '../config/world_charter_templates.dart';
 
 final _iconChoices = const [
@@ -402,10 +398,8 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                 children: [
                   Text('World details', style: theme.textTheme.titleMedium),
                   const SizedBox(height: VSpacing.md),
-                  FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: _nameController,
-                    ),
+                  VTextFormField(
+                    controller: _nameController,
                     label: const Text('World name'),
                     hint: 'At least 3 characters',
                     textCapitalization: TextCapitalization.words,
@@ -445,10 +439,8 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     }).toList(),
                   ),
                   const SizedBox(height: VSpacing.md),
-                  FTextFormField(
-                    control: FTextFieldControl.managed(
-                      controller: _descController,
-                    ),
+                  VTextFormField(
+                    controller: _descController,
                     label: const Text('Description'),
                     hint: 'What is your world about?',
                     textCapitalization: TextCapitalization.sentences,
@@ -472,9 +464,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     runSpacing: VSpacing.xs,
                     children: _iconChoices.map((choice) {
                       final isSelected = _selectedIcon == choice.id;
-                      return FButton.icon(
-                        variant: isSelected ? .primary : .outline,
-                        onPress: () =>
+                      return VIconButton(
+                        selected: isSelected,
+                        onPressed: () =>
                             setState(() => _selectedIcon = choice.id),
                         child: Icon(choice.icon, size: 22),
                       );
@@ -521,9 +513,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                           child: Row(
                             children: [
                               Expanded(child: Text(channel.label)),
-                              FSwitch(
+                              VSwitch(
                                 value: _channelToggles[channel.key]!,
-                                onChange: (v) => setState(
+                                onChanged: (v) => setState(
                                   () => _channelToggles[channel.key] = v,
                                 ),
                               ),
@@ -539,29 +531,12 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
             const SizedBox(height: VSpacing.xl),
 
             // ── Submit — gold CTA ──────────────────────────────────
-            FButton(
-              onPress: _isCreating || !_isFormReady ? null : _submit,
-              child: _isCreating
-                  ? const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: FCircularProgress(),
-                        ),
-                        SizedBox(width: VSpacing.sm),
-                        Text('Creating...'),
-                      ],
-                    )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(VIcons.plus, size: 20),
-                        SizedBox(width: VSpacing.sm),
-                        Text('Create World'),
-                      ],
-                    ),
+            VButton(
+              label: 'Create World',
+              isFullWidth: true,
+              isLoading: _isCreating,
+              icon: Icon(VIcons.plus, size: 20),
+              onPressed: _isFormReady ? _submit : null,
             ),
 
             const SizedBox(height: VSpacing.xl),

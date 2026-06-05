@@ -6,8 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/ui/ui.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/message.dart';
@@ -15,8 +15,6 @@ import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
-import '../ui/buttons/v_button.dart';
-import '../ui/icons/v_icons.dart';
 import '../utils/chat_new_since_visit.dart';
 import '../utils/date_format.dart';
 import '../utils/presence_utils.dart';
@@ -359,12 +357,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       lastVisitAt: _visitDividerAnchor,
     );
 
-    return FScaffold(
-      header: FHeader.nested(
+    return VScaffold(
+      header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
             label: 'Back to messages',
-            icon: const Icon(FIcons.chevronLeft),
+            icon: Icon(VIcons.chevronLeft),
             onPress: () {
               if (context.canPop()) context.pop();
             },

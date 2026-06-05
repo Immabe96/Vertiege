@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../models/world.dart';
@@ -54,7 +54,7 @@ class WorldCard extends ConsumerWidget {
     if (plainStyle) {
       return FadeIn(
         delayMs: index * 40,
-        child: FCard.raw(
+        child: VSurfaceCard(
           child: Material(
             color: Colors.transparent,
             child: InkWell(

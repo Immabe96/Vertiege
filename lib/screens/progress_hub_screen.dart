@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:vertiege/ui/ui.dart';
@@ -52,13 +51,13 @@ class _ProgressHubScreenState extends ConsumerState<ProgressHubScreen>
       showBack: true,
       headerActions: [
         if (_tabs.index == 0)
-          FHeaderAction(
-            icon: const Icon(FIcons.rotateCw),
+          VHeaderAction(
+            icon: Icon(VIcons.rotateCw),
             onPress: () => ref.read(questProvider.notifier).loadQuests(),
           ),
         if (_tabs.index == 3)
-          FHeaderAction(
-            icon: const Icon(FIcons.rotateCw),
+          VHeaderAction(
+            icon: Icon(VIcons.rotateCw),
             onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
           ),
       ],

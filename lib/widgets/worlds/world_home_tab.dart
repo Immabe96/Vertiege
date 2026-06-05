@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../config/progression_glossary.dart';
 import '../../config/world_page_ia.dart';
@@ -75,9 +75,10 @@ class WorldHomeTab extends StatelessWidget {
         ],
         if (isJoined) ...[
           const SizedBox(height: VSpacing.md),
-          FButton(
-            onPress: onOpenFeed,
-            child: const Text('Go to feed'),
+          VButton(
+            label: 'Go to feed',
+            isFullWidth: true,
+            onPressed: onOpenFeed,
           ),
         ],
         const SizedBox(height: VSpacing.lg),
@@ -144,7 +145,7 @@ class _GroupMetaCard extends StatelessWidget {
     final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
     final desc = world.description.trim();
 
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -332,7 +333,7 @@ class _DiscussionPreview extends StatelessWidget {
     final theme = Theme.of(context);
     final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
 
-    return FCard.raw(
+    return VSurfaceCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(

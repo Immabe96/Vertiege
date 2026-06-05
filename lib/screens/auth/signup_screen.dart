@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/brand_assets.dart';
 import '../../ui/icons/v_icons.dart';
+import 'package:vertiege/ui/ui.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -212,18 +213,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       onSubmit: _isValid ? (_) => _handleSignUp() : null,
                     ),
                     const SizedBox(height: VSpacing.xl),
-                    FilledButton.icon(
-                      onPressed: _isLoading || !_isValid ? null : _handleSignUp,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(VIcons.arrowLeft),
-                      label: Text(
-                        _isLoading ? 'Creating account...' : 'Create Account',
-                      ),
+                    VButton(
+                      label: 'Create Account',
+                      isFullWidth: true,
+                      isLoading: _isLoading,
+                      icon: const Icon(VIcons.arrowLeft),
+                      onPressed: _isValid ? _handleSignUp : null,
                     ),
                   ],
                 ),

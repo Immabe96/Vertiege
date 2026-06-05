@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,9 +23,7 @@ import '../services/supabase.dart';
 import '../services/world_nav_prefs.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
-import '../ui/icons/v_icons.dart';
 import 'package:vertiege/ui/ui.dart';
-import '../widgets/core/v_feedback.dart';
 import '../widgets/core/v_theme_scheme_picker.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
@@ -651,17 +648,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showResetDataDialog() {
     final router = GoRouter.of(context);
-    showFDialog(
+    showVDialog<void>(
       context: context,
-      builder: (ctx, style, animation) => FDialog.raw(
-        builder: (context, dialogStyle) => _ResetDataConfirmationDialog(
-          onConfirmed: () async {
-            await StorageService.clearAll();
-            if (ctx.mounted) Navigator.pop(ctx);
-            ref.read(themeProvider.notifier).setScheme(ThemeScheme.system);
-            router.go('/onboarding');
-          },
-        ),
+      title: 'Reset all data?',
+      titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+        color: VColors.error,
+        fontWeight: VFontWeight.bold,
+      ),
+      content: _ResetDataConfirmationDialog(
+        onConfirmed: () async {
+          await StorageService.clearAll();
+          if (context.mounted) Navigator.pop(context);
+          ref.read(themeProvider.notifier).setScheme(ThemeScheme.system);
+          router.go('/onboarding');
+        },
       ),
     );
   }
@@ -731,20 +731,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FSelect<TextSize>.rich(
+                  VSelect<TextSize>(
+                    value: textSize,
+                    hint: 'Text size',
+                    onChanged: (v) {
+                      if (v != null) {
+                        ref.read(themeProvider.notifier).setTextSize(v);
+                      }
+                    },
                     format: (value) =>
                         value.name[0].toUpperCase() + value.name.substring(1),
-                    control: FSelectControl.lifted(
-                      value: textSize,
-                      onChange: (v) {
-                        if (v != null) {
-                          ref.read(themeProvider.notifier).setTextSize(v);
-                        }
-                      },
-                    ),
-                    children: TextSize.values
+                    items: TextSize.values
                         .map(
-                          (t) => FSelectItem<TextSize>(
+                          (t) => VSelectItem<TextSize>(
                             value: t,
                             title: Text(
                               t.name[0].toUpperCase() + t.name.substring(1),
@@ -774,9 +773,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ),
                       ),
-                      FSwitch(
+                      VSwitch(
                         value: highContrast,
-                        onChange: (enabled) {
+                        onChanged: (enabled) {
                           ref
                               .read(themeProvider.notifier)
                               .setTextSize(
@@ -817,7 +816,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             VSectionList(
               title: 'About',
               children: [
-                FTile(
+                VTile(
                   title: Text(
                     'Version $kAppVersionLabel',
                     style: TextStyle(
@@ -974,7 +973,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SettingsSectionLabel(title: 'Appearance'),
+                const VSectionLabel(title: 'Appearance'),
                 Card(
                   margin: EdgeInsets.zero,
                   elevation: 0,
@@ -1016,39 +1015,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     VSectionList(
                       title: 'Tier Perks',
                       children: [
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.trending_up,
                           title: 'XP Multiplier',
                           value: 'x${multiplier.toStringAsFixed(2)}',
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.monetization_on,
                           title: 'Daily Coin Bonus',
                           value: '+$coinBonus',
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.emoji_emotions,
                           title: 'Custom Reactions',
                           value: '$reactionSlots slots',
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.push_pin,
                           title: 'Post Pins',
                           value: pinLimit > 0
                               ? '$pinLimit available'
                               : 'Locked',
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.language,
                           title: 'World Creation',
                           value: '$worldLimit worlds',
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.local_bar,
                           title: 'Lounge Access',
                           value: hasLounge ? 'Unlocked' : 'Locked',
                         ),
-                        _PerkTile(
+                        VPerkTile(
                           icon: Icons.how_to_vote,
                           title: 'Governance Vote',
                           value: hasVote ? 'Unlocked' : 'Locked',
@@ -1148,59 +1147,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-/// Matches [VSectionList] uppercase section labels.
-class _SettingsSectionLabel extends StatelessWidget {
-  final String title;
-
-  const _SettingsSectionLabel({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    return Padding(
-      padding: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
-      child: Text(
-        title.toUpperCase(),
-        style: theme.typography.sm.copyWith(
-          fontWeight: FontWeight.w600,
-          color: theme.colors.mutedForeground,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-class _PerkTile extends FTile {
-  _PerkTile({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) : super(
-         prefix: Builder(
-           builder: (context) =>
-               Icon(icon, color: context.theme.colors.mutedForeground),
-         ),
-         title: Builder(
-           builder: (context) => Text(
-             title,
-             style: TextStyle(color: context.theme.colors.foreground),
-           ),
-         ),
-         details: Builder(
-           builder: (context) {
-             final valueColor = value.contains('Locked')
-                 ? context.theme.colors.mutedForeground
-                 : VColors.tertiary;
-             return Text(
-               value,
-               style: TextStyle(color: valueColor, fontWeight: FontWeight.w600),
-             );
-           },
-         ),
-       );
-}
-
 class _ResetDataConfirmationDialog extends StatefulWidget {
   final VoidCallback onConfirmed;
 
@@ -1235,27 +1181,11 @@ class _ResetDataConfirmationDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.all(VSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.warning_amber_rounded, color: VColors.error),
-              const SizedBox(width: VSpacing.sm),
-              Text(
-                'Reset all data?',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: VColors.error,
-                  fontWeight: VFontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.sm),
-          if (_step == 0)
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_step == 0)
             const Text(
               'This will permanently delete all local data including posts, notifications, '
               'achievements, and preferences. Your account will not be deleted, but all cached data will be gone.\n\n'
@@ -1301,33 +1231,32 @@ class _ResetDataConfirmationDialogState
                 ),
               ],
             ),
-          const SizedBox(height: VSpacing.lg),
-          vDialogActionsRow(
-            _step == 0
-                ? [
-                    VButton(
-                      label: 'Cancel',
-                      onPressed: () => Navigator.pop(context),
-                      variant: ButtonVariant.text,
-                    ),
-                    VButton(label: 'Continue', onPressed: _goToStep2),
-                  ]
-                : [
-                    VButton(
-                      label: 'Back',
-                      onPressed: _goBack,
-                      variant: ButtonVariant.text,
-                    ),
-                    VButton(
-                      label: 'Reset Everything',
-                      onPressed: _typedText.trim() == 'RESET'
-                          ? widget.onConfirmed
-                          : null,
-                    ),
-                  ],
-          ),
-        ],
-      ),
+        const SizedBox(height: VSpacing.lg),
+        vDialogActionsRow(
+          _step == 0
+              ? [
+                  VButton(
+                    label: 'Cancel',
+                    onPressed: () => Navigator.pop(context),
+                    variant: ButtonVariant.text,
+                  ),
+                  VButton(label: 'Continue', onPressed: _goToStep2),
+                ]
+              : [
+                  VButton(
+                    label: 'Back',
+                    onPressed: _goBack,
+                    variant: ButtonVariant.text,
+                  ),
+                  VButton(
+                    label: 'Reset Everything',
+                    onPressed: _typedText.trim() == 'RESET'
+                        ? widget.onConfirmed
+                        : null,
+                  ),
+                ],
+        ),
+      ],
     );
   }
 }

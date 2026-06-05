@@ -42,10 +42,21 @@ class VIcons {
     fontFamily: _family,
     fontPackage: _package,
   );
+  static const IconData compass = IconData(
+    57499,
+    fontFamily: _family,
+    fontPackage: _package,
+  );
   static const IconData chart = IconData(
     57450,
     fontFamily: _family,
     fontPackage: _package,
+  );
+  static const IconData chevronLeft = IconData(
+    57454,
+    fontFamily: _family,
+    fontPackage: _package,
+    matchTextDirection: true,
   );
   static const IconData chevronRight = IconData(
     57455,
@@ -65,6 +76,11 @@ class VIcons {
   );
   static const IconData diamond = IconData(
     58066,
+    fontFamily: _family,
+    fontPackage: _package,
+  );
+  static const IconData ellipsis = IconData(
+    57526,
     fontFamily: _family,
     fontPackage: _package,
   );
@@ -165,6 +181,11 @@ class VIcons {
   );
   static const IconData rocket = IconData(
     57990,
+    fontFamily: _family,
+    fontPackage: _package,
+  );
+  static const IconData rotateCw = IconData(
+    57673,
     fontFamily: _family,
     fontPackage: _package,
   );

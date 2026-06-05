@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../config/progression_glossary.dart';
 import '../../config/world_capability_matrix.dart';
@@ -52,7 +52,7 @@ class WorldShopTab extends ConsumerWidget {
       );
     }
 
-    final links = <FTileMixin>[
+    final links = <VSectionTile>[
       if (FeatureFlags.marketplace && showMarket)
         VSectionTile(
           icon: Icons.storefront,
@@ -109,9 +109,7 @@ class WorldShopTab extends ConsumerWidget {
         else
           VSectionList(title: 'Open', children: links),
         const SizedBox(height: VSpacing.md),
-        FCard.raw(
-          child: Padding(
-            padding: const EdgeInsets.all(VSpacing.md),
+        VSurfaceCard(
             child: Row(
               children: [
                 Icon(Icons.auto_awesome, color: prestigeColor),
@@ -136,7 +134,6 @@ class WorldShopTab extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
         ),
         const SizedBox(height: VSpacing.xl),
       ],

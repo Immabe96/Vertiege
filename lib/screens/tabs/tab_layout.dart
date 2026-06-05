@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/ui/ui.dart';
 import '../../state/notification_provider.dart';
 import '../../state/tab_shell_overlay_provider.dart';
 import '../../state/resident_provider.dart';
@@ -242,7 +242,7 @@ class _MainBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FBottomNavigationBar(
+    return VBottomNavigationBar(
       index: index,
       onChange: onTabTap,
       safeAreaBottom: true,
@@ -275,7 +275,7 @@ class _MainBottomNav extends StatelessWidget {
     return Semantics(
       label: dest.semanticsLabel,
       button: true,
-      child: FBottomNavigationBarItem(
+      child: VBottomNavigationBarItem(
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -302,7 +302,7 @@ class _TabNavIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected = FBottomNavigationBarData.of(context).selected;
+    final selected = vBottomNavItemSelected(context);
     return Icon(selected ? filled : outlined);
   }
 }

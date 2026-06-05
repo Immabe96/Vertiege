@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../models/message.dart';
 import '../state/chat_provider.dart';
@@ -15,7 +15,6 @@ import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
-import '../ui/icons/v_icons.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/core/screen_loading.dart';
@@ -125,12 +124,12 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return FScaffold(
-      header: FHeader.nested(
+    return VScaffold(
+      header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
             label: 'Back to channel',
-            icon: const Icon(FIcons.chevronLeft),
+            icon: Icon(VIcons.chevronLeft),
             onPress: () {
               if (context.canPop()) context.pop();
             },

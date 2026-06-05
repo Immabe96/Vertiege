@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/achievement.dart';
@@ -39,16 +38,10 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
       title: 'Hall of Ascension',
       showBack: true,
       headerActions: [
-        FButton(
-          onPress: () => context.push('/ascension-path'),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.map, size: VIconSize.sm),
-              SizedBox(width: VSpacing.xs),
-              Text('Journey'),
-            ],
-          ),
+        VButton(
+          label: 'Journey',
+          icon: const Icon(Icons.map, size: VIconSize.sm),
+          onPressed: () => context.push('/ascension-path'),
         ),
       ],
       body: Column(
@@ -68,24 +61,22 @@ class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
             _PrestigeHeader(resident: resident, canAscend: canAscend),
           ],
           Expanded(
-            child: FTabs(
-              expands: true,
+            child: VTabs(
               scrollable: true,
-              control: const FTabControl.managed(),
-              children: [
-                FTabEntry(
+              tabs: [
+                VTabEntry(
                   label: const Text('TOTAL XP'),
                   child: _XpLeaderboard(),
                 ),
-                FTabEntry(
+                VTabEntry(
                   label: const Text('WORLD PRESTIGE'),
                   child: _PrestigeLeaderboard(),
                 ),
-                FTabEntry(
+                VTabEntry(
                   label: const Text('ACHIEVEMENTS'),
                   child: _AchievementLeaderboard(),
                 ),
-                FTabEntry(
+                VTabEntry(
                   label: const Text('REFERRALS'),
                   child: _ReferralLeaderboard(),
                 ),

@@ -5,10 +5,9 @@ import '../../services/auth_service.dart';
 import '../../services/invite_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
-import 'package:forui/forui.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/brand_assets.dart';
-import '../../ui/buttons/v_button.dart';
+import 'package:vertiege/ui/ui.dart';
 
 class AuthCallbackScreen extends ConsumerStatefulWidget {
   const AuthCallbackScreen({super.key});
@@ -123,7 +122,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   const SizedBox(
                     width: VIconSize.lg,
                     height: VIconSize.lg,
-                    child: FCircularProgress(),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 else
                   Icon(
