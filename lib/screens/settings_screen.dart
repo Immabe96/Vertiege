@@ -97,7 +97,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
     if (key == _kPrefPushEnabled) {
-      await StorageService.setString(_kPrefPushEnabled, value ? 'true' : 'false');
+      await StorageService.setString(
+        _kPrefPushEnabled,
+        value ? 'true' : 'false',
+      );
     }
     await _syncNotificationPrefToServer(key, value);
   }
@@ -297,97 +300,97 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       title: 'Change Password',
       content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: oldController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Current password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: oldController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Current password',
+                prefixIcon: const Icon(Icons.lock_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
                   ),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: VSpacing.sm),
-              TextFormField(
-                controller: newController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'New password',
-                  prefixIcon: const Icon(VIcons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
                   ),
                 ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Required';
-                  if (v.length < 8) return 'At least 8 characters';
-                  return null;
-                },
               ),
-              const SizedBox(height: VSpacing.sm),
-              TextFormField(
-                controller: confirmController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm new password',
-                  prefixIcon: const Icon(VIcons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: BorderSide(
-                      color: isDark ? VColors.outlineDark : VColors.outline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    borderSide: const BorderSide(
-                      color: VColors.primary,
-                      width: 2,
-                    ),
+              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+            ),
+            const SizedBox(height: VSpacing.sm),
+            TextFormField(
+              controller: newController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'New password',
+                prefixIcon: const Icon(VIcons.lock),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
                   ),
                 ),
-                validator: (v) {
-                  if (v != newController.text) return 'Passwords do not match';
-                  return null;
-                },
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
+                  ),
+                ),
               ),
-            ],
-          ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (v.length < 8) return 'At least 8 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: VSpacing.sm),
+            TextFormField(
+              controller: confirmController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Confirm new password',
+                prefixIcon: const Icon(VIcons.lock),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: BorderSide(
+                    color: isDark ? VColors.outlineDark : VColors.outline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  borderSide: const BorderSide(
+                    color: VColors.primary,
+                    width: 2,
+                  ),
+                ),
+              ),
+              validator: (v) {
+                if (v != newController.text) return 'Passwords do not match';
+                return null;
+              },
+            ),
+          ],
         ),
+      ),
       actions: [
         vDialogActionsRow([
           VButton(
@@ -415,7 +418,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
                 if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
-                  VFeedback.showMessage(context, 'Password changed successfully');
+                  VFeedback.showMessage(
+                    context,
+                    'Password changed successfully',
+                  );
                 }
               } catch (e) {
                 if (context.mounted) Navigator.pop(context);
@@ -439,9 +445,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       title: 'Delete Account',
       titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: VFontWeight.bold,
-            color: VColors.error,
-          ),
+        fontWeight: VFontWeight.bold,
+        color: VColors.error,
+      ),
       content: StatefulBuilder(
         builder: (ctx, setDialogState) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -473,10 +479,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.error,
-                    width: 2,
-                  ),
+                  borderSide: const BorderSide(color: VColors.error, width: 2),
                 ),
               ),
               onChanged: (v) => setDialogState(() => confirmText = v),
@@ -605,8 +608,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     final parsed = jsonDecode(raw);
                     if (parsed is! Map<String, dynamic>) {
                       setDialogState(
-                        () =>
-                            validationError = 'Invalid JSON: expected an object',
+                        () => validationError =
+                            'Invalid JSON: expected an object',
                       );
                       return;
                     }
@@ -724,32 +727,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Consumer(
             builder: (context, ref, _) {
               final textSize = ref.watch(themeProvider).textSize;
-              final highContrast = textSize == TextSize.large ||
-                  textSize == TextSize.xlarge;
+              final highContrast =
+                  textSize == TextSize.large || textSize == TextSize.xlarge;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FSelect<TextSize>.rich(
-                format: (value) =>
-                    value.name[0].toUpperCase() + value.name.substring(1),
-                control: FSelectControl.lifted(
-                  value: textSize,
-                  onChange: (v) {
-                    if (v != null) {
-                      ref.read(themeProvider.notifier).setTextSize(v);
-                    }
-                  },
-                ),
-                children: TextSize.values
-                    .map(
-                      (t) => FSelectItem<TextSize>(
-                        value: t,
-                        title: Text(
-                          t.name[0].toUpperCase() + t.name.substring(1),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                    format: (value) =>
+                        value.name[0].toUpperCase() + value.name.substring(1),
+                    control: FSelectControl.lifted(
+                      value: textSize,
+                      onChange: (v) {
+                        if (v != null) {
+                          ref.read(themeProvider.notifier).setTextSize(v);
+                        }
+                      },
+                    ),
+                    children: TextSize.values
+                        .map(
+                          (t) => FSelectItem<TextSize>(
+                            value: t,
+                            title: Text(
+                              t.name[0].toUpperCase() + t.name.substring(1),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: VSpacing.sm),
                   VSectionSwitchTile(
@@ -757,7 +760,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     label: 'High contrast text',
                     value: highContrast,
                     onChanged: (enabled) {
-                      ref.read(themeProvider.notifier).setTextSize(
+                      ref
+                          .read(themeProvider.notifier)
+                          .setTextSize(
                             enabled ? TextSize.large : TextSize.medium,
                           );
                     },
@@ -918,7 +923,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 VSectionSwitchTile(
                   icon: Icons.leaderboard_outlined,
                   label: 'Low-pressure mode',
-                  value: ref.watch(residentProvider).resident?.leaderboardOptOut ??
+                  value:
+                      ref.watch(residentProvider).resident?.leaderboardOptOut ??
                       false,
                   onChanged: (v) {
                     ref.read(residentProvider.notifier).setLeaderboardOptOut(v);
@@ -980,19 +986,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           icon: Icons.trending_up,
                           title: 'XP Multiplier',
                           value: 'x${multiplier.toStringAsFixed(2)}',
-
                         ),
                         _PerkTile(
                           icon: Icons.monetization_on,
                           title: 'Daily Coin Bonus',
                           value: '+$coinBonus',
-
                         ),
                         _PerkTile(
                           icon: Icons.emoji_emotions,
                           title: 'Custom Reactions',
                           value: '$reactionSlots slots',
-
                         ),
                         _PerkTile(
                           icon: Icons.push_pin,
@@ -1000,25 +1003,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           value: pinLimit > 0
                               ? '$pinLimit available'
                               : 'Locked',
-
                         ),
                         _PerkTile(
                           icon: Icons.language,
                           title: 'World Creation',
                           value: '$worldLimit worlds',
-
                         ),
                         _PerkTile(
                           icon: Icons.local_bar,
                           title: 'Lounge Access',
                           value: hasLounge ? 'Unlocked' : 'Locked',
-
                         ),
                         _PerkTile(
                           icon: Icons.how_to_vote,
                           title: 'Governance Vote',
                           value: hasVote ? 'Unlocked' : 'Locked',
-
                         ),
                       ],
                     ),
@@ -1048,7 +1047,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: () async {
                     await BackupService.createBackup();
                     if (context.mounted) {
-                      VFeedback.showMessage(context, 'Backup created successfully');
+                      VFeedback.showMessage(
+                        context,
+                        'Backup created successfully',
+                      );
                     }
                   },
                 ),
@@ -1083,6 +1085,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         : 'Firebase: ${FirebaseBootstrap.lastError ?? "offline"}',
                     enabled: false,
                   ),
+                  VSectionTile(
+                    icon: Icons.science_outlined,
+                    label: 'UI Wave 0 spike',
+                    detail: 'Forui / shadcn_ui / Material 3',
+                    onTap: () => context.push('/debug/ui-spike'),
+                  ),
                 ],
               ),
             ],
@@ -1113,10 +1121,8 @@ class _PerkTile extends FTile {
     required String value,
   }) : super(
          prefix: Builder(
-           builder: (context) => Icon(
-             icon,
-             color: context.theme.colors.mutedForeground,
-           ),
+           builder: (context) =>
+               Icon(icon, color: context.theme.colors.mutedForeground),
          ),
          title: Builder(
            builder: (context) => Text(
@@ -1131,10 +1137,7 @@ class _PerkTile extends FTile {
                  : VColors.tertiary;
              return Text(
                value,
-               style: TextStyle(
-                 color: valueColor,
-                 fontWeight: FontWeight.w600,
-               ),
+               style: TextStyle(color: valueColor, fontWeight: FontWeight.w600),
              );
            },
          ),

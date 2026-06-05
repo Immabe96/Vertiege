@@ -1,7 +1,8 @@
 # Vertiege UI migration: unified design system (Forui out)
 
-**Status:** Active — **Wave 0 gate not passed** (plan only, no library swap on `develop` yet)  
-**Branch:** `docs/shadcn-migration-plan` — polish docs here until merge; **`develop` is frozen** for UI migration until Wave 0 passes.  
+**Status:** Active — **Wave 0 spike implemented** (on-device scoring pending)  
+**Branch:** `feature/ui-wave-0-spike` — docs + spike; PR to `develop` when scored.  
+**Spike route (debug):** `/debug/ui-spike` · Settings → Developer → UI Wave 0 spike  
 **Snapshot:** 2026-05-30 — 65 `lib/` files import Forui; 35 of 54 screen files import Forui directly.
 
 **Goal:** One visible design system behind Vertiege `V*` wrappers. **Forui is removed gradually**, not in a big-bang rewrite.
@@ -179,11 +180,13 @@ Optional **Candidate C** (`shadcn_flutter`) only if A fails on dialog/sheet but 
 
 **Deliverables:**
 
-- [ ] Spike PR with screenshots or short screen recording (Android, light + dark).
-- [ ] Completed score table in PR description.
-- [ ] **Decision record** section in this file (package chosen, Flutter SDK bump needed or not).
+- [x] Spike code: `lib/ui_spike/` — baseline / `shadcn_ui` / Material 3 backends.
+- [x] Debug route `/debug/ui-spike` (tree-shaken from release).
+- [x] `shadcn_ui: ^0.54.0` in `pubspec.yaml` (spike branch only until PR merges).
+- [x] `VertiegeShadTheme` token bridge (`lib/ui_spike/shadcn_ui/vertiege_shad_theme.dart`).
+- [ ] On-device score table (light + dark) — fill decision record below.
+- [ ] Spike PR with screenshots or short screen recording (Android).
 - [ ] If **Plan B** (stay Forui 0.21): close Forui-removal waves; rename track to “wrapper consolidation”.
-- [ ] If **shadcn_ui** wins: add dependency in Wave A PR only, not in Wave 0 doc-only merge.
 
 **Wave 0 PR template (copy into PR body):**
 
@@ -412,13 +415,13 @@ _Fill in when spike PR merges._
 
 | Field | Value |
 |-------|-------|
-| Date | |
-| Chosen backing | `shadcn_ui` / `shadcn_flutter` / `material3` / `forui-0.21` |
-| Flutter SDK bump required | |
-| APK size delta (vs baseline) | |
-| Spike PR | |
-| Forui file count at spike start | 65 |
-| Notes | |
+| Date | 2026-05-30 (spike landed; scores TBD on device) |
+| Chosen backing | **Provisional: `shadcn_ui`** — pending emulator scorecard |
+| Flutter SDK bump required | **No** — Flutter 3.44.0 / Dart 3.11 meets `shadcn_ui` 0.54 floor |
+| APK size delta (vs baseline) | _Measure before merge_ |
+| Spike PR | `feature/ui-wave-0-spike` → `develop` |
+| Forui file count at spike start | 66 (`check_no_forui_in_lib.sh --report`) |
+| Notes | Leaf widgets + theme bridge validated in CI (`flutter test` 231). Tab shell still custom (Material `Scaffold` + `ShadTheme`). Score all three backends on `/debug/ui-spike` before Wave A. |
 
 ---
 
@@ -429,3 +432,4 @@ _Fill in when spike PR merges._
 | 2026-06-05 | Initial plan + Wave 0 gate |
 | 2026-05-30 | Inventory baseline, screen matrix, spike folder layout, PR template, enforcement |
 | 2026-05-30 | Widget mapping doc, theme bridge, `check_no_forui_in_lib.sh` |
+| 2026-05-30 | Wave 0 spike implemented (`lib/ui_spike/`, debug route, `shadcn_ui` dep) |

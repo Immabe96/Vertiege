@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +24,7 @@ import '../screens/tabs/explore_screen.dart';
 import '../screens/tabs/chat_list_screen.dart';
 import '../screens/tabs/identity_screen.dart';
 import '../screens/tabs/more_screen.dart';
+import '../ui_spike/spike_settings_page.dart';
 
 import '../screens/tabs/alerts_screen.dart';
 import '../screens/world_detail_screen.dart';
@@ -275,35 +277,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'marketplace',
                         builder: (context, state) => WorldMarketplaceScreen(
                           worldId: state.pathParameters['worldId']!,
-                          isMember: state.uri.queryParameters['member'] == 'true',
+                          isMember:
+                              state.uri.queryParameters['member'] == 'true',
                         ),
                       ),
                       GoRoute(
                         path: 'polls',
                         builder: (context, state) => WorldPollsScreen(
                           worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
+                          isSovereignOrCouncil:
+                              state.uri.queryParameters['admin'] == 'true',
                         ),
                       ),
                       GoRoute(
                         path: 'treasury',
                         builder: (context, state) => WorldTreasuryScreen(
                           worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
+                          isSovereignOrCouncil:
+                              state.uri.queryParameters['admin'] == 'true',
                         ),
                       ),
                       GoRoute(
                         path: 'challenges',
                         builder: (context, state) => WorldChallengesScreen(
                           worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil: state.uri.queryParameters['admin'] == 'true',
+                          isSovereignOrCouncil:
+                              state.uri.queryParameters['admin'] == 'true',
                         ),
                       ),
                       GoRoute(
                         path: 'jobs',
                         builder: (context, state) => WorldJobsScreen(
                           worldId: state.pathParameters['worldId']!,
-                          canManage: state.uri.queryParameters['admin'] == 'true',
+                          canManage:
+                              state.uri.queryParameters['admin'] == 'true',
                         ),
                       ),
                       GoRoute(
@@ -454,6 +461,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
       ),
+      if (kDebugMode)
+        vGoRoute(
+          path: '/debug/ui-spike',
+          builder: (context, state) =>
+              SpikeSettingsPage.fromQuery(state.uri.queryParameters['backend']),
+        ),
       vGoRoute(
         path: '/search',
         builder: (context, state) => const SearchScreen(),
@@ -562,16 +575,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Deep-link: notifications
       GoRoute(
         path: '/notifications/:id',
-        builder: (context, state) => _NotificationDeepLink(
-          notificationId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            _NotificationDeepLink(notificationId: state.pathParameters['id']!),
       ),
       // Deep-link: post detail
       GoRoute(
         path: '/post/:postId',
-        builder: (context, state) => _PostDeepLink(
-          postId: state.pathParameters['postId']!,
-        ),
+        builder: (context, state) =>
+            _PostDeepLink(postId: state.pathParameters['postId']!),
       ),
     ],
   );
@@ -618,9 +629,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     if (!mounted) return;
     if (resident == null || !resident.gateCompleted) {
       await InviteService.savePendingInviteCode(widget.code);
-      unawaited(
-        AnalyticsService.logEvent(AnalyticsEvents.inviteSavedPending),
-      );
+      unawaited(AnalyticsService.logEvent(AnalyticsEvents.inviteSavedPending));
       if (!mounted) return;
       final hasSession = maybeSupabase()?.auth.currentSession != null;
       context.go(hasSession ? '/onboarding' : '/login');
@@ -634,9 +643,7 @@ class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
     );
     if (!mounted) return;
     if (!result.succeeded) {
-      unawaited(
-        AnalyticsService.logEvent(AnalyticsEvents.inviteRedeemFailed),
-      );
+      unawaited(AnalyticsService.logEvent(AnalyticsEvents.inviteRedeemFailed));
       setState(() {
         _loading = false;
         _error = result.errorMessage ?? 'Something went wrong';
@@ -786,8 +793,9 @@ class _NotificationDeepLinkState extends ConsumerState<_NotificationDeepLink> {
 
   Future<void> _redirect() async {
     final notifs = ref.read(notificationProvider).notifications;
-    final notif =
-        notifs.where((n) => n.id == widget.notificationId).firstOrNull;
+    final notif = notifs
+        .where((n) => n.id == widget.notificationId)
+        .firstOrNull;
 
     if (notif != null && !notif.read) {
       ref.read(notificationProvider.notifier).markRead(widget.notificationId);
@@ -854,7 +862,9 @@ class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
             .maybeSingle();
         final worldId = row?['world_id'] as String?;
         if (worldId != null && mounted) {
-          await ref.read(postProvider.notifier).ensurePostVisible(widget.postId);
+          await ref
+              .read(postProvider.notifier)
+              .ensurePostVisible(widget.postId);
           if (!mounted) return;
           context.go(exploreWorldPath(worldId, postId: widget.postId));
           return;
@@ -869,7 +879,10 @@ class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
       if (mounted) context.go('/notifications');
     } catch (_) {
       if (mounted) {
-        setState(() { _loading = false; _error = 'Post not found'; });
+        setState(() {
+          _loading = false;
+          _error = 'Post not found';
+        });
       }
     }
   }
