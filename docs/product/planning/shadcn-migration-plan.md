@@ -6,7 +6,8 @@
 
 **Goal:** One visible design system behind Vertiege `V*` wrappers. **Forui is removed gradually**, not in a big-bang rewrite.
 
-**Historical plans & audits:** [consolidated-legacy-plans.md](../../archive/consolidated-legacy-plans.md) · [consolidated-legacy-audits.md](../../archive/consolidated-legacy-audits.md)
+**Historical plans & audits:** [consolidated-legacy-plans.md](../../archive/consolidated-legacy-plans.md) · [consolidated-legacy-audits.md](../../archive/consolidated-legacy-audits.md)  
+**Widget mapping:** [ui-widget-mapping.md](ui-widget-mapping.md) — Forui symbol inventory, per-package mapping, theme bridge.
 
 ---
 
@@ -86,9 +87,9 @@ Screens depend on these types only. **Backing library is an implementation detai
 Re-run before spike PR:
 
 ```bash
-rg "package:forui" lib --count | wc -l          # files (baseline: 65)
+bash scripts/check_no_forui_in_lib.sh --report   # file list + counts (baseline: 65)
+# Optional ripgrep breakdown:
 rg "package:forui" lib/screens --count | wc -l    # screen files (baseline: 35)
-rg '\bF(Scaffold|Header|Button|Tile|Card|Dialog|Sheet|TextField)\b' lib -c
 ```
 
 ### Forui import hotspots (migrate early in shell wave)
@@ -161,6 +162,14 @@ Optional **Candidate C** (`shadcn_flutter`) only if A fails on dialog/sheet but 
 | Typography (Plus Jakarta) | Matches `VFont` scale | | | |
 | Maintainer fit | Docs, releases, issue velocity | n/a | | |
 | Min Flutter / Dart SDK | `pubspec` constraint note | SDK `^3.11.0` | | |
+| Tab shell ergonomics | `VTabShell` + back stack on emulator | | | |
+| Settings row density | `VTile` / section list | | | |
+
+**Known spike risks (see [ui-widget-mapping.md](ui-widget-mapping.md)):**
+
+- `shadcn_ui` has strong leaf widgets but **no Forui-style page scaffold** — `VPage` likely composes Material `Scaffold` + `ShadTheme`.
+- `shadcn_flutter` has closer `Scaffold` + `NavigationBar` — time-box Candidate C if shell scores low.
+- `FIcons` in 24 files — spike may use Material icons; batch replace in Wave A.
 
 **Theme spike checklist:**
 
@@ -315,6 +324,16 @@ Each step must leave `flutter test` green and UAT gates intact. **One wave per P
 
 **Allowed during transition:** `lib/ui/`, `lib/theme/`, `lib/forui/` (until deleted), `lib/ui_spike/` (debug).
 
+**Script:** `scripts/check_no_forui_in_lib.sh`
+
+| Mode | When |
+|------|------|
+| `--report` | Now — baseline tracking, always passes |
+| `--enforce-screens` | After Wave A merges — add to CI `ui` job |
+| `--enforce-zero` | Wave F — fail if any Forui import remains |
+
+Allowlist lives in the script header; shrink it each wave as files migrate.
+
 ---
 
 ## Risks & mitigations
@@ -353,6 +372,7 @@ Already on `develop`: Wave 22 drops, progress hub, daily reward `TweenSequence` 
 - `flutter analyze --no-fatal-infos`
 - `flutter test --no-pub`
 - `scripts/check_no_service_role_in_lib.sh`
+- `scripts/check_no_forui_in_lib.sh --report` (Wave A+: `--enforce-screens` in CI)
 - Achievement asset check (or documented fallback)
 
 **Visual smoke (Android release APK):**
@@ -408,3 +428,4 @@ _Fill in when spike PR merges._
 |------|--------|
 | 2026-06-05 | Initial plan + Wave 0 gate |
 | 2026-05-30 | Inventory baseline, screen matrix, spike folder layout, PR template, enforcement |
+| 2026-05-30 | Widget mapping doc, theme bridge, `check_no_forui_in_lib.sh` |
