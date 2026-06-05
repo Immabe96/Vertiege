@@ -8,7 +8,6 @@ import '../../services/feature_flags.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/v_feedback.dart';
-import '../../widgets/v_section_list.dart';
 
 /// Secondary navigation hub — accessible via the More tab.
 class MoreScreen extends ConsumerWidget {

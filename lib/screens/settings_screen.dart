@@ -25,12 +25,9 @@ import '../services/world_nav_prefs.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../ui/icons/v_icons.dart';
-import '../ui/buttons/v_button.dart';
 import 'package:vertiege/ui/ui.dart';
-import '../widgets/v_section_list.dart';
 import '../widgets/core/v_feedback.dart';
 import '../widgets/core/v_theme_scheme_picker.dart';
-import '../widgets/core/v_dialog.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';

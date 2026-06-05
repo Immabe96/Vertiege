@@ -24,6 +24,8 @@ ALLOWLIST=(
   "lib/theme/forui_theme.dart"
   "lib/ui_spike/"
   "lib/ui/shell/"
+  "lib/ui/lists/"
+  "lib/ui/overlays/"
   "lib/app.dart"
   "lib/router/app_router.dart"
   "lib/ui/buttons/v_button.dart"

@@ -13,7 +13,6 @@ import '../state/world_provider.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/quiet_gate_tile.dart';
-import '../widgets/v_section_list.dart';
 import '../services/permission_service.dart';
 
 /// Manage / Participate hub (Wave 10) with visible gate reasons.

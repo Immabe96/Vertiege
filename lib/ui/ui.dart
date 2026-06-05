@@ -10,3 +10,5 @@ export 'feedback/v_sync_badge.dart';
 // Shell + Forui-backed primitives — see lib/forui/README.md.
 export 'shell/v_page.dart';
 export 'shell/v_tab_shell.dart';
+export 'lists/v_section_list.dart';
+export 'overlays/v_dialog.dart';

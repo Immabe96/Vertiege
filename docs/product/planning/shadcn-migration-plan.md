@@ -239,7 +239,8 @@ Same screen groupings as the old ladder, but **Forui remains the backing library
 - [x] `ui.dart` exports shell; `shadcn_ui` removed; debug spike = Forui baseline only.
 - [x] Settings Appearance `Card` layout fix; design-system layout rules documented.
 - [x] Migrate `lib/screens/` to `import 'package:vertiege/ui/ui.dart'` (shell).
-- [ ] Migrate remaining `lib/widgets/` forui shell imports (incremental).
+- [x] `VSectionList` + `showVDialog` moved to `lib/ui/lists/`, `lib/ui/overlays/`.
+- [ ] Product widgets (`world_realm_dossier`, etc.) — forui OK until W3 touch.
 - [ ] Tab roots grey-void UAT #2 pass.
 
 ### W2 — Auth & onboarding

@@ -18,7 +18,6 @@ import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_avatar_surface.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/core/sync_warning_banner.dart';
-import '../../widgets/v_section_list.dart';
 
 class AchievementsIndexScreen extends ConsumerWidget {
   const AchievementsIndexScreen({super.key});

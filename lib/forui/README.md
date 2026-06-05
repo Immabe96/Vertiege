@@ -21,7 +21,7 @@ Import: `package:vertiege/ui/ui.dart` or `lib/ui/shell/*.dart`.
 |------|---------|
 | Layout | `FScaffold`, `FHeader`, `FHeader.nested`, `FHeaderAction` |
 | Navigation | `FTabs`, `FBottomNavigationBar` |
-| Lists | `FTile`, `FTileGroup` — see `lib/widgets/v_section_list.dart` |
+| Lists | `VSectionList`, `VTile` — `lib/ui/lists/v_section_list.dart` |
 | Forms | `FButton`, `FSelect`, `FSwitch`, `FTextField` |
 | Feedback | `FDialog`, `FSheet`, `FToast` |
 

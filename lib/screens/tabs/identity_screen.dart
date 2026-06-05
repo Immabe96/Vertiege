@@ -4,7 +4,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
-import '../../widgets/v_section_list.dart';
 import '../../widgets/identity/honour_stat_chip.dart';
 import '../../models/achievement.dart';
 import '../../models/resident.dart';
