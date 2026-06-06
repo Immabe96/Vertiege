@@ -1100,7 +1100,7 @@ class _EmptyChannels extends ConsumerWidget {
   }
 }
 
-class _DmRoomTile extends StatelessWidget {
+class _DmRoomTile extends StatefulWidget {
   final Map<String, dynamic> room;
   final String currentUserId;
   final String otherName;
@@ -1120,17 +1120,68 @@ class _DmRoomTile extends StatelessWidget {
   });
 
   @override
+  State<_DmRoomTile> createState() => _DmRoomTileState();
+}
+
+class _DmRoomTileState extends State<_DmRoomTile>
+    with SingleTickerProviderStateMixin {
+  int _previousUnread = 0;
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseScale;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousUnread = widget.room['unread_count'] as int? ?? 0;
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _pulseScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 1.4)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.4, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 70,
+      ),
+    ]).animate(_pulseController);
+  }
+
+  @override
+  void didUpdateWidget(covariant _DmRoomTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final current = widget.room['unread_count'] as int? ?? 0;
+    if (_previousUnread == 0 && current > 0) {
+      _pulseController.forward(from: 0);
+    }
+    _previousUnread = current;
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final hasTyping = typingLabel != null;
-    final lastMessage = hasTyping ? typingLabel! : (room['last_message'] as String? ?? '');
-    final unreadCount = room['unread_count'] as int? ?? 0;
+    final hasTyping = widget.typingLabel != null;
+    final lastMessage = hasTyping
+        ? widget.typingLabel!
+        : (widget.room['last_message'] as String? ?? '');
+    final unreadCount = widget.room['unread_count'] as int? ?? 0;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push('/chat/${room['id']}', extra: presence),
+        onTap: () =>
+            context.push('/chat/${widget.room['id']}', extra: widget.presence),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.md,
@@ -1140,7 +1191,7 @@ class _DmRoomTile extends StatelessWidget {
             children: [
               Stack(
                 children: [
-                  CosmeticAvatar(imageUrl: otherAvatar, size: 48),
+                  CosmeticAvatar(imageUrl: widget.otherAvatar, size: 48),
                   Positioned(
                     right: 0,
                     bottom: 0,
@@ -1153,7 +1204,7 @@ class _DmRoomTile extends StatelessWidget {
                           width: 2,
                         ),
                       ),
-                      child: StatusDot(presence: presence, size: 10),
+                      child: StatusDot(presence: widget.presence, size: 10),
                     ),
                   ),
                 ],
@@ -1167,7 +1218,9 @@ class _DmRoomTile extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            otherName.isNotEmpty ? otherName : 'Unknown',
+                            widget.otherName.isNotEmpty
+                                ? widget.otherName
+                                : 'Unknown',
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: unreadCount > 0
                                   ? VFontWeight.semiBold
@@ -1184,9 +1237,9 @@ class _DmRoomTile extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (timeLabel.isNotEmpty)
+                        if (widget.timeLabel.isNotEmpty)
                           Text(
-                            timeLabel,
+                            widget.timeLabel,
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: isDark
                                   ? VColors.onSurfaceVariantDark
@@ -1227,12 +1280,15 @@ class _DmRoomTile extends StatelessWidget {
                           ),
                         ),
                         if (unreadCount > 0)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: VColors.primary,
-                              shape: BoxShape.circle,
+                          ScaleTransition(
+                            scale: _pulseScale,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: VColors.primary,
+                                shape: BoxShape.circle,
+                              ),
                             ),
                           ),
                       ],
