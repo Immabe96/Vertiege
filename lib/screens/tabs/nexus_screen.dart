@@ -8,7 +8,9 @@ import '../../router/search_navigation.dart';
 import '../../services/notification_onboarding_prefs.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/onboarding_funnel_sync.dart';
+import '../../services/world_service.dart';
 import '../../state/notification_provider.dart';
+import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -35,7 +37,20 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     });
   }
 
+  void _syncNexusRealtime() {
+    final joinedIds =
+        ref
+            .read(residentProvider)
+            .resident
+            ?.joinedWorldIds
+            .where(WorldService.isRemoteWorldId)
+            .toSet() ??
+        {};
+    unawaited(ref.read(postProvider.notifier).setNexusRealtimeScope(joinedIds));
+  }
+
   Future<void> _onNexusOpened() async {
+    _syncNexusRealtime();
     final residentId = ref.read(residentProvider).resident?.id;
     if (residentId != null) {
       await OnboardingFunnelSync.markOpenedNexus(residentId);
@@ -67,6 +82,14 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      residentProvider.select((s) => s.resident?.joinedWorldIds),
+      (previous, next) {
+        if (previous == next) return;
+        _syncNexusRealtime();
+      },
+    );
+
     final theme = Theme.of(context);
 
     final headerActions = <Widget>[

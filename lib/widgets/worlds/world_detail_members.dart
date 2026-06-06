@@ -1,9 +1,9 @@
-﻿import 'dart:math' as math;
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../state/world_provider.dart';
+import '../../utils/world_presence.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 import 'leaderboard.dart';
@@ -37,7 +37,7 @@ class WorldDetailMembers extends ConsumerWidget {
           child: WorldMemberRow(
             members: members,
             isLoading: membersLoading,
-            onlineCount: math.min(8, (members.length * 0.4).round()),
+            onlineCount: countOnlineWorldMembers(members),
             onTap: () => context.push(
               worldMembersPath(
                 worldId,

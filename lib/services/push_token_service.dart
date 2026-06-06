@@ -8,7 +8,6 @@ import 'analytics_service.dart';
 import 'crash_reporter.dart';
 import 'firebase_bootstrap.dart';
 import 'firebase_messaging_handlers.dart';
-import 'local_notification_service.dart';
 import 'storage_service.dart';
 import 'supabase.dart';
 
@@ -124,7 +123,6 @@ class PushTokenService {
     FirebaseMessaging.onMessage.listen((message) {
       unawaited(_recordMessageEvent('notification_foreground', message));
       _foregroundMessages.add(message);
-      unawaited(LocalNotificationService.showFromRemoteMessage(message));
       CrashReporter.instance.addBreadcrumb(
         message.messageId ?? 'foreground message',
         category: 'fcm',
@@ -149,6 +147,32 @@ class PushTokenService {
       'last_seen_at': DateTime.now().toUtc().toIso8601String(),
       'updated_at': DateTime.now().toIso8601String(),
     }, onConflict: 'token');
+  }
+
+  static Future<void> clearForResident() async {
+    if (!FirebaseBootstrap.isInitialized || kIsWeb) {
+      _residentId = null;
+      return;
+    }
+
+    final messaging = FirebaseMessaging.instance;
+    try {
+      final token = await messaging.getToken();
+      if (token != null &&
+          token.isNotEmpty &&
+          isSupabaseConfigured()) {
+        await getSupabase()
+            .from('device_tokens')
+            .delete()
+            .eq('token', token);
+      }
+    } catch (_) {}
+
+    try {
+      await messaging.deleteToken();
+    } catch (_) {}
+
+    _residentId = null;
   }
 
   static Future<void> _recordMessageEvent(

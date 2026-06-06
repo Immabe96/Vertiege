@@ -89,6 +89,8 @@ class PostRepository {
         ? client.from('posts').select().eq('world_id', worldId)
         : client.from('posts').select();
 
+    query = query.eq('status', 'published');
+
     if (cursor != null) {
       query = query.lt('created_at', cursor);
     }

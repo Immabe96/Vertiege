@@ -33,6 +33,8 @@ import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/subscription_badge.dart';
 import '../../widgets/achievements/achievement_queue_summary.dart';
 import '../../widgets/profile/trophy_case.dart';
+import '../../utils/presence_utils.dart';
+import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/trophy_case_sheet.dart';
 import '../../widgets/profile/featured_achievements_sheet.dart';
 import '../../widgets/profile/status_picker.dart';
@@ -105,8 +107,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   bool _funnelOpenedNexus = false;
   bool _tierPerksExpanded = false;
   bool _progressionExpanded = false;
-  ResidentStatus _residentStatus = const ResidentStatus();
-
   static const double _avatarRadius = 48;
 
   Widget _wrapShell({
@@ -238,14 +238,12 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     int tierValue,
   ) {
     final brightness = Theme.of(context).brightness;
-    final statusLabel = _residentStatus.customStatus?.isNotEmpty == true
-        ? _residentStatus.customStatus!
-        : switch (_residentStatus.presence) {
-            ResidentPresence.online => 'Online',
-            ResidentPresence.idle => 'Idle',
-            ResidentPresence.dnd => 'Do not disturb',
-            ResidentPresence.invisible => 'Invisible',
-          };
+    final statusLabel = switch (presenceFromLastSeenMs(resident.lastSeenAt)) {
+      Presence.online => 'Online',
+      Presence.idle => 'Away',
+      Presence.dnd => 'Do not disturb',
+      Presence.offline => 'Offline',
+    };
 
     return Material(
       color: VCommuneColors.surfaceSecondaryOf(brightness),
@@ -315,32 +313,20 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               const SizedBox(height: VSpacing.sm),
               Row(
                 children: [
+                  StatusDot(
+                    presence: presenceFromLastSeenMs(resident.lastSeenAt),
+                    size: 8,
+                  ),
+                  const SizedBox(width: VSpacing.xs),
                   Expanded(
-                    child: InkWell(
-                      onTap: () async {
-                        final next = await showStatusPicker(
-                          context,
-                          current: _residentStatus,
-                        );
-                        if (next != null && mounted) {
-                          setState(() => _residentStatus = next);
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(VRadius.pill),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: VSpacing.xs,
-                        ),
-                        child: Text(
-                          statusLabel,
-                          style: TextStyle(
-                            fontSize: VFontSize.labelSm,
-                            color: VCommuneColors.textMutedOf(brightness),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                    child: Text(
+                      statusLabel,
+                      style: TextStyle(
+                        fontSize: VFontSize.labelSm,
+                        color: VCommuneColors.textMutedOf(brightness),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(

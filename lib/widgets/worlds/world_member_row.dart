@@ -156,22 +156,24 @@ class WorldMemberRow extends StatelessWidget {
                     ),
                   ),
                 if (remaining > 0) const SizedBox(width: VSpacing.sm),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: VColors.success,
+                if (onlineCount > 0) ...[
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: VColors.success,
+                    ),
                   ),
-                ),
-                const SizedBox(width: VSpacing.xs),
-                Text(
-                  '$onlineCount online',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: VColors.success,
-                    fontWeight: VFontWeight.regular,
+                  const SizedBox(width: VSpacing.xs),
+                  Text(
+                    '$onlineCount online',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: VColors.success,
+                      fontWeight: VFontWeight.regular,
+                    ),
                   ),
-                ),
+                ],
               ],
               const Spacer(),
               Icon(VIcons.chevronRight, size: VIconSize.md, color: cs.outline),

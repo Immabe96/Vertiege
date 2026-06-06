@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Presence;
 import 'package:vertiege/ui/ui.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -63,6 +64,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   final Set<String> _animatedMessageIds = {};
   Presence? _headerPresence;
+  RealtimeChannel? _partnerPresenceChannel;
   DateTime? _visitDividerAnchor;
 
   String? _replyToMessageId;
@@ -86,7 +88,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
-        notifier.markChannelRead(channelId: roomId, residentId: resident.id);
+        notifier.markDmRead(roomId: roomId, residentId: resident.id);
       }
       final draft = widget.initialDraft?.trim();
       if (draft != null && draft.isNotEmpty && _controller.text.isEmpty) {
@@ -95,6 +97,41 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     });
     _headerPresence = widget.initialPresence;
     unawaited(_refreshRecipientPresence());
+    _subscribePartnerPresence();
+  }
+
+  void _subscribePartnerPresence() {
+    final resident = ref.read(residentProvider).resident;
+    final rooms = ref.read(chatProvider).dmRooms;
+    final room = rooms.cast<Map<String, dynamic>?>().firstWhere(
+      (r) => r?['id'] == widget.roomId,
+      orElse: () => null,
+    );
+    final otherId = _recipientId(room, resident?.id ?? '');
+    if (otherId.isEmpty || !isSupabaseConfigured()) return;
+
+    _partnerPresenceChannel?.unsubscribe();
+    _partnerPresenceChannel = getSupabase()
+        .channel('dm_partner_presence_$otherId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'profiles',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id',
+            value: otherId,
+          ),
+          callback: (payload) {
+            if (!mounted) return;
+            setState(() {
+              _headerPresence = presenceFromProfileField(
+                payload.newRecord['last_seen_at'],
+              );
+            });
+          },
+        )
+        .subscribe();
   }
 
   Future<void> _refreshRecipientPresence() async {
@@ -144,6 +181,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   @override
   void dispose() {
+    unawaited(_partnerPresenceChannel?.unsubscribe());
+    _partnerPresenceChannel = null;
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();

@@ -5,6 +5,7 @@ import '../models/notification.dart';
 import '../services/storage_service.dart';
 import '../services/notification_service.dart';
 import '../services/push_service.dart';
+import '../services/push_token_service.dart';
 import '../services/achievement_realtime_service.dart';
 import '../services/resident_realtime_service.dart';
 import '../services/quiet_hours_service.dart';
@@ -58,43 +59,55 @@ class NotificationNotifier extends Notifier<NotificationState> {
   void addNotification({
     required NotificationType type,
     required String message,
+    String? recipientId,
     String? postId,
     String? worldId,
+    String? roomId,
+    bool showInLocalInbox = true,
+    bool persistRemote = false,
   }) async {
+    final resident = ref.read(residentProvider).resident;
+    final targetId = recipientId ?? resident?.id;
+    if (targetId == null) return;
+
     final n = AppNotification(
       id: generateId(),
       type: type,
       message: message,
       postId: postId,
       worldId: worldId,
+      roomId: roomId,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
-    final isPriority =
-        type == NotificationType.modAction ||
-        type == NotificationType.tierUpgrade ||
-        type == NotificationType.welcome;
+    final isSelf = resident != null && targetId == resident.id;
 
-    if (worldId != null && !isPriority) {
-      final quiet = await QuietHoursService.isQuietTime(worldId);
-      if (quiet) {
-        state = state.copyWith(
-          quietNotifications: [...state.quietNotifications, n],
-        );
-        _persist();
-        return;
+    if (isSelf && showInLocalInbox) {
+      final isPriority =
+          type == NotificationType.modAction ||
+          type == NotificationType.tierUpgrade ||
+          type == NotificationType.welcome;
+
+      if (worldId != null && !isPriority) {
+        final quiet = await QuietHoursService.isQuietTime(worldId);
+        if (quiet) {
+          state = state.copyWith(
+            quietNotifications: [...state.quietNotifications, n],
+          );
+          _persist();
+          return;
+        }
       }
+
+      state = state.copyWith(notifications: [n, ...state.notifications]);
+      _unreadCount++;
+      _persist();
     }
 
-    state = state.copyWith(notifications: [n, ...state.notifications]);
-    _unreadCount++;
-    _persist();
-
-    final resident = ref.read(residentProvider).resident;
-    if (resident != null) {
+    if (persistRemote || (!isSelf && resident != null)) {
       unawaited(
         NotificationService.createNotification(
-          recipientId: resident.id,
+          recipientId: targetId,
           notification: n,
         ).catchError((_) {}),
       );
@@ -247,6 +260,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
       type: NotificationType.ranking,
       message: message,
       worldId: worldId,
+      showInLocalInbox: true,
+      persistRemote: false,
     );
   }
 
@@ -260,6 +275,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
     addNotification(
       type: NotificationType.streakReminder,
       message: scheduleMsg,
+      showInLocalInbox: true,
+      persistRemote: false,
     );
   }
 
@@ -275,6 +292,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
       message: '$count residents reacted to your post!',
       postId: postId,
       worldId: worldId,
+      showInLocalInbox: true,
+      persistRemote: false,
     );
   }
 
@@ -291,6 +310,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         message: json['message'] as String,
         worldId: json['worldId'] as String?,
         postId: json['postId'] as String?,
+        roomId: json['roomId'] as String?,
         read: (json['read'] as bool?) ?? false,
         createdAt: (json['createdAt'] as int?) ?? 0,
       );
@@ -304,6 +324,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
     _realtimeSubscription = null;
     _realtimeResidentId = null;
     _unreadCount = 0;
+    unawaited(PushService.dispose());
+    unawaited(PushTokenService.clearForResident());
     unawaited(AchievementRealtimeService.dispose());
     unawaited(ResidentRealtimeService.dispose());
     state = const NotificationState(isLoading: false);
@@ -315,6 +337,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     'message': n.message,
     'worldId': n.worldId,
     'postId': n.postId,
+    'roomId': n.roomId,
     'read': n.read,
     'createdAt': n.createdAt,
   };

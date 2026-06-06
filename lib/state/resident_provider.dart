@@ -751,10 +751,16 @@ class ResidentNotifier extends Notifier<ResidentState> {
   Future<void> touchPresence() async {
     final r = state.resident;
     if (r == null) return;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
     state = state.copyWith(
-      resident: r.copyWith(lastSeenAt: DateTime.now().millisecondsSinceEpoch),
+      resident: r.copyWith(lastSeenAt: nowMs),
     );
     _persist();
+    if (isSupabaseConfigured()) {
+      try {
+        await getSupabase().rpc('touch_presence');
+      } catch (_) {}
+    }
   }
 
   Future<void> joinWorld(String worldId) async {

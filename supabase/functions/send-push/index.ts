@@ -72,6 +72,9 @@ serve(async (req: Request) => {
     const tokens = (data ?? []) as DeviceToken[]
     if (tokens.length === 0) return json({ delivered: 0, skipped: 'no_tokens' })
 
+    const skipReason = await pushSkipReason(supabase, record)
+    if (skipReason) return json({ delivered: 0, skipped: skipReason })
+
     const serviceAccount = JSON.parse(serviceAccountJson) as ServiceAccount
     const accessToken = await getFirebaseAccessToken(serviceAccount)
     const results = await Promise.allSettled(
@@ -262,6 +265,49 @@ function dmSenderName(message?: string) {
   const idx = message.indexOf(':')
   if (idx <= 0) return 'Someone'
   return message.slice(0, idx).trim() || 'Someone'
+}
+
+type NotificationPreferences = {
+  push_enabled: boolean
+  likes_enabled: boolean
+  comments_enabled: boolean
+  tier_upgrades_enabled: boolean
+  world_invites_enabled: boolean
+}
+
+async function pushSkipReason(
+  supabase: ReturnType<typeof createClient>,
+  record: NotificationRecord,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('notification_preferences')
+    .select(
+      'push_enabled, likes_enabled, comments_enabled, tier_upgrades_enabled, world_invites_enabled',
+    )
+    .eq('resident_id', record.recipient_id)
+    .maybeSingle()
+
+  const prefs: NotificationPreferences = {
+    push_enabled: data?.push_enabled ?? true,
+    likes_enabled: data?.likes_enabled ?? true,
+    comments_enabled: data?.comments_enabled ?? true,
+    tier_upgrades_enabled: data?.tier_upgrades_enabled ?? true,
+    world_invites_enabled: data?.world_invites_enabled ?? true,
+  }
+
+  if (!prefs.push_enabled) return 'push_disabled'
+
+  const type = record.type ?? ''
+  if (type === 'like' && !prefs.likes_enabled) return 'likes_disabled'
+  if (type === 'comment' && !prefs.comments_enabled) return 'comments_disabled'
+  if (type === 'tierUpgrade' && !prefs.tier_upgrades_enabled) {
+    return 'tier_upgrades_disabled'
+  }
+  if (type === 'worldUnlocked' && !prefs.world_invites_enabled) {
+    return 'world_invites_disabled'
+  }
+
+  return null
 }
 
 function notificationTitle(record: NotificationRecord) {

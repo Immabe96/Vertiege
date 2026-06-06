@@ -167,6 +167,10 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   /// Staggered secondary loads so Nexus stays responsive after sign-in.
   void _scheduleBackgroundLoads() {
+    Future<void>.delayed(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
+    });
     Future<void>.delayed(const Duration(milliseconds: 900), () {
       if (!mounted) return;
       unawaited(
@@ -583,6 +587,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       unawaited(ref.read(postProvider.notifier).setRealtimePaused(false));
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
+        unawaited(ref.read(residentProvider.notifier).touchPresence());
         ref.read(residentProvider.notifier).checkStreakRisk();
         unawaited(_tryDailyStreakCheckIn());
       }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -121,6 +123,22 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     );
   }
 
+  void _loadWorldChannelActivity(String worldId) {
+    unawaited(
+      ref.read(channelProvider.notifier).loadChannels(worldId).then((_) {
+        if (!mounted) return;
+        final channels =
+            ref.read(channelProvider).channelsByWorld[worldId] ?? [];
+        if (channels.isEmpty) return;
+        unawaited(
+          ref.read(chatProvider.notifier).loadChannelActivity(
+            channels.map((channel) => channel.id).toList(),
+          ),
+        );
+      }),
+    );
+  }
+
   void _ensureSelectedWorld(List<World> joinedWorlds) {
     if (joinedWorlds.isEmpty) {
       if (_selectedWorldId != null) {
@@ -139,8 +157,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() => _selectedWorldId = firstId);
-        ref.read(channelProvider.notifier).loadChannels(firstId);
+        _loadWorldChannelActivity(firstId);
       });
+    } else if (_selectedWorldId != null) {
+      final worldId = _selectedWorldId!;
+      final channels = ref.read(channelProvider).channelsByWorld[worldId];
+      if (channels != null && channels.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          unawaited(
+            ref.read(chatProvider.notifier).loadChannelActivity(
+              channels.map((channel) => channel.id).toList(),
+            ),
+          );
+        });
+      }
     }
   }
 
@@ -235,7 +266,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           selectedWorldId: selectedWorld.id,
           onWorldSelected: (worldId) {
             setState(() => _selectedWorldId = worldId);
-            ref.read(channelProvider.notifier).loadChannels(worldId);
+            _loadWorldChannelActivity(worldId);
           },
         ),
         // Right panel — world header + channel list

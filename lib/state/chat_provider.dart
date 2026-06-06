@@ -507,6 +507,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }) {
     if (subscriptions.containsKey(roomId)) return;
     final channel = subscribe(roomId, (data) {
+      if (data['thread_id'] != null) return;
       final msg = _parseRealtimeMessage(data, roomId);
       CrashReporter.instance.log(
         'chat realtime receive roomId=$roomId messageId=${msg.id}',
@@ -782,8 +783,25 @@ class ChatNotifier extends Notifier<ChatState> {
       subscriptions: _subscriptions,
       getMessageMap: () => state.channelMessages,
       updateState: (updated) => state.copyWith(channelMessages: updated),
-      subscribe: ChatService.subscribeToChannelMessages,
+      subscribe: (id, onInsert) => ChatService.subscribeToChannelMessages(
+        id,
+        onInsert,
+        onUpdate: (data) => _patchChannelMessage(id, data),
+      ),
       trackChannelActivity: true,
+    );
+  }
+
+  void _patchChannelMessage(String channelId, Map<String, dynamic> data) {
+    if (data['thread_id'] != null) return;
+    final msg = _parseRealtimeMessage(data, channelId);
+    final messages = state.channelMessages[channelId] ?? [];
+    final index = messages.indexWhere((m) => m.id == msg.id);
+    if (index == -1) return;
+    final updated = List<ChannelMessage>.from(messages);
+    updated[index] = msg;
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, channelId: updated},
     );
   }
 
@@ -832,6 +850,22 @@ class ChatNotifier extends Notifier<ChatState> {
       channelId: channelId,
       residentId: residentId,
     );
+  }
+
+  Future<void> markDmRead({
+    required String roomId,
+    required String residentId,
+  }) async {
+    final now = DateTime.now();
+    state = state.copyWith(
+      channelReads: {...state.channelReads, roomId: now},
+    );
+    await ChatService.markDmRead(roomId: roomId, residentId: residentId);
+    final updatedRooms = state.dmRooms.map((room) {
+      if (room['id'] != roomId) return room;
+      return {...room, 'unread_count': 0};
+    }).toList();
+    state = state.copyWith(dmRooms: updatedRooms);
   }
 
   /// Persist last-opened channel for resume (DCX-021).
@@ -903,6 +937,19 @@ class ChatNotifier extends Notifier<ChatState> {
         threadId: [...existing, msg],
       },
     );
+    final channelMessages = state.channelMessages[channelId] ?? [];
+    final parentIndex = channelMessages.indexWhere((m) => m.id == threadId);
+    if (parentIndex != -1) {
+      final parent = channelMessages[parentIndex];
+      final bumped = List<ChannelMessage>.from(channelMessages);
+      bumped[parentIndex] = parent.copyWith(
+        threadCount: parent.threadCount + 1,
+      );
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, channelId: bumped},
+      );
+    }
+
     try {
       await ChatService.sendThreadReply(
         messageId: msg.id,
@@ -914,6 +961,7 @@ class ChatNotifier extends Notifier<ChatState> {
         content: content,
         threadId: threadId,
       );
+      unawaited(ChatService.incrementThreadCount(threadId));
     } catch (_) {
       final reverted = (state.channelMessages[threadId] ?? [])
           .where((m) => m.id != msg.id)
@@ -1114,16 +1162,17 @@ class ChatNotifier extends Notifier<ChatState> {
     final msg = messages[msgIndex];
     final currentReactions = Map<String, List<String>>.from(msg.reactions);
     final users = List<String>.from(currentReactions[emoji] ?? []);
+    final adding = !users.contains(userId);
 
-    if (users.contains(userId)) {
+    if (adding) {
+      currentReactions[emoji] = [...users, userId];
+    } else {
       users.remove(userId);
       if (users.isEmpty) {
         currentReactions.remove(emoji);
       } else {
         currentReactions[emoji] = users;
       }
-    } else {
-      currentReactions[emoji] = [...users, userId];
     }
 
     final updatedMsg = msg.copyWith(reactions: currentReactions);
@@ -1139,7 +1188,7 @@ class ChatNotifier extends Notifier<ChatState> {
         messageId: messageId,
         userId: userId,
         emoji: emoji,
-        add: users.contains(userId),
+        add: adding,
       );
     } catch (_) {
       final revertedMessages = List<ChannelMessage>.from(messages);

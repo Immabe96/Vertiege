@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,8 +24,10 @@ import '../repositories/post_repository.dart';
 import '../utils/id_generator.dart';
 import '../utils/text_parser.dart';
 import '../utils/haptics.dart';
+import '../utils/nexus_feed_sort.dart';
 import '../utils/provider_errors.dart';
 import '../utils/rate_limiter.dart';
+import '../widgets/nexus/feed_sort_dropdown.dart';
 import '../config/achievements.dart';
 import 'resident_provider.dart';
 import 'notification_provider.dart';
@@ -96,7 +97,9 @@ class PostState {
 class PostNotifier extends Notifier<PostState> {
   final PostRepository _postsRepository = const PostRepository();
   RealtimeChannel? _realtimeChannel;
+  RealtimeChannel? _nexusRealtimeChannel;
   String? _realtimeWorldId;
+  Set<String> _nexusWorldIds = {};
   bool _realtimePaused = false;
   Timer? _schedulerTimer;
   final Map<String, Set<String>> _userReactions = {};
@@ -109,6 +112,7 @@ class PostNotifier extends Notifier<PostState> {
   PostState build() {
     ref.onDispose(() {
       unawaited(_realtimeChannel?.unsubscribe());
+      unawaited(_nexusRealtimeChannel?.unsubscribe());
       _schedulerTimer?.cancel();
     });
 
@@ -129,7 +133,22 @@ class PostNotifier extends Notifier<PostState> {
 
     _loadScheduledPosts();
     _startScheduler();
+    Future.microtask(_hydrateFromCache);
     return const PostState();
+  }
+
+  Future<void> _hydrateFromCache() async {
+    if (state.posts.isNotEmpty) return;
+    try {
+      final raw = await StorageService.getString(StorageService.postsKey);
+      if (raw == null || raw.isEmpty) return;
+      final list = jsonDecode(raw) as List<dynamic>;
+      final posts = list
+          .map((e) => _postFromJson(e as Map<String, dynamic>))
+          .toList();
+      if (posts.isEmpty) return;
+      state = state.copyWith(posts: posts, isLoading: false);
+    } catch (_) {}
   }
 
   static const String _scheduledKey = '@scheduled_posts';
@@ -502,8 +521,11 @@ class PostNotifier extends Notifier<PostState> {
         ref.read(notificationProvider.notifier).addNotification(
               type: NotificationType.like,
               message: 'Someone reacted to your post',
+              recipientId: reactedPost.residentId,
               postId: postId,
               worldId: reactedPost.worldId,
+              showInLocalInbox: false,
+              persistRemote: false,
             );
         final totalReactions = reactedPost.reactions.values.fold<int>(
           0,
@@ -604,14 +626,17 @@ class PostNotifier extends Notifier<PostState> {
     unawaited(_postsRepository.addComment(postId: postId, comment: comment));
 
     ref.read(questProvider.notifier).onCommentAdded();
-    ref
-        .read(notificationProvider.notifier)
-        .addNotification(
-          type: NotificationType.comment,
-          message: 'Someone commented on your post',
-          postId: postId,
-          worldId: post.worldId,
-        );
+    if (post.residentId != comment.residentId) {
+      ref.read(notificationProvider.notifier).addNotification(
+            type: NotificationType.comment,
+            message: 'Someone commented on your post',
+            recipientId: post.residentId,
+            postId: postId,
+            worldId: post.worldId,
+            showInLocalInbox: false,
+            persistRemote: false,
+          );
+    }
   }
 
   void voteOnPoll(String postId, String pollOptionId) {
@@ -709,14 +734,15 @@ class PostNotifier extends Notifier<PostState> {
     _persist();
 
     final awardedPost = state.posts.where((p) => p.id == postId).firstOrNull;
-    if (awardedPost != null) {
-      ref
-          .read(notificationProvider.notifier)
-          .addNotification(
+    if (awardedPost != null && awardedPost.residentId != residentId) {
+      ref.read(notificationProvider.notifier).addNotification(
             type: NotificationType.like,
             message: 'Someone gave your post an award!',
+            recipientId: awardedPost.residentId,
             postId: postId,
             worldId: awardedPost.worldId,
+            showInLocalInbox: false,
+            persistRemote: false,
           );
     }
   }
@@ -824,14 +850,17 @@ class PostNotifier extends Notifier<PostState> {
 
     ref.read(questProvider.notifier).onPostCreated();
 
-    ref
-        .read(notificationProvider.notifier)
-        .addNotification(
-          type: NotificationType.like,
-          message: '${resident.name} reposted your post',
-          postId: originalPostId,
-          worldId: original.worldId,
-        );
+    if (original.residentId != resident.id) {
+      ref.read(notificationProvider.notifier).addNotification(
+            type: NotificationType.like,
+            message: '${resident.name} reposted your post',
+            recipientId: original.residentId,
+            postId: originalPostId,
+            worldId: original.worldId,
+            showInLocalInbox: false,
+            persistRemote: false,
+          );
+    }
   }
 
   /// Loads a single post into the feed for deep links and notification targets.
@@ -860,68 +889,23 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   List<Post> getPostsByWorld(String worldId) {
-    return _sortPosts(state.posts.where((p) => p.worldId == worldId));
+    return sortNexusFeedPosts(
+      state.posts.where((p) => p.worldId == worldId).toList(),
+      FeedSort.hot,
+    );
   }
 
   List<Post> getAllPosts() {
-    return _sortPosts(state.posts);
+    return sortNexusFeedPosts(state.posts, FeedSort.hot);
   }
 
   List<Post> _sortPosts(Iterable<Post> source, {String sort = 'hot'}) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final decreeExpiry = const Duration(hours: 24).inMilliseconds;
-
-    // List.of(source) creates a new mutable copy; sort() mutates this copy,
-    // not the original source iterable, so the caller's data is unaffected.
-    final posts = List.of(source);
-
-    int priority(Post p) {
-      if (p.isDecree && (now - p.timestamp) < decreeExpiry) return 0;
-      if (p.isPinned && !p.isDecree) return 1;
-      if (p.isAnnouncement && !p.isPinned && !p.isDecree) return 2;
-      return 3;
-    }
-
-    int compareByReactions(Post a, Post b) {
-      final aTotal = a.reactions.values.fold<int>(0, (s, c) => s + c);
-      final bTotal = b.reactions.values.fold<int>(0, (s, c) => s + c);
-      return bTotal.compareTo(aTotal);
-    }
-
-    int compareByHot(Post a, Post b) {
-      final aScore = _hotScore(a);
-      final bScore = _hotScore(b);
-      return bScore.compareTo(aScore);
-    }
-
-    posts.sort((a, b) {
-      final pa = priority(a);
-      final pb = priority(b);
-      if (pa != pb) return pa.compareTo(pb);
-      if (pa == 3) {
-        switch (sort) {
-          case 'new':
-            return b.timestamp.compareTo(a.timestamp);
-          case 'top':
-            return compareByReactions(a, b);
-          case 'hot':
-          default:
-            return compareByHot(a, b);
-        }
-      }
-      return b.timestamp.compareTo(a.timestamp);
-    });
-
-    return posts;
-  }
-
-  double _hotScore(Post post) {
-    final totalReactions =
-        post.reactions.values.fold<int>(0, (s, c) => s + c) +
-        post.comments.length;
-    final ageMs = DateTime.now().millisecondsSinceEpoch - post.timestamp;
-    final ageHours = ageMs / (1000 * 60 * 60);
-    return totalReactions / math.pow(ageHours + 2, 1.5);
+    final feedSort = switch (sort) {
+      'new' => FeedSort.latest,
+      'top' => FeedSort.top,
+      _ => FeedSort.hot,
+    };
+    return sortNexusFeedPosts(source.toList(), feedSort);
   }
 
   void setPosts(List<Post> posts) {
@@ -931,10 +915,15 @@ class PostNotifier extends Notifier<PostState> {
 
   Future<void> loadPosts() async {
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
-      _currentLimit = 25;
-      _lastCursor = null;
-      _hasMore = false;
+      final hadCachedPosts = state.posts.isNotEmpty;
+      state = state.copyWith(
+        isLoading: !hadCachedPosts,
+        clearError: true,
+      );
+      if (!hadCachedPosts) {
+        _currentLimit = 25;
+        _lastCursor = null;
+      }
 
       await _postsRepository.replayOutbox();
 
@@ -961,7 +950,7 @@ class PostNotifier extends Notifier<PostState> {
         isLoading: false,
         error: joinedResult?.loadError,
         clearError: joinedResult?.loadError == null,
-        hasMorePosts: false,
+        hasMorePosts: joinedResult?.hasMore ?? false,
       );
       _persist();
     } catch (e) {
@@ -1064,18 +1053,68 @@ class PostNotifier extends Notifier<PostState> {
     }
   }
 
+  /// Multi-world Nexus feed realtime (joined worlds).
+  Future<void> setNexusRealtimeScope(Set<String> worldIds) async {
+    _nexusWorldIds = worldIds
+        .where(WorldService.isRemoteWorldId)
+        .take(15)
+        .toSet();
+    if (_realtimePaused) return;
+    await _subscribeNexusRealtime();
+  }
+
   Future<void> setRealtimePaused(bool paused) async {
     _realtimePaused = paused;
     if (paused) {
       await clearRealtimeSubscriptions();
-    } else if (_realtimeWorldId != null) {
-      await _subscribeRealtime();
+      await _clearNexusRealtimeSubscriptions();
+    } else {
+      if (_realtimeWorldId != null) {
+        await _subscribeRealtime();
+      }
+      if (_nexusWorldIds.isNotEmpty) {
+        await _subscribeNexusRealtime();
+      }
     }
   }
 
   Future<void> clearRealtimeSubscriptions() async {
     await _realtimeChannel?.unsubscribe();
     _realtimeChannel = null;
+  }
+
+  Future<void> _clearNexusRealtimeSubscriptions() async {
+    await _nexusRealtimeChannel?.unsubscribe();
+    _nexusRealtimeChannel = null;
+  }
+
+  void _mergeRealtimePost(
+    Post? post, {
+    bool isDelete = false,
+    String? deletedId,
+  }) {
+    if (isDelete) {
+      final id = deletedId;
+      if (id == null) return;
+      state = state.copyWith(
+        posts: state.posts.where((p) => p.id != id).toList(),
+      );
+      _persist();
+      return;
+    }
+
+    if (post == null || post.status != 'published') return;
+    if (state.scheduledPosts.any((p) => p.id == post.id)) return;
+
+    final existingIndex = state.posts.indexWhere((p) => p.id == post.id);
+    if (existingIndex == -1) {
+      state = state.copyWith(posts: [post, ...state.posts]);
+    } else {
+      final posts = List<Post>.from(state.posts);
+      posts[existingIndex] = post;
+      state = state.copyWith(posts: posts);
+    }
+    _persist();
   }
 
   Future<void> _subscribeRealtime() async {
@@ -1102,11 +1141,7 @@ class PostNotifier extends Notifier<PostState> {
             value: worldId,
           ),
           callback: (payload) {
-            final newPost = _postFromJson(payload.newRecord);
-            if (state.posts.any((p) => p.id == newPost.id)) return;
-            if (state.scheduledPosts.any((p) => p.id == newPost.id)) return;
-            state = state.copyWith(posts: [newPost, ...state.posts]);
-            _persist();
+            _mergeRealtimePost(_postFromJson(payload.newRecord), isDelete: false);
           },
         )
         .onPostgresChanges(
@@ -1119,13 +1154,7 @@ class PostNotifier extends Notifier<PostState> {
             value: worldId,
           ),
           callback: (payload) {
-            final updated = _postFromJson(payload.newRecord);
-            final posts = state.posts.map((p) {
-              if (p.id == updated.id) return updated;
-              return p;
-            }).toList();
-            state = state.copyWith(posts: posts);
-            _persist();
+            _mergeRealtimePost(_postFromJson(payload.newRecord), isDelete: false);
           },
         )
         .onPostgresChanges(
@@ -1138,18 +1167,104 @@ class PostNotifier extends Notifier<PostState> {
             value: worldId,
           ),
           callback: (payload) {
-            final deletedId = payload.oldRecord['id'] as String?;
-            if (deletedId == null) return;
-            state = state.copyWith(
-              posts: state.posts.where((p) => p.id != deletedId).toList(),
+            _mergeRealtimePost(
+              null,
+              isDelete: true,
+              deletedId: payload.oldRecord['id'] as String?,
             );
-            _persist();
           },
         )
         .subscribe();
   }
 
-  Future<({List<Post> posts, String? loadError})?> _loadPostsFromJoinedWorlds() async {
+  Future<void> _subscribeNexusRealtime() async {
+    final client = maybeSupabase();
+    if (client == null || _realtimePaused || _nexusWorldIds.isEmpty) return;
+
+    await _nexusRealtimeChannel?.unsubscribe();
+
+    var channel = client.channel('nexus_posts_${_nexusWorldIds.length}');
+    for (final worldId in _nexusWorldIds) {
+      channel = channel
+          .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'posts',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'world_id',
+              value: worldId,
+            ),
+            callback: (payload) {
+              _mergeRealtimePost(
+                _postFromJson(payload.newRecord),
+                isDelete: false,
+              );
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'posts',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'world_id',
+              value: worldId,
+            ),
+            callback: (payload) {
+              _mergeRealtimePost(
+                _postFromJson(payload.newRecord),
+                isDelete: false,
+              );
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.delete,
+            schema: 'public',
+            table: 'posts',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'world_id',
+              value: worldId,
+            ),
+            callback: (payload) {
+              _mergeRealtimePost(
+                null,
+                isDelete: true,
+                deletedId: payload.oldRecord['id'] as String?,
+              );
+            },
+          );
+    }
+    _nexusRealtimeChannel = channel.subscribe();
+  }
+
+  Future<void> loadMoreNexusPosts() async {
+    if (!_hasMore || state.isLoadingMore) return;
+    state = state.copyWith(isLoadingMore: true);
+    _currentLimit += 25;
+    try {
+      final joinedResult = await _loadPostsFromJoinedWorlds(append: true);
+      if (joinedResult == null) {
+        state = state.copyWith(isLoadingMore: false);
+        return;
+      }
+      state = state.copyWith(
+        posts: joinedResult.posts,
+        isLoadingMore: false,
+        hasMorePosts: joinedResult.hasMore,
+        error: joinedResult.loadError,
+        clearError: joinedResult.loadError == null,
+      );
+      _persist();
+    } catch (_) {
+      state = state.copyWith(isLoadingMore: false);
+    }
+  }
+
+  Future<({List<Post> posts, String? loadError, bool hasMore})?> _loadPostsFromJoinedWorlds({
+    bool append = false,
+  }) async {
     final joinedWorldIds = ref
         .read(residentProvider)
         .resident
@@ -1159,8 +1274,9 @@ class PostNotifier extends Notifier<PostState> {
         .toList();
     if (joinedWorldIds == null || joinedWorldIds.isEmpty) return null;
 
-    final posts = <Post>[];
+    final posts = append ? List<Post>.from(state.posts) : <Post>[];
     var failures = 0;
+    var anyHasMore = false;
     for (final worldId in joinedWorldIds) {
       try {
         final result = await _postsRepository.loadPosts(
@@ -1168,10 +1284,13 @@ class PostNotifier extends Notifier<PostState> {
           limit: _currentLimit,
         );
         posts.addAll(result.items.map(_postFromJson));
+        if (result.hasMore) anyHasMore = true;
       } catch (_) {
         failures++;
       }
     }
+
+    _hasMore = anyHasMore;
 
     final sorted = posts.isEmpty
         ? <Post>[]
@@ -1185,7 +1304,7 @@ class PostNotifier extends Notifier<PostState> {
       loadError = 'Some worlds could not be loaded.';
     }
 
-    return (posts: sorted, loadError: loadError);
+    return (posts: sorted, loadError: loadError, hasMore: anyHasMore);
   }
 
   static Post _postFromJson(Map<String, dynamic> json) {

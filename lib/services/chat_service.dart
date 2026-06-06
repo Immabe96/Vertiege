@@ -78,6 +78,14 @@ class ChatService {
       if (id != null) byId[id] = row;
     }
 
+    final reads = await getDmReads(residentId);
+    final roomIds = rooms
+        .map((r) => r['id'] as String?)
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toList();
+    final latestSenders = await _latestDmMessageSenders(roomIds);
+
     return rooms.map((room) {
       final ids = (room['resident_ids'] as List?)?.cast<String>() ?? [];
       final otherId = ids.firstWhere(
@@ -85,15 +93,64 @@ class ChatService {
         orElse: () => ids.isNotEmpty ? ids.first : '',
       );
       final profile = otherId.isEmpty ? null : byId[otherId];
-      if (profile == null) return room;
+      final roomId = room['id'] as String? ?? '';
+      final unreadCount = _dmUnreadCount(
+        roomId: roomId,
+        residentId: residentId,
+        lastMessageAt: room['last_message_at'],
+        lastReadAt: reads[roomId],
+        latestSenderId: latestSenders[roomId],
+      );
+
+      if (profile == null) {
+        return {...room, 'unread_count': unreadCount};
+      }
 
       return {
         ...room,
         'other_name': profile['name'] ?? room['other_name'],
         'other_avatar': profile['avatar_url'] ?? room['other_avatar'],
         'other_last_seen_at': parseLastSeenMs(profile['last_seen_at']),
+        'unread_count': unreadCount,
       };
     }).toList();
+  }
+
+  static int _dmUnreadCount({
+    required String roomId,
+    required String residentId,
+    required dynamic lastMessageAt,
+    required DateTime? lastReadAt,
+    required String? latestSenderId,
+  }) {
+    if (roomId.isEmpty) return 0;
+    final lastMsgAt = DateTime.tryParse('$lastMessageAt');
+    if (lastMsgAt == null) return 0;
+    if (latestSenderId == residentId) return 0;
+    if (lastReadAt != null && !lastMsgAt.isAfter(lastReadAt)) return 0;
+    return 1;
+  }
+
+  static Future<Map<String, String>> _latestDmMessageSenders(
+    List<String> roomIds,
+  ) async {
+    if (!isSupabaseConfigured() || roomIds.isEmpty) return {};
+    final client = getSupabase();
+    final senders = <String, String>{};
+    for (final roomId in roomIds) {
+      try {
+        final row = await client
+            .from('chat_messages')
+            .select('sender_id')
+            .eq('room_id', roomId)
+            .order('created_at', ascending: false)
+            .limit(1)
+            .maybeSingle();
+        final senderId = row?['sender_id'] as String?;
+        if (senderId != null) senders[roomId] = senderId;
+      } catch (_) {}
+    }
+    return senders;
   }
 
   static Future<void> sendMessage({
@@ -369,6 +426,7 @@ class ChatService {
         .from('channel_messages')
         .select()
         .eq('channel_id', channelId)
+        .isFilter('thread_id', null)
         .order('created_at', ascending: true)
         .limit(limit);
     return (data as List).cast<Map<String, dynamic>>();
@@ -400,6 +458,48 @@ class ChatService {
       'channel_id': channelId,
       'last_read_at': DateTime.now().toIso8601String(),
     });
+  }
+
+  static Future<void> markDmRead({
+    required String roomId,
+    required String residentId,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await client.from('dm_reads').upsert({
+      'resident_id': residentId,
+      'room_id': roomId,
+      'last_read_at': now,
+    });
+    await client.from('channel_reads').upsert({
+      'resident_id': residentId,
+      'channel_id': roomId,
+      'last_read_at': now,
+    });
+  }
+
+  static Future<Map<String, DateTime>> getDmReads(String residentId) async {
+    if (!isSupabaseConfigured()) return {};
+    final client = getSupabase();
+    try {
+      final data = await client
+          .from('dm_reads')
+          .select('room_id, last_read_at')
+          .eq('resident_id', residentId);
+      final map = <String, DateTime>{};
+      for (final row in (data as List)) {
+        final roomId = row['room_id'] as String?;
+        final ts = DateTime.tryParse(row['last_read_at'] ?? '');
+        if (roomId != null && ts != null) {
+          map[roomId] = ts;
+        }
+      }
+      return map;
+    } catch (_) {
+      final channelReads = await getChannelReads(residentId);
+      return channelReads;
+    }
   }
 
   static Future<Map<String, DateTime>> getChannelReads(
@@ -558,6 +658,16 @@ class ChatService {
     return (data as List).cast<Map<String, dynamic>>();
   }
 
+  static Future<void> incrementThreadCount(String threadId) async {
+    if (!isSupabaseConfigured() || threadId.isEmpty) return;
+    try {
+      await getSupabase().rpc(
+        'increment_thread_count',
+        params: {'msg_id': threadId},
+      );
+    } catch (_) {}
+  }
+
   static Future<void> sendThreadReply({
     required String messageId,
     required String channelId,
@@ -600,12 +710,13 @@ class ChatService {
 
   static RealtimeChannel? subscribeToChannelMessages(
     String channelId,
-    void Function(Map<String, dynamic> message) onInsert,
-  ) {
+    void Function(Map<String, dynamic> message) onInsert, {
+    void Function(Map<String, dynamic> message)? onUpdate,
+  }) {
     if (!isSupabaseConfigured()) return null;
     final client = getSupabase();
-    return client
-        .channel('channel_$channelId')
+    var channel = client.channel('channel_$channelId');
+    channel = channel
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
@@ -616,10 +727,27 @@ class ChatService {
             value: channelId,
           ),
           callback: (payload) {
+            if (payload.newRecord['thread_id'] != null) return;
             onInsert(payload.newRecord);
           },
-        )
-        .subscribe();
+        );
+    if (onUpdate != null) {
+      channel = channel.onPostgresChanges(
+        event: PostgresChangeEvent.update,
+        schema: 'public',
+        table: 'channel_messages',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'channel_id',
+          value: channelId,
+        ),
+        callback: (payload) {
+          if (payload.newRecord['thread_id'] != null) return;
+          onUpdate(payload.newRecord);
+        },
+      );
+    }
+    return channel.subscribe();
   }
 
   // F-02: Reactions

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +20,7 @@ import '../../widgets/nexus/nexus_feed_header.dart';
 import '../../widgets/nexus/nexus_inline_compose.dart';
 import '../../widgets/nexus/nexus_shortcuts_section.dart';
 import '../../screens/tabs/tab_layout.dart';
+import '../../utils/nexus_feed_sort.dart';
 import '../../utils/verified_moment.dart';
 
 enum _NexusFeedTab { all, verified, following, announcements }
@@ -70,9 +73,19 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
   }
 
   void _onScroll() {
-    final show = _scrollController.hasClients && _scrollController.offset > 400;
+    if (!_scrollController.hasClients) return;
+
+    final show = _scrollController.offset > 400;
     if (show != _showScrollFab) {
       setState(() => _showScrollFab = show);
+    }
+
+    final postState = ref.read(postProvider);
+    if (!postState.hasMorePosts || postState.isLoadingMore) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    if (maxScroll <= 0) return;
+    if (_scrollController.offset >= maxScroll - 320) {
+      unawaited(ref.read(postProvider.notifier).loadMoreNexusPosts());
     }
   }
 
@@ -128,13 +141,17 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                 .toList(),
         };
 
-        return _sortPosts(filtered, _sort);
+        return sortNexusFeedPosts(filtered, _sort);
       }),
     );
 
     final postError = ref.watch(postProvider.select((s) => s.error));
     final postHasError = ref.watch(postProvider.select((s) => s.hasError));
     final postIsLoading = ref.watch(postProvider.select((s) => s.isLoading));
+    final postIsLoadingMore = ref.watch(
+      postProvider.select((s) => s.isLoadingMore),
+    );
+    final postHasMore = ref.watch(postProvider.select((s) => s.hasMorePosts));
 
     final joinedRemoteIds =
         resident?.joinedWorldIds.where(WorldService.isRemoteWorldId).toList() ??
@@ -239,6 +256,29 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                       childCount: posts.length,
                     ),
                   ),
+                if (postIsLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(VSpacing.md),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  )
+                else if (posts.isNotEmpty && !postHasMore)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(VSpacing.md),
+                      child: Center(
+                        child: Text(
+                          'You\'re all caught up',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: VCommuneColors.textMutedOf(
+                              isDark ? Brightness.dark : Brightness.light,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 SliverToBoxAdapter(
                   child: SizedBox(
                     height:
@@ -325,36 +365,4 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
         );
     }
   }
-}
-
-List<Post> _sortPosts(List<Post> posts, FeedSort sort) {
-  final sorted = List<Post>.from(posts);
-  switch (sort) {
-    case FeedSort.latest:
-      sorted.sort((a, b) {
-        final byTime = b.timestamp.compareTo(a.timestamp);
-        if (byTime != 0) return byTime;
-        final aMoment = isVerifiedMomentPost(a) ? 1 : 0;
-        final bMoment = isVerifiedMomentPost(b) ? 1 : 0;
-        return bMoment.compareTo(aMoment);
-      });
-      break;
-    case FeedSort.hot:
-      sorted.sort((a, b) {
-        final aReactions = a.reactions.values.fold<int>(
-          0,
-          (sum, v) => sum + v,
-        );
-        final bReactions = b.reactions.values.fold<int>(
-          0,
-          (sum, v) => sum + v,
-        );
-        return bReactions.compareTo(aReactions);
-      });
-      break;
-    case FeedSort.top:
-      sorted.sort((a, b) => b.comments.length.compareTo(a.comments.length));
-      break;
-  }
-  return sorted;
 }
