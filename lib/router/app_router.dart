@@ -434,6 +434,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ? state.extra! as Presence
               : null,
           initialDraft: state.uri.queryParameters['draft'],
+          initialMessageId: state.uri.queryParameters['message'],
         ),
       ),
       GoRoute(

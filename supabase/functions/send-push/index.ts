@@ -14,6 +14,7 @@ type NotificationRecord = {
   post_id?: string | null
   channel_id?: string | null
   room_id?: string | null
+  message_id?: string | null
 }
 
 type DeviceToken = {
@@ -127,6 +128,7 @@ async function sendFcmMessage(
     post_id: record.post_id,
     channel_id: record.channel_id,
     room_id: record.room_id,
+    message_id: record.message_id,
     route: routeFor(record),
     message: record.message,
     sender_name: dmSenderName(record.message),
@@ -397,7 +399,10 @@ function routeFor(record: NotificationRecord) {
 
   if (type === 'dmMessage') {
     if (record.room_id) {
-      return `/chat/${encodeURIComponent(record.room_id)}`
+      const base = `/chat/${encodeURIComponent(record.room_id)}`
+      return record.message_id
+        ? `${base}?message=${encodeURIComponent(record.message_id)}`
+        : base
     }
     return '/chat'
   }

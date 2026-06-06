@@ -717,6 +717,7 @@ class PostNotifier extends Notifier<PostState> {
   static const String _bookmarksKey = '@bookmarked_posts';
 
   void toggleBookmark(String postId) {
+    Haptics.light();
     if (state.bookmarkedPostIds.contains(postId)) {
       _unbookmark(postId);
     } else {

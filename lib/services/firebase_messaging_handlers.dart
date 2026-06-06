@@ -49,10 +49,14 @@ String? routeFromRemoteMessage(RemoteMessage message) {
   final worldId = data['world_id'] ?? data['worldId'];
   final postId = data['post_id'] ?? data['postId'];
   final roomId = data['room_id'] ?? data['roomId'] ?? data['dm_room_id'];
+  final messageId = data['message_id'] ?? data['messageId'];
 
   if (type == 'dmMessage') {
     if (roomId is String && roomId.isNotEmpty) {
-      return chatShellPath(roomId);
+      return chatShellPath(
+        roomId,
+        messageId: messageId is String ? messageId : null,
+      );
     }
     return '/chat';
   }

@@ -63,6 +63,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     String? postId,
     String? worldId,
     String? roomId,
+    String? messageId,
     bool showInLocalInbox = true,
     bool persistRemote = false,
   }) async {
@@ -77,6 +78,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
       postId: postId,
       worldId: worldId,
       roomId: roomId,
+      messageId: messageId,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
@@ -311,6 +313,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         worldId: json['worldId'] as String?,
         postId: json['postId'] as String?,
         roomId: json['roomId'] as String?,
+        messageId: json['messageId'] as String?,
         read: (json['read'] as bool?) ?? false,
         createdAt: (json['createdAt'] as int?) ?? 0,
       );
@@ -338,6 +341,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     'worldId': n.worldId,
     'postId': n.postId,
     'roomId': n.roomId,
+    'messageId': n.messageId,
     'read': n.read,
     'createdAt': n.createdAt,
   };

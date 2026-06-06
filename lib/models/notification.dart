@@ -28,6 +28,7 @@ class AppNotification {
   final String? worldId;
   final String? postId;
   final String? roomId;
+  final String? messageId;
   final String? channelId;
   final String? allyRequestId;
   final bool read;
@@ -40,6 +41,7 @@ class AppNotification {
     this.worldId,
     this.postId,
     this.roomId,
+    this.messageId,
     this.channelId,
     this.allyRequestId,
     this.read = false,
@@ -53,6 +55,7 @@ class AppNotification {
     String? worldId,
     String? postId,
     String? roomId,
+    String? messageId,
     String? channelId,
     String? allyRequestId,
     bool? read,
@@ -64,6 +67,7 @@ class AppNotification {
     worldId: worldId ?? this.worldId,
     postId: postId ?? this.postId,
     roomId: roomId ?? this.roomId,
+    messageId: messageId ?? this.messageId,
     channelId: channelId ?? this.channelId,
     allyRequestId: allyRequestId ?? this.allyRequestId,
     read: read ?? this.read,
@@ -113,6 +117,7 @@ class AppNotification {
         worldId: data['world_id'],
         postId: data['post_id'],
         roomId: data['room_id'],
+        messageId: data['message_id'],
         channelId: data['channel_id'],
         allyRequestId: data['ally_request_id'],
         read: data['read'] ?? false,
@@ -129,6 +134,7 @@ class AppNotification {
     'world_id': worldId,
     'post_id': postId,
     'room_id': roomId,
+    'message_id': messageId,
     'channel_id': channelId,
     'ally_request_id': allyRequestId,
     'read': read,

@@ -14,6 +14,7 @@ import '../services/mutation_outbox_service.dart';
 import '../services/storage_service.dart';
 import '../services/typing_service.dart';
 import '../utils/chat_unread.dart';
+import '../utils/haptics.dart';
 import '../utils/id_generator.dart';
 import '../utils/provider_errors.dart';
 import '../utils/rate_limiter.dart';
@@ -367,6 +368,7 @@ class ChatNotifier extends Notifier<ChatState> {
     int? autoDeleteAfterSeconds,
   }) async {
     if (!RateLimiter.canProceed('message_$roomId', maxCalls: 3)) return;
+    Haptics.light();
 
     CrashReporter.instance.log(
       'chat sendDmMessage roomId=$roomId hasImage=${imageUrl != null}',
@@ -827,6 +829,7 @@ class ChatNotifier extends Notifier<ChatState> {
     String? imageUrl,
   }) async {
     if (!RateLimiter.canProceed('message_$channelId', maxCalls: 3)) return;
+    Haptics.light();
 
     String? durableImageUrl = imageUrl;
     if (durableImageUrl != null && !durableImageUrl.startsWith('http')) {
@@ -1075,6 +1078,8 @@ class ChatNotifier extends Notifier<ChatState> {
     required String content,
     required String threadId,
   }) async {
+    Haptics.light();
+
     final msg = ChannelMessage(
       id: generateId(),
       channelId: channelId,

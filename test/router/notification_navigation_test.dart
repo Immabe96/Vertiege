@@ -117,6 +117,21 @@ void main() {
       expect(routeForNotification(n), isNot('/chats'));
     });
 
+    test('dm message with messageId appends scroll-to query', () {
+      const n = AppNotification(
+        id: 'n-dm-msg',
+        type: NotificationType.dmMessage,
+        message: 'Alice: hi',
+        roomId: 'room-1',
+        messageId: 'msg-99',
+        createdAt: 0,
+      );
+      expect(
+        routeForNotification(n),
+        chatShellPath('room-1', messageId: 'msg-99'),
+      );
+    });
+
     test('mention with world and channel opens channel screen', () {
       const n = AppNotification(
         id: 'n5',

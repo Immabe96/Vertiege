@@ -24,7 +24,9 @@ String? routeForNotification(AppNotification notification) {
       return '/notifications';
     case NotificationType.dmMessage:
       final roomId = notification.roomId;
-      if (roomId != null && roomId.isNotEmpty) return chatShellPath(roomId);
+      if (roomId != null && roomId.isNotEmpty) {
+        return chatShellPath(roomId, messageId: notification.messageId);
+      }
       return '/chat';
     case NotificationType.mention:
       final channelId = notification.channelId;

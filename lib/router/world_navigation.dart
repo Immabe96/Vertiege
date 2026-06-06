@@ -163,20 +163,22 @@ String residentProfilePath(
 String leaguesPath() => '/progress?tab=league';
 
 /// Opens a DM room (full-screen, outside shell).
-String chatRoomPath(String roomId, {String? draft}) {
-  return _path(
-    '/chat/${Uri.encodeComponent(roomId)}',
-    draft != null ? {'draft': draft} : null,
-  );
+String chatRoomPath(String roomId, {String? draft, String? messageId}) {
+  final query = <String, String>{};
+  if (draft != null) query['draft'] = draft;
+  if (messageId != null && messageId.isNotEmpty) {
+    query['message'] = messageId;
+  }
+  return _path('/chat/${Uri.encodeComponent(roomId)}', query.isEmpty ? null : query);
 }
 
 /// @deprecated Use [chatRoomPath].
-String chatShellPath(String roomId, {String? draft}) =>
-    chatRoomPath(roomId, draft: draft);
+String chatShellPath(String roomId, {String? draft, String? messageId}) =>
+    chatRoomPath(roomId, draft: draft, messageId: messageId);
 
 /// @deprecated Use [chatRoomPath].
-String dmPath(String roomId, {String? draft}) =>
-    chatRoomPath(roomId, draft: draft);
+String dmPath(String roomId, {String? draft, String? messageId}) =>
+    chatRoomPath(roomId, draft: draft, messageId: messageId);
 
 String campfirePath({
   required String channelId,

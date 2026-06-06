@@ -43,12 +43,14 @@ class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;
   final Presence? initialPresence;
   final String? initialDraft;
+  final String? initialMessageId;
 
   const ChatRoomScreen({
     super.key,
     required this.roomId,
     this.initialPresence,
     this.initialDraft,
+    this.initialMessageId,
   });
 
   @override
@@ -76,6 +78,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   String? _replyToSenderId;
   String? _replyToSenderName;
   String? _replyToContent;
+  String? _pendingScrollMessageId;
+  int _pendingScrollAttempts = 0;
+  int _lastSeenMessageCount = 0;
+  static const int _maxScrollAttempts = 4;
 
   @override
   void initState() {
@@ -83,6 +89,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final roomId = widget.roomId;
     final notifier = ref.read(chatProvider.notifier);
     _visitDividerAnchor = ref.read(chatProvider).channelReads[roomId];
+    _pendingScrollMessageId = widget.initialMessageId;
     notifier.loadDmMessages(roomId, force: true);
     notifier.subscribeToDm(roomId);
     notifier.subscribeToTyping(roomId);
@@ -105,6 +112,49 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     _subscribePartnerPresence();
     unawaited(_refreshPartnerRead());
     _subscribePartnerRead();
+  }
+
+  void _tryScrollToPendingMessage() {
+    if (!mounted) return;
+    final targetId = _pendingScrollMessageId;
+    if (targetId == null) return;
+    final messages = ref.read(chatProvider).dmMessages[widget.roomId] ?? const [];
+    final index = messages.indexWhere((m) => m.id == targetId);
+    if (index >= 0) {
+      _pendingScrollMessageId = null;
+      _pendingScrollAttempts = 0;
+      final total = _scrollController.hasClients
+          ? _scrollController.position.maxScrollExtent
+          : 0.0;
+      final perChild = messages.isEmpty ? 0.0 : total / messages.length;
+      final target = (perChild * index).clamp(0.0, total).toDouble();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        _scrollController.animateTo(
+          target,
+          duration: VAnimation.normal,
+          curve: VAnimation.standard,
+        );
+        VFeedback.showMessage(context, 'Jumped to message');
+      });
+      return;
+    }
+    if (_pendingScrollAttempts >= _maxScrollAttempts) {
+      _pendingScrollMessageId = null;
+      return;
+    }
+    _pendingScrollAttempts += 1;
+    unawaited(
+      ref
+          .read(chatProvider.notifier)
+          .loadOlderDmMessages(widget.roomId)
+          .then((_) {
+            if (!mounted) return;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _tryScrollToPendingMessage();
+            });
+          }),
+    );
   }
 
   void _subscribePartnerPresence() {
@@ -489,6 +539,15 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         if (mounted) setState(() {});
       });
     }
+    if (_pendingScrollMessageId != null &&
+        messages.length != _lastSeenMessageCount) {
+      _lastSeenMessageCount = messages.length;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _tryScrollToPendingMessage();
+      });
+    } else if (messages.length != _lastSeenMessageCount) {
+      _lastSeenMessageCount = messages.length;
+    }
     final displayItems = buildChatDisplayItems(messages);
     final chatCompact =
         ref.watch(chatDensityProvider) == ChatMessageDensity.compact;
@@ -522,6 +581,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           recipientId,
           recipientPresence,
           customStatus: room?['other_custom_status'] as String?,
+          isTyping: otherTyping,
         ),
         suffixes: [
           VAccessibleHeaderAction(
@@ -661,6 +721,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     String? recipientId,
     Presence presence, {
     String? customStatus,
+    bool isTyping = false,
   }) {
     return Row(
       children: [
@@ -683,32 +744,39 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                StatusDot(presence: presence, size: 6, borderWidth: 1),
+                if (isTyping) ...[
+                  _TypingDots(isDark: isDark),
+                  const SizedBox(width: VSpacing.xs),
+                ] else
+                  StatusDot(presence: presence, size: 6, borderWidth: 1),
                 const SizedBox(width: VSpacing.xs),
                 Flexible(
                   child: Text(
-                    customStatus?.trim().isNotEmpty == true
-                        ? customStatus!.trim()
-                        : switch (presence) {
-                            Presence.online => 'Online',
-                            Presence.idle => 'Idle',
-                            Presence.dnd => 'Do not disturb',
-                            Presence.offline => 'Offline',
-                          },
+                    isTyping
+                        ? 'typing…'
+                        : (customStatus?.trim().isNotEmpty == true
+                            ? customStatus!.trim()
+                            : switch (presence) {
+                                Presence.online => 'Online',
+                                Presence.idle => 'Idle',
+                                Presence.dnd => 'Do not disturb',
+                                Presence.offline => 'Offline',
+                              }),
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: customStatus?.trim().isNotEmpty == true
-                          ? (isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant)
-                          : switch (presence) {
-                              Presence.online => VColors.success,
-                              Presence.idle => VColors.warning,
-                              Presence.dnd => VColors.error,
-                              Presence.offline =>
-                                isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
-                            },
+                      color: isTyping
+                          ? VColors.success
+                          : (customStatus?.trim().isNotEmpty == true
+                              ? (isDark
+                                  ? VColors.onSurfaceVariantDark
+                                  : VColors.onSurfaceVariant)
+                              : switch (presence) {
+                                  Presence.online => VColors.success,
+                                  Presence.idle => VColors.warning,
+                                  Presence.dnd => VColors.error,
+                                  Presence.offline => isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant,
+                                }),
                       fontSize: VFontSize.labelSm,
                     ),
                     maxLines: 1,
@@ -991,6 +1059,64 @@ class _TypingIndicatorState extends State<_TypingIndicator>
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TypingDots extends StatefulWidget {
+  final bool isDark;
+
+  const _TypingDots({required this.isDark});
+
+  @override
+  State<_TypingDots> createState() => _TypingDotsState();
+}
+
+class _TypingDotsState extends State<_TypingDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final base = isDark ? VColors.success : VColors.success;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: List.generate(3, (i) {
+        final delay = i * 0.15;
+        return AnimatedBuilder(
+          animation: _ctrl,
+          builder: (_, _) {
+            final t = (_ctrl.value + delay) % 1.0;
+            final bounce = math.sin(t * math.pi);
+            return Container(
+              width: 4,
+              height: 4,
+              margin: const EdgeInsets.symmetric(horizontal: 1.5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: base.withValues(alpha: 0.4 + 0.5 * bounce),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }

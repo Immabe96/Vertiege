@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/ally.dart';
 import '../services/ally_service.dart';
+import '../utils/haptics.dart';
 
 class AllyState {
   final List<Ally> allies;
@@ -56,6 +57,7 @@ class AllyNotifier extends Notifier<AllyState> {
     required String requesterId,
     required String receiverId,
   }) async {
+    Haptics.light();
     await AllyService.sendAllegianceRequest(
       requesterId: requesterId,
       receiverId: receiverId,
@@ -63,6 +65,7 @@ class AllyNotifier extends Notifier<AllyState> {
   }
 
   Future<void> acceptRequest(String requestId) async {
+    Haptics.light();
     await AllyService.acceptAllegianceRequest(requestId);
     state = state.copyWith(
       pendingRequests: state.pendingRequests
@@ -72,6 +75,7 @@ class AllyNotifier extends Notifier<AllyState> {
   }
 
   Future<void> declineRequest(String requestId) async {
+    Haptics.light();
     await AllyService.declineAllegianceRequest(requestId);
     state = state.copyWith(
       pendingRequests: state.pendingRequests
@@ -81,6 +85,7 @@ class AllyNotifier extends Notifier<AllyState> {
   }
 
   Future<void> block(String requestId) async {
+    Haptics.light();
     await AllyService.blockResident(requestId);
     state = state.copyWith(
       pendingRequests: state.pendingRequests
