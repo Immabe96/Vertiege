@@ -1191,6 +1191,7 @@ class ChatNotifier extends Notifier<ChatState> {
     required String replyToSenderId,
     required String replyToSenderName,
     required String replyToContent,
+    int? autoDeleteAfterSeconds,
   }) async {
     if (!RateLimiter.canProceed('message_$roomId', maxCalls: 3)) return;
 
@@ -1214,6 +1215,7 @@ class ChatNotifier extends Notifier<ChatState> {
       replyToSenderName: replyToSenderName,
       replyToContent: replyToContent,
       createdAt: DateTime.now().millisecondsSinceEpoch,
+      autoDeleteAfterSeconds: autoDeleteAfterSeconds,
     );
 
     final existing = state.dmMessages[roomId] ?? [];
@@ -1239,6 +1241,7 @@ class ChatNotifier extends Notifier<ChatState> {
           replyToSenderId: replyToSenderId,
           replyToSenderName: replyToSenderName,
           replyToContent: replyToContent,
+          autoDeleteAfterSeconds: autoDeleteAfterSeconds,
         ),
       );
       return;
@@ -1257,6 +1260,7 @@ class ChatNotifier extends Notifier<ChatState> {
         replyToSenderId: replyToSenderId,
         replyToSenderName: replyToSenderName,
         replyToContent: replyToContent,
+        autoDeleteAfterSeconds: autoDeleteAfterSeconds,
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {

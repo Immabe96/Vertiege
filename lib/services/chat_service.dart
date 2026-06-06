@@ -69,7 +69,9 @@ class ChatService {
     final client = getSupabase();
     final profiles = await client
         .from('profiles')
-        .select('id, name, avatar_url, last_seen_at')
+        .select(
+          'id, name, avatar_url, last_seen_at, presence_mode, custom_status',
+        )
         .inFilter('id', otherIds.toList());
 
     final byId = <String, Map<String, dynamic>>{};
@@ -111,6 +113,8 @@ class ChatService {
         'other_name': profile['name'] ?? room['other_name'],
         'other_avatar': profile['avatar_url'] ?? room['other_avatar'],
         'other_last_seen_at': parseLastSeenMs(profile['last_seen_at']),
+        'other_presence_mode': profile['presence_mode'],
+        'other_custom_status': profile['custom_status'],
         'unread_count': unreadCount,
       };
     }).toList();

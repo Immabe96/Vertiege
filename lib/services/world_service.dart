@@ -339,12 +339,42 @@ class WorldService {
   static Future<List<Map<String, dynamic>>> getMembers(String worldId) async {
     if (!isSupabaseConfigured()) return [];
     final client = getSupabase();
-    final data = await client
-        .from('world_members')
-        .select()
-        .eq('world_id', worldId)
-        .order('rep', ascending: false);
-    return (data as List).cast<Map<String, dynamic>>();
+    try {
+      final data = await client
+          .from('world_members')
+          .select(
+            '*, profiles(avatar_url, tier, total_xp, last_seen_at, verified_roles, presence_mode, custom_status, avatar_frame_id)',
+          )
+          .eq('world_id', worldId)
+          .order('rep', ascending: false);
+      return (data as List)
+          .cast<Map<String, dynamic>>()
+          .map(_flattenMemberProfile)
+          .toList();
+    } catch (_) {
+      final data = await client
+          .from('world_members')
+          .select()
+          .eq('world_id', worldId)
+          .order('rep', ascending: false);
+      return (data as List).cast<Map<String, dynamic>>();
+    }
+  }
+
+  static Map<String, dynamic> _flattenMemberProfile(Map<String, dynamic> row) {
+    final profile = row['profiles'];
+    if (profile is! Map<String, dynamic>) return row;
+    return {
+      ...row,
+      'avatar_url': profile['avatar_url'],
+      'tier': profile['tier'],
+      'total_xp': profile['total_xp'],
+      'last_seen_at': profile['last_seen_at'],
+      'verified_roles': profile['verified_roles'],
+      'presence_mode': profile['presence_mode'],
+      'custom_status': profile['custom_status'],
+      'avatar_frame_id': profile['avatar_frame_id'],
+    };
   }
 
   /// Total + online residents for world headers (profiles.last_seen_at when available).

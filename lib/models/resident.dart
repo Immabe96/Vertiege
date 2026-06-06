@@ -73,6 +73,8 @@ class Resident {
   final int worldCreationLimit;
   final int lastActivityAt;
   final bool leaderboardOptOut;
+  final String presenceMode;
+  final String? customStatus;
 
   const Resident({
     required this.id,
@@ -113,6 +115,8 @@ class Resident {
     this.worldCreationLimit = 1,
     this.lastActivityAt = 0,
     this.leaderboardOptOut = false,
+    this.presenceMode = 'online',
+    this.customStatus,
   });
 
   /// Unique referral code derived from the resident's ID — first 8 chars,
@@ -160,6 +164,8 @@ class Resident {
     int? worldCreationLimit,
     int? lastActivityAt,
     bool? leaderboardOptOut,
+    String? presenceMode,
+    String? customStatus,
   }) => Resident(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -199,5 +205,7 @@ class Resident {
     worldCreationLimit: worldCreationLimit ?? this.worldCreationLimit,
     lastActivityAt: lastActivityAt ?? this.lastActivityAt,
     leaderboardOptOut: leaderboardOptOut ?? this.leaderboardOptOut,
+    presenceMode: presenceMode ?? this.presenceMode,
+    customStatus: customStatus ?? this.customStatus,
   );
 }

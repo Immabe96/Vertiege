@@ -37,6 +37,7 @@ import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/core/status_dot.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/chat/dm_room_settings_sheet.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;
@@ -396,6 +397,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
     HapticFeedback.lightImpact();
     ref.read(chatProvider.notifier).stopTyping(widget.roomId, resident.id);
+    final autoDeleteSeconds = await ref
+        .read(chatProvider.notifier)
+        .getAutoDeleteForRoom(widget.roomId);
     try {
       if (_replyToMessageId != null) {
         await ref
@@ -411,6 +415,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               replyToSenderId: _replyToSenderId!,
               replyToSenderName: _replyToSenderName!,
               replyToContent: _replyToContent!,
+              autoDeleteAfterSeconds: autoDeleteSeconds,
             );
       } else {
         await ref
@@ -422,6 +427,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               senderAvatar: resident.avatarUrl,
               content: content,
               imageUrl: _imagePath,
+              autoDeleteAfterSeconds: autoDeleteSeconds,
             );
       }
       if (mounted) {
@@ -515,7 +521,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           recipientAvatar,
           recipientId,
           recipientPresence,
+          customStatus: room?['other_custom_status'] as String?,
         ),
+        suffixes: [
+          VAccessibleHeaderAction(
+            label: 'Chat settings',
+            icon: const Icon(Icons.timer_outlined),
+            onPress: () => showDmRoomSettingsSheet(
+              context,
+              roomId: widget.roomId,
+            ),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -630,7 +647,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   Presence _presenceFromRoom(Map<String, dynamic>? room, String currentUserId) {
     if (room == null) return Presence.offline;
-    return presenceFromProfileField(room['other_last_seen_at']);
+    return presenceFromStatusFields(
+      presenceMode: room['other_presence_mode'] as String?,
+      lastSeenRaw: room['other_last_seen_at'],
+    );
   }
 
   Widget _buildHeaderTitle(
@@ -639,8 +659,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     String recipientName,
     String? recipientAvatar,
     String? recipientId,
-    Presence presence,
-  ) {
+    Presence presence, {
+    String? customStatus,
+  }) {
     return Row(
       children: [
         CosmeticAvatar(
@@ -664,24 +685,34 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               children: [
                 StatusDot(presence: presence, size: 6, borderWidth: 1),
                 const SizedBox(width: VSpacing.xs),
-                Text(
-                  switch (presence) {
-                    Presence.online => 'Online',
-                    Presence.idle => 'Idle',
-                    Presence.dnd => 'Do not disturb',
-                    Presence.offline => 'Offline',
-                  },
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: switch (presence) {
-                      Presence.online => VColors.success,
-                      Presence.idle => VColors.warning,
-                      Presence.dnd => VColors.error,
-                      Presence.offline =>
-                        isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
-                    },
-                    fontSize: VFontSize.labelSm,
+                Flexible(
+                  child: Text(
+                    customStatus?.trim().isNotEmpty == true
+                        ? customStatus!.trim()
+                        : switch (presence) {
+                            Presence.online => 'Online',
+                            Presence.idle => 'Idle',
+                            Presence.dnd => 'Do not disturb',
+                            Presence.offline => 'Offline',
+                          },
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: customStatus?.trim().isNotEmpty == true
+                          ? (isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant)
+                          : switch (presence) {
+                              Presence.online => VColors.success,
+                              Presence.idle => VColors.warning,
+                              Presence.dnd => VColors.error,
+                              Presence.offline =>
+                                isDark
+                                    ? VColors.onSurfaceVariantDark
+                                    : VColors.onSurfaceVariant,
+                            },
+                      fontSize: VFontSize.labelSm,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

@@ -37,6 +37,7 @@ import '../../utils/presence_utils.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/trophy_case_sheet.dart';
 import '../../widgets/profile/featured_achievements_sheet.dart';
+import '../../services/resident_status_service.dart';
 import '../../widgets/profile/status_picker.dart';
 import '../../config/achievements.dart' as ach_config;
 import '../../widgets/achievements/achievement_category_meta.dart';
@@ -231,6 +232,24 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     );
   }
 
+  Future<void> _editStatus(Resident resident) async {
+    final current = ResidentStatus(
+      presence: ResidentStatusService.presenceFromStorage(
+        resident.presenceMode,
+      ),
+      customStatus: resident.customStatus,
+    );
+    final updated = await showStatusPicker(context, current: current);
+    if (updated == null || !mounted) return;
+    await ResidentStatusService.upsertStatus(updated);
+    await ref.read(residentProvider.notifier).updateResidentStatus(
+          presenceMode: ResidentStatusService.presenceModeStorage(
+            updated.presence,
+          ),
+          customStatus: updated.customStatus,
+        );
+  }
+
   Widget _buildYouProfileCard(
     BuildContext context,
     Resident resident,
@@ -238,12 +257,19 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     int tierValue,
   ) {
     final brightness = Theme.of(context).brightness;
-    final statusLabel = switch (presenceFromLastSeenMs(resident.lastSeenAt)) {
+    final presence = presenceFromStatusFields(
+      presenceMode: resident.presenceMode,
+      lastSeenRaw: resident.lastSeenAt,
+    );
+    final statusLabel = switch (presence) {
       Presence.online => 'Online',
       Presence.idle => 'Away',
       Presence.dnd => 'Do not disturb',
       Presence.offline => 'Offline',
     };
+    final statusText = resident.customStatus?.trim().isNotEmpty == true
+        ? resident.customStatus!.trim()
+        : statusLabel;
 
     return Material(
       color: VCommuneColors.surfaceSecondaryOf(brightness),
@@ -311,33 +337,43 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ],
               ),
               const SizedBox(height: VSpacing.sm),
-              Row(
-                children: [
-                  StatusDot(
-                    presence: presenceFromLastSeenMs(resident.lastSeenAt),
-                    size: 8,
-                  ),
-                  const SizedBox(width: VSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      statusLabel,
-                      style: TextStyle(
-                        fontSize: VFontSize.labelSm,
+              InkWell(
+                onTap: () => _editStatus(resident),
+                borderRadius: BorderRadius.circular(VRadius.sm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.xxs),
+                  child: Row(
+                    children: [
+                      StatusDot(presence: presence, size: 8),
+                      const SizedBox(width: VSpacing.xs),
+                      Expanded(
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: VFontSize.labelSm,
+                            color: VCommuneColors.textMutedOf(brightness),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(
+                        Icons.edit_outlined,
+                        size: VIconSize.sm,
                         color: VCommuneColors.textMutedOf(brightness),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(width: VSpacing.sm),
+                      Text(
+                        '${resident.sovereignCoins} coins',
+                        style: TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          color: VCommuneColors.textLinkOf(brightness),
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    '${resident.sovereignCoins} coins',
-                    style: TextStyle(
-                      fontSize: VFontSize.labelSm,
-                      color: VCommuneColors.textLinkOf(brightness),
-                      fontWeight: VFontWeight.semiBold,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),

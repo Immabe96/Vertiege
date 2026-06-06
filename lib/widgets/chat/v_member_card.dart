@@ -6,6 +6,7 @@ import '../../router/world_navigation.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/standing_display_color.dart';
+import '../core/status_dot.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../shared/tier_icon.dart';
 
@@ -17,7 +18,12 @@ class VMemberCard extends StatelessWidget {
   final int tier;
   final String? profession;
   final String? avatarUrl;
+  final String? avatarFrameId;
+  final int totalXp;
   final String? sovereignId;
+  final Presence? presence;
+  final bool identityVerified;
+  final String? customStatus;
   final VoidCallback? onMessage;
   final VoidCallback? onDismiss;
 
@@ -29,7 +35,12 @@ class VMemberCard extends StatelessWidget {
     required this.tier,
     this.profession,
     this.avatarUrl,
+    this.avatarFrameId,
+    this.totalXp = 0,
     this.sovereignId,
+    this.presence,
+    this.identityVerified = false,
+    this.customStatus,
     this.onMessage,
     this.onDismiss,
   });
@@ -55,10 +66,23 @@ class VMemberCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CosmeticAvatar(
-                  imageUrl: avatarUrl,
-                  seed: residentId,
-                  size: 52,
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CosmeticAvatar(
+                      imageUrl: avatarUrl,
+                      seed: residentId,
+                      size: 52,
+                      totalXp: totalXp,
+                      frameId: avatarFrameId,
+                    ),
+                    if (presence != null)
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: StatusDot(presence: presence!, size: 12),
+                      ),
+                  ],
                 ),
                 const SizedBox(width: VSpacing.md),
                 Expanded(
@@ -78,6 +102,14 @@ class VMemberCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (identityVerified) ...[
+                            const SizedBox(width: VSpacing.xxs),
+                            const Icon(
+                              Icons.verified,
+                              size: 18,
+                              color: VCommuneColors.textLink,
+                            ),
+                          ],
                           const SizedBox(width: VSpacing.xs),
                           TierIcon(tier: tier, size: 20),
                         ],
@@ -105,6 +137,16 @@ class VMemberCard extends StatelessWidget {
                           fontWeight: VFontWeight.semiBold,
                         ),
                       ),
+                      if (customStatus != null &&
+                          customStatus!.trim().isNotEmpty)
+                        Text(
+                          customStatus!.trim(),
+                          style: const TextStyle(
+                            fontSize: VFontSize.labelSm,
+                            color: VCommuneColors.textMuted,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                     ],
                   ),
                 ),

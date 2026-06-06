@@ -11,11 +11,13 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/member_profile_fields.dart';
 import '../../utils/standing_display_color.dart';
+import '../core/status_dot.dart';
 import '../profile/cosmetic_avatar.dart';
 import 'v_member_card.dart';
 
-/// Resident list for a world channel — avatars, standing, tap to DM.
+/// Resident list for a world channel — presence, tier ring, identity tick, tap to DM.
 void showResidentListSheet(
   BuildContext context, {
   required String worldId,
@@ -131,7 +133,7 @@ class _ResidentListContentState extends ConsumerState<_ResidentListContent> {
                       height: 1,
                     ),
                     itemBuilder: (context, index) {
-                      final m = _members[index];
+                      final m = flattenWorldMemberRow(_members[index]);
                       final id = m['resident_id'] as String? ?? '';
                       final name =
                           m['resident_name'] as String? ?? 'Resident';
@@ -142,27 +144,64 @@ class _ResidentListContentState extends ConsumerState<_ResidentListContent> {
                         sovereignId: sovereignId,
                         residentId: id,
                       );
-
                       final tierValue =
                           (m['tier'] as int?) ??
                           (m['standing'] as int?) ??
                           1;
+                      final presence = memberPresence(m);
+                      final identityTick = memberHasIdentityTick(m);
+                      final customStatus = m['custom_status'] as String?;
+
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: CosmeticAvatar(
-                          imageUrl: m['avatar_url'] as String?,
-                          seed: id,
-                          size: 36,
+                        leading: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            CosmeticAvatar(
+                              imageUrl: m['avatar_url'] as String?,
+                              seed: id,
+                              size: 40,
+                              totalXp: memberTotalXp(m),
+                              frameId: m['avatar_frame_id'] as String?,
+                            ),
+                            Positioned(
+                              right: -2,
+                              bottom: -2,
+                              child: StatusDot(presence: presence, size: 10),
+                            ),
+                          ],
                         ),
-                        title: Text(
-                          name,
-                          style: TextStyle(
-                            fontWeight: VFontWeight.semiBold,
-                            color: nameColor,
-                          ),
+                        title: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  fontWeight: VFontWeight.semiBold,
+                                  color: nameColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (identityTick) ...[
+                              const SizedBox(width: VSpacing.xxs),
+                              Icon(
+                                VIcons.badgeCheck,
+                                size: VIconSize.sm,
+                                color: VCommuneColors.textLink,
+                              ),
+                            ],
+                          ],
                         ),
                         subtitle: Text(
-                          '${standing.title} · $rep rep',
+                          [
+                            '${standing.title} · $rep rep',
+                            if (customStatus != null &&
+                                customStatus.trim().isNotEmpty)
+                              customStatus.trim(),
+                          ].join(' · '),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: VFontSize.labelSm,
                             color: VCommuneColors.textMutedOf(brightness),
@@ -184,7 +223,12 @@ class _ResidentListContentState extends ConsumerState<_ResidentListContent> {
                               tier: tierValue,
                               profession: m['profession'] as String?,
                               avatarUrl: m['avatar_url'] as String?,
+                              avatarFrameId: m['avatar_frame_id'] as String?,
+                              totalXp: memberTotalXp(m),
                               sovereignId: sovereignId,
+                              presence: presence,
+                              identityVerified: identityTick,
+                              customStatus: customStatus,
                               onMessage: me != null && me.id != id
                                   ? () => _openDm(id, name)
                                   : null,

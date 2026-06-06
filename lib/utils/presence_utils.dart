@@ -36,6 +36,21 @@ Presence presenceFromProfileField(dynamic lastSeenRaw, {DateTime? now}) {
   return presenceFromLastSeenMs(parseLastSeenMs(lastSeenRaw), now: now);
 }
 
+/// Combines persisted [presence_mode] with [last_seen_at] heartbeat.
+Presence presenceFromStatusFields({
+  String? presenceMode,
+  dynamic lastSeenRaw,
+  DateTime? now,
+}) {
+  return switch (presenceMode) {
+    'invisible' => Presence.offline,
+    'dnd' => Presence.dnd,
+    'idle' => Presence.idle,
+    'online' => presenceFromProfileField(lastSeenRaw, now: now),
+    _ => presenceFromProfileField(lastSeenRaw, now: now),
+  };
+}
+
 /// Unified status dot colors from [VCommuneColors] (DCX-033).
 Color presenceColor(Presence presence) => switch (presence) {
   Presence.online => VCommuneColors.statusOnline,

@@ -748,6 +748,21 @@ class ResidentNotifier extends Notifier<ResidentState> {
     }
   }
 
+  Future<void> updateResidentStatus({
+    required String presenceMode,
+    String? customStatus,
+  }) async {
+    final r = state.resident;
+    if (r == null) return;
+    state = state.copyWith(
+      resident: r.copyWith(
+        presenceMode: presenceMode,
+        customStatus: customStatus,
+      ),
+    );
+    _persist();
+  }
+
   Future<void> touchPresence() async {
     final r = state.resident;
     if (r == null) return;
@@ -1131,6 +1146,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
       postPinLimit: (json['postPinLimit'] as int?) ?? 0,
       worldCreationLimit: (json['worldCreationLimit'] as int?) ?? 1,
       lastActivityAt: (json['lastActivityAt'] as int?) ?? 0,
+      presenceMode: (json['presenceMode'] as String?) ?? 'online',
+      customStatus: json['customStatus'] as String?,
     );
   }
 
@@ -1182,6 +1199,8 @@ class ResidentNotifier extends Notifier<ResidentState> {
     'postPinLimit': r.postPinLimit,
     'worldCreationLimit': r.worldCreationLimit,
     'lastActivityAt': r.lastActivityAt,
+    'presenceMode': r.presenceMode,
+    if (r.customStatus != null) 'customStatus': r.customStatus,
   };
 
   static List<String>? _toStringList(dynamic value) {

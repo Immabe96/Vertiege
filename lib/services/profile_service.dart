@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/resident.dart';
 import '../utils/local_date.dart';
+import '../utils/presence_utils.dart';
 import 'supabase.dart';
 import 'crash_reporter.dart';
 
@@ -216,6 +217,9 @@ class ProfileService {
       lastActivityAt: _parseLastActivityAt(data['last_activity_at']),
       title: data['display_title'] as String? ?? data['title'] as String?,
       leaderboardOptOut: data['leaderboard_opt_out'] == true,
+      lastSeenAt: parseLastSeenMs(data['last_seen_at']) ?? 0,
+      presenceMode: data['presence_mode'] as String? ?? 'online',
+      customStatus: data['custom_status'] as String?,
     );
   }
 
