@@ -123,23 +123,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     context.go(route);
   }
 
-  String? _bootstrapMessage(SupabaseBootstrapResult bootstrap) {
-    return switch (bootstrap) {
-      SupabaseBootstrapResult.ready => null,
-      SupabaseBootstrapResult.missingConfig =>
-        'Cloud sign-in is not configured in this build (.env missing in APK).',
-      SupabaseBootstrapResult.failed =>
-        'Could not connect to cloud. Check network and tap Retry on the banner above.',
-      SupabaseBootstrapResult.pending => 'Connecting to cloud…',
-    };
-  }
-
-  Future<bool> _ensureSupabaseReady() async {
-    if (maybeSupabase() != null) return true;
-    final result = await SupabaseBootstrap.initialize();
-    return result == SupabaseBootstrapResult.ready;
-  }
-
   Future<void> _handleLogin() async {
     if (!_isValid || _isLoading) return;
 
@@ -149,12 +132,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      if (!await _ensureSupabaseReady()) {
+      if (!await SupabaseBootstrap.ensureReady()) {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
           _errorMessage =
-              _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+              SupabaseBootstrap.messageFor(SupabaseBootstrap.lastResult) ??
               'Cloud sign-in is unavailable.';
         });
         return;
@@ -198,11 +181,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      if (!await _ensureSupabaseReady()) {
+      if (!await SupabaseBootstrap.ensureReady()) {
         if (!mounted) return;
         setState(() {
           _errorMessage =
-              _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+              SupabaseBootstrap.messageFor(SupabaseBootstrap.lastResult) ??
               'Cloud sign-in is unavailable.';
         });
         return;
@@ -236,11 +219,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      if (!await _ensureSupabaseReady()) {
+      if (!await SupabaseBootstrap.ensureReady()) {
         if (!mounted) return;
         setState(() {
           _errorMessage =
-              _bootstrapMessage(SupabaseBootstrap.lastResult) ??
+              SupabaseBootstrap.messageFor(SupabaseBootstrap.lastResult) ??
               'Cloud sign-in is unavailable.';
         });
         return;

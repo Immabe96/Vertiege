@@ -1,6 +1,6 @@
 # Vertiege — Social stack plan (canonical)
 
-**Status:** Active · **Created:** 2026-06-06  
+**Status:** Active · **Created:** 2026-06-06 · **Waves S1–S5:** delivered on `develop`  
 **Supersedes:** All docs in `docs/archive/planning/` (DCX redesign, perfection backlog, wave status, waves 13–22, shadcn migration plan, etc.)
 
 Vertiege’s next engineering focus: make **posts, notifications, presence, and chat** reliable and competitive with modern social/chat apps — without conflating **identity verification** (government ID tick) with **achievement proof** (Nexus standing).
@@ -42,9 +42,10 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
-## Wave S1 — Stop the bleeding (P0)
+## Wave S1 — Stop the bleeding (P0) ✅
 
-**Target:** ~1 week · **Exit:** Cached feed on launch; DM unread works; presence updates; threads stay in threads; no self-push on own reactions.
+**Target:** ~1 week · **Exit:** Cached feed on launch; DM unread works; presence updates; threads stay in threads; no self-push on own reactions.  
+**Migrations:** `20260606140000_social_wave_s1.sql`, `20260606150000_social_wave_s1_completion.sql`
 
 ### Posts & feed
 
@@ -91,9 +92,10 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
-## Wave S2 — Feel alive (P1)
+## Wave S2 — Feel alive (P1) ✅
 
-**Target:** ~1 week · **Exit:** New posts appear without manual refresh; notification volume matches settings.
+**Target:** ~1 week · **Exit:** New posts appear without manual refresh; notification volume matches settings.  
+**Migration:** `20260606160000_social_wave_s2.sql`
 
 | ID | Task |
 |----|------|
@@ -107,9 +109,10 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
-## Wave S3 — Social polish (P2)
+## Wave S3 — Social polish (P2) ✅
 
-**Target:** ~2 weeks · Inspired by modern chat app patterns (structure only).
+**Target:** ~2 weeks · Inspired by modern chat app patterns (structure only).  
+**Migration:** `20260630170000_social_wave_s3.sql`
 
 ### Discord-style patterns → Vertiege
 
@@ -140,13 +143,13 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 | Achievement share | Chat ✅ — add moment → Nexus reverse cross-post |
 | Tier gates | Visible on locked channels and tools |
 
-| ID | Task |
-|----|------|
-| SOC-S01 | Read receipts (DMs only) — `message_reads` table |
-| SOC-S02 | Allies row → open DM (`getOrCreateRoom`) |
-| SOC-S03 | Channel image attach (parity with DM) |
-| SOC-S04 | Per-channel mute + mention alerts |
-| SOC-S05 | Chat → feed cross-post (inverse of existing feed → channel sheet) |
+| ID | Task | Status |
+|----|------|--------|
+| SOC-S01 | Read receipts (DMs only) — `message_reads` table | ✅ |
+| SOC-S02 | Allies row → open DM (`getOrCreateRoom`) | ✅ |
+| SOC-S03 | Channel image attach (parity with DM) | ✅ |
+| SOC-S04 | Per-channel mute + mention alerts | ✅ |
+| SOC-S05 | Chat → feed cross-post (inverse of existing feed → channel sheet) | ✅ |
 
 ---
 
@@ -176,17 +179,31 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
-## Schema / backend (planned migrations)
+## Schema / backend (delivered)
 
-| Migration | Purpose |
-|-----------|---------|
-| `touch_presence()` | Update `profiles.last_seen_at` (+ optional custom status) |
-| `increment_thread_count` trigger | On thread reply INSERT |
-| `notify_post_reaction` / `notify_post_comment` | Correct `recipient_id` = post author |
+| Migration / RPC | Purpose |
+|-----------------|---------|
+| `20260606140000` / `20260606150000` | Social wave S1 — presence, threads, DM unread, notification fixes |
+| `20260606160000` | Social wave S2 — Nexus cursor RPC, reposts, quiet hours |
+| `20260630170000` | Social wave S3 — `dm_reads`, `message_reads`, channel mute prefs |
+| `20260630180000` | Social wave S4 — `presence_mode`, `custom_status`, `upsert_resident_status()` |
+| `20260630190000` | Social wave S5 — per-resident mentions, `channel_id` on notifications, active residents RPC |
+| `touch_presence()` / `upsert_resident_status()` | Presence heartbeat + persisted status |
 | `list_nexus_posts_cursor` | Single-query Nexus feed |
-| `dm_reads` or per-user `last_read_at` on DM participation | DM unread |
-| `message_reads` (optional) | Read receipts |
-| `send-push` update | Preferences + quiet hours |
+| `broadcast_channel_mention_notifications` | Per-resident @mention fan-out |
+| `send-push` | Preferences + quiet hours (deploy separately from SQL) |
+
+---
+
+## What's next (post S5)
+
+Optional polish from the S3 pattern table — not yet scheduled as a wave:
+
+| Item | Notes |
+|------|--------|
+| Honest streak UI + server reconcile | `record_daily_check_in` exists; tighten Identity display |
+| World activity map (full) | S5 shipped preview avatars in Messages panel |
+| @AllResidents / nearby aliases | Broadcast mentions work; expand tests |
 
 ---
 
@@ -202,13 +219,9 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
-## Execution order (recommended)
+## Execution order (historical — S1 bootstrap)
 
-1. SOC-R01 — presence heartbeat  
-2. SOC-N01 + SOC-N02 — notification recipient + server triggers  
-3. SOC-C03 — DM unread  
-4. SOC-C01 + SOC-C02 — thread isolation + counts  
-5. SOC-P01 + SOC-P02 — post cache + pagination  
+Used for the initial social-stack rescue; waves S1–S5 are complete. For new work, add a **Wave S6** section here before coding.
 
 ---
 

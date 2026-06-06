@@ -112,9 +112,10 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 | Local `flutter build apk` fails with `26.0.1` | Gradle/Kotlin does not support JDK 26 yet. Install **JDK 21** (CI uses Java 21), set `JAVA_HOME`, or run `.\scripts\ci-local.ps1` |
 | CI failed | Fix analyze/test/build errors on `develop`, push again |
 | Black screen on APK launch | CI must set `SUPABASE_*` secrets; app uses `dotenv.load(isOptional: true)` |
-| Channels empty but world “joined” | Need `world_members` row — slug worlds must sync on join ([DEVICE_UAT.md](DEVICE_UAT.md)) |
-| Install APK | `adb uninstall` then `adb install -r` — see [DEVICE_UAT.md](DEVICE_UAT.md) (clear cache ≠ uninstall) |
-| “App already installed” | Uninstall `com.vertiege` (or legacy `com.imma96.virtual_status_worlds`) — see [DEVICE_UAT.md](DEVICE_UAT.md) |
+| “Supabase not configured” on sign-up | Local `.env` missing or empty; CI APK needs `SUPABASE_*` secrets — see [firebase-and-supabase.md](firebase-and-supabase.md) |
+| Channels empty but world “joined” | Need `world_members` row — slug worlds must sync on join ([device-uat.md](device-uat.md)) |
+| Install APK | `adb uninstall` then `adb install -r` — see [device-uat.md](device-uat.md) (clear cache ≠ uninstall) |
+| “App already installed” | Uninstall `com.vertiege` (or legacy `com.imma96.virtual_status_worlds`) — see [device-uat.md](device-uat.md) |
 
 ## Recommended GitHub settings
 
@@ -122,22 +123,22 @@ Manual promote: Actions → **Promote to main** → Run workflow.
 - **Protect `main`:** block direct pushes (only Actions promote)
 - **Protect `develop`:** require **CI** to pass before merge (optional)
 
-Backend deploy (Supabase/Firebase): [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE_SUPABASE_HYBRID_SETUP.md)
+Backend deploy (Supabase/Firebase): [firebase-and-supabase.md](firebase-and-supabase.md)
 
 | Doc | Purpose |
 |-----|---------|
-| [plan/MANUAL_REMAINING.md](plan/MANUAL_REMAINING.md) | Dashboard steps (auth, Firebase, Free plan limits) |
-| [plan/PACKAGE_ID_COM_VERTIEGE.md](plan/PACKAGE_ID_COM_VERTIEGE.md) | `com.vertiege`, SHA-1, OAuth redirects |
-| [UNDERSTAND_ANYTHING.md](UNDERSTAND_ANYTHING.md) | Codebase knowledge graph for Cursor (`/understand`; not in CI) |
-| [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) | Staff-only verification login |
-| [DEVICE_UAT.md](DEVICE_UAT.md) | Device test checklist + adb install notes |
+| [../archive/planning/manual-remaining.md](../archive/planning/manual-remaining.md) | Dashboard steps (auth, Firebase, Free plan limits) |
+| [../reference/android-package-id.md](../reference/android-package-id.md) | `com.vertiege`, SHA-1, OAuth redirects |
+| [codebase-map.md](codebase-map.md) | Codebase map for Cursor |
+| [verifier-portal.md](verifier-portal.md) | Staff-only verification login |
+| [device-uat.md](device-uat.md) | Device test checklist + adb install notes |
 
 ## Release gate (before `main` / APK)
 
 1. Push `develop` → green **CI** (`verify` + `build-apk` on develop only).
-2. Download APK artifact; install via adb ([DEVICE_UAT.md](DEVICE_UAT.md)).
-3. Complete device UAT checklist; log issues in [DEVICE_UAT.md](DEVICE_UAT.md).
+2. Download APK artifact; install via adb ([device-uat.md](device-uat.md)).
+3. Complete device UAT checklist; log issues in [../operations/uat/issue-log.md](../operations/uat/issue-log.md).
 4. Fix findings, push again, wait for green CI.
 5. Promote to `main` when UAT and audits are satisfied.
 
-**Staff review** is not part of player UAT — smoke-test [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) separately.
+**Staff review** is not part of player UAT — smoke-test [verifier-portal.md](verifier-portal.md) separately.

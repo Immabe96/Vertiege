@@ -80,6 +80,21 @@ Do not add Firebase Auth unless auth ownership is intentionally changed.
 - Performance Monitoring: Flutter SDK is active. Android Gradle auto-instrumentation is intentionally disabled because it crashes the local JDK/Gradle release build on this machine.
 - App Check: configure Play Integrity/debug providers, but do not enable enforcement until debug and release APKs are verified.
 
+## Flutter client (`.env`)
+
+The mobile app reads **anon** credentials from a bundled `.env` asset (`pubspec.yaml` lists `.env`).
+
+| Variable | Purpose |
+|----------|---------|
+| `SUPABASE_URL` | Project API URL |
+| `SUPABASE_ANON_KEY` | Public anon JWT for client SDK |
+
+Local: copy [`.env.template`](../../.env.template) → `.env`. CI/release APKs: GitHub Actions writes `.env` from `SUPABASE_URL` and `SUPABASE_ANON_KEY` secrets.
+
+`main.dart` calls `SupabaseBootstrap.initialize()` before `runApp`. Auth screens call `SupabaseBootstrap.ensureReady()` before sign-in or sign-up. Missing keys → user-visible “not configured” message (not a crash).
+
+Do **not** put service-role keys or Firebase service account JSON in `.env`.
+
 ## Build Notes
 
 - `flutter build apk --release` with tree-shaken icons currently crashes the Windows Dart VM in this environment.

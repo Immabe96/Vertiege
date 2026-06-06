@@ -25,6 +25,31 @@ abstract final class SupabaseBootstrap {
   static bool get isReady =>
       _initialized && _lastResult == SupabaseBootstrapResult.ready;
 
+  /// User-facing message when cloud auth/data is unavailable.
+  static String? messageFor(SupabaseBootstrapResult result) {
+    return switch (result) {
+      SupabaseBootstrapResult.ready => null,
+      SupabaseBootstrapResult.missingConfig =>
+        'Cloud sign-in is not configured in this build (.env missing in APK).',
+      SupabaseBootstrapResult.failed =>
+        'Could not connect to cloud. Check network and try again.',
+      SupabaseBootstrapResult.pending => 'Connecting to cloud…',
+    };
+  }
+
+  /// Idempotent — safe from main(), auth screens, and app bootstrap.
+  static Future<bool> ensureReady() async {
+    if (isReady) return true;
+    try {
+      if (Supabase.instance.isInitialized) {
+        _initialized = true;
+        _lastResult = SupabaseBootstrapResult.ready;
+        return true;
+      }
+    } catch (_) {}
+    return (await initialize()) == SupabaseBootstrapResult.ready;
+  }
+
   static Future<SupabaseBootstrapResult> initialize() async {
     if (_initialized && _lastResult == SupabaseBootstrapResult.ready) {
       return _lastResult;

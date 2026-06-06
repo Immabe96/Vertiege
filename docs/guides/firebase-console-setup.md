@@ -31,7 +31,7 @@ This guide walks you through connecting Firebase to Vertiege. You only need to d
 2. Fill in:
    - **Android package name**: `com.vertiege` (must match `applicationId` in `android/app/build.gradle.kts`)
    - **App nickname**: `Vertiege`
-   - **Debug signing certificate SHA-1**: Required for Google Sign-In on device — see [plan/PACKAGE_ID_COM_VERTIEGE.md](plan/PACKAGE_ID_COM_VERTIEGE.md)
+   - **Debug signing certificate SHA-1**: Required for Google Sign-In on device — see [../reference/android-package-id.md](../reference/android-package-id.md)
 3. Click **Register app**
 4. Download the `google-services.json` file
 5. Put this file exactly here:

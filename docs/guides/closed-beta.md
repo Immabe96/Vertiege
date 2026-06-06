@@ -33,7 +33,7 @@ Testers get the **same backend** (production Supabase). Bump **`pubspec.yaml` bu
   - `vertiege://auth/callback`
   - Site URL can stay your Supabase URL for now
 - [ ] Optional: cap signups in Dashboard if you want invite-only growth later
-- [ ] Push: `send-push` secrets + DB webhook — see [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE_SUPABASE_HYBRID_SETUP.md)
+- [ ] Push: `send-push` secrets + DB webhook — see [firebase-and-supabase.md](firebase-and-supabase.md)
 
 ### Staff / verifiers
 
@@ -43,7 +43,7 @@ Grant in Supabase Dashboard → Authentication → user → **App metadata**:
 { "is_verifier": true, "role": "verifier" }
 ```
 
-Testers use the normal app; staff open **Settings → Staff review**. See [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md).
+Testers use the normal app; staff open **Settings → Staff review**. See [verifier-portal.md](verifier-portal.md).
 
 ### Firebase (CLI sync)
 
@@ -295,12 +295,12 @@ Share [beta/TESTER_GUIDE.md](beta/TESTER_GUIDE.md) with:
 
 | Doc | Topic |
 |-----|--------|
-| [DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md) | CI / develop → APK |
+| [development-workflow.md](development-workflow.md) | CI / develop → APK |
 | [releases/README.md](../releases/README.md) | APK naming & scripts |
-| [FIREBASE_SUPABASE_HYBRID_SETUP.md](FIREBASE_SUPABASE_HYBRID_SETUP.md) | Push, webhooks |
-| [DEVICE_UAT.md](DEVICE_UAT.md) | Device test scenarios |
-| [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md) | Staff review |
-| [plan/PACKAGE_ID_COM_VERTIEGE.md](plan/PACKAGE_ID_COM_VERTIEGE.md) | OAuth SHA-1 |
+| [firebase-and-supabase.md](firebase-and-supabase.md) | Push, webhooks, client `.env` |
+| [device-uat.md](device-uat.md) | Device test scenarios |
+| [verifier-portal.md](verifier-portal.md) | Staff review |
+| [../reference/android-package-id.md](../reference/android-package-id.md) | OAuth SHA-1 |
 
 ---
 

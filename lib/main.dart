@@ -6,6 +6,7 @@ import 'app.dart';
 import 'config/image_cache_policy.dart';
 import 'theme/theme_prefs.dart';
 import 'services/crash_reporter.dart';
+import 'services/supabase_bootstrap.dart';
 import 'services/firebase_messaging_handlers.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -35,6 +36,7 @@ void main() async {
 
   await dotenv.load(fileName: '.env', isOptional: true);
   await ThemePrefs.warmCache();
+  await SupabaseBootstrap.initialize();
 
   runApp(const ProviderScope(child: VirtualStatusWorldsApp()));
 }

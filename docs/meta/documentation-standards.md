@@ -45,7 +45,8 @@ We use [Diátaxis](https://diataxis.fr/) for **intent**, plus three project-spec
 
 ## Maintenance cadence
 
-- **After a wave ships:** update `PLAN.md` (repository root) and `operations/uat/issue-log.md`.
+- **After a wave ships:** update `PLAN.md` (repository root) and `operations/uat/issue-log.md` if device findings apply.
+- **Canonical paths:** guides use `guides/*.md` (kebab-case). Root stubs (`docs/DEVICE_UAT.md`, `docs/VERIFIER_PORTAL.md`, etc.) redirect only — do not duplicate content there.
 - **After design token changes:** update `reference/design-system.md` and `lib/theme/*` together.
 - **Quarterly:** skim `archive/` and root redirect stubs; remove stubs when traffic is zero.
 

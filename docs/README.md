@@ -35,7 +35,7 @@ docs/
 
 ## Product & planning
 
-- [**PLAN.md**](../PLAN.md) — canonical active plan (social stack waves S1–S3)
+- [**PLAN.md**](../PLAN.md) — canonical active plan (social stack waves S1–S5 ✅)
 - [Archived planning](archive/planning/) — DCX redesign, wave status, perfection backlog, waves 13–22, roadmap, UI migration
 - [Legacy plans (archive)](archive/consolidated-legacy-plans.md) · [Legacy audits (archive)](archive/consolidated-legacy-audits.md)
 - [Vision](product/vision/) — worlds, gamification, onboarding, channels

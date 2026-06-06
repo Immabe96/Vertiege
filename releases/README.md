@@ -19,7 +19,7 @@ Example: `vertiege-1.1.0-beta.2+6-arm64-release.apk`
 ./scripts/build_release_appbundle.sh        # Google Play closed testing (.aab)
 ```
 
-Closed beta (Play + TestFlight): **[docs/CLOSED_BETA.md](../docs/CLOSED_BETA.md)**
+Closed beta (Play + TestFlight): **[docs/guides/closed-beta.md](../docs/guides/closed-beta.md)**
 
 APK binaries are gitignored (`/releases/*.apk`). Manifests are committed.
 

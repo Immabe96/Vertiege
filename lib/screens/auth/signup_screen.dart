@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/invite_navigation.dart';
+import '../../services/supabase_bootstrap.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../widgets/auth/auth_fields.dart';
@@ -78,6 +79,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     });
 
     try {
+      if (!await SupabaseBootstrap.ensureReady()) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              SupabaseBootstrap.messageFor(SupabaseBootstrap.lastResult) ??
+              'Cloud sign-up is unavailable.';
+        });
+        return;
+      }
+
       await AuthService.signUpWithEmail(
         _emailController.text.trim(),
         _passwordController.text,

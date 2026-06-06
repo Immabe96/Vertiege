@@ -18,7 +18,8 @@ SupabaseClient? maybeSupabase() {
 /// credentials come from flutter_dotenv.
 ///
 /// [Supabase.initialize] is called from [SupabaseBootstrap.initialize]
-/// in main() before runApp when `.env` is present in the asset bundle.
+/// in `main.dart` before `runApp` when `.env` is present in the asset bundle.
+/// Auth screens may call [SupabaseBootstrap.ensureReady] to retry after a failed boot.
 bool isSupabaseConfigured() {
   return maybeSupabase() != null;
 }

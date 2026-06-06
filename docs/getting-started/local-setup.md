@@ -5,10 +5,12 @@ Same Flutter app, same backend, same `pubspec.yaml` version. Use the commands be
 ## One-time setup
 
 ```bash
-cp .env.template .env          # Supabase URL + anon key
+cp .env.template .env          # SUPABASE_URL + SUPABASE_ANON_KEY (required for sign-up)
 ./scripts/firebase_beta_sync.sh # google-services.json + GoogleService-Info.plist
 ./scripts/check_beta_prereqs.sh
 ```
+
+Supabase initializes at app launch (`main.dart` → `SupabaseBootstrap.initialize()`). Without a valid `.env`, sign-up shows a clear configuration error instead of a silent failure.
 
 | Step | Android | iOS (Mac) |
 |------|---------|-----------|
@@ -49,7 +51,7 @@ CI on `develop`: Ubuntu builds signed **APK**; macOS job builds **iOS simulator*
 
 ## UI / UX standards
 
-See [../UI_STANDARDS.md](../UI_STANDARDS.md). Design tokens and navigation are shared — do not fork per platform.
+See [../reference/design-system.md](../reference/design-system.md) and [../reference/DESIGN.md](../reference/DESIGN.md) (Commune tokens). Design tokens and navigation are shared — do not fork per platform.
 
 ## Device smoke matrix (before beta)
 

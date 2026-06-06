@@ -235,4 +235,4 @@ adb shell am start -a android.intent.action.VIEW -d "vertiege://verifier/login" 
 - [ ] Approve one test submission; status updates in Supabase
 - [ ] Sign out; cannot reach main app without player login
 
-See [VERIFIER_PORTAL.md](VERIFIER_PORTAL.md).
+See [verifier-portal.md](verifier-portal.md).
