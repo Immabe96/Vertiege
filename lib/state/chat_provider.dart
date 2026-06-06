@@ -87,6 +87,33 @@ class ChatState {
 
   bool isChannelMuted(String channelId) =>
       muteModeFor(channelId) == ChannelMuteMode.all;
+
+  int totalDmUnread() => dmRooms.fold<int>(
+        0,
+        (sum, room) => sum + ((room['unread_count'] as int?) ?? 0),
+      );
+
+  int totalChatTabUnread({String? currentUserId}) {
+    final dmRoomIds = dmRooms
+        .map((room) => room['id'])
+        .whereType<String>()
+        .toSet();
+    var channels = 0;
+    for (final channelId in channelLatestMessageTimes.keys) {
+      if (dmRoomIds.contains(channelId)) continue;
+      final messages = channelMessages[channelId] ?? const [];
+      final lastRead = channelReads[channelId];
+      final latest = channelLatestMessageTimes[channelId];
+      channels += countUnreadMessages(
+        loadedMessages: messages,
+        lastReadAt: lastRead,
+        latestMessageAt:
+            latest != null && latest.millisecondsSinceEpoch > 0 ? latest : null,
+        excludeSenderId: currentUserId,
+      );
+    }
+    return totalDmUnread() + channels;
+  }
 }
 
 class ChatNotifier extends Notifier<ChatState> {
@@ -1119,6 +1146,23 @@ class ChatNotifier extends Notifier<ChatState> {
       latestMessageAt: latest == _emptyChannelActivity ? null : latest,
       excludeSenderId: currentUserId,
     );
+  }
+
+  int unreadForWorldChannels(
+    Iterable<String> channelIds, {
+    String? currentUserId,
+  }) {
+    var total = 0;
+    for (final channelId in channelIds) {
+      total += unreadCount(channelId, currentUserId: currentUserId);
+    }
+    return total;
+  }
+
+  List<ChannelMessage> threadStartersForChannel(String channelId) {
+    final messages = state.channelMessages[channelId] ?? const [];
+    return messages.where((m) => m.hasThread && m.threadId == null).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   void unsubscribeAll() {

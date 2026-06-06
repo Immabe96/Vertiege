@@ -15,6 +15,8 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../services/world_mute_prefs.dart';
+import '../../utils/chat_unread.dart';
 import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/chat/chat_connection_banner.dart';
@@ -37,8 +39,10 @@ class ChatListScreen extends ConsumerStatefulWidget {
 class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   bool _didTriggerDmLoad = false;
   bool _didTriggerReadLoad = false;
+  bool _didLoadWorldChannels = false;
   _ChatMode _mode = _ChatMode.worlds;
   String? _selectedWorldId;
+  Set<String> _mutedWorldIds = {};
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +73,31 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       Future.microtask(() {
         final id = ref.read(residentProvider).resident?.id;
         if (id != null) ref.read(chatProvider.notifier).loadChannelReads(id);
+      });
+    }
+
+    if (residentId != null && joinedWorlds.isNotEmpty && !_didLoadWorldChannels) {
+      _didLoadWorldChannels = true;
+      Future.microtask(() async {
+        for (final world in joinedWorlds) {
+          await ref.read(channelProvider.notifier).loadChannels(world.id);
+        }
+        final channelIds = joinedWorlds
+            .expand<WorldChannel>(
+              (world) =>
+                  ref.read(channelProvider).channelsByWorld[world.id] ??
+                  const <WorldChannel>[],
+            )
+            .where((ch) => ch.channelType != ChannelType.voice)
+            .map((ch) => ch.id)
+            .toList(growable: false);
+        if (channelIds.isNotEmpty) {
+          await ref
+              .read(chatProvider.notifier)
+              .loadChannelActivity(channelIds);
+        }
+        final muted = await WorldMutePrefs.load();
+        if (mounted) setState(() => _mutedWorldIds = muted);
       });
     }
 
@@ -206,7 +235,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           ),
           child: _ModeSwitch(
             mode: _mode,
-            dmCount: chatState.dmRooms.length,
+            dmUnread: chatState.totalDmUnread(),
             worldCount: joinedWorlds.length,
             onChanged: (mode) => setState(() => _mode = mode),
           ),
@@ -257,6 +286,20 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final world = ref.watch(worldProvider).worlds[selectedWorld.id];
     final residentCount = world?.memberCount ?? 0;
 
+    final unreadByWorld = <String, int>{};
+    for (final world in joinedWorlds) {
+      final channelIds = (channelState.channelsByWorld[world.id] ?? [])
+          .where((ch) => ch.channelType != ChannelType.voice)
+          .map((ch) => ch.id);
+      final raw = ref
+          .read(chatProvider.notifier)
+          .unreadForWorldChannels(channelIds, currentUserId: currentUserId);
+      unreadByWorld[world.id] = worldRailUnreadCount(
+        rawCount: raw,
+        muted: _mutedWorldIds.contains(world.id),
+      );
+    }
+
     // Discord-like two-panel layout
     return Row(
       children: [
@@ -264,9 +307,14 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         _WorldRail(
           worlds: joinedWorlds,
           selectedWorldId: selectedWorld.id,
+          unreadByWorldId: unreadByWorld,
           onWorldSelected: (worldId) {
             setState(() => _selectedWorldId = worldId);
             _loadWorldChannelActivity(worldId);
+          },
+          onToggleMute: (worldId) async {
+            final muted = await WorldMutePrefs.toggle(worldId);
+            if (mounted) setState(() => _mutedWorldIds = muted);
           },
         ),
         // Right panel — world header + channel list
@@ -422,13 +470,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
 class _ModeSwitch extends StatelessWidget {
   final _ChatMode mode;
-  final int dmCount;
+  final int dmUnread;
   final int worldCount;
   final ValueChanged<_ChatMode> onChanged;
 
   const _ModeSwitch({
     required this.mode,
-    required this.dmCount,
+    required this.dmUnread,
     required this.worldCount,
     required this.onChanged,
   });
@@ -463,9 +511,10 @@ class _ModeSwitch extends StatelessWidget {
           Expanded(
             child: _ModeButton(
               label: 'Direct',
-              count: dmCount,
+              count: dmUnread,
               icon: Icons.mail_outline,
               selected: mode == _ChatMode.dms,
+              showUnreadBadge: dmUnread > 0,
               onTap: () => onChanged(_ChatMode.dms),
             ),
           ),
@@ -480,6 +529,7 @@ class _ModeButton extends StatelessWidget {
   final int count;
   final IconData icon;
   final bool selected;
+  final bool showUnreadBadge;
   final VoidCallback onTap;
 
   const _ModeButton({
@@ -487,6 +537,7 @@ class _ModeButton extends StatelessWidget {
     required this.count,
     required this.icon,
     required this.selected,
+    this.showUnreadBadge = false,
     required this.onTap,
   });
 
@@ -523,14 +574,14 @@ class _ModeButton extends StatelessWidget {
             ),
             const SizedBox(width: VSpacing.xs),
             Text(
-              '$label $count',
+              showUnreadBadge ? '$label ($count unread)' : '$label $count',
               style: TextStyle(
                 color: selected
                     ? VColors.primary
                     : (isDark
                           ? VColors.onSurfaceVariantDark
                           : VColors.onSurfaceVariant),
-                fontWeight: selected
+                fontWeight: selected || showUnreadBadge
                     ? VFontWeight.semiBold
                     : VFontWeight.regular,
               ),
@@ -670,12 +721,16 @@ class _ChannelTile extends StatelessWidget {
 class _WorldRail extends StatelessWidget {
   final List<World> worlds;
   final String selectedWorldId;
+  final Map<String, int> unreadByWorldId;
   final ValueChanged<String> onWorldSelected;
+  final ValueChanged<String>? onToggleMute;
 
   const _WorldRail({
     required this.worlds,
     required this.selectedWorldId,
+    this.unreadByWorldId = const {},
     required this.onWorldSelected,
+    this.onToggleMute,
   });
 
   @override
@@ -693,10 +748,14 @@ class _WorldRail extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
         children: worlds.map((world) {
           final isSelected = world.id == selectedWorldId;
+          final unread = unreadByWorldId[world.id] ?? 0;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
             child: GestureDetector(
               onTap: () => onWorldSelected(world.id),
+              onLongPress: onToggleMute == null
+                  ? null
+                  : () => onToggleMute!(world.id),
               behavior: HitTestBehavior.opaque,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 48),
@@ -721,15 +780,43 @@ class _WorldRail extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      WorldIcon(
-                        worldId: world.assetKey,
-                        size: 36,
-                        useGlassContainer: false,
-                        tintColor: isSelected
-                            ? VColors.primary
-                            : (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          WorldIcon(
+                            worldId: world.assetKey,
+                            size: 36,
+                            useGlassContainer: false,
+                            tintColor: isSelected
+                                ? VColors.primary
+                                : (isDark
+                                      ? VColors.onSurfaceVariantDark
+                                      : VColors.onSurfaceVariant),
+                          ),
+                          if (unread > 0)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: VColors.error,
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: Text(
+                                  unread > 99 ? '99+' : '$unread',
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: VFontWeight.bold,
+                                    color: VColors.onPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(

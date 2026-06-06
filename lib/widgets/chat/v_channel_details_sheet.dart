@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/channel_mute_mode.dart';
 import '../../router/search_navigation.dart';
+import 'channel_thread_list_sheet.dart';
 import 'v_member_list_sheet.dart';
 import '../../router/world_navigation.dart';
 import '../../state/chat_provider.dart';
@@ -178,6 +179,23 @@ class _ChannelDetailsContentState extends ConsumerState<_ChannelDetailsContent> 
             onPress: () {
               Navigator.of(context).pop();
               context.push(exploreWorldPath(widget.worldId));
+            },
+          ),
+          VTile(
+            prefix: Icon(
+              Icons.forum_outlined,
+              color: VCommuneColors.textNormalOf(brightness),
+            ),
+            title: const Text('Threads'),
+            subtitle: Text('Active threads in #${widget.channelName}'),
+            onPress: () {
+              Navigator.of(context).pop();
+              showChannelThreadListSheet(
+                context,
+                channelId: widget.channelId,
+                channelName: widget.channelName,
+                worldId: widget.worldId,
+              );
             },
           ),
           VTile(

@@ -150,6 +150,20 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
+## Wave S4 — Unread & threads (P2)
+
+**Target:** ~1 week · Remaining S3 pattern table items.
+
+| ID | Task |
+|----|------|
+| SOC-S06 | Unread badges everywhere — Chat tab, world rail aggregate, Direct mode count |
+| SOC-S07 | Threads first-class — channel thread list sheet from channel details |
+| SOC-S08 | Rich member list — presence + tier ring + resident tick in member sheet |
+| SOC-S09 | Persist custom status to `profiles` + DM header (SOC-R05) |
+| SOC-S10 | Ephemeral DM `auto_delete` prefs in room settings |
+
+---
+
 ## Schema / backend (planned migrations)
 
 | Migration | Purpose |

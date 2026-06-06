@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../state/commune_shell_provider.dart';
+import '../../state/chat_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../state/tab_shell_overlay_provider.dart';
 import '../../state/resident_provider.dart';
@@ -81,11 +82,17 @@ class _TabLayoutState extends ConsumerState<TabLayout>
 
   @override
   Widget build(BuildContext context) {
-    final unread = ref
+    final nexusUnread = ref
         .watch(notificationProvider)
         .notifications
         .where((n) => !n.read)
         .length;
+    final residentId = ref.watch(residentProvider.select((s) => s.resident?.id));
+    final chatUnread = ref.watch(
+      chatProvider.select(
+        (s) => s.totalChatTabUnread(currentUserId: residentId),
+      ),
+    );
     final shellIndex = widget.navigationShell.currentIndex;
     final tabIndex = _visibleTabIndex(shellIndex);
     final hideNav = ref.watch(hideBottomNavProvider);
@@ -147,7 +154,8 @@ class _TabLayoutState extends ConsumerState<TabLayout>
               ),
               child: _MainBottomNav(
                 index: tabIndex,
-                unread: unread,
+                nexusUnread: nexusUnread,
+                chatUnread: chatUnread,
                 onTabTap: (visibleIndex) {
                   VHaptics.lightImpact(context);
                   final branch = _branchForTab[visibleIndex];
@@ -200,12 +208,14 @@ class _TabLayoutState extends ConsumerState<TabLayout>
 
 class _MainBottomNav extends StatelessWidget {
   final int index;
-  final int unread;
+  final int nexusUnread;
+  final int chatUnread;
   final void Function(int) onTabTap;
 
   const _MainBottomNav({
     required this.index,
-    required this.unread,
+    required this.nexusUnread,
+    required this.chatUnread,
     required this.onTabTap,
   });
 
@@ -240,8 +250,8 @@ class _MainBottomNav extends StatelessWidget {
         for (var i = 0; i < _destinations.length; i++)
           _navItem(
             dest: _destinations[i],
-            showBadge: i == 0 && unread > 0,
-            badgeCount: unread,
+            showBadge: (i == 0 && nexusUnread > 0) || (i == 1 && chatUnread > 0),
+            badgeCount: i == 0 ? nexusUnread : chatUnread,
             outlined: _destinations[i].icon,
             filled: _destinations[i].activeIcon,
           ),
