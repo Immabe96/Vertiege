@@ -8,7 +8,7 @@ import '../core/glass_panel.dart';
 import '../../ui/icons/v_icons.dart';
 import 'chat_attachment_tray.dart';
 
-class ChatInputBar extends StatelessWidget {
+class ChatInputBar extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
   final String hintText;
@@ -46,20 +46,63 @@ class ChatInputBar extends StatelessWidget {
     this.useCommuneStyle = false,
   });
 
+  @override
+  State<ChatInputBar> createState() => _ChatInputBarState();
+}
+
+class _ChatInputBarState extends State<ChatInputBar> {
   static const double _maxComposerHeight = 120;
+
+  late bool _canSend;
+
+  @override
+  void initState() {
+    super.initState();
+    _canSend = _computeCanSend();
+    widget.controller.addListener(_recompute);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatInputBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.slashCommandBar != widget.slashCommandBar ||
+        oldWidget.controller != widget.controller) {
+      _recompute();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_recompute);
+    super.dispose();
+  }
+
+  void _recompute() {
+    final next = _computeCanSend();
+    if (next != _canSend) {
+      setState(() {
+        _canSend = next;
+      });
+    }
+  }
+
+  bool _computeCanSend() {
+    if (widget.slashCommandBar != null) return true;
+    return widget.controller.text.trim().isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
     final composer = TextField(
-      controller: controller,
-      onChanged: onChanged,
+      controller: widget.controller,
+      onChanged: widget.onChanged,
       style: TextStyle(
         color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
       ),
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: widget.hintText,
         hintStyle: TextStyle(
           color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
         ),
@@ -73,7 +116,7 @@ class ChatInputBar extends StatelessWidget {
           borderSide: BorderSide(color: VColors.primary),
         ),
         filled: true,
-        fillColor: useCommuneStyle
+        fillColor: widget.useCommuneStyle
             ? VCommuneColors.surfaceTertiaryOf(brightness)
             : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
         isDense: true,
@@ -83,23 +126,23 @@ class ChatInputBar extends StatelessWidget {
         ),
       ),
       minLines: 1,
-      maxLines: useCommuneStyle ? 6 : 5,
-      keyboardType: useCommuneStyle
+      maxLines: widget.useCommuneStyle ? 6 : 5,
+      keyboardType: widget.useCommuneStyle
           ? TextInputType.multiline
           : TextInputType.text,
       textInputAction:
-          useCommuneStyle ? TextInputAction.newline : TextInputAction.send,
-      onSubmitted: useCommuneStyle ? null : (_) => onSend(),
+          widget.useCommuneStyle ? TextInputAction.newline : TextInputAction.send,
+      onSubmitted: widget.useCommuneStyle ? null : (_) => widget.onSend(),
     );
 
-    final constrainedComposer = useCommuneStyle
+    final constrainedComposer = widget.useCommuneStyle
         ? ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: _maxComposerHeight),
             child: composer,
           )
         : composer;
 
-    final field = useCommuneStyle
+    final field = widget.useCommuneStyle
         ? Shortcuts(
             shortcuts: const {
               SingleActivator(LogicalKeyboardKey.enter): SendMessageIntent(),
@@ -110,19 +153,19 @@ class ChatInputBar extends StatelessWidget {
               actions: {
                 SendMessageIntent: CallbackAction<SendMessageIntent>(
                   onInvoke: (_) {
-                    onSend();
+                    widget.onSend();
                     return null;
                   },
                 ),
                 NewlineInComposerIntent: CallbackAction<NewlineInComposerIntent>(
                   onInvoke: (_) {
-                    final text = controller.text;
-                    final selection = controller.selection;
+                    final text = widget.controller.text;
+                    final selection = widget.controller.selection;
                     final insertAt = selection.baseOffset < 0
                         ? text.length
                         : selection.baseOffset;
                     final next = text.replaceRange(insertAt, insertAt, '\n');
-                    controller.value = TextEditingValue(
+                    widget.controller.value = TextEditingValue(
                       text: next,
                       selection: TextSelection.collapsed(offset: insertAt + 1),
                     );
@@ -138,47 +181,51 @@ class ChatInputBar extends StatelessWidget {
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (slashCommandBar != null) slashCommandBar!,
-        if (replyToName != null) _ReplyQuoteBlock(
-          replyToName: replyToName!,
-          replyToContent: replyToContent,
-          onCancelReply: onCancelReply,
-          useCommuneStyle: useCommuneStyle,
+        if (widget.slashCommandBar != null) widget.slashCommandBar!,
+        if (widget.replyToName != null) _ReplyQuoteBlock(
+          replyToName: widget.replyToName!,
+          replyToContent: widget.replyToContent,
+          onCancelReply: widget.onCancelReply,
+          useCommuneStyle: widget.useCommuneStyle,
           isDark: isDark,
         ),
-        if (replyToName != null) const SizedBox(height: VSpacing.xs),
+        if (widget.replyToName != null) const SizedBox(height: VSpacing.xs),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (onOpenMediaPicker != null)
+            if (widget.onOpenMediaPicker != null)
               IconButton(
                 icon: const Icon(Icons.gif_box_outlined),
-                onPressed: onOpenMediaPicker,
+                onPressed: widget.onOpenMediaPicker,
                 tooltip: 'GIF & stickers',
-                color: useCommuneStyle
+                color: widget.useCommuneStyle
                     ? VCommuneColors.textMuted
                     : (isDark ? VColors.onSurfaceVariantDark : VColors.outline),
                 iconSize: VIconSize.lg,
                 padding: EdgeInsets.zero,
               ),
-            if (showAttach)
+            if (widget.showAttach)
               IconButton(
                 icon: Icon(
-                  useAttachmentTray ? Icons.add_circle_outline : Icons.image_outlined,
+                  widget.useAttachmentTray
+                      ? Icons.add_circle_outline
+                      : Icons.image_outlined,
                 ),
                 onPressed: () {
-                  if (useAttachmentTray) {
+                  if (widget.useAttachmentTray) {
                     showChatAttachmentTray(
                       context,
-                      onAttachImage: onAttach,
-                      onShareAchievement: onShareAchievement,
+                      onAttachImage: widget.onAttach,
+                      onShareAchievement: widget.onShareAchievement,
                     );
                   } else {
-                    onAttach?.call();
+                    widget.onAttach?.call();
                   }
                 },
-                tooltip: useAttachmentTray ? 'Add attachment' : 'Attach image',
-                color: useCommuneStyle
+                tooltip: widget.useAttachmentTray
+                    ? 'Add attachment'
+                    : 'Attach image',
+                color: widget.useCommuneStyle
                     ? VCommuneColors.textMuted
                     : (isDark ? VColors.onSurfaceVariantDark : VColors.outline),
                 iconSize: VIconSize.lg,
@@ -186,22 +233,31 @@ class ChatInputBar extends StatelessWidget {
               ),
             Expanded(child: field),
             const SizedBox(width: VSpacing.sm),
-            IconButton(
-              onPressed: onSend,
-              icon: const Icon(VIcons.send),
-              color: useCommuneStyle
-                  ? VCommuneColors.textLink
-                  : VColors.tertiary,
-              iconSize: VIconSize.lg,
-              padding: EdgeInsets.zero,
+            Opacity(
+              opacity: _canSend ? 1.0 : 0.5,
+              child: IconButton(
+                onPressed: _canSend ? widget.onSend : null,
+                icon: const Icon(VIcons.send),
+                color: _canSend
+                    ? (widget.useCommuneStyle
+                        ? VCommuneColors.textLink
+                        : VColors.tertiary)
+                    : (widget.useCommuneStyle
+                        ? VCommuneColors.textMuted
+                        : (isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.outline)),
+                iconSize: VIconSize.lg,
+                padding: EdgeInsets.zero,
+              ),
             ),
           ],
         ),
-        if (typingIndicator != null && typingIndicator!.isNotEmpty)
+        if (widget.typingIndicator != null && widget.typingIndicator!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 2, left: VSpacing.md),
             child: Text(
-              typingIndicator!,
+              widget.typingIndicator!,
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
                 color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
@@ -214,7 +270,7 @@ class ChatInputBar extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      child: useCommuneStyle
+      child: widget.useCommuneStyle
           ? ColoredBox(
               color: VCommuneColors.surfaceSecondaryOf(brightness),
               child: Padding(

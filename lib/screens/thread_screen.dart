@@ -54,6 +54,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     super.initState();
     final notifier = ref.read(chatProvider.notifier);
     notifier.loadThreadMessages(widget.parentMessage.id);
+    notifier.subscribeToTyping(widget.channelId);
     ChatNotificationScope.setActiveChannel(
       channelId: widget.channelId,
       threadId: widget.parentMessage.id,
@@ -68,6 +69,12 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             );
       }
     });
+  }
+
+  @override
+  void deactivate() {
+    ref.read(chatProvider.notifier).unsubscribeFromTyping(widget.channelId);
+    super.deactivate();
   }
 
   @override
@@ -143,6 +150,13 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     final chatState = ref.watch(chatProvider);
     final isLoading = !chatState.channelMessages.containsKey(threadId);
     final messagesLoadError = chatState.messagesLoadErrorFor(threadId);
+    final remoteTyping = ref.watch(
+      chatProvider.select(
+        (s) => s.typingUsers[widget.channelId] ?? const <String>{},
+      ),
+    );
+    final otherTyping =
+        resident != null && remoteTyping.any((id) => id != resident.id);
     if (_scrollFabTracker.syncMessageCount(messages.length)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() {});
@@ -234,6 +248,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             controller: _controller,
             onSend: _sendReply,
             hintText: 'Reply in thread...',
+            typingIndicator: otherTyping ? 'Someone is typing…' : null,
             useCommuneStyle: true,
           ),
         ],

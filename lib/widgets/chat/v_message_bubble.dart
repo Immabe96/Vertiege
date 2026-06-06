@@ -9,6 +9,7 @@ import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../theme/v_animation.dart';
 import '../../utils/date_format.dart';
+import '../../utils/haptics.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
 import 'chat_image.dart';
@@ -442,7 +443,10 @@ class _VMessageBubbleState extends State<VMessageBubble>
             reactions: msg.reactions,
             currentUserId: _dm.currentUserId,
             onAddReaction: () => _showEmojiPicker(context),
-            onToggleReaction: (emoji) => _dm.onReaction(msg, emoji),
+            onToggleReaction: (emoji) {
+              Haptics.selection();
+              _dm.onReaction(msg, emoji);
+            },
           ),
       ],
     );
@@ -500,7 +504,10 @@ class _VMessageBubbleState extends State<VMessageBubble>
     return VChatBadgeReactions(
       reactions: widget.message.reactions,
       currentUserId: userId,
-      onToggle: (key) => onReaction(widget.message, key),
+      onToggle: (key) {
+        Haptics.selection();
+        onReaction(widget.message, key);
+      },
     );
   }
 
@@ -570,6 +577,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
                         child: GestureDetector(
                           onTap: () {
                             Navigator.pop(context);
+                            Haptics.selection();
                             onReaction(widget.message, emoji);
                           },
                           child: Center(
@@ -591,7 +599,10 @@ class _VMessageBubbleState extends State<VMessageBubble>
                 Navigator.pop(context);
                 showChatBadgeReactionPicker(
                   context,
-                  onPick: (key) => onReaction(widget.message, key),
+                  onPick: (key) {
+                    Haptics.selection();
+                    onReaction(widget.message, key);
+                  },
                 );
               },
             ),
@@ -691,7 +702,10 @@ class _VMessageBubbleState extends State<VMessageBubble>
 
     showMessageActionSheet(
       context,
-      onReaction: (emoji) => _dm.onReaction(msg, emoji),
+      onReaction: (emoji) {
+        Haptics.selection();
+        _dm.onReaction(msg, emoji);
+      },
       actions: buildDmMessageActions(
         context: context,
         message: msg,
@@ -747,7 +761,10 @@ class _VMessageBubbleState extends State<VMessageBubble>
   void _showEmojiPicker(BuildContext context) {
     showMessageReactionPicker(
       context,
-      onPick: (emoji) => _dm.onReaction(widget.message, emoji),
+      onPick: (emoji) {
+        Haptics.selection();
+        _dm.onReaction(widget.message, emoji);
+      },
     );
   }
 }
