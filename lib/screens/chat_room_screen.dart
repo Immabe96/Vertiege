@@ -119,15 +119,27 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final targetId = _pendingScrollMessageId;
     if (targetId == null) return;
     final messages = ref.read(chatProvider).dmMessages[widget.roomId] ?? const [];
-    final index = messages.indexWhere((m) => m.id == targetId);
-    if (index >= 0) {
+    final displayItems = buildChatDisplayItems(messages);
+    final displayIndex = displayItems.indexWhere(
+      (i) => i.message?.id == targetId,
+    );
+    if (displayIndex >= 0) {
       _pendingScrollMessageId = null;
       _pendingScrollAttempts = 0;
+      final totalChildren = displayItems.length;
+      final unreadDividerIndex = newSinceVisitDividerDisplayIndex(
+        messages: messages,
+        lastVisitAt: _visitDividerAnchor,
+      );
+      final renderedIndex = unreadDividerIndex != null &&
+              displayIndex >= unreadDividerIndex
+          ? displayIndex + 1
+          : displayIndex;
       final total = _scrollController.hasClients
           ? _scrollController.position.maxScrollExtent
           : 0.0;
-      final perChild = messages.isEmpty ? 0.0 : total / messages.length;
-      final target = (perChild * index).clamp(0.0, total).toDouble();
+      final perChild = totalChildren == 0 ? 0.0 : total / totalChildren;
+      final target = (perChild * renderedIndex).clamp(0.0, total).toDouble();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !_scrollController.hasClients) return;
         _scrollController.animateTo(
@@ -546,7 +558,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         _tryScrollToPendingMessage();
       });
     } else if (messages.length != _lastSeenMessageCount) {
+      final grew = messages.length > _lastSeenMessageCount;
       _lastSeenMessageCount = messages.length;
+      if (grew && !_scrollFabTracker.show) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_scrollController.hasClients) return;
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: VAnimation.fast,
+            curve: VAnimation.standard,
+          );
+        });
+      }
     }
     final displayItems = buildChatDisplayItems(messages);
     final chatCompact =
