@@ -377,6 +377,40 @@ class WorldService {
     };
   }
 
+  /// Recently active residents for world activity preview (Wave S5).
+  static Future<List<Map<String, dynamic>>> getActiveResidents(
+    String worldId, {
+    int limit = 5,
+  }) async {
+    if (!isSupabaseConfigured()) return [];
+    try {
+      final data = await getSupabase().rpc(
+        'list_world_active_residents',
+        params: {'p_world_id': worldId, 'p_limit': limit},
+      );
+      return (data as List).cast<Map<String, dynamic>>();
+    } catch (_) {
+      final counts = await residentPresenceCounts(worldId);
+      if (counts.online == 0) return [];
+      final members = await getMembers(worldId);
+      return members
+          .where(
+            (m) =>
+                presenceFromProfileField(m['last_seen_at']) ==
+                v_status.Presence.online,
+          )
+          .take(limit)
+          .map(
+            (m) => {
+              'resident_id': m['resident_id'],
+              'resident_name': m['resident_name'],
+              'avatar_url': m['avatar_url'],
+            },
+          )
+          .toList();
+    }
+  }
+
   /// Total + online residents for world headers (profiles.last_seen_at when available).
   static Future<({int total, int online})> residentPresenceCounts(
     String worldId,

@@ -36,6 +36,8 @@ final class VChannelBubbleConfig {
   onReaction;
   final Color? senderNameColor;
   final VoidCallback? onShareToFeed;
+  final String? selfMentionHandle;
+  final int threadUnreadCount;
 
   const VChannelBubbleConfig({
     this.isSystem = false,
@@ -47,6 +49,8 @@ final class VChannelBubbleConfig {
     this.onReaction,
     this.senderNameColor,
     this.onShareToFeed,
+    this.selfMentionHandle,
+    this.threadUnreadCount = 0,
   });
 }
 
@@ -477,7 +481,11 @@ class _VMessageBubbleState extends State<VMessageBubble>
           const SizedBox(height: VSpacing.xs),
         ],
         if (bodyText.isNotEmpty && achId == null)
-          VMessageContent(content: bodyText, textColor: textColor),
+          VMessageContent(
+            content: bodyText,
+            textColor: textColor,
+            accentMentionHandle: _channel.selfMentionHandle,
+          ),
         if (embed != null) embed,
       ],
     );
@@ -531,6 +539,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
           replyCount: widget.message.threadCount,
           previewText: widget.threadPreview,
           onTap: _openThread,
+          unreadCount: _channel.threadUnreadCount,
         ),
       ],
     );
@@ -670,6 +679,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
           replyCount: widget.message.threadCount,
           previewText: widget.threadPreview,
           onTap: _openThread,
+          unreadCount: _channel.threadUnreadCount,
         ),
       ],
     );

@@ -362,15 +362,15 @@ class ChatService {
           .insert(payload)
           .select()
           .single();
-      if (TextParser.containsAllResidents(content)) {
-        unawaited(
-          _broadcastMentionNotifications(
-            worldId: worldId,
-            senderId: senderId,
-            senderName: senderName,
-          ),
-        );
-      }
+      unawaited(
+        _fanOutMentionNotifications(
+          worldId: worldId,
+          channelId: channelId,
+          senderId: senderId,
+          senderName: senderName,
+          content: content,
+        ),
+      );
       return Map<String, dynamic>.from(inserted);
     } on PostgrestException catch (e) {
       final missingOptionalColumns =
@@ -387,17 +387,42 @@ class ChatService {
           .insert(fallbackPayload)
           .select()
           .single();
-      if (TextParser.containsAllResidents(content)) {
-        unawaited(
-          _broadcastMentionNotifications(
-            worldId: worldId,
-            senderId: senderId,
-            senderName: senderName,
-          ),
-        );
-      }
+      unawaited(
+        _fanOutMentionNotifications(
+          worldId: worldId,
+          channelId: channelId,
+          senderId: senderId,
+          senderName: senderName,
+          content: content,
+        ),
+      );
       return Map<String, dynamic>.from(inserted);
     }
+  }
+
+  static Future<void> _fanOutMentionNotifications({
+    required String worldId,
+    required String channelId,
+    required String senderId,
+    required String senderName,
+    required String content,
+  }) async {
+    if (TextParser.containsAllResidents(content)) {
+      await _broadcastMentionNotifications(
+        worldId: worldId,
+        senderId: senderId,
+        senderName: senderName,
+      );
+    }
+    final handles = TextParser.extractResidentMentionHandles(content);
+    if (handles.isEmpty) return;
+    await _broadcastResidentMentionNotifications(
+      worldId: worldId,
+      channelId: channelId,
+      senderId: senderId,
+      handles: handles,
+      preview: '$senderName mentioned you',
+    );
   }
 
   static Future<void> _broadcastMentionNotifications({
@@ -417,6 +442,30 @@ class ChatService {
       );
     } catch (_) {
       // Mention fan-out is best-effort; channel message already persisted.
+    }
+  }
+
+  static Future<void> _broadcastResidentMentionNotifications({
+    required String worldId,
+    required String channelId,
+    required String senderId,
+    required List<String> handles,
+    required String preview,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    try {
+      await getSupabase().rpc(
+        'broadcast_channel_mention_notifications',
+        params: {
+          'p_world_id': worldId,
+          'p_channel_id': channelId,
+          'p_sender_id': senderId,
+          'p_mention_handles': handles,
+          'p_message': preview,
+        },
+      );
+    } catch (_) {
+      // Best-effort per-resident mention fan-out.
     }
   }
 

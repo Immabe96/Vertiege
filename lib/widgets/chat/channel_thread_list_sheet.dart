@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/message.dart';
 import '../../state/chat_provider.dart';
+import '../../state/resident_provider.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/overlays/v_sheet.dart';
 import '../../utils/date_format.dart';
@@ -42,8 +43,9 @@ class ChannelThreadListSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     ref.watch(chatProvider);
-    final threads =
-        ref.read(chatProvider.notifier).threadStartersForChannel(channelId);
+    final notifier = ref.read(chatProvider.notifier);
+    final threads = notifier.threadStartersForChannel(channelId);
+    final currentUserId = ref.watch(residentProvider).resident?.id;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -80,10 +82,19 @@ class ChannelThreadListSheet extends ConsumerWidget {
                 shrinkWrap: true,
                 itemCount: threads.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (_, index) => _ThreadRow(
-                  message: threads[index],
-                  onTap: () => _openThread(context, threads[index]),
-                ),
+                itemBuilder: (_, index) {
+                  final message = threads[index];
+                  final threadId = message.id;
+                  final unread = notifier.threadUnreadCount(
+                    threadId,
+                    currentUserId: currentUserId,
+                  );
+                  return _ThreadRow(
+                    message: message,
+                    unreadCount: unread,
+                    onTap: () => _openThread(context, message),
+                  );
+                },
               ),
             ),
         ],
@@ -107,9 +118,14 @@ class ChannelThreadListSheet extends ConsumerWidget {
 
 class _ThreadRow extends StatelessWidget {
   final ChannelMessage message;
+  final int unreadCount;
   final VoidCallback onTap;
 
-  const _ThreadRow({required this.message, required this.onTap});
+  const _ThreadRow({
+    required this.message,
+    required this.onTap,
+    this.unreadCount = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +162,28 @@ class _ThreadRow extends StatelessWidget {
           ),
         ],
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (unreadCount > 0)
+            Container(
+              margin: const EdgeInsets.only(right: VSpacing.xs),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(VRadius.pill),
+              ),
+              child: Text(
+                unreadCount > 99 ? '99+' : '$unreadCount',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+            ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
     );
   }
 }

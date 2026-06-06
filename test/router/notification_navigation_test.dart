@@ -117,9 +117,28 @@ void main() {
       expect(routeForNotification(n), isNot('/chats'));
     });
 
-    test('mention with world uses exploreWorldPath', () {
+    test('mention with world and channel opens channel screen', () {
       const n = AppNotification(
         id: 'n5',
+        type: NotificationType.mention,
+        message: 'mention',
+        worldId: 'world-a',
+        channelId: 'ch-1',
+        createdAt: 0,
+      );
+      expect(
+        routeForNotification(n),
+        worldChannelPathFromParts(
+          'world-a',
+          channelId: 'ch-1',
+          channelName: 'mentions',
+        ),
+      );
+    });
+
+    test('mention with world only uses exploreWorldPath', () {
+      const n = AppNotification(
+        id: 'n5a',
         type: NotificationType.mention,
         message: 'mention',
         worldId: 'world-a',

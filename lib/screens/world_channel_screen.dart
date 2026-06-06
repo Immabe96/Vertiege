@@ -51,6 +51,8 @@ import '../services/chat_notification_scope.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_feedback.dart';
 import '../widgets/feed/cross_post_to_feed_sheet.dart';
+import '../widgets/chat/channel_mention_suggestions.dart';
+import '../utils/text_parser.dart';
 
 class WorldChannelScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -82,6 +84,8 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   final Set<String> _prefetchedThreads = {};
   final Map<String, int> _memberRepById = {};
   String? _imagePath;
+  final _mentionController = ChannelMentionController();
+  List<String> _mentionSuggestions = const [];
 
   @override
   void initState() {
@@ -95,6 +99,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       unawaited(_loadResidentCounts());
+      unawaited(_loadMentionResidents());
       unawaited(WorldActivityService.touchWorld(widget.worldId));
       final resident = ref.read(residentProvider).resident;
       if (resident == null) return;
@@ -270,9 +275,21 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     });
   }
 
+  Future<void> _loadMentionResidents() async {
+    final members = await WorldService.getMembers(widget.worldId);
+    _mentionController.setResidents(members);
+  }
+
   void _onComposerChanged(String text) {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
+
+    final cursor = _controller.selection.baseOffset;
+    _mentionController.onTextChanged(text, cursor);
+    final suggestions = _mentionController.suggestions;
+    if (suggestions != _mentionSuggestions) {
+      setState(() => _mentionSuggestions = suggestions);
+    }
 
     final notifier = ref.read(chatProvider.notifier);
     if (text.trim().isEmpty) {
@@ -286,6 +303,22 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     _outboundTypingDebounce = Timer(const Duration(milliseconds: 350), () {
       notifier.startTyping(widget.channelId, resident.id);
     });
+  }
+
+  void _applyMentionSuggestion(String name) {
+    final cursor = _controller.selection.baseOffset;
+    final result = _mentionController.applySuggestion(
+      _controller.text,
+      name,
+      cursor,
+    );
+    if (result == null) return;
+    _controller.value = TextEditingValue(
+      text: result.text,
+      selection: TextSelection.collapsed(offset: result.cursor),
+    );
+    setState(() => _mentionSuggestions = const []);
+    _onComposerChanged(result.text);
   }
 
   Future<void> _shareAchievement() async {
@@ -607,6 +640,22 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             const CampfireChannelBar(),
             if (_imagePath != null)
               _ChannelImagePreview(path: _imagePath!, onRemove: _removeImage),
+            if (_mentionSuggestions.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  VSpacing.md,
+                  0,
+                  VSpacing.md,
+                  VSpacing.xs,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ChannelMentionSuggestions(
+                    suggestions: _mentionSuggestions,
+                    onSelect: _applyMentionSuggestion,
+                  ),
+                ),
+              ),
             ChatInputBar(
               controller: _controller,
               onSend: _sendMessage,
@@ -733,6 +782,15 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     required bool canPin,
   }) {
     final resident = ref.read(residentProvider).resident;
+    final selfHandle = resident == null
+        ? null
+        : TextParser.mentionHandleForName(resident.name);
+    final threadUnread = message.hasThread
+        ? ref.read(chatProvider.notifier).threadUnreadCount(
+              message.id,
+              currentUserId: resident?.id,
+            )
+        : 0;
     return VChannelBubbleConfig(
       isSystem:
           message.senderId == 'system' || message.senderName == 'System',
@@ -740,6 +798,8 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       worldId: widget.worldId,
       channelName: widget.channelName,
       currentUserId: resident?.id,
+      selfMentionHandle: selfHandle?.isNotEmpty == true ? selfHandle : null,
+      threadUnreadCount: threadUnread,
       senderNameColor: _senderNameColor(message.senderId),
       onTogglePin: (msgId, pin) {
         ref.read(chatProvider.notifier).togglePin(

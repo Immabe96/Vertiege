@@ -164,6 +164,18 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
+## Wave S5 — Mentions & activity (P2) ✅
+
+**Target:** ~1 week · Remaining S3 Discord/Snapchat pattern items.
+
+| ID | Task | Status |
+|----|------|--------|
+| SOC-S11 | @mentions — per-resident push + in-channel highlight + composer autocomplete | ✅ |
+| SOC-S12 | Thread unread — per-thread read cursors + badges on thread list/chip | ✅ |
+| SOC-S13 | World activity preview — online residents in Messages world panel | ✅ |
+
+---
+
 ## Schema / backend (planned migrations)
 
 | Migration | Purpose |

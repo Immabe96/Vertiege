@@ -8,12 +8,14 @@ class VThreadIndicatorChip extends StatelessWidget {
   final int replyCount;
   final String? previewText;
   final VoidCallback? onTap;
+  final int unreadCount;
 
   const VThreadIndicatorChip({
     super.key,
     required this.replyCount,
     this.previewText,
     this.onTap,
+    this.unreadCount = 0,
   });
 
   @override
@@ -59,6 +61,27 @@ class VThreadIndicatorChip extends StatelessWidget {
                         color: VCommuneColors.textLink,
                       ),
                     ),
+                    if (unreadCount > 0) ...[
+                      const SizedBox(width: VSpacing.xs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: VCommuneColors.textLink,
+                          borderRadius: BorderRadius.circular(VRadius.pill),
+                        ),
+                        child: Text(
+                          unreadCount > 99 ? '99+' : '$unreadCount',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: VFontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 if (previewText != null && previewText!.isNotEmpty) ...[

@@ -26,6 +26,7 @@ class ChatState {
   final Map<String, bool> dmLoadingOlder;
   final Map<String, List<ChannelMessage>> channelMessages;
   final Map<String, DateTime> channelReads;
+  final Map<String, DateTime> threadReads;
   final Map<String, DateTime> channelLatestMessageTimes;
   final Map<String, Set<String>> typingUsers;
   final bool isLoadingRooms;
@@ -41,6 +42,7 @@ class ChatState {
     this.dmLoadingOlder = const {},
     this.channelMessages = const {},
     this.channelReads = const {},
+    this.threadReads = const {},
     this.channelLatestMessageTimes = const {},
     this.typingUsers = const {},
     this.isLoadingRooms = false,
@@ -56,6 +58,7 @@ class ChatState {
     Map<String, bool>? dmLoadingOlder,
     Map<String, List<ChannelMessage>>? channelMessages,
     Map<String, DateTime>? channelReads,
+    Map<String, DateTime>? threadReads,
     Map<String, DateTime>? channelLatestMessageTimes,
     Map<String, Set<String>>? typingUsers,
     bool? isLoadingRooms,
@@ -70,6 +73,7 @@ class ChatState {
     dmLoadingOlder: dmLoadingOlder ?? this.dmLoadingOlder,
     channelMessages: channelMessages ?? this.channelMessages,
     channelReads: channelReads ?? this.channelReads,
+    threadReads: threadReads ?? this.threadReads,
     channelLatestMessageTimes:
         channelLatestMessageTimes ?? this.channelLatestMessageTimes,
     typingUsers: typingUsers ?? this.typingUsers,
@@ -1165,6 +1169,34 @@ class ChatNotifier extends Notifier<ChatState> {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
+  Future<void> markThreadRead({
+    required String threadId,
+    String? currentUserId,
+  }) async {
+    final now = DateTime.now();
+    state = state.copyWith(
+      threadReads: {...state.threadReads, threadId: now},
+    );
+    await _persistMessages(state);
+  }
+
+  int threadUnreadCount(
+    String threadId, {
+    String? currentUserId,
+  }) {
+    final messages = state.channelMessages[threadId] ?? const [];
+    final lastRead = state.threadReads[threadId];
+    return countUnreadMessages(
+      loadedMessages: messages,
+      lastReadAt: lastRead,
+      latestMessageAt: latestMessageTime(messages),
+      excludeSenderId: currentUserId,
+    );
+  }
+
+  bool hasThreadUnread(String threadId, {String? currentUserId}) =>
+      threadUnreadCount(threadId, currentUserId: currentUserId) > 0;
+
   void unsubscribeAll() {
     _dmRoomsListChannel?.unsubscribe();
     _dmRoomsListChannel = null;
@@ -1547,6 +1579,7 @@ class ChatNotifier extends Notifier<ChatState> {
         dmMessages: _decodeMessageMap(data['dmMessages']),
         channelMessages: _decodeMessageMap(data['channelMessages']),
         channelReads: _decodeDateMap(data['channelReads']),
+        threadReads: _decodeDateMap(data['threadReads']),
         channelLatestMessageTimes: _decodeDateMap(
           data['channelLatestMessageTimes'],
         ),
@@ -1562,6 +1595,7 @@ class ChatNotifier extends Notifier<ChatState> {
       ),
       'channelMessages': _encodeMessageMap(snapshot.channelMessages),
       'channelReads': _encodeDateMap(snapshot.channelReads),
+      'threadReads': _encodeDateMap(snapshot.threadReads),
       'channelLatestMessageTimes': _encodeDateMap(
         snapshot.channelLatestMessageTimes,
       ),

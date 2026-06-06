@@ -26,6 +26,7 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../widgets/worlds/world_icon.dart';
+import '../../services/world_service.dart';
 
 enum _ChatMode { worlds, dms }
 
@@ -43,6 +44,8 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   _ChatMode _mode = _ChatMode.worlds;
   String? _selectedWorldId;
   Set<String> _mutedWorldIds = {};
+  final Map<String, List<Map<String, dynamic>>> _activeResidentsByWorld = {};
+  final Map<String, int> _onlineCountByWorld = {};
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +156,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   void _loadWorldChannelActivity(String worldId) {
+    unawaited(_loadWorldActivity(worldId));
     unawaited(
       ref.read(channelProvider.notifier).loadChannels(worldId).then((_) {
         if (!mounted) return;
@@ -166,6 +170,20 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         );
       }),
     );
+  }
+
+  Future<void> _loadWorldActivity(String worldId) async {
+    final results = await Future.wait([
+      WorldService.getActiveResidents(worldId),
+      WorldService.residentPresenceCounts(worldId),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      _activeResidentsByWorld[worldId] =
+          results[0] as List<Map<String, dynamic>>;
+      _onlineCountByWorld[worldId] =
+          (results[1] as ({int total, int online})).online;
+    });
   }
 
   void _ensureSelectedWorld(List<World> joinedWorlds) {
@@ -327,6 +345,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                 residentCount: residentCount,
                 icon: selectedWorld.icon,
                 prestige: selectedWorld.prestige,
+                onlineCount: _onlineCountByWorld[selectedWorld.id] ?? 0,
+                activeResidents:
+                    _activeResidentsByWorld[selectedWorld.id] ?? const [],
               ),
               const Divider(height: 1),
               Expanded(
@@ -853,12 +874,16 @@ class _WorldPanelHeader extends StatelessWidget {
   final int residentCount;
   final String icon;
   final int prestige;
+  final int onlineCount;
+  final List<Map<String, dynamic>> activeResidents;
 
   const _WorldPanelHeader({
     required this.worldName,
     required this.residentCount,
     required this.icon,
     required this.prestige,
+    this.onlineCount = 0,
+    this.activeResidents = const [],
   });
 
   @override
@@ -889,18 +914,67 @@ class _WorldPanelHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${residentCount == 1 ? '1 Resident' : '$residentCount Residents'} · Lv.$prestige',
+                  '${residentCount == 1 ? '1 Resident' : '$residentCount Residents'}'
+                  '${onlineCount > 0 ? ' · $onlineCount online' : ''}'
+                  ' · Lv.$prestige',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: isDark
                         ? VColors.onSurfaceVariantDark
                         : VColors.onSurfaceVariant,
                   ),
                 ),
+                if (activeResidents.isNotEmpty) ...[
+                  const SizedBox(height: VSpacing.xs),
+                  _ActiveResidentsRow(residents: activeResidents),
+                ],
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ActiveResidentsRow extends StatelessWidget {
+  final List<Map<String, dynamic>> residents;
+
+  const _ActiveResidentsRow({required this.residents});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final preview = residents.take(5).toList();
+
+    return Row(
+      children: [
+        ...preview.map((resident) {
+          final id = resident['resident_id'] as String? ?? '';
+          return Padding(
+            padding: const EdgeInsets.only(right: VSpacing.xs),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                CosmeticAvatar(
+                  imageUrl: resident['avatar_url'] as String?,
+                  seed: id,
+                  size: 24,
+                ),
+                const Positioned(
+                  right: -1,
+                  bottom: -1,
+                  child: StatusDot(presence: Presence.online, size: 8),
+                ),
+              ],
+            ),
+          );
+        }),
+        if (residents.length > preview.length)
+          Text(
+            '+${residents.length - preview.length}',
+            style: theme.textTheme.labelSmall,
+          ),
+      ],
     );
   }
 }

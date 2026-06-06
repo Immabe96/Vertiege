@@ -28,6 +28,7 @@ class AppNotification {
   final String? worldId;
   final String? postId;
   final String? roomId;
+  final String? channelId;
   final String? allyRequestId;
   final bool read;
   final int createdAt;
@@ -39,6 +40,7 @@ class AppNotification {
     this.worldId,
     this.postId,
     this.roomId,
+    this.channelId,
     this.allyRequestId,
     this.read = false,
     required this.createdAt,
@@ -51,6 +53,7 @@ class AppNotification {
     String? worldId,
     String? postId,
     String? roomId,
+    String? channelId,
     String? allyRequestId,
     bool? read,
     int? createdAt,
@@ -61,6 +64,7 @@ class AppNotification {
     worldId: worldId ?? this.worldId,
     postId: postId ?? this.postId,
     roomId: roomId ?? this.roomId,
+    channelId: channelId ?? this.channelId,
     allyRequestId: allyRequestId ?? this.allyRequestId,
     read: read ?? this.read,
     createdAt: createdAt ?? this.createdAt,
@@ -109,6 +113,7 @@ class AppNotification {
         worldId: data['world_id'],
         postId: data['post_id'],
         roomId: data['room_id'],
+        channelId: data['channel_id'],
         allyRequestId: data['ally_request_id'],
         read: data['read'] ?? false,
         createdAt: data['created_at'] != null
@@ -124,6 +129,7 @@ class AppNotification {
     'world_id': worldId,
     'post_id': postId,
     'room_id': roomId,
+    'channel_id': channelId,
     'ally_request_id': allyRequestId,
     'read': read,
     'created_at': DateTime.fromMillisecondsSinceEpoch(

@@ -12,12 +12,15 @@ class VMessageContent extends StatelessWidget {
   final String content;
   final Color textColor;
   final bool selectable;
+  /// When set, @mentions matching this handle render with accent styling.
+  final String? accentMentionHandle;
 
   const VMessageContent({
     super.key,
     required this.content,
     required this.textColor,
     this.selectable = true,
+    this.accentMentionHandle,
   });
 
   static final _spoilerPattern = RegExp(r'\|\|([^|]+)\|\|');
@@ -31,6 +34,16 @@ class VMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final handle = accentMentionHandle?.trim();
+    if (handle != null &&
+        handle.isNotEmpty &&
+        VMessagePlainContent.contentMentionsHandle(content, handle)) {
+      return VMessagePlainContent(
+        content: content,
+        textColor: textColor,
+        accentMentionHandle: handle,
+      );
+    }
     final normalized = preprocessSpoilers(content);
     if (!normalized.contains('§SPOILER§')) {
       return _buildMarkdown(context, normalized);
@@ -191,12 +204,21 @@ class _SpoilerChipState extends State<_SpoilerChip> {
 class VMessagePlainContent extends StatelessWidget {
   final String content;
   final Color textColor;
+  final String? accentMentionHandle;
 
   const VMessagePlainContent({
     super.key,
     required this.content,
     required this.textColor,
+    this.accentMentionHandle,
   });
+
+  static bool contentMentionsHandle(String content, String handle) {
+    final pattern = RegExp(r'@(\w+)');
+    return pattern.allMatches(content).any(
+          (m) => m.group(1)!.toLowerCase() == handle.toLowerCase(),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,6 +228,7 @@ class VMessagePlainContent extends StatelessWidget {
       caseSensitive: false,
     );
     var lastEnd = 0;
+    final accent = accentMentionHandle?.toLowerCase();
 
     for (final match in pattern.allMatches(content)) {
       if (match.start > lastEnd) {
@@ -213,16 +236,23 @@ class VMessagePlainContent extends StatelessWidget {
       }
       final raw = match.group(0)!;
       final isMention = match.group(1) != null;
+      final isSelfMention = isMention &&
+          accent != null &&
+          raw.substring(1).toLowerCase() == accent;
       spans.add(
         TextSpan(
           text: raw,
           style: TextStyle(
             color: isMention
-                ? VCommuneChatTheme.mentionColor
+                ? (isSelfMention
+                    ? VColors.primary
+                    : VCommuneChatTheme.mentionColor)
                 : VCommuneChatTheme.linkColor,
             fontWeight: isMention ? VFontWeight.semiBold : VFontWeight.regular,
             backgroundColor: isMention
-                ? VCommuneChatTheme.mentionColor.withValues(alpha: 0.12)
+                ? (isSelfMention
+                    ? VColors.primary.withValues(alpha: 0.18)
+                    : VCommuneChatTheme.mentionColor.withValues(alpha: 0.12))
                 : null,
             decoration: isMention ? null : TextDecoration.underline,
           ),

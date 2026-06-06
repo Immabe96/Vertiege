@@ -59,6 +59,15 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
       threadId: widget.parentMessage.id,
     );
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final residentId = ref.read(residentProvider).resident?.id;
+      if (residentId != null) {
+        ref.read(chatProvider.notifier).markThreadRead(
+              threadId: widget.parentMessage.id,
+              currentUserId: residentId,
+            );
+      }
+    });
   }
 
   @override
@@ -117,9 +126,20 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
-    final messages =
-        ref.watch(chatProvider).channelMessages[widget.parentMessage.id] ?? [];
     final threadId = widget.parentMessage.id;
+    ref.listen(
+      chatProvider.select((s) => s.channelMessages[threadId]?.length ?? 0),
+      (previous, next) {
+        final residentId = ref.read(residentProvider).resident?.id;
+        if (residentId == null || next == (previous ?? 0)) return;
+        ref.read(chatProvider.notifier).markThreadRead(
+              threadId: threadId,
+              currentUserId: residentId,
+            );
+      },
+    );
+    final messages =
+        ref.watch(chatProvider).channelMessages[threadId] ?? [];
     final chatState = ref.watch(chatProvider);
     final isLoading = !chatState.channelMessages.containsKey(threadId);
     final messagesLoadError = chatState.messagesLoadErrorFor(threadId);
