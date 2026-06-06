@@ -87,10 +87,12 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   String? _imagePath;
   final _mentionController = ChannelMentionController();
   List<String> _mentionSuggestions = const [];
+  bool _pinnedDismissed = false;
 
   @override
   void initState() {
     super.initState();
+    _pinnedDismissed = false;
     final notifier = ref.read(chatProvider.notifier);
     _visitDividerAnchor = ref.read(chatProvider).channelReads[widget.channelId];
     notifier.loadChannelMessages(widget.channelId, force: true);
@@ -563,20 +565,21 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       ],
       body: Column(
         children: [
-          VPinMessageBanner(
-            pinnedMessages: pinnedMessages,
-            residentId: resident?.id ?? '',
-            worldId: widget.worldId,
-            channelName: widget.channelName,
-            canPin: canPin,
-            onTogglePin: (msgId, pin) {
-              ref.read(chatProvider.notifier).togglePin(
-                channelId: widget.channelId,
-                messageId: msgId,
-                isPinned: pin,
-              );
-            },
-          ),
+          if (pinnedMessages.isNotEmpty && !_pinnedDismissed)
+            VPinMessageBanner(
+              pinnedMessages: pinnedMessages,
+              residentId: resident?.id ?? '',
+              worldId: widget.worldId,
+              channelName: widget.channelName,
+              canPin: canPin,
+              onTogglePin: (msgId, pin) {
+                ref.read(chatProvider.notifier).togglePin(
+                  channelId: widget.channelId,
+                  messageId: msgId,
+                  isPinned: pin,
+                );
+              },
+            ),
           Expanded(
             child: isLoading
                 ? const ScreenLoading.list()

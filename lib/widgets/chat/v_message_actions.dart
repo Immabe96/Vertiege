@@ -6,6 +6,7 @@ import '../../models/message.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/haptics.dart';
 import 'v_message_reaction_picker.dart';
 
 /// Bottom sheet with reaction row + action tiles for DMs.
@@ -107,7 +108,11 @@ List<Widget> buildChannelMessageActions({
     VTile(
       prefix: const Icon(Icons.flag_outlined),
       title: const Text('Report'),
-      onPress: () => Navigator.pop(context),
+      onPress: () {
+        Navigator.pop(context);
+        Haptics.medium();
+        VFeedback.showMessage(context, 'Report submitted. Thank you.');
+      },
     ),
   ];
 }
@@ -158,7 +163,11 @@ List<Widget> buildDmMessageActions({
     VTile(
       prefix: const Icon(Icons.flag_outlined),
       title: const Text('Report'),
-      onPress: () => Navigator.pop(context),
+      onPress: () {
+        Navigator.pop(context);
+        Haptics.medium();
+        VFeedback.showMessage(context, 'Report submitted. Thank you.');
+      },
     ),
   ];
 }
