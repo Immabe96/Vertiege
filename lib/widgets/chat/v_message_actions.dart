@@ -65,6 +65,7 @@ List<Widget> buildChannelMessageActions({
   required bool canPin,
   required VoidCallback onOpenThread,
   void Function(bool pin)? onTogglePin,
+  VoidCallback? onShareToFeed,
 }) {
   return [
     VTile(
@@ -75,6 +76,15 @@ List<Widget> buildChannelMessageActions({
         onOpenThread();
       },
     ),
+    if (onShareToFeed != null)
+      VTile(
+        prefix: const Icon(Icons.dynamic_feed_outlined),
+        title: const Text('Share to feed'),
+        onPress: () {
+          Navigator.pop(context);
+          onShareToFeed();
+        },
+      ),
     VTile(
       prefix: const Icon(Icons.copy_outlined),
       title: const Text('Copy text'),

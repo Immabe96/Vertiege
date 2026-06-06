@@ -78,6 +78,9 @@ serve(async (req: Request) => {
     const quietReason = await quietHoursSkipReason(supabase, record)
     if (quietReason) return json({ delivered: 0, skipped: quietReason })
 
+    const channelMuteReason = await channelMuteSkipReason(supabase, record)
+    if (channelMuteReason) return json({ delivered: 0, skipped: channelMuteReason })
+
     const serviceAccount = JSON.parse(serviceAccountJson) as ServiceAccount
     const accessToken = await getFirebaseAccessToken(serviceAccount)
     const results = await Promise.allSettled(
@@ -303,6 +306,28 @@ async function quietHoursSkipReason(
       : currentHour >= startHour && currentHour < endHour
 
   return inQuietWindow ? 'quiet_hours' : null
+}
+
+async function channelMuteSkipReason(
+  supabase: ReturnType<typeof createClient>,
+  record: NotificationRecord,
+): Promise<string | null> {
+  const channelId = record.channel_id
+  if (!channelId) return null
+
+  const { data } = await supabase
+    .from('channel_mute_prefs')
+    .select('mute_mode')
+    .eq('resident_id', record.recipient_id)
+    .eq('channel_id', channelId)
+    .maybeSingle()
+
+  const mode = data?.mute_mode ?? 'off'
+  if (mode === 'off') return null
+  if (mode === 'mentions_only' && record.type === 'mention') return null
+  if (mode === 'all') return 'channel_muted'
+  if (mode === 'mentions_only') return 'channel_mentions_only'
+  return null
 }
 
 async function pushSkipReason(

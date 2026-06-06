@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/channel_mute_mode.dart';
 import '../../router/search_navigation.dart';
 import 'v_member_list_sheet.dart';
 import '../../router/world_navigation.dart';
+import '../../state/chat_provider.dart';
+import '../../state/resident_provider.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/ui.dart';
 
-/// Channel metadata and quick actions (open world, search).
+/// Channel metadata and quick actions (open world, search, notifications).
 void showChannelDetailsSheet(
   BuildContext context, {
   required String worldId,
@@ -28,11 +32,11 @@ void showChannelDetailsSheet(
       activeResidentCount: activeResidentCount,
       pinnedCount: pinnedCount,
     ),
-    maxSize: 0.55,
+    maxSize: 0.62,
   );
 }
 
-class _ChannelDetailsContent extends StatelessWidget {
+class _ChannelDetailsContent extends ConsumerStatefulWidget {
   final String worldId;
   final String channelId;
   final String channelName;
@@ -50,9 +54,31 @@ class _ChannelDetailsContent extends StatelessWidget {
   });
 
   @override
+  ConsumerState<_ChannelDetailsContent> createState() =>
+      _ChannelDetailsContentState();
+}
+
+class _ChannelDetailsContentState extends ConsumerState<_ChannelDetailsContent> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final residentId = ref.read(residentProvider).resident?.id;
+      if (residentId != null) {
+        ref.read(chatProvider.notifier).loadChannelMutePrefs(residentId);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final residentLabel = activeResidentCount == 1 ? 'resident' : 'residents';
+    final resident = ref.watch(residentProvider).resident;
+    final muteMode = ref.watch(
+      chatProvider.select((s) => s.muteModeFor(widget.channelId)),
+    );
+    final residentLabel =
+        widget.activeResidentCount == 1 ? 'resident' : 'residents';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -66,7 +92,7 @@ class _ChannelDetailsContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            channelName,
+            widget.channelName,
             style: TextStyle(
               fontSize: VFontSize.headlineMd,
               fontWeight: VFontWeight.bold,
@@ -76,7 +102,7 @@ class _ChannelDetailsContent extends StatelessWidget {
           ),
           const SizedBox(height: VSpacing.xs),
           Text(
-            worldName,
+            widget.worldName,
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
               color: VCommuneColors.headerSecondaryOf(brightness),
@@ -87,14 +113,56 @@ class _ChannelDetailsContent extends StatelessWidget {
           _InfoRow(
             icon: VIcons.activity,
             label:
-                '$activeResidentCount active $residentLabel in channel',
+                '${widget.activeResidentCount} active $residentLabel in channel',
           ),
-          if (pinnedCount > 0) ...[
+          if (widget.pinnedCount > 0) ...[
             const SizedBox(height: VSpacing.sm),
             _InfoRow(
               icon: VIcons.pin,
               label:
-                  '$pinnedCount pinned ${pinnedCount == 1 ? 'message' : 'messages'}',
+                  '${widget.pinnedCount} pinned ${widget.pinnedCount == 1 ? 'message' : 'messages'}',
+            ),
+          ],
+          if (resident != null) ...[
+            const SizedBox(height: VSpacing.lg),
+            Text(
+              'Notifications',
+              style: TextStyle(
+                fontSize: VFontSize.labelLg,
+                fontWeight: VFontWeight.bold,
+                color: VCommuneColors.headerPrimaryOf(brightness),
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            ...ChannelMuteMode.values.map(
+              (mode) => RadioListTile<ChannelMuteMode>(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                value: mode,
+                groupValue: muteMode,
+                title: Text(mode.label),
+                subtitle: Text(
+                  switch (mode) {
+                    ChannelMuteMode.off =>
+                      'Receive all channel and mention alerts',
+                    ChannelMuteMode.mentionsOnly =>
+                      'Only @mentions and @all pings',
+                    ChannelMuteMode.all => 'No channel notifications',
+                  },
+                  style: TextStyle(
+                    fontSize: VFontSize.labelSm,
+                    color: VCommuneColors.textMutedOf(brightness),
+                  ),
+                ),
+                onChanged: (value) async {
+                  if (value == null) return;
+                  await ref.read(chatProvider.notifier).setChannelMuteMode(
+                        residentId: resident.id,
+                        channelId: widget.channelId,
+                        mode: value,
+                      );
+                },
+              ),
             ),
           ],
           const SizedBox(height: VSpacing.lg),
@@ -106,10 +174,10 @@ class _ChannelDetailsContent extends StatelessWidget {
               color: VCommuneColors.textNormalOf(brightness),
             ),
             title: const Text('Open world'),
-            subtitle: Text(worldName),
+            subtitle: Text(widget.worldName),
             onPress: () {
               Navigator.of(context).pop();
-              context.push(exploreWorldPath(worldId));
+              context.push(exploreWorldPath(widget.worldId));
             },
           ),
           VTile(
@@ -118,14 +186,14 @@ class _ChannelDetailsContent extends StatelessWidget {
               color: VCommuneColors.textNormalOf(brightness),
             ),
             title: const Text('Search in channel'),
-            subtitle: Text('Messages in #$channelName'),
+            subtitle: Text('Messages in #${widget.channelName}'),
             onPress: () {
               Navigator.of(context).pop();
               openChannelSearch(
                 context,
-                worldId: worldId,
-                channelId: channelId,
-                channelName: channelName,
+                worldId: widget.worldId,
+                channelId: widget.channelId,
+                channelName: widget.channelName,
               );
             },
           ),
@@ -140,8 +208,8 @@ class _ChannelDetailsContent extends StatelessWidget {
               Navigator.of(context).pop();
               showResidentListSheet(
                 context,
-                worldId: worldId,
-                channelName: channelName,
+                worldId: widget.worldId,
+                channelName: widget.channelName,
               );
             },
           ),
@@ -149,7 +217,6 @@ class _ChannelDetailsContent extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _InfoRow extends StatelessWidget {

@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
+import '../models/channel_mute_mode.dart';
+import '../services/channel_mute_service.dart';
 import '../services/chat_service.dart';
 import '../services/last_channel_prefs.dart';
 import '../services/crash_reporter.dart';
@@ -30,6 +32,7 @@ class ChatState {
   final String? roomsLoadError;
   /// Per room/channel id when message history failed to load.
   final Map<String, String> messagesLoadErrors;
+  final Map<String, ChannelMuteMode> channelMuteModes;
 
   const ChatState({
     this.dmRooms = const [],
@@ -43,6 +46,7 @@ class ChatState {
     this.isLoadingRooms = false,
     this.roomsLoadError,
     this.messagesLoadErrors = const {},
+    this.channelMuteModes = const {},
   });
 
   ChatState copyWith({
@@ -58,6 +62,7 @@ class ChatState {
     String? roomsLoadError,
     bool clearRoomsLoadError = false,
     Map<String, String>? messagesLoadErrors,
+    Map<String, ChannelMuteMode>? channelMuteModes,
   }) => ChatState(
     dmRooms: dmRooms ?? this.dmRooms,
     dmMessages: dmMessages ?? this.dmMessages,
@@ -72,9 +77,16 @@ class ChatState {
     roomsLoadError:
         clearRoomsLoadError ? null : (roomsLoadError ?? this.roomsLoadError),
     messagesLoadErrors: messagesLoadErrors ?? this.messagesLoadErrors,
+    channelMuteModes: channelMuteModes ?? this.channelMuteModes,
   );
 
   String? messagesLoadErrorFor(String id) => messagesLoadErrors[id];
+
+  ChannelMuteMode muteModeFor(String channelId) =>
+      channelMuteModes[channelId] ?? ChannelMuteMode.off;
+
+  bool isChannelMuted(String channelId) =>
+      muteModeFor(channelId) == ChannelMuteMode.all;
 }
 
 class ChatNotifier extends Notifier<ChatState> {
@@ -938,6 +950,30 @@ class ChatNotifier extends Notifier<ChatState> {
       channelId: channelId,
       residentId: residentId,
     );
+  }
+
+  Future<void> loadChannelMutePrefs(String residentId) async {
+    final prefs = await ChannelMuteService.getMutePrefs(residentId);
+    state = state.copyWith(channelMuteModes: prefs);
+  }
+
+  Future<void> setChannelMuteMode({
+    required String residentId,
+    required String channelId,
+    required ChannelMuteMode mode,
+  }) async {
+    await ChannelMuteService.setMuteMode(
+      residentId: residentId,
+      channelId: channelId,
+      mode: mode,
+    );
+    final updated = Map<String, ChannelMuteMode>.from(state.channelMuteModes);
+    if (mode == ChannelMuteMode.off) {
+      updated.remove(channelId);
+    } else {
+      updated[channelId] = mode;
+    }
+    state = state.copyWith(channelMuteModes: updated);
   }
 
   Future<void> markDmRead({

@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router/world_navigation.dart';
+import '../../services/chat_service.dart';
 import '../../state/ally_provider.dart';
 import '../../state/resident_provider.dart';
+import '../../widgets/core/v_feedback.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../profile/cosmetic_avatar.dart';
@@ -95,7 +97,9 @@ class _AlliesPreviewRowState extends ConsumerState<AlliesPreviewRow> {
                 final ally = preview[index];
                 final otherId = ally.otherId(resident.id);
                 return GestureDetector(
-                  onTap: () => context.push(residentProfilePath(otherId)),
+                  onTap: () => _openAllyDm(context, resident.id, otherId),
+                  onLongPress: () =>
+                      context.push(residentProfilePath(otherId)),
                   child: Column(
                     children: [
                       CosmeticAvatar(seed: otherId, size: 44),
@@ -123,5 +127,21 @@ class _AlliesPreviewRowState extends ConsumerState<AlliesPreviewRow> {
         ],
       ),
     );
+  }
+
+  Future<void> _openAllyDm(
+    BuildContext context,
+    String residentId,
+    String otherId,
+  ) async {
+    final room = await ChatService.getOrCreateRoom(residentId, otherId);
+    if (room == null) {
+      if (context.mounted) {
+        VFeedback.showMessage(context, 'Could not open chat.');
+      }
+      return;
+    }
+    if (!context.mounted) return;
+    context.push(chatRoomPath(room['id'] as String));
   }
 }

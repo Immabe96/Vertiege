@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/channel.dart';
+import '../../models/channel_mute_mode.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
@@ -39,6 +40,12 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
   void initState() {
     super.initState();
     _loadCollapsedState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final residentId = ref.read(residentProvider).resident?.id;
+      if (residentId != null) {
+        ref.read(chatProvider.notifier).loadChannelMutePrefs(residentId);
+      }
+    });
   }
 
   Future<void> _loadCollapsedState() async {
@@ -248,6 +255,9 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
             features: features,
             resident: resident,
           );
+    final muteMode = ref.watch(
+      chatProvider.select((s) => s.muteModeFor(channel.id)),
+    );
     return _ChannelTile(
       channel: channel,
       voiceOccupancy: voiceOccupancy,
@@ -257,6 +267,7 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
                 currentUserId: resident?.id,
               )
           : 0,
+      isMuted: muteMode != ChannelMuteMode.off,
       lockedReason: decision.reason,
       onTap: decision.canOpen && world != null
           ? () => context.push(
@@ -364,6 +375,7 @@ class _ChannelTile extends StatelessWidget {
   final WorldChannel channel;
   final int unreadCount;
   final int? voiceOccupancy;
+  final bool isMuted;
   final VoidCallback? onTap;
   final String? lockedReason;
 
@@ -371,6 +383,7 @@ class _ChannelTile extends StatelessWidget {
     required this.channel,
     required this.unreadCount,
     this.voiceOccupancy,
+    this.isMuted = false,
     required this.onTap,
     this.lockedReason,
   });
@@ -436,25 +449,38 @@ class _ChannelTile extends StatelessWidget {
                               fontWeight: VFontWeight.semiBold,
                             ),
                           )
-                        else if (unreadCount > 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: VColors.error,
-                              borderRadius: BorderRadius.circular(9),
-                            ),
-                            child: Text(
-                              unreadCount > 99 ? '99+' : '$unreadCount',
-                              style: const TextStyle(
-                                fontSize: VFontSize.labelSm,
-                                fontWeight: VFontWeight.bold,
-                                color: VColors.onPrimary,
+                        else ...[
+                          if (isMuted)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: VSpacing.xs,
+                              ),
+                              child: Icon(
+                                Icons.notifications_off_outlined,
+                                size: 16,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          ),
+                          if (unreadCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: VColors.error,
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: Text(
+                                unreadCount > 99 ? '99+' : '$unreadCount',
+                                style: const TextStyle(
+                                  fontSize: VFontSize.labelSm,
+                                  fontWeight: VFontWeight.bold,
+                                  color: VColors.onPrimary,
+                                ),
+                              ),
+                            ),
+                        ],
                       ],
                     ),
                     if (lockedReason != null) ...[

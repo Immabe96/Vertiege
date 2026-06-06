@@ -477,6 +477,90 @@ class ChatService {
       'channel_id': roomId,
       'last_read_at': now,
     });
+    unawaited(recordMessageReadsForRoom(roomId: roomId, residentId: residentId));
+  }
+
+  static Future<void> recordMessageReadsForRoom({
+    required String roomId,
+    required String residentId,
+  }) async {
+    if (!isSupabaseConfigured()) return;
+    final client = getSupabase();
+    try {
+      final data = await client
+          .from('chat_messages')
+          .select('id')
+          .eq('room_id', roomId)
+          .neq('sender_id', residentId);
+      final ids = (data as List)
+          .map((row) => row['id'] as String?)
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toList();
+      if (ids.isEmpty) return;
+      final now = DateTime.now().toUtc().toIso8601String();
+      await client.from('message_reads').upsert(
+        ids
+            .map(
+              (id) => {
+                'message_id': id,
+                'resident_id': residentId,
+                'room_id': roomId,
+                'read_at': now,
+              },
+            )
+            .toList(),
+      );
+    } catch (_) {
+      // message_reads is optional; dm_reads still drives unread.
+    }
+  }
+
+  static Future<DateTime?> getPartnerDmReadAt({
+    required String roomId,
+    required String partnerId,
+  }) async {
+    if (!isSupabaseConfigured() || partnerId.isEmpty) return null;
+    final client = getSupabase();
+    try {
+      final data = await client
+          .from('dm_reads')
+          .select('last_read_at')
+          .eq('room_id', roomId)
+          .eq('resident_id', partnerId)
+          .maybeSingle();
+      return DateTime.tryParse(data?['last_read_at'] ?? '');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static RealtimeChannel? subscribeToPartnerDmRead({
+    required String roomId,
+    required String partnerId,
+    required void Function(DateTime readAt) onUpdate,
+  }) {
+    if (!isSupabaseConfigured() || partnerId.isEmpty) return null;
+    final client = getSupabase();
+    return client
+        .channel('dm_reads_${roomId}_$partnerId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'dm_reads',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'resident_id',
+            value: partnerId,
+          ),
+          callback: (payload) {
+            final record = payload.newRecord;
+            if (record['room_id'] != roomId) return;
+            final ts = DateTime.tryParse(record['last_read_at'] ?? '');
+            if (ts != null) onUpdate(ts);
+          },
+        )
+        .subscribe();
   }
 
   static Future<Map<String, DateTime>> getDmReads(String residentId) async {

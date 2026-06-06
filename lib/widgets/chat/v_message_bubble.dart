@@ -35,6 +35,7 @@ final class VChannelBubbleConfig {
   final Future<void> Function(ChannelMessage message, String reactionKey)?
   onReaction;
   final Color? senderNameColor;
+  final VoidCallback? onShareToFeed;
 
   const VChannelBubbleConfig({
     this.isSystem = false,
@@ -45,6 +46,7 @@ final class VChannelBubbleConfig {
     this.onTogglePin,
     this.onReaction,
     this.senderNameColor,
+    this.onShareToFeed,
   });
 }
 
@@ -77,6 +79,7 @@ class VMessageBubble extends StatefulWidget {
   final bool compact;
   final String? threadPreview;
   final VoidCallback? onRetryFailed;
+  final bool showReadReceipt;
 
   static const int maxAnimatedIds = 50;
 
@@ -92,6 +95,7 @@ class VMessageBubble extends StatefulWidget {
     this.compact = false,
     this.threadPreview,
     this.onRetryFailed,
+    this.showReadReceipt = false,
   }) : assert(
          (mode == VMessageBubbleMode.channel && channelConfig != null) ||
              (mode == VMessageBubbleMode.directMessage && dmConfig != null),
@@ -412,6 +416,17 @@ class _VMessageBubbleState extends State<VMessageBubble>
                           ),
                         ),
                       ],
+                      if (isMe && widget.showReadReceipt) ...[
+                        const SizedBox(width: VSpacing.xs),
+                        Text(
+                          'Seen',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: timestampColor,
+                            fontSize: VFontSize.labelSm,
+                            fontWeight: VFontWeight.semiBold,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
               ],
@@ -585,6 +600,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
             onOpenThread: _openThread,
             onTogglePin: (pin) =>
                 _channel.onTogglePin?.call(widget.message.id, pin),
+            onShareToFeed: _channel.onShareToFeed,
           ),
           SizedBox(height: MediaQuery.paddingOf(context).bottom),
         ],

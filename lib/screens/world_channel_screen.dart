@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,6 +50,7 @@ import '../utils/v_motion.dart';
 import '../services/chat_notification_scope.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/feed/cross_post_to_feed_sheet.dart';
 
 class WorldChannelScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -78,6 +81,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   int? _onlineResidents;
   final Set<String> _prefetchedThreads = {};
   final Map<String, int> _memberRepById = {};
+  String? _imagePath;
 
   @override
   void initState() {
@@ -304,9 +308,31 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     _scrollToBottom();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final result = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200,
+      );
+      if (!mounted) return;
+      if (result != null) {
+        setState(() => _imagePath = result.path);
+      }
+    } catch (_) {
+      if (mounted) {
+        VFeedback.showError(context, 'Failed to pick image. Please try again.');
+      }
+    }
+  }
+
+  void _removeImage() {
+    setState(() => _imagePath = null);
+  }
+
   void _sendMessage() {
     final content = _controller.text.trim();
-    if (content.isEmpty) return;
+    if (content.isEmpty && _imagePath == null) return;
 
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
@@ -322,12 +348,14 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
           senderName: resident.name,
           senderAvatar: resident.avatarUrl,
           content: content,
+          imageUrl: _imagePath,
         )
         .catchError((_) {
           if (!mounted) return;
           VFeedback.showMessage(context, 'Failed to send message.');
         });
     _controller.clear();
+    setState(() => _imagePath = null);
     _scrollToBottom();
   }
 
@@ -577,6 +605,8 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             )
           else ...[
             const CampfireChannelBar(),
+            if (_imagePath != null)
+              _ChannelImagePreview(path: _imagePath!, onRemove: _removeImage),
             ChatInputBar(
               controller: _controller,
               onSend: _sendMessage,
@@ -589,6 +619,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
               useCommuneStyle: true,
               showAttach: true,
               useAttachmentTray: true,
+              onAttach: _pickImage,
               onShareAchievement: _shareAchievement,
               onOpenMediaPicker: () => showVMediaPicker(
                 context,
@@ -725,6 +756,12 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
               userId: resident.id,
               emoji: key,
             ),
+      onShareToFeed: () => showCrossPostToFeedSheet(
+        context,
+        message: message,
+        sourceWorldId: widget.worldId,
+        sourceChannelName: widget.channelName,
+      ),
     );
   }
 }
@@ -824,5 +861,68 @@ class _FoundationPanel extends StatelessWidget {
     'roles' => Icons.badge_outlined,
     _ => Icons.description_outlined,
   };
+}
+
+class _ChannelImagePreview extends StatelessWidget {
+  final String path;
+  final VoidCallback onRemove;
+
+  const _ChannelImagePreview({required this.path, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        VSpacing.xs,
+        VSpacing.xs,
+        0,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(VRadius.md),
+            child: Image.file(
+              File(path),
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.broken_image,
+                size: 32,
+                color: VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: Text(
+              'Image ready to send',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: VIconSize.md),
+            onPressed: onRemove,
+            tooltip: 'Remove image',
+          ),
+        ],
+      ),
+    );
+  }
 }
 

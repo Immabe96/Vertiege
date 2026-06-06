@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
+import '../services/chat_service.dart';
+import '../widgets/core/v_feedback.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../models/ally.dart';
 import '../models/resident.dart';
@@ -241,7 +243,13 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                           : null,
                     )
                   else
-                    ..._rows.map((row) => _PersonTile(row: row)),
+                    ..._rows.map(
+                      (row) => _PersonTile(
+                        row: row,
+                        showMessageAction:
+                            widget.mode == ConnectionsMode.allies,
+                      ),
+                    ),
                 ],
               ),
       ),
@@ -249,13 +257,17 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
   }
 }
 
-class _PersonTile extends StatelessWidget {
+class _PersonTile extends ConsumerWidget {
   final _ResidentRow row;
+  final bool showMessageAction;
 
-  const _PersonTile({required this.row});
+  const _PersonTile({
+    required this.row,
+    this.showMessageAction = false,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final resident = row.resident;
@@ -292,7 +304,40 @@ class _PersonTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(VIcons.chevronRight),
+              trailing: showMessageAction
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(VIcons.message),
+                          tooltip: 'Message',
+                          onPressed: () async {
+                            final currentId =
+                                ref.read(residentProvider).resident?.id;
+                            if (currentId == null) return;
+                            final room = await ChatService.getOrCreateRoom(
+                              currentId,
+                              row.resident.id,
+                            );
+                            if (room == null) {
+                              if (context.mounted) {
+                                VFeedback.showMessage(
+                                  context,
+                                  'Could not open chat.',
+                                );
+                              }
+                              return;
+                            }
+                            if (!context.mounted) return;
+                            context.push(
+                              chatRoomPath(room['id'] as String),
+                            );
+                          },
+                        ),
+                        const Icon(VIcons.chevronRight),
+                      ],
+                    )
+                  : const Icon(VIcons.chevronRight),
             ),
           ),
         ),

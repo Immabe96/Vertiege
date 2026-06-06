@@ -10,6 +10,8 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide Presence;
 import 'package:vertiege/ui/ui.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../models/message.dart';
+import '../services/chat_service.dart';
 import '../services/chat_density_prefs.dart';
 import '../state/chat_density_provider.dart';
 import '../state/chat_provider.dart';
@@ -65,6 +67,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   final Set<String> _animatedMessageIds = {};
   Presence? _headerPresence;
   RealtimeChannel? _partnerPresenceChannel;
+  RealtimeChannel? _partnerReadChannel;
+  DateTime? _partnerReadAt;
   DateTime? _visitDividerAnchor;
 
   String? _replyToMessageId;
@@ -98,6 +102,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     _headerPresence = widget.initialPresence;
     unawaited(_refreshRecipientPresence());
     _subscribePartnerPresence();
+    unawaited(_refreshPartnerRead());
+    _subscribePartnerRead();
   }
 
   void _subscribePartnerPresence() {
@@ -180,9 +186,67 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   }
 
   @override
+  Future<void> _refreshPartnerRead() async {
+    final resident = ref.read(residentProvider).resident;
+    final rooms = ref.read(chatProvider).dmRooms;
+    final room = rooms.cast<Map<String, dynamic>?>().firstWhere(
+      (r) => r?['id'] == widget.roomId,
+      orElse: () => null,
+    );
+    final otherId = _recipientId(room, resident?.id ?? '');
+    if (otherId.isEmpty) return;
+    final readAt = await ChatService.getPartnerDmReadAt(
+      roomId: widget.roomId,
+      partnerId: otherId,
+    );
+    if (!mounted || readAt == null) return;
+    setState(() => _partnerReadAt = readAt);
+  }
+
+  void _subscribePartnerRead() {
+    final resident = ref.read(residentProvider).resident;
+    final rooms = ref.read(chatProvider).dmRooms;
+    final room = rooms.cast<Map<String, dynamic>?>().firstWhere(
+      (r) => r?['id'] == widget.roomId,
+      orElse: () => null,
+    );
+    final otherId = _recipientId(room, resident?.id ?? '');
+    if (otherId.isEmpty) return;
+
+    _partnerReadChannel?.unsubscribe();
+    _partnerReadChannel = ChatService.subscribeToPartnerDmRead(
+      roomId: widget.roomId,
+      partnerId: otherId,
+      onUpdate: (readAt) {
+        if (!mounted) return;
+        setState(() => _partnerReadAt = readAt);
+      },
+    );
+  }
+
+  String? _readReceiptMessageId(
+    List<ChannelMessage> messages,
+    String residentId,
+  ) {
+    final partnerRead = _partnerReadAt;
+    if (partnerRead == null) return null;
+    final readMs = partnerRead.millisecondsSinceEpoch;
+    ChannelMessage? latest;
+    for (final msg in messages) {
+      if (msg.senderId != residentId || msg.sendFailed) continue;
+      if (msg.createdAt <= readMs &&
+          (latest == null || msg.createdAt >= latest.createdAt)) {
+        latest = msg;
+      }
+    }
+    return latest?.id;
+  }
+
   void dispose() {
     unawaited(_partnerPresenceChannel?.unsubscribe());
     _partnerPresenceChannel = null;
+    unawaited(_partnerReadChannel?.unsubscribe());
+    _partnerReadChannel = null;
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -427,6 +491,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       messages: messages,
       lastVisitAt: _visitDividerAnchor,
     );
+    final readReceiptMessageId = resident == null
+        ? null
+        : _readReceiptMessageId(messages, resident.id);
 
     return ColoredBox(
       color: VCommuneChatTheme.backgroundColor,
@@ -501,6 +568,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                               item,
                               resident?.id ?? '',
                               compact: chatCompact,
+                              readReceiptMessageId: readReceiptMessageId,
                             );
                           }
                           return const SizedBox.shrink();
@@ -655,6 +723,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     ChatDisplayItem item,
     String residentId, {
     bool compact = false,
+    String? readReceiptMessageId,
   }) {
     switch (item.type) {
       case ChatItemType.dateSeparator:
@@ -705,6 +774,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                     );
               },
             ),
+            showReadReceipt: item.message!.id == readReceiptMessageId,
             onRetryFailed: item.message!.sendFailed
                 ? () => ref.read(chatProvider.notifier).retryFailedDmMessage(
                       roomId: widget.roomId,
@@ -723,6 +793,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             animatedMessageIds: _animatedMessageIds,
             mode: VMessageBubbleMode.directMessage,
             compact: compact,
+            showReadReceipt: item.message!.id == readReceiptMessageId,
             dmConfig: VDirectMessageBubbleConfig(
               currentUserId: residentId,
               onReply: (msg) => _setReply(
