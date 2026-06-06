@@ -66,7 +66,8 @@ class ChatScrollFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showBadge = badgeCount > 0;
-    final label = badgeCount > 99 ? '99+' : '$badgeCount';
+    final countLabel = badgeCount > 99 ? '99+' : '$badgeCount';
+    final badgeLabel = badgeCount == 1 ? 'New' : 'New · $countLabel';
 
     if (useCommuneStyle) {
       return Material(
@@ -92,15 +93,15 @@ class ChatScrollFab extends StatelessWidget {
                 if (showBadge) ...[
                   const SizedBox(width: VSpacing.xs),
                   Container(
-                    constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    constraints: const BoxConstraints(minWidth: 18, minHeight: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
                       color: VCommuneColors.headerPrimary,
                       borderRadius: BorderRadius.circular(VRadius.pill),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      label,
+                      badgeLabel,
                       style: const TextStyle(
                         color: VCommuneColors.surfaceFloating,
                         fontSize: VFontSize.labelSm,

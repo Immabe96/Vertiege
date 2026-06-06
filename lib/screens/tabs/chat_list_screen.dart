@@ -295,6 +295,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final allChannels = channelState.channelsByWorld[selectedWorld.id] ?? [];
     final channelError = channelState.error;
     final channelLoading = channelState.isLoading;
+    final typingByRoom = ref.watch(
+      chatProvider.select((s) => s.typingUsers),
+    );
 
     final announcementChannels = allChannels
         .where((c) => c.channelType == ChannelType.announcement)
@@ -386,10 +389,15 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     channel.id,
                                     currentUserId: currentUserId,
                                   );
+                              final typingLabel = channelTypingLabel(
+                                typingByRoom[channel.id] ?? const <String>{},
+                                currentUserId: currentUserId,
+                              );
                               return _ChannelTile(
                                 channel: channel,
                                 world: selectedWorld,
                                 unreadCount: unreadCount,
+                                typingLabel: typingLabel,
                               );
                             }),
                           ],
@@ -402,10 +410,15 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     channel.id,
                                     currentUserId: currentUserId,
                                   );
+                              final typingLabel = channelTypingLabel(
+                                typingByRoom[channel.id] ?? const <String>{},
+                                currentUserId: currentUserId,
+                              );
                               return _ChannelTile(
                                 channel: channel,
                                 world: selectedWorld,
                                 unreadCount: unreadCount,
+                                typingLabel: typingLabel,
                               );
                             }),
                           ],
@@ -653,11 +666,13 @@ class _ChannelTile extends StatelessWidget {
   final World world;
   final WorldChannel channel;
   final int unreadCount;
+  final String? typingLabel;
 
   const _ChannelTile({
     required this.channel,
     required this.world,
     required this.unreadCount,
+    this.typingLabel,
   });
 
   IconData get _icon {
@@ -686,6 +701,7 @@ class _ChannelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hasTyping = typingLabel != null;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -730,7 +746,18 @@ class _ChannelTile extends StatelessWidget {
                                   : VColors.onSurfaceVariant),
                       ),
                     ),
-                    if (channel.description != null &&
+                    if (hasTyping)
+                      Text(
+                        typingLabel!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: VColors.success,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      )
+                    else if (channel.description != null &&
                         channel.description!.isNotEmpty)
                       Text(
                         channel.description!,

@@ -78,6 +78,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   final _scrollFabTracker = ChatScrollFabTracker();
   final Set<String> _animatedMessageIds = {};
   DateTime? _visitDividerAnchor;
+  bool _didInitialScroll = false;
   Timer? _outboundTypingDebounce;
   int _totalResidents = 0;
   int? _onlineResidents;
@@ -275,6 +276,36 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     });
   }
 
+  void _scrollToNewSinceVisitDivider() {
+    if (_didInitialScroll) return;
+    if (_visitDividerAnchor == null) return;
+    _didInitialScroll = true;
+    final all =
+        ref.read(chatProvider).channelMessages[widget.channelId] ?? const [];
+    final unpinnedMessages = all.where((m) => !m.isPinned).toList();
+    if (unpinnedMessages.isEmpty) {
+      _didInitialScroll = false;
+      return;
+    }
+    final displayItems = buildChatDisplayItems(unpinnedMessages);
+    final dividerIndex = newSinceVisitDividerDisplayIndex(
+      messages: unpinnedMessages,
+      lastVisitAt: _visitDividerAnchor,
+    );
+    if (dividerIndex == null || dividerIndex <= 0) return;
+    final total = _scrollController.hasClients
+        ? _scrollController.position.maxScrollExtent
+        : 0.0;
+    if (total <= 0) return;
+    final renderedIndex = dividerIndex;
+    final perChild = displayItems.isEmpty ? 0.0 : total / displayItems.length;
+    final target = (perChild * renderedIndex).clamp(0.0, total).toDouble();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      _scrollController.jumpTo(target);
+    });
+  }
+
   Future<void> _loadMentionResidents() async {
     final members = await WorldService.getMembers(widget.worldId);
     _mentionController.setResidents(members);
@@ -418,6 +449,9 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() {});
       });
+    }
+    if (!_didInitialScroll && messages.isNotEmpty) {
+      _scrollToNewSinceVisitDivider();
     }
     final displayItems = buildChatDisplayItems(unpinnedMessages);
     final newSinceDividerIndex = newSinceVisitDividerDisplayIndex(
