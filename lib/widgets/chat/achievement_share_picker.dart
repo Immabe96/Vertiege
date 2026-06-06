@@ -9,12 +9,14 @@ import '../../theme/v_tokens.dart';
 import '../achievements/achievement_category_meta.dart';
 import '../achievements/achievement_icon.dart';
 import '../core/v_feedback.dart';
+import '../../utils/haptics.dart';
 
 /// Pick a verified achievement to embed in chat (channels or DMs).
 Future<Achievement?> pickVerifiedAchievementToShare(
   BuildContext context,
   WidgetRef ref,
 ) async {
+  Haptics.light();
   final verified = ref
       .read(achievementProvider)
       .userAchievements

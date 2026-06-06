@@ -931,6 +931,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
               },
             ),
             showReadReceipt: item.message!.id == readReceiptMessageId,
+            readReceiptTooltip: readReceiptMessageId != null
+                ? _formatPartnerReadAt(_partnerReadAt)
+                : null,
             onRetryFailed: item.message!.sendFailed
                 ? () => ref.read(chatProvider.notifier).retryFailedDmMessage(
                       roomId: widget.roomId,
@@ -950,6 +953,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             mode: VMessageBubbleMode.directMessage,
             compact: compact,
             showReadReceipt: item.message!.id == readReceiptMessageId,
+            readReceiptTooltip: readReceiptMessageId != null
+                ? _formatPartnerReadAt(_partnerReadAt)
+                : null,
             dmConfig: VDirectMessageBubbleConfig(
               currentUserId: residentId,
               onReply: (msg) => _setReply(
@@ -1022,6 +1028,16 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final avatar = room['other_avatar'];
     if (avatar is String && avatar.isNotEmpty) return avatar;
     return null;
+  }
+
+  String? _formatPartnerReadAt(DateTime? at) {
+    if (at == null) return null;
+    var hour = at.hour;
+    final minute = at.minute.toString().padLeft(2, '0');
+    final suffix = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    if (hour == 0) hour = 12;
+    return 'Read $hour:$minute $suffix';
   }
 }
 

@@ -85,6 +85,7 @@ class VMessageBubble extends StatefulWidget {
   final String? threadPreview;
   final VoidCallback? onRetryFailed;
   final bool showReadReceipt;
+  final String? readReceiptTooltip;
 
   static const int maxAnimatedIds = 50;
 
@@ -101,6 +102,7 @@ class VMessageBubble extends StatefulWidget {
     this.threadPreview,
     this.onRetryFailed,
     this.showReadReceipt = false,
+    this.readReceiptTooltip,
   }) : assert(
          (mode == VMessageBubbleMode.channel && channelConfig != null) ||
              (mode == VMessageBubbleMode.directMessage && dmConfig != null),
@@ -423,14 +425,27 @@ class _VMessageBubbleState extends State<VMessageBubble>
                       ],
                       if (isMe && widget.showReadReceipt) ...[
                         const SizedBox(width: VSpacing.xs),
-                        Text(
-                          'Seen',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: timestampColor,
-                            fontSize: VFontSize.labelSm,
-                            fontWeight: VFontWeight.semiBold,
+                        if (widget.readReceiptTooltip != null)
+                          Tooltip(
+                            message: widget.readReceiptTooltip!,
+                            child: Text(
+                              'Seen',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: timestampColor,
+                                fontSize: VFontSize.labelSm,
+                                fontWeight: VFontWeight.semiBold,
+                              ),
+                            ),
+                          )
+                        else
+                          Text(
+                            'Seen',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: timestampColor,
+                              fontSize: VFontSize.labelSm,
+                              fontWeight: VFontWeight.semiBold,
+                            ),
                           ),
-                        ),
                       ],
                     ],
                   ),
