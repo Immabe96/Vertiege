@@ -17,6 +17,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../services/world_mute_prefs.dart';
 import '../../utils/chat_unread.dart';
+import '../../utils/chat_channel_sort.dart';
 import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/chat/chat_connection_banner.dart';
@@ -297,9 +298,17 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final announcementChannels = allChannels
         .where((c) => c.channelType == ChannelType.announcement)
         .toList();
-    final chatChannels = allChannels
-        .where((c) => c.channelType != ChannelType.announcement)
-        .toList();
+    final chatChannels = sortChatChannelsWithUnreadFirst(
+      channels: allChannels
+          .where((c) => c.channelType != ChannelType.announcement)
+          .toList(),
+      unreadByChannelId: _unreadByChannelId(
+        channels: allChannels
+            .where((c) => c.channelType != ChannelType.announcement)
+            .toList(),
+        currentUserId: currentUserId,
+      ),
+    );
 
     final world = ref.watch(worldProvider).worlds[selectedWorld.id];
     final residentCount = world?.memberCount ?? 0;
@@ -479,6 +488,22 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   Presence _presence(Map<String, dynamic> room) {
     return presenceFromProfileField(room['other_last_seen_at']);
+  }
+
+  Map<String, int> _unreadByChannelId({
+    required List<WorldChannel> channels,
+    required String? currentUserId,
+  }) {
+    final notifier = ref.read(chatProvider.notifier);
+    final result = <String, int>{};
+    for (final channel in channels) {
+      if (currentUserId == null) continue;
+      result[channel.id] = notifier.unreadCount(
+        channel.id,
+        currentUserId: currentUserId,
+      );
+    }
+    return result;
   }
 
   String _timeLabel(String? iso) {
