@@ -295,6 +295,26 @@ class _VMessageBubbleState extends State<VMessageBubble>
           ],
         ),
       );
+    } else if (widget.message.sending && widget.isMe) {
+      child = Column(
+        crossAxisAlignment: widget.isMe
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          animated,
+          const Padding(
+            padding: EdgeInsets.only(top: VSpacing.xs),
+            child: Text(
+              'Sending…',
+              style: TextStyle(
+                fontSize: VFontSize.labelSm,
+                fontStyle: FontStyle.italic,
+                color: VColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      );
     }
 
     return RepaintBoundary(

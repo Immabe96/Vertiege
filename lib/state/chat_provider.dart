@@ -387,6 +387,7 @@ class ChatNotifier extends Notifier<ChatState> {
       imageUrl: imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       autoDeleteAfterSeconds: autoDeleteAfterSeconds,
+      sending: true,
     );
 
     final existing = state.dmMessages[roomId] ?? [];
@@ -470,6 +471,7 @@ class ChatNotifier extends Notifier<ChatState> {
         replyToContent: replyToContent,
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
+      _markDmMessageSent(roomId, msg);
     } catch (_) {
       await MutationOutboxService.enqueue('chat.message', {
         'roomId': roomId,
@@ -489,8 +491,19 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  void _markDmMessageSent(String roomId, ChannelMessage msg) {
+    final current = state.dmMessages[roomId];
+    if (current == null) return;
+    final cleared = current
+        .map((m) => m.id == msg.id ? m.copyWith(sending: false) : m)
+        .toList();
+    state = state.copyWith(
+      dmMessages: {...state.dmMessages, roomId: cleared},
+    );
+  }
+
   void _markDmMessageFailed(String roomId, ChannelMessage msg) {
-    final failedMsg = msg.copyWith(sendFailed: true);
+    final failedMsg = msg.copyWith(sendFailed: true, sending: false);
     final updated = state.dmMessages[roomId]
         ?.map((m) => m.id == msg.id ? failedMsg : m)
         .toList();
@@ -508,7 +521,11 @@ class ChatNotifier extends Notifier<ChatState> {
     if (msg == null || !msg.sendFailed) return;
 
     final cleared = messages
-        .map((m) => m.id == messageId ? m.copyWith(sendFailed: false) : m)
+        .map(
+          (m) => m.id == messageId
+              ? m.copyWith(sendFailed: false, sending: true)
+              : m,
+        )
         .toList();
     state = state.copyWith(
       dmMessages: {...state.dmMessages, roomId: cleared},
@@ -540,7 +557,11 @@ class ChatNotifier extends Notifier<ChatState> {
     if (msg == null || !msg.sendFailed) return;
 
     final cleared = messages
-        .map((m) => m.id == messageId ? m.copyWith(sendFailed: false) : m)
+        .map(
+          (m) => m.id == messageId
+              ? m.copyWith(sendFailed: false, sending: true)
+              : m,
+        )
         .toList();
     state = state.copyWith(
       channelMessages: {...state.channelMessages, channelId: cleared},
@@ -848,6 +869,7 @@ class ChatNotifier extends Notifier<ChatState> {
       content: content,
       imageUrl: durableImageUrl ?? imageUrl,
       createdAt: DateTime.now().millisecondsSinceEpoch,
+      sending: true,
     );
 
     final existing = state.channelMessages[channelId] ?? [];
@@ -895,7 +917,7 @@ class ChatNotifier extends Notifier<ChatState> {
         'imageUrl': durableImageUrl,
         'messageId': msg.id,
       });
-      final failedMsg = msg.copyWith(sendFailed: true);
+      final failedMsg = msg.copyWith(sendFailed: true, sending: false);
       final updated = allMessages
           .map((m) => m.id == msg.id ? failedMsg : m)
           .toList();
@@ -1089,6 +1111,7 @@ class ChatNotifier extends Notifier<ChatState> {
       content: content,
       threadId: threadId,
       createdAt: DateTime.now().millisecondsSinceEpoch,
+      sending: true,
     );
     final existing = state.channelMessages[threadId] ?? [];
     state = state.copyWith(
@@ -1122,6 +1145,12 @@ class ChatNotifier extends Notifier<ChatState> {
         threadId: threadId,
       );
       unawaited(ChatService.incrementThreadCount(threadId));
+      final cleared = (state.channelMessages[threadId] ?? [])
+          .map((m) => m.id == msg.id ? m.copyWith(sending: false) : m)
+          .toList();
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, threadId: cleared},
+      );
     } catch (_) {
       final reverted = (state.channelMessages[threadId] ?? [])
           .where((m) => m.id != msg.id)
@@ -1253,6 +1282,7 @@ class ChatNotifier extends Notifier<ChatState> {
       replyToContent: replyToContent,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       autoDeleteAfterSeconds: autoDeleteAfterSeconds,
+      sending: true,
     );
 
     final existing = state.dmMessages[roomId] ?? [];
@@ -1300,6 +1330,7 @@ class ChatNotifier extends Notifier<ChatState> {
         autoDeleteAfterSeconds: autoDeleteAfterSeconds,
       );
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
+      _markDmMessageSent(roomId, msg);
     } catch (_) {
       _markDmMessageFailed(roomId, msg);
       rethrow;
