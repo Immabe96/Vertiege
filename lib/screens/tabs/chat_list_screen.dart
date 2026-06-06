@@ -18,6 +18,7 @@ import '../../theme/v_tokens.dart';
 import '../../services/world_mute_prefs.dart';
 import '../../utils/chat_unread.dart';
 import '../../utils/chat_channel_sort.dart';
+import '../../utils/channel_typing_label.dart';
 import '../../utils/presence_utils.dart';
 import '../../utils/time_ago.dart';
 import '../../widgets/chat/chat_connection_banner.dart';
@@ -447,11 +448,19 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     List<Map<String, dynamic>> rooms,
     String currentUserId,
   ) {
+    final typingByRoom = ref.watch(
+      chatProvider.select((s) => s.typingUsers),
+    );
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
       itemCount: rooms.length,
       itemBuilder: (context, index) {
         final room = rooms[index];
+        final roomId = room['id'] as String?;
+        final typingLabel = channelTypingLabel(
+          typingByRoom[roomId] ?? const <String>{},
+          currentUserId: currentUserId,
+        );
         return _DmRoomTile(
           room: room,
           currentUserId: currentUserId,
@@ -459,6 +468,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           otherAvatar: _otherAvatar(room),
           presence: _presence(room),
           timeLabel: _timeLabel(room['last_message_at'] as String?),
+          typingLabel: typingLabel,
         );
       },
     );
@@ -1070,6 +1080,7 @@ class _DmRoomTile extends StatelessWidget {
   final String? otherAvatar;
   final Presence presence;
   final String timeLabel;
+  final String? typingLabel;
 
   const _DmRoomTile({
     required this.room,
@@ -1078,13 +1089,15 @@ class _DmRoomTile extends StatelessWidget {
     required this.otherAvatar,
     required this.presence,
     required this.timeLabel,
+    this.typingLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final lastMessage = room['last_message'] as String? ?? '';
+    final hasTyping = typingLabel != null;
+    final lastMessage = hasTyping ? typingLabel! : (room['last_message'] as String? ?? '');
     final unreadCount = room['unread_count'] as int? ?? 0;
 
     return Material(
@@ -1164,16 +1177,23 @@ class _DmRoomTile extends StatelessWidget {
                                 ? lastMessage
                                 : 'No messages yet',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: unreadCount > 0
-                                  ? (isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface)
-                                  : (isDark
-                                        ? VColors.onSurfaceVariantDark
-                                        : VColors.onSurfaceVariant),
-                              fontWeight: unreadCount > 0
+                              color: hasTyping
+                                  ? VColors.success
+                                  : (unreadCount > 0
+                                        ? (isDark
+                                              ? VColors.onSurfaceDark
+                                              : VColors.onSurface)
+                                        : (isDark
+                                              ? VColors.onSurfaceVariantDark
+                                              : VColors.onSurfaceVariant)),
+                              fontWeight: hasTyping
                                   ? VFontWeight.semiBold
-                                  : VFontWeight.regular,
+                                  : (unreadCount > 0
+                                        ? VFontWeight.semiBold
+                                        : VFontWeight.regular),
+                              fontStyle: hasTyping
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
