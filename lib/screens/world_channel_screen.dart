@@ -45,6 +45,7 @@ import '../widgets/voice/campfire_mini_bar.dart';
 import '../utils/world_foundations.dart';
 import '../widgets/core/empty_state.dart';
 import '../utils/v_motion.dart';
+import '../services/chat_notification_scope.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_feedback.dart';
 
@@ -86,6 +87,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     notifier.loadChannelMessages(widget.channelId, force: true);
     notifier.subscribeToChannel(widget.channelId);
     notifier.subscribeToTyping(widget.channelId);
+    ChatNotificationScope.setActiveChannel(channelId: widget.channelId);
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       unawaited(_loadResidentCounts());
@@ -121,6 +123,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     }
     ref.read(chatProvider.notifier).unsubscribeFromTyping(widget.channelId);
     ref.read(chatProvider.notifier).unsubscribeFromChannel(widget.channelId);
+    ChatNotificationScope.clearChannel();
     super.deactivate();
   }
 
@@ -333,6 +336,13 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final theme = Theme.of(context);
     final resident = ref.watch(residentProvider).resident;
     final messages = ref.watch(channelMessagesProvider(widget.channelId));
+    final remoteTyping = ref.watch(
+      chatProvider.select(
+        (s) => s.typingUsers[widget.channelId] ?? const <String>{},
+      ),
+    );
+    final otherTyping =
+        resident != null && remoteTyping.any((id) => id != resident.id);
     final messagesLoadError = ref.watch(
       channelMessagesErrorProvider(widget.channelId),
     );
@@ -575,6 +585,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                 setState(() {});
               },
               hintText: 'Message #${widget.channelName}',
+              typingIndicator: otherTyping ? 'Someone is typing…' : null,
               useCommuneStyle: true,
               showAttach: true,
               useAttachmentTray: true,
@@ -654,6 +665,13 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             item.message!,
             canPin: canPin,
           ),
+          onRetryFailed: item.message!.sendFailed
+              ? () => ref.read(chatProvider.notifier).retryFailedChannelMessage(
+                    worldId: widget.worldId,
+                    channelId: widget.channelId,
+                    messageId: item.message!.id,
+                  )
+              : null,
         );
       case ChatItemType.subsequent:
         return VMessageBubble(
@@ -668,6 +686,13 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             item.message!,
             canPin: canPin,
           ),
+          onRetryFailed: item.message!.sendFailed
+              ? () => ref.read(chatProvider.notifier).retryFailedChannelMessage(
+                    worldId: widget.worldId,
+                    channelId: widget.channelId,
+                    messageId: item.message!.id,
+                  )
+              : null,
         );
     }
   }

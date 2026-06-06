@@ -106,6 +106,7 @@ class PostNotifier extends Notifier<PostState> {
   int _lastPersistedCount = 0;
   int _currentLimit = 20;
   String? _lastCursor;
+  String? _nexusCursor;
   bool _hasMore = true;
 
   @override
@@ -822,7 +823,7 @@ class PostNotifier extends Notifier<PostState> {
     }
   }
 
-  void repost(String originalPostId) {
+  Future<void> repost(String originalPostId) async {
     final original = state.posts
         .where((p) => p.id == originalPostId)
         .firstOrNull;
@@ -831,8 +832,7 @@ class PostNotifier extends Notifier<PostState> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    final repost = Post(
-      id: generateId(),
+    await addPost(
       worldId: original.worldId,
       residentId: resident.id,
       residentName: resident.name,
@@ -840,27 +840,9 @@ class PostNotifier extends Notifier<PostState> {
       content: original.content,
       imageUri: original.imageUri,
       imageUris: original.imageUris,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-      tierAtPosting: resident.tier,
+      tierValue: resident.tier.value,
       repostOf: originalPostId,
     );
-
-    state = state.copyWith(posts: [repost, ...state.posts]);
-    _persist();
-
-    ref.read(questProvider.notifier).onPostCreated();
-
-    if (original.residentId != resident.id) {
-      ref.read(notificationProvider.notifier).addNotification(
-            type: NotificationType.like,
-            message: '${resident.name} reposted your post',
-            recipientId: original.residentId,
-            postId: originalPostId,
-            worldId: original.worldId,
-            showInLocalInbox: false,
-            persistRemote: false,
-          );
-    }
   }
 
   /// Loads a single post into the feed for deep links and notification targets.
@@ -923,6 +905,7 @@ class PostNotifier extends Notifier<PostState> {
       if (!hadCachedPosts) {
         _currentLimit = 25;
         _lastCursor = null;
+        _nexusCursor = null;
       }
 
       await _postsRepository.replayOutbox();
@@ -1242,7 +1225,6 @@ class PostNotifier extends Notifier<PostState> {
   Future<void> loadMoreNexusPosts() async {
     if (!_hasMore || state.isLoadingMore) return;
     state = state.copyWith(isLoadingMore: true);
-    _currentLimit += 25;
     try {
       final joinedResult = await _loadPostsFromJoinedWorlds(append: true);
       if (joinedResult == null) {
@@ -1274,6 +1256,30 @@ class PostNotifier extends Notifier<PostState> {
         .toList();
     if (joinedWorldIds == null || joinedWorldIds.isEmpty) return null;
 
+    final nexusResult = await _postsRepository.loadNexusPosts(
+      cursor: append ? _nexusCursor : null,
+      limit: 25,
+    );
+
+    if (nexusResult.items.isNotEmpty || !append) {
+      _nexusCursor = nexusResult.nextCursor;
+      _hasMore = nexusResult.hasMore;
+
+      final fetched = nexusResult.items.map(_postFromJson).toList();
+      final merged = append
+          ? _sortPosts([...state.posts, ...fetched]).take(150).toList()
+          : _sortPosts(fetched).take(150).toList();
+
+      return (
+        posts: merged,
+        loadError: merged.isEmpty && !append
+            ? 'Could not load posts from your worlds. Pull to refresh.'
+            : null,
+        hasMore: nexusResult.hasMore,
+      );
+    }
+
+    // Fallback when Nexus RPC is unavailable.
     final posts = append ? List<Post>.from(state.posts) : <Post>[];
     var failures = 0;
     var anyHasMore = false;
@@ -1369,7 +1375,7 @@ class PostNotifier extends Notifier<PostState> {
           json['isAnnouncement'] ?? json['is_announcement'] ?? false,
       isPinned: json['isPinned'] ?? json['is_pinned'] ?? false,
       isEdited: json['isEdited'] ?? json['is_edited'] ?? false,
-      repostOf: json['repostOf'],
+      repostOf: json['repostOf'] ?? json['repost_of'],
       mentions:
           (json['mentions'] as List<dynamic>?)
               ?.map((e) => e.toString())

@@ -22,6 +22,7 @@ import '../widgets/core/screen_loading.dart';
 import '../utils/date_format.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
+import '../services/chat_notification_scope.dart';
 import '../widgets/core/v_feedback.dart';
 
 class ThreadScreen extends ConsumerStatefulWidget {
@@ -53,11 +54,16 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     super.initState();
     final notifier = ref.read(chatProvider.notifier);
     notifier.loadThreadMessages(widget.parentMessage.id);
+    ChatNotificationScope.setActiveChannel(
+      channelId: widget.channelId,
+      threadId: widget.parentMessage.id,
+    );
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    ChatNotificationScope.clearChannel();
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();

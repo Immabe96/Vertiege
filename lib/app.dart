@@ -383,6 +383,13 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   void _showForegroundPush(RemoteMessage message) {
     final type = message.data['type']?.toString() ?? '';
+    if (ChatNotificationScope.shouldSuppressRemote(
+      type: type,
+      roomId: message.data['room_id']?.toString(),
+      channelId: message.data['channel_id']?.toString(),
+    )) {
+      return;
+    }
     if (type == 'dmMessage') {
       _refreshChatFromForegroundDmPush(message);
       return;
@@ -428,12 +435,8 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     if (fresh.isEmpty) return;
 
     final notification = fresh.first;
-    if (notification.type == NotificationType.dmMessage) {
-      final roomId = notification.roomId;
-      if (roomId != null &&
-          ChatNotificationScope.shouldSuppressDm(roomId)) {
-        return;
-      }
+    if (ChatNotificationScope.shouldSuppressNotification(notification)) {
+      return;
     }
     if (notification.type == NotificationType.achievementApproved) {
       unawaited(

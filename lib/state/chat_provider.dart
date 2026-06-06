@@ -445,12 +445,100 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void _markDmMessageFailed(String roomId, ChannelMessage msg) {
-    final failedMsg = msg.copyWith(content: 'Failed to send - tap to retry');
+    final failedMsg = msg.copyWith(sendFailed: true);
     final updated = state.dmMessages[roomId]
         ?.map((m) => m.id == msg.id ? failedMsg : m)
         .toList();
     state = state.copyWith(
       dmMessages: {...state.dmMessages, roomId: updated ?? []},
+    );
+  }
+
+  Future<void> retryFailedDmMessage({
+    required String roomId,
+    required String messageId,
+  }) async {
+    final messages = state.dmMessages[roomId] ?? [];
+    final msg = messages.where((m) => m.id == messageId).firstOrNull;
+    if (msg == null || !msg.sendFailed) return;
+
+    final cleared = messages
+        .map((m) => m.id == messageId ? m.copyWith(sendFailed: false) : m)
+        .toList();
+    state = state.copyWith(
+      dmMessages: {...state.dmMessages, roomId: cleared},
+    );
+
+    await _persistDmMessage(
+      msg: msg.copyWith(sendFailed: false),
+      roomId: roomId,
+      senderId: msg.senderId,
+      senderName: msg.senderName,
+      senderAvatar: msg.senderAvatar,
+      content: msg.content,
+      imageUrl: msg.imageUrl,
+      autoDeleteAfterSeconds: msg.autoDeleteAfterSeconds,
+      replyToMessageId: msg.replyToMessageId,
+      replyToSenderId: msg.replyToSenderId,
+      replyToSenderName: msg.replyToSenderName,
+      replyToContent: msg.replyToContent,
+    );
+  }
+
+  Future<void> retryFailedChannelMessage({
+    required String worldId,
+    required String channelId,
+    required String messageId,
+  }) async {
+    final messages = state.channelMessages[channelId] ?? [];
+    final msg = messages.where((m) => m.id == messageId).firstOrNull;
+    if (msg == null || !msg.sendFailed) return;
+
+    final cleared = messages
+        .map((m) => m.id == messageId ? m.copyWith(sendFailed: false) : m)
+        .toList();
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, channelId: cleared},
+    );
+
+    try {
+      final inserted = await ChatService.sendChannelMessage(
+        messageId: msg.id,
+        channelId: channelId,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        senderAvatar: msg.senderAvatar,
+        worldId: worldId,
+        content: msg.content,
+        imageUrl: msg.imageUrl,
+      );
+      final confirmed = _toChannelMessages([inserted]).first;
+      final current = state.channelMessages[channelId] ?? const [];
+      state = state.copyWith(
+        channelMessages: {
+          ...state.channelMessages,
+          channelId: current
+              .map((m) => m.id == msg.id ? confirmed : m)
+              .toList(),
+        },
+      );
+    } catch (_) {
+      _markChannelMessageFailed(channelId, msg, cleared);
+      rethrow;
+    }
+  }
+
+  void _markChannelMessageFailed(
+    String channelId,
+    ChannelMessage msg,
+    List<ChannelMessage> allMessages,
+  ) {
+    final failedMsg = msg.copyWith(sendFailed: true);
+    final updated = allMessages
+        .map((m) => m.id == msg.id ? failedMsg : m)
+        .toList();
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, channelId: updated},
     );
   }
 
@@ -761,7 +849,7 @@ class ChatNotifier extends Notifier<ChatState> {
         'imageUrl': durableImageUrl,
         'messageId': msg.id,
       });
-      final failedMsg = msg.copyWith(content: 'Failed to send - tap to retry');
+      final failedMsg = msg.copyWith(sendFailed: true);
       final updated = allMessages
           .map((m) => m.id == msg.id ? failedMsg : m)
           .toList();
@@ -1324,6 +1412,10 @@ class ChatNotifier extends Notifier<ChatState> {
               content: payload['content'] as String,
               imageUrl: payload['imageUrl'] as String?,
               autoDeleteAfterSeconds: payload['autoDeleteAfterSeconds'] as int?,
+              replyToMessageId: payload['replyToMessageId'] as String?,
+              replyToSenderId: payload['replyToSenderId'] as String?,
+              replyToSenderName: payload['replyToSenderName'] as String?,
+              replyToContent: payload['replyToContent'] as String?,
             );
             return;
           case 'channel.message':

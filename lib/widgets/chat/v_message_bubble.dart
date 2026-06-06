@@ -76,6 +76,7 @@ class VMessageBubble extends StatefulWidget {
   final VDirectMessageBubbleConfig? dmConfig;
   final bool compact;
   final String? threadPreview;
+  final VoidCallback? onRetryFailed;
 
   static const int maxAnimatedIds = 50;
 
@@ -90,6 +91,7 @@ class VMessageBubble extends StatefulWidget {
     this.dmConfig,
     this.compact = false,
     this.threadPreview,
+    this.onRetryFailed,
   }) : assert(
          (mode == VMessageBubbleMode.channel && channelConfig != null) ||
              (mode == VMessageBubbleMode.directMessage && dmConfig != null),
@@ -257,9 +259,36 @@ class _VMessageBubbleState extends State<VMessageBubble>
           )
         : bubble;
 
+    Widget child = animated;
+    if (widget.message.sendFailed &&
+        widget.isMe &&
+        widget.onRetryFailed != null) {
+      child = GestureDetector(
+        onTap: widget.onRetryFailed,
+        child: Column(
+          crossAxisAlignment: widget.isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
+            animated,
+            const Padding(
+              padding: EdgeInsets.only(top: VSpacing.xs),
+              child: Text(
+                'Failed to send · tap to retry',
+                style: TextStyle(
+                  fontSize: VFontSize.labelSm,
+                  color: VColors.error,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return RepaintBoundary(
       key: ValueKey(widget.message.id),
-      child: animated,
+      child: child,
     );
   }
 

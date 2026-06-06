@@ -24,6 +24,8 @@ class ChannelMessage {
   final bool isDeleted;
   // Auto-delete: seconds after creation when message should be removed
   final int? autoDeleteAfterSeconds;
+  /// Local-only: message failed to reach server; tap to retry.
+  final bool sendFailed;
 
   const ChannelMessage({
     required this.id,
@@ -47,6 +49,7 @@ class ChannelMessage {
     this.editedAt,
     this.isDeleted = false,
     this.autoDeleteAfterSeconds,
+    this.sendFailed = false,
   });
 
   bool get hasThread => threadCount > 0;
@@ -75,6 +78,7 @@ class ChannelMessage {
     int? editedAt,
     bool? isDeleted,
     int? autoDeleteAfterSeconds,
+    bool? sendFailed,
   }) => ChannelMessage(
     id: id ?? this.id,
     channelId: channelId ?? this.channelId,
@@ -96,7 +100,9 @@ class ChannelMessage {
     isEdited: isEdited ?? this.isEdited,
     editedAt: editedAt ?? this.editedAt,
     isDeleted: isDeleted ?? this.isDeleted,
-    autoDeleteAfterSeconds: autoDeleteAfterSeconds ?? this.autoDeleteAfterSeconds,
+    autoDeleteAfterSeconds:
+        autoDeleteAfterSeconds ?? this.autoDeleteAfterSeconds,
+    sendFailed: sendFailed ?? this.sendFailed,
   );
 
   Map<String, dynamic> toJson() => {
@@ -121,6 +127,7 @@ class ChannelMessage {
     'editedAt': editedAt,
     'isDeleted': isDeleted,
     'autoDeleteAfterSeconds': autoDeleteAfterSeconds,
+    'sendFailed': sendFailed,
   };
 
   static ChannelMessage fromJson(Map<String, dynamic> json) => ChannelMessage(
@@ -149,5 +156,6 @@ class ChannelMessage {
     editedAt: json['editedAt'],
     isDeleted: json['isDeleted'] ?? false,
     autoDeleteAfterSeconds: json['autoDeleteAfterSeconds'],
+    sendFailed: json['sendFailed'] == true,
   );
 }

@@ -705,6 +705,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                     );
               },
             ),
+            onRetryFailed: item.message!.sendFailed
+                ? () => ref.read(chatProvider.notifier).retryFailedDmMessage(
+                      roomId: widget.roomId,
+                      messageId: item.message!.id,
+                    )
+                : null,
           ),
         );
       case ChatItemType.subsequent:
@@ -750,6 +756,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                     );
               },
             ),
+            onRetryFailed: item.message!.sendFailed
+                ? () => ref.read(chatProvider.notifier).retryFailedDmMessage(
+                      roomId: widget.roomId,
+                      messageId: item.message!.id,
+                    )
+                : null,
           ),
         );
     }

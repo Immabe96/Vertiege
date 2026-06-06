@@ -89,10 +89,11 @@ class LocalNotificationService {
     final type = data['type']?.toString() ?? '';
     final roomId =
         data['room_id'] ?? data['roomId'] ?? data['dm_room_id'];
-    if (type == 'dmMessage' &&
-        roomId is String &&
-        roomId.isNotEmpty &&
-        ChatNotificationScope.shouldSuppressDm(roomId)) {
+    if (ChatNotificationScope.shouldSuppressRemote(
+      type: type,
+      roomId: roomId is String ? roomId : null,
+      channelId: data['channel_id']?.toString(),
+    )) {
       return;
     }
 

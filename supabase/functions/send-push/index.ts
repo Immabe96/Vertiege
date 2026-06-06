@@ -75,6 +75,9 @@ serve(async (req: Request) => {
     const skipReason = await pushSkipReason(supabase, record)
     if (skipReason) return json({ delivered: 0, skipped: skipReason })
 
+    const quietReason = await quietHoursSkipReason(supabase, record)
+    if (quietReason) return json({ delivered: 0, skipped: quietReason })
+
     const serviceAccount = JSON.parse(serviceAccountJson) as ServiceAccount
     const accessToken = await getFirebaseAccessToken(serviceAccount)
     const results = await Promise.allSettled(
@@ -273,6 +276,33 @@ type NotificationPreferences = {
   comments_enabled: boolean
   tier_upgrades_enabled: boolean
   world_invites_enabled: boolean
+}
+
+async function quietHoursSkipReason(
+  supabase: ReturnType<typeof createClient>,
+  record: NotificationRecord,
+): Promise<string | null> {
+  const worldId = record.world_id
+  if (!worldId) return null
+
+  const { data } = await supabase
+    .from('world_quiet_hours')
+    .select('start_hour, end_hour, enabled')
+    .eq('world_id', worldId)
+    .maybeSingle()
+
+  if (!data?.enabled) return null
+
+  const startHour = data.start_hour ?? 22
+  const endHour = data.end_hour ?? 8
+  const currentHour = new Date().getUTCHours()
+
+  const inQuietWindow =
+    startHour > endHour
+      ? currentHour >= startHour || currentHour < endHour
+      : currentHour >= startHour && currentHour < endHour
+
+  return inQuietWindow ? 'quiet_hours' : null
 }
 
 async function pushSkipReason(

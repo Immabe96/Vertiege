@@ -64,6 +64,47 @@ class PostRepository {
     return ids;
   }
 
+  Future<PaginatedResult<Map<String, dynamic>>> loadNexusPosts({
+    String? cursor,
+    int limit = 25,
+  }) async {
+    if (!isSupabaseConfigured()) {
+      return const PaginatedResult(items: [], hasMore: false);
+    }
+    try {
+      final client = getSupabase();
+      final raw = await client.rpc(
+        'list_nexus_posts_cursor',
+        params: {
+          if (cursor != null) 'p_cursor': cursor,
+          'p_limit': limit,
+        },
+      );
+      if (raw is! Map) {
+        throw StateError('Unexpected list_nexus_posts_cursor response');
+      }
+      final map = Map<String, dynamic>.from(raw);
+      if (map['success'] != true) {
+        throw StateError(map['error'] as String? ?? 'Could not load Nexus feed');
+      }
+      final itemsRaw = map['items'];
+      final list = itemsRaw is List
+          ? itemsRaw
+                .map((e) => Map<String, dynamic>.from(e as Map))
+                .toList()
+          : <Map<String, dynamic>>[];
+      final hasMore = map['has_more'] == true;
+      final nextCursor = map['next_cursor']?.toString();
+      return PaginatedResult(
+        items: list,
+        hasMore: hasMore,
+        nextCursor: nextCursor,
+      );
+    } catch (_) {
+      return const PaginatedResult(items: [], hasMore: false);
+    }
+  }
+
   Future<PaginatedResult<Map<String, dynamic>>> loadPosts({
     String? worldId,
     String? cursor,
@@ -175,6 +216,7 @@ class PostRepository {
         'p_mentions': post.mentions,
         'p_hashtags': post.hashtags,
         'p_scheduled_for': post.scheduledFor?.toUtc().toIso8601String(),
+        if (post.repostOf != null) 'p_repost_of': post.repostOf,
       },
     );
     if (result is! Map) {
@@ -484,6 +526,7 @@ class PostRepository {
       isAnnouncement: json['is_announcement'] == true,
       isPinned: json['is_pinned'] == true,
       status: json['status']?.toString() ?? 'published',
+      repostOf: json['repost_of'] as String? ?? json['repostOf'] as String?,
     );
   }
 
@@ -527,5 +570,6 @@ class PostRepository {
     'hashtags': post.hashtags,
     'poll': post.poll?.toJson(),
     'scheduled_for': post.scheduledFor?.toIso8601String(),
+    if (post.repostOf != null) 'repost_of': post.repostOf,
   };
 }
