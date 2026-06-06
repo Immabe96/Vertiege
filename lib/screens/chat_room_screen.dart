@@ -81,6 +81,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   String? _pendingScrollMessageId;
   int _pendingScrollAttempts = 0;
   int _lastSeenMessageCount = 0;
+  bool _didInitialScroll = false;
   static const int _maxScrollAttempts = 4;
 
   @override
@@ -167,6 +168,33 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             });
           }),
     );
+  }
+
+  void _scrollToNewSinceVisitDivider() {
+    if (_didInitialScroll) return;
+    _didInitialScroll = true;
+    final messages = ref.read(chatProvider).dmMessages[widget.roomId] ?? const [];
+    if (messages.isEmpty) {
+      _didInitialScroll = false;
+      return;
+    }
+    final displayItems = buildChatDisplayItems(messages);
+    final dividerIndex = newSinceVisitDividerDisplayIndex(
+      messages: messages,
+      lastVisitAt: _visitDividerAnchor,
+    );
+    if (dividerIndex == null || dividerIndex <= 0) return;
+    final total = _scrollController.hasClients
+        ? _scrollController.position.maxScrollExtent
+        : 0.0;
+    if (total <= 0) return;
+    final renderedIndex = dividerIndex;
+    final perChild = displayItems.isEmpty ? 0.0 : total / displayItems.length;
+    final target = (perChild * renderedIndex).clamp(0.0, total).toDouble();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      _scrollController.jumpTo(target);
+    });
   }
 
   void _subscribePartnerPresence() {
@@ -550,6 +578,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() {});
       });
+    }
+    if (!_didInitialScroll &&
+        _pendingScrollMessageId == null &&
+        messages.isNotEmpty) {
+      _scrollToNewSinceVisitDivider();
     }
     if (_pendingScrollMessageId != null &&
         messages.length != _lastSeenMessageCount) {
