@@ -699,6 +699,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
               },
               hintText: 'Message #${widget.channelName}',
               typingIndicator: otherTyping ? 'Someone is typing…' : null,
+              canSendOverride: _imagePath != null,
               useCommuneStyle: true,
               showAttach: true,
               useAttachmentTray: true,

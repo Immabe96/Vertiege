@@ -23,6 +23,7 @@ class ChatInputBar extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final Widget? slashCommandBar;
   final VoidCallback? onOpenMediaPicker;
+  final bool canSendOverride;
 
   /// Solid commune composer (world channels / DMs) instead of glass blur.
   final bool useCommuneStyle;
@@ -43,6 +44,7 @@ class ChatInputBar extends StatefulWidget {
     this.onChanged,
     this.slashCommandBar,
     this.onOpenMediaPicker,
+    this.canSendOverride = false,
     this.useCommuneStyle = false,
   });
 
@@ -66,7 +68,8 @@ class _ChatInputBarState extends State<ChatInputBar> {
   void didUpdateWidget(covariant ChatInputBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.slashCommandBar != widget.slashCommandBar ||
-        oldWidget.controller != widget.controller) {
+        oldWidget.controller != widget.controller ||
+        oldWidget.canSendOverride != widget.canSendOverride) {
       _recompute();
     }
   }
@@ -87,6 +90,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   }
 
   bool _computeCanSend() {
+    if (widget.canSendOverride) return true;
     if (widget.slashCommandBar != null) return true;
     return widget.controller.text.trim().isNotEmpty;
   }

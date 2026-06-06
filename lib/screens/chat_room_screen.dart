@@ -753,6 +753,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             typingIndicator: otherTyping
                 ? '${recipientName.isNotEmpty ? recipientName : 'Someone'} is typing…'
                 : null,
+            canSendOverride: _imagePath != null,
             useCommuneStyle: true,
           ),
         ],
