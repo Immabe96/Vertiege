@@ -10,8 +10,14 @@ import '../core/shimmer.dart';
 class PostImage extends StatelessWidget {
   final String uri;
   final double height;
+  final BorderRadius? borderRadius;
 
-  const PostImage({super.key, required this.uri, this.height = 200});
+  const PostImage({
+    super.key,
+    required this.uri,
+    this.height = 200,
+    this.borderRadius,
+  });
 
   bool get _isNetwork =>
       uri.startsWith('http://') || uri.startsWith('https://');
@@ -19,7 +25,7 @@ class PostImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(VRadius.md),
+      borderRadius: borderRadius ?? BorderRadius.circular(VRadius.md),
       child: _isNetwork ? _networkImage() : _localImage(),
     );
   }

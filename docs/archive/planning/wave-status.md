@@ -303,6 +303,16 @@ Cross-reference: [`roadmap.md`](../roadmap.md) (7–12), [`perfection-backlog.md
 
 ---
 
+## Commune UX (Discord redesign) — Wave 6 You tab
+
+| Item | Status |
+|------|--------|
+| You tab: single header chrome (`IdentityScreen.embedded` in `YouScreen`) | **Done** — search + refresh moved to `VTabPage` header; `/identity` still redirects to `/you` |
+
+No dedicated DCX id for double-header fix; unblocks Wave 6 You/identity polish (DCX-099+).
+
+---
+
 ## Follow-ups (product / infra)
 
 1. **Store receipt validation** — Edge function deployed (stub → RPC); live Apple/Google verify in **Wave 19**. See [store-receipt-hardening.md](../../operations/store-receipt-hardening.md).

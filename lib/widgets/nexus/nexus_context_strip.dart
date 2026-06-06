@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../services/contextual_help_prefs.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/progression_help_button.dart';
 import '../../config/progression_glossary.dart';
 
-/// Achievement-first context line at the top of Nexus.
+/// Achievement-first context chips at the top of Nexus (DCX-091).
 class NexusContextStrip extends StatelessWidget {
   final bool showJoinWorldsCta;
+  final bool useCommuneStyle;
 
   const NexusContextStrip({
     super.key,
     this.showJoinWorldsCta = false,
+    this.useCommuneStyle = false,
   });
 
   @override
@@ -30,11 +33,61 @@ class NexusContextStrip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Nexus',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: VFontWeight.semiBold,
-              color: context.vOnSurface,
+          Row(
+            children: [
+              Text(
+                'Nexus',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                  color: useCommuneStyle
+                      ? VCommuneColors.headerPrimary
+                      : context.vOnSurface,
+                ),
+              ),
+              const Spacer(),
+              ProgressionHelpButton(
+                focus: ProgressionFocus.overview,
+                tooltip: 'How XP, tier & rep work',
+                iconSize: VIconSize.md,
+              ),
+            ],
+          ),
+          const SizedBox(height: VSpacing.sm),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _ContextChip(
+                  label: 'Season',
+                  icon: Icons.auto_awesome,
+                  useCommuneStyle: useCommuneStyle,
+                  onTap: () => context.push('/progress?tab=season'),
+                ),
+                const SizedBox(width: VSpacing.xs),
+                _ContextChip(
+                  label: 'Quests',
+                  icon: Icons.flag_outlined,
+                  useCommuneStyle: useCommuneStyle,
+                  onTap: () => context.push('/progress?tab=quests'),
+                ),
+                const SizedBox(width: VSpacing.xs),
+                _ContextChip(
+                  label: 'Worlds',
+                  icon: Icons.public_outlined,
+                  useCommuneStyle: useCommuneStyle,
+                  onTap: () => context.push('/explore'),
+                ),
+                if (showJoinWorldsCta) ...[
+                  const SizedBox(width: VSpacing.xs),
+                  _ContextChip(
+                    label: 'Browse worlds',
+                    icon: Icons.explore_outlined,
+                    selected: true,
+                    useCommuneStyle: useCommuneStyle,
+                    onTap: () => context.push('/explore'),
+                  ),
+                ],
+              ],
             ),
           ),
           FutureBuilder<bool>(
@@ -43,47 +96,91 @@ class NexusContextStrip extends StatelessWidget {
               if (snapshot.data != true) {
                 return const SizedBox.shrink();
               }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: VSpacing.xs),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          showJoinWorldsCta
-                              ? 'Join a world to unlock your feed and submit proof.'
-                              : 'Your worlds, quests, and progress — start here.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: context.vOnSurfaceVariant,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                      ProgressionHelpButton(
-                        focus: ProgressionFocus.overview,
-                        tooltip: 'How XP, tier & rep work',
-                        iconSize: VIconSize.md,
-                      ),
-                    ],
+              return Padding(
+                padding: const EdgeInsets.only(top: VSpacing.sm),
+                child: Text(
+                  showJoinWorldsCta
+                      ? 'Join a world to unlock your feed and share standing.'
+                      : 'Your worlds, quests, and progress — start here.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: useCommuneStyle
+                        ? VCommuneColors.textMuted
+                        : context.vOnSurfaceVariant,
+                    height: 1.35,
                   ),
-                ],
+                ),
               );
             },
           ),
-          if (showJoinWorldsCta) ...[
-            const SizedBox(height: VSpacing.sm),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => context.go('/explore'),
-                icon: const Icon(Icons.explore_outlined, size: VIconSize.sm),
-                label: const Text('Browse worlds'),
-              ),
-            ),
-          ],
         ],
+      ),
+    );
+  }
+}
+
+class _ContextChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final bool useCommuneStyle;
+  final VoidCallback onTap;
+
+  const _ContextChip({
+    required this.label,
+    required this.icon,
+    this.selected = false,
+    this.useCommuneStyle = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = useCommuneStyle
+        ? (selected
+              ? VCommuneColors.modifierSelected
+              : VCommuneColors.surfaceSecondary)
+        : (selected
+              ? context.vPrimary.withValues(alpha: 0.18)
+              : context.vSurfaceContainer);
+    final border = useCommuneStyle
+        ? VCommuneColors.dividerSubtle
+        : context.vOutline.withValues(alpha: 0.35);
+    final fg = useCommuneStyle
+        ? (selected ? VCommuneColors.headerPrimary : VCommuneColors.textMuted)
+        : (selected ? context.vOnSurface : context.vOnSurfaceVariant);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(VRadius.pill),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.sm,
+            vertical: VSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(VRadius.pill),
+            border: Border.all(color: border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: VIconSize.sm, color: fg),
+              const SizedBox(width: VSpacing.xs),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: selected ? VFontWeight.semiBold : VFontWeight.medium,
+                  color: fg,
+                  height: VLineHeight.label,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

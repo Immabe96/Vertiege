@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,26 +9,28 @@ import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/message.dart';
+import '../services/chat_density_prefs.dart';
+import '../state/chat_density_provider.dart';
 import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
+import '../theme/v_commune_chat_theme.dart';
 import '../theme/v_tokens.dart';
 import '../utils/chat_new_since_visit.dart';
-import '../utils/date_format.dart';
 import '../utils/presence_utils.dart';
 import '../services/chat_notification_scope.dart';
 import '../services/supabase.dart';
 import '../widgets/chat/chat_connection_banner.dart';
 import '../widgets/chat/chat_date_separator.dart';
-import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
+import '../widgets/chat/v_message_bubble.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/new_since_visit_divider.dart';
 import '../widgets/core/v_accessible.dart';
+import '../widgets/chat/achievement_share_picker.dart';
 import '../widgets/chat/scroll_fab.dart';
+import '../widgets/chat/v_achievement_attachment.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
-import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/core/status_dot.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_feedback.dart';
@@ -55,7 +56,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
 
-  bool _showScrollFab = false;
+  final _scrollFabTracker = ChatScrollFabTracker();
   bool _loadingOlderRequested = false;
   String? _imagePath;
   Timer? _outboundTypingDebounce;
@@ -129,7 +130,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   }
 
   @override
-  void dispose() {
+  void deactivate() {
     _outboundTypingDebounce?.cancel();
     final resident = ref.read(residentProvider).resident;
     final notifier = ref.read(chatProvider.notifier);
@@ -138,6 +139,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     }
     notifier.unsubscribeFromTyping(widget.roomId);
     ChatNotificationScope.setActiveDmRoom(null);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -145,14 +151,13 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    final offset = _scrollController.offset;
-    final maxExtent = _scrollController.position.maxScrollExtent;
-    final showFab = (maxExtent - offset) > 200;
-    if (showFab != _showScrollFab) {
-      setState(() => _showScrollFab = showFab);
+    if (_scrollController.hasClients &&
+        _scrollFabTracker.updateFromScroll(_scrollController)) {
+      setState(() {});
     }
-    _maybeLoadOlderMessages(offset);
+    _maybeLoadOlderMessages(_scrollController.hasClients
+        ? _scrollController.offset
+        : 0);
   }
 
   void _maybeLoadOlderMessages(double offset) {
@@ -259,6 +264,26 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     });
   }
 
+  Future<void> _shareAchievement() async {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    final picked = await pickVerifiedAchievementToShare(context, ref);
+    if (picked == null || !mounted) return;
+
+    final note = _controller.text.trim();
+    final content = achievementShareContent(picked.id, note: note);
+    _controller.clear();
+    await ref.read(chatProvider.notifier).sendDmMessage(
+      roomId: widget.roomId,
+      senderId: resident.id,
+      senderName: resident.name,
+      senderAvatar: resident.avatarUrl,
+      content: content,
+    );
+    if (mounted) _scrollToBottom();
+  }
+
   Future<void> _send() async {
     final content = _controller.text.trim();
     if (content.isEmpty && _imagePath == null) return;
@@ -350,14 +375,23 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         widget.initialPresence ??
         _presenceFromRoom(room, resident?.id ?? '');
 
+    if (_scrollFabTracker.syncMessageCount(messages.length)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
     final displayItems = buildChatDisplayItems(messages);
+    final chatCompact =
+        ref.watch(chatDensityProvider) == ChatMessageDensity.compact;
 
     final unreadDividerIndex = newSinceVisitDividerDisplayIndex(
       messages: messages,
       lastVisitAt: _visitDividerAnchor,
     );
 
-    return VScaffold(
+    return ColoredBox(
+      color: VCommuneChatTheme.backgroundColor,
+      child: VScaffold(
       header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
@@ -427,6 +461,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                               isDark,
                               item,
                               resident?.id ?? '',
+                              compact: chatCompact,
                             );
                           }
                           return const SizedBox.shrink();
@@ -450,11 +485,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                             ),
                           ),
                         ),
-                      if (_showScrollFab)
+                      if (_scrollFabTracker.show)
                         Positioned(
                           right: VSpacing.md,
                           bottom: VSpacing.sm,
-                          child: ChatScrollFab(onTap: _scrollToBottom),
+                          child: ChatScrollFab(
+                            onTap: _scrollToBottom,
+                            badgeCount: _scrollFabTracker.badgeCount,
+                          ),
                         ),
                     ],
                   ),
@@ -466,16 +504,20 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
             onSend: _send,
             onChanged: _onComposerChanged,
             showAttach: true,
+            useAttachmentTray: true,
             onAttach: _pickImage,
+            onShareAchievement: _shareAchievement,
             replyToName: _replyToSenderName,
             replyToContent: _replyToContent,
             onCancelReply: _cancelReply,
             typingIndicator: otherTyping
                 ? '${recipientName.isNotEmpty ? recipientName : 'Someone'} is typing…'
                 : null,
+            useCommuneStyle: true,
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -572,8 +614,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     ThemeData theme,
     bool isDark,
     ChatDisplayItem item,
-    String residentId,
-  ) {
+    String residentId, {
+    bool compact = false,
+  }) {
     switch (item.type) {
       case ChatItemType.dateSeparator:
         return ChatDateSeparator(
@@ -583,83 +626,91 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       case ChatItemType.firstInGroup:
         return RepaintBoundary(
           key: ValueKey(item.message!.id),
-          child: _MessageBubble(
+          child: VMessageBubble(
             message: item.message!,
             isMe: item.message!.senderId == residentId,
             showHeader: true,
             animatedMessageIds: _animatedMessageIds,
-            currentUserId: residentId,
-            onReply: (msg) => _setReply(
-              messageId: msg.id,
-              senderId: msg.senderId,
-              senderName: msg.senderName,
-              content: msg.content,
+            mode: VMessageBubbleMode.directMessage,
+            compact: compact,
+            dmConfig: VDirectMessageBubbleConfig(
+              currentUserId: residentId,
+              onReply: (msg) => _setReply(
+                messageId: msg.id,
+                senderId: msg.senderId,
+                senderName: msg.senderName,
+                content: msg.content,
+              ),
+              onEdit: (msg, newContent) async {
+                await ref
+                    .read(chatProvider.notifier)
+                    .editMessage(
+                      roomId: widget.roomId,
+                      messageId: msg.id,
+                      newContent: newContent,
+                    );
+              },
+              onDelete: (msg) async {
+                await ref
+                    .read(chatProvider.notifier)
+                    .deleteMessage(roomId: widget.roomId, messageId: msg.id);
+              },
+              onReaction: (msg, emoji) async {
+                await ref
+                    .read(chatProvider.notifier)
+                    .toggleReaction(
+                      roomId: widget.roomId,
+                      messageId: msg.id,
+                      userId: residentId,
+                      emoji: emoji,
+                    );
+              },
             ),
-            onEdit: (msg, newContent) async {
-              await ref
-                  .read(chatProvider.notifier)
-                  .editMessage(
-                    roomId: widget.roomId,
-                    messageId: msg.id,
-                    newContent: newContent,
-                  );
-            },
-            onDelete: (msg) async {
-              await ref
-                  .read(chatProvider.notifier)
-                  .deleteMessage(roomId: widget.roomId, messageId: msg.id);
-            },
-            onReaction: (msg, emoji) async {
-              await ref
-                  .read(chatProvider.notifier)
-                  .toggleReaction(
-                    roomId: widget.roomId,
-                    messageId: msg.id,
-                    userId: residentId,
-                    emoji: emoji,
-                  );
-            },
           ),
         );
       case ChatItemType.subsequent:
         return RepaintBoundary(
           key: ValueKey(item.message!.id),
-          child: _MessageBubble(
+          child: VMessageBubble(
             message: item.message!,
             isMe: item.message!.senderId == residentId,
             showHeader: false,
             animatedMessageIds: _animatedMessageIds,
-            currentUserId: residentId,
-            onReply: (msg) => _setReply(
-              messageId: msg.id,
-              senderId: msg.senderId,
-              senderName: msg.senderName,
-              content: msg.content,
+            mode: VMessageBubbleMode.directMessage,
+            compact: compact,
+            dmConfig: VDirectMessageBubbleConfig(
+              currentUserId: residentId,
+              onReply: (msg) => _setReply(
+                messageId: msg.id,
+                senderId: msg.senderId,
+                senderName: msg.senderName,
+                content: msg.content,
+              ),
+              onEdit: (msg, newContent) async {
+                await ref
+                    .read(chatProvider.notifier)
+                    .editMessage(
+                      roomId: widget.roomId,
+                      messageId: msg.id,
+                      newContent: newContent,
+                    );
+              },
+              onDelete: (msg) async {
+                await ref
+                    .read(chatProvider.notifier)
+                    .deleteMessage(roomId: widget.roomId, messageId: msg.id);
+              },
+              onReaction: (msg, emoji) async {
+                await ref
+                    .read(chatProvider.notifier)
+                    .toggleReaction(
+                      roomId: widget.roomId,
+                      messageId: msg.id,
+                      userId: residentId,
+                      emoji: emoji,
+                    );
+              },
             ),
-            onEdit: (msg, newContent) async {
-              await ref
-                  .read(chatProvider.notifier)
-                  .editMessage(
-                    roomId: widget.roomId,
-                    messageId: msg.id,
-                    newContent: newContent,
-                  );
-            },
-            onDelete: (msg) async {
-              await ref
-                  .read(chatProvider.notifier)
-                  .deleteMessage(roomId: widget.roomId, messageId: msg.id);
-            },
-            onReaction: (msg, emoji) async {
-              await ref
-                  .read(chatProvider.notifier)
-                  .toggleReaction(
-                    roomId: widget.roomId,
-                    messageId: msg.id,
-                    userId: residentId,
-                    emoji: emoji,
-                  );
-            },
           ),
         );
     }
@@ -693,457 +744,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final avatar = room['other_avatar'];
     if (avatar is String && avatar.isNotEmpty) return avatar;
     return null;
-  }
-}
-
-class _MessageBubble extends StatefulWidget {
-  final ChannelMessage message;
-  final bool isMe;
-  final bool showHeader;
-  final Set<String> animatedMessageIds;
-  final String currentUserId;
-  final void Function(ChannelMessage) onReply;
-  final Future<void> Function(ChannelMessage, String) onEdit;
-  final Future<void> Function(ChannelMessage) onDelete;
-  final Future<void> Function(ChannelMessage, String) onReaction;
-
-  static const int maxAnimatedIds = 50;
-
-  const _MessageBubble({
-    required this.message,
-    required this.isMe,
-    required this.showHeader,
-    required this.animatedMessageIds,
-    required this.currentUserId,
-    required this.onReply,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onReaction,
-  });
-
-  @override
-  State<_MessageBubble> createState() => _MessageBubbleState();
-}
-
-class _MessageBubbleState extends State<_MessageBubble>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animController;
-  late final Animation<double> _opacity;
-  late final Animation<Offset> _slide;
-  bool _hasAnimated = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _hasAnimated = widget.animatedMessageIds.contains(widget.message.id);
-
-    _animController = AnimationController(
-      duration: const Duration(milliseconds: 350),
-      vsync: this,
-    );
-
-    _opacity = Tween(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
-
-    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
-    );
-
-    if (_hasAnimated) {
-      _animController.value = 1.0;
-    } else {
-      if (widget.animatedMessageIds.length >= _MessageBubble.maxAnimatedIds) {
-        final toRemove = widget.animatedMessageIds
-            .take(_MessageBubble.maxAnimatedIds ~/ 2)
-            .toList();
-        widget.animatedMessageIds.removeAll(toRemove);
-      }
-      widget.animatedMessageIds.add(widget.message.id);
-      Future.delayed(const Duration(milliseconds: 30), () {
-        if (mounted) _animController.forward();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isMe = widget.isMe;
-    final showHeader = widget.showHeader;
-    final msg = widget.message;
-
-    final bubbleColor = isMe
-        ? VColors.primary
-        : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground);
-
-    final bubbleBorder = isMe
-        ? Colors.transparent
-        : (isDark ? VColors.glassBorderDark : VColors.glassBorder);
-
-    final textColor = isMe
-        ? VColors.onPrimary
-        : (isDark ? VColors.onSurfaceDark : VColors.onSurface);
-    final timestampColor = isMe
-        ? VColors.onPrimary.withValues(alpha: 0.6)
-        : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant);
-
-    final borderRadius = isMe
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(VRadius.lg),
-            bottomLeft: Radius.circular(VRadius.lg),
-            bottomRight: Radius.circular(VRadius.lg),
-            topRight: Radius.circular(VRadius.sm),
-          )
-        : const BorderRadius.only(
-            topRight: Radius.circular(VRadius.lg),
-            bottomRight: Radius.circular(VRadius.lg),
-            bottomLeft: Radius.circular(VRadius.lg),
-            topLeft: Radius.circular(VRadius.sm),
-          );
-
-    final alignment = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-
-    final margin = showHeader
-        ? const EdgeInsets.only(bottom: VSpacing.sm)
-        : const EdgeInsets.only(bottom: VSpacing.xs);
-
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: Align(
-          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            margin: margin,
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
-            ),
-            child: Column(
-              crossAxisAlignment: alignment,
-              children: [
-                if (showHeader && !isMe) ...[
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CosmeticAvatar(
-                        imageUrl: widget.message.senderAvatar,
-                        seed: widget.message.senderId,
-                        size: 24,
-                      ),
-                      const SizedBox(width: VSpacing.xs),
-                      LuminaryNameplate(
-                        name: widget.message.senderName,
-                        fontSize: VFontSize.labelSm,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: VSpacing.xs),
-                ],
-                GestureDetector(
-                  onLongPress: () => _showMessageOptions(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.sm,
-                      vertical: VSpacing.sm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bubbleColor,
-                      borderRadius: borderRadius,
-                      border: Border.all(color: bubbleBorder),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: alignment,
-                      children: [
-                        if (msg.hasReply) ...[
-                          _ReplyPreview(
-                            senderName: msg.replyToSenderName ?? 'Unknown',
-                            content: msg.replyToContent ?? '',
-                            isMe: isMe,
-                            textColor: textColor,
-                          ),
-                          const SizedBox(height: VSpacing.xs),
-                        ],
-                        if (msg.imageUrl != null && msg.imageUrl!.isNotEmpty)
-                          ChatImage(url: msg.imageUrl!),
-                        if (msg.content.isNotEmpty) ...[
-                          if (msg.imageUrl != null && msg.imageUrl!.isNotEmpty)
-                            const SizedBox(height: VSpacing.xs),
-                          msg.isDeleted
-                              ? Text(
-                                  msg.content,
-                                  style: TextStyle(
-                                    fontSize: VFontSize.bodyMd,
-                                    color: timestampColor,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                )
-                              : _ChatContent(
-                                  content: msg.content,
-                                  textColor: textColor,
-                                ),
-                        ],
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              formatTimestamp(msg.createdAt),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: timestampColor,
-                                fontSize: VFontSize.labelSm,
-                              ),
-                            ),
-                            if (msg.isEdited) ...[
-                              const SizedBox(width: VSpacing.xs),
-                              Text(
-                                '(edited)',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: timestampColor,
-                                  fontSize: VFontSize.labelSm,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (msg.hasReactions)
-                  _ReactionBar(
-                    reactions: msg.reactions,
-                    currentUserId: widget.currentUserId,
-                    onAddReaction: () => _showEmojiPicker(context),
-                    onToggleReaction: (emoji) => widget.onReaction(msg, emoji),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMessageOptions(BuildContext context) {
-    final isMe = widget.isMe;
-    final msg = widget.message;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(VSpacing.md),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['👍', '❤️', '😂', '😮', '😢', '🔥']
-                    .map(
-                      (emoji) => GestureDetector(
-                        onTap: () {
-                          widget.onReaction(msg, emoji);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(VSpacing.sm),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? VColors.surfaceContainerDark
-                                : VColors.surfaceContainer,
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                          ),
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(
-                              fontSize: VFontSize.headlineSm,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(VIcons.arrowLeft),
-              title: const Text('Reply'),
-              onTap: () {
-                Navigator.pop(context);
-                widget.onReply(msg);
-              },
-            ),
-            if (isMe) ...[
-              ListTile(
-                leading: const Icon(VIcons.edit),
-                title: const Text('Edit'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditDialog(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete_outline, color: VColors.error),
-                title: const Text(
-                  'Delete',
-                  style: TextStyle(color: VColors.error),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onDelete(msg);
-                },
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context) {
-    final controller = TextEditingController(text: widget.message.content);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        title: const Text('Edit Message'),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainer,
-          ),
-        ),
-        actions: [
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(context),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Save',
-            onPressed: () {
-              final newContent = controller.text.trim();
-              if (newContent.isNotEmpty) {
-                widget.onEdit(widget.message, newContent);
-              }
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEmojiPicker(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: Wrap(
-            spacing: VSpacing.sm,
-            runSpacing: VSpacing.sm,
-            children:
-                ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉', '👀', '💯', '🚀']
-                    .map(
-                      (emoji) => GestureDetector(
-                        onTap: () {
-                          widget.onReaction(widget.message, emoji);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(VSpacing.sm),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? VColors.surfaceContainerDark
-                                : VColors.surfaceContainer,
-                            borderRadius: BorderRadius.circular(VRadius.md),
-                          ),
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(
-                              fontSize: VFontSize.headlineMd,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChatContent extends StatelessWidget {
-  final String content;
-  final Color textColor;
-
-  const _ChatContent({required this.content, required this.textColor});
-
-  @override
-  Widget build(BuildContext context) {
-    final spans = _parseMentions(content, textColor);
-    return RichText(
-      text: TextSpan(
-        children: spans,
-        style: TextStyle(color: textColor),
-      ),
-    );
-  }
-
-  List<TextSpan> _parseMentions(String text, Color defaultColor) {
-    final spans = <TextSpan>[];
-    final mentionRegex = RegExp(r'@(\w+)');
-    var lastEnd = 0;
-
-    for (final match in mentionRegex.allMatches(text)) {
-      if (match.start > lastEnd) {
-        spans.add(TextSpan(text: text.substring(lastEnd, match.start)));
-      }
-      spans.add(
-        TextSpan(
-          text: match.group(0),
-          style: TextStyle(
-            color: VColors.primary,
-            fontWeight: VFontWeight.semiBold,
-            backgroundColor: VColors.primary.withValues(alpha: 0.1),
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              // Could navigate to profile
-            },
-        ),
-      );
-      lastEnd = match.end;
-    }
-
-    if (lastEnd < text.length) {
-      spans.add(TextSpan(text: text.substring(lastEnd)));
-    }
-
-    return spans.isEmpty ? [TextSpan(text: text)] : spans;
   }
 }
 
@@ -1299,166 +899,6 @@ class _ImagePreview extends StatelessWidget {
             icon: const Icon(VIcons.x, size: VIconSize.md),
             onPressed: onRemove,
             tooltip: 'Remove image',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReplyPreview extends StatelessWidget {
-  final String senderName;
-  final String content;
-  final bool isMe;
-  final Color textColor;
-
-  const _ReplyPreview({
-    required this.senderName,
-    required this.content,
-    required this.isMe,
-    required this.textColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.xs,
-        vertical: VSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: textColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(VRadius.sm),
-        border: Border(
-          left: BorderSide(
-            color: isMe ? textColor.withValues(alpha: 0.4) : VColors.primary,
-            width: 2,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            senderName,
-            style: TextStyle(
-              fontSize: VFontSize.labelSm,
-              fontWeight: VFontWeight.semiBold,
-              color: isMe ? textColor.withValues(alpha: 0.7) : VColors.primary,
-            ),
-          ),
-          Text(
-            content,
-            style: TextStyle(
-              fontSize: VFontSize.labelSm,
-              color: textColor.withValues(alpha: 0.5),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReactionBar extends StatelessWidget {
-  final Map<String, List<String>> reactions;
-  final String currentUserId;
-  final VoidCallback onAddReaction;
-  final void Function(String emoji) onToggleReaction;
-
-  const _ReactionBar({
-    required this.reactions,
-    required this.currentUserId,
-    required this.onAddReaction,
-    required this.onToggleReaction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: VSpacing.xs),
-      child: Wrap(
-        spacing: VSpacing.xs,
-        runSpacing: VSpacing.xs,
-        children: [
-          ...reactions.entries.map((entry) {
-            final hasReacted = entry.value.contains(currentUserId);
-            return GestureDetector(
-              onTap: () => onToggleReaction(entry.key),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: VSpacing.xs,
-                  vertical: VSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: hasReacted
-                      ? VColors.primary.withValues(alpha: 0.15)
-                      : (isDark
-                            ? VColors.surfaceContainerDark
-                            : VColors.surfaceContainer),
-                  borderRadius: BorderRadius.circular(VRadius.pill),
-                  border: Border.all(
-                    color: hasReacted
-                        ? VColors.primary.withValues(alpha: 0.3)
-                        : (isDark
-                              ? VColors.outlineVariantDark
-                              : VColors.outlineVariant),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      entry.key,
-                      style: const TextStyle(fontSize: VFontSize.bodyMd),
-                    ),
-                    if (entry.value.length > 1) ...[
-                      const SizedBox(width: VSpacing.xs),
-                      Text(
-                        '${entry.value.length}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: hasReacted
-                              ? VColors.primary
-                              : (isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          }),
-          GestureDetector(
-            onTap: onAddReaction,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: VSpacing.xs,
-                vertical: VSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(VRadius.pill),
-                border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark
-                      : VColors.outlineVariant,
-                ),
-              ),
-              child: const Icon(
-                Icons.add,
-                size: 14,
-                color: VColors.onSurfaceVariant,
-              ),
-            ),
           ),
         ],
       ),

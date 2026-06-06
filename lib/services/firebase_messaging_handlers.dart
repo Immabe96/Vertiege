@@ -57,7 +57,14 @@ String? routeFromRemoteMessage(RemoteMessage message) {
     return '/chat';
   }
 
-  if (type == 'achievementApproved' || type == 'achievementRejected') {
+  if (
+    type == 'achievementApproved' ||
+    type == 'identityVerified' ||
+    type == 'identityRejected'
+  ) {
+    return '/identity';
+  }
+  if (type == 'achievementRejected') {
     return '/achievements';
   }
 

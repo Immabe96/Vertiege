@@ -48,19 +48,26 @@ List<ChatDisplayItem> buildChatDisplayItems(List<ChannelMessage> messages) {
       lastSenderTimestamp = null;
     }
 
-    final sameSender = msg.senderId == lastSenderId;
+    final isSystem =
+        msg.senderId == 'system' || msg.senderName == 'System';
+
+    final sameSender = !isSystem && msg.senderId == lastSenderId;
     final withinWindow =
         lastSenderTimestamp != null &&
         (msg.createdAt - lastSenderTimestamp).abs() < chatGroupWindow;
 
-    if (sameSender && withinWindow) {
+    if (isSystem) {
+      items.add(ChatDisplayItem.first(msg));
+      lastSenderId = null;
+      lastSenderTimestamp = null;
+    } else if (sameSender && withinWindow) {
       items.add(ChatDisplayItem.subsequent(msg));
+      lastSenderTimestamp = msg.createdAt;
     } else {
       items.add(ChatDisplayItem.first(msg));
+      lastSenderId = msg.senderId;
+      lastSenderTimestamp = msg.createdAt;
     }
-
-    lastSenderId = msg.senderId;
-    lastSenderTimestamp = msg.createdAt;
   }
 
   return items;

@@ -16,6 +16,7 @@ import '../../state/achievement_provider.dart';
 import '../../state/quest_provider.dart';
 import '../../state/post_provider.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
@@ -34,7 +35,12 @@ import '../../widgets/achievements/achievement_queue_summary.dart';
 import '../../widgets/profile/trophy_case.dart';
 import '../../widgets/profile/trophy_case_sheet.dart';
 import '../../widgets/profile/featured_achievements_sheet.dart';
+import '../../widgets/profile/status_picker.dart';
+import '../../config/achievements.dart' as ach_config;
+import '../../widgets/achievements/achievement_category_meta.dart';
+import '../../widgets/achievements/achievement_icon.dart';
 import '../../utils/profile_share.dart';
+import '../../router/world_navigation.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/empty_state.dart';
@@ -46,6 +52,8 @@ import '../../widgets/identity/joined_worlds_row.dart';
 import '../../config/onboarding_funnel.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/onboarding_funnel_sync.dart';
+import '../../config/identity_verification.dart';
+import '../../widgets/identity/identity_verification_card.dart';
 import '../../widgets/onboarding/first_steps_card.dart';
 import '../../config/achievements.dart';
 import '../../config/progression_glossary.dart';
@@ -53,8 +61,33 @@ import '../../widgets/core/progression_help_button.dart';
 import '../../config/cosmetics.dart';
 import '../../widgets/core/v_feedback.dart';
 
+/// Refreshes honour-wall data (resident, achievements, posts).
+///
+/// [onAfterLoad] runs after provider reloads (e.g. high-prestige worlds).
+Future<void> refreshHonourWallData(
+  WidgetRef ref,
+  BuildContext context, {
+  Future<void> Function()? onAfterLoad,
+}) async {
+  Haptics.light();
+  try {
+    await ref.read(residentProvider.notifier).loadResident();
+    await ref.read(achievementProvider.notifier).loadAchievements();
+    await ref.read(postProvider.notifier).loadPosts();
+    await onAfterLoad?.call();
+    if (!context.mounted) return;
+    VFeedback.showMessage(context, 'Honour wall refreshed');
+  } catch (_) {
+    if (!context.mounted) return;
+    VFeedback.showMessage(context, 'Refresh failed');
+  }
+}
+
 class IdentityScreen extends ConsumerStatefulWidget {
-  const IdentityScreen({super.key});
+  const IdentityScreen({super.key, this.embedded = false});
+
+  /// When true, omit [VHubPage] chrome — parent (e.g. [YouScreen]) owns the header.
+  final bool embedded;
 
   @override
   ConsumerState<IdentityScreen> createState() => _IdentityScreenState();
@@ -71,8 +104,22 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   bool _funnelOpenedWorld = false;
   bool _funnelOpenedNexus = false;
   bool _tierPerksExpanded = false;
+  bool _progressionExpanded = false;
+  ResidentStatus _residentStatus = const ResidentStatus();
 
   static const double _avatarRadius = 48;
+
+  Widget _wrapShell({
+    required Widget body,
+    List<Widget> headerActions = const [],
+  }) {
+    if (widget.embedded) return body;
+    return VHubPage(
+      title: 'Wall of Honour',
+      headerActions: headerActions,
+      body: body,
+    );
+  }
 
   @override
   void initState() {
@@ -184,6 +231,265 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     );
   }
 
+  Widget _buildYouProfileCard(
+    BuildContext context,
+    Resident resident,
+    int currentXp,
+    int tierValue,
+  ) {
+    final brightness = Theme.of(context).brightness;
+    final statusLabel = _residentStatus.customStatus?.isNotEmpty == true
+        ? _residentStatus.customStatus!
+        : switch (_residentStatus.presence) {
+            ResidentPresence.online => 'Online',
+            ResidentPresence.idle => 'Idle',
+            ResidentPresence.dnd => 'Do not disturb',
+            ResidentPresence.invisible => 'Invisible',
+          };
+
+    return Material(
+      color: VCommuneColors.surfaceSecondaryOf(brightness),
+      borderRadius: BorderRadius.circular(VRadius.lg),
+      child: InkWell(
+        onTap: () => _showEditProfileSheet(resident),
+        borderRadius: BorderRadius.circular(VRadius.lg),
+        child: Padding(
+          padding: const EdgeInsets.all(VSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  CosmeticAvatar(
+                    totalXp: currentXp,
+                    size: 56,
+                    imageUrl: resident.avatarUrl,
+                    seed: resident.id,
+                  ),
+                  const SizedBox(width: VSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: LuminaryNameplate(
+                                name: resident.name,
+                                tier: tierValue,
+                                fontSize: VFontSize.bodyLg,
+                                title: resident.title,
+                              ),
+                            ),
+                            if (IdentityVerification.isVerified(resident)) ...[
+                              const SizedBox(width: 4),
+                              Tooltip(
+                                message: 'Verified resident',
+                                child: Icon(
+                                  VIcons.badgeCheck,
+                                  size: VIconSize.md,
+                                  color: VColors.brand,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          resident.tier.label,
+                          style: TextStyle(
+                            fontSize: VFontSize.labelSm,
+                            color: VCommuneColors.textMutedOf(brightness),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.edit_outlined,
+                    size: VIconSize.md,
+                    color: VCommuneColors.textMutedOf(brightness),
+                  ),
+                ],
+              ),
+              const SizedBox(height: VSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () async {
+                        final next = await showStatusPicker(
+                          context,
+                          current: _residentStatus,
+                        );
+                        if (next != null && mounted) {
+                          setState(() => _residentStatus = next);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(VRadius.pill),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: VSpacing.xs,
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: TextStyle(
+                            fontSize: VFontSize.labelSm,
+                            color: VCommuneColors.textMutedOf(brightness),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${resident.sovereignCoins} coins',
+                    style: TextStyle(
+                      fontSize: VFontSize.labelSm,
+                      color: VCommuneColors.textLinkOf(brightness),
+                      fontWeight: VFontWeight.semiBold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedAchievementsStrip(
+    List<UserAchievement> userAchievements,
+  ) {
+    final featured = userAchievements
+        .where((a) => a.status == AchievementStatus.verified)
+        .where((a) => a.featuredOrder != null && a.featuredOrder! <= 3)
+        .toList()
+      ..sort((a, b) => (a.featuredOrder ?? 99).compareTo(b.featuredOrder ?? 99));
+    if (featured.isEmpty) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 88,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+        itemCount: featured.length,
+        separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
+        itemBuilder: (context, index) {
+          final ua = featured[index];
+          final ach = ach_config.achievementForId(ua.achievementId);
+          if (ach == null) return const SizedBox.shrink();
+          final meta = metaForCategory(ach.category);
+          final brightness = Theme.of(context).brightness;
+          return Material(
+            color: VCommuneColors.surfaceSecondaryOf(brightness),
+            borderRadius: BorderRadius.circular(VRadius.md),
+            child: InkWell(
+              onTap: () => context.push('/achievements'),
+              borderRadius: BorderRadius.circular(VRadius.md),
+              child: Padding(
+                padding: const EdgeInsets.all(VSpacing.sm),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AchievementBadgeAvatar(
+                      achievement: ach,
+                      accentColor: meta.color,
+                      size: 40,
+                      showEarnedBadge: true,
+                    ),
+                    const SizedBox(width: VSpacing.xs),
+                    SizedBox(
+                      width: 96,
+                      child: Text(
+                        ach.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.semiBold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSeasonProgressChip(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final seasonEnd = DateTime.utc(2026, 12, 31);
+    final daysLeft = seasonEnd.difference(DateTime.now().toUtc()).inDays;
+    final progressLabel = daysLeft > 0 ? '$daysLeft days left' : 'Season ending';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        VSpacing.sm,
+        VSpacing.md,
+        0,
+      ),
+      child: Material(
+        color: VCommuneColors.surfaceSecondaryOf(brightness),
+        borderRadius: BorderRadius.circular(VRadius.pill),
+        child: InkWell(
+          onTap: () => context.push('/season'),
+          borderRadius: BorderRadius.circular(VRadius.pill),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: VSpacing.md,
+              vertical: VSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.emoji_events_outlined,
+                  size: VIconSize.sm,
+                  color: VColors.tertiary,
+                ),
+                const SizedBox(width: VSpacing.xs),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Season 1: The Big Bang',
+                        style: TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.semiBold,
+                          color: VCommuneColors.headerSecondaryOf(brightness),
+                        ),
+                      ),
+                      Text(
+                        progressLabel,
+                        style: TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          color: VCommuneColors.textMutedOf(brightness),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  size: VIconSize.sm,
+                  color: VCommuneColors.textMutedOf(brightness),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   String _topPercentLabel(int tier) {
     switch (tier) {
       case 5:
@@ -255,15 +561,11 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     });
 
     if (residentState.isLoading) {
-      return const VHubPage(
-        title: 'Wall of Honour',
-        body: ScreenLoading.profile(),
-      );
+      return _wrapShell(body: const ScreenLoading.profile());
     }
 
     if (resident == null) {
-      return VHubPage(
-        title: 'Wall of Honour',
+      return _wrapShell(
         body: AppErrorState(
           message: residentState.loadError ?? 'Could not load your profile.',
           onRetry: () => ref.read(residentProvider.notifier).loadResident(),
@@ -305,40 +607,37 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     };
     final nextTierName = tierNames[nextTierValue] ?? 'Max';
 
-    Future<void> refreshHonourWall() async {
-      Haptics.light();
-      try {
-        await ref.read(residentProvider.notifier).loadResident();
-        await ref.read(achievementProvider.notifier).loadAchievements();
-        await ref.read(postProvider.notifier).loadPosts();
-        await _loadHighPrestigeWorlds();
-        if (!mounted) return;
-        VFeedback.showMessage(context, 'Honour wall refreshed');
-      } catch (_) {
-        if (!mounted) return;
-        VFeedback.showMessage(context, 'Refresh failed');
-      }
-    }
+    Future<void> refreshHonourWall() => refreshHonourWallData(
+      ref,
+      context,
+      onAfterLoad: _loadHighPrestigeWorlds,
+    );
 
-    return VHubPage(
-      title: 'Wall of Honour',
-      headerActions: [
-        VAccessibleHeaderAction(
-          label: 'Search residents',
-          icon: Icon(VIcons.search),
-          onPress: () => openGlobalSearch(context),
-        ),
-        VAccessibleHeaderAction(
-          label: 'Refresh honour wall',
-          icon: Icon(VIcons.rotateCw),
-          onPress: refreshHonourWall,
-        ),
-        VAccessibleHeaderAction(
-          label: 'Settings',
-          icon: Icon(VIcons.settings),
-          onPress: () => context.push('/settings'),
-        ),
-      ],
+    final headerActions = [
+      VAccessibleHeaderAction(
+        label: 'Preview public profile',
+        icon: Icon(VIcons.user),
+        onPress: () => context.push(residentProfilePath(resident.id)),
+      ),
+      VAccessibleHeaderAction(
+        label: 'Search residents',
+        icon: Icon(VIcons.search),
+        onPress: () => openGlobalSearch(context),
+      ),
+      VAccessibleHeaderAction(
+        label: 'Refresh honour wall',
+        icon: Icon(VIcons.rotateCw),
+        onPress: refreshHonourWall,
+      ),
+      VAccessibleHeaderAction(
+        label: 'Settings',
+        icon: Icon(VIcons.settings),
+        onPress: () => context.push('/settings'),
+      ),
+    ];
+
+    return _wrapShell(
+      headerActions: headerActions,
       body: RefreshIndicator(
         onRefresh: refreshHonourWall,
         child: ListView(
@@ -374,7 +673,27 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       ref.read(achievementProvider.notifier).loadAchievements(),
                 ),
               ),
-            // ── Hero Section ──────────────────────────────
+            if (widget.embedded) const IdentityVerificationCard(),
+            // ── Hero / You profile card ───────────────────
+            if (widget.embedded) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  VSpacing.md,
+                  VSpacing.md,
+                  VSpacing.md,
+                  0,
+                ),
+                child: _buildYouProfileCard(
+                  context,
+                  resident,
+                  currentXp,
+                  tierValue,
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              _buildFeaturedAchievementsStrip(achievements.userAchievements),
+              _buildSeasonProgressChip(context),
+            ] else
             Container(
               padding: const EdgeInsets.all(VSpacing.lg),
               child: Column(
@@ -716,6 +1035,20 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             AchievementQueueSummary(
               userAchievements: achievements.userAchievements,
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.lg,
+                VSpacing.sm,
+                VSpacing.lg,
+                0,
+              ),
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/achievements/submit'),
+                icon: const Icon(Icons.workspace_premium_outlined, size: 18),
+                label: const Text('Submit achievement proof'),
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
 
             InkWell(
               onTap: () => showTrophyCaseSheet(
@@ -768,17 +1101,33 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               const SizedBox(height: VSpacing.lg),
             ],
 
-            _SectionHeader(
-              title: 'Your tier & XP',
-              theme: theme,
-              trailing: const ProgressionHelpButton(
-                focus: ProgressionFocus.xpAndTier,
+            InkWell(
+              onTap: () =>
+                  setState(() => _progressionExpanded = !_progressionExpanded),
+              child: _SectionHeader(
+                title: 'Your tier & XP',
+                theme: theme,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const ProgressionHelpButton(
+                      focus: ProgressionFocus.xpAndTier,
+                    ),
+                    Icon(
+                      _progressionExpanded
+                          ? Icons.expand_less
+                          : Icons.expand_more,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: VSpacing.sm),
-
-            // ── Progress (tier bar + XP + collapsible perks) ──
-            Padding(
+            if (_progressionExpanded) ...[
+              const SizedBox(height: VSpacing.sm),
+              Padding(
               padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: Container(
                 padding: const EdgeInsets.all(VSpacing.md),
@@ -866,7 +1215,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: VSpacing.xl),
+              const SizedBox(height: VSpacing.xl),
+            ],
 
             // ── Action Buttons ─────────────────────────────
             Padding(
@@ -1069,6 +1419,11 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               child: VSectionList(
                 title: 'Account',
                 children: [
+                  VSectionTile(
+                    icon: Icons.settings_outlined,
+                    label: 'Settings',
+                    onTap: () => context.push('/settings'),
+                  ),
                   VSectionTile(
                     icon: Icons.logout,
                     label: 'Sign Out',

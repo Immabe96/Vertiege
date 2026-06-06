@@ -7,13 +7,22 @@ import '../../services/admin_access_service.dart';
 import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/shimmer.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../widgets/worlds/world_card.dart';
 
 class WorldDiscoveryScreen extends ConsumerStatefulWidget {
-  const WorldDiscoveryScreen({super.key});
+  /// When true, omits [VHubPage] chrome — used as Home slide-over (DCX-024).
+  final bool embedded;
+  final VoidCallback? onClose;
+
+  const WorldDiscoveryScreen({
+    super.key,
+    this.embedded = false,
+    this.onClose,
+  });
 
   @override
   ConsumerState<WorldDiscoveryScreen> createState() =>
@@ -85,21 +94,7 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
       tierValue: resident?.tier.value ?? 0,
     );
 
-    return VHubPage(
-      title: 'Discover Worlds',
-      showBack: true,
-      footer: canCreateWorld
-          ? Padding(
-              padding: const EdgeInsets.all(VSpacing.md),
-              child: VButton(
-                label: 'Create World',
-                isFullWidth: true,
-                icon: Icon(VIcons.plus, size: 18),
-                onPressed: () => context.push('/create-world'),
-              ),
-            )
-          : null,
-      body: Column(
+    final body = Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -242,7 +237,74 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
             ),
           ),
         ],
-      ),
+    );
+
+    if (widget.embedded) {
+      return ColoredBox(
+        color: VCommuneColors.surfacePrimary,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                VSpacing.sm,
+                VSpacing.sm,
+                VSpacing.md,
+                VSpacing.xs,
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Back to Home',
+                    onPressed: widget.onClose ?? () => context.pop(),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: VCommuneColors.textMuted,
+                    ),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Discover worlds',
+                      style: TextStyle(
+                        fontSize: VFontSize.headlineSm,
+                        fontWeight: VFontWeight.bold,
+                        color: VCommuneColors.headerPrimary,
+                      ),
+                    ),
+                  ),
+                  if (canCreateWorld)
+                    IconButton(
+                      tooltip: 'Create world',
+                      onPressed: () => context.push('/create-world'),
+                      icon: const Icon(
+                        Icons.add,
+                        color: VCommuneColors.statusOnline,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Expanded(child: body),
+          ],
+        ),
+      );
+    }
+
+    return VHubPage(
+      title: 'Discover Worlds',
+      showBack: true,
+      footer: canCreateWorld
+          ? Padding(
+              padding: const EdgeInsets.all(VSpacing.md),
+              child: VButton(
+                label: 'Create World',
+                isFullWidth: true,
+                icon: Icon(VIcons.plus, size: 18),
+                onPressed: () => context.push('/create-world'),
+              ),
+            )
+          : null,
+      body: body,
     );
   }
 }

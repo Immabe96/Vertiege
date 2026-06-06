@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../config/world_page_ia.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../v_section_list.dart';
+import 'world_treasury_glance.dart';
 
 /// Short world overflow menu — full features live in [WorldManageScreen].
 class WorldToolsPanel extends ConsumerWidget {
@@ -78,7 +80,12 @@ class WorldToolsPanel extends ConsumerWidget {
               ),
             ),
           )
-        else
+        else ...[
+          WorldTreasuryGlance(
+            worldId: worldId,
+            world: world,
+            isAdminOrCouncil: isAdminOrCouncil,
+          ),
           VSectionList(
             title: 'Participate',
             children: [
@@ -91,8 +98,84 @@ class WorldToolsPanel extends ConsumerWidget {
                   context.push(worldManagePath(worldId));
                 },
               ),
+              if (world.isMarketplace)
+                VSectionTile(
+                  icon: Icons.storefront_outlined,
+                  label: 'Shop',
+                  detail: 'Marketplace listings',
+                  onTap: () {
+                    onDismiss();
+                    context.push(
+                      worldMarketplacePath(worldId, member: isJoined),
+                    );
+                  },
+                ),
+              VSectionTile(
+                icon: Icons.work_outline,
+                label: 'Jobs',
+                detail: 'World gigs and bounties',
+                onTap: () {
+                  onDismiss();
+                  context.push(worldJobsPath(worldId, admin: isAdminOrCouncil));
+                },
+              ),
             ],
           ),
+          VSectionList(
+            title: 'World features',
+            children: [
+              VSectionTile(
+                icon: Icons.account_balance_outlined,
+                label: 'Treasury',
+                detail: 'World economy glance',
+                onTap: () {
+                  onDismiss();
+                  context.push(
+                    worldTreasuryPath(worldId, admin: isAdminOrCouncil),
+                  );
+                },
+              ),
+              if (world.dominionType == DominionType.academy)
+                VSectionTile(
+                  icon: Icons.school_outlined,
+                  label: 'Academy',
+                  detail: 'Courses and learning',
+                  onTap: () {
+                    onDismiss();
+                    context.push(
+                      '/explore/${Uri.encodeComponent(worldId)}/academy',
+                    );
+                  },
+                ),
+              if (WorldPageIa.hasFeedTab(world))
+                VSectionTile(
+                  icon: Icons.dynamic_feed_outlined,
+                  label: 'World feed',
+                  onTap: () {
+                    onDismiss();
+                    context.push(exploreWorldPath(worldId));
+                  },
+                ),
+            ],
+          ),
+          if (isAdminOrCouncil)
+            VSectionList(
+              title: 'Moderation',
+              children: [
+                VSectionTile(
+                  icon: Icons.gavel_outlined,
+                  label: 'Governance',
+                  detail: 'Votes, constitution, moderation',
+                  onTap: () {
+                    onDismiss();
+                    context.push(
+                      worldGovernancePath(worldId, worldName: world.name),
+                    );
+                  },
+                ),
+              ],
+            ),
+        ],
         VSectionList(
           title: 'More',
           children: [

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs/product/planning/discord-redesign-changes.json"
+OUT = ROOT / "docs/archive/planning/discord-redesign-changes.json"
 
 def c(id_, wave, cat, pri, title, desc, files=None, discord_ref=""):
     return {

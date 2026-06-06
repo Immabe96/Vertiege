@@ -22,4 +22,16 @@ class WorldNavPrefs {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(askedFeedDefaultKey) ?? false;
   }
+
+  static const _welcomeSeenPrefix = 'world_welcome_seen_';
+
+  static Future<bool> hasSeenWelcome(String worldId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('$_welcomeSeenPrefix$worldId') ?? false;
+  }
+
+  static Future<void> markWelcomeSeen(String worldId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('$_welcomeSeenPrefix$worldId', true);
+  }
 }

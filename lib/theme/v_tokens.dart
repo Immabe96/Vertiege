@@ -17,13 +17,18 @@ class VRadius {
   static const double xxs = 2;
   static const double none = 0;
   static const double xs = 4;
+  /// Commune card radius — 8px (DCX-029).
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
   static const double xl = 18;
   static const double xxl = 20;
   static const double xxxl = 24;
+  /// Pill buttons and chips (DCX-029).
   static const double pill = 9999;
+
+  static const double communeCard = sm;
+  static const double communeButton = pill;
 }
 
 class VIconSize {
@@ -33,6 +38,11 @@ class VIconSize {
   static const double md = 20;
   static const double lg = 24;
   static const double xl = 32;
+
+  /// Dense list icon steps for channel rows (DCX-038): 20 / 16 / 14.
+  static const double denseLg = 20;
+  static const double denseMd = 16;
+  static const double denseSm = 14;
 }
 
 /// Raster profession / achievement badge display sizes (~10% above legacy defaults).
@@ -121,6 +131,13 @@ class VLineHeight {
   static const double body = 1.4;
   static const double bodyLg = 1.5;
   static const double label = 1.0;
+}
+
+/// Chat message text roles (DCX-027).
+enum VChatTextRole { normal, muted, headerPrimary, headerSecondary, link, mention }
+
+class VChatText {
+  VChatText._();
 }
 
 class VShadow {

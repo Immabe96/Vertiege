@@ -39,14 +39,14 @@ class ScreenLoading extends StatelessWidget {
         return Column(
           children: List.generate(
             itemCount,
-            (_) => const _GlassPostCardShimmer(),
+            (_) => const ShimmerPostCard(),
           ),
         );
       case ScreenLoadingType.list:
         return Column(
           children: List.generate(
             itemCount,
-            (_) => const _GlassChatTileShimmer(),
+            (_) => const ShimmerChatTile(),
           ),
         );
       case ScreenLoadingType.grid:
@@ -77,96 +77,6 @@ class ScreenLoading extends StatelessWidget {
       case ScreenLoadingType.detail:
         return _DetailShimmer();
     }
-  }
-}
-
-// ──────────────────────────────────────────────────────────────
-// Glass-styled shimmer placeholders
-// ──────────────────────────────────────────────────────────────
-
-class _GlassPostCardShimmer extends StatelessWidget {
-  const _GlassPostCardShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.sm,
-      ),
-      child: VSurfacePanel(
-        padding: const EdgeInsets.all(VSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Pulse(width: 48, height: 48, borderRadius: VRadius.pill),
-            const SizedBox(width: VSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: VSpacing.xs),
-                  Pulse(
-                    width: MediaQuery.of(context).size.width * 0.35,
-                    height: VFontSize.bodyMd,
-                    borderRadius: VRadius.sm,
-                  ),
-                  const SizedBox(height: VSpacing.sm),
-                  const Pulse(borderRadius: VRadius.sm),
-                  const SizedBox(height: VSpacing.xs),
-                  Pulse(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    height: 14,
-                    borderRadius: VRadius.sm,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassChatTileShimmer extends StatelessWidget {
-  const _GlassChatTileShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.sm + 2,
-      ),
-      child: VSurfacePanel(
-        padding: const EdgeInsets.all(VSpacing.md),
-        child: Row(
-          children: [
-            const Pulse(width: 56, height: 56, borderRadius: VRadius.pill),
-            const SizedBox(width: VSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Pulse(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    height: VFontSize.bodyMd,
-                    borderRadius: VRadius.sm,
-                  ),
-                  const SizedBox(height: VSpacing.xs + 2),
-                  Pulse(
-                    width: MediaQuery.of(context).size.width * 0.55,
-                    height: VFontSize.bodyMd,
-                    borderRadius: VRadius.sm,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

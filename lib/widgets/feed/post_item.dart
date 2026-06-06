@@ -25,9 +25,12 @@ import '../core/tab_aware_sheet.dart';
 import 'comment_sheet.dart';
 import 'post_action_bar.dart';
 import 'reaction_bar.dart';
+import '../../state/world_mute_provider.dart';
 import 'heart_animation.dart';
 import 'post_image.dart';
+import '../../utils/verified_moment.dart';
 import '../../widgets/core/v_feedback.dart';
+import 'verified_moment_badge.dart';
 
 class PostItem extends ConsumerWidget {
   final Post post;
@@ -57,6 +60,7 @@ class PostItem extends ConsumerWidget {
     }
 
     final isCouncilPost = post.tierAtPosting.value >= 4;
+    final isVerifiedMoment = isVerifiedMomentPost(post);
 
     return FadeIn(
       delayMs: index * 70,
@@ -88,18 +92,34 @@ class PostItem extends ConsumerWidget {
             vertical: VSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: VColors.glassBackground,
+            color: isVerifiedMoment
+                ? VColors.brand.withValues(alpha: 0.06)
+                : VColors.glassBackground,
             borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border(
-              left: isCouncilPost
+              left: isVerifiedMoment
+                  ? const BorderSide(color: VColors.brand, width: 3)
+                  : isCouncilPost
                   ? BorderSide(
                       color: VColors.tertiary.withValues(alpha: 0.5),
                       width: 3,
                     )
                   : BorderSide(color: VColors.glassBorder),
-              top: BorderSide(color: VColors.glassBorder),
-              right: BorderSide(color: VColors.glassBorder),
-              bottom: BorderSide(color: VColors.glassBorder),
+              top: BorderSide(
+                color: isVerifiedMoment
+                    ? VColors.brand.withValues(alpha: 0.25)
+                    : VColors.glassBorder,
+              ),
+              right: BorderSide(
+                color: isVerifiedMoment
+                    ? VColors.brand.withValues(alpha: 0.25)
+                    : VColors.glassBorder,
+              ),
+              bottom: BorderSide(
+                color: isVerifiedMoment
+                    ? VColors.brand.withValues(alpha: 0.25)
+                    : VColors.glassBorder,
+              ),
             ),
           ),
           child: Padding(
@@ -107,6 +127,10 @@ class PostItem extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (isVerifiedMoment) ...[
+                  const VerifiedMomentBadge(),
+                  const SizedBox(height: VSpacing.sm),
+                ],
                 Row(
                   children: [
                     GestureDetector(
@@ -176,6 +200,7 @@ class PostItem extends ConsumerWidget {
                           if (action == 'report') _onReport(context, ref);
                           if (action == 'pin') _onTogglePin(ref);
                           if (action == 'edit') _onEdit(context, ref);
+                          if (action == 'mute') _onMuteWorld(context, ref);
                         },
                         itemBuilder: (context) => [
                           if (isOwnPost)
@@ -199,6 +224,15 @@ class PostItem extends ConsumerWidget {
                             const PopupMenuItem(
                               value: 'report',
                               child: Text('Report'),
+                            ),
+                          if (post.worldId.isNotEmpty)
+                            PopupMenuItem(
+                              value: 'mute',
+                              child: Text(
+                                ref.watch(worldMuteProvider).contains(post.worldId)
+                                    ? 'Unmute world notifications'
+                                    : 'Mute world notifications',
+                              ),
                             ),
                         ],
                       ),
@@ -269,9 +303,21 @@ class PostItem extends ConsumerWidget {
                 if (post.allImageUris.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: post.allImageUris.length == 1
-                        ? PostImage(uri: post.allImageUris.first)
-                        : _ImageCarousel(imageUris: post.allImageUris),
+                    child: Transform.translate(
+                      offset: const Offset(-14, 0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width,
+                        child: post.allImageUris.length == 1
+                            ? PostImage(
+                                uri: post.allImageUris.first,
+                                borderRadius: BorderRadius.zero,
+                              )
+                            : _ImageCarousel(
+                                imageUris: post.allImageUris,
+                                edgeToEdge: true,
+                              ),
+                      ),
+                    ),
                   ),
                 ],
                 if (post.awards.isNotEmpty) ...[
@@ -506,6 +552,18 @@ class PostItem extends ConsumerWidget {
     ref.read(postProvider.notifier).deletePost(post.id);
   }
 
+  void _onMuteWorld(BuildContext context, WidgetRef ref) {
+    if (post.worldId.isEmpty) return;
+    ref.read(worldMuteProvider.notifier).toggle(post.worldId);
+    final muted = ref.read(worldMuteProvider).contains(post.worldId);
+    VFeedback.showMessage(
+      context,
+      muted
+          ? 'Notifications muted for this world'
+          : 'Notifications restored for this world',
+    );
+  }
+
   void _onReport(BuildContext context, WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
@@ -528,26 +586,7 @@ class PostItem extends ConsumerWidget {
   }
 
   void _showComments(BuildContext context, WidgetRef ref) {
-    showPostCommentSheet(
-      context: context,
-      sheet: CommentSheet(
-        comments: post.comments,
-        postAuthorId: post.residentId,
-        onSubmit: (content) {
-          final resident = ref.read(residentProvider).resident;
-          if (resident == null) return;
-          final comment = Comment(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            residentId: resident.id,
-            residentName: resident.name,
-            content: content,
-            timestamp: DateTime.now().millisecondsSinceEpoch,
-            tierAtPosting: resident.tier.value,
-          );
-          ref.read(postProvider.notifier).addComment(post.id, comment);
-        },
-      ),
-    );
+    openPostComments(context, postId: post.id);
   }
 }
 
@@ -986,7 +1025,12 @@ class _DecreeLabelState extends State<_DecreeLabel>
 
 class _ImageCarousel extends StatefulWidget {
   final List<String> imageUris;
-  const _ImageCarousel({required this.imageUris});
+  final bool edgeToEdge;
+
+  const _ImageCarousel({
+    required this.imageUris,
+    this.edgeToEdge = false,
+  });
 
   @override
   State<_ImageCarousel> createState() => _ImageCarouselState();
@@ -1007,7 +1051,9 @@ class _ImageCarouselState extends State<_ImageCarousel> {
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(VRadius.md),
+          borderRadius: widget.edgeToEdge
+              ? BorderRadius.zero
+              : BorderRadius.circular(VRadius.md),
           child: SizedBox(
             height: 250,
             child: PageView.builder(
@@ -1018,6 +1064,9 @@ class _ImageCarouselState extends State<_ImageCarousel> {
                 return PostImage(
                   uri: widget.imageUris[index],
                   height: 250,
+                  borderRadius: widget.edgeToEdge
+                      ? BorderRadius.zero
+                      : null,
                 );
               },
             ),

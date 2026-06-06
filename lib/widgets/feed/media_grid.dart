@@ -6,18 +6,24 @@ import '../core/shimmer.dart';
 class MediaGrid extends StatelessWidget {
   final List<String> images;
   final ValueChanged<String>? onImagePress;
+  final bool edgeToEdge;
 
-  const MediaGrid({super.key, required this.images, this.onImagePress});
+  const MediaGrid({
+    super.key,
+    required this.images,
+    this.onImagePress,
+    this.edgeToEdge = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: VSpacing.xs,
-        mainAxisSpacing: VSpacing.xs,
+        crossAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
+        mainAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
         childAspectRatio: 1,
       ),
       itemCount: images.length,
@@ -27,7 +33,9 @@ class MediaGrid extends StatelessWidget {
               ? () => onImagePress!(images[index])
               : null,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(VRadius.lg),
+            borderRadius: edgeToEdge
+                ? BorderRadius.zero
+                : BorderRadius.circular(VRadius.lg),
             child: Image.network(
               images[index],
               fit: BoxFit.cover,

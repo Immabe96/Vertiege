@@ -130,31 +130,34 @@ class VerificationService {
     return data?['status'] as String?;
   }
 
-  /// Approve a verification submission.
+  /// Approve a verification submission (verifier RPC).
   static Future<void> approve(
-    String submissionId,
-    String residentId,
-    String profession,
-  ) async {
+    String submissionId, {
+    String? reviewerNotes,
+  }) async {
     if (!isSupabaseConfigured()) {
       throw StateError('Supabase is required to approve verifications.');
     }
-    final client = getSupabase();
-    await client
-        .from('verification_submissions')
-        .update({'status': 'verified'})
-        .eq('id', submissionId);
+    await getSupabase().rpc(
+      'approve_verification_submission',
+      params: {
+        'p_submission_id': submissionId,
+        'p_reviewer_notes': reviewerNotes,
+      },
+    );
   }
 
-  /// Reject a verification submission.
+  /// Reject a verification submission (verifier RPC).
   static Future<void> reject(String submissionId, {String? notes}) async {
     if (!isSupabaseConfigured()) {
       throw StateError('Supabase is required to reject verifications.');
     }
-    final client = getSupabase();
-    await client
-        .from('verification_submissions')
-        .update({'status': 'rejected', 'reviewer_notes': notes})
-        .eq('id', submissionId);
+    await getSupabase().rpc(
+      'reject_verification_submission',
+      params: {
+        'p_submission_id': submissionId,
+        'p_reviewer_notes': notes,
+      },
+    );
   }
 }

@@ -97,7 +97,7 @@ class FirstStepsCard extends StatelessWidget {
                 subtitle: joinedDone
                     ? 'You\'re in ${resident.joinedWorldIds.length} world(s)'
                     : 'Browse worlds that match your goals',
-                onTap: joinedDone ? null : () => context.go('/explore'),
+                onTap: joinedDone ? null : () => context.push('/explore'),
               ),
               _StepRow(
                 done: openedWorld,
@@ -109,7 +109,7 @@ class FirstStepsCard extends StatelessWidget {
                         if (id != null) {
                           context.push(exploreWorldPath(id));
                         } else {
-                          context.go('/explore');
+                          context.push('/explore');
                         }
                       },
               ),

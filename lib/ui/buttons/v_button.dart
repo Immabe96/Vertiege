@@ -144,7 +144,7 @@ class _GlassButton extends StatelessWidget {
         padding: padding,
         decoration: BoxDecoration(
           color: context.vSurfaceContainer,
-          borderRadius: BorderRadius.circular(VRadius.md),
+          borderRadius: BorderRadius.circular(VRadius.communeButton),
           border: Border.all(color: context.vOutlineVariant),
         ),
         alignment: Alignment.center,

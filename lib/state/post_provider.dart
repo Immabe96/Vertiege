@@ -238,25 +238,28 @@ class PostNotifier extends Notifier<PostState> {
       state = state.copyWith(isPosting: false);
       return;
     }
-    if (!resident.joinedWorldIds.contains(worldId)) {
+    final isNexusFeed = WorldService.localOnlyWorldIds.contains(worldId);
+    if (!isNexusFeed && !resident.joinedWorldIds.contains(worldId)) {
       state = state.copyWith(isPosting: false);
       return;
     }
 
-    final world = ref.read(worldProvider).worlds[worldId];
-    final constitution = world?.constitution ?? const WorldConstitution();
-    if (!WorldPermissions.canPost(
-      resident,
-      worldId,
-      world?.sovereignId,
-      constitution: constitution,
-    )) {
-      state = state.copyWith(isPosting: false);
-      return;
-    }
-    if (WorldPermissions.isMuted(resident, worldId)) {
-      state = state.copyWith(isPosting: false);
-      return;
+    if (!isNexusFeed) {
+      final world = ref.read(worldProvider).worlds[worldId];
+      final constitution = world?.constitution ?? const WorldConstitution();
+      if (!WorldPermissions.canPost(
+        resident,
+        worldId,
+        world?.sovereignId,
+        constitution: constitution,
+      )) {
+        state = state.copyWith(isPosting: false);
+        return;
+      }
+      if (WorldPermissions.isMuted(resident, worldId)) {
+        state = state.copyWith(isPosting: false);
+        return;
+      }
     }
 
     final mentions = TextParser.extractMentions(content);

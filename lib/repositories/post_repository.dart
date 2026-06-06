@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/paginated_result.dart';
 import '../models/post.dart';
+import '../models/resident.dart';
 import '../models/repository_result.dart';
 import '../models/sync_status.dart';
 import '../services/feature_flags.dart';
@@ -22,6 +23,27 @@ class PostRepository {
   static const votePollMutation = 'post.poll.vote';
 
   /// Residents who share at least one of [worldIds] (for Nexus "Following" filter).
+  /// Published standing posts for a resident's public profile grid.
+  Future<List<Post>> publishedPostsByResident(
+    String residentId, {
+    int limit = 12,
+    int offset = 0,
+  }) async {
+    if (!isSupabaseConfigured() || residentId.isEmpty) return [];
+    final client = getSupabase();
+    final data = await client
+        .from('posts')
+        .select()
+        .eq('resident_id', residentId)
+        .eq('status', 'published')
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
+    return (data as List)
+        .cast<Map<String, dynamic>>()
+        .map(_postFromRow)
+        .toList();
+  }
+
   Future<Set<String>> residentIdsInWorlds(
     List<String> worldIds, {
     String? excludeResidentId,
@@ -430,6 +452,37 @@ class PostRepository {
       await MutationOutboxService.enqueue(mutationType, payload);
       return RepositoryResult<T>.failure(error, stackTrace);
     }
+  }
+
+  static Post _postFromRow(Map<String, dynamic> json) {
+    final media = (json['media'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList();
+    final createdAt = json['created_at'];
+
+    return Post(
+      id: json['id']?.toString() ?? '',
+      worldId: json['world_id']?.toString() ?? '',
+      residentId: json['resident_id']?.toString() ?? '',
+      residentName: json['resident_name']?.toString() ?? '',
+      authorDisplayTitle: json['author_display_title'] as String?,
+      residentAvatar: json['resident_avatar']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
+      imageUri: json['image_url'] as String?,
+      imageUris: media,
+      timestamp: createdAt is int
+          ? createdAt
+          : DateTime.tryParse(createdAt?.toString() ?? '')
+                  ?.millisecondsSinceEpoch ??
+              0,
+      tierAtPosting: ResidentTier.fromValue(
+        json['tier_at_posting'] ?? 1,
+      ),
+      reactions: Map<String, int>.from(json['reactions'] ?? {}),
+      isAnnouncement: json['is_announcement'] == true,
+      isPinned: json['is_pinned'] == true,
+      status: json['status']?.toString() ?? 'published',
+    );
   }
 
   static Map<String, dynamic> _postPayload(Post post) => _postRow(post);

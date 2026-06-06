@@ -22,6 +22,7 @@ import '../widgets/worlds/world_profile_header.dart';
 import '../widgets/worlds/world_realm_dossier.dart';
 import '../widgets/worlds/world_home_tab.dart';
 import '../widgets/worlds/world_constitution_sheet.dart';
+import '../widgets/worlds/world_welcome_flow.dart';
 import '../widgets/worlds/world_shop_tab.dart';
 import '../widgets/worlds/world_tools_panel.dart';
 import '../widgets/core/sync_warning_banner.dart';
@@ -506,6 +507,8 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     if (!mounted) return;
     final joinedWorld = ref.read(worldProvider).worlds[widget.worldId];
     if (joinedWorld == null) return;
+    await showWorldWelcomeFlow(context, ref, world: joinedWorld);
+    if (!mounted) return;
     await _maybePromptFeedDefault(joinedWorld);
     if (!mounted) return;
     setState(() => _defaultTabApplied = false);
@@ -617,7 +620,6 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -803,9 +805,16 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                     prestigeTierColor: prestigeTierColor,
                     tierLabel: tierLabel,
                     isJoined: isJoined,
+                    compact: isJoined,
                     scaleAnimation: scaleAnimation,
                     joinButtonKey: _joinButtonKey,
                     onJoin: _handleJoin,
+                    onHeaderTap: () => _openToolsSheet(
+                      world,
+                      isJoined: isJoined,
+                      isAdminOrCouncil: isAdminOrCouncil,
+                      onSettings: onSettings,
+                    ),
                   ),
                 ),
               ),

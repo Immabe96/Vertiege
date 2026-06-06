@@ -9,6 +9,7 @@ import '../utils/haptics.dart';
 import '../utils/provider_errors.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
+import '../widgets/worlds/world_admin_breadcrumb.dart';
 
 class WorldGovernanceScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -128,6 +129,10 @@ class _WorldGovernanceScreenState extends ConsumerState<WorldGovernanceScreen> {
   Widget build(BuildContext context) {
     return VHubPage(
       title: 'Council queue',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Governance',
+      ),
       showBack: true,
       headerActions: [
         VHeaderAction(

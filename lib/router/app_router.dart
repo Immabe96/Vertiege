@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../state/resident_provider.dart';
 import '../state/notification_provider.dart';
 import '../state/post_provider.dart';
+import '../state/chat_provider.dart';
 import '../services/supabase.dart';
 import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
@@ -19,7 +20,6 @@ import '../screens/subscription_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/tabs/tab_layout.dart';
-import '../screens/tabs/commune_home_screen.dart';
 import '../screens/tabs/nexus_screen.dart';
 import '../screens/tabs/explore_screen.dart';
 import '../screens/tabs/chat_list_screen.dart';
@@ -55,6 +55,7 @@ import '../services/admin_access_service.dart';
 import '../screens/audit_log_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
+import '../screens/post_comments_screen.dart';
 import '../screens/challenges_screen.dart';
 import '../screens/daily_quests_screen.dart';
 import '../screens/world_marketplace_screen.dart';
@@ -237,13 +238,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const CommuneHomeScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'feed',
-                    builder: (context, state) => const NexusScreen(),
-                  ),
-                ],
+                redirect: (context, state) {
+                  final panel = state.uri.queryParameters['panel'];
+                  if (panel == 'discover') return '/explore/discover';
+                  final worldId = state.uri.queryParameters['world'];
+                  if (worldId != null && worldId.isNotEmpty) {
+                    return '/explore/$worldId';
+                  }
+                  return null;
+                },
+                builder: (context, state) => const NexusScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/chat',
+                builder: (context, state) => const ChatListScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/identity',
+                builder: (context, state) => const YouScreen(),
               ),
             ],
           ),
@@ -371,7 +391,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                             queryParams: state.uri.queryParameters,
                           );
                         },
-                        builder: (context, state) => WorldChannelScreen(
+                        builder: (context, state) => _WorldChannelRoute(
                           worldId: state.pathParameters['worldId']!,
                           channelId: state.uri.queryParameters['id'] ?? '',
                           channelName: state.pathParameters['channelName']!,
@@ -383,51 +403,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/chat',
-                builder: (context, state) => const ChatListScreen(),
-                routes: [
-                  GoRoute(
-                    path: ':roomId',
-                    builder: (context, state) => ChatRoomScreen(
-                      roomId: state.pathParameters['roomId']!,
-                      initialPresence: state.extra is Presence
-                          ? state.extra! as Presence
-                          : null,
-                      initialDraft: state.uri.queryParameters['draft'],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/you',
-                builder: (context, state) => const YouScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/notifications',
-                builder: (context, state) => const AlertsScreen(),
-              ),
-            ],
-          ),
         ],
       ),
       GoRoute(
-        path: '/identity',
-        redirect: (context, state) => '/you',
+        path: '/you',
+        redirect: (context, state) => '/identity',
       ),
       GoRoute(
         path: '/more',
-        redirect: (context, state) => '/you',
+        redirect: (context, state) => '/identity',
+      ),
+      vGoRoute(
+        path: '/notifications',
+        builder: (context, state) => const AlertsScreen(),
       ),
       vGoRoute(
         path: '/residents/:id',
@@ -436,9 +424,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           highlightAchievementId: state.uri.queryParameters['achievement'],
         ),
       ),
-      // Full-screen DM from search/profile (outside shell — avoids white screen).
+      // Full-screen DM (single route — profile, search, Home DMs).
       vGoRoute(
-        path: '/dm/:roomId',
+        path: '/chat/:roomId',
+        panelSlide: true,
         builder: (context, state) => ChatRoomScreen(
           roomId: state.pathParameters['roomId']!,
           initialPresence: state.extra is Presence
@@ -446,6 +435,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               : null,
           initialDraft: state.uri.queryParameters['draft'],
         ),
+      ),
+      GoRoute(
+        path: '/dm/:roomId',
+        redirect: (context, state) {
+          final roomId = state.pathParameters['roomId']!;
+          final q = state.uri.query;
+          return q.isEmpty ? '/chat/$roomId' : '/chat/$roomId?$q';
+        },
       ),
       vGoRoute(
         path: '/achievements',
@@ -533,7 +530,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       vGoRoute(
         path: '/campfire/:channelId',
         slideUp: true,
-        builder: (context, state) => CampfireScreen(
+        builder: (context, state) => _CampfireRoute(
           channelId: state.pathParameters['channelId']!,
           channelName: state.uri.queryParameters['name'] ?? 'Campfire',
           worldId: state.uri.queryParameters['worldId'] ?? '',
@@ -594,9 +591,98 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             _PostDeepLink(postId: state.pathParameters['postId']!),
       ),
+      GoRoute(
+        path: '/post/:postId/comments',
+        builder: (context, state) => PostCommentsScreen(
+          postId: state.pathParameters['postId']!,
+        ),
+      ),
     ],
   );
 });
+
+/// Remembers last channel when deep-linking into a world channel.
+class _WorldChannelRoute extends ConsumerStatefulWidget {
+  final String worldId;
+  final String channelId;
+  final String channelName;
+
+  const _WorldChannelRoute({
+    required this.worldId,
+    required this.channelId,
+    required this.channelName,
+  });
+
+  @override
+  ConsumerState<_WorldChannelRoute> createState() => _WorldChannelRouteState();
+}
+
+class _WorldChannelRouteState extends ConsumerState<_WorldChannelRoute> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.channelId.isNotEmpty) {
+        ref.read(chatProvider.notifier).rememberLastChannel(
+          worldId: widget.worldId,
+          channelId: widget.channelId,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WorldChannelScreen(
+      worldId: widget.worldId,
+      channelId: widget.channelId,
+      channelName: widget.channelName,
+    );
+  }
+}
+
+class _CampfireRoute extends ConsumerStatefulWidget {
+  final String channelId;
+  final String channelName;
+  final String worldId;
+  final String worldName;
+
+  const _CampfireRoute({
+    required this.channelId,
+    required this.channelName,
+    required this.worldId,
+    required this.worldName,
+  });
+
+  @override
+  ConsumerState<_CampfireRoute> createState() => _CampfireRouteState();
+}
+
+class _CampfireRouteState extends ConsumerState<_CampfireRoute> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.worldId.isEmpty) return;
+      ref.read(chatProvider.notifier).rememberLastChannel(
+        worldId: widget.worldId,
+        channelId: widget.channelId,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CampfireScreen(
+      channelId: widget.channelId,
+      channelName: widget.channelName,
+      worldId: widget.worldId,
+      worldName: widget.worldName,
+    );
+  }
+}
 
 class _AcceptInviteScreen extends ConsumerStatefulWidget {
   final String code;

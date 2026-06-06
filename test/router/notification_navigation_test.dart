@@ -45,14 +45,34 @@ void main() {
       );
     });
 
-    test('achievement approved routes to achievements', () {
+    test('achievement approved routes to identity', () {
       const n = AppNotification(
         id: 'n3',
         type: NotificationType.achievementApproved,
         message: 'approved',
         createdAt: 0,
       );
-      expect(routeForNotification(n), '/achievements');
+      expect(routeForNotification(n), '/identity');
+    });
+
+    test('identity verified routes to identity', () {
+      const n = AppNotification(
+        id: 'n3a',
+        type: NotificationType.identityVerified,
+        message: 'verified',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/identity');
+    });
+
+    test('identity rejected routes to identity', () {
+      const n = AppNotification(
+        id: 'n3c',
+        type: NotificationType.identityRejected,
+        message: 'rejected',
+        createdAt: 0,
+      );
+      expect(routeForNotification(n), '/identity');
     });
 
     test('achievement rejected routes to achievements', () {

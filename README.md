@@ -61,8 +61,8 @@ flutter test
 | [docs/guides/development-workflow.md](docs/guides/development-workflow.md) | Local + cloud workflow, CI, APK downloads |
 | [docs/guides/firebase-and-supabase.md](docs/guides/firebase-and-supabase.md) | Supabase + Firebase setup |
 | [docs/reference/design-system.md](docs/reference/design-system.md) | UI and design system (current) |
-| [docs/product/roadmap.md](docs/product/roadmap.md) | Product roadmap |
-| [docs/product/planning/wave-status.md](docs/product/planning/wave-status.md) | Wave delivery status |
+| [PLAN.md](PLAN.md) | Active engineering plan (social stack) |
+| [docs/archive/planning/](docs/archive/planning/) | Archived planning docs (DCX, waves, backlog) |
 
 ## Project layout
 

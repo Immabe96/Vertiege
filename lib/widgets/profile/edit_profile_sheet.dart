@@ -9,6 +9,7 @@ import '../../theme/v_colors.dart';
 import '../../utils/haptics.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../ui/overlays/v_sheet.dart';
 
 class EditProfileSheet extends StatefulWidget {
   final Resident resident;
@@ -51,58 +52,38 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.85,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (ctx, scrollController) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(ctx).viewInsets.bottom,
-          ),
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(
-              VSpacing.lg,
-              VSpacing.sm,
-              VSpacing.lg,
-              VSpacing.xl,
-            ),
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: VSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Theme.of(ctx)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(VRadius.pill),
-                  ),
-                ),
-              ),
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(
+          VSpacing.lg,
+          VSpacing.sm,
+          VSpacing.lg,
+          VSpacing.xl,
+        ),
+        children: [
               Text(
                 'Edit Profile',
-                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: VFontWeight.bold,
                 ),
               ),
               const SizedBox(height: VSpacing.xs),
               Text(
                 'Customize how others see you in the worlds.',
-                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(ctx).colorScheme.outline,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
                 ),
               ),
               const SizedBox(height: VSpacing.lg),
-              _sectionHeader(ctx, 'Profile Photo'),
+              _sectionHeader(context, 'Profile Photo'),
               const SizedBox(height: VSpacing.sm),
-              _buildAvatarPicker(ctx),
+              _buildAvatarPicker(context),
               const SizedBox(height: VSpacing.lg),
-              _sectionHeader(ctx, 'Display name'),
+              _sectionHeader(context, 'Display name'),
               const SizedBox(height: VSpacing.sm),
               TextField(
                 controller: _nameController,
@@ -125,13 +106,13 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _sectionHeader(ctx, 'Bio'),
+                  _sectionHeader(context, 'Bio'),
                   Text(
                     '${_bioController.text.length}/160',
-                    style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: _bioController.text.length >= 160
                           ? VColors.error
-                          : Theme.of(ctx).colorScheme.outline,
+                          : Theme.of(context).colorScheme.outline,
                     ),
                   ),
                 ],
@@ -158,7 +139,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 ),
               ),
               const SizedBox(height: VSpacing.lg),
-              _sectionHeader(ctx, 'Profession'),
+              _sectionHeader(context, 'Profession'),
               const SizedBox(height: VSpacing.sm),
               Wrap(
                 spacing: 8,
@@ -173,7 +154,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                             size: VBadgeSize.professionInline,
                             fallbackColor: isSel
                                 ? VColors.onPrimary
-                                : Theme.of(ctx).colorScheme.onSurfaceVariant,
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     label: Text(p.isEmpty ? 'None' : p),
                     selected: isSel,
@@ -182,15 +163,15 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                     labelStyle: TextStyle(
                       color: isSel
                           ? VColors.onPrimary
-                          : Theme.of(ctx).colorScheme.onSurfaceVariant,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: VFontSize.bodyMd,
                     ),
                     backgroundColor:
-                        Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     side: BorderSide(
                       color: isSel
                           ? VColors.primary
-                          : Theme.of(ctx).colorScheme.outlineVariant,
+                          : Theme.of(context).colorScheme.outlineVariant,
                     ),
                   );
                 }).toList(),
@@ -198,8 +179,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
               const SizedBox(height: VSpacing.xs),
               Text(
                 'Self-declared — verification coming soon.',
-                style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(ctx).colorScheme.outline,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
                 ),
               ),
               const SizedBox(height: VSpacing.xl),
@@ -216,9 +197,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 variant: ButtonVariant.text,
               ),
             ],
-          ),
-        );
-      },
+      ),
     );
   }
 
@@ -333,15 +312,9 @@ void showEditProfileSheet(
   Resident resident, {
   required void Function({String? name, String? bio, String? avatarPath, String? profession}) onSave,
 }) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(VRadius.xl),
-      ),
-    ),
-    builder: (sheetContext) => EditProfileSheet(resident: resident, onSave: onSave),
+  showVSheet(
+    context,
+    EditProfileSheet(resident: resident, onSave: onSave),
+    maxSize: 0.92,
   );
 }

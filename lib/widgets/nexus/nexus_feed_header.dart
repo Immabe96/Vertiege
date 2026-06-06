@@ -9,11 +9,13 @@ import 'feed_tab_chip.dart';
 class NexusFeedHeader extends StatelessWidget {
   final bool isDark;
   final bool allSelected;
+  final bool verifiedSelected;
   final bool followingSelected;
   final bool announcementsSelected;
   final FeedSort currentSort;
   final ValueChanged<FeedSort> onSortChanged;
   final VoidCallback onAllTap;
+  final VoidCallback onVerifiedTap;
   final VoidCallback onFollowingTap;
   final VoidCallback onAnnouncementsTap;
 
@@ -21,11 +23,13 @@ class NexusFeedHeader extends StatelessWidget {
     super.key,
     required this.isDark,
     required this.allSelected,
+    required this.verifiedSelected,
     required this.followingSelected,
     required this.announcementsSelected,
     required this.currentSort,
     required this.onSortChanged,
     required this.onAllTap,
+    required this.onVerifiedTap,
     required this.onFollowingTap,
     required this.onAnnouncementsTap,
   });
@@ -51,6 +55,13 @@ class NexusFeedHeader extends StatelessWidget {
                     label: 'All',
                     selected: allSelected,
                     onTap: onAllTap,
+                  ),
+                  const SizedBox(width: 6),
+                  FeedTabChip(
+                    label: 'Verified',
+                    selected: verifiedSelected,
+                    icon: Icons.verified,
+                    onTap: onVerifiedTap,
                   ),
                   const SizedBox(width: 6),
                   FeedTabChip(
@@ -106,6 +117,7 @@ class NexusFeedHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant NexusFeedHeaderDelegate oldDelegate) =>
       oldDelegate.header.isDark != header.isDark ||
       oldDelegate.header.allSelected != header.allSelected ||
+      oldDelegate.header.verifiedSelected != header.verifiedSelected ||
       oldDelegate.header.followingSelected != header.followingSelected ||
       oldDelegate.header.announcementsSelected != header.announcementsSelected ||
       oldDelegate.header.currentSort != header.currentSort;

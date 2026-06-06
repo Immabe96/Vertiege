@@ -1,13 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../models/channel.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
-import '../../services/world_service.dart';
+import '../../router/world_navigation.dart';
+import '../../services/world_nav_prefs.dart';
+import '../../state/channel_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../ui/icons/v_icons.dart';
+
+/// Shows the world welcome modal on first join (DCX-084).
+Future<void> showWorldWelcomeFlow(
+  BuildContext context,
+  WidgetRef ref, {
+  required World world,
+}) async {
+  if (await WorldNavPrefs.hasSeenWelcome(world.id)) return;
+  if (!context.mounted) return;
+
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (ctx) => WorldWelcomeFlow(
+      world: world,
+      onComplete: () async {
+        await WorldNavPrefs.markWelcomeSeen(world.id);
+        if (ctx.mounted) Navigator.of(ctx).pop();
+      },
+    ),
+  );
+}
 
 class WorldWelcomeFlow extends ConsumerStatefulWidget {
   final World world;
@@ -26,7 +53,6 @@ class WorldWelcomeFlow extends ConsumerStatefulWidget {
 class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
   int _step = 0;
   bool _rulesAcknowledged = false;
-  bool _isLoading = false;
 
   late final PageController _pageController;
 
@@ -34,6 +60,7 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    ref.read(channelProvider.notifier).loadChannels(widget.world.id);
   }
 
   @override
@@ -42,7 +69,13 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
     super.dispose();
   }
 
+  bool get _canContinue {
+    if (_step == 1) return _rulesAcknowledged;
+    return true;
+  }
+
   void _next() {
+    if (!_canContinue) return;
     if (_step < 2) {
       setState(() => _step++);
       _pageController.nextPage(
@@ -50,18 +83,6 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
         curve: Curves.easeInOut,
       );
     } else {
-      _complete();
-    }
-  }
-
-  Future<void> _complete() async {
-    setState(() => _isLoading = true);
-    await WorldService.updateWorld(
-      worldId: widget.world.id,
-      welcomeMessage: widget.world.welcomeMessage,
-    );
-    if (mounted) {
-      setState(() => _isLoading = false);
       widget.onComplete();
     }
   }
@@ -71,9 +92,10 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
+    final channels =
+        ref.watch(channelProvider).channelsByWorld[widget.world.id] ?? [];
 
     return Dialog(
-      backgroundColor: Colors.transparent,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         padding: const EdgeInsets.all(VSpacing.lg),
@@ -86,16 +108,18 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
           children: [
             Row(
               children: [
-                Text(
-                  'Welcome to ${widget.world.name}',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: VFontWeight.bold,
+                Expanded(
+                  child: Text(
+                    'Welcome to ${widget.world.name}',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: VFontWeight.bold,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 IconButton(
+                  tooltip: 'Close',
                   icon: const Icon(VIcons.x),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: widget.onComplete,
                 ),
               ],
             ),
@@ -107,7 +131,9 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
                     height: 4,
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
-                      color: i <= _step ? VColors.primary : VColors.outline.withValues(alpha: 0.2),
+                      color: i <= _step
+                          ? VColors.primary
+                          : VColors.outline.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(VRadius.xxs),
                     ),
                   ),
@@ -127,15 +153,19 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
                     onChanged: (v) => setState(() => _rulesAcknowledged = v),
                     isDark: isDark,
                   ),
-                  _RoleStep(world: widget.world, resident: resident, isDark: isDark),
+                  _ChannelPicksStep(
+                    world: widget.world,
+                    resident: resident,
+                    channels: channels,
+                    isDark: isDark,
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: VSpacing.lg),
             VButton(
-              label: _step < 2 ? 'Continue' : 'Enter World',
-              onPressed: _next,
-              isLoading: _isLoading,
+              label: _step < 2 ? 'Continue' : 'Enter world',
+              onPressed: _canContinue ? _next : null,
             ),
           ],
         ),
@@ -186,7 +216,9 @@ class _WelcomeStep extends StatelessWidget {
               '"${world.motto}"',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontStyle: FontStyle.italic,
-                color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                color: isDark
+                    ? VColors.onSurfaceVariantDark
+                    : VColors.onSurfaceVariant,
               ),
             ),
           ],
@@ -194,7 +226,9 @@ class _WelcomeStep extends StatelessWidget {
           Text(
             world.description,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
             ),
           ),
           if (world.lore.isNotEmpty) ...[
@@ -207,13 +241,19 @@ class _WelcomeStep extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(VIcons.sparkles, size: VIconSize.sm, color: VColors.warning),
+                  const Icon(
+                    VIcons.sparkles,
+                    size: VIconSize.sm,
+                    color: VColors.warning,
+                  ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Text(
                       world.lore,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                        color: isDark
+                            ? VColors.onSurfaceVariantDark
+                            : VColors.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -262,7 +302,7 @@ class _RulesStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Rules & Guidelines',
+            'Rules & guidelines',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: VFontWeight.bold,
             ),
@@ -277,10 +317,29 @@ class _RulesStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _RuleItem(icon: Icons.handshake, text: 'Treat all residents with respect'),
-                _RuleItem(icon: Icons.no_adult_content, text: 'Keep content appropriate for all'),
-                _RuleItem(icon: Icons.shield, text: 'Follow the sovereign\'s guidance'),
-                _RuleItem(icon: Icons.report, text: 'Report violations to moderators'),
+                const _RuleItem(
+                  icon: Icons.handshake,
+                  text: 'Treat all residents with respect',
+                ),
+                const _RuleItem(
+                  icon: Icons.no_adult_content,
+                  text: 'Keep content appropriate for all',
+                ),
+                const _RuleItem(
+                  icon: Icons.shield,
+                  text: 'Follow the sovereign\'s guidance',
+                ),
+                const _RuleItem(
+                  icon: Icons.report,
+                  text: 'Report violations to moderators',
+                ),
+                if (world.welcomeMessage.isNotEmpty) ...[
+                  const Divider(height: VSpacing.lg),
+                  Text(
+                    world.welcomeMessage,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
               ],
             ),
           ),
@@ -321,66 +380,85 @@ class _RuleItem extends StatelessWidget {
   }
 }
 
-class _RoleStep extends StatelessWidget {
+class _ChannelPicksStep extends StatelessWidget {
   final World world;
   final Resident? resident;
+  final List<WorldChannel> channels;
   final bool isDark;
 
-  const _RoleStep({required this.world, required this.resident, required this.isDark});
+  const _ChannelPicksStep({
+    required this.world,
+    required this.resident,
+    required this.channels,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textChannels = channels
+        .where((c) => c.channelType != ChannelType.voice)
+        .take(6)
+        .toList();
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Get Started',
+            'Quick channel picks',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: VFontWeight.bold,
             ),
           ),
+          const SizedBox(height: VSpacing.xs),
+          Text(
+            'Jump into a channel to get started.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? VColors.onSurfaceVariantDark
+                  : VColors.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: VSpacing.md),
-          _ActionCard(
-            icon: Icons.person_outline,
-            title: 'Introduce Yourself',
-            subtitle: 'Say hello in the general channel',
-            onTap: () {},
-          ),
-          const SizedBox(height: VSpacing.sm),
-          _ActionCard(
-            icon: Icons.explore,
-            title: 'Explore Channels',
-            subtitle: 'Browse the available channels',
-            onTap: () {},
-          ),
+          if (textChannels.isEmpty)
+            Text(
+              'Channels will appear here once the world is set up.',
+              style: theme.textTheme.bodyMedium,
+            )
+          else
+            ...textChannels.map(
+              (ch) => Padding(
+                padding: const EdgeInsets.only(bottom: VSpacing.sm),
+                child: _ActionCard(
+                  icon: Icons.tag,
+                  title: '#${ch.name}',
+                  subtitle: ch.description?.isNotEmpty == true
+                      ? ch.description!
+                      : 'Text channel',
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    context.push(
+                      worldChannelDestinationPath(
+                        world.id,
+                        ch,
+                        worldName: world.name,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           const SizedBox(height: VSpacing.sm),
           _ActionCard(
             icon: Icons.people_outline,
-            title: 'Meet Residents',
-            subtitle: 'Connect with other members',
-            onTap: () {},
+            title: 'Meet residents',
+            subtitle: 'Browse who\'s in this world',
+            onTap: () {
+              Navigator.of(context).pop();
+              context.push('/worlds/${world.id}/members');
+            },
           ),
-          if (world.dominionType == DominionType.sanctuary) ...[
-            const SizedBox(height: VSpacing.sm),
-            _ActionCard(
-              icon: Icons.self_improvement,
-              title: 'Check Your Tier',
-              subtitle: 'See your current tier and perks',
-              onTap: () {},
-            ),
-          ],
-          if (world.dominionType == DominionType.marketplace) ...[
-            const SizedBox(height: VSpacing.sm),
-            _ActionCard(
-              icon: Icons.storefront,
-              title: 'Browse Marketplace',
-              subtitle: 'See what\'s available for trade',
-              onTap: () {},
-            ),
-          ],
         ],
       ),
     );
@@ -428,7 +506,9 @@ class _ActionCard extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                      color: isDark
+                          ? VColors.onSurfaceVariantDark
+                          : VColors.onSurfaceVariant,
                     ),
                   ),
                 ],

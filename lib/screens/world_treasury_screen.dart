@@ -15,6 +15,7 @@ import '../ui/buttons/v_button.dart';
 import '../../widgets/core/new_user_context_hint.dart';
 import '../../widgets/core/progression_help_button.dart';
 import '../../config/progression_glossary.dart';
+import '../../widgets/worlds/world_admin_breadcrumb.dart';
 
 class WorldTreasuryScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -218,6 +219,10 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
 
     return VHubPage(
       title: 'Treasury',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Treasury',
+      ),
       showBack: true,
       headerActions: const [
         ProgressionHelpButton(

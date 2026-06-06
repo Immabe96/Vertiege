@@ -17,8 +17,7 @@ void main() {
       );
     });
 
-    test('hides nav in dm and chat room', () {
-      expect(communeImmersivePath('/dm/room-1'), isTrue);
+    test('hides nav in chat room', () {
       expect(communeImmersivePath('/chat/room-1'), isTrue);
     });
 
@@ -26,9 +25,12 @@ void main() {
       expect(communeImmersivePath('/campfire/ch-1'), isTrue);
     });
 
-    test('shows nav on home', () {
+    test('shows nav on primary tabs and explore root', () {
       expect(communeImmersivePath('/'), isFalse);
-      expect(communeImmersivePath('/you'), isFalse);
+      expect(communeImmersivePath('/chat'), isFalse);
+      expect(communeImmersivePath('/identity'), isFalse);
+      expect(communeImmersivePath('/explore'), isFalse);
+      expect(communeImmersivePath('/explore/discover'), isFalse);
     });
   });
 }

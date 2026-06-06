@@ -1,10 +1,20 @@
 ﻿import 'package:flutter/material.dart';
+
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/glass_panel.dart';
 
 class BentoGrid extends StatelessWidget {
   final List<BentoCard> cards;
-  const BentoGrid({super.key, required this.cards});
+
+  /// Flatter activity rows — less glass chrome (DCX-087).
+  final bool flat;
+
+  const BentoGrid({
+    super.key,
+    required this.cards,
+    this.flat = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +38,7 @@ class BentoGrid extends StatelessWidget {
                 row: rows[i],
                 cellWidth: cellWidth,
                 spacing: spacing,
+                flat: flat,
               ),
             ],
           ],
@@ -85,11 +96,13 @@ class _BentoRow extends StatelessWidget {
   final List<BentoCard> row;
   final double cellWidth;
   final double spacing;
+  final bool flat;
 
   const _BentoRow({
     required this.row,
     required this.cellWidth,
     required this.spacing,
+    this.flat = false,
   });
 
   @override
@@ -103,6 +116,7 @@ class _BentoRow extends StatelessWidget {
         card: row.first,
         width: fullWidth,
         height: height,
+        flat: flat,
       );
     }
 
@@ -117,6 +131,7 @@ class _BentoRow extends StatelessWidget {
                 card: row[i],
                 width: cellWidth,
                 height: height,
+                flat: flat,
               ),
             ),
           ],
@@ -133,44 +148,80 @@ class _BentoRow extends StatelessWidget {
     return maxH;
   }
 
-  double _heightFor(BentoSize size) => switch (size) {
-        BentoSize.small => 164,
-        BentoSize.medium => 184,
-        BentoSize.large => 212,
-        BentoSize.full => 212,
+  double _heightFor(BentoSize size) {
+    if (flat) {
+      return switch (size) {
+        BentoSize.small => 132,
+        BentoSize.medium => 148,
+        BentoSize.large => 168,
+        BentoSize.full => 168,
       };
+    }
+    return switch (size) {
+      BentoSize.small => 164,
+      BentoSize.medium => 184,
+      BentoSize.large => 212,
+      BentoSize.full => 212,
+    };
+  }
 }
 
 class _BentoCardTile extends StatelessWidget {
   final BentoCard card;
   final double width;
   final double height;
+  final bool flat;
 
   const _BentoCardTile({
     required this.card,
     required this.width,
     required this.height,
+    this.flat = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final innerHeight = height - (VSpacing.md * 2);
+    final brightness = Theme.of(context).brightness;
+    final padding = flat ? VSpacing.sm : VSpacing.md;
+    final innerHeight = height - (padding * 2);
+    final surface = flat
+        ? DecoratedBox(
+            decoration: BoxDecoration(
+              color: VCommuneColors.surfaceSecondaryOf(brightness),
+              borderRadius: BorderRadius.circular(VRadius.md),
+              border: Border.all(color: VCommuneColors.dividerOf(brightness)),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(padding),
+              child: ClipRect(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    width: width - (padding * 2),
+                    height: innerHeight,
+                    child: card.child,
+                  ),
+                ),
+              ),
+            ),
+          )
+        : VSurfacePanel(
+            padding: EdgeInsets.all(padding),
+            child: ClipRect(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: width - (padding * 2),
+                  height: innerHeight,
+                  child: card.child,
+                ),
+              ),
+            ),
+          );
     final child = SizedBox(
       width: width,
       height: height,
-      child: VSurfacePanel(
-        padding: const EdgeInsets.all(VSpacing.md),
-        child: ClipRect(
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: width - (VSpacing.md * 2),
-              height: innerHeight,
-              child: card.child,
-            ),
-          ),
-        ),
-      ),
+      child: surface,
     );
 
     if (card.onTap != null) {

@@ -80,14 +80,21 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
     if (_collected) return;
     setState(() => _collected = true);
     widget.onCollect();
+    Navigator.of(context).pop();
+  }
+
+  void _dismissWithoutCollecting() {
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Center(
-      child: Container(
+    return PopScope(
+      canPop: true,
+      child: Center(
+        child: Container(
         margin: const EdgeInsets.symmetric(horizontal: VSpacing.xl),
         padding: const EdgeInsets.all(VSpacing.xl),
         decoration: BoxDecoration(
@@ -171,7 +178,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: _collected ? null : _onCollect,
+                onPressed: _onCollect,
                 style: FilledButton.styleFrom(
                   backgroundColor: VColors.tertiary,
                   foregroundColor: VColors.onTertiary,
@@ -181,7 +188,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                   ),
                 ),
                 child: Text(
-                  _collected ? 'COLLECTED!' : 'COLLECT',
+                  'COLLECT',
                   style: TextStyle(
                     fontSize: VFontSize.bodyLg,
                     fontWeight: VFontWeight.bold,
@@ -190,7 +197,18 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                 ),
               ),
             ),
+            const SizedBox(height: VSpacing.sm),
+            TextButton(
+              onPressed: _dismissWithoutCollecting,
+              child: Text(
+                'Not now',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: VColors.onSurfaceVariant,
+                ),
+              ),
+            ),
           ],
+        ),
         ),
       ),
     );

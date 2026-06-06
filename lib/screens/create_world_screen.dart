@@ -465,6 +465,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                     children: _iconChoices.map((choice) {
                       final isSelected = _selectedIcon == choice.id;
                       return VIconButton(
+                        semanticsLabel: 'World icon ${choice.id}',
                         selected: isSelected,
                         onPressed: () =>
                             setState(() => _selectedIcon = choice.id),

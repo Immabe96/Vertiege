@@ -62,7 +62,7 @@ class ContextualChips extends ConsumerWidget {
             icon: Icons.mail,
             label: 'Invites ($invitesCount)',
             color: VColors.warning,
-            onTap: () => context.go('/explore'),
+            onTap: () => context.push('/explore'),
           ),
         );
       }

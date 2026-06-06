@@ -18,6 +18,7 @@ import '../../widgets/worlds/create_listing_dialog.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
+import '../../widgets/worlds/world_admin_breadcrumb.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/new_user_context_hint.dart';
 import '../../widgets/core/quiet_gate_tile.dart';
@@ -113,7 +114,6 @@ class _WorldMarketplaceScreenState
     showTabAwareModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => _ListingDetailSheet(
         listing: listing,
         worldId: widget.worldId,
@@ -144,6 +144,10 @@ class _WorldMarketplaceScreenState
 
     return VHubPage(
       title: 'Marketplace',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Marketplace',
+      ),
       showBack: true,
       headerActions: [
         if (widget.isMember && canList)

@@ -9,6 +9,7 @@ import '../models/message.dart';
 import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
+import '../theme/v_commune_chat_theme.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
@@ -45,7 +46,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     with TickerProviderStateMixin {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
-  bool _showScrollFab = false;
+  final _scrollFabTracker = ChatScrollFabTracker();
 
   @override
   void initState() {
@@ -64,12 +65,8 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    final offset = _scrollController.offset;
-    final maxExtent = _scrollController.position.maxScrollExtent;
-    final showFab = (maxExtent - offset) > 200;
-    if (showFab != _showScrollFab) {
-      setState(() => _showScrollFab = showFab);
+    if (_scrollFabTracker.updateFromScroll(_scrollController)) {
+      setState(() {});
     }
   }
 
@@ -120,11 +117,17 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     final chatState = ref.watch(chatProvider);
     final isLoading = !chatState.channelMessages.containsKey(threadId);
     final messagesLoadError = chatState.messagesLoadErrorFor(threadId);
+    if (_scrollFabTracker.syncMessageCount(messages.length)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
     final displayItems = buildChatDisplayItems(messages);
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return VScaffold(
+    return ColoredBox(
+      color: VCommuneChatTheme.backgroundColor,
+      child: VScaffold(
       header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
@@ -147,9 +150,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             Text(
               '# ${widget.channelName}',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: VCommuneChatTheme.timestampMuted,
               ),
             ),
           ],
@@ -191,11 +192,14 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                           return _buildItem(item, resident?.id ?? '');
                         },
                       ),
-                      if (_showScrollFab)
+                      if (_scrollFabTracker.show)
                         Positioned(
                           right: VSpacing.md,
                           bottom: VSpacing.sm,
-                          child: ChatScrollFab(onTap: _scrollToBottom),
+                          child: ChatScrollFab(
+                            onTap: _scrollToBottom,
+                            badgeCount: _scrollFabTracker.badgeCount,
+                          ),
                         ),
                     ],
                   ),
@@ -204,9 +208,11 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             controller: _controller,
             onSend: _sendReply,
             hintText: 'Reply in thread...',
+            useCommuneStyle: true,
           ),
         ],
       ),
+    ),
     );
   }
 

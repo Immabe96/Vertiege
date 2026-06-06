@@ -162,15 +162,21 @@ String residentProfilePath(
 
 String leaguesPath() => '/progress?tab=league';
 
-/// In-shell chat tab route (keeps bottom navigation).
-String chatShellPath(String roomId, {String? draft}) {
-  return _path('/chat/${Uri.encodeComponent(roomId)}', draft != null ? {'draft': draft} : null);
+/// Opens a DM room (full-screen, outside shell).
+String chatRoomPath(String roomId, {String? draft}) {
+  return _path(
+    '/chat/${Uri.encodeComponent(roomId)}',
+    draft != null ? {'draft': draft} : null,
+  );
 }
 
-/// Full-screen DM (outside shell) — profile, marketplace, etc.
-String dmPath(String roomId, {String? draft}) {
-  return _path('/dm/${Uri.encodeComponent(roomId)}', draft != null ? {'draft': draft} : null);
-}
+/// @deprecated Use [chatRoomPath].
+String chatShellPath(String roomId, {String? draft}) =>
+    chatRoomPath(roomId, draft: draft);
+
+/// @deprecated Use [chatRoomPath].
+String dmPath(String roomId, {String? draft}) =>
+    chatRoomPath(roomId, draft: draft);
 
 String campfirePath({
   required String channelId,

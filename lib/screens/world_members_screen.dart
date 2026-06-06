@@ -18,7 +18,9 @@ import '../widgets/core/empty_state.dart';
 import '../ui/buttons/v_button.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/core/screen_loading.dart';
+import '../widgets/worlds/world_admin_breadcrumb.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/worlds/world_admin_breadcrumb.dart';
 
 class WorldMembersScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -109,7 +111,11 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
             ));
 
     return VHubPage(
-      title: 'Members',
+      title: 'Residents',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Residents',
+      ),
       showBack: true,
       headerActions: [
         VHeaderAction(
@@ -326,14 +332,9 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
 
     final sheetMaxHeight = MediaQuery.sizeOf(context).height * 0.65;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: isDark
-          ? VColors.surfaceContainerHighDark
-          : VColors.surfaceContainerHigh,
-      builder: (ctx) => StatefulBuilder(
+    await showVSheet(
+      context,
+      StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -384,7 +385,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                   children: [
                     VButton(
                       label: 'Cancel',
-                      onPressed: () => Navigator.pop(ctx),
+                      onPressed: () => Navigator.pop(context),
                       variant: ButtonVariant.text,
                     ),
                     const Spacer(),
@@ -410,8 +411,8 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                           );
                           if (!executed) pendingRankChanges++;
                         }
-                        if (!ctx.mounted) return;
-                        Navigator.pop(ctx);
+                        if (!context.mounted) return;
+                        Navigator.pop(context);
                         if (!mounted) return;
                         if (pendingRankChanges > 0) {
                           VFeedback.showMessage(
@@ -430,6 +431,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
           ),
         ),
       ),
+      maxSize: 0.75,
     );
   }
 

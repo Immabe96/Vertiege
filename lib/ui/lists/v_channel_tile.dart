@@ -10,7 +10,12 @@ class VChannelTile extends StatelessWidget {
   final int unreadCount;
   final bool isMuted;
   final bool isSelected;
+  final bool isFavorite;
+  final bool isLocked;
+  final String? gateHint;
+  final String? activitySubtitle;
   final VoidCallback? onTap;
+  final VoidCallback? onToggleFavorite;
 
   const VChannelTile({
     super.key,
@@ -19,18 +24,31 @@ class VChannelTile extends StatelessWidget {
     this.unreadCount = 0,
     this.isMuted = false,
     this.isSelected = false,
+    this.isFavorite = false,
+    this.isLocked = false,
+    this.gateHint,
+    this.activitySubtitle,
     this.onTap,
+    this.onToggleFavorite,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hasUnread = unreadCount > 0;
-    final nameColor = hasUnread
+    final hasUnread = !isLocked && unreadCount > 0;
+    final nameColor = isLocked
+        ? VCommuneColors.textMuted
+        : hasUnread
         ? VCommuneColors.headerPrimary
         : VCommuneColors.textMuted;
-    final iconColor = hasUnread
+    final iconColor = isLocked
+        ? VCommuneColors.textMuted
+        : hasUnread
         ? VCommuneColors.textNormal
         : VCommuneColors.textMuted;
+    final rowIcon = isLocked ? Icons.lock_outline : icon;
+    final subtitle = isLocked && gateHint != null && gateHint!.isNotEmpty
+        ? gateHint
+        : activitySubtitle;
 
     return Material(
       color: isSelected
@@ -48,23 +66,59 @@ class VChannelTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: VIconSize.md, color: iconColor),
+              Icon(rowIcon, size: VIconSize.md, color: iconColor),
               const SizedBox(width: VSpacing.sm),
               Expanded(
-                child: Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: VFontSize.bodyMd,
-                    fontWeight: hasUnread
-                        ? VFontWeight.semiBold
-                        : VFontWeight.medium,
-                    color: nameColor,
-                    height: VLineHeight.label,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: VFontSize.bodyMd,
+                        fontWeight: hasUnread
+                            ? VFontWeight.semiBold
+                            : VFontWeight.medium,
+                        color: nameColor,
+                        height: VLineHeight.label,
+                      ),
+                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty)
+                      Text(
+                        subtitle!,
+                        maxLines: isLocked ? 2 : 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          color: isLocked
+                              ? VCommuneColors.statusIdle
+                              : VCommuneColors.textLink,
+                          fontStyle:
+                              isLocked ? FontStyle.normal : FontStyle.italic,
+                          height: VLineHeight.label,
+                        ),
+                      ),
+                  ],
                 ),
               ),
+              if (onToggleFavorite != null)
+                GestureDetector(
+                  onTap: onToggleFavorite,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: VSpacing.xs),
+                    child: Icon(
+                      isFavorite ? Icons.star : Icons.star_border,
+                      size: VIconSize.sm,
+                      color: isFavorite
+                          ? VCommuneColors.statusIdle
+                          : VCommuneColors.textMuted,
+                    ),
+                  ),
+                ),
               if (isMuted)
                 const Padding(
                   padding: EdgeInsets.only(left: VSpacing.xs),

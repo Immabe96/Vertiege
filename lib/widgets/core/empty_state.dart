@@ -9,6 +9,15 @@ import '../../utils/v_motion.dart';
 /// Variant determines the color tint applied to the empty state.
 enum EmptyStateVariant { default_, error, success }
 
+/// Commune illustration presets for empty states (DCX-116).
+enum EmptyStateIllustration {
+  default_,
+  worlds,
+  chat,
+  achievements,
+  nexus,
+}
+
 /// Compact Forui-aligned empty state: muted icon, title, optional CTA.
 class AppEmptyState extends ConsumerStatefulWidget {
   final String title;
@@ -17,6 +26,7 @@ class AppEmptyState extends ConsumerStatefulWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final EmptyStateVariant variant;
+  final EmptyStateIllustration illustration;
 
   const AppEmptyState({
     super.key,
@@ -26,6 +36,7 @@ class AppEmptyState extends ConsumerStatefulWidget {
     this.actionLabel,
     this.onAction,
     this.variant = EmptyStateVariant.default_,
+    this.illustration = EmptyStateIllustration.default_,
   });
 
   @override
@@ -82,6 +93,26 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
     }
   }
 
+  IconData _illustrationIcon() {
+    if (widget.illustration != EmptyStateIllustration.default_) {
+      return switch (widget.illustration) {
+        EmptyStateIllustration.worlds => Icons.public,
+        EmptyStateIllustration.chat => Icons.forum_outlined,
+        EmptyStateIllustration.achievements => Icons.emoji_events_outlined,
+        EmptyStateIllustration.nexus => Icons.dynamic_feed_outlined,
+        EmptyStateIllustration.default_ => widget.icon,
+      };
+    }
+    return widget.icon;
+  }
+
+  List<Color> _illustrationGradient(Color base) {
+    return [
+      base.withValues(alpha: 0.18),
+      base.withValues(alpha: 0.06),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -99,15 +130,22 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 72,
+                height: 72,
                 decoration: BoxDecoration(
-                  color: variantColor.withValues(alpha: 0.1),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: _illustrationGradient(variantColor),
+                  ),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: variantColor.withValues(alpha: 0.12),
+                  ),
                 ),
                 child: Icon(
-                  widget.icon,
-                  size: 28,
+                  _illustrationIcon(),
+                  size: 32,
                   color: variantColor,
                 ),
               ),

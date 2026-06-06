@@ -8,6 +8,8 @@ import '../models/resident.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
 import '../state/ally_provider.dart';
+import '../models/post.dart';
+import '../repositories/post_repository.dart';
 import '../services/profile_service.dart';
 import '../services/chat_service.dart';
 import '../theme/v_colors.dart';
@@ -19,6 +21,7 @@ import '../widgets/profile/luminary_nameplate.dart';
 import '../ui/icons/v_icons.dart';
 import '../widgets/profile/badge_display.dart';
 import '../widgets/profile/profile_achievement_showcase.dart';
+import '../widgets/profile/profile_standing_grid.dart';
 import '../services/profile_achievements_service.dart';
 import '../widgets/shared/profession_icon.dart';
 import '../widgets/shared/tier_icon.dart';
@@ -42,8 +45,13 @@ class ResidentProfileScreen extends ConsumerStatefulWidget {
 class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
   Resident? _profile;
   List<PublicAchievementEntry> _publicAchievements = [];
+  List<Post> _standingPosts = [];
+  bool _hasMoreStandingPosts = false;
+  bool _loadingMoreStanding = false;
   bool _loading = true;
   String? _error;
+  static const _postRepository = PostRepository();
+  static const _standingPageSize = 12;
 
   @override
   void initState() {
@@ -74,6 +82,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     }
 
     List<PublicAchievementEntry> achievements = [];
+    List<Post> standingPosts = [];
     if (profile != null) {
       try {
         achievements = await ProfileAchievementsService.fetchPublicProfile(
@@ -82,15 +91,46 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       } catch (_) {
         achievements = [];
       }
+      try {
+        standingPosts = await _postRepository.publishedPostsByResident(
+          widget.residentId,
+          limit: _standingPageSize,
+        );
+      } catch (_) {
+        standingPosts = [];
+      }
     }
 
     if (!mounted) return;
     setState(() {
       _profile = profile;
       _publicAchievements = achievements;
+      _standingPosts = standingPosts;
+      _hasMoreStandingPosts = standingPosts.length >= _standingPageSize;
       _loading = false;
       _error = profile == null ? 'Resident not found' : null;
     });
+  }
+
+  Future<void> _loadMoreStandingPosts() async {
+    if (_loadingMoreStanding || !_hasMoreStandingPosts) return;
+    setState(() => _loadingMoreStanding = true);
+    try {
+      final next = await _postRepository.publishedPostsByResident(
+        widget.residentId,
+        limit: _standingPageSize,
+        offset: _standingPosts.length,
+      );
+      if (!mounted) return;
+      setState(() {
+        _standingPosts = [..._standingPosts, ...next];
+        _hasMoreStandingPosts = next.length >= _standingPageSize;
+        _loadingMoreStanding = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingMoreStanding = false);
+    }
   }
 
   @override
@@ -162,19 +202,18 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     final resident = _profile!;
     final isOwnProfile = resident.id == ref.read(residentProvider).resident?.id;
     final totalXp = resident.totalXp;
-
     return ListView(
       padding: const EdgeInsets.all(VSpacing.lg),
       children: [
         FadeIn(
           delayMs: 60,
           child: Container(
-            padding: const EdgeInsets.all(VSpacing.xl),
+            padding: const EdgeInsets.all(VSpacing.lg),
             decoration: BoxDecoration(
               color: isDark
                   ? VColors.surfaceContainerDark
                   : VColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(VRadius.xl),
+              borderRadius: BorderRadius.circular(VRadius.lg),
               border: Border.all(
                 color: isDark
                     ? VColors.outlineVariantDark.withValues(alpha: 0.2)
@@ -183,25 +222,13 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
             ),
             child: Column(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: VColors.primary.withValues(alpha: 0.2),
-                        blurRadius: 24,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: Hero(
-                    tag: 'avatar-${resident.id}',
-                    child: CosmeticAvatar(
-                      totalXp: totalXp,
-                      size: 96,
-                      imageUrl: resident.avatarUrl,
-                      seed: resident.id,
-                    ),
+                Hero(
+                  tag: 'avatar-${resident.id}',
+                  child: CosmeticAvatar(
+                    totalXp: totalXp,
+                    size: 72,
+                    imageUrl: resident.avatarUrl,
+                    seed: resident.id,
                   ),
                 ),
                 const SizedBox(height: VSpacing.md),
@@ -303,11 +330,11 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
         ),
 
         if (!isOwnProfile) ...[
-          const SizedBox(height: VSpacing.lg),
+          const SizedBox(height: VSpacing.md),
           FadeIn(
             delayMs: 120,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FilledButton.icon(
                   onPressed: () async {
@@ -324,8 +351,16 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                   },
                   icon: const Icon(VIcons.message),
                   label: const Text('Message'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: VSpacing.md,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: VSpacing.sm),
+                const SizedBox(height: VSpacing.sm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                 Consumer(
                   builder: (context, ref, _) {
                     final currentId = ref.watch(residentProvider).resident?.id;
@@ -416,6 +451,8 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                           );
                   },
                 ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -444,7 +481,61 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
               ),
             ),
           ),
+        ] else if (!isOwnProfile) ...[
+          const SizedBox(height: VSpacing.lg),
+          FadeIn(
+            delayMs: 140,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(VSpacing.lg),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? VColors.surfaceContainerDark
+                    : VColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(VRadius.xl),
+                border: Border.all(
+                  color: isDark
+                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                      : VColors.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                'No public achievements yet.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isDark
+                      ? VColors.onSurfaceVariantDark
+                      : VColors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
         ],
+
+        const SizedBox(height: VSpacing.lg),
+        FadeIn(
+          delayMs: 160,
+          child: Container(
+            padding: const EdgeInsets.all(VSpacing.lg),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? VColors.surfaceContainerDark
+                  : VColors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(VRadius.xl),
+              border: Border.all(
+                color: isDark
+                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
+                    : VColors.outlineVariant.withValues(alpha: 0.3),
+              ),
+            ),
+            child: ProfileStandingGrid(
+              posts: _standingPosts,
+              maxVisible: _standingPosts.length,
+              hasMore: _hasMoreStandingPosts,
+              isLoadingMore: _loadingMoreStanding,
+              onLoadMore: _loadMoreStandingPosts,
+            ),
+          ),
+        ),
 
         if (resident.decorations.isNotEmpty) ...[
           const SizedBox(height: VSpacing.lg),

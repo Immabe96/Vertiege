@@ -1,8 +1,20 @@
 # Vertiege Commune UX — Master Plan
 
-**Status:** Wave 1 in progress  
+**Status:** Waves 0–9 shipped on **3-tab IA** (see live shell below)  
 **Branch:** `feature/discord-ux-redesign` · [PR #33](https://github.com/Immabe96/Vertiege/pull/33)  
 **Goal:** Borrow **chat-native navigation and density** from modern community apps — without renaming Vertiege or diluting what makes it unique.
+
+## Live shell — three-tab thesis (authoritative)
+
+| Tab | Analog | Job |
+|-----|--------|-----|
+| **Nexus** | LinkedIn | Public standing feed — verified wins, progression, announcements |
+| **Chat** | Discord | Worlds, channels, DMs, Campfire — fast comms |
+| **Identity** | *Vertiege only* | Proof submit, verifier queue, honour wall, tier truth |
+
+Routes: Nexus `/` · Chat `/chat` · Identity `/identity` · Explore `/explore` (shell branch 3, no tab).
+
+**Superseded:** unified Commune Home rail (`CommuneHomeScreen`) — not routed. Do not treat DCX-001/003/013 as live IA.
 
 ---
 
@@ -28,9 +40,9 @@ Research references (Discord mobile blogs, dark UI patterns) inform **layout and
 
 | Borrow (UX patterns) | Keep (Vertiege identity) |
 |----------------------|---------------------------|
-| Unified Home: worlds + DMs in one place | Worlds, not “servers” |
-| Overlapping panels: world rail → channels → chat | Tier-locked channels visible |
-| Bottom nav hides in active channel/DM | Achievements prominent in Home + You |
+| Chat tab: worlds + DMs (Discord-fast) | Worlds, not “servers” |
+| Explore branch for world browse | Tier-locked channels visible |
+| Bottom nav hides in active channel/DM | Proof + honour on Identity; moments on Nexus |
 | Dark surface ladder, dense lists | Gold/violet prestige accents on milestones |
 | Swipe-to-reply, grouped messages | Proof submit, verifier, trophy wall |
 | Tap channel name for details | Governance, treasury, academy (world tools) |

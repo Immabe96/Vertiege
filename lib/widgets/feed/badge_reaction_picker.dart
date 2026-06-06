@@ -30,7 +30,6 @@ class BadgeReactionPickerSheet extends ConsumerWidget {
     return showTabAwareModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => BadgeReactionPickerSheet(onPick: reactionKey),
     );
   }
@@ -45,11 +44,7 @@ class BadgeReactionPickerSheet extends ConsumerWidget {
         .whereType<Achievement>()
         .toList();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(VRadius.xl)),
-      ),
+    return Padding(
       padding: EdgeInsets.only(
         left: VSpacing.md,
         right: VSpacing.md,

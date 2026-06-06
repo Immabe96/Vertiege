@@ -1,6 +1,8 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../models/post.dart';
+import '../../theme/v_commune_colors.dart';
 import '../core/tab_aware_sheet.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -13,7 +15,15 @@ import '../../widgets/core/v_feedback.dart';
 
 enum CommentSort { best, newest, oldest }
 
-/// Opens comments above tab-shell chrome (compose FAB) and restores it on close.
+/// Full-screen comment thread (DCX-092).
+void openPostComments(
+  BuildContext context, {
+  required String postId,
+}) {
+  context.push('/post/$postId/comments');
+}
+
+/// Opens comments above tab-shell chrome (legacy sheet).
 Future<void> showPostCommentSheet({
   required BuildContext context,
   required CommentSheet sheet,
@@ -21,7 +31,6 @@ Future<void> showPostCommentSheet({
   return showTabAwareModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (_) => sheet,
   );
 }
@@ -29,13 +38,15 @@ Future<void> showPostCommentSheet({
 class CommentSheet extends StatefulWidget {
   final List<Comment> comments;
   final ValueChanged<String> onSubmit;
-  final String? postAuthorId; // For OP badge
+  final String? postAuthorId;
+  final bool embedded;
 
   const CommentSheet({
     super.key,
     required this.comments,
     required this.onSubmit,
     this.postAuthorId,
+    this.embedded = false,
   });
 
   @override
@@ -44,19 +55,24 @@ class CommentSheet extends StatefulWidget {
 
 class _CommentSheetState extends State<CommentSheet> {
   late final TextEditingController _controller;
+  ScrollController? _listController;
   CommentSort _sort = CommentSort.best;
-  String? _replyToId; // F-01: Reply-to-comment
+  String? _replyToId;
   String? _replyToName;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    if (widget.embedded) {
+      _listController = ScrollController();
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _listController?.dispose();
     super.dispose();
   }
 
@@ -152,90 +168,82 @@ class _CommentSheetState extends State<CommentSheet> {
     return depth;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final tree = _buildTree(widget.comments);
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.3,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(VRadius.md),
+  Widget _buildThreadBody({
+    required ThemeData theme,
+    required bool isDark,
+    required List<Comment> tree,
+    required ScrollController scrollController,
+  }) {
+    return Column(
+      children: [
+        if (!widget.embedded) ...[
+          const SizedBox(height: VSpacing.sm),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.outlineVariant,
+              borderRadius: BorderRadius.circular(VRadius.sm),
             ),
-            border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
           ),
-          child: Column(
+          const SizedBox(height: VSpacing.sm),
+        ],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+          child: Row(
             children: [
-              const SizedBox(height: VSpacing.sm),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(VRadius.sm),
+              Text(
+                'Comments',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: widget.embedded
+                      ? VCommuneColors.headerPrimary
+                      : null,
                 ),
               ),
-              const SizedBox(height: VSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-                child: Row(
-                  children: [
-                    Text(
-                      'Comments',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const Spacer(),
-                    // F-13: Comment sort dropdown
-                    _SortDropdown(
-                      value: _sort,
-                      onChanged: (sort) => setState(() => _sort = sort),
-                    ),
-                  ],
+              const Spacer(),
+              _SortDropdown(
+                value: _sort,
+                onChanged: (sort) => setState(() => _sort = sort),
+              ),
+            ],
+          ),
+        ),
+        Divider(
+          height: 1,
+          color: widget.embedded
+              ? VCommuneColors.dividerSubtle
+              : null,
+        ),
+        Expanded(
+          child: tree.isEmpty
+              ? const AppEmptyState(
+                  title: 'No comments yet',
+                  description: 'Be the first to share your thoughts.',
+                  icon: Icons.chat_bubble_outline,
+                )
+              : ListView.builder(
+                  controller: scrollController,
+                  itemCount: tree.length,
+                  itemBuilder: (context, index) {
+                    final comment = tree[index];
+                    final depth = _getDepth(comment.id);
+                    return _CommentTile(
+                      comment: comment,
+                      depth: depth,
+                      isOp: widget.postAuthorId != null &&
+                          comment.residentId == widget.postAuthorId,
+                      allComments: widget.comments,
+                      onReply: (id, name) {
+                        setState(() {
+                          _replyToId = id;
+                          _replyToName = name;
+                        });
+                      },
+                    );
+                  },
                 ),
-              ),
-              const Divider(),
-              Expanded(
-                child: tree.isEmpty
-                    ? const AppEmptyState(
-                        title: 'No comments yet',
-                        description: 'Be the first to share your thoughts.',
-                        icon: Icons.chat_bubble_outline,
-                      )
-                    : ListView.builder(
-                        controller: scrollController,
-                        itemCount: tree.length,
-                        itemBuilder: (context, index) {
-                          final comment = tree[index];
-                          final depth = _getDepth(comment.id);
-                          return _CommentTile(
-                            comment: comment,
-                            depth: depth,
-                            isOp: widget.postAuthorId != null &&
-                                comment.residentId == widget.postAuthorId,
-                            allComments: widget.comments,
-                            onReply: (id, name) {
-                              setState(() {
-                                _replyToId = id;
-                                _replyToName = name;
-                              });
-                              FocusScope.of(context).requestFocus(
-                                FocusNode(),
-                              ); // Focus input
-                            },
-                          );
-                        },
-                      ),
-              ),
-              // F-01: Reply preview
-              if (_replyToId != null)
+        ),
+        if (_replyToId != null)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: VSpacing.md,
@@ -320,7 +328,46 @@ class _CommentSheetState extends State<CommentSheet> {
                   ],
                 ),
               ),
-            ],
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final tree = _buildTree(widget.comments);
+
+    if (widget.embedded) {
+      return _buildThreadBody(
+        theme: theme,
+        isDark: isDark,
+        tree: tree,
+        scrollController: _listController!,
+      );
+    }
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.3,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(VRadius.md),
+            ),
+            border: Border.all(
+              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            ),
+          ),
+          child: _buildThreadBody(
+            theme: theme,
+            isDark: isDark,
+            tree: tree,
+            scrollController: scrollController,
           ),
         );
       },

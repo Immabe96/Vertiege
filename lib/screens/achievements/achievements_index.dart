@@ -12,6 +12,7 @@ import '../../widgets/core/screen_loading.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
+import '../../widgets/achievements/achievement_category_sheet.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/core/sync_warning_banner.dart';
 
@@ -129,8 +130,10 @@ class AchievementsIndexScreen extends ConsumerWidget {
                     category: entry.key,
                     meta: entry.value,
                     progress: notifier.getCategoryProgress(entry.key.name),
-                    onTap: () =>
-                        context.push('/achievements/${entry.key.name}'),
+                    onTap: () => showAchievementCategorySheet(
+                      context,
+                      category: entry.key,
+                    ),
                   ),
               ],
             ),

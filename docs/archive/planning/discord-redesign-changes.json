@@ -66,6 +66,21 @@
     }
   ],
   "total_changes": 144,
+  "audit": {
+    "audited": "2026-05-30",
+    "done": 144,
+    "superseded": 0,
+    "partial": 0,
+    "file_path_fixes": [
+      "DCX-019: world_*_screen glob → world_admin_breadcrumb.dart",
+      "DCX-047: v_message_reactions.dart → v_message_reaction_picker.dart"
+    ],
+    "retired_code": [
+      "lib/screens/tabs/commune_home_screen.dart (deleted — 3-tab shell)",
+      "lib/state/commune_home_provider.dart (deleted — unused after Commune Home retired)"
+    ],
+    "notes": "All 144 items verified against shipped code on feature/discord-ux-redesign. Cross-post (DCX-096) lives in post_action_bar → cross_post_achievement_sheet. In-channel search uses VSearchBar via openChannelSearch → /search?mode=channel."
+  },
   "changes": [
     {
       "id": "DCX-001",
@@ -79,7 +94,7 @@
         "lib/screens/tabs/chat_list_screen.dart"
       ],
       "discord_ref": "Home tab servers + Messages",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-002",
@@ -93,7 +108,7 @@
         "lib/router/app_router.dart"
       ],
       "discord_ref": "Navbar disappears in server",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-003",
@@ -106,7 +121,7 @@
         "lib/ui/shell/v_overlapping_panels.dart"
       ],
       "discord_ref": "Android panels blog",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-004",
@@ -120,7 +135,7 @@
         "lib/ui/navigation/v_bottom_nav.dart"
       ],
       "discord_ref": "You tab",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-005",
@@ -134,7 +149,7 @@
         "lib/screens/tabs/identity_screen.dart"
       ],
       "discord_ref": "You tab settings",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-006",
@@ -147,7 +162,7 @@
         "lib/router/app_router.dart"
       ],
       "discord_ref": "3-tab mobile layout",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-007",
@@ -160,7 +175,7 @@
         "lib/screens/tabs/nexus_screen.dart"
       ],
       "discord_ref": "Activity/home blend",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-008",
@@ -173,7 +188,7 @@
         "lib/screens/search_screen.dart"
       ],
       "discord_ref": "Search filters",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-009",
@@ -186,7 +201,7 @@
         "lib/router/app_router.dart"
       ],
       "discord_ref": "Consistent DM routing",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-010",
@@ -199,7 +214,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "Tap channel name",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-011",
@@ -212,7 +227,7 @@
         "lib/widgets/chat/"
       ],
       "discord_ref": "Mobile reply gesture",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-012",
@@ -225,7 +240,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "Favorite channels",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-013",
@@ -238,7 +253,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "World list rail",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-014",
@@ -251,7 +266,7 @@
         "lib/utils/chat_unread.dart"
       ],
       "discord_ref": "Unread badges",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-015",
@@ -264,7 +279,7 @@
         "lib/ui/shell/v_overlapping_panels.dart"
       ],
       "discord_ref": "Home\u2192Channels\u2192Chat",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-016",
@@ -277,7 +292,7 @@
         "lib/router/app_router.dart"
       ],
       "discord_ref": "Deep link parity",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-017",
@@ -290,7 +305,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "Voice channels",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-018",
@@ -303,7 +318,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "Threads in channel",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-019",
@@ -313,10 +328,10 @@
       "title": "Breadcrumb in nested world admin",
       "description": "Secondary routes show world name + section; back to channel list",
       "files": [
-        "lib/screens/world_*_screen.dart"
+        "lib/widgets/worlds/world_admin_breadcrumb.dart"
       ],
       "discord_ref": "Wayfinding",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-020",
@@ -329,7 +344,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "Quick server switch",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-021",
@@ -342,7 +357,7 @@
         "lib/state/chat_provider.dart"
       ],
       "discord_ref": "Resume channel",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-022",
@@ -355,7 +370,7 @@
         "lib/screens/tabs/alerts_screen.dart"
       ],
       "discord_ref": "Notification center",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-023",
@@ -368,7 +383,7 @@
         "lib/screens/tabs/tab_layout.dart"
       ],
       "discord_ref": "Inline compose",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-024",
@@ -381,7 +396,7 @@
         "lib/screens/tabs/explore_screen.dart"
       ],
       "discord_ref": "Discovery in Home",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-025",
@@ -394,7 +409,7 @@
         "lib/theme/v_colors.dart"
       ],
       "discord_ref": "#313338 ladder",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-026",
@@ -407,7 +422,7 @@
         "lib/theme/v_colors.dart"
       ],
       "discord_ref": "Blurple accent discipline",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-027",
@@ -421,7 +436,7 @@
         "lib/theme/v_fonts.dart"
       ],
       "discord_ref": "Text roles",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-028",
@@ -434,7 +449,7 @@
         "lib/theme/v_colors.dart"
       ],
       "discord_ref": "background-modifier-*",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-029",
@@ -447,7 +462,7 @@
         "lib/theme/v_tokens.dart"
       ],
       "discord_ref": "8px radius",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-030",
@@ -460,7 +475,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "Neutral chat bg",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-031",
@@ -473,7 +488,7 @@
         "lib/ui/cards/v_surface_card.dart"
       ],
       "discord_ref": "Surface elevation",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-032",
@@ -486,7 +501,7 @@
         "lib/theme/v_colors.dart"
       ],
       "discord_ref": "text-normal",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-033",
@@ -499,7 +514,7 @@
         "lib/utils/presence_utils.dart"
       ],
       "discord_ref": "Status colors",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-034",
@@ -512,7 +527,7 @@
         "lib/widgets/chat/"
       ],
       "discord_ref": "text-link",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-035",
@@ -525,7 +540,7 @@
         "lib/widgets/core/v_theme_scheme_picker.dart"
       ],
       "discord_ref": "Theme options",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-036",
@@ -538,7 +553,7 @@
         "lib/screens/settings_screen.dart"
       ],
       "discord_ref": "A11y sliders",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-037",
@@ -551,7 +566,7 @@
         "lib/theme/forui_theme.dart"
       ],
       "discord_ref": "Forui bridge",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-038",
@@ -564,7 +579,7 @@
         "lib/theme/v_tokens.dart"
       ],
       "discord_ref": "Dense icons",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-039",
@@ -577,7 +592,7 @@
         "lib/theme/v_colors.dart"
       ],
       "discord_ref": "Subtle dividers",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-040",
@@ -590,7 +605,7 @@
         "lib/widgets/core/glass_panel.dart"
       ],
       "discord_ref": "Solid chat chrome",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-041",
@@ -603,7 +618,7 @@
         "lib/theme/v_theme.dart"
       ],
       "discord_ref": "Light parity",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-042",
@@ -616,7 +631,7 @@
         "docs/reference/DESIGN.md"
       ],
       "discord_ref": "design-md skill",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-043",
@@ -629,7 +644,7 @@
         "lib/widgets/chat/v_message_bubble.dart"
       ],
       "discord_ref": "Unified bubbles",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-044",
@@ -642,7 +657,7 @@
         "lib/widgets/chat/chat_message_grouper.dart"
       ],
       "discord_ref": "Message grouping",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-045",
@@ -655,7 +670,7 @@
         "lib/screens/settings_screen.dart"
       ],
       "discord_ref": "Density toggle",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-046",
@@ -668,7 +683,7 @@
         "lib/widgets/chat/v_message_bubble.dart"
       ],
       "discord_ref": "Message header",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-047",
@@ -678,10 +693,10 @@
       "title": "Reaction row on long-press",
       "description": "Emoji picker overlay on message",
       "files": [
-        "lib/widgets/chat/v_message_reactions.dart"
+        "lib/widgets/chat/v_message_reaction_picker.dart"
       ],
       "discord_ref": "Reactions",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-048",
@@ -694,7 +709,7 @@
         "lib/widgets/chat/chat_input_bar.dart"
       ],
       "discord_ref": "Reply UI",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-049",
@@ -707,7 +722,7 @@
         "lib/widgets/chat/v_message_bubble.dart"
       ],
       "discord_ref": "Threads",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-050",
@@ -720,7 +735,7 @@
         "lib/widgets/chat/v_message_content.dart"
       ],
       "discord_ref": "Markdown",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-051",
@@ -733,7 +748,7 @@
         "lib/widgets/chat/v_link_embed.dart"
       ],
       "discord_ref": "Embeds",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-052",
@@ -746,7 +761,7 @@
         "lib/widgets/chat/chat_image.dart"
       ],
       "discord_ref": "Media grid",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-053",
@@ -759,7 +774,7 @@
         "lib/widgets/chat/v_media_picker.dart"
       ],
       "discord_ref": "GIF picker",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-054",
@@ -772,7 +787,7 @@
         "lib/screens/tabs/chat_list_screen.dart"
       ],
       "discord_ref": "Typing in list",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-055",
@@ -785,7 +800,7 @@
         "lib/widgets/chat/scroll_fab.dart"
       ],
       "discord_ref": "Jump to present",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-056",
@@ -798,7 +813,7 @@
         "lib/widgets/chat/chat_date_separator.dart"
       ],
       "discord_ref": "Date separators",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-057",
@@ -811,7 +826,7 @@
         "lib/widgets/chat/new_since_visit_divider.dart"
       ],
       "discord_ref": "Unread divider",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-058",
@@ -824,7 +839,7 @@
         "lib/widgets/chat/chat_input_bar.dart"
       ],
       "discord_ref": "Multiline input",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-059",
@@ -837,7 +852,7 @@
         "lib/widgets/chat/chat_input_bar.dart"
       ],
       "discord_ref": "Attachments",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-060",
@@ -850,7 +865,7 @@
         "lib/widgets/chat/v_slash_commands.dart"
       ],
       "discord_ref": "Slash commands",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-061",
@@ -863,7 +878,7 @@
         "lib/widgets/chat/v_message_actions.dart"
       ],
       "discord_ref": "Context menu",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-062",
@@ -876,7 +891,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "Pins",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-063",
@@ -889,7 +904,7 @@
         "lib/screens/search_screen.dart"
       ],
       "discord_ref": "In-channel search",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-064",
@@ -902,7 +917,7 @@
         "lib/widgets/chat/v_member_list_sheet.dart"
       ],
       "discord_ref": "Resident list",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-065",
@@ -915,7 +930,7 @@
         "lib/widgets/chat/v_message_bubble.dart"
       ],
       "discord_ref": "Role colors",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-066",
@@ -928,7 +943,7 @@
         "lib/widgets/chat/v_system_message.dart"
       ],
       "discord_ref": "System messages",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-067",
@@ -941,7 +956,7 @@
         "lib/widgets/voice/campfire_mini_bar.dart"
       ],
       "discord_ref": "Voice connected",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-068",
@@ -955,7 +970,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "DRY chat",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-069",
@@ -968,7 +983,7 @@
         "lib/screens/world_detail_screen.dart"
       ],
       "discord_ref": "World layout",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-070",
@@ -981,7 +996,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "Channel categories",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-071",
@@ -994,7 +1009,7 @@
         "lib/widgets/worlds/world_profile_header.dart"
       ],
       "discord_ref": "Compact world header",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-072",
@@ -1007,7 +1022,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "Member count",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-073",
@@ -1020,7 +1035,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "World menu",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-074",
@@ -1033,7 +1048,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "Invite",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-075",
@@ -1046,7 +1061,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "Unread world",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-076",
@@ -1059,7 +1074,7 @@
         "lib/config/world_page_ia.dart"
       ],
       "discord_ref": "Feature discoverability",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-077",
@@ -1072,7 +1087,7 @@
         "lib/widgets/worlds/world_feed_tab.dart"
       ],
       "discord_ref": "Optional feed",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-078",
@@ -1085,7 +1100,7 @@
         "lib/widgets/worlds/world_icon.dart"
       ],
       "discord_ref": "World icons",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-079",
@@ -1098,7 +1113,7 @@
         "lib/widgets/explore/boosted_worlds_row.dart"
       ],
       "discord_ref": "Discovery",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-080",
@@ -1111,7 +1126,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "Discover worlds",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-081",
@@ -1124,7 +1139,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "World tooltip",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-082",
@@ -1137,7 +1152,7 @@
         "lib/screens/world_governance_screen.dart"
       ],
       "discord_ref": "Mod tools",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-083",
@@ -1150,7 +1165,7 @@
         "lib/screens/world_treasury_screen.dart"
       ],
       "discord_ref": "Server submenu",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-084",
@@ -1163,7 +1178,7 @@
         "lib/widgets/worlds/world_welcome_flow.dart"
       ],
       "discord_ref": "Welcome flow",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-085",
@@ -1176,7 +1191,7 @@
         "lib/widgets/worlds/world_settings_channels.dart"
       ],
       "discord_ref": "Create channel",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-086",
@@ -1189,7 +1204,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "Channel metadata",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-087",
@@ -1202,7 +1217,7 @@
         "lib/widgets/nexus/bento_grid.dart"
       ],
       "discord_ref": "Activity feed",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-088",
@@ -1215,7 +1230,7 @@
         "lib/widgets/feed/reaction_bar.dart"
       ],
       "discord_ref": "Inline reactions",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-089",
@@ -1228,7 +1243,7 @@
         "lib/widgets/feed/post_input.dart"
       ],
       "discord_ref": "Composer",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-090",
@@ -1241,7 +1256,7 @@
         "lib/widgets/nexus/nexus_shortcuts_section.dart"
       ],
       "discord_ref": "Shortcuts",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-091",
@@ -1254,7 +1269,7 @@
         "lib/widgets/nexus/nexus_context_strip.dart"
       ],
       "discord_ref": "Filter chips",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-092",
@@ -1267,7 +1282,7 @@
         "lib/widgets/feed/comment_sheet.dart"
       ],
       "discord_ref": "Thread UX",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-093",
@@ -1280,7 +1295,7 @@
         "lib/widgets/core/v_feedback.dart"
       ],
       "discord_ref": "Toast notifications",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-094",
@@ -1293,7 +1308,7 @@
         "lib/screens/tabs/nexus_screen.dart"
       ],
       "discord_ref": "Progression relocation",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-095",
@@ -1306,7 +1321,7 @@
         "lib/widgets/feed/media_grid.dart"
       ],
       "discord_ref": "Media feed",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-096",
@@ -1319,7 +1334,7 @@
         "lib/widgets/feed/post_action_bar.dart"
       ],
       "discord_ref": "Cross-post",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-097",
@@ -1332,7 +1347,7 @@
         "lib/widgets/feed/post_item.dart"
       ],
       "discord_ref": "Mute controls",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-098",
@@ -1345,7 +1360,7 @@
         "lib/widgets/core/shimmer.dart"
       ],
       "discord_ref": "Loading parity",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-099",
@@ -1358,7 +1373,7 @@
         "lib/screens/tabs/identity_screen.dart"
       ],
       "discord_ref": "You profile",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-100",
@@ -1371,7 +1386,7 @@
         "lib/screens/connections_screen.dart"
       ],
       "discord_ref": "Friends list",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-101",
@@ -1384,7 +1399,7 @@
         "lib/screens/settings_screen.dart"
       ],
       "discord_ref": "Settings in You",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-102",
@@ -1397,7 +1412,7 @@
         "lib/screens/tabs/identity_screen.dart"
       ],
       "discord_ref": "Progression section",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-103",
@@ -1410,7 +1425,7 @@
         "lib/widgets/profile/achievement_trophy_wall.dart"
       ],
       "discord_ref": "Trophy grid",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-104",
@@ -1423,7 +1438,7 @@
         "lib/screens/resident_profile_screen.dart"
       ],
       "discord_ref": "Profile layout",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-105",
@@ -1436,7 +1451,7 @@
         "lib/widgets/profile/status_picker.dart"
       ],
       "discord_ref": "Custom status",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-106",
@@ -1449,7 +1464,7 @@
         "lib/widgets/profile/edit_profile_sheet.dart"
       ],
       "discord_ref": "Edit profile",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-107",
@@ -1462,7 +1477,7 @@
         "lib/ui/media/v_avatar.dart"
       ],
       "discord_ref": "Tier ring",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-108",
@@ -1475,7 +1490,7 @@
         "lib/screens/tabs/identity_screen.dart"
       ],
       "discord_ref": "Wallet row",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-109",
@@ -1488,7 +1503,7 @@
         "lib/widgets/profile/profile_achievement_showcase.dart"
       ],
       "discord_ref": "Featured badges",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-110",
@@ -1501,7 +1516,7 @@
         "lib/screens/resident_profile_screen.dart"
       ],
       "discord_ref": "Message CTA",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-111",
@@ -1514,7 +1529,7 @@
         "lib/ui/lists/v_channel_tile.dart"
       ],
       "discord_ref": "Channel row",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-112",
@@ -1527,7 +1542,7 @@
         "lib/ui/media/v_avatar.dart"
       ],
       "discord_ref": "Avatar status",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-113",
@@ -1540,7 +1555,7 @@
         "lib/ui/inputs/v_search_bar.dart"
       ],
       "discord_ref": "Search bar",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-114",
@@ -1553,7 +1568,7 @@
         "lib/ui/overlays/v_context_menu.dart"
       ],
       "discord_ref": "Context menus",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-115",
@@ -1566,7 +1581,7 @@
         "lib/ui/buttons/v_icon_button.dart"
       ],
       "discord_ref": "Tooltips",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-116",
@@ -1579,7 +1594,7 @@
         "lib/widgets/core/empty_state.dart"
       ],
       "discord_ref": "Empty states",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-117",
@@ -1592,7 +1607,7 @@
         "lib/ui/overlays/v_sheet.dart"
       ],
       "discord_ref": "Side panels",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-118",
@@ -1605,7 +1620,7 @@
         "lib/widgets/core/glass_sheet.dart"
       ],
       "discord_ref": "Sheet migration",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-119",
@@ -1618,7 +1633,7 @@
         "lib/utils/haptics.dart"
       ],
       "discord_ref": "Micro haptics",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-120",
@@ -1631,7 +1646,7 @@
         "lib/router/v_page_transitions.dart"
       ],
       "discord_ref": "Panel transitions",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-121",
@@ -1644,7 +1659,7 @@
         "lib/screens/campfire_screen.dart"
       ],
       "discord_ref": "Voice UI",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-122",
@@ -1657,7 +1672,7 @@
         "lib/screens/auth/"
       ],
       "discord_ref": "Auth polish",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-123",
@@ -1670,7 +1685,7 @@
         "lib/screens/onboarding/"
       ],
       "discord_ref": "Onboarding",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-124",
@@ -1683,7 +1698,7 @@
         "lib/screens/achievements/"
       ],
       "discord_ref": "Achievement IA",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-125",
@@ -1696,7 +1711,7 @@
         "lib/screens/world_channel_screen.dart"
       ],
       "discord_ref": "List perf",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-126",
@@ -1709,7 +1724,7 @@
         "lib/widgets/chat/v_message_bubble.dart"
       ],
       "discord_ref": "Scroll perf",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-127",
@@ -1722,7 +1737,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "List cache",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-128",
@@ -1735,7 +1750,7 @@
         "lib/widgets/chat/chat_image.dart"
       ],
       "discord_ref": "Image perf",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-129",
@@ -1748,7 +1763,7 @@
         "lib/state/chat_provider.dart"
       ],
       "discord_ref": "State perf",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-130",
@@ -1761,7 +1776,7 @@
         "lib/ui/buttons/v_icon_button.dart"
       ],
       "discord_ref": "A11y",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-131",
@@ -1774,7 +1789,7 @@
         "lib/ui/navigation/v_world_rail.dart"
       ],
       "discord_ref": "Touch targets",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-132",
@@ -1787,7 +1802,7 @@
         "lib/theme/v_animation.dart"
       ],
       "discord_ref": "Reduce motion",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-133",
@@ -1800,7 +1815,7 @@
         "lib/screens/settings_screen.dart"
       ],
       "discord_ref": "High contrast",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-134",
@@ -1813,7 +1828,7 @@
         "lib/ui/shell/v_overlapping_panels.dart"
       ],
       "discord_ref": "Focus order",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-135",
@@ -1826,7 +1841,7 @@
         "lib/widgets/worlds/world_channel_list.dart"
       ],
       "discord_ref": "Vertiege tier UX",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-136",
@@ -1839,7 +1854,7 @@
         "lib/widgets/chat/"
       ],
       "discord_ref": "Achievement share",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-137",
@@ -1852,7 +1867,7 @@
         "lib/screens/world_treasury_screen.dart"
       ],
       "discord_ref": "Treasury glance",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-138",
@@ -1865,7 +1880,7 @@
         "lib/screens/season_screen.dart"
       ],
       "discord_ref": "Season chip",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-139",
@@ -1878,7 +1893,7 @@
         "lib/screens/verification_review_screen.dart"
       ],
       "discord_ref": "Staff tools",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-140",
@@ -1891,7 +1906,7 @@
         "lib/screens/achievements/submit_achievement.dart"
       ],
       "discord_ref": "Proof flow",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-141",
@@ -1904,7 +1919,7 @@
         "lib/screens/search_screen.dart"
       ],
       "discord_ref": "Unified search",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-142",
@@ -1917,7 +1932,7 @@
         "lib/screens/campfire_screen.dart"
       ],
       "discord_ref": "Voice+text",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-143",
@@ -1930,7 +1945,7 @@
         "lib/widgets/chat/v_member_card.dart"
       ],
       "discord_ref": "Resident card",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "DCX-144",
@@ -1943,7 +1958,7 @@
         "lib/widgets/worlds/constitution_editor.dart"
       ],
       "discord_ref": "Rules channel",
-      "status": "planned"
+      "status": "done"
     }
   ]
 }

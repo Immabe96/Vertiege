@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'v_colors.dart';
+import 'v_commune_colors.dart';
 import 'v_fonts.dart';
 import 'v_tokens.dart';
 
@@ -8,6 +9,8 @@ class VTheme {
 
   static ThemeData get light => _build(false);
   static ThemeData get dark => _build(true);
+  static ThemeData get lightCommune => _buildCommune(false);
+  static ThemeData get darkCommune => _buildCommune(true);
 
   static ThemeData _build(bool isDark) {
     return ThemeData(
@@ -103,6 +106,149 @@ class VTheme {
       scaffoldBackgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
     );
   }
+
+  /// Commune ladder — neutral surfaces, desaturated body, 8px cards (DCX-041).
+  static ThemeData _buildCommune(bool isDark) {
+    final base = _build(isDark);
+    final bg = isDark
+        ? VCommuneColors.surfacePrimary
+        : VCommuneColors.surfacePrimaryLight;
+    final onSurface = isDark
+        ? VCommuneColors.textNormal
+        : VCommuneColors.textNormalLight;
+    final onVariant = isDark
+        ? VCommuneColors.textMuted
+        : VCommuneColors.textMutedLight;
+    return base.copyWith(
+      scaffoldBackgroundColor: bg,
+      colorScheme: base.colorScheme.copyWith(
+        surface: bg,
+        onSurface: onSurface,
+        onSurfaceVariant: onVariant,
+        surfaceContainerLowest: isDark
+            ? VCommuneColors.surfaceFloating
+            : VCommuneColors.surfaceFloatingLight,
+        surfaceContainerLow: isDark
+            ? VCommuneColors.surfaceTertiary
+            : VCommuneColors.surfaceTertiaryLight,
+        surfaceContainer: isDark
+            ? VCommuneColors.surfaceSecondary
+            : VCommuneColors.surfaceSecondaryLight,
+        surfaceContainerHigh: isDark
+            ? VCommuneColors.surfaceSecondaryAlt
+            : VCommuneColors.surfaceSecondaryAltLight,
+        surfaceContainerHighest: isDark
+            ? VCommuneColors.surfacePrimary
+            : VCommuneColors.surfacePrimaryLight,
+        outline: VCommuneColors.dividerOf(
+          isDark ? Brightness.dark : Brightness.light,
+        ),
+        outlineVariant: VCommuneColors.dividerOf(
+          isDark ? Brightness.dark : Brightness.light,
+        ),
+      ),
+      textTheme: _communeTextTheme(isDark),
+      cardTheme: _communeCardTheme(isDark),
+      dividerTheme: DividerThemeData(
+        color: VCommuneColors.dividerOf(
+          isDark ? Brightness.dark : Brightness.light,
+        ),
+        thickness: 1,
+        space: 1,
+      ),
+      chipTheme: _chipTheme(isDark).copyWith(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(VRadius.communeButton),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: VColors.brand,
+          foregroundColor: VColors.onBrand,
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.xl,
+            vertical: VSpacing.md,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(VRadius.communeButton),
+          ),
+          textStyle: _font(
+            fontSize: VFontSize.labelLg,
+            fontWeight: VFontWeight.semiBold,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: isDark ? VCommuneColors.headerPrimary : VColors.primary,
+          side: BorderSide(color: VCommuneColors.dividerOf(
+            isDark ? Brightness.dark : Brightness.light,
+          )),
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.xl,
+            vertical: VSpacing.md,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(VRadius.communeButton),
+          ),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: isDark
+            ? VCommuneColors.surfaceSecondary
+            : VCommuneColors.surfaceSecondaryLight,
+        indicatorColor: VColors.brand.withValues(alpha: 0.2),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return _font(
+            fontSize: VFontSize.labelMd,
+            fontWeight: selected ? VFontWeight.medium : VFontWeight.regular,
+            color: selected
+                ? VColors.brand
+                : onVariant,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? VColors.brand : onVariant,
+            size: VIconSize.lg,
+          );
+        }),
+      ),
+    );
+  }
+
+  static TextTheme _communeTextTheme(bool isDark) {
+    final brightness = isDark ? Brightness.dark : Brightness.light;
+    return TextTheme(
+      bodyLarge: VFonts.chat(role: VChatTextRole.normal, brightness: brightness,
+          fontSize: VFontSize.bodyLg),
+      bodyMedium: VFonts.chat(role: VChatTextRole.normal, brightness: brightness),
+      bodySmall: VFonts.chat(role: VChatTextRole.muted, brightness: brightness,
+          fontSize: VFontSize.bodySm),
+      titleMedium: VFonts.chat(role: VChatTextRole.headerPrimary, brightness: brightness),
+      labelMedium: VFonts.chat(role: VChatTextRole.muted, brightness: brightness,
+          fontSize: VFontSize.labelMd),
+    );
+  }
+
+  static CardThemeData _communeCardTheme(bool isDark) => CardThemeData(
+    color: isDark
+        ? VCommuneColors.surfaceSecondary
+        : VCommuneColors.surfaceSecondaryLight,
+    elevation: 0,
+    shadowColor: Colors.transparent,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(VRadius.communeCard),
+      side: BorderSide(
+        color: VCommuneColors.dividerOf(
+          isDark ? Brightness.dark : Brightness.light,
+        ),
+      ),
+    ),
+    margin: EdgeInsets.zero,
+  );
 
   static TextStyle _font({
     double? fontSize,

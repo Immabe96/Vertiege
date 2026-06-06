@@ -1,9 +1,9 @@
 # Design system reference
 
-> **Commune UX redesign:** [DESIGN.md](DESIGN.md) · [master plan](../product/planning/discord-redesign-master-plan.md) · Vertiege lexicon (worlds, residents, achievements) · 144 tracked changes.
+> **Commune UX redesign:** [DESIGN.md](DESIGN.md) · [archived master plan](../archive/planning/discord-redesign-master-plan.md) · Vertiege lexicon (worlds, residents, achievements) · 144 tracked changes (archived).
 
 > **Status: Current** — Prestige Noir + Forui (2026).  
-> **Migration:** [shadcn-migration-plan.md](../product/planning/shadcn-migration-plan.md) — Wave 0 chose **Forui 0.21**; wrapper consolidation (not shadcn swap).  
+> **Migration:** [shadcn-migration-plan.md](../archive/planning/shadcn-migration-plan.md) (archived) — Wave 0 chose **Forui 0.21**; wrapper consolidation (not shadcn swap).  
 > Historical glassmorphism spec: [archive/design-sovereign-excellence-historical.md](../archive/design-sovereign-excellence-historical.md).
 
 ## Stack

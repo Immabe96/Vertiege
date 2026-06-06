@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
+import '../services/last_channel_prefs.dart';
 import '../services/crash_reporter.dart';
 import '../services/media_service.dart';
 import '../services/mutation_outbox_service.dart';
@@ -833,6 +834,17 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
+  /// Persist last-opened channel for resume (DCX-021).
+  Future<void> rememberLastChannel({
+    required String worldId,
+    required String channelId,
+  }) async {
+    await LastChannelPrefs.save(worldId: worldId, channelId: channelId);
+  }
+
+  Future<String?> lastChannelIdForWorld(String worldId) =>
+      LastChannelPrefs.loadForWorld(worldId);
+
   // ── Threads ────────────────────────────────────────────
 
   Future<void> loadThreadMessages(String threadId) async {
@@ -1033,6 +1045,57 @@ class ChatNotifier extends Notifier<ChatState> {
       ref.read(residentProvider.notifier).awardActivityXp('comment', 3);
     } catch (_) {
       _markDmMessageFailed(roomId, msg);
+      rethrow;
+    }
+  }
+
+  Future<void> toggleChannelReaction({
+    required String channelId,
+    required String messageId,
+    required String userId,
+    required String emoji,
+  }) async {
+    final messages = state.channelMessages[channelId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final currentReactions = Map<String, List<String>>.from(msg.reactions);
+    final users = List<String>.from(currentReactions[emoji] ?? []);
+    final adding = !users.contains(userId);
+
+    if (adding) {
+      currentReactions[emoji] = [...users, userId];
+    } else {
+      users.remove(userId);
+      if (users.isEmpty) {
+        currentReactions.remove(emoji);
+      } else {
+        currentReactions[emoji] = users;
+      }
+    }
+
+    final updatedMsg = msg.copyWith(reactions: currentReactions);
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, channelId: updatedMessages},
+    );
+
+    try {
+      await ChatService.toggleReaction(
+        messageId: messageId,
+        userId: userId,
+        emoji: emoji,
+        add: adding,
+      );
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, channelId: revertedMessages},
+      );
       rethrow;
     }
   }
@@ -1344,4 +1407,40 @@ final dmRoomMessagesProvider = Provider.family<List<ChannelMessage>, String>((
 ) {
   ref.watch(chatProvider.select((s) => s.dmMessages[roomId]));
   return ref.read(chatProvider.notifier).dmMessagesFor(roomId);
+});
+
+/// Channel message list for one world channel (DCX-129).
+final channelMessagesProvider =
+    Provider.family<List<ChannelMessage>, String>((ref, channelId) {
+  return ref.watch(
+    chatProvider.select((s) => s.channelMessages[channelId] ?? const []),
+  );
+});
+
+/// Whether channel messages are still loading.
+final channelMessagesLoadingProvider = Provider.family<bool, String>((
+  ref,
+  channelId,
+) {
+  return ref.watch(
+    chatProvider.select((s) => !s.channelMessages.containsKey(channelId)),
+  );
+});
+
+/// Load error for a channel or thread id.
+final channelMessagesErrorProvider = Provider.family<String?, String>((
+  ref,
+  channelId,
+) {
+  return ref.watch(
+    chatProvider.select((s) => s.messagesLoadErrorFor(channelId)),
+  );
+});
+
+/// Typing users in a channel (excludes optional [excludeUserId]).
+final channelTypingUsersProvider =
+    Provider.family<Set<String>, String>((ref, channelId) {
+  return ref.watch(
+    chatProvider.select((s) => s.typingUsers[channelId] ?? const {}),
+  );
 });

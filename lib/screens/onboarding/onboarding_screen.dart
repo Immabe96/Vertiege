@@ -17,12 +17,14 @@ import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
 import 'the_gate_screen.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/world_service.dart';
+import '../../ui/overlays/v_sheet.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -194,7 +196,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      backgroundColor: isDark
+          ? VCommuneColors.surfaceTertiary
+          : VCommuneColors.surfaceSecondaryLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -513,10 +517,9 @@ class _ProfileTab extends StatelessWidget {
   }
 
   void _showAvatarOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => SafeArea(
-        child: Column(
+    showVSheet(
+      context,
+      Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
@@ -537,7 +540,7 @@ class _ProfileTab extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      maxSize: 0.35,
     );
   }
 }
@@ -830,7 +833,7 @@ class _WorldTab extends ConsumerWidget {
               if (id != null) {
                 context.push(exploreWorldPath(id));
               } else {
-                context.go('/explore');
+                context.push('/explore');
               }
             },
             icon: const Icon(Icons.public),

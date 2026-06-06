@@ -10,6 +10,10 @@ class ThemePrefs {
 
   static const _themeKey = '@theme_preference';
   static const _textSizeKey = 'settings_text_size';
+  static const _darkPresetKey = 'settings_dark_preset';
+  static const _saturationKey = 'settings_theme_saturation';
+  static const _contrastKey = 'settings_theme_contrast';
+  static const _highContrastKey = 'settings_high_contrast';
 
   static Future<void> warmCache() async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,6 +33,24 @@ class ThemePrefs {
         orElse: () => TextSize.medium,
       );
     }
-    cached = ThemeState(scheme: scheme, textSize: textSize);
+    var darkPreset = DarkPreset.commune;
+    final presetValue = prefs.getString(_darkPresetKey);
+    if (presetValue != null) {
+      darkPreset = DarkPreset.values.firstWhere(
+        (p) => p.name == presetValue,
+        orElse: () => DarkPreset.commune,
+      );
+    }
+    final saturation = prefs.getDouble(_saturationKey) ?? 1.0;
+    final contrast = prefs.getDouble(_contrastKey) ?? 1.0;
+    final highContrast = prefs.getBool(_highContrastKey) ?? false;
+    cached = ThemeState(
+      scheme: scheme,
+      textSize: textSize,
+      darkPreset: darkPreset,
+      saturation: saturation,
+      contrast: contrast,
+      highContrast: highContrast,
+    );
   }
 }

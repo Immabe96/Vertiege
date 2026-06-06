@@ -13,18 +13,80 @@ import 'world_banner.dart';
 import 'world_here_subtitle.dart';
 import 'world_icon.dart';
 
+/// Icon + name + chevron — chat-first world identity (no hero banner).
+class WorldCompactHeader extends StatelessWidget {
+  final World world;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+
+  const WorldCompactHeader({
+    super.key,
+    required this.world,
+    this.onTap,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              WorldIcon(
+                worldId: world.assetKey,
+                size: 40,
+                useGlassContainer: false,
+              ),
+              const SizedBox(width: VSpacing.sm),
+              Expanded(
+                child: Text(
+                  world.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: VFontWeight.bold,
+                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  ),
+                ),
+              ),
+              if (trailing != null)
+                trailing!
+              else if (onTap != null)
+                Icon(Icons.expand_more, size: VIconSize.md, color: muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Minimal world identity block — contained banner, typography on surface.
 ///
 /// Used below the pinned app bar on [WorldDetailScreen] (not over the image).
+/// Set [compact] on the chat path (joined residents) to drop the hero banner card.
 class WorldProfileHeader extends StatelessWidget {
   final World world;
   final String worldId;
   final Color prestigeTierColor;
   final String tierLabel;
   final bool isJoined;
+  final bool compact;
   final Animation<double> scaleAnimation;
   final GlobalKey joinButtonKey;
   final VoidCallback onJoin;
+  final VoidCallback? onHeaderTap;
 
   const WorldProfileHeader({
     super.key,
@@ -33,13 +95,22 @@ class WorldProfileHeader extends StatelessWidget {
     required this.prestigeTierColor,
     required this.tierLabel,
     required this.isJoined,
+    this.compact = false,
     required this.scaleAnimation,
     required this.joinButtonKey,
     required this.onJoin,
+    this.onHeaderTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (compact) {
+      return WorldCompactHeader(
+        world: world,
+        onTap: onHeaderTap ?? () => context.push(exploreWorldPath(worldId)),
+      );
+    }
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;

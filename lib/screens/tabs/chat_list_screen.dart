@@ -76,6 +76,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       title: 'Messages',
       headerActions: [
         VAccessibleHeaderAction(
+          label: 'Explore worlds',
+          icon: Icon(VIcons.globe),
+          onPress: () => context.push('/explore'),
+        ),
+        VAccessibleHeaderAction(
           label: 'New direct message',
           icon: Icon(VIcons.userPlus),
           onPress: () => openGlobalSearch(context),

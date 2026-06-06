@@ -90,6 +90,7 @@ class NexusShortcutsSection extends ConsumerWidget {
                 : CrossFadeState.showFirst,
             firstChild: _CompactShortcutsRow(hideLeague: hideLeague),
             secondChild: BentoGrid(
+              flat: true,
               cards: [
                 const BentoCard(
                   child: PrestigeProgressCard(),
@@ -221,17 +222,68 @@ class _CompactShortcutsRowState extends State<_CompactShortcutsRow> {
           byId[id]!,
     ];
 
-    return SizedBox(
-      height: 92,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(bottom: VSpacing.xs),
+    const primaryCount = 3;
+    final primary = ordered.take(primaryCount).toList();
+    final overflow = ordered.skip(primaryCount).toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: VSpacing.xs),
+      child: Row(
         children: [
-          for (final s in ordered)
-            _CompactShortcut(
-              icon: s.icon,
-              label: s.label,
-              onTap: () => _go(s.id, s.onTap),
+          for (final s in primary)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: VSpacing.sm),
+                child: _CompactShortcut(
+                  icon: s.icon,
+                  label: s.label,
+                  onTap: () => _go(s.id, s.onTap),
+                  expand: true,
+                ),
+              ),
+            ),
+          if (overflow.isNotEmpty)
+            _ShortcutsOverflowButton(
+              shortcuts: overflow,
+              onSelect: (s) => _go(s.id, s.onTap),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShortcutsOverflowButton extends StatelessWidget {
+  final List<_ShortcutDef> shortcuts;
+  final ValueChanged<_ShortcutDef> onSelect;
+
+  const _ShortcutsOverflowButton({
+    required this.shortcuts,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: context.vSurfaceContainer,
+      borderRadius: BorderRadius.circular(VRadius.lg),
+      child: PopupMenuButton<_ShortcutDef>(
+        tooltip: 'More shortcuts',
+        padding: const EdgeInsets.all(VSpacing.sm),
+        icon: Icon(Icons.more_horiz, color: context.vOnSurfaceVariant),
+        onSelected: onSelect,
+        itemBuilder: (context) => [
+          for (final s in shortcuts)
+            PopupMenuItem(
+              value: s,
+              child: Row(
+                children: [
+                  Icon(s.icon, size: VIconSize.sm, color: context.vPrimary),
+                  const SizedBox(width: VSpacing.sm),
+                  Text(s.label, style: theme.textTheme.bodyMedium),
+                ],
+              ),
             ),
         ],
       ),
@@ -257,56 +309,59 @@ class _CompactShortcut extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool expand;
 
   const _CompactShortcut({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.expand = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(right: VSpacing.sm),
-      child: Material(
-        color: context.vSurfaceContainer,
+    final tile = Material(
+      color: context.vSurfaceContainer,
+      borderRadius: BorderRadius.circular(VRadius.lg),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 96, minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: VSpacing.sm,
-                vertical: VSpacing.sm,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: VIconSize.md, color: context.vPrimary),
-                  const SizedBox(height: VSpacing.xxs),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: VFontWeight.semiBold,
-                        color: context.vOnSurface,
-                        height: 1.15,
-                      ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: expand ? 0 : 96,
+            minHeight: 48,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: VSpacing.sm,
+              vertical: VSpacing.sm,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: VIconSize.md, color: context.vPrimary),
+                const SizedBox(height: VSpacing.xxs),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: VFontWeight.semiBold,
+                      color: context.vOnSurface,
+                      height: 1.15,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
+    return expand ? tile : Padding(padding: const EdgeInsets.only(right: VSpacing.sm), child: tile);
   }
 }

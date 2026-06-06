@@ -2,13 +2,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 
 /// Container card with surface-aware background.
 ///
-/// Replaces legacy glassmorphism with clean surface container colors.
-/// BackdropFilter is opt-in for documented exceptions only
-/// (image viewers, export/share visuals, image scrims).
+/// Solid surfaces by default — no blur in chat shell (DCX-040).
+/// [useBlur] is opt-in for modals and image viewers only.
 class VSurfacePanel extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -37,34 +37,31 @@ class VSurfacePanel extends StatelessWidget {
     final container = Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.xl),
-        border: border ?? Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-          width: 0.5,
-        ),
-        boxShadow:
-            shadows ??
-            [
-              BoxShadow(
-                color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+        color: isDark
+            ? VCommuneColors.surfaceSecondary
+            : VCommuneColors.surfaceSecondaryLight,
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.communeCard),
+        border: border ??
+            Border.all(
+              color: VCommuneColors.dividerOf(
+                isDark ? Brightness.dark : Brightness.light,
               ),
-            ],
+              width: 1,
+            ),
+        boxShadow: shadows ?? const [],
       ),
       child: child,
     );
 
     if (!useBlur) {
       return ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.xl),
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.communeCard),
         child: container,
       );
     }
 
     return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.circular(VRadius.xl),
+      borderRadius: borderRadius ?? BorderRadius.circular(VRadius.communeCard),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: container,
@@ -85,23 +82,20 @@ class VSurfaceModal extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(VRadius.xl),
+      borderRadius: BorderRadius.circular(VRadius.communeCard),
       child: Container(
         padding: padding ?? const EdgeInsets.all(VSpacing.lg),
         decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(VRadius.xl),
+          color: isDark
+              ? VCommuneColors.surfaceFloating
+              : VCommuneColors.surfaceFloatingLight,
+          borderRadius: BorderRadius.circular(VRadius.communeCard),
           border: Border.all(
-            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-            width: 0.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: (isDark ? VColors.onSurfaceDark : VColors.onSurface).withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+            color: VCommuneColors.dividerOf(
+              isDark ? Brightness.dark : Brightness.light,
             ),
-          ],
+            width: 1,
+          ),
         ),
         child: child,
       ),

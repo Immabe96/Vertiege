@@ -106,7 +106,6 @@ class AchievementShareCard extends StatelessWidget {
     return showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,

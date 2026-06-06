@@ -12,3 +12,26 @@ void openGlobalSearch(BuildContext context, {String? query}) {
   }
   context.push('/search');
 }
+
+/// In-channel message search (filters loaded channel history).
+void openChannelSearch(
+  BuildContext context, {
+  required String worldId,
+  required String channelId,
+  required String channelName,
+  String? query,
+}) {
+  final params = <String, String>{
+    'mode': 'channel',
+    'worldId': worldId,
+    'channelId': channelId,
+    'channelName': channelName,
+  };
+  if (query != null && query.trim().isNotEmpty) {
+    params['q'] = query.trim().startsWith('#')
+        ? query.trim().substring(1)
+        : query.trim();
+  }
+  final uri = Uri(path: '/search', queryParameters: params);
+  context.push(uri.toString());
+}

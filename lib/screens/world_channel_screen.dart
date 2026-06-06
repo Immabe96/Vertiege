@@ -11,26 +11,41 @@ import '../models/channel.dart';
 import '../models/message.dart';
 import '../services/permission_service.dart';
 import '../services/world_activity_service.dart';
+import '../services/world_service.dart';
+import '../services/chat_density_prefs.dart';
 import '../state/channel_provider.dart';
+import '../state/chat_density_provider.dart';
 import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
+import '../theme/v_commune_chat_theme.dart';
+import '../theme/v_commune_colors.dart';
 import '../theme/v_tokens.dart';
 import '../utils/chat_new_since_visit.dart';
+import '../utils/world_resident_count_label.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/new_since_visit_divider.dart';
-import '../widgets/chat/chat_image.dart';
+import '../config/tiers.dart';
+import '../router/search_navigation.dart';
+import '../utils/standing_display_color.dart';
 import '../widgets/chat/chat_input_bar.dart';
+import '../widgets/chat/v_message_bubble.dart';
+import '../widgets/chat/v_channel_details_sheet.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
-import '../utils/date_format.dart';
+import '../widgets/chat/v_pin_message_banner.dart';
+import '../widgets/chat/v_slash_commands.dart';
+import '../widgets/chat/v_media_picker.dart';
+import '../widgets/chat/v_member_list_sheet.dart';
+import '../widgets/chat/v_achievement_attachment.dart';
+import '../widgets/chat/achievement_share_picker.dart';
+import '../widgets/worlds/world_constitution_pin.dart';
+import '../widgets/voice/campfire_mini_bar.dart';
 import '../utils/world_foundations.dart';
 import '../widgets/core/empty_state.dart';
 import '../utils/v_motion.dart';
 import '../widgets/core/screen_loading.dart';
-import '../widgets/profile/cosmetic_avatar.dart';
-import '../widgets/profile/luminary_nameplate.dart';
 import '../widgets/core/v_feedback.dart';
 
 class WorldChannelScreen extends ConsumerStatefulWidget {
@@ -54,9 +69,14 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
 
-  bool _showScrollFab = false;
+  final _scrollFabTracker = ChatScrollFabTracker();
   final Set<String> _animatedMessageIds = {};
   DateTime? _visitDividerAnchor;
+  Timer? _outboundTypingDebounce;
+  int _totalResidents = 0;
+  int? _onlineResidents;
+  final Set<String> _prefetchedThreads = {};
+  final Map<String, int> _memberRepById = {};
 
   @override
   void initState() {
@@ -65,8 +85,10 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     _visitDividerAnchor = ref.read(chatProvider).channelReads[widget.channelId];
     notifier.loadChannelMessages(widget.channelId, force: true);
     notifier.subscribeToChannel(widget.channelId);
+    notifier.subscribeToTyping(widget.channelId);
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      unawaited(_loadResidentCounts());
       unawaited(WorldActivityService.touchWorld(widget.worldId));
       final resident = ref.read(residentProvider).resident;
       if (resident == null) return;
@@ -89,21 +111,143 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   }
 
   @override
-  void dispose() {
+  void deactivate() {
+    _outboundTypingDebounce?.cancel();
+    final resident = ref.read(residentProvider).resident;
+    if (resident != null) {
+      ref
+          .read(chatProvider.notifier)
+          .stopTyping(widget.channelId, resident.id);
+    }
+    ref.read(chatProvider.notifier).unsubscribeFromTyping(widget.channelId);
     ref.read(chatProvider.notifier).unsubscribeFromChannel(widget.channelId);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
+  void _maybePrefetchThreadPreviews(List<ChannelMessage> messages) {
+    final notifier = ref.read(chatProvider.notifier);
+    final loaded = ref.read(chatProvider).channelMessages;
+    for (final message in messages) {
+      if (message.threadCount <= 0) continue;
+      if (_prefetchedThreads.contains(message.id)) continue;
+      if (loaded.containsKey(message.id)) continue;
+      _prefetchedThreads.add(message.id);
+      unawaited(notifier.loadThreadMessages(message.id));
+    }
+  }
+
+  String? _threadPreviewFor(ChannelMessage message) {
+    if (message.threadCount <= 0) return null;
+    final replies = ref.watch(channelMessagesProvider(message.id));
+    if (replies.isEmpty) return null;
+    final last = replies.last;
+    final snippet = last.content.replaceAll('\n', ' ').trim();
+    if (snippet.isEmpty) return '${last.senderName} replied';
+    final preview = snippet.length > 72
+        ? '${snippet.substring(0, 72)}…'
+        : snippet;
+    return '${last.senderName}: $preview';
+  }
+
+  Future<void> _loadResidentCounts() async {
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    final fallbackTotal = world?.memberCount ?? 0;
+    try {
+      final counts = await WorldService.residentPresenceCounts(widget.worldId);
+      final members = await WorldService.getMembers(widget.worldId);
+      if (!mounted) return;
+      setState(() {
+        _totalResidents = counts.total > 0 ? counts.total : fallbackTotal;
+        _onlineResidents = counts.online > 0 ? counts.online : null;
+        _memberRepById
+          ..clear()
+          ..addEntries(
+            members.map((m) {
+              final id = m['resident_id'] as String? ?? '';
+              final rep = (m['rep'] as int?) ?? 0;
+              return MapEntry(id, rep);
+            }).where((e) => e.key.isNotEmpty),
+          );
+      });
+    } catch (_) {
+      if (mounted && fallbackTotal > 0) {
+        setState(() => _totalResidents = fallbackTotal);
+      }
+    }
+  }
+
+  Color? _senderNameColor(String senderId) {
+    final world = ref.read(worldProvider).worlds[widget.worldId];
+    final rep = _memberRepById[senderId];
+    if (rep == null) return null;
+    return standingDisplayColor(
+      rep,
+      sovereignId: world?.sovereignId,
+      residentId: senderId,
+    );
+  }
+
+  void _handleSlashPin() {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+    final messages =
+        ref.read(chatProvider).channelMessages[widget.channelId] ?? [];
+    final mine = messages.where((m) => m.senderId == resident.id).toList();
+    if (mine.isEmpty) return;
+    final last = mine.last;
+    _controller.clear();
+    ref.read(chatProvider.notifier).togglePin(
+      channelId: widget.channelId,
+      messageId: last.id,
+      isPinned: !last.isPinned,
+    );
+  }
+
+  void _handleSlashThread() {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+    final messages =
+        ref.read(chatProvider).channelMessages[widget.channelId] ?? [];
+    final mine = messages.where((m) => m.senderId == resident.id).toList();
+    if (mine.isEmpty) return;
+    _controller.clear();
+    final last = mine.last;
+    context.push(
+      '/thread/${last.id}',
+      extra: {
+        'message': last,
+        'channelId': widget.channelId,
+        'worldId': widget.worldId,
+        'channelName': widget.channelName,
+      },
+    );
+  }
+
+  void _handleSlashTier() {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+    _controller.clear();
+    final rep = _memberRepById[resident.id] ??
+        resident.worldStandings[widget.worldId]?.rep ??
+        0;
+    final standing = getStanding(rep);
+    VFeedback.showMessage(
+      context,
+      '${standing.title} · $rep rep in this world',
+    );
+  }
+
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    final offset = _scrollController.offset;
-    final maxExtent = _scrollController.position.maxScrollExtent;
-    final showFab = (maxExtent - offset) > 200;
-    if (showFab != _showScrollFab) {
-      setState(() => _showScrollFab = showFab);
+    if (_scrollFabTracker.updateFromScroll(_scrollController)) {
+      setState(() {});
     }
   }
 
@@ -119,6 +263,44 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     });
   }
 
+  void _onComposerChanged(String text) {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    final notifier = ref.read(chatProvider.notifier);
+    if (text.trim().isEmpty) {
+      _outboundTypingDebounce?.cancel();
+      _outboundTypingDebounce = null;
+      notifier.stopTyping(widget.channelId, resident.id);
+      return;
+    }
+
+    _outboundTypingDebounce?.cancel();
+    _outboundTypingDebounce = Timer(const Duration(milliseconds: 350), () {
+      notifier.startTyping(widget.channelId, resident.id);
+    });
+  }
+
+  Future<void> _shareAchievement() async {
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    final picked = await pickVerifiedAchievementToShare(context, ref);
+    if (picked == null || !mounted) return;
+    final note = _controller.text.trim();
+    final content = achievementShareContent(picked.id, note: note);
+    _controller.clear();
+    await ref.read(chatProvider.notifier).sendChannelMessage(
+      worldId: widget.worldId,
+      channelId: widget.channelId,
+      senderId: resident.id,
+      senderName: resident.name,
+      senderAvatar: resident.avatarUrl,
+      content: content,
+    );
+    _scrollToBottom();
+  }
+
   void _sendMessage() {
     final content = _controller.text.trim();
     if (content.isEmpty) return;
@@ -126,6 +308,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
+    ref.read(chatProvider.notifier).stopTyping(widget.channelId, resident.id);
     HapticFeedback.lightImpact();
     ref
         .read(chatProvider.notifier)
@@ -148,22 +331,31 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
-    final chatState = ref.watch(chatProvider);
-    final messages = chatState.channelMessages[widget.channelId] ?? [];
-    final messagesLoadError = chatState.messagesLoadErrorFor(widget.channelId);
-    final isLoading = !chatState.channelMessages.containsKey(widget.channelId);
+    final messages = ref.watch(channelMessagesProvider(widget.channelId));
+    final messagesLoadError = ref.watch(
+      channelMessagesErrorProvider(widget.channelId),
+    );
+    final isLoading = ref.watch(
+      channelMessagesLoadingProvider(widget.channelId),
+    );
 
     final pinnedMessages = messages.where((m) => m.isPinned).toList();
     final unpinnedMessages = messages.where((m) => !m.isPinned).toList();
+    _maybePrefetchThreadPreviews(unpinnedMessages);
+    if (_scrollFabTracker.syncMessageCount(unpinnedMessages.length)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
     final displayItems = buildChatDisplayItems(unpinnedMessages);
     final newSinceDividerIndex = newSinceVisitDividerDisplayIndex(
       messages: unpinnedMessages,
       lastVisitAt: _visitDividerAnchor,
     );
-    final pinnedHeaderCount = pinnedMessages.isNotEmpty ? 1 : 0;
     final hasNewSinceDivider = newSinceDividerIndex != null;
+    final composerText = _controller.text;
+    final slashFilter = VSlashCommandBar.commandFilter(composerText);
 
     final sovereignId = ref
         .watch(worldProvider)
@@ -178,7 +370,16 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
             ).level >=
             7;
 
-    final activeMembers = messages.map((m) => m.senderId).toSet().length;
+    final world =
+        ref.watch(worldProvider).worlds[widget.worldId];
+    final worldName = world?.name ?? 'World';
+    final totalResidents = _totalResidents > 0
+        ? _totalResidents
+        : (world?.memberCount ?? 0);
+    final residentSubtitle = worldChannelResidentSubtitle(
+      totalResidents: totalResidents,
+      onlineResidents: _onlineResidents,
+    );
 
     final channel = ref
         .watch(channelProvider)
@@ -187,38 +388,90 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
         .firstOrNull;
     final isAnnouncement = channel?.channelType == ChannelType.announcement;
     final canPostInChannel = !isAnnouncement || canPin;
+    final chatCompact =
+        ref.watch(chatDensityProvider) == ChatMessageDensity.compact;
+    final isRulesChannel =
+        (channel?.name ?? widget.channelName).toLowerCase() == 'rules';
+    final showConstitutionPin = isRulesChannel && world != null;
 
-    return VPage(
+    return ColoredBox(
+      color: VCommuneChatTheme.backgroundColor,
+      child: VPage(
       showBack: true,
       title: '',
       titleWidget: Semantics(
         header: true,
-        label: '${widget.channelName} channel, $activeMembers members',
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '# ${widget.channelName}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: VFontWeight.bold,
+        label: '${widget.channelName} channel, $residentSubtitle',
+        button: true,
+        child: GestureDetector(
+          onTap: () => showChannelDetailsSheet(
+            context,
+            worldId: widget.worldId,
+            channelId: widget.channelId,
+            channelName: widget.channelName,
+            worldName: worldName,
+            activeResidentCount: totalResidents,
+            pinnedCount: pinnedMessages.length,
+          ),
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '# ${widget.channelName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              activeMembers == 1 ? '1 member' : '$activeMembers members',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: VFontWeight.regular,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
-              ),
-            ),
-          ],
+              if (residentSubtitle.isNotEmpty)
+                Text(
+                  residentSubtitle,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: VFontWeight.regular,
+                    color: VCommuneChatTheme.timestampMuted,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
+      headerActions: [
+        VHeaderAction(
+          icon: const Icon(Icons.search),
+          onPress: () => openChannelSearch(
+            context,
+            worldId: widget.worldId,
+            channelId: widget.channelId,
+            channelName: widget.channelName,
+          ),
+        ),
+        VHeaderAction(
+          icon: const Icon(Icons.people_outline),
+          onPress: () => showResidentListSheet(
+            context,
+            worldId: widget.worldId,
+            channelName: widget.channelName,
+          ),
+        ),
+      ],
       body: Column(
         children: [
+          VPinMessageBanner(
+            pinnedMessages: pinnedMessages,
+            residentId: resident?.id ?? '',
+            worldId: widget.worldId,
+            channelName: widget.channelName,
+            canPin: canPin,
+            onTogglePin: (msgId, pin) {
+              ref.read(chatProvider.notifier).togglePin(
+                channelId: widget.channelId,
+                messageId: msgId,
+                isPinned: pin,
+              );
+            },
+          ),
           Expanded(
             child: isLoading
                 ? const ScreenLoading.list()
@@ -235,34 +488,22 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                     children: [
                       ListView.builder(
                         controller: _scrollController,
+                        cacheExtent: 480,
+                        addAutomaticKeepAlives: false,
                         padding: const EdgeInsets.symmetric(
                           horizontal: VSpacing.sm,
                           vertical: VSpacing.sm,
                         ),
                         itemCount:
                             displayItems.length +
-                            pinnedHeaderCount +
-                            (hasNewSinceDivider ? 1 : 0),
+                            (hasNewSinceDivider ? 1 : 0) +
+                            (showConstitutionPin ? 1 : 0),
                         itemBuilder: (context, index) {
-                          if (pinnedHeaderCount > 0 && index == 0) {
-                            return _PinnedMessagesPanel(
-                              pinnedMessages: pinnedMessages,
-                              residentId: resident?.id ?? '',
-                              worldId: widget.worldId,
-                              channelName: widget.channelName,
-                              canPin: canPin,
-                              onTogglePin: (msgId, pin) {
-                                ref
-                                    .read(chatProvider.notifier)
-                                    .togglePin(
-                                      channelId: widget.channelId,
-                                      messageId: msgId,
-                                      isPinned: pin,
-                                    );
-                              },
-                            );
+                          if (showConstitutionPin && index == 0) {
+                            return WorldConstitutionPin(world: world);
                           }
-                          var listIndex = index - pinnedHeaderCount;
+                          var listIndex =
+                              showConstitutionPin ? index - 1 : index;
                           if (hasNewSinceDivider &&
                               listIndex == newSinceDividerIndex) {
                             return const NewSinceVisitDivider();
@@ -272,18 +513,27 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                             listIndex -= 1;
                           }
                           final item = displayItems[listIndex];
-                          return _buildItem(
-                            item,
-                            resident?.id ?? '',
-                            canPin: canPin,
+                          return RepaintBoundary(
+                            key: ValueKey(
+                              item.message?.id ?? 'sep-${item.dateLabel}',
+                            ),
+                            child: _buildItem(
+                              item,
+                              resident?.id ?? '',
+                              canPin: canPin,
+                              compact: chatCompact,
+                            ),
                           );
                         },
                       ),
-                      if (_showScrollFab)
+                      if (_scrollFabTracker.show)
                         Positioned(
                           right: VSpacing.md,
                           bottom: VSpacing.sm,
-                          child: ChatScrollFab(onTap: _scrollToBottom),
+                          child: ChatScrollFab(
+                            onTap: _scrollToBottom,
+                            badgeCount: _scrollFabTracker.badgeCount,
+                          ),
                         ),
                     ],
                   ),
@@ -315,14 +565,43 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                 ],
               ),
             )
-          else
+          else ...[
+            const CampfireChannelBar(),
             ChatInputBar(
               controller: _controller,
               onSend: _sendMessage,
+              onChanged: (text) {
+                _onComposerChanged(text);
+                setState(() {});
+              },
               hintText: 'Message #${widget.channelName}',
+              useCommuneStyle: true,
+              showAttach: true,
+              useAttachmentTray: true,
+              onShareAchievement: _shareAchievement,
+              onOpenMediaPicker: () => showVMediaPicker(
+                context,
+                resident: resident,
+                onPick: (asset) {
+                  _controller.text = '${_controller.text}$asset'.trim();
+                  setState(() {});
+                },
+              ),
+              slashCommandBar: VSlashCommandBar.shouldShow(composerText)
+                  ? VSlashCommandBar(
+                      filter: slashFilter,
+                      commands: VSlashCommandBar.channelCommands(
+                        onPin: _handleSlashPin,
+                        onThread: _handleSlashThread,
+                        onTier: _handleSlashTier,
+                      ),
+                    )
+                  : null,
             ),
+          ],
         ],
       ),
+    ),
     );
   }
 
@@ -357,55 +636,71 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
     ChatDisplayItem item,
     String residentId, {
     bool canPin = false,
+    bool compact = false,
   }) {
     switch (item.type) {
       case ChatItemType.dateSeparator:
         return ChatDateSeparator(label: item.dateLabel);
       case ChatItemType.firstInGroup:
-        return _MessageBubble(
+        return VMessageBubble(
           message: item.message!,
           isMe: item.message!.senderId == residentId,
-          isSystem:
-              item.message!.senderId == 'system' ||
-              item.message!.senderName == 'System',
           showHeader: true,
-          canPin: canPin,
           animatedMessageIds: _animatedMessageIds,
-          worldId: widget.worldId,
-          channelName: widget.channelName,
-          onTogglePin: (msgId, pin) {
-            ref
-                .read(chatProvider.notifier)
-                .togglePin(
-                  channelId: widget.channelId,
-                  messageId: msgId,
-                  isPinned: pin,
-                );
-          },
+          mode: VMessageBubbleMode.channel,
+          compact: compact,
+          threadPreview: _threadPreviewFor(item.message!),
+          channelConfig: _channelBubbleConfig(
+            item.message!,
+            canPin: canPin,
+          ),
         );
       case ChatItemType.subsequent:
-        return _MessageBubble(
+        return VMessageBubble(
           message: item.message!,
           isMe: item.message!.senderId == residentId,
-          isSystem:
-              item.message!.senderId == 'system' ||
-              item.message!.senderName == 'System',
           showHeader: false,
-          canPin: canPin,
           animatedMessageIds: _animatedMessageIds,
-          worldId: widget.worldId,
-          channelName: widget.channelName,
-          onTogglePin: (msgId, pin) {
-            ref
-                .read(chatProvider.notifier)
-                .togglePin(
-                  channelId: widget.channelId,
-                  messageId: msgId,
-                  isPinned: pin,
-                );
-          },
+          mode: VMessageBubbleMode.channel,
+          compact: compact,
+          threadPreview: _threadPreviewFor(item.message!),
+          channelConfig: _channelBubbleConfig(
+            item.message!,
+            canPin: canPin,
+          ),
         );
     }
+  }
+
+  VChannelBubbleConfig _channelBubbleConfig(
+    ChannelMessage message, {
+    required bool canPin,
+  }) {
+    final resident = ref.read(residentProvider).resident;
+    return VChannelBubbleConfig(
+      isSystem:
+          message.senderId == 'system' || message.senderName == 'System',
+      canPin: canPin,
+      worldId: widget.worldId,
+      channelName: widget.channelName,
+      currentUserId: resident?.id,
+      senderNameColor: _senderNameColor(message.senderId),
+      onTogglePin: (msgId, pin) {
+        ref.read(chatProvider.notifier).togglePin(
+          channelId: widget.channelId,
+          messageId: msgId,
+          isPinned: pin,
+        );
+      },
+      onReaction: resident == null
+          ? null
+          : (msg, key) => ref.read(chatProvider.notifier).toggleChannelReaction(
+              channelId: widget.channelId,
+              messageId: msg.id,
+              userId: resident.id,
+              emoji: key,
+            ),
+    );
   }
 }
 
@@ -417,17 +712,11 @@ class _FoundationPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Container(
       padding: const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: VCommuneColors.surfaceSecondary,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,19 +743,16 @@ class _FoundationPanel extends StatelessWidget {
                   children: [
                     Text(
                       '# $channelName',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceDark
-                            : VColors.onSurface,
+                      style: const TextStyle(
+                        color: VCommuneColors.headerPrimary,
+                        fontSize: VFontSize.headlineSm,
                         fontWeight: VFontWeight.bold,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Foundation channel',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                      style: TextStyle(
+                        color: VCommuneColors.textMuted,
                         fontSize: VFontSize.labelSm,
                       ),
                     ),
@@ -480,24 +766,24 @@ class _FoundationPanel extends StatelessWidget {
             data: markdown,
             selectable: true,
             styleSheet: MarkdownStyleSheet(
-              h2: theme.textTheme.titleLarge?.copyWith(
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              h2: const TextStyle(
+                color: VCommuneColors.headerPrimary,
+                fontSize: VFontSize.headlineMd,
                 fontWeight: VFontWeight.bold,
               ),
-              h3: theme.textTheme.titleSmall?.copyWith(
+              h3: TextStyle(
                 color: VColors.tertiary,
+                fontSize: VFontSize.bodyLg,
                 fontWeight: VFontWeight.semiBold,
               ),
-              p: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+              p: const TextStyle(
+                color: VCommuneColors.textMuted,
                 fontSize: VFontSize.bodyMd,
                 height: 1.35,
               ),
               listBullet: const TextStyle(color: VColors.tertiary),
-              strong: TextStyle(
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              strong: const TextStyle(
+                color: VCommuneColors.headerPrimary,
                 fontWeight: VFontWeight.bold,
               ),
             ),
@@ -515,535 +801,3 @@ class _FoundationPanel extends StatelessWidget {
   };
 }
 
-class _MessageBubble extends StatefulWidget {
-  final ChannelMessage message;
-  final bool isMe;
-  final bool isSystem;
-  final bool showHeader;
-  final bool canPin;
-  final String worldId;
-  final String channelName;
-  final Set<String> animatedMessageIds;
-  final void Function(String messageId, bool isPinned)? onTogglePin;
-
-  const _MessageBubble({
-    required this.message,
-    required this.isMe,
-    required this.isSystem,
-    required this.showHeader,
-    this.canPin = false,
-    required this.worldId,
-    required this.channelName,
-    required this.animatedMessageIds,
-    this.onTogglePin,
-  });
-
-  @override
-  State<_MessageBubble> createState() => _MessageBubbleState();
-}
-
-class _MessageBubbleState extends State<_MessageBubble>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animController;
-  late final Animation<double> _opacity;
-  late final Animation<Offset> _slide;
-  bool _hasAnimated = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _hasAnimated = widget.animatedMessageIds.contains(widget.message.id);
-
-    _animController = AnimationController(
-      duration: const Duration(milliseconds: 350),
-      vsync: this,
-    );
-
-    _opacity = Tween(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
-
-    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
-    );
-
-    if (_hasAnimated) {
-      _animController.value = 1.0;
-    } else {
-      widget.animatedMessageIds.add(widget.message.id);
-      Future.delayed(const Duration(milliseconds: 30), () {
-        if (mounted) _animController.forward();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  static MarkdownStyleSheet _markdownStyle({required Color textColor}) {
-    return MarkdownStyleSheet(
-      p: TextStyle(
-        fontSize: VFontSize.bodyMd,
-        color: textColor,
-        height: VLineHeight.body,
-      ),
-      code: TextStyle(
-        fontSize: VFontSize.bodyMd - 2,
-        color: textColor,
-        backgroundColor: textColor.withValues(alpha: 0.1),
-        fontFamily: 'monospace',
-      ),
-      codeblockDecoration: BoxDecoration(
-        color: textColor.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: textColor.withValues(alpha: 0.15)),
-      ),
-      a: TextStyle(
-        fontSize: VFontSize.bodyMd,
-        color: VColors.primary,
-        decoration: TextDecoration.underline,
-      ),
-      blockquoteDecoration: BoxDecoration(
-        border: const Border(
-          left: BorderSide(color: VColors.primary, width: 3),
-        ),
-        color: VColors.primary.withValues(alpha: 0.05),
-      ),
-      h1: TextStyle(
-        fontSize: VFontSize.headlineMd,
-        fontWeight: VFontWeight.bold,
-        color: textColor,
-      ),
-      h2: TextStyle(
-        fontSize: VFontSize.bodyLg,
-        fontWeight: VFontWeight.bold,
-        color: textColor,
-      ),
-      h3: TextStyle(
-        fontSize: VFontSize.bodyMd,
-        fontWeight: VFontWeight.semiBold,
-        color: textColor,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isMe = widget.isMe;
-    final showHeader = widget.showHeader;
-    final isSystem = widget.isSystem;
-
-    final margin = showHeader
-        ? const EdgeInsets.only(bottom: VSpacing.sm)
-        : const EdgeInsets.only(bottom: 2);
-
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: Align(
-          alignment: isSystem
-              ? Alignment.center
-              : isMe
-              ? Alignment.centerRight
-              : Alignment.centerLeft,
-          child: Container(
-            margin: margin,
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
-            ),
-            child: isSystem
-                ? _buildSystemBubble()
-                : isMe
-                ? GestureDetector(
-                    onLongPress: widget.canPin
-                        ? () => _showPinContextMenu(context)
-                        : null,
-                    child: _buildSentBubble(showHeader),
-                  )
-                : GestureDetector(
-                    onLongPress: widget.canPin
-                        ? () => _showPinContextMenu(context)
-                        : null,
-                    child: _buildReceivedBubble(showHeader),
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showPinContextMenu(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isPinned = widget.message.isPinned;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(VRadius.xl)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(VIcons.arrowLeft, color: VColors.primary),
-              title: const Text('Reply in Thread'),
-              subtitle: const Text('Start or join a threaded conversation'),
-              onTap: () {
-                Navigator.pop(context);
-                final router = GoRouter.of(context);
-                router.push(
-                  '/thread/${widget.message.id}',
-                  extra: {
-                    'message': widget.message,
-                    'channelId': widget.message.channelId,
-                    'worldId': widget.worldId,
-                    'channelName': widget.channelName,
-                  },
-                );
-              },
-            ),
-            if (widget.canPin)
-              ListTile(
-                leading: Icon(
-                  isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                  color: isPinned ? VColors.warning : VColors.primary,
-                ),
-                title: Text(isPinned ? 'Unpin Message' : 'Pin Message'),
-                subtitle: Text(
-                  isPinned
-                      ? 'Remove this message from pinned notices'
-                      : 'Show this message at the top of the channel',
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onTogglePin?.call(widget.message.id, !isPinned);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSystemBubble() {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.md + VSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: VColors.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: const Border(
-          left: BorderSide(color: VColors.primary, width: 3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          MarkdownBody(
-            data: widget.message.content,
-            styleSheet: _markdownStyle(
-              textColor: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            formatTimestamp(widget.message.createdAt),
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: VFontSize.labelSm,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static const _sentRadius = BorderRadius.only(
-    topLeft: Radius.circular(VRadius.lg),
-    topRight: Radius.circular(VRadius.lg),
-    bottomLeft: Radius.circular(VRadius.lg),
-    bottomRight: Radius.circular(VRadius.sm),
-  );
-
-  Widget _buildSentBubble(bool showHeader) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: VSpacing.md,
-            vertical: VSpacing.md + VSpacing.xxs,
-          ),
-          decoration: const BoxDecoration(
-            color: VColors.primary,
-            borderRadius: _sentRadius,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.message.imageUrl != null &&
-                  widget.message.imageUrl!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: ChatImage(url: widget.message.imageUrl!),
-                ),
-              MarkdownBody(
-                data: widget.message.content,
-                styleSheet: _markdownStyle(textColor: VColors.onPrimary),
-              ),
-              const SizedBox(height: 2),
-              Row(
-                children: [
-                  Text(
-                    formatTimestamp(widget.message.createdAt),
-                    style: TextStyle(
-                      fontSize: VFontSize.labelSm,
-                      color: VColors.onPrimary.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  if (widget.message.threadCount > 0) ...[
-                    const SizedBox(width: VSpacing.sm),
-                    GestureDetector(
-                      onTap: _openThread,
-                      child: Text(
-                        '${widget.message.threadCount} ${widget.message.threadCount == 1 ? 'reply' : 'replies'}',
-                        style: TextStyle(
-                          fontSize: VFontSize.labelSm,
-                          color: VColors.onPrimary.withValues(alpha: 0.8),
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _openThread() {
-    GoRouter.of(context).push(
-      '/thread/${widget.message.id}',
-      extra: {
-        'message': widget.message,
-        'channelId': widget.message.channelId,
-        'worldId': widget.worldId,
-        'channelName': widget.channelName,
-      },
-    );
-  }
-
-  static const _receivedRadius = BorderRadius.only(
-    topRight: Radius.circular(VRadius.lg),
-    bottomRight: Radius.circular(VRadius.lg),
-    bottomLeft: Radius.circular(VRadius.lg),
-    topLeft: Radius.circular(VRadius.sm),
-  );
-
-  Widget _buildReceivedBubble(bool showHeader) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showHeader) ...[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CosmeticAvatar(
-                  totalXp: 0,
-                  size: 24,
-                  imageUrl: widget.message.senderAvatar,
-                ),
-              ),
-              const SizedBox(width: VSpacing.xs),
-              LuminaryNameplate(
-                name: widget.message.senderName,
-                tier: 1,
-                fontSize: VFontSize.labelSm,
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-        ],
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: VSpacing.md,
-            vertical: VSpacing.md + VSpacing.xxs,
-          ),
-          decoration: BoxDecoration(
-            color: isDark
-                ? VColors.glassBackgroundDark
-                : VColors.glassBackground,
-            borderRadius: _receivedRadius,
-            border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.message.imageUrl != null &&
-                  widget.message.imageUrl!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: ChatImage(url: widget.message.imageUrl!),
-                ),
-              MarkdownBody(
-                data: widget.message.content,
-                styleSheet: _markdownStyle(
-                  textColor: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Row(
-                children: [
-                  Text(
-                    formatTimestamp(widget.message.createdAt),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
-                    ),
-                  ),
-                  if (widget.message.threadCount > 0) ...[
-                    const SizedBox(width: VSpacing.sm),
-                    GestureDetector(
-                      onTap: _openThread,
-                      child: Text(
-                        '${widget.message.threadCount} ${widget.message.threadCount == 1 ? 'reply' : 'replies'}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontSize: VFontSize.labelSm,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PinnedMessagesPanel extends StatefulWidget {
-  final List<ChannelMessage> pinnedMessages;
-  final String residentId;
-  final String worldId;
-  final String channelName;
-  final bool canPin;
-  final void Function(String messageId, bool isPinned) onTogglePin;
-
-  const _PinnedMessagesPanel({
-    required this.pinnedMessages,
-    required this.residentId,
-    required this.worldId,
-    required this.channelName,
-    required this.canPin,
-    required this.onTogglePin,
-  });
-
-  @override
-  State<_PinnedMessagesPanel> createState() => _PinnedMessagesPanelState();
-}
-
-class _PinnedMessagesPanelState extends State<_PinnedMessagesPanel> {
-  bool _expanded = true;
-  final Set<String> _animatedIds = {};
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    if (widget.pinnedMessages.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(VSpacing.sm),
-      decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: () => setState(() => _expanded = !_expanded),
-            child: Row(
-              children: [
-                const Icon(Icons.push_pin, size: 14, color: VColors.tertiary),
-                const SizedBox(width: VSpacing.xs),
-                Expanded(
-                  child: Text(
-                    'Pinned (${widget.pinnedMessages.length})',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontSize: VFontSize.labelSm,
-                      fontWeight: VFontWeight.semiBold,
-                      color: VColors.tertiary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                Icon(
-                  _expanded ? Icons.expand_less : Icons.expand_more,
-                  size: VIconSize.sm,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ),
-          if (_expanded) ...[
-            const SizedBox(height: VSpacing.xs),
-            ...widget.pinnedMessages.map(
-              (msg) => _MessageBubble(
-                message: msg,
-                isMe: msg.senderId == widget.residentId,
-                isSystem:
-                    msg.senderId == 'system' || msg.senderName == 'System',
-                showHeader: true,
-                canPin: widget.canPin,
-                worldId: widget.worldId,
-                channelName: widget.channelName,
-                animatedMessageIds: _animatedIds,
-                onTogglePin: widget.onTogglePin,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}

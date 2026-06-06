@@ -38,17 +38,18 @@ class WorldPageIa {
     }
   }
 
+  /// Feed tab only for worlds with social activity or marketplace dominions.
+  static bool hasFeedTab(World world) =>
+      world.isMarketplace || world.activityScore > 0 || world.prestige >= 15;
+
+  /// Channels-first world detail — shop/jobs live in world tools menu (DCX-076).
   static List<WorldDetailTabId> tabsFor(World world) {
-    final tabs = <WorldDetailTabId>[
-      WorldDetailTabId.home,
-      WorldDetailTabId.feed,
+    return <WorldDetailTabId>[
       WorldDetailTabId.channels,
+      WorldDetailTabId.home,
+      if (hasFeedTab(world)) WorldDetailTabId.feed,
       WorldDetailTabId.members,
     ];
-    if (world.isMarketplace) {
-      tabs.add(WorldDetailTabId.shop);
-    }
-    return tabs;
   }
 
   static String tabLabel(WorldDetailTabId id) {
@@ -80,9 +81,10 @@ class WorldPageIa {
     bool hasPostHighlight = false,
     bool memberOpensOnFeed = true,
   }) {
-    if (hasPostHighlight) return feedIndex(world);
+    if (hasPostHighlight && hasFeedTab(world)) return feedIndex(world);
     if (isJoined) {
-      return memberOpensOnFeed ? feedIndex(world) : homeIndex(world);
+      if (memberOpensOnFeed && hasFeedTab(world)) return feedIndex(world);
+      return indexOf(world, WorldDetailTabId.channels);
     }
     return homeIndex(world);
   }

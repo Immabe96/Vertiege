@@ -7,6 +7,7 @@ import '../screens/onboarding/the_gate_screen.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
 import '../models/notification.dart';
+import '../config/identity_verification.dart';
 import '../config/tiers.dart';
 import '../services/media_service.dart';
 import '../services/profile_service.dart';
@@ -266,6 +267,18 @@ class ResidentNotifier extends Notifier<ResidentState> {
       await awardActivityXp('check_in', serverResult.bonusXp);
     }
     return serverResult;
+  }
+
+  /// After server-side XP/tier changes (achievement verify, activity XP, realtime).
+  Future<void> refreshFromServerAndCelebrateTier() async {
+    final r = state.resident;
+    if (r == null) return;
+    final oldTier = r.tier;
+    await refreshGamificationFromServer();
+    final refreshed = state.resident;
+    if (refreshed != null && refreshed.tier.value > oldTier.value) {
+      await _performTierUpgrade(r, refreshed.tier);
+    }
   }
 
   /// Pulls XP, streak, coins, and standings from Supabase (server wins).
@@ -813,6 +826,31 @@ class ResidentNotifier extends Notifier<ResidentState> {
     final r = state.resident;
     if (r == null) return false;
     return r.joinedWorldIds.contains(worldId);
+  }
+
+  /// Passport / national ID — separate from achievement proof. Grants verified tick.
+  Future<void> submitIdentityVerification({
+    required IdentityDocumentType documentType,
+    required String proofPath,
+  }) async {
+    final r = state.resident;
+    if (r == null) return;
+
+    state = state.copyWith(verificationStatus: VerificationStatus.verifying);
+    final proofUrl = await VerificationService.uploadProof(proofPath, r.id);
+    if (proofUrl == null) {
+      state = state.copyWith(verificationStatus: VerificationStatus.failed);
+      throw StateError('Could not upload identity document.');
+    }
+
+    await VerificationService.submitVerification(
+      residentId: r.id,
+      residentName: r.name,
+      profession: documentType.professionKey,
+      proofUrl: proofUrl,
+    );
+    state = state.copyWith(verificationStatus: VerificationStatus.idle);
+    _persist();
   }
 
   Future<void> verifyProfession(String profession, {String? proofPath}) async {

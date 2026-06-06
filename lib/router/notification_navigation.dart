@@ -8,6 +8,9 @@ String? routeForNotification(AppNotification notification) {
 
   switch (notification.type) {
     case NotificationType.achievementApproved:
+    case NotificationType.identityVerified:
+    case NotificationType.identityRejected:
+      return '/identity';
     case NotificationType.achievementRejected:
       return '/achievements';
     case NotificationType.allegianceRequest:

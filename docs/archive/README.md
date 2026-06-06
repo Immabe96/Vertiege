@@ -24,8 +24,8 @@ Scattered files under `plans/`, `audits/`, and `completed-plans/` were merged in
 
 ## Active planning
 
-- UI migration (Forui → shadcn): [shadcn-migration-plan.md](../product/planning/shadcn-migration-plan.md)
-- Product waves: [waves-13-22-master-plan.md](../product/planning/waves-13-22-master-plan.md)
-- Current status: [wave-status.md](../product/planning/wave-status.md)
+**Canonical plan:** [`PLAN.md`](../../PLAN.md) (repository root)
+
+Historical planning docs: [planning/](planning/)
 
 For current workflow and design, start at [docs/README.md](../README.md).

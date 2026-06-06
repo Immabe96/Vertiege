@@ -13,6 +13,7 @@ import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
+import '../widgets/worlds/world_admin_breadcrumb.dart';
 import '../widgets/core/new_user_context_hint.dart';
 
 class WorldJobsScreen extends ConsumerStatefulWidget {
@@ -330,6 +331,10 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
   Widget build(BuildContext context) {
     return VHubPage(
       title: 'World roles',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Roles',
+      ),
       showBack: true,
       headerActions: widget.canManage
           ? [

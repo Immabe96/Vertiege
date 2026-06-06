@@ -135,7 +135,6 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(VSpacing.lg),

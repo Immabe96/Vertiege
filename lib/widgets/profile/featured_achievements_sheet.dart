@@ -10,15 +10,11 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../ui/overlays/v_sheet.dart';
 
 /// Pick up to 3 verified achievements for the public profile (Wave 20).
 void showFeaturedAchievementsSheet(BuildContext context, WidgetRef ref) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (ctx) => const _FeaturedAchievementsSheet(),
-  );
+  showVSheet(context, const _FeaturedAchievementsSheet(), maxSize: 0.85);
 }
 
 class _FeaturedAchievementsSheet extends ConsumerStatefulWidget {

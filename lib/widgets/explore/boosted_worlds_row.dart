@@ -5,6 +5,7 @@ import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
+import '../worlds/world_icon.dart';
 
 class BoostedWorldsRow extends StatelessWidget {
   final List<World> worlds;
@@ -45,14 +46,11 @@ class BoostedWorldsRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: VColors.tertiary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(VRadius.md),
-                    ),
-                    child: const Icon(VIcons.rocket, color: VColors.tertiary, size: VIconSize.md),
+                  WorldIcon(
+                    worldId: world.assetKey,
+                    size: 40,
+                    useGlassContainer: false,
+                    circular: true,
                   ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(

@@ -43,6 +43,15 @@ int countUnreadMessages({
   return 0;
 }
 
+/// World-rail unread — hidden when the world is notification-muted (DCX-014).
+int worldRailUnreadCount({
+  required int rawCount,
+  required bool muted,
+}) {
+  if (muted || rawCount <= 0) return 0;
+  return rawCount;
+}
+
 bool hasUnreadMessages({
   required List<ChannelMessage> loadedMessages,
   required DateTime? lastReadAt,

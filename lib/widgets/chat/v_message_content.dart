@@ -1,0 +1,254 @@
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../theme/v_colors.dart';
+import '../../theme/v_commune_chat_theme.dart';
+import '../../theme/v_tokens.dart';
+
+/// Commune chat markdown: bold, italic, code, spoilers, mentions, links.
+class VMessageContent extends StatelessWidget {
+  final String content;
+  final Color textColor;
+  final bool selectable;
+
+  const VMessageContent({
+    super.key,
+    required this.content,
+    required this.textColor,
+    this.selectable = true,
+  });
+
+  static final _spoilerPattern = RegExp(r'\|\|([^|]+)\|\|');
+  static final _mentionPattern = RegExp(r'@(\w+)');
+  static final _urlPattern = RegExp(r'https?://[^\s<>]+', caseSensitive: false);
+
+  /// Preprocess Discord-style spoilers into inline markers for parsing.
+  static String preprocessSpoilers(String raw) {
+    return raw.replaceAllMapped(_spoilerPattern, (m) => '§SPOILER§${m[1]}§/SPOILER§');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = preprocessSpoilers(content);
+    if (!normalized.contains('§SPOILER§')) {
+      return _buildMarkdown(context, normalized);
+    }
+    return _buildWithSpoilers(context, normalized);
+  }
+
+  Widget _buildWithSpoilers(BuildContext context, String text) {
+    final parts = <InlineSpan>[];
+    var cursor = 0;
+    final spoilerMarker = RegExp(r'§SPOILER§([^§]+)§/SPOILER§');
+
+    for (final match in spoilerMarker.allMatches(text)) {
+      if (match.start > cursor) {
+        parts.addAll(
+          _markdownSpans(context, text.substring(cursor, match.start)),
+        );
+      }
+      parts.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: _SpoilerChip(
+            text: match.group(1) ?? '',
+            textColor: textColor,
+          ),
+        ),
+      );
+      cursor = match.end;
+    }
+    if (cursor < text.length) {
+      parts.addAll(_markdownSpans(context, text.substring(cursor)));
+    }
+
+    return SelectableText.rich(
+      TextSpan(children: parts, style: TextStyle(color: textColor)),
+    );
+  }
+
+  List<InlineSpan> _markdownSpans(BuildContext context, String segment) {
+    if (segment.trim().isEmpty) return [];
+    return [
+      WidgetSpan(
+        child: _buildMarkdown(context, segment),
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+      ),
+    ];
+  }
+
+  Widget _buildMarkdown(BuildContext context, String data) {
+    final brightness = Theme.of(context).brightness;
+    final withMentions = _injectMentionStyles(data);
+    final sheet = VCommuneChatTheme.markdownStyle(
+      textColor: textColor,
+      brightness: brightness,
+    ).copyWith(
+      strong: TextStyle(
+        fontSize: VFontSize.bodyMd,
+        fontWeight: VFontWeight.semiBold,
+        color: VCommuneChatTheme.mentionColor,
+      ),
+      a: TextStyle(
+        fontSize: VFontSize.bodyMd,
+        color: VCommuneChatTheme.linkColorOf(brightness),
+        decoration: TextDecoration.underline,
+      ),
+    );
+    return MarkdownBody(
+      data: withMentions,
+      selectable: selectable,
+      styleSheet: sheet,
+      onTapLink: (text, href, title) {
+        if (href == null) return;
+        launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
+      },
+    );
+  }
+
+  String _injectMentionStyles(String data) {
+    return data.replaceAllMapped(_mentionPattern, (m) => '**@${m[1]}**');
+  }
+
+  /// Extract the first http(s) URL from message text (for embed cards).
+  static String? firstUrl(String content) {
+    final match = _urlPattern.firstMatch(content);
+    return match?.group(0);
+  }
+
+  /// Image URLs from message body (excluding embed targets handled separately).
+  static List<String> imageUrlsInContent(String content) {
+    return _urlPattern
+        .allMatches(content)
+        .map((m) => m.group(0)!)
+        .where(_looksLikeImageUrl)
+        .toList();
+  }
+
+  static bool _looksLikeImageUrl(String url) {
+    final lower = url.toLowerCase();
+    return lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.webp') ||
+        lower.contains('giphy.com') ||
+        lower.contains('tenor.com');
+  }
+}
+
+class _SpoilerChip extends StatefulWidget {
+  final String text;
+  final Color textColor;
+
+  const _SpoilerChip({required this.text, required this.textColor});
+
+  @override
+  State<_SpoilerChip> createState() => _SpoilerChipState();
+}
+
+class _SpoilerChipState extends State<_SpoilerChip> {
+  bool _revealed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() => _revealed = !_revealed),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+        decoration: BoxDecoration(
+          color: _revealed
+              ? widget.textColor.withValues(alpha: 0.08)
+              : VCommuneChatTheme.timestampMuted.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(VRadius.xs),
+        ),
+        child: Text(
+          _revealed ? widget.text : 'spoiler',
+          style: TextStyle(
+            fontSize: VFontSize.bodyMd,
+            color: _revealed ? widget.textColor : Colors.transparent,
+            shadows: _revealed
+                ? null
+                : [
+                    Shadow(
+                      color: widget.textColor.withValues(alpha: 0.9),
+                      offset: Offset.zero,
+                      blurRadius: 8,
+                    ),
+                  ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Plain text with @mention highlighting for DM bubbles.
+class VMessagePlainContent extends StatelessWidget {
+  final String content;
+  final Color textColor;
+
+  const VMessagePlainContent({
+    super.key,
+    required this.content,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = <TextSpan>[];
+    final pattern = RegExp(
+      r'(@\w+)|(https?://[^\s]+)',
+      caseSensitive: false,
+    );
+    var lastEnd = 0;
+
+    for (final match in pattern.allMatches(content)) {
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(text: content.substring(lastEnd, match.start)));
+      }
+      final raw = match.group(0)!;
+      final isMention = match.group(1) != null;
+      spans.add(
+        TextSpan(
+          text: raw,
+          style: TextStyle(
+            color: isMention
+                ? VCommuneChatTheme.mentionColor
+                : VCommuneChatTheme.linkColor,
+            fontWeight: isMention ? VFontWeight.semiBold : VFontWeight.regular,
+            backgroundColor: isMention
+                ? VCommuneChatTheme.mentionColor.withValues(alpha: 0.12)
+                : null,
+            decoration: isMention ? null : TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              if (!isMention) {
+                launchUrl(
+                  Uri.parse(raw),
+                  mode: LaunchMode.externalApplication,
+                );
+              }
+            },
+        ),
+      );
+      lastEnd = match.end;
+    }
+
+    if (lastEnd < content.length) {
+      spans.add(TextSpan(text: content.substring(lastEnd)));
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: spans.isEmpty ? [TextSpan(text: content)] : spans,
+        style: TextStyle(color: textColor, fontSize: VFontSize.bodyMd),
+      ),
+    );
+  }
+}

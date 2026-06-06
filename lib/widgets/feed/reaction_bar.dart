@@ -141,17 +141,9 @@ class _ReactionBarState extends State<ReactionBar> {
   void _showLongPressMenu() {
     showTabAwareModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
       builder: (ctx) {
         final theme = Theme.of(ctx);
-        return Container(
-          decoration: BoxDecoration(
-            color: VColors.glassBackground,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(VRadius.md),
-            ),
-            border: Border.all(color: VColors.glassBorder),
-          ),
+        return Padding(
           padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
             mainAxisSize: MainAxisSize.min,

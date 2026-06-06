@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import '../models/channel.dart';
 import '../models/world.dart';
 import '../utils/id_generator.dart';
+import '../utils/presence_utils.dart';
+import '../widgets/core/status_dot.dart' as v_status;
 import '../utils/validators.dart' as validators;
 import '../utils/world_foundations.dart';
 import 'supabase.dart';
@@ -343,6 +345,35 @@ class WorldService {
         .eq('world_id', worldId)
         .order('rep', ascending: false);
     return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  /// Total + online residents for world headers (profiles.last_seen_at when available).
+  static Future<({int total, int online})> residentPresenceCounts(
+    String worldId,
+  ) async {
+    if (!isSupabaseConfigured()) return (total: 0, online: 0);
+    try {
+      final client = getSupabase();
+      final data = await client
+          .from('world_members')
+          .select('resident_id, profiles(last_seen_at)')
+          .eq('world_id', worldId);
+      final rows = (data as List).cast<Map<String, dynamic>>();
+      var online = 0;
+      for (final row in rows) {
+        final profile = row['profiles'];
+        final lastSeen = profile is Map<String, dynamic>
+            ? profile['last_seen_at']
+            : null;
+        if (presenceFromProfileField(lastSeen) == v_status.Presence.online) {
+          online++;
+        }
+      }
+      return (total: rows.length, online: online);
+    } catch (_) {
+      final members = await getMembers(worldId);
+      return (total: members.length, online: 0);
+    }
   }
 
   static Future<List<WorldChannel>> getChannels(String worldId) async {

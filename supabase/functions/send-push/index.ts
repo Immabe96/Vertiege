@@ -278,6 +278,14 @@ function notificationTitle(record: NotificationRecord) {
       return 'World unlocked'
     case 'allegianceRequest':
       return 'New alliance request'
+    case 'achievementApproved':
+      return 'Achievement verified'
+    case 'achievementRejected':
+      return 'Achievement review'
+    case 'identityVerified':
+      return 'Identity verified'
+    case 'identityRejected':
+      return 'Identity review'
     default:
       return 'Vertiege'
   }
@@ -293,7 +301,15 @@ function routeFor(record: NotificationRecord) {
     return '/chat'
   }
 
-  if (type === 'achievementApproved' || type === 'achievementRejected') {
+  if (
+    type === 'achievementApproved' ||
+    type === 'identityVerified' ||
+    type === 'identityRejected'
+  ) {
+    return '/identity'
+  }
+
+  if (type === 'achievementRejected') {
     return '/achievements'
   }
 

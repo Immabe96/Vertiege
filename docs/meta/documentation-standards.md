@@ -45,7 +45,7 @@ We use [Diátaxis](https://diataxis.fr/) for **intent**, plus three project-spec
 
 ## Maintenance cadence
 
-- **After a wave ships:** update `product/planning/wave-status.md` and `operations/uat/issue-log.md`.
+- **After a wave ships:** update `PLAN.md` (repository root) and `operations/uat/issue-log.md`.
 - **After design token changes:** update `reference/design-system.md` and `lib/theme/*` together.
 - **Quarterly:** skim `archive/` and root redirect stubs; remove stubs when traffic is zero.
 

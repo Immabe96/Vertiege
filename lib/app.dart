@@ -27,6 +27,8 @@ import 'services/daily_reward_service.dart';
 import 'services/storage_service.dart';
 import 'services/store_service.dart';
 import 'services/push_service.dart';
+import 'services/achievement_realtime_service.dart';
+import 'services/resident_realtime_service.dart';
 import 'services/push_token_service.dart';
 import 'services/analytics_events.dart';
 import 'services/analytics_service.dart';
@@ -45,6 +47,7 @@ import 'widgets/core/mutation_outbox_sync_banner.dart';
 import 'widgets/core/offline_banner.dart';
 import 'widgets/core/v_app_banner.dart';
 import 'widgets/core/v_feedback.dart';
+import 'widgets/nexus/nexus_moment_sheet.dart';
 
 class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
   const VirtualStatusWorldsApp({super.key});
@@ -259,6 +262,40 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         }
       }
       await PushService.initialize(userId: resident.id);
+      await AchievementRealtimeService.initialize(
+        userId: resident.id,
+        onVerified: () {
+          if (!mounted) return;
+          unawaited(
+            ref
+                .read(achievementProvider.notifier)
+                .reloadAndCelebrateRemoteVerifications(),
+          );
+        },
+      );
+      await ResidentRealtimeService.initialize(
+        userId: resident.id,
+        onGamificationChange: () {
+          if (!mounted) return;
+          unawaited(
+            ref
+                .read(residentProvider.notifier)
+                .refreshFromServerAndCelebrateTier(),
+          );
+        },
+        onIdentityVerified: () {
+          if (!mounted) return;
+          unawaited(
+            ref.read(residentProvider.notifier).loadResident().then((_) {
+              if (!mounted) return;
+              VFeedback.showMessage(
+                context,
+                'Identity verified — your resident tick is now active.',
+              );
+            }),
+          );
+        },
+      );
       unawaited(ref.read(allyProvider.notifier).loadAll(resident.id));
       // Posts, bookmarks, notifications, DMs load after splash via _startBackgroundLoads.
 
@@ -346,6 +383,16 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       _refreshChatFromForegroundDmPush(message);
       return;
     }
+    if (type == 'achievementApproved') {
+      unawaited(
+        ref
+            .read(achievementProvider.notifier)
+            .reloadAndCelebrateRemoteVerifications(),
+      );
+    }
+    if (type == 'identityVerified') {
+      unawaited(ref.read(residentProvider.notifier).loadResident());
+    }
     final id =
         message.data['notification_id'] ??
         message.data['notificationId'] ??
@@ -383,6 +430,16 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
           ChatNotificationScope.shouldSuppressDm(roomId)) {
         return;
       }
+    }
+    if (notification.type == NotificationType.achievementApproved) {
+      unawaited(
+        ref
+            .read(achievementProvider.notifier)
+            .reloadAndCelebrateRemoteVerifications(),
+      );
+    }
+    if (notification.type == NotificationType.identityVerified) {
+      unawaited(ref.read(residentProvider.notifier).loadResident());
     }
     _showInAppNotification(
       id: notification.id,
@@ -438,6 +495,8 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     NotificationType.allegianceRequest => 'Allegiance request',
     NotificationType.achievementApproved => 'Achievement verified',
     NotificationType.achievementRejected => 'Achievement review',
+    NotificationType.identityVerified => 'Identity verified',
+    NotificationType.identityRejected => 'Identity review',
     NotificationType.jobApplicationAccepted => 'Role application',
     NotificationType.jobApplicationRejected => 'Role application',
     NotificationType.governanceProposalApproved => 'Proposal approved',
@@ -552,6 +611,18 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       notificationProvider,
       _showRealtimeNotification,
     );
+    ref.listen<AchievementState>(achievementProvider, (previous, next) {
+      final prevIds = previous?.recentlyUnlockedIds ?? const [];
+      for (final id in next.recentlyUnlockedIds) {
+        if (prevIds.contains(id)) continue;
+        VFeedback.showAchievementUnlock(
+          context,
+          achievementId: id,
+          subtitle: 'Verified — share your Nexus moment?',
+          onShareToNexus: () => showNexusMomentSheet(context, achievementId: id),
+        );
+      }
+    });
 
     final router = ref.watch(appRouterProvider);
     final themeState = ref.watch(themeProvider);
@@ -574,14 +645,17 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: AppTheme.lightFor(themeState),
+      darkTheme: AppTheme.darkFor(themeState),
       themeMode: themeState.themeMode,
       routerConfig: router,
       builder: (context, child) {
-        final shell = _withForui(
+        final shell = _applyA11yColorAdjustments(
+          themeState,
+          _withForui(
           context,
           textScaler,
+          themeState,
           Column(
             children: [
               if (_buildBlocked)
@@ -616,6 +690,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
             ],
           ),
           isDark: useDarkForui,
+        ),
         );
         if (!_showSplash) return shell;
         return Stack(
@@ -629,15 +704,36 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     );
   }
 
+  Widget _applyA11yColorAdjustments(ThemeState state, Widget child) {
+    final c = state.effectiveContrast;
+    if (state.saturation == 1.0 && c == 1.0) return child;
+    final s = state.saturation;
+    final translate = (1 - c) * 128;
+    return ColorFiltered(
+      colorFilter: ColorFilter.matrix(<double>[
+        c * s, 0, 0, 0, translate,
+        0, c * s, 0, 0, translate,
+        0, 0, c * s, 0, translate,
+        0, 0, 0, 1, 0,
+      ]),
+      child: child,
+    );
+  }
+
   Widget _withForui(
     BuildContext context,
     TextScaler textScaler,
+    ThemeState themeState,
     Widget child, {
     required bool isDark,
   }) {
     final materialColor = Theme.of(context).colorScheme.surface;
+    final forui = VertiegeForuiTheme.forPreset(
+      isDark: isDark,
+      commune: themeState.useCommunePreset,
+    );
     return FTheme(
-      data: isDark ? VertiegeForuiTheme.dark : VertiegeForuiTheme.light,
+      data: forui,
       child: FToaster(
         child: FTooltipGroup(
           child: Material(

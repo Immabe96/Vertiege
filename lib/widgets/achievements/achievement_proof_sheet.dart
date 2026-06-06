@@ -16,6 +16,7 @@ import 'proof_requirements_banner.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../ui/overlays/v_sheet.dart';
 
 /// Bottom sheet: achievement detail, proof upload, submit.
 Future<void> showAchievementProofSheet({
@@ -25,16 +26,14 @@ Future<void> showAchievementProofSheet({
   required AchievementStatus status,
   UserAchievement? userAchievement,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: Colors.transparent,
-    builder: (ctx) => _AchievementProofSheet(
+  return showVSheet(
+    context,
+    _AchievementProofSheet(
       achievement: achievement,
       status: status,
       userAchievement: userAchievement,
     ),
+    maxSize: 0.92,
   );
 }
 

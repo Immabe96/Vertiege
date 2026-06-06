@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'v_commune_colors.dart';
+
 /// Vertiege color system — Material 3 + Prestige Noir brand.
 ///
+/// **Accent discipline (DCX-026):** [brand] and [secondary] are for
+/// interactive affordances only — CTAs, mentions, active nav, tier locks.
+/// Never use them as list/card/chat backgrounds; use [VCommuneColors] ladder.
+///
 /// Accent roles:
-/// - [brand] (tertiary): gold prestige — CTAs, Campfire, highlights
-/// - [secondary]: violet — worlds, magic, creative UI
+/// - [brand] (tertiary): gold prestige — CTAs, @mentions, active states
+/// - [secondary]: violet — worlds, magic, selected creative UI
 /// - [link]: blue — URLs and system-style links only
 /// - [primary]: neutral chrome (ink on light / paper on dark)
 class VColors {
@@ -147,10 +153,20 @@ class VColors {
   static const tierOldMoney = Color(0xFFF59E0B);
   static const tierApex = Color(0xFFEC4899);
 
-  static const online = Color(0xFF10B981);
-  static const idle = Color(0xFFF59E0B);
-  static const dnd = Color(0xFFEF4444);
-  static const offline = Color(0xFF6B7280);
+  /// Presence — unified with [VCommuneColors] (DCX-033).
+  static const online = VCommuneColors.statusOnline;
+  static const idle = VCommuneColors.statusIdle;
+  static const dnd = VCommuneColors.statusDnd;
+  static const offline = VCommuneColors.statusOffline;
+
+  /// Desaturated body on dark — #dbdee1 equivalent (DCX-032).
+  static const bodyTextDark = VCommuneColors.textNormal;
+  static const bodyTextMutedDark = VCommuneColors.textMuted;
+  static const headerTextDark = VCommuneColors.headerPrimary;
+
+  /// Commune divider — 10% white on dark surfaces (DCX-039).
+  static Color get dividerCommune => VCommuneColors.dividerSubtle;
+  static Color get dividerCommuneLight => VCommuneColors.dividerSubtleLight;
 
   static const achievementEducation = Color(0xFF3B82F6);
   static const achievementCareer = Color(0xFF10B981);

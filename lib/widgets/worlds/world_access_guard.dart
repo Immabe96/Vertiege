@@ -14,6 +14,7 @@ import '../../widgets/core/loading_state.dart';
 import 'access_icon.dart';
 import '../../ui/buttons/v_button.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../ui/overlays/v_sheet.dart';
 import '../../widgets/core/v_feedback.dart';
 
 class WorldAccessGuard extends ConsumerWidget {
@@ -120,9 +121,9 @@ class WorldAccessGuard extends ConsumerWidget {
       _ => 'Resident',
     };
 
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => Padding(
+    showVSheet(
+      context,
+      Padding(
         padding: EdgeInsets.only(
           left: 16,
           right: 16,
@@ -159,7 +160,7 @@ class WorldAccessGuard extends ConsumerWidget {
                 icon: const Icon(VIcons.trophy),
                 label: const Text('Go to Achievements'),
                 onPressed: () {
-                  Navigator.pop(ctx);
+                  Navigator.pop(context);
                   context.push('/achievements');
                 },
               ),
@@ -168,7 +169,7 @@ class WorldAccessGuard extends ConsumerWidget {
             VButton(
               label: 'Close',
               onPressed: () {
-                Navigator.pop(ctx);
+                Navigator.pop(context);
               },
               variant: ButtonVariant.text,
               isFullWidth: true,
@@ -176,6 +177,7 @@ class WorldAccessGuard extends ConsumerWidget {
           ],
         ),
       ),
+      maxSize: 0.55,
     );
   }
 
@@ -184,19 +186,19 @@ class WorldAccessGuard extends ConsumerWidget {
     WidgetRef ref,
     String profession,
   ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => _VerificationSheet(
+    showVSheet(
+      context,
+      _VerificationSheet(
         profession: profession,
         onSubmit: (proofPath) {
-          Navigator.pop(ctx);
+          Navigator.pop(context);
           ref
               .read(residentProvider.notifier)
               .verifyProfession(profession, proofPath: proofPath);
           VFeedback.showMessage(context, 'Verification submitted. You will be notified when it is reviewed.',);
         },
       ),
+      maxSize: 0.75,
     );
   }
 }

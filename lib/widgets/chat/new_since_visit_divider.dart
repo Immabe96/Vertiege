@@ -1,35 +1,52 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 
-/// Divider marking messages received since the user's last channel visit.
+/// Unread boundary — red accent pill (DCX-057).
 class NewSinceVisitDivider extends StatelessWidget {
   const NewSinceVisitDivider({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
       child: Row(
         children: [
-          const Expanded(
-            child: Divider(color: VColors.primary, thickness: 1),
+          Expanded(
+            child: Divider(
+              color: VCommuneColors.statusDnd.withValues(alpha: 0.85),
+              thickness: 1,
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
-            child: Text(
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: VSpacing.sm,
+              vertical: VSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: VCommuneColors.statusDnd.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(VRadius.pill),
+              border: Border.all(
+                color: VCommuneColors.statusDnd.withValues(alpha: 0.45),
+              ),
+            ),
+            child: const Text(
               'New since last visit',
-              style: theme.textTheme.labelSmall?.copyWith(
+              style: TextStyle(
                 fontSize: VFontSize.labelSm,
-                fontWeight: VFontWeight.semiBold,
-                color: VColors.primary,
+                fontWeight: VFontWeight.bold,
+                color: VCommuneColors.statusDnd,
+                height: VLineHeight.label,
               ),
             ),
           ),
-          const Expanded(
-            child: Divider(color: VColors.primary, thickness: 1),
+          Expanded(
+            child: Divider(
+              color: VCommuneColors.statusDnd.withValues(alpha: 0.85),
+              thickness: 1,
+            ),
           ),
         ],
       ),

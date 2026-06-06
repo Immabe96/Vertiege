@@ -8,6 +8,7 @@ import '../../state/resident_provider.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../widgets/auth/auth_fields.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/brand_assets.dart';
 import '../../ui/icons/v_icons.dart';
@@ -114,7 +115,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      backgroundColor: isDark
+          ? VCommuneColors.surfaceTertiary
+          : VCommuneColors.surfaceSecondaryLight,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),

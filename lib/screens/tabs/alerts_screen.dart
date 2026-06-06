@@ -11,9 +11,9 @@ import '../../utils/time_ago.dart';
 import '../../widgets/core/fade_in.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/sync_warning_banner.dart';
-import '../../widgets/core/glass_panel.dart';
 import '../../widgets/core/screen_loading.dart';
 import 'package:vertiege/ui/ui.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 import '../../theme/v_colors.dart';
@@ -105,14 +105,14 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     if (notifState.isLoading) {
       return const VHubPage(
         title: 'Alerts',
-        showBack: true,
+        showBack: false,
         body: ScreenLoading.list(),
       );
     }
 
     return VHubPage(
       title: 'Alerts',
-      showBack: true,
+      showBack: false,
       headerActions: [
         if (hasUnread)
           AnimatedBuilder(
@@ -238,13 +238,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SliverPersistentHeader(
       pinned: true,
       delegate: _SectionHeaderDelegate(
         title: title,
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
-        textColor: VColors.tertiary,
+        backgroundColor: VCommuneColors.surfacePrimary,
+        textColor: VCommuneColors.headerSecondary,
       ),
     );
   }
@@ -406,6 +405,8 @@ class _NotificationSliverList extends StatelessWidget {
       NotificationType.dmMessage => VColors.primary,
       NotificationType.allegianceRequest => VColors.tertiary,
       NotificationType.achievementApproved => VColors.success,
+      NotificationType.identityVerified => VColors.brand,
+      NotificationType.identityRejected => VColors.error,
       NotificationType.achievementRejected => VColors.error,
       NotificationType.jobApplicationAccepted => VColors.success,
       NotificationType.jobApplicationRejected => VColors.error,
@@ -480,8 +481,11 @@ class _NotificationCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(VRadius.xl),
-        child: VSurfacePanel(
-          padding: EdgeInsets.zero,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: VCommuneColors.surfaceSecondary,
+            borderRadius: BorderRadius.circular(VRadius.md),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -494,10 +498,10 @@ class _NotificationCard extends StatelessWidget {
                       Container(
                         width: 3,
                         decoration: const BoxDecoration(
-                          color: VColors.primary,
+                          color: VCommuneColors.textLink,
                           borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(VRadius.xl),
-                            bottomLeft: Radius.circular(VRadius.xl),
+                            topLeft: Radius.circular(VRadius.md),
+                            bottomLeft: Radius.circular(VRadius.md),
                           ),
                         ),
                       ),
@@ -592,6 +596,8 @@ class _NotificationCard extends StatelessWidget {
       NotificationType.dmMessage => Icons.chat_outlined,
       NotificationType.allegianceRequest => Icons.handshake,
       NotificationType.achievementApproved => Icons.verified,
+      NotificationType.identityVerified => Icons.badge_outlined,
+      NotificationType.identityRejected => Icons.badge_outlined,
       NotificationType.achievementRejected => Icons.cancel_outlined,
       NotificationType.jobApplicationAccepted => Icons.work_outline,
       NotificationType.jobApplicationRejected => Icons.work_off_outlined,

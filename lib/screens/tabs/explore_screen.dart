@@ -15,6 +15,7 @@ import '../../ui/icons/v_icons.dart';
 import '../../utils/provider_errors.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
+import '../../widgets/explore/boosted_worlds_row.dart';
 import '../../widgets/explore/shimmer_world_card.dart';
 import '../../widgets/worlds/world_icon.dart';
 
@@ -58,6 +59,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final trending = available.where((w) => w.activityScore > 0).toList()
       ..sort((a, b) => b.activityScore.compareTo(a.activityScore));
     final topTrending = trending.take(5).toList();
+
+    final boosted = List<World>.from(available)
+      ..sort((a, b) => b.prestige.compareTo(a.prestige));
+    final boostedWorlds = boosted.take(5).where((w) => w.prestige >= 10).toList();
 
     final recommended = resident != null
         ? available
@@ -159,6 +164,30 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       ),
                     ),
                   ),
+                  if (boostedWorlds.isNotEmpty && _searchQuery.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              VSpacing.md,
+                              0,
+                              VSpacing.md,
+                              VSpacing.sm,
+                            ),
+                            child: Text(
+                              'Featured worlds',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: VFontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          BoostedWorldsRow(worlds: boostedWorlds),
+                          const SizedBox(height: VSpacing.sm),
+                        ],
+                      ),
+                    ),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(

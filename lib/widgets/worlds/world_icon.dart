@@ -19,6 +19,8 @@ class WorldIcon extends StatelessWidget {
   final Color? tintColor;
   /// When false, shows only the raster/Material emblem (no glass box or glow).
   final bool useGlassContainer;
+  /// Commune rail/header: circular clip without glass chrome (DCX-078).
+  final bool circular;
 
   const WorldIcon({
     super.key,
@@ -26,6 +28,7 @@ class WorldIcon extends StatelessWidget {
     this.size = 64,
     this.tintColor,
     this.useGlassContainer = true,
+    this.circular = false,
   });
 
   @override
@@ -46,7 +49,11 @@ class WorldIcon extends StatelessWidget {
         : _materialIcon(iconColor);
 
     if (!useGlassContainer) {
-      return SizedBox(width: size, height: size, child: Center(child: emblem));
+      final child = SizedBox(width: size, height: size, child: Center(child: emblem));
+      if (circular) {
+        return ClipOval(child: child);
+      }
+      return child;
     }
 
     return Container(
@@ -54,7 +61,8 @@ class WorldIcon extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(VRadius.xl),
+        borderRadius: circular ? null : BorderRadius.circular(VRadius.xl),
+        shape: circular ? BoxShape.circle : BoxShape.rectangle,
         border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
         boxShadow: [
           BoxShadow(

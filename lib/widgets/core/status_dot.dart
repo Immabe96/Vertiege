@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/presence_utils.dart';
 
 /// Discord-style presence indicator.
 /// Online=green, idle=yellow, dnd=red, offline=gray.
@@ -30,12 +32,7 @@ class _StatusDotState extends State<StatusDot>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
 
-  Color get _color => switch (widget.presence) {
-    Presence.online => VColors.success,
-    Presence.idle => VColors.warning,
-    Presence.dnd => VColors.error,
-    Presence.offline => VColors.outline,
-  };
+  Color get _color => presenceColor(widget.presence);
 
   @override
   void initState() {
@@ -93,9 +90,9 @@ class _StatusDotState extends State<StatusDot>
             width: glassSize,
             height: glassSize,
             decoration: BoxDecoration(
-              color: VColors.surfaceContainerLow,
+              color: VCommuneColors.surfaceSecondary,
               shape: BoxShape.circle,
-              border: Border.all(color: VColors.outlineVariant),
+              border: Border.all(color: VCommuneColors.dividerSubtle),
             ),
             child: Center(
               child: Container(

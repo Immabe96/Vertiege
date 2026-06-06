@@ -369,10 +369,9 @@ class _ShopCard extends ConsumerWidget {
 
   void _previewItem(BuildContext context, WidgetRef ref, _ShopItem item) {
     final resident = ref.read(residentProvider).resident;
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) => Padding(
+    showVSheet(
+      context,
+      Padding(
         padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -380,7 +379,7 @@ class _ShopCard extends ConsumerWidget {
             Text(
               item.name,
               style: Theme.of(
-                ctx,
+                context,
               ).textTheme.titleMedium?.copyWith(fontWeight: VFontWeight.bold),
             ),
             const SizedBox(height: VSpacing.md),
@@ -399,18 +398,19 @@ class _ShopCard extends ConsumerWidget {
             Text(
               item.description,
               textAlign: TextAlign.center,
-              style: Theme.of(ctx).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: VSpacing.md),
             Text(
               '${item.price} coins · ${item.subtype}',
               style: Theme.of(
-                ctx,
+                context,
               ).textTheme.labelMedium?.copyWith(color: VColors.tertiary),
             ),
           ],
         ),
       ),
+      maxSize: 0.55,
     );
   }
 
@@ -488,11 +488,10 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
   }
 
   void _openListingDetail(Listing listing) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _DominionListingDetailSheet(listing: listing),
+    showVSheet(
+      context,
+      _DominionListingDetailSheet(listing: listing),
+      maxSize: 0.85,
     );
   }
 

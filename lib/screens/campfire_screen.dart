@@ -3,15 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import 'package:livekit_client/livekit_client.dart';
+import '../models/channel.dart';
+import '../router/world_navigation.dart';
+import '../state/channel_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/voice_provider.dart';
 import '../theme/v_colors.dart';
+import '../theme/v_commune_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../services/device_permission_service.dart';
-import '../services/feature_flags.dart';
 import '../widgets/voice/campfire_reconnect_banner.dart';
 
 class CampfireScreen extends ConsumerStatefulWidget {
@@ -72,7 +75,9 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
     final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final immersive = FeatureFlags.campfireImmersive;
+    final bg = isDark
+        ? VCommuneColors.surfaceTertiary
+        : VCommuneColors.surfaceTertiaryLight;
 
     return VScaffold(
       header: VNestedHeader(
@@ -107,13 +112,10 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
         ),
       ),
       child: ColoredBox(
-        color: immersive
-            ? (isDark ? VColors.surfaceDark : Colors.black)
-            : Colors.transparent,
+        color: bg,
         child: Column(
           children: [
             const CampfireReconnectBanner(),
-            if (!immersive) const SizedBox(height: VSpacing.xl),
             Expanded(
               child: resident == null
                   ? const AppEmptyState(
@@ -170,9 +172,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                       ),
                     )
                   : GridView.builder(
-                      padding: EdgeInsets.all(
-                        immersive ? VSpacing.lg : VSpacing.md,
-                      ),
+                      padding: const EdgeInsets.all(VSpacing.lg),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
@@ -185,8 +185,94 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                           _ParticipantTile(participant: participants[i]),
                     ),
             ),
+            _CampfireTextSplitBar(
+              worldId: widget.worldId,
+              worldName: widget.worldName,
+            ),
             const _CampfireControls(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Picture-in-picture style bar to read text while in Campfire (DCX-142).
+class _CampfireTextSplitBar extends ConsumerWidget {
+  final String worldId;
+  final String worldName;
+
+  const _CampfireTextSplitBar({
+    required this.worldId,
+    required this.worldName,
+  });
+
+  WorldChannel? _textChannel(List<WorldChannel> channels) {
+    for (final name in ['general', 'lounge', 'chat']) {
+      final match = channels
+          .where(
+            (c) =>
+                c.channelType == ChannelType.text &&
+                c.name.toLowerCase() == name,
+          )
+          .firstOrNull;
+      if (match != null) return match;
+    }
+    return channels
+        .where((c) => c.channelType == ChannelType.text)
+        .firstOrNull;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final channels = ref.watch(channelProvider).channelsByWorld[worldId] ?? [];
+    final textChannel = _textChannel(channels);
+    if (textChannel == null) return const SizedBox.shrink();
+
+    return Material(
+      color: VCommuneColors.surfaceSecondary,
+      child: InkWell(
+        onTap: () => context.push(
+          worldChannelPath(worldId, textChannel),
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: VColors.primary.withValues(alpha: 0.25)),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.forum_outlined,
+                size: VIconSize.sm,
+                color: VColors.primary,
+              ),
+              const SizedBox(width: VSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Read #${textChannel.name} while in Campfire',
+                  style: const TextStyle(
+                    fontSize: VFontSize.labelSm,
+                    fontWeight: VFontWeight.medium,
+                    color: VCommuneColors.textNormal,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const Icon(
+                Icons.open_in_new,
+                size: 14,
+                color: VColors.primary,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -367,11 +453,13 @@ class _CampfireControls extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+            ? VCommuneColors.surfaceFloating
+            : VCommuneColors.surfaceFloatingLight,
         border: Border(
           top: BorderSide(
-            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+            color: isDark
+                ? VCommuneColors.dividerSubtle
+                : VCommuneColors.dividerSubtleLight,
           ),
         ),
       ),

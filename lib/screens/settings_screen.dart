@@ -18,9 +18,12 @@ import '../services/device_permission_service.dart';
 import '../services/firebase_bootstrap.dart';
 import '../services/push_token_service.dart';
 import '../services/mutation_outbox_service.dart';
+import '../services/achievement_review_service.dart';
 import '../services/notification_preferences_service.dart';
 import '../services/supabase.dart';
+import '../services/chat_density_prefs.dart';
 import '../services/world_nav_prefs.dart';
+import '../state/chat_density_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -49,6 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _tierUpgradesEnabled = true;
   int _cacheSizeBytes = 0;
   int _failedOutboxCount = 0;
+  int _verifierQueueCount = 0;
   bool _prefsLoaded = false;
 
   @override
@@ -57,6 +61,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _loadPrefs();
     _estimateCacheSize();
     _loadFailedOutboxCount();
+    _loadVerifierQueueCount();
+  }
+
+  Future<void> _loadVerifierQueueCount() async {
+    if (!AdminAccessService.isCurrentSessionVerifier()) return;
+    final metrics = await AchievementReviewService.getQueueMetrics();
+    if (!mounted) return;
+    setState(() => _verifierQueueCount = metrics.pendingCount);
   }
 
   Future<void> _loadFailedOutboxCount() async {
@@ -699,7 +711,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: VSpacing.sm),
           VThemeSchemePicker(
             scheme: scheme,
-            onChanged: (s) => ref.read(themeProvider.notifier).setScheme(s),
+            darkPreset: ref.watch(themeProvider).darkPreset,
+            onSchemeChanged: (s) =>
+                ref.read(themeProvider.notifier).setScheme(s),
+            onDarkPresetChanged: (p) =>
+                ref.read(themeProvider.notifier).setDarkPreset(p),
           ),
           const SizedBox(height: VSpacing.md),
           Row(
@@ -724,9 +740,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: VSpacing.sm),
           Consumer(
             builder: (context, ref, _) {
-              final textSize = ref.watch(themeProvider).textSize;
-              final highContrast =
-                  textSize == TextSize.large || textSize == TextSize.xlarge;
+              final theme = ref.watch(themeProvider);
+              final textSize = theme.textSize;
+              final highContrast = theme.highContrast;
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -775,15 +791,71 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       VSwitch(
                         value: highContrast,
-                        onChanged: (enabled) {
-                          ref
-                              .read(themeProvider.notifier)
-                              .setTextSize(
-                                enabled ? TextSize.large : TextSize.medium,
-                              );
-                        },
+                        onChanged: (enabled) => ref
+                            .read(themeProvider.notifier)
+                            .setHighContrast(enabled),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: VSpacing.md),
+                  _ThemeSliderRow(
+                    icon: Icons.tune,
+                    label: 'Saturation',
+                    value: ref.watch(themeProvider).saturation,
+                    onChanged: (v) =>
+                        ref.read(themeProvider.notifier).setSaturation(v),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  _ThemeSliderRow(
+                    icon: Icons.contrast,
+                    label: 'Contrast',
+                    value: ref.watch(themeProvider).contrast,
+                    onChanged: (v) =>
+                        ref.read(themeProvider.notifier).setContrast(v),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final density = ref.watch(chatDensityProvider);
+                      final compact =
+                          density == ChatMessageDensity.compact;
+                      return Row(
+                        children: [
+                          Icon(
+                            Icons.view_agenda_outlined,
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: VSpacing.md),
+                          Expanded(
+                            child: Text(
+                              'Compact chat',
+                              style: TextStyle(
+                                fontSize: VFontSize.bodyMd,
+                                color: isDark
+                                    ? VColors.onSurfaceDark
+                                    : VColors.onSurface,
+                              ),
+                            ),
+                          ),
+                          VSwitch(
+                            value: compact,
+                            onChanged: (enabled) {
+                              ref
+                                  .read(chatDensityProvider.notifier)
+                                  .setDensity(
+                                    enabled
+                                        ? ChatMessageDensity.compact
+                                        : ChatMessageDensity.cozy,
+                                  );
+                            },
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               );
@@ -847,6 +919,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   VSectionTile(
                     icon: Icons.verified_user_outlined,
                     label: 'Staff review',
+                    detail: _verifierQueueCount > 0
+                        ? '$_verifierQueueCount in verifier queue'
+                        : 'Achievement & profession review',
                     onTap: () => context.push('/verifier/review'),
                   ),
                 VSectionTile(
@@ -1066,7 +1141,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.info_outline,
                   label: 'Privacy, terms & licenses',
                   detail: 'Open the More tab',
-                  onTap: () => context.go('/more'),
+                  onTap: () => context.go('/identity'),
                 ),
               ],
             ),
@@ -1255,6 +1330,58 @@ class _ResetDataConfirmationDialogState
                         : null,
                   ),
                 ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Saturation / contrast accessibility sliders (DCX-036).
+class _ThemeSliderRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+  final bool isDark;
+
+  const _ThemeSliderRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final variantColor = isDark
+        ? VColors.onSurfaceVariantDark
+        : VColors.onSurfaceVariant;
+    return Row(
+      children: [
+        Icon(icon, color: variantColor, size: VIconSize.md),
+        const SizedBox(width: VSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: VFontSize.bodyMd,
+                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                ),
+              ),
+              Slider(
+                value: value,
+                min: 0.5,
+                max: 1.5,
+                divisions: 20,
+                label: value.toStringAsFixed(2),
+                onChanged: onChanged,
+              ),
+            ],
+          ),
         ),
       ],
     );

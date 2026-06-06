@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vertiege/config/world_page_ia.dart';
 import 'package:vertiege/models/world.dart';
 
-World _dominion(DominionType type) => World(
+World _dominion(DominionType type, {int prestige = 1, int activityScore = 0}) =>
+    World(
       id: 'w1',
       slug: 'w1',
       name: 'Test',
@@ -11,20 +12,33 @@ World _dominion(DominionType type) => World(
       sovereignId: 's1',
       sovereignName: 'Admin',
       dominionType: type,
+      prestige: prestige,
+      activityScore: activityScore,
     );
 
 void main() {
   group('WorldPageIa', () {
-    test('marketplace world includes shop tab', () {
+    test('marketplace world is channels-first with optional feed', () {
       final tabs = WorldPageIa.tabsFor(_dominion(DominionType.marketplace));
-      expect(tabs, contains(WorldDetailTabId.shop));
-      expect(tabs.length, 5);
+      expect(tabs.first, WorldDetailTabId.channels);
+      expect(tabs, isNot(contains(WorldDetailTabId.shop)));
+      expect(tabs, contains(WorldDetailTabId.feed));
+      expect(tabs.length, 4);
     });
 
-    test('sanctuary world has no shop tab', () {
+    test('sanctuary world has no shop or feed tab by default', () {
       final tabs = WorldPageIa.tabsFor(_dominion(DominionType.sanctuary));
       expect(tabs, isNot(contains(WorldDetailTabId.shop)));
-      expect(tabs.length, 4);
+      expect(tabs, isNot(contains(WorldDetailTabId.feed)));
+      expect(tabs.first, WorldDetailTabId.channels);
+      expect(tabs.length, 3);
+    });
+
+    test('feed tab appears when world has activity', () {
+      final tabs = WorldPageIa.tabsFor(
+        _dominion(DominionType.sanctuary, activityScore: 5),
+      );
+      expect(tabs, contains(WorldDetailTabId.feed));
     });
 
     test('default tab visitor vs member', () {
@@ -35,7 +49,7 @@ void main() {
       );
       expect(
         WorldPageIa.defaultTabIndex(world: world, isJoined: true),
-        WorldPageIa.feedIndex(world),
+        WorldPageIa.indexOf(world, WorldDetailTabId.channels),
       );
       expect(
         WorldPageIa.defaultTabIndex(
@@ -43,12 +57,12 @@ void main() {
           isJoined: true,
           memberOpensOnFeed: false,
         ),
-        WorldPageIa.homeIndex(world),
+        WorldPageIa.indexOf(world, WorldDetailTabId.channels),
       );
     });
 
-    test('post highlight opens feed', () {
-      final world = _dominion(DominionType.sanctuary);
+    test('post highlight opens feed when available', () {
+      final world = _dominion(DominionType.marketplace);
       expect(
         WorldPageIa.defaultTabIndex(
           world: world,

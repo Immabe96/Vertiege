@@ -330,6 +330,47 @@ class AchievementNotifier extends Notifier<AchievementState> {
 
   int calculateTotalXp() => _calculateTotalXp(state.userAchievements);
 
+  /// After staff approves on the server, pull cloud state and surface unlock UI.
+  Future<void> reloadAndCelebrateRemoteVerifications() async {
+    final beforeVerified = state.userAchievements
+        .where((a) => a.status == AchievementStatus.verified)
+        .map((a) => a.achievementId)
+        .toSet();
+    final oldTier =
+        ref.read(residentProvider).resident?.tier ??
+        config.getTierForXp(state.totalXp);
+
+    await loadAchievements();
+    await ref.read(residentProvider.notifier).refreshGamificationFromServer();
+
+    final afterVerified = state.userAchievements
+        .where((a) => a.status == AchievementStatus.verified)
+        .map((a) => a.achievementId)
+        .toSet();
+    final newlyVerified = afterVerified.difference(beforeVerified).toList();
+    if (newlyVerified.isEmpty) return;
+
+    final refreshed = ref.read(residentProvider).resident;
+    final newTier = refreshed?.tier ?? config.getTierForXp(state.totalXp);
+    final tierChanged = newTier.value > oldTier.value;
+
+    final newIds = [
+      ...state.recentlyUnlockedIds,
+      ...newlyVerified.where((id) => !state.recentlyUnlockedIds.contains(id)),
+    ];
+
+    state = state.copyWith(
+      recentlyUnlockedIds: newIds,
+      celebrationTier: tierChanged ? newTier : state.celebrationTier,
+    );
+
+    onAchievementsVerified?.call(
+      newlyVerified,
+      tierChanged ? newTier : null,
+    );
+    Haptics.success();
+  }
+
   Future<void> loadAchievements() async {
     state = state.copyWith(isLoading: true, clearError: true);
     var achievements = <UserAchievement>[];

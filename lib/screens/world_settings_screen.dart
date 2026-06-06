@@ -25,6 +25,7 @@ import '../widgets/core/screen_loading.dart';
 import '../services/rank_service.dart';
 import '../models/rank.dart';
 import '../widgets/worlds/banner_generator.dart';
+import '../widgets/worlds/world_admin_breadcrumb.dart';
 import '../widgets/worlds/world_settings_channels.dart';
 import '../widgets/worlds/world_settings_invites.dart';
 import '../widgets/core/v_feedback.dart';
@@ -392,7 +393,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(VSpacing.md),
         child: Container(
           constraints: const BoxConstraints(maxHeight: 600),
@@ -532,7 +532,11 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final resident = ref.watch(residentProvider).resident;
 
     return VHubPage(
-      title: 'World Settings',
+      title: 'World settings',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Settings',
+      ),
       showBack: true,
       body: world == null
           ? const ScreenLoading.list()

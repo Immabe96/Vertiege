@@ -1,6 +1,6 @@
 # Vertiege — consolidated legacy plans
 
-**Status:** Archived — read for history only. Superseded for active work by [shadcn migration plan](../product/planning/shadcn-migration-plan.md) and [waves 13–22](../product/planning/waves-13-22-master-plan.md).
+**Status:** Archived — read for history only. Superseded for active work by [PLAN.md](../../PLAN.md).
 
 **Consolidated:** 2026-06-05 — 11 source documents.
 
@@ -4342,7 +4342,7 @@ After all phases complete:
 
 # Moved
 
-This document lives at **[../product/planning/perfection-backlog.md](../product/planning/perfection-backlog.md)**.
+This document lives at **[planning/perfection-backlog.md](planning/perfection-backlog.md)** (archived).
 
 ---
 

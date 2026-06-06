@@ -10,6 +10,7 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/progression_help_button.dart';
 import '../../config/progression_glossary.dart';
+import '../../widgets/worlds/world_admin_breadcrumb.dart';
 
 class WorldPollsScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -183,6 +184,10 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
   Widget build(BuildContext context) {
     return VHubPage(
       title: 'Polls',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Polls',
+      ),
       showBack: true,
       headerActions: [
         const ProgressionHelpButton(

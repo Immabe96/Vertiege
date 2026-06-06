@@ -6,6 +6,7 @@ import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../achievements/achievement_icon.dart';
+import '../../ui/overlays/v_sheet.dart';
 
 /// Grid of verified achievements for Identity trophy case and profile hubs.
 class AchievementTrophyWall extends StatelessWidget {
@@ -71,8 +72,8 @@ class AchievementTrophyWall extends StatelessWidget {
         const SizedBox(height: VSpacing.sm),
         LayoutBuilder(
           builder: (context, constraints) {
-            const columns = 3;
-            const spacing = VSpacing.sm;
+            const columns = 4;
+            const spacing = VSpacing.xs;
             final cellWidth =
                 (constraints.maxWidth - spacing * (columns - 1)) / columns;
 
@@ -115,7 +116,17 @@ class _TrophyCell extends StatelessWidget {
 
     return SizedBox(
       width: width,
-      child: Column(
+      child: InkWell(
+        onTap: () => showVSheet(
+          context,
+          _TrophyDetailSheet(
+            achievement: achievement,
+            userAchievement: userAchievement,
+          ),
+          maxSize: 0.55,
+        ),
+        borderRadius: BorderRadius.circular(VRadius.md),
+        child: Column(
         children: [
           Stack(
             clipBehavior: Clip.none,
@@ -123,7 +134,7 @@ class _TrophyCell extends StatelessWidget {
               AchievementBadgeAvatar(
                 achievement: achievement,
                 accentColor: VColors.tertiary,
-                size: VBadgeSize.avatar,
+                size: VBadgeSize.avatarCompact,
                 showEarnedBadge: true,
               ),
               if (hidden)
@@ -148,32 +159,89 @@ class _TrophyCell extends StatelessWidget {
           const SizedBox(height: VSpacing.xs),
           Text(
             achievement.title,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: VFontWeight.semiBold,
-              fontSize: VFontSize.labelSm,
+              fontSize: 10,
             ),
           ),
           Text(
-            '+${achievement.xpValue} XP',
+            '+${achievement.xpValue}',
             style: theme.textTheme.labelSmall?.copyWith(
               color: VColors.warning,
-              fontSize: VFontSize.labelSm,
+              fontSize: 10,
             ),
           ),
-          if (achievement.category == AchievementCategory.inApp)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                'Auto',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: VColors.primary,
-                  fontSize: 10,
-                ),
+        ],
+      ),
+      ),
+    );
+  }
+}
+
+class _TrophyDetailSheet extends StatelessWidget {
+  final Achievement achievement;
+  final UserAchievement userAchievement;
+
+  const _TrophyDetailSheet({
+    required this.achievement,
+    required this.userAchievement,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.lg,
+        VSpacing.sm,
+        VSpacing.lg,
+        VSpacing.xl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AchievementBadgeAvatar(
+            achievement: achievement,
+            accentColor: VColors.tertiary,
+            size: VBadgeSize.avatarSheet,
+            showEarnedBadge: true,
+          ),
+          const SizedBox(height: VSpacing.md),
+          Text(
+            achievement.title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: VFontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Text(
+            achievement.description,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: VSpacing.md),
+          Text(
+            '+${achievement.xpValue} XP · Verified',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: VColors.warning,
+              fontWeight: VFontWeight.bold,
+            ),
+          ),
+          if (!userAchievement.isProfileVisible) ...[
+            const SizedBox(height: VSpacing.sm),
+            Text(
+              'Hidden on your public profile',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.outline,
               ),
             ),
+          ],
         ],
       ),
     );

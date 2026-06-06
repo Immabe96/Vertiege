@@ -35,6 +35,29 @@ class VPageTransitions {
       },
     );
   }
+
+  /// Horizontal panel slide for chat navigation (DCX-120).
+  static CustomTransitionPage<void> panelSlide({
+    required GoRouterState state,
+    required Widget child,
+  }) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: _duration,
+      reverseTransitionDuration: _reverseDuration,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween<Offset>(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutCubic));
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
 }
 
 /// [GoRoute] with consistent transitions for full-screen pushes.
@@ -43,6 +66,7 @@ GoRoute vGoRoute({
   required Widget Function(BuildContext context, GoRouterState state) builder,
   List<RouteBase> routes = const [],
   bool slideUp = false,
+  bool panelSlide = false,
   String? name,
   GoRouterRedirect? redirect,
 }) {
@@ -51,10 +75,15 @@ GoRoute vGoRoute({
     name: name,
     redirect: redirect,
     routes: routes,
-    pageBuilder: (context, state) => VPageTransitions.fadeSlide(
-      state: state,
-      slideUp: slideUp,
-      child: builder(context, state),
-    ),
+    pageBuilder: (context, state) => panelSlide
+        ? VPageTransitions.panelSlide(
+            state: state,
+            child: builder(context, state),
+          )
+        : VPageTransitions.fadeSlide(
+            state: state,
+            slideUp: slideUp,
+            child: builder(context, state),
+          ),
   );
 }

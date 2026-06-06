@@ -5,6 +5,8 @@ import '../models/notification.dart';
 import '../services/storage_service.dart';
 import '../services/notification_service.dart';
 import '../services/push_service.dart';
+import '../services/achievement_realtime_service.dart';
+import '../services/resident_realtime_service.dart';
 import '../services/quiet_hours_service.dart';
 import '../services/re_engagement_push_copy.dart';
 import '../utils/id_generator.dart';
@@ -47,6 +49,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
     ref.onDispose(() {
       _realtimeSubscription?.cancel();
       unawaited(PushService.dispose());
+      unawaited(AchievementRealtimeService.dispose());
+      unawaited(ResidentRealtimeService.dispose());
     });
     return const NotificationState();
   }
@@ -300,6 +304,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
     _realtimeSubscription = null;
     _realtimeResidentId = null;
     _unreadCount = 0;
+    unawaited(AchievementRealtimeService.dispose());
+    unawaited(ResidentRealtimeService.dispose());
     state = const NotificationState(isLoading: false);
   }
 

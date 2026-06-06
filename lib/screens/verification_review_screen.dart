@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
 import '../config/achievement_reject_reasons.dart';
 import '../config/achievements.dart';
+import '../config/identity_verification.dart';
 import '../services/gamification_service.dart';
 import '../services/verification_service.dart';
 import '../services/achievement_review_service.dart';
@@ -72,7 +73,11 @@ class _VerificationReviewScreenState
   }
 
   Future<void> _approve(VerificationSubmission s) async {
-    await VerificationService.approve(s.id, s.residentId, s.profession);
+    await VerificationService.approve(s.id);
+    if (IdentityVerification.isIdentityProfession(s.profession)) {
+      _load();
+      return;
+    }
     final achievementId = achievementIdForVerifiedProfession(s.profession);
     if (achievementId != null) {
       try {
@@ -226,7 +231,11 @@ class _VerificationReviewScreenState
                                 ),
                               ),
                               Text(
-                                s.profession,
+                                IdentityVerification.isIdentityProfession(
+                                      s.profession,
+                                    )
+                                    ? 'Identity: ${IdentityVerification.labelForProfession(s.profession)}'
+                                    : 'Profession: ${s.profession}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: VColors.primary,
                                 ),

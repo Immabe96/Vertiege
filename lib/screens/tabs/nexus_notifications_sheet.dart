@@ -30,108 +30,94 @@ class _NexusNotificationsSheetState
     final isDark = theme.brightness == Brightness.dark;
     final hasUnread = notifications.any((n) => !n.read);
 
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.65,
-      minChildSize: 0.3,
-      maxChildSize: 0.9,
-      builder: (_, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: isDark ? VColors.surfaceDark : VColors.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(VRadius.xl),
+    final sheetHeight = MediaQuery.sizeOf(context).height * 0.65;
+
+    return SizedBox(
+      height: sheetHeight,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.sm,
+              VSpacing.md,
+              VSpacing.md,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color:
+                        (isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant)
+                            .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(VRadius.pill),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'Notifications',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                  ),
+                ),
+                const Spacer(),
+                if (hasUnread)
+                  VButton(
+                    label: 'Mark all read',
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      ref.read(notificationProvider.notifier).markAllRead();
+                    },
+                    variant: ButtonVariant.text,
+                  ),
+                IconButton(
+                  icon: const Icon(VIcons.x),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  VSpacing.md,
-                  VSpacing.sm,
-                  VSpacing.md,
-                  VSpacing.md,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color:
-                            (isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant)
-                                .withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(VRadius.pill),
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      'Notifications',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: VFontWeight.semiBold,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (hasUnread)
-                      VButton(
-                        label: 'Mark all read',
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          ref.read(notificationProvider.notifier).markAllRead();
-                        },
-                        variant: ButtonVariant.text,
-                      ),
-                    IconButton(
-                      icon: const Icon(VIcons.x),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: notifications.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.notifications_outlined,
-                              size: 48,
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: VSpacing.md),
-                            Text(
-                              'All caught up!',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: VFontWeight.semiBold,
-                              ),
-                            ),
-                            const SizedBox(height: VSpacing.xs),
-                            Text(
-                              'No notifications yet',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+          const Divider(height: 1),
+          Expanded(
+            child: notifications.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.notifications_outlined,
+                          size: 48,
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
                         ),
-                      )
-                    : NotificationList(
-                        notifications: notifications,
-                        scrollController: scrollController,
-                      ),
-              ),
-            ],
+                        const SizedBox(height: VSpacing.md),
+                        Text(
+                          'All caught up!',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: VFontWeight.semiBold,
+                          ),
+                        ),
+                        const SizedBox(height: VSpacing.xs),
+                        Text(
+                          'No notifications yet',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDark
+                                ? VColors.onSurfaceVariantDark
+                                : VColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : NotificationList(notifications: notifications),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -266,6 +252,8 @@ class NotificationList extends ConsumerWidget {
       NotificationType.dmMessage => VColors.primary,
       NotificationType.allegianceRequest => VColors.tertiary,
       NotificationType.achievementApproved => VColors.success,
+      NotificationType.identityVerified => VColors.brand,
+      NotificationType.identityRejected => VColors.error,
       NotificationType.achievementRejected => VColors.error,
       NotificationType.jobApplicationAccepted => VColors.success,
       NotificationType.jobApplicationRejected => VColors.error,
@@ -289,6 +277,8 @@ class NotificationList extends ConsumerWidget {
       NotificationType.dmMessage => Icons.chat_outlined,
       NotificationType.allegianceRequest => Icons.handshake,
       NotificationType.achievementApproved => Icons.verified,
+      NotificationType.identityVerified => Icons.badge_outlined,
+      NotificationType.identityRejected => Icons.badge_outlined,
       NotificationType.achievementRejected => Icons.cancel_outlined,
       NotificationType.jobApplicationAccepted => Icons.work_outline,
       NotificationType.jobApplicationRejected => Icons.work_off_outlined,

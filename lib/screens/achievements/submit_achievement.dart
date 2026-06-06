@@ -12,6 +12,7 @@ import '../../theme/v_tokens.dart';
 import '../../widgets/achievements/achievement_category_meta.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/achievements/proof_requirements_banner.dart';
+import '../../widgets/achievements/ai_proof_preview_panel.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_feedback.dart';
 
@@ -358,6 +359,12 @@ class _SubmitAchievementScreenState
             ),
             const SizedBox(height: VSpacing.md),
             ProofRequirementsBanner(achievement: selectedAchievement),
+            const SizedBox(height: VSpacing.md),
+            AiProofPreviewPanel(
+              achievement: selectedAchievement,
+              proofImageCount: _proofImagePaths.length,
+              storyText: _storyController.text,
+            ),
             const SizedBox(height: VSpacing.md),
             if (_proofImagePaths.isNotEmpty)
               SizedBox(

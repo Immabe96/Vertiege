@@ -7,6 +7,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/worlds/world_admin_breadcrumb.dart';
 
 class WorldChallengesScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -213,6 +214,10 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
   Widget build(BuildContext context) {
     return VHubPage(
       title: 'Challenges',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: widget.worldId,
+        sectionTitle: 'Challenges',
+      ),
       showBack: true,
       headerActions: widget.isSovereignOrCouncil
           ? [

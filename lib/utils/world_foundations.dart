@@ -125,14 +125,47 @@ ${foundation.entryPrompt}
 ''';
 }
 
+String _constitutionSummary(World world) {
+  final c = world.constitution;
+  final admission = switch (c.admission) {
+    'invite' => 'Invite-only',
+    'application' => 'Application required',
+    'paid' => 'Paid entry',
+    _ => 'Open admission',
+  };
+  final tierLine = c.minTier != null
+      ? 'Minimum tier: ${tierNames[c.minTier] ?? 'Tier ${c.minTier}'}'
+      : null;
+  final professionLine = c.requiredProfession != null
+      ? 'Required profession: ${c.requiredProfession}'
+      : null;
+  final posting = c.posting == 'council-only'
+      ? 'Council-only posting'
+      : 'All residents may post';
+  final commenting = c.commenting == 'council-only'
+      ? 'Council-only comments'
+      : 'All residents may comment';
+
+  return '''
+### 0. World constitution
+$admission${tierLine != null ? ' · $tierLine' : ''}${professionLine != null ? ' · $professionLine' : ''}  
+$posting · $commenting  
+Allowed content: ${c.contentTypes.join(', ')}${c.entryFee > 0 ? ' · Entry fee: ${c.entryFee} coins' : ''}
+
+This charter is pinned in #rules and enforced through governance.
+''';
+}
+
 String _rulesMarkdown(World world, WorldFoundation foundation) {
   final disclaimer = foundation.safetyDisclaimer;
   final disclaimerBlock = disclaimer != null
       ? '\n### 7. Safety Disclaimer\n$disclaimer\n'
       : '';
+  final constitutionBlock = _constitutionSummary(world);
   return '''
 ## ${world.name} Rules
 
+$constitutionBlock
 ### 1. Bring Signal
 Post with context, evidence, examples, or a clear ask. Low-effort flexing, spam, and vague bait lower the quality of the world.
 

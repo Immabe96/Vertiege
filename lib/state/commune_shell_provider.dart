@@ -25,8 +25,15 @@ final hideBottomNavProvider = Provider<bool>((ref) {
 
 @visibleForTesting
 bool communeImmersivePath(String path) {
+  // Primary tab roots always keep the bottom bar visible.
+  if (path == '/' ||
+      path == '/chat' ||
+      path == '/identity' ||
+      path == '/explore') {
+    return false;
+  }
+
   if (path.startsWith('/campfire/')) return true;
-  if (path.startsWith('/dm/')) return true;
 
   final chatRoom = RegExp(r'^/chat/[^/]+$');
   if (chatRoom.hasMatch(path)) return true;

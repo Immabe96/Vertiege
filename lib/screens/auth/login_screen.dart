@@ -14,6 +14,7 @@ import '../../state/resident_provider.dart';
 import '../../services/supabase_bootstrap.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/v_colors.dart';
+import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../widgets/auth/auth_social_buttons.dart';
@@ -375,7 +376,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      backgroundColor: isDark
+          ? VCommuneColors.surfaceTertiary
+          : VCommuneColors.surfaceSecondaryLight,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

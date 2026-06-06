@@ -6,9 +6,24 @@
 
 ---
 
+## Tab mapping (product IA)
+
+| Tab | Role |
+|-----|------|
+| **Identity** | **Government ID** (passport / national ID) → verified **tick**. Honour wall, tier/XP. Achievement proof is a separate button — not the same as identity. |
+| **Nexus** | Share verified **achievement** moments (LinkedIn-style standing feed) |
+| **Chat** | Celebrate wins in worlds; achievement attachments in channels |
+
+## Two proof types (do not conflate)
+
+| Type | What | Where | Outcome |
+|------|------|-------|---------|
+| **Identity verification** | Passport or national ID card | Identity tab | Verified resident **tick** |
+| **Achievement proof** | Evidence for a catalog achievement | Achievements hub | XP, honour wall entry, tier progress |
+
 ## Two pillars
 
-### 1. Real-life standing (proof achievements)
+### 1. Real-life standing (achievement proof)
 
 Residents earn credibility from **real life**, not only app usage.
 

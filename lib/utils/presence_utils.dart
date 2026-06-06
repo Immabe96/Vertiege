@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+
+import '../theme/v_commune_colors.dart';
 import '../widgets/core/status_dot.dart';
 
 /// Normalize [profiles.last_seen_at] (bigint seconds or ms) to epoch ms.
@@ -32,3 +35,11 @@ Presence presenceFromLastSeenMs(int? lastSeenMs, {DateTime? now}) {
 Presence presenceFromProfileField(dynamic lastSeenRaw, {DateTime? now}) {
   return presenceFromLastSeenMs(parseLastSeenMs(lastSeenRaw), now: now);
 }
+
+/// Unified status dot colors from [VCommuneColors] (DCX-033).
+Color presenceColor(Presence presence) => switch (presence) {
+  Presence.online => VCommuneColors.statusOnline,
+  Presence.idle => VCommuneColors.statusIdle,
+  Presence.dnd => VCommuneColors.statusDnd,
+  Presence.offline => VCommuneColors.statusOffline,
+};

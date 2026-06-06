@@ -36,4 +36,4 @@ Vertiege quality work should **not** add visible chrome by default. Use these ru
 - Campfire: `CampfireMiniBar` (connecting / connected / mute / leave) — no extra screens
 - Season: collapsed “How this season works”; low-pressure note only when opted in
 
-See also: [wave-status.md](../product/planning/wave-status.md), [perfection-backlog.md](../product/planning/perfection-backlog.md).
+See also: [PLAN.md](../../PLAN.md) (active plan), [archived wave status](../archive/planning/wave-status.md).

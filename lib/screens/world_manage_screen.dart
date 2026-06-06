@@ -13,6 +13,7 @@ import '../state/world_provider.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/quiet_gate_tile.dart';
+import '../widgets/worlds/world_admin_breadcrumb.dart';
 import '../services/permission_service.dart';
 
 /// Manage / Participate hub (Wave 10) with visible gate reasons.
@@ -116,6 +117,10 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
 
     return VHubPage(
       title: 'Manage & participate',
+      titleWidget: WorldAdminBreadcrumb(
+        worldId: worldId,
+        sectionTitle: 'Manage',
+      ),
       showBack: true,
       body: ListView(
         controller: _scrollController,
@@ -287,11 +292,9 @@ void _openLoungeCampfirePicker(
   required String? loungeGate,
   required String? campfireGate,
 }) {
-  showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    builder: (ctx) => SafeArea(
-      child: Column(
+  showVSheet(
+    context,
+    Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (lounge != null)
@@ -304,7 +307,7 @@ void _openLoungeCampfirePicker(
               enabled: loungeGate == null,
               onTap: loungeGate == null
                   ? () {
-                      Navigator.pop(ctx);
+                      Navigator.pop(context);
                       context.push(
                         worldChannelDestinationPath(
                           worldId,
@@ -323,7 +326,7 @@ void _openLoungeCampfirePicker(
               enabled: campfireGate == null,
               onTap: campfireGate == null
                   ? () {
-                      Navigator.pop(ctx);
+                      Navigator.pop(context);
                       context.push(
                         worldChannelDestinationPath(
                           worldId,
@@ -337,6 +340,6 @@ void _openLoungeCampfirePicker(
           const SizedBox(height: VSpacing.md),
         ],
       ),
-    ),
+    maxSize: 0.45,
   );
 }

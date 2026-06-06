@@ -8,6 +8,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 import 'badge_reaction_picker.dart';
+import 'cross_post_achievement_sheet.dart';
 
 /// Primary post actions: like, vote, comment, repost, share, badge react.
 class PostActionBar extends ConsumerWidget {
@@ -119,6 +120,20 @@ class PostActionBar extends ConsumerWidget {
                       context,
                       reactionKey: (key) => _toggle(ref, key),
                     )
+                : null,
+          ),
+          _CompactAction(
+            icon: Icons.send_outlined,
+            tooltip: 'Share to world channel',
+            onTap: canInteract
+                ? () {
+                    Haptics.light();
+                    showCrossPostAchievementSheet(
+                      context,
+                      post: post,
+                      activeReactions: activeReactions,
+                    );
+                  }
                 : null,
           ),
         ],

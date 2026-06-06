@@ -1,6 +1,6 @@
 # Vertiege — consolidated legacy audits
 
-**Status:** Archived — read for history only. Superseded for active work by [shadcn migration plan](../product/planning/shadcn-migration-plan.md) and [waves 13–22](../product/planning/waves-13-22-master-plan.md).
+**Status:** Archived — read for history only. Superseded for active work by [PLAN.md](../../PLAN.md).
 
 **Consolidated:** 2026-06-05 — 22 source documents.
 
