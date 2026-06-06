@@ -185,12 +185,12 @@ class _CompactAction extends StatelessWidget {
               Icon(icon, size: VIconSize.md, color: iconColor),
               if (badge != null)
                 Positioned(
-                  right: 2,
-                  top: 4,
+                  right: VSpacing.xxs,
+                  top: VSpacing.xs,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 1,
+                      horizontal: VSpacing.xs,
+                      vertical: VSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,

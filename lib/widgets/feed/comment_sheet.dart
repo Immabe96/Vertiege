@@ -460,7 +460,7 @@ class _CommentTileState extends State<_CommentTile> {
     final isDark = theme.brightness == Brightness.dark;
     const maxDepth = 5;
     final effectiveDepth = widget.depth > maxDepth ? maxDepth : widget.depth;
-    final indent = effectiveDepth * 12.0;
+    final indent = effectiveDepth * VSpacing.md;
     final isDeeplyNested = widget.depth > 2;
 
     return Padding(
@@ -472,12 +472,12 @@ class _CommentTileState extends State<_CommentTile> {
             Container(
               width: 2,
               height: 20,
-              margin: const EdgeInsets.only(left: 4, bottom: 4),
+              margin: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
               color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
             ),
           if (isDeeplyNested)
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 4),
+              padding: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
               child: GestureDetector(
                 onTap: () {
                   final parent = _findParent(widget.comment.parentId);
@@ -495,11 +495,11 @@ class _CommentTileState extends State<_CommentTile> {
                 ),
               ),
             ),
-          if (_collapsed)
-            GestureDetector(
-              onTap: () => setState(() => _collapsed = false),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
+            if (_collapsed)
+              GestureDetector(
+                onTap: () => setState(() => _collapsed = false),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
                 child: Text(
                   'Show reply',
                   style: TextStyle(
@@ -536,14 +536,14 @@ class _CommentTileState extends State<_CommentTile> {
                                   color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: VSpacing.xs),
                               TierBadge(tier: widget.comment.tierAtPosting, size: 14),
                               if (widget.isOp)
                                 Container(
-                                  margin: const EdgeInsets.only(left: 4),
+                                  margin: const EdgeInsets.only(left: VSpacing.xs),
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                    vertical: 1,
+                                    horizontal: VSpacing.xs,
+                                    vertical: VSpacing.xxs,
                                   ),
                                   decoration: BoxDecoration(
                                     color: VColors.primary.withValues(alpha: 0.15),
@@ -568,7 +568,7 @@ class _CommentTileState extends State<_CommentTile> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: VSpacing.xxs),
                           Text(
                             widget.comment.content,
                             style: TextStyle(

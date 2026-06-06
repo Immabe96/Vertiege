@@ -123,7 +123,12 @@ class PostItem extends ConsumerWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
+            padding: const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.md,
+              VSpacing.sm,
+              VSpacing.sm,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -146,7 +151,7 @@ class PostItem extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: VSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,19 +168,19 @@ class PostItem extends ConsumerWidget {
                                   tier: post.tierAtPosting.value,
                                   fontSize: VFontSize.bodyMd,
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: VSpacing.xs),
                                 TierBadge(tier: post.tierAtPosting.value),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 1),
+                          const SizedBox(height: VSpacing.xxs),
                           Row(
                             children: [
                               TierIcon(
                                 tier: post.tierAtPosting.value,
                                 size: 12,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: VSpacing.xs),
                               Text(
                                 formatTimestamp(post.timestamp) +
                                     (post.isEdited ? ' (edited)' : ''),
@@ -239,7 +244,7 @@ class PostItem extends ConsumerWidget {
                   ],
                 ),
                 if (post.isPinned || post.isAnnouncement || post.isDecree) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: VSpacing.sm),
                   if (post.isDecree) _DecreeLabel(),
                   if (post.isPinned && !post.isDecree)
                     Row(
@@ -249,7 +254,7 @@ class PostItem extends ConsumerWidget {
                           size: 14,
                           color: theme.colorScheme.tertiary,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: VSpacing.xs),
                         Text(
                           'Pinned',
                           style: theme.textTheme.labelSmall?.copyWith(
@@ -267,7 +272,7 @@ class PostItem extends ConsumerWidget {
                           size: 14,
                           color: theme.colorScheme.primary,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: VSpacing.xs),
                         Text(
                           'Announcement',
                           style: theme.textTheme.labelSmall?.copyWith(
@@ -280,8 +285,12 @@ class PostItem extends ConsumerWidget {
                 ],
                 Padding(
                   padding: EdgeInsets.only(
-                    top: post.isPinned || post.isAnnouncement ? 6 : 8,
-                    bottom: post.imageUri != null || post.poll != null ? 8 : 0,
+                    top: post.isPinned || post.isAnnouncement
+                        ? VSpacing.xs
+                        : VSpacing.sm,
+                    bottom: post.imageUri != null || post.poll != null
+                        ? VSpacing.sm
+                        : 0,
                   ),
                   child: _RichPostContent(
                     content: post.content,
@@ -297,14 +306,14 @@ class PostItem extends ConsumerWidget {
                 ),
                 // ── Poll display ──
                 if (post.poll != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: VSpacing.sm),
                   _PollDisplay(post: post),
                 ],
                 if (post.allImageUris.isNotEmpty) ...[
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.only(bottom: VSpacing.md),
                     child: Transform.translate(
-                      offset: const Offset(-14, 0),
+                      offset: const Offset(-VSpacing.md, 0),
                       child: SizedBox(
                         width: MediaQuery.sizeOf(context).width,
                         child: post.allImageUris.length == 1
@@ -322,16 +331,16 @@ class PostItem extends ConsumerWidget {
                 ],
                 if (post.awards.isNotEmpty) ...[
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: VSpacing.sm),
                     child: Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
+                      spacing: VSpacing.xs,
+                      runSpacing: VSpacing.xs,
                       children: post.awards.map((awardKey) {
                         final awardTypeId = awardKey.split(':').first;
                         final meta = AwardType.all[awardTypeId];
                         if (meta == null) return const SizedBox.shrink();
                         return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs, vertical: VSpacing.xxs),
                           decoration: BoxDecoration(
                             color: VColors.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(VRadius.pill),
@@ -341,7 +350,7 @@ class PostItem extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(meta.icon, style: const TextStyle(fontSize: VFontSize.labelMd)),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: VSpacing.xxs),
                               Text(meta.label, style: const TextStyle(fontSize: VFontSize.labelSm, color: VColors.onSurfaceVariant)),
                             ],
                           ),
