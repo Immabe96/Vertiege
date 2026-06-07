@@ -22,7 +22,7 @@ class ThemeState {
   const ThemeState({
     this.scheme = ThemeScheme.system,
     this.textSize = TextSize.medium,
-    this.darkPreset = DarkPreset.commune,
+    this.darkPreset = DarkPreset.prestige,
     this.saturation = 1.0,
     this.contrast = 1.0,
     this.highContrast = false,

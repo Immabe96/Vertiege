@@ -15,7 +15,7 @@ class VThemeSchemePicker extends StatelessWidget {
   const VThemeSchemePicker({
     super.key,
     required this.scheme,
-    this.darkPreset = DarkPreset.commune,
+    this.darkPreset = DarkPreset.prestige,
     required this.onSchemeChanged,
     this.onDarkPresetChanged,
   });
