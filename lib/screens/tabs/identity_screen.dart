@@ -727,7 +727,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: VColors.primary.withValues(alpha: 0.2),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                           blurRadius: 24,
                           spreadRadius: 4,
                         ),
@@ -779,14 +779,14 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: VColors.primary.withValues(
+                                      color: Theme.of(context).colorScheme.primary.withValues(
                                         alpha: 0.15,
                                       ),
                                       borderRadius: BorderRadius.circular(
                                         VRadius.pill,
                                       ),
                                       border: Border.all(
-                                        color: VColors.primary.withValues(
+                                        color: Theme.of(context).colorScheme.primary.withValues(
                                           alpha: 0.3,
                                         ),
                                       ),
@@ -800,7 +800,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                                           resident.tier.label,
                                           style: theme.textTheme.labelSmall
                                               ?.copyWith(
-                                                color: VColors.primary,
+                                                color: Theme.of(context).colorScheme.primary,
                                                 fontWeight: VFontWeight.bold,
                                               ),
                                         ),
@@ -808,7 +808,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                                         Icon(
                                           Icons.chevron_right,
                                           size: 14,
-                                          color: VColors.primary.withValues(
+                                          color: Theme.of(context).colorScheme.primary.withValues(
                                             alpha: 0.8,
                                           ),
                                         ),
@@ -875,9 +875,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       resident.bio,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -895,11 +893,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         color: Colors.transparent,
                         borderRadius: BorderRadius.circular(VRadius.pill),
                         border: Border.all(
-                          color: isDark
-                              ? VColors.outlineVariantDark.withValues(
-                                  alpha: 0.4,
-                                )
-                              : VColors.outlineVariant.withValues(alpha: 0.5),
+                          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -908,17 +902,13 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           ProfessionIcon(
                             profession: resident.profession,
                             size: VBadgeSize.professionInline,
-                            fallbackColor: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            fallbackColor: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: VSpacing.xxs),
                           Text(
                             resident.profession!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -987,7 +977,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       icon: Icons.public,
                       value: '${resident.joinedWorldIds.length}',
                       label: 'Worlds',
-                      accent: VColors.primary,
+                      accent: Theme.of(context).colorScheme.primary,
                       onTap: () => context.push('/explore'),
                     ),
                   ),
@@ -1030,18 +1020,14 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         Icon(
                           Icons.local_fire_department_outlined,
                           size: VIconSize.md,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: VSpacing.sm),
                         Expanded(
                           child: Text(
                             'No active streak—start from daily quests.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -1110,7 +1096,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: VFontWeight.bold,
                     letterSpacing: 0.5,
-                    color: VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -1139,9 +1125,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       _progressionExpanded
                           ? Icons.expand_less
                           : Icons.expand_more,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -1159,9 +1143,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       : VColors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(VRadius.lg),
                   border: Border.all(
-                    color: isDark
-                        ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                        : VColors.outlineVariant.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -1183,7 +1165,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     const SizedBox(height: VSpacing.sm),
                     SovereignProgressBar(
                       progress: tierProgress,
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       label: resident.tier.label,
                       trailing: nextThreshold != null ? nextTierName : 'Max',
                     ),
@@ -1191,9 +1173,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     Text(
                       ProgressionGlossary.xpToNextTier(currentXp, tierValue),
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     InkWell(
@@ -1219,9 +1199,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                               _tierPerksExpanded
                                   ? Icons.expand_less
                                   : Icons.expand_more,
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ],
                         ),
@@ -1338,9 +1316,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                               Text(
                                 world['name'] as String,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               Text(
@@ -1492,7 +1468,7 @@ class _SectionHeader extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: VFontWeight.bold,
                 letterSpacing: 0.5,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1540,7 +1516,7 @@ class _PerksCard extends ConsumerWidget {
               child: Text(
                 title,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -1562,7 +1538,7 @@ class _PerksCard extends ConsumerWidget {
       return Divider(
         height: 1,
         indent: VSpacing.lg + VSpacing.sm,
-        color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+        color: Theme.of(context).colorScheme.outlineVariant,
       );
     }
 
@@ -1612,9 +1588,7 @@ class _PerksCard extends ConsumerWidget {
             : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isDark
-              ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-              : VColors.outlineVariant.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.2),
         ),
       ),
       child: perksTiles,

@@ -103,9 +103,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
             Text(
               widget.worldName,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -141,9 +139,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                           Text(
                             'Joining Campfire...',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -163,9 +159,7 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                           Text(
                             'Waiting for others to join...',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -243,15 +237,15 @@ class _CampfireTextSplitBar extends ConsumerWidget {
           ),
           decoration: BoxDecoration(
             border: Border(
-              top: BorderSide(color: VColors.primary.withValues(alpha: 0.25)),
+              top: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25)),
             ),
           ),
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.forum_outlined,
                 size: VIconSize.sm,
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: VSpacing.sm),
               Expanded(
@@ -266,10 +260,10 @@ class _CampfireTextSplitBar extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.open_in_new,
                 size: 14,
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -331,9 +325,7 @@ class _ParticipantTileState extends State<_ParticipantTile>
         border: isSpeaking
             ? null
             : Border.all(
-                color: isDark
-                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                    : VColors.outlineVariant.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                 width: 1,
               ),
         boxShadow: isSpeaking
@@ -428,7 +420,7 @@ class _ParticipantContent extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -470,9 +462,7 @@ class _CampfireControls extends ConsumerWidget {
             'Mute stops your mic. Deafen mutes you and silences others.',
             textAlign: TextAlign.center,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -537,10 +527,8 @@ class _ControlButton extends StatelessWidget {
     final c =
         color ??
         (active
-            ? VColors.primary
-            : (theme.brightness == Brightness.dark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant));
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSurfaceVariant);
     return GestureDetector(
       onTap: onTap,
       child: Column(

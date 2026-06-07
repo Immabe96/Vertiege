@@ -21,9 +21,9 @@ class BrokenMediaTile extends StatelessWidget {
       width: double.infinity,
       constraints: const BoxConstraints(minHeight: 96),
       decoration: BoxDecoration(
-        color: VColors.surfaceBright,
+        color: Theme.of(context).colorScheme.surfaceBright,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(color: VColors.glassBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

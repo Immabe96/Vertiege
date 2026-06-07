@@ -44,7 +44,6 @@ class _SpotlightCardState extends State<SpotlightCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +57,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
               'Resident Spotlight',
               style: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: VFontWeight.bold,
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ],
@@ -73,17 +72,13 @@ class _SpotlightCardState extends State<SpotlightCard> {
           Container(
             padding: const EdgeInsets.all(VSpacing.sm),
             decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerHighDark
-                  : VColors.surfaceContainerHigh,
+              color: theme.colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(VRadius.md),
             ),
             child: Text(
               'No resident to spotlight today.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           )
@@ -125,9 +120,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
                           _spotlightResident!.name,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: VFontWeight.bold,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
+                            color: theme.colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -136,9 +129,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
                           Text(
                             _spotlightResident!.profession!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

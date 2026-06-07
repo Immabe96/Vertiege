@@ -382,9 +382,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     'Welcome back',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),

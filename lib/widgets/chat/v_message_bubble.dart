@@ -302,14 +302,14 @@ class _VMessageBubbleState extends State<VMessageBubble>
             : CrossAxisAlignment.start,
         children: [
           animated,
-          const Padding(
-            padding: EdgeInsets.only(top: VSpacing.xs),
+          Padding(
+            padding: const EdgeInsets.only(top: VSpacing.xs),
             child: Text(
               'Sending…',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
                 fontStyle: FontStyle.italic,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -754,12 +754,10 @@ class _VMessageBubbleState extends State<VMessageBubble>
 
   void _showEditDialog(BuildContext context) {
     final controller = TextEditingController(text: widget.message.content);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: const Text('Edit Message'),
         content: TextField(
           controller: controller,
@@ -767,9 +765,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             filled: true,
-            fillColor: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainer,
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
           ),
         ),
         actions: [
@@ -829,7 +825,7 @@ class _ReplyPreview extends StatelessWidget {
         borderRadius: BorderRadius.circular(VRadius.sm),
         border: Border(
           left: BorderSide(
-            color: isMe ? textColor.withValues(alpha: 0.4) : VColors.primary,
+            color: isMe ? textColor.withValues(alpha: 0.4) : Theme.of(context).colorScheme.primary,
             width: 2,
           ),
         ),
@@ -842,7 +838,7 @@ class _ReplyPreview extends StatelessWidget {
             style: TextStyle(
               fontSize: VFontSize.labelSm,
               fontWeight: VFontWeight.semiBold,
-              color: isMe ? textColor.withValues(alpha: 0.7) : VColors.primary,
+              color: isMe ? textColor.withValues(alpha: 0.7) : Theme.of(context).colorScheme.primary,
             ),
           ),
           Text(
@@ -895,17 +891,13 @@ class _ReactionBar extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: hasReacted
-                      ? VColors.primary.withValues(alpha: 0.15)
-                      : (isDark
-                            ? VColors.surfaceContainerDark
-                            : VColors.surfaceContainer),
+                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+                      : Theme.of(context).colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(VRadius.pill),
                   border: Border.all(
                     color: hasReacted
-                        ? VColors.primary.withValues(alpha: 0.3)
-                        : (isDark
-                              ? VColors.outlineVariantDark
-                              : VColors.outlineVariant),
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                        : Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
                 child: Row(
@@ -921,10 +913,8 @@ class _ReactionBar extends StatelessWidget {
                         '${entry.value.length}',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: hasReacted
-                              ? VColors.primary
-                              : (isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant),
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -941,20 +931,16 @@ class _ReactionBar extends StatelessWidget {
                 vertical: VSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainer,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(VRadius.pill),
                 border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark
-                      : VColors.outlineVariant,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.add,
                 size: 14,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

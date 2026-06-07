@@ -50,18 +50,18 @@ class EventCard extends ConsumerWidget {
                   children: [
                     Text(
                       post.eventTitle ?? 'Event',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: VFontSize.headlineMd,
                         fontWeight: VFontWeight.semiBold,
-                        color: VColors.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       dateStr,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: VFontSize.labelSm,
-                        color: VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -73,9 +73,9 @@ class EventCard extends ConsumerWidget {
             const SizedBox(height: VSpacing.sm),
             Text(
               post.content,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: VFontSize.bodyMd,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -87,9 +87,9 @@ class EventCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   '$rsvpCount attending',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: VFontSize.labelSm,
-                    color: VColors.outline,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
                 ),
               ),
@@ -108,7 +108,7 @@ class EventCard extends ConsumerWidget {
                 label: Text(hasRsvp ? 'GOING' : 'ATTEND'),
                 style: FilledButton.styleFrom(
                   backgroundColor: hasRsvp
-                      ? VColors.primary
+                      ? Theme.of(context).colorScheme.primary
                       : VColors.tertiary,
                   foregroundColor: hasRsvp
                       ? VColors.onPrimary

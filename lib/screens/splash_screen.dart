@@ -92,13 +92,13 @@ class _SplashScreenState extends State<SplashScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    (isDark ? VColors.surfaceDark : VColors.surface).withValues(
+                    Theme.of(context).colorScheme.surface.withValues(
                       alpha: 0.65,
                     ),
-                    (isDark ? VColors.surfaceDark : VColors.surface).withValues(
+                    Theme.of(context).colorScheme.surface.withValues(
                       alpha: 0.8,
                     ),
-                    isDark ? VColors.surfaceDark : VColors.surface,
+                    Theme.of(context).colorScheme.surface,
                   ],
                 ),
               ),
@@ -121,10 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:
-                        (isDark
-                                ? VColors.glassBackgroundDark
-                                : VColors.glassBackground)
+                    color: Theme.of(context).colorScheme.surface
                             .withValues(alpha: 0.72),
                     boxShadow: [
                       BoxShadow(
@@ -155,7 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
                   style: TextStyle(
                     fontSize: VFontSize.displayXl,
                     fontWeight: VFontWeight.bold,
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                     letterSpacing: 0,
                   ),
                 ),
@@ -198,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget _buildDecorativeShapes() {
     return Opacity(
       opacity: _shapesFade.value,
-      child: const Stack(
+      child: Stack(
         children: [
           // Top-right large shape — gold
           Positioned(
@@ -218,7 +215,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: _DecoShape(
               size: 300,
               rotation: -0.6,
-              color: VColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               opacity: 0.07,
             ),
           ),
@@ -240,7 +237,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: _DecoShape(
               size: 180,
               rotation: -0.3,
-              color: VColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               opacity: 0.06,
             ),
           ),

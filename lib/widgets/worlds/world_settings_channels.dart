@@ -52,7 +52,7 @@ class WorldSettingsChannels extends ConsumerWidget {
         const SizedBox(height: VSpacing.sm),
         Text(
           'Manage channels for this world.',
-          style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
+          style: theme.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
         ),
         const SizedBox(height: VSpacing.md),
         if (channels.isNotEmpty)
@@ -113,7 +113,7 @@ class _ChannelRow extends StatelessWidget {
                     ? Icons.dynamic_feed
                     : Icons.tag,
                 size: VIconSize.md,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: VSpacing.sm),
               Expanded(
@@ -124,7 +124,7 @@ class _ChannelRow extends StatelessWidget {
                       '# ${channel.name}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: VFontWeight.semiBold,
-                        color: VColors.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (channel.description != null &&
@@ -134,7 +134,7 @@ class _ChannelRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: VColors.outline,
+                          color: Theme.of(context).colorScheme.outline,
                         ),
                       ),
                   ],
@@ -144,7 +144,7 @@ class _ChannelRow extends StatelessWidget {
                 Text(
                   'Default',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: VColors.outline,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
                 )
               else if (isSovereign)

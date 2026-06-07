@@ -38,9 +38,7 @@ class WorldGrowthCard extends StatelessWidget {
             : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isDark
-              ? VColors.outlineVariantDark.withValues(alpha: 0.25)
-              : VColors.outlineVariant.withValues(alpha: 0.35),
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: isDark ? 0.25 : 0.35),
         ),
       ),
       child: Column(
@@ -75,7 +73,7 @@ class WorldGrowthCard extends StatelessWidget {
                   vertical: VSpacing.xxs,
                 ),
                 decoration: BoxDecoration(
-                  color: VColors.primary.withValues(alpha: 0.12),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(VRadius.pill),
                 ),
                 child: Text(
@@ -83,7 +81,7 @@ class WorldGrowthCard extends StatelessWidget {
                       ? ProgressionGlossary.worldGrowthLevelShort(growth.level)
                       : ProgressionGlossary.worldPrestigeShort(world.prestige),
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: VFontWeight.bold,
                   ),
                 ),
@@ -108,9 +106,7 @@ class WorldGrowthCard extends StatelessWidget {
                   ? '${growth.activityScore} activity points · max growth level'
                   : '${growth.activityScore} activity · ${growth.progress}/${growth.range} to growth level ${growth.level + 1}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             if (capacity != null) ...[
@@ -127,9 +123,7 @@ class WorldGrowthCard extends StatelessWidget {
             Text(
               ProgressionGlossary.worldPrestigeFull(world.prestige),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           if (WorldCapabilityMatrix.worldHasMarketplace(world) ||

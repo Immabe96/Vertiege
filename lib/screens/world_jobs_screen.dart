@@ -417,7 +417,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                   Text(
                     job.roleLabel,
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: VSpacing.sm),
@@ -447,7 +447,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                             ? 'You were accepted for this role.'
                             : 'Application pending review.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: VColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: VFontWeight.semiBold,
                         ),
                       ),
@@ -519,8 +519,8 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, color) = switch (status) {
       WorldJobStatus.open => ('Open', VColors.success),
-      WorldJobStatus.filled => ('Filled', VColors.primary),
-      WorldJobStatus.closed => ('Closed', VColors.onSurfaceVariant),
+      WorldJobStatus.filled => ('Filled', Theme.of(context).colorScheme.primary),
+      WorldJobStatus.closed => ('Closed', Theme.of(context).colorScheme.onSurfaceVariant),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

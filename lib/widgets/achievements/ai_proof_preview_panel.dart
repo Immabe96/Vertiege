@@ -68,16 +68,16 @@ class AiProofPreviewPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: VColors.primary.withValues(alpha: 0.08),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(color: VColors.primary.withValues(alpha: 0.25)),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, size: 18, color: VColors.primary),
+              Icon(Icons.auto_awesome, size: 18, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Proof assist',
@@ -89,7 +89,7 @@ class AiProofPreviewPanel extends StatelessWidget {
               Text(
                 '$confidenceLabel · ${(confidence * 100).round()}%',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: VColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: VFontWeight.semiBold,
                 ),
               ),
@@ -112,7 +112,7 @@ class AiProofPreviewPanel extends StatelessWidget {
                   Icon(
                     item.met ? Icons.check_circle : Icons.radio_button_unchecked,
                     size: 16,
-                    color: item.met ? VColors.success : VColors.outline,
+                    color: item.met ? VColors.success : Theme.of(context).colorScheme.outline,
                   ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(

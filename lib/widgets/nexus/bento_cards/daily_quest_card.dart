@@ -25,23 +25,23 @@ class DailyQuestCard extends ConsumerWidget {
                 color: VColors.tertiary,
               ),
               const SizedBox(width: VSpacing.xs),
-              const Text(
+              Text(
                 'DAILY QUESTS',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontWeight: VFontWeight.semiBold,
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 0,
                 ),
               ),
             ],
           ),
           const SizedBox(height: VSpacing.md),
-          const Text(
+          Text(
             'No active quests',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: VColors.outline,
+              color: Theme.of(context).colorScheme.outline,
             ),
           ),
         ],
@@ -64,13 +64,13 @@ class DailyQuestCard extends ConsumerWidget {
               color: VColors.tertiary,
             ),
             const SizedBox(width: VSpacing.xs),
-            const Expanded(
+            Expanded(
               child: Text(
                 'DAILY QUESTS',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontWeight: VFontWeight.semiBold,
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 0,
                 ),
               ),
@@ -91,16 +91,16 @@ class DailyQuestCard extends ConsumerWidget {
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 4,
-            backgroundColor: VColors.glassBorder,
+            backgroundColor: Theme.of(context).colorScheme.outlineVariant,
             valueColor: const AlwaysStoppedAnimation<Color>(VColors.tertiary),
           ),
         ),
         const SizedBox(height: VSpacing.sm),
         Text(
           '${quests.where((q) => q.isComplete && !q.claimed).length} ready to claim',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: VColors.outline,
+            color: Theme.of(context).colorScheme.outline,
           ),
         ),
       ],

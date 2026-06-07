@@ -27,7 +27,7 @@ class DailyRewardDialog extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Daily Reward',
-      barrierColor: VColors.surface.withValues(alpha: 0.85),
+      barrierColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
       transitionDuration: VAnimation.normal,
       pageBuilder: (context, animation, secondaryAnimation) {
         return DailyRewardDialog(reward: reward, onCollect: onCollect);
@@ -98,9 +98,9 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
         margin: const EdgeInsets.symmetric(horizontal: VSpacing.xl),
         padding: const EdgeInsets.all(VSpacing.xl),
         decoration: BoxDecoration(
-          color: VColors.glassBackground,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.md),
-          border: Border.all(color: VColors.glassBorder),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
               color: VColors.tertiary.withValues(alpha: 0.15),
@@ -158,7 +158,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                 fontWeight: VFontWeight.bold,
                 color: widget.reward.isShield
                     ? VColors.tierHustler
-                    : VColors.onSurface,
+                    : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: VSpacing.sm),
@@ -168,7 +168,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
                   ? 'Protects your streak for one missed day!'
                   : 'Resonance energy granted',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -203,7 +203,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
               child: Text(
                 'Not now',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),

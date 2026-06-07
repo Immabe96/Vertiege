@@ -72,9 +72,9 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
             child: VSurfaceCard(
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.shield,
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: VIconSize.lg,
                     ),
                     const SizedBox(width: VSpacing.sm),

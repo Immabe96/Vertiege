@@ -34,12 +34,12 @@ class ChallengesCard extends ConsumerWidget {
               color: VColors.secondary,
             ),
             const SizedBox(width: VSpacing.xs),
-            const Text(
+            Text(
               'CHALLENGES',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
                 fontWeight: VFontWeight.semiBold,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 letterSpacing: 0,
               ),
             ),
@@ -48,44 +48,44 @@ class ChallengesCard extends ConsumerWidget {
         const SizedBox(height: VSpacing.sm),
         Text(
           '$activeCount Active',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.headlineMd,
             fontWeight: VFontWeight.bold,
-            color: VColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: VSpacing.xs),
         if (inProgressCount > 0)
           Text(
             '$inProgressCount in progress',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: VFontSize.labelSm,
-              color: VColors.outline,
+              color: Theme.of(context).colorScheme.outline,
             ),
           )
         else
-          const Text(
+          Text(
             'Tap to view challenges',
             style: TextStyle(
               fontSize: VFontSize.labelSm,
-              color: VColors.outline,
+              color: Theme.of(context).colorScheme.outline,
             ),
           ),
         const SizedBox(height: VSpacing.md),
-        const Row(
+        Row(
           children: [
             Text(
               'View All',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            SizedBox(width: VSpacing.xs),
+            const SizedBox(width: VSpacing.xs),
             Icon(
               Icons.chevron_right,
               size: VIconSize.sm,
-              color: VColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ],
         ),

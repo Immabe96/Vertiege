@@ -89,9 +89,7 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                   child: Text(
                     'Season ranks worlds by growth — not the same as weekly Ascension Leagues (personal XP ladders).',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.35,
                     ),
                   ),
@@ -185,9 +183,7 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                 : VColors.surfaceContainerLow,
             borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(
-              color: isDark
-                  ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                  : VColors.outlineVariant.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
           ),
           child: const Pulse(borderRadius: 0),
@@ -218,7 +214,7 @@ class _SeasonCohortCard extends StatelessWidget {
                 Text(
                   'Your cohort',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
@@ -420,9 +416,7 @@ class _SeasonHero extends StatelessWidget {
               season.tagline,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -445,9 +439,7 @@ class _SeasonHero extends StatelessWidget {
                 season.narrative,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -482,7 +474,7 @@ class _SeasonProgress extends StatelessWidget {
                 'Week ${season.currentWeek} of 4',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: VFontWeight.semiBold,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Text(
@@ -675,7 +667,7 @@ class _PodiumCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: VFontWeight.bold,
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -684,9 +676,7 @@ class _PodiumCard extends StatelessWidget {
                 '${score.compositeScore} pts',
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: VFontWeight.semiBold,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -728,7 +718,7 @@ class _SectionHeader extends StatelessWidget {
               title,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: VFontWeight.semiBold,
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -781,9 +771,7 @@ class _RankingRow extends StatelessWidget {
                 : VColors.surfaceContainerLow,
             borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(
-              color: isDark
-                  ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                  : VColors.outlineVariant.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -797,9 +785,7 @@ class _RankingRow extends StatelessWidget {
                     fontWeight: VFontWeight.bold,
                     color: score.rank <= 3
                         ? VColors.tertiary
-                        : (isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant),
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -825,9 +811,7 @@ class _RankingRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: VFontWeight.bold,
-                        color: isDark
-                            ? VColors.onSurfaceDark
-                            : VColors.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -836,9 +820,7 @@ class _RankingRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -866,9 +848,7 @@ class _RankingRow extends StatelessWidget {
                       Text(
                         'pts',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],

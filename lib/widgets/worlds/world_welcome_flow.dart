@@ -100,7 +100,7 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         padding: const EdgeInsets.all(VSpacing.lg),
         decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceContainerDark : VColors.surface,
+          color: isDark ? VColors.surfaceContainerDark : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.xl),
         ),
         child: Column(
@@ -132,8 +132,8 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
                       color: i <= _step
-                          ? VColors.primary
-                          : VColors.outline.withValues(alpha: 0.2),
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(VRadius.xxs),
                     ),
                   ),
@@ -192,7 +192,7 @@ class _WelcomeStep extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: VColors.primary.withValues(alpha: 0.15),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(VRadius.lg),
             ),
             child: Icon(
@@ -200,7 +200,7 @@ class _WelcomeStep extends StatelessWidget {
                   ? _dominionIcon(world.dominionType!)
                   : Icons.public,
               size: VIconSize.xl,
-              color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: VSpacing.lg),
@@ -216,9 +216,7 @@ class _WelcomeStep extends StatelessWidget {
               '"${world.motto}"',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontStyle: FontStyle.italic,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -226,9 +224,7 @@ class _WelcomeStep extends StatelessWidget {
           Text(
             world.description,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           if (world.lore.isNotEmpty) ...[
@@ -251,9 +247,7 @@ class _WelcomeStep extends StatelessWidget {
                     child: Text(
                       world.lore,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -371,7 +365,7 @@ class _RuleItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
       child: Row(
         children: [
-          Icon(icon, size: VIconSize.sm, color: VColors.primary),
+            Icon(icon, size: VIconSize.sm, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: VSpacing.sm),
           Expanded(child: Text(text)),
         ],
@@ -415,9 +409,7 @@ class _ChannelPicksStep extends StatelessWidget {
           Text(
             'Jump into a channel to get started.',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.md),
@@ -492,7 +484,7 @@ class _ActionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: VIconSize.md, color: VColors.primary),
+            Icon(icon, size: VIconSize.md, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: VSpacing.md),
             Expanded(
               child: Column(
@@ -506,9 +498,7 @@ class _ActionCard extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

@@ -57,9 +57,9 @@ class WorldAccessGuard extends ConsumerWidget {
       padding: const EdgeInsets.all(32),
       child: Container(
         decoration: BoxDecoration(
-          color: VColors.glassBackground,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.md),
-          border: Border.all(color: VColors.glassBorder),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -250,7 +250,7 @@ class _VerificationSheetState extends State<_VerificationSheet> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(VRadius.lg),
-                border: Border.all(color: VColors.glassBorder),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(VRadius.lg),

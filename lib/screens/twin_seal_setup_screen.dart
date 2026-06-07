@@ -125,9 +125,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             Text(
               'Twin Seal adds an extra layer of security. After setup, you\'ll need a 6-digit code from your authenticator app each time you sign in.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: VSpacing.xl),
@@ -166,9 +164,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
           Text(
             'Your account is now protected with two-factor authentication.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -198,9 +194,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
         Text(
           'Scan the QR code in your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code below.',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: VSpacing.lg),
@@ -212,9 +206,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                 color: isDark ? VColors.surfaceDark : VColors.surface,
                 borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark
-                      : VColors.outlineVariant,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
               child: Column(
@@ -230,9 +222,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                         'QR Code\n(Use qr_flutter package)',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -243,7 +233,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                     style: TextStyle(
                       fontFamily: VFont.mono,
                       fontSize: VFontSize.bodyMd,
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: VSpacing.sm),
@@ -316,9 +306,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
         Text(
           'Tap the button below to generate your unique Twin Seal secret. You\'ll need an authenticator app ready.',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: VSpacing.xl),

@@ -305,7 +305,7 @@ class _TypeLeadSection extends StatelessWidget {
                   world.type == WorldType.profession
                       ? Icons.badge_outlined
                       : Icons.diamond_outlined,
-                  color: VColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: VIconSize.md,
                 ),
                 const SizedBox(width: VSpacing.sm),
@@ -323,7 +323,7 @@ class _TypeLeadSection extends StatelessWidget {
             Text(
               access,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: VFontWeight.semiBold,
               ),
             ),
@@ -331,9 +331,7 @@ class _TypeLeadSection extends StatelessWidget {
             Text(
               'Prestige ${world.prestige} · ${world.sovereignStatusLabel}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -382,14 +380,14 @@ class _CharterSection extends StatelessWidget {
               isJoined ? foundation.premise : _teaserPremise(world, foundation),
               style: theme.textTheme.bodyMedium?.copyWith(
                 height: 1.35,
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: VSpacing.sm),
             Text(
               'Access: $access',
               style: theme.textTheme.labelMedium?.copyWith(
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: VFontWeight.semiBold,
               ),
             ),
@@ -466,9 +464,7 @@ class _SafetyDisclaimerSection extends StatelessWidget {
                   Text(
                     disclaimer,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.35,
                     ),
                   ),
@@ -567,9 +563,7 @@ class _StandingSection extends StatelessWidget {
               Text(
                 'Join and participate to earn rep in this world.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -583,7 +577,7 @@ class _StandingSection extends StatelessWidget {
                     Icon(
                       active ? Icons.check_circle : Icons.circle_outlined,
                       size: 16,
-                      color: active ? VColors.success : VColors.onSurfaceVariant,
+                      color: active ? VColors.success : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: VSpacing.xs),
                     Expanded(
@@ -757,7 +751,7 @@ class _EconomySection extends StatelessWidget {
       icon: icon,
       label: label,
       enabled: enabled,
-      titleColor: enabled ? null : VColors.onSurfaceVariant,
+              titleColor: enabled ? null : Theme.of(context).colorScheme.onSurfaceVariant,
       trailing: (!enabled || showLock)
           ? const Icon(Icons.lock_outline, size: 18)
           : null,
@@ -825,9 +819,7 @@ class _NewsSection extends StatelessWidget {
               Text(
                 'No announcements yet. Check back when the sovereign posts.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               )
             else
@@ -854,7 +846,7 @@ class _NewsSection extends StatelessWidget {
                                 ? 'Announcement · ${post.residentName}'
                                 : post.residentName,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: VColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: VFontWeight.semiBold,
                             ),
                           ),
@@ -915,13 +907,13 @@ class _OrientationSection extends StatelessWidget {
                           height: 28,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: VColors.primary.withValues(alpha: 0.12),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
                           child: Text(
                             '${i + 1}',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: VColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: VFontWeight.bold,
                             ),
                           ),
@@ -944,7 +936,7 @@ class _OrientationSection extends StatelessWidget {
                               Text(
                                 'Open #${step.channel}',
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: VColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -1051,9 +1043,7 @@ class _CouncilPreviewSection extends StatelessWidget {
                 'Council members will appear here once residents reach '
                 '$_councilRepMin rep.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               )
             else
@@ -1109,7 +1099,7 @@ class _CouncilPreviewSection extends StatelessWidget {
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: isSovereign
                                         ? VColors.tertiary
-                                        : VColors.primary,
+                                        : Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                               ],
@@ -1218,7 +1208,7 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
                     Text(
                       'Active poll',
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: VColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: VFontWeight.bold,
                       ),
                     ),
@@ -1269,9 +1259,7 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
               subtitle: Text(
                 'No active polls. Council and sovereign can create votes when needed.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -1295,9 +1283,7 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
                   ? 'Polls unlock when governance is enabled for this world.'
                   : 'Join this world to participate in council polls.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

@@ -137,7 +137,7 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                   Icon(
                     Icons.verified_user_outlined,
                     size: 48,
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: VSpacing.md),
                   Text(
@@ -151,7 +151,7 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                   Text(
                     'Same account as the main app. After sign-in, open Settings → Staff review.',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),

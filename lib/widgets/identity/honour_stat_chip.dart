@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
 /// Compact stat chip for the Identity honour wall.
@@ -22,7 +21,7 @@ class HonourStatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = accent ?? VColors.primary;
+    final color = accent ?? theme.colorScheme.primary;
 
     return Material(
       color: Colors.transparent,
@@ -53,7 +52,7 @@ class HonourStatChip extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: VColors.onSurfaceVariant,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

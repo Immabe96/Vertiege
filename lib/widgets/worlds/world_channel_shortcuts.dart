@@ -56,7 +56,7 @@ class WorldChannelShortcuts extends StatelessWidget {
               avatar: Icon(
                 Icons.tag,
                 size: VIconSize.sm,
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
               label: const Text('General'),
               onPressed: () => open(general!),

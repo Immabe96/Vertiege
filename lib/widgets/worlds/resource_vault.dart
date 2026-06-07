@@ -36,17 +36,17 @@ class ResourceVault extends StatelessWidget {
                   vaultUnlocked
                       ? Icons.folder_special_outlined
                       : Icons.menu_book_outlined,
-                  color: vaultUnlocked ? VColors.tertiary : VColors.primary,
+                  color: vaultUnlocked ? VColors.tertiary : Theme.of(context).colorScheme.primary,
                   size: VIconSize.md,
                 ),
                 const SizedBox(width: VSpacing.sm),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'WORLD GUIDE',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
                       fontWeight: VFontWeight.semiBold,
-                      color: VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                       letterSpacing: 0,
                     ),
                   ),
@@ -62,9 +62,9 @@ class ResourceVault extends StatelessWidget {
               vaultUnlocked
                   ? 'Official resources live here first. Use the starter channels to orient new residents.'
                   : 'A quick path through the world before residents jump into general chat.',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: VFontSize.bodyMd,
-                color: VColors.outline,
+                color: Theme.of(context).colorScheme.outline,
               ),
             ),
             const SizedBox(height: VSpacing.md),
@@ -120,7 +120,7 @@ class _GuideItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: VColors.surfaceContainer.withValues(alpha: 0.64),
             borderRadius: BorderRadius.circular(VRadius.md),
-            border: Border.all(color: VColors.glassBorder),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Row(
             children: [
@@ -128,12 +128,12 @@ class _GuideItem extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: VColors.primary.withValues(alpha: 0.12),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(VRadius.md),
                 ),
                 child: Icon(
                   _icon,
-                  color: VColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: VIconSize.md,
                 ),
               ),
@@ -146,8 +146,8 @@ class _GuideItem extends StatelessWidget {
                       '# ${channel.name}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: VColors.onSurface,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: VFontWeight.semiBold,
                       ),
                     ),
@@ -156,17 +156,17 @@ class _GuideItem extends StatelessWidget {
                         channel.description!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: VColors.outline,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
                           fontSize: VFontSize.labelSm,
                         ),
                       ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
-                color: VColors.outline,
+                color: Theme.of(context).colorScheme.outline,
                 size: VIconSize.md,
               ),
             ],
@@ -214,11 +214,11 @@ class _VaultEmpty extends StatelessWidget {
       decoration: BoxDecoration(
         color: VColors.surfaceContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: VColors.glassBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
-      child: const Text(
+      child: Text(
         'Starter channels are being prepared for this world.',
-        style: TextStyle(color: VColors.outline),
+        style: TextStyle(color: Theme.of(context).colorScheme.outline),
       ),
     );
   }

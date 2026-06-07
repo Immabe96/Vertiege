@@ -156,9 +156,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       child: Text(
                         'Join a world to submit proof, earn rep, and unlock channels.',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           height: 1.4,
                         ),
                       ),
@@ -199,22 +197,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       child: TextField(
                         controller: _searchController,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Search worlds...',
                           hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           prefixIcon: Icon(
                             Icons.search,
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
@@ -229,23 +221,17 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                 )
                               : null,
                           filled: true,
-                          fillColor: isDark
-                              ? VColors.glassBackgroundDark
-                              : VColors.glassBackground,
+                          fillColor: Theme.of(context).colorScheme.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(VRadius.pill),
                             borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.glassBorderDark
-                                  : VColors.glassBorder,
+                              color: Theme.of(context).colorScheme.outlineVariant,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(VRadius.pill),
                             borderSide: BorderSide(
-                              color: isDark
-                                  ? VColors.glassBorderDark
-                                  : VColors.glassBorder,
+                              color: Theme.of(context).colorScheme.outlineVariant,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -324,14 +310,14 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                               Icon(
                                 Icons.recommend,
                                 size: VIconSize.sm,
-                                color: VColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: VSpacing.xs),
                               Text(
                                 'Recommended for You',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: VFontWeight.semiBold,
-                                  color: VColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -432,18 +418,14 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             Icon(
                               Icons.lock_outline,
                               size: VIconSize.sm,
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: VSpacing.xs),
                             Text(
                               'Locked (${filteredLocked.length})',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: VFontWeight.semiBold,
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -535,12 +517,10 @@ class _WorldListCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(VRadius.lg),
         child: Container(
           decoration: BoxDecoration(
-            color: isDark
-                ? VColors.glassBackgroundDark
-                : VColors.glassBackground,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
           child: Column(
@@ -571,9 +551,7 @@ class _WorldListCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: VFontWeight.semiBold,
-                                    color: isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ),
@@ -639,18 +617,14 @@ class _WorldListCard extends StatelessWidget {
                               Text(
                                 '${world.memberCount} members',
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(width: VSpacing.xs),
                               Text(
                                 'P${world.prestige}',
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -666,9 +640,7 @@ class _WorldListCard extends StatelessWidget {
                         duration: VAnimation.fast,
                         child: Icon(
                           Icons.keyboard_arrow_down,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -685,9 +657,7 @@ class _WorldListCard extends StatelessWidget {
                       Text(
                         world.description,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           height: 1.4,
                         ),
                       ),
@@ -836,10 +806,10 @@ class _InfoChip extends StatelessWidget {
         vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceDark : VColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: Row(
@@ -848,17 +818,13 @@ class _InfoChip extends StatelessWidget {
           Icon(
             icon,
             size: VIconSize.xs,
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: VSpacing.xxs),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -882,10 +848,10 @@ class _TrendingWorldCard extends StatelessWidget {
       child: Container(
         width: 160,
         decoration: BoxDecoration(
-          color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Padding(
@@ -917,16 +883,14 @@ class _TrendingWorldCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: VFontWeight.semiBold,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const Spacer(),
               Text(
                 '${world.memberCount} members',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

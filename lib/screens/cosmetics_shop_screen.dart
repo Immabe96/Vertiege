@@ -198,9 +198,7 @@ class _ShopGrid extends StatelessWidget {
             Icon(
               Icons.store_outlined,
               size: 48,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: VSpacing.md),
             const Text(
@@ -211,9 +209,7 @@ class _ShopGrid extends StatelessWidget {
             Text(
               'New items are being crafted.',
               style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -294,9 +290,7 @@ class _ShopCard extends ConsumerWidget {
                     Icon(
                       Icons.lock_outline,
                       size: VIconSize.xs,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                 ],
               ),
@@ -315,7 +309,7 @@ class _ShopCard extends ConsumerWidget {
                 item.name,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: VFontWeight.semiBold,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -324,9 +318,7 @@ class _ShopCard extends ConsumerWidget {
               Text(
                 item.description,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -566,9 +558,7 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
             Icon(
               Icons.storefront_outlined,
               size: 48,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: VSpacing.md),
             const Text(
@@ -579,9 +569,7 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
             Text(
               'Listings from your worlds will appear here.',
               style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -591,7 +579,7 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
 
     return RefreshIndicator(
       onRefresh: _loadListings,
-      color: VColors.primary,
+      color: Theme.of(context).colorScheme.primary,
       child: GridView.builder(
         padding: const EdgeInsets.all(VSpacing.md),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -652,9 +640,7 @@ class _DominionListingDetailSheet extends StatelessWidget {
                     child: Icon(
                       Icons.image_outlined,
                       size: 48,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -690,9 +676,7 @@ class _DominionListingDetailSheet extends StatelessWidget {
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontStyle: FontStyle.italic,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -700,9 +684,7 @@ class _DominionListingDetailSheet extends StatelessWidget {
             Text(
               'Seller: ${listing.sellerName}',
               style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: VSpacing.sm),
@@ -712,14 +694,14 @@ class _DominionListingDetailSheet extends StatelessWidget {
                 vertical: VSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: VColors.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(VRadius.pill),
               ),
               child: Text(
                 listing.category.name[0].toUpperCase() +
                     listing.category.name.substring(1),
-                style: const TextStyle(
-                  color: VColors.primary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: VFontWeight.semiBold,
                   fontSize: VFontSize.labelSm,
                 ),
@@ -729,9 +711,7 @@ class _DominionListingDetailSheet extends StatelessWidget {
             Text(
               listing.description,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: VSpacing.xl),

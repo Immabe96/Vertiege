@@ -172,17 +172,13 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                   Icon(
                     Icons.person_off,
                     size: VIconSize.xl,
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: VSpacing.md),
                   Text(
                     _error ?? 'Resident not found',
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: VSpacing.lg),
@@ -215,9 +211,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                   : VColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(VRadius.lg),
               border: Border.all(
-                color: isDark
-                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                    : VColors.outlineVariant.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
               ),
             ),
             child: Column(
@@ -251,9 +245,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(VRadius.pill),
                       border: Border.all(
-                        color: isDark
-                            ? VColors.glassBorderDark
-                            : VColors.glassBorder,
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
                     ),
                     child: Row(
@@ -262,17 +254,13 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                         ProfessionIcon(
                           profession: resident.profession,
                           size: VBadgeSize.professionInline,
-                          fallbackColor: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          fallbackColor: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: VSpacing.xxs),
                         Text(
                           resident.profession!,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -288,7 +276,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     Text(
                       resident.tier.label,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: VColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: VFontWeight.semiBold,
                       ),
                     ),
@@ -300,9 +288,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     resident.bio,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -391,13 +377,9 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                         icon: const Icon(VIcons.handshake),
                         label: const Text('Pending'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
                           side: BorderSide(
-                            color: isDark
-                                ? VColors.outlineVariantDark
-                                : VColors.outlineVariant,
+                            color: Theme.of(context).colorScheme.outlineVariant,
                           ),
                         ),
                       );
@@ -432,13 +414,9 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                             icon: const Icon(VIcons.userMinus),
                             label: const Text('Unfollow'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
                               side: BorderSide(
-                                color: isDark
-                                    ? VColors.outlineVariantDark
-                                    : VColors.outlineVariant,
+                                color: Theme.of(context).colorScheme.outlineVariant,
                               ),
                             ),
                           )
@@ -470,9 +448,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     : VColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                      : VColors.outlineVariant.withValues(alpha: 0.3),
+                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                 ),
               ),
               child: ProfileAchievementShowcase(
@@ -494,17 +470,13 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     : VColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                      : VColors.outlineVariant.withValues(alpha: 0.3),
+                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                 ),
               ),
               child: Text(
                 'No public achievements yet.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -522,9 +494,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                   : VColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(VRadius.xl),
               border: Border.all(
-                color: isDark
-                    ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                    : VColors.outlineVariant.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
               ),
             ),
             child: ProfileStandingGrid(
@@ -549,9 +519,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     : VColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
-                  color: isDark
-                      ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                      : VColors.outlineVariant.withValues(alpha: 0.3),
+                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(

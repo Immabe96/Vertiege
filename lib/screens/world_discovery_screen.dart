@@ -113,9 +113,7 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
                 hintText: 'Search worlds...',
                 prefixIcon: Icon(
                   VIcons.search,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -134,17 +132,13 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(VRadius.lg),
                   borderSide: BorderSide(
-                    color: isDark
-                        ? VColors.outlineVariantDark
-                        : VColors.outlineVariant,
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(VRadius.lg),
                   borderSide: BorderSide(
-                    color: isDark
-                        ? VColors.outlineVariantDark
-                        : VColors.outlineVariant,
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
               ),
@@ -347,7 +341,7 @@ class _WorldList extends StatelessWidget {
             Icon(
               Icons.explore_outlined,
               size: 48,
-              color: VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: VSpacing.md),
             const Text(
@@ -396,13 +390,13 @@ class _FilterChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? VColors.primary.withValues(alpha: 0.15)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
             color: selected
-                ? VColors.primary
-                : VColors.outline.withValues(alpha: 0.3),
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -410,7 +404,7 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: VFontSize.labelSm,
             fontWeight: selected ? VFontWeight.semiBold : VFontWeight.regular,
-            color: selected ? VColors.primary : null,
+            color: selected ? Theme.of(context).colorScheme.primary : null,
           ),
         ),
       ),

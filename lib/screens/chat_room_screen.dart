@@ -718,9 +718,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -823,16 +821,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                       color: isTyping
                           ? VColors.success
                           : (customStatus?.trim().isNotEmpty == true
-                              ? (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant)
+                              ? Theme.of(context).colorScheme.onSurfaceVariant
                               : switch (presence) {
                                   Presence.online => VColors.success,
                                   Presence.idle => VColors.warning,
                                   Presence.dnd => VColors.error,
-                                  Presence.offline => isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant,
+                                  Presence.offline => Theme.of(context).colorScheme.onSurfaceVariant,
                                 }),
                       fontSize: VFontSize.labelSm,
                     ),
@@ -856,7 +850,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           Icon(
             Icons.chat_bubble_outline,
             size: 48,
-            color: VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: VSpacing.md),
           const Text(
@@ -866,7 +860,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           const SizedBox(height: VSpacing.xs),
           Text(
             'Send a message to start the conversation',
-            style: TextStyle(color: VColors.onSurfaceVariant),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -1087,9 +1081,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
               vertical: VSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.glassBackgroundDark
-                  : VColors.glassBackground,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(VRadius.lg),
                 bottomRight: Radius.circular(VRadius.lg),
@@ -1097,7 +1089,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
                 topLeft: Radius.circular(VRadius.sm),
               ),
               border: Border.all(
-                color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
             child: Row(
@@ -1117,10 +1109,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
                         margin: const EdgeInsets.symmetric(horizontal: 2),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color:
-                              (isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant)
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
                                   .withValues(alpha: 0.3 + 0.4 * bounce),
                         ),
                       ),
@@ -1213,10 +1202,10 @@ class _ImagePreview extends StatelessWidget {
         0,
       ),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
       ),
@@ -1229,10 +1218,10 @@ class _ImagePreview extends StatelessWidget {
               width: 56,
               height: 56,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(
+              errorBuilder: (_, _, _) => Icon(
                 Icons.broken_image,
                 size: 32,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1241,9 +1230,7 @@ class _ImagePreview extends StatelessWidget {
             child: Text(
               'Image ready to send',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

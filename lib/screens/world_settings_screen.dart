@@ -400,7 +400,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
             color: isDark ? VColors.surfaceDark : VColors.surface,
             borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
           child: Column(
@@ -412,22 +412,20 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   children: [
                     const Icon(VIcons.sparkles, color: VColors.tertiary),
                     const SizedBox(width: VSpacing.sm),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'The Herald — Banner Generator',
                         style: TextStyle(
                           fontSize: VFontSize.headlineMd,
                           fontWeight: VFontWeight.semiBold,
-                          color: VColors.onSurface,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
                     IconButton(
                       icon: Icon(
                         Icons.close,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       onPressed: () => Navigator.pop(ctx),
                     ),
@@ -478,7 +476,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           style: TextStyle(
             fontSize: VFontSize.bodyMd,
             fontWeight: VFontWeight.bold,
-            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -509,12 +507,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
       filled: false,
       border: UnderlineInputBorder(
         borderSide: BorderSide(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       focusedBorder: const UnderlineInputBorder(
@@ -674,9 +672,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         Text(
                           'Generate AI-assisted banner variants for your world.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
@@ -730,18 +726,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           Text(
                             'Configure lounge access and settings for this world.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: VSpacing.md),
                           Text(
                             'Lounge settings coming soon.',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -770,9 +762,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           Text(
                             'Participate in world governance and voting.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: VSpacing.md),
@@ -822,9 +812,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         Text(
                           'Manage residents and their standing in this world.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
@@ -885,10 +873,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                                       ?.copyWith(
                                                         fontWeight: VFontWeight
                                                             .semiBold,
-                                                        color: isDark
-                                                            ? VColors
-                                                                  .onSurfaceDark
-                                                            : VColors.onSurface,
+                                                        color: Theme.of(context).colorScheme.onSurface,
                                                       ),
                                                 ),
                                               ),
@@ -976,9 +961,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                         icon: Icon(
                                           Icons.more_vert,
                                           size: 18,
-                                          color: isDark
-                                              ? VColors.outlineVariantDark
-                                              : VColors.outlineVariant,
+                                          color: Theme.of(context).colorScheme.outlineVariant,
                                         ),
                                         onSelected: (action) {
                                           switch (action) {
@@ -1027,9 +1010,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         Text(
                           'Mute notifications during specific hours.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
@@ -1042,9 +1023,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               Text(
                                 'Enable Quiet Hours',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceDark
-                                      : VColors.onSurface,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                               Switch(
@@ -1165,9 +1144,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       ),
                       trailing: Icon(
                         Icons.chevron_right,
-                        color: isDark
-                            ? VColors.outlineVariantDark
-                            : VColors.outlineVariant,
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(VRadius.xl),
@@ -1177,9 +1154,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       ),
                     ),
                   ListTile(
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.menu_book_outlined,
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     title: const Text('World archive'),
                     subtitle: const Text(
@@ -1187,9 +1164,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     ),
                     trailing: Icon(
                       Icons.chevron_right,
-                      color: isDark
-                          ? VColors.outlineVariantDark
-                          : VColors.outlineVariant,
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(VRadius.xl),
@@ -1235,9 +1210,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           'Permanently delete this world and all '
                           'associated data. This action cannot be undone.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
@@ -1319,9 +1292,7 @@ class _BoostWorldCard extends ConsumerWidget {
           Text(
             'World growth advances through member activity. Paid boosts are disabled for v1.',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.md),
@@ -1359,9 +1330,7 @@ class _BoostWorldCard extends ConsumerWidget {
                   child: Text(
                     '$progress / $range to growth level $nextLevel',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.outlineVariantDark
-                          : VColors.outlineVariant,
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
                 ),
@@ -1398,9 +1367,7 @@ class _BoostWorldCard extends ConsumerWidget {
               Text(
                 'Earned only',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: VFontWeight.regular,
                 ),
               ),
@@ -1573,9 +1540,7 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
             Text(
               'No ranks yet. Create one to assign privileges.',
               style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             )
           else
@@ -1627,7 +1592,7 @@ class _Card extends StatelessWidget {
             : VColors.surfaceContainerLow,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: child,

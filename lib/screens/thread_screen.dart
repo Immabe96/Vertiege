@@ -308,7 +308,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                 ),
                 decoration: BoxDecoration(
                   color: isMe
-                      ? VColors.primary
+                      ? Theme.of(context).colorScheme.primary
                       : (isDark
                             ? VColors.surfaceContainerDark
                             : VColors.surfaceContainerLow),
@@ -328,9 +328,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                   border: isMe
                       ? null
                       : Border.all(
-                          color: isDark
-                              ? VColors.outlineVariantDark
-                              : VColors.outlineVariant,
+                          color: Theme.of(context).colorScheme.outlineVariant,
                         ),
                 ),
                 child: MarkdownBody(
@@ -338,7 +336,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                   styleSheet: _markdownStyle(
                     textColor: isMe
                         ? VColors.onPrimary
-                        : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
+                        : Theme.of(context).colorScheme.onSurface,
                     isDark: isDark,
                   ),
                 ),
@@ -347,9 +345,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
               Text(
                 formatTimestamp(message.createdAt),
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -359,10 +355,11 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
     );
   }
 
-  static MarkdownStyleSheet _markdownStyle({
+  MarkdownStyleSheet _markdownStyle({
     required Color textColor,
     required bool isDark,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return MarkdownStyleSheet(
       p: TextStyle(
         fontSize: VFontSize.bodyMd,
@@ -383,12 +380,12 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
             : VColors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(VRadius.md),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: colorScheme.outlineVariant,
         ),
       ),
       a: TextStyle(
         fontSize: VFontSize.bodyMd,
-        color: VColors.primary,
+        color: colorScheme.primary,
         decoration: TextDecoration.underline,
       ),
     );
@@ -413,7 +410,7 @@ class _ParentMessageCard extends StatelessWidget {
             : VColors.surfaceContainerLow,
         border: Border(
           bottom: BorderSide(
-            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
       ),
@@ -437,9 +434,7 @@ class _ParentMessageCard extends StatelessWidget {
               Text(
                 formatTimestamp(message.createdAt),
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -448,7 +443,8 @@ class _ParentMessageCard extends StatelessWidget {
           MarkdownBody(
             data: message.content,
             styleSheet: _markdownStyle(
-              textColor: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              context: context,
+              textColor: Theme.of(context).colorScheme.onSurface,
               isDark: isDark,
             ),
           ),
@@ -461,9 +457,7 @@ class _ParentMessageCard extends StatelessWidget {
           Text(
             '${message.threadCount} ${message.threadCount == 1 ? 'reply' : 'replies'}',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -471,10 +465,12 @@ class _ParentMessageCard extends StatelessWidget {
     );
   }
 
-  static MarkdownStyleSheet _markdownStyle({
+  MarkdownStyleSheet _markdownStyle({
+    required BuildContext context,
     required Color textColor,
     required bool isDark,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return MarkdownStyleSheet(
       p: TextStyle(
         fontSize: VFontSize.bodyMd,
@@ -491,7 +487,7 @@ class _ParentMessageCard extends StatelessWidget {
       ),
       a: TextStyle(
         fontSize: VFontSize.bodyMd,
-        color: VColors.primary,
+        color: colorScheme.primary,
         decoration: TextDecoration.underline,
       ),
     );

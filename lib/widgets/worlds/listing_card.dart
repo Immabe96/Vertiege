@@ -27,12 +27,10 @@ class ListingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(VRadius.lg),
         child: Container(
           decoration: BoxDecoration(
-            color: isDark
-                ? VColors.glassBackgroundDark
-                : VColors.glassBackground,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
           child: Stack(
@@ -50,9 +48,7 @@ class ListingCard extends StatelessWidget {
                           listing.title,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: VFontWeight.semiBold,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -62,7 +58,7 @@ class ListingCard extends StatelessWidget {
                           Text(
                             worldName!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: VColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: VFontWeight.medium,
                             ),
                             maxLines: 1,
@@ -100,9 +96,7 @@ class ListingCard extends StatelessWidget {
                           Text(
                             listing.priceNote!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontStyle: FontStyle.italic,
                             ),
                             maxLines: 1,
@@ -112,9 +106,7 @@ class ListingCard extends StatelessWidget {
                         Text(
                           listing.sellerName,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -198,9 +190,7 @@ class _Placeholder extends StatelessWidget {
       child: Icon(
         Icons.image_outlined,
         size: VIconSize.xl,
-        color: isDark
-            ? VColors.onSurfaceVariantDark
-            : VColors.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }

@@ -653,7 +653,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                 vertical: VSpacing.sm,
               ),
               color: VColors.warning.withValues(alpha: 0.10),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
@@ -666,7 +666,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                       'This announcement channel is read-only for your rank.',
                       style: TextStyle(
                         fontSize: VFontSize.labelSm,
-                        color: VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -979,10 +979,10 @@ class _ChannelImagePreview extends StatelessWidget {
         0,
       ),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
       ),
@@ -995,10 +995,10 @@ class _ChannelImagePreview extends StatelessWidget {
               width: 56,
               height: 56,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(
+              errorBuilder: (_, _, _) => Icon(
                 Icons.broken_image,
                 size: 32,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1007,9 +1007,7 @@ class _ChannelImagePreview extends StatelessWidget {
             child: Text(
               'Image ready to send',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

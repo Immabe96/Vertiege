@@ -45,7 +45,7 @@ class ContextualChips extends ConsumerWidget {
           _ContextChip(
             icon: Icons.shield,
             label: 'Governance',
-            color: VColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             onTap: () => context.push('/hall-of-ascension'),
           ),
         );

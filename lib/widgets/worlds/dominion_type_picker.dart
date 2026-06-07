@@ -33,7 +33,7 @@ class DominionTypePicker extends StatelessWidget {
         Text(
           'Community for discussion, or Shop for marketplace and treasury.',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: VSpacing.lg),
@@ -75,11 +75,11 @@ class _DominionTypeCard extends StatelessWidget {
         padding: const EdgeInsets.all(VSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? VColors.primary.withValues(alpha: 0.1)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
               : (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer),
           borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(
-            color: isSelected ? VColors.primary : Colors.transparent,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
             width: 2,
           ),
         ),
@@ -89,13 +89,13 @@ class _DominionTypeCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _typeColor(type).withValues(alpha: 0.15),
+                color: _typeColor(context, type).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(VRadius.md),
               ),
               child: Icon(
                 _typeIcon(type),
                 size: VIconSize.lg,
-                color: _typeColor(type),
+                color: _typeColor(context, type),
               ),
             ),
             const SizedBox(width: VSpacing.md),
@@ -107,14 +107,14 @@ class _DominionTypeCard extends StatelessWidget {
                     type.displayName,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: VFontWeight.bold,
-                      color: isSelected ? VColors.primary : null,
+                      color: isSelected ? Theme.of(context).colorScheme.primary : null,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     type.lore,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -123,19 +123,19 @@ class _DominionTypeCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(VIcons.badgeCheck, color: VColors.primary, size: VIconSize.md),
+              Icon(VIcons.badgeCheck, color: Theme.of(context).colorScheme.primary, size: VIconSize.md),
           ],
         ),
       ),
     );
   }
 
-  Color _typeColor(DominionType type) {
+  Color _typeColor(BuildContext context, DominionType type) {
     switch (type) {
       case DominionType.marketplace:
         return VColors.tertiary;
       case DominionType.academy:
-        return VColors.primary;
+        return Theme.of(context).colorScheme.primary;
       case DominionType.sanctuary:
         return VColors.success;
       case DominionType.archive:

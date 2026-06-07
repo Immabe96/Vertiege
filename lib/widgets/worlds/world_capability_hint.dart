@@ -32,16 +32,14 @@ class WorldCapabilityHint extends StatelessWidget {
           Icon(
             icon,
             size: VIconSize.sm,
-            color: isDark ? VColors.primary : VColors.primary,
+            color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: VSpacing.xs),
           Expanded(
             child: Text(
               message,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -65,7 +63,7 @@ class WorldCapabilityTooltipIcon extends StatelessWidget {
       child: Icon(
         Icons.help_outline,
         size: VIconSize.md,
-        color: VColors.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }

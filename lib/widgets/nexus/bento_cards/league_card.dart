@@ -37,23 +37,23 @@ class LeagueCard extends ConsumerWidget {
                 color: VColors.secondary,
               ),
               const SizedBox(width: VSpacing.xs),
-              const Text(
+              Text(
                 'LEAGUES',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontWeight: VFontWeight.semiBold,
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 0,
                 ),
               ),
             ],
           ),
           const SizedBox(height: VSpacing.md),
-          const Text(
+          Text(
             'Loading...',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: VColors.outline,
+              color: Theme.of(context).colorScheme.outline,
             ),
           ),
         ],
@@ -75,13 +75,13 @@ class LeagueCard extends ConsumerWidget {
           children: [
             Icon(tierIcon, size: VIconSize.md, color: tierColor),
             const SizedBox(width: VSpacing.xs),
-            const Expanded(
+            Expanded(
               child: Text(
                 'LEAGUES',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontWeight: VFontWeight.semiBold,
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 0,
                 ),
               ),
@@ -111,9 +111,9 @@ class LeagueCard extends ConsumerWidget {
             calmLabel,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: VFontSize.bodySm,
-              color: VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: VFontWeight.semiBold,
             ),
           ),
@@ -123,9 +123,9 @@ class LeagueCard extends ConsumerWidget {
           '${userLeague.weeklyXp} XP this week',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.bodySm,
-            color: VColors.outline,
+            color: Theme.of(context).colorScheme.outline,
           ),
         ),
       ],

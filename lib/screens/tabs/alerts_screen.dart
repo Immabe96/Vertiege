@@ -445,7 +445,7 @@ class _SwipeBackground extends StatelessWidget {
       padding: padding,
       child: Icon(
         icon,
-        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+        color: Theme.of(context).colorScheme.onSurface,
         size: VIconSize.lg,
       ),
     );
@@ -537,12 +537,8 @@ class _NotificationCard extends StatelessWidget {
                                       ? VFontWeight.bold
                                       : VFontWeight.regular,
                                   color: unread
-                                      ? (isDark
-                                            ? VColors.onSurfaceDark
-                                            : VColors.onSurface)
-                                      : (isDark
-                                            ? VColors.onSurfaceVariantDark
-                                            : VColors.onSurfaceVariant),
+                                      ? Theme.of(context).colorScheme.onSurface
+                                      : Theme.of(context).colorScheme.onSurfaceVariant,
                                   height: VLineHeight.body,
                                 ),
                               ),
@@ -552,9 +548,7 @@ class _NotificationCard extends StatelessWidget {
                             TimeAgo(
                               DateTime.fromMillisecondsSinceEpoch(n.createdAt),
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],

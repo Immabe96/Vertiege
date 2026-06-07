@@ -22,8 +22,6 @@ class TrophyCase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
       child: Column(
@@ -47,7 +45,6 @@ class TrophyCase extends StatelessWidget {
           // Tier journey timeline
           _TimelineSection(
             resident: resident,
-            isDark: isDark,
             theme: theme,
           ),
           const SizedBox(height: VSpacing.md),
@@ -56,7 +53,6 @@ class TrophyCase extends StatelessWidget {
           if (resident.prestigeStars > 0)
             _PrestigeStarsSection(
               stars: resident.prestigeStars,
-              isDark: isDark,
               theme: theme,
             ),
           if (resident.prestigeStars > 0)
@@ -69,7 +65,7 @@ class TrophyCase extends StatelessWidget {
               Text(
                 'Achievement wall',
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: VColors.primary,
+                  color: theme.colorScheme.primary,
                   fontWeight: VFontWeight.bold,
                 ),
               ),
@@ -83,7 +79,6 @@ class TrophyCase extends StatelessWidget {
           if (resident.streakCount > 0)
             _StreakMilestonesSection(
               streak: resident.streakCount,
-              isDark: isDark,
               theme: theme,
             ),
         ],
@@ -94,12 +89,10 @@ class TrophyCase extends StatelessWidget {
 
 class _TimelineSection extends StatelessWidget {
   final Resident resident;
-  final bool isDark;
   final ThemeData theme;
 
   const _TimelineSection({
     required this.resident,
-    required this.isDark,
     required this.theme,
   });
 
@@ -113,7 +106,7 @@ class _TimelineSection extends StatelessWidget {
         Text(
           'Tier Journey',
           style: theme.textTheme.labelMedium?.copyWith(
-            color: VColors.primary,
+            color: theme.colorScheme.primary,
             fontWeight: VFontWeight.bold,
           ),
         ),
@@ -127,7 +120,6 @@ class _TimelineSection extends StatelessWidget {
             date: tierEntry.date,
             isCurrent: isCurrent,
             isLast: index == tierHistory.length - 1,
-            isDark: isDark,
             theme: theme,
           );
         }),
@@ -167,7 +159,6 @@ class _TimelineItem extends StatelessWidget {
   final String? date;
   final bool isCurrent;
   final bool isLast;
-  final bool isDark;
   final ThemeData theme;
 
   const _TimelineItem({
@@ -175,7 +166,6 @@ class _TimelineItem extends StatelessWidget {
     required this.date,
     required this.isCurrent,
     required this.isLast,
-    required this.isDark,
     required this.theme,
   });
 
@@ -221,9 +211,7 @@ class _TimelineItem extends StatelessWidget {
               Container(
                 width: 2,
                 height: 24,
-                color: isDark
-                    ? VColors.outlineVariantDark.withValues(alpha: 0.3)
-                    : VColors.outlineVariant.withValues(alpha: 0.3),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
               ),
           ],
         ),
@@ -240,7 +228,7 @@ class _TimelineItem extends StatelessWidget {
                       tier.label,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: isCurrent ? VFontWeight.bold : VFontWeight.regular,
-                        color: isCurrent ? color : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
+                        color: isCurrent ? color : theme.colorScheme.onSurface,
                       ),
                     ),
                     if (isCurrent) ...[
@@ -270,9 +258,7 @@ class _TimelineItem extends StatelessWidget {
                   Text(
                     'Achieved $date',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
               ],
@@ -286,12 +272,10 @@ class _TimelineItem extends StatelessWidget {
 
 class _PrestigeStarsSection extends StatelessWidget {
   final int stars;
-  final bool isDark;
   final ThemeData theme;
 
   const _PrestigeStarsSection({
     required this.stars,
-    required this.isDark,
     required this.theme,
   });
 
@@ -370,12 +354,10 @@ class _PrestigeStarsSection extends StatelessWidget {
 
 class _StreakMilestonesSection extends StatelessWidget {
   final int streak;
-  final bool isDark;
   final ThemeData theme;
 
   const _StreakMilestonesSection({
     required this.streak,
-    required this.isDark,
     required this.theme,
   });
 
@@ -395,7 +377,7 @@ class _StreakMilestonesSection extends StatelessWidget {
         Text(
           'Streak Milestones',
           style: theme.textTheme.labelMedium?.copyWith(
-            color: VColors.primary,
+            color: theme.colorScheme.primary,
             fontWeight: VFontWeight.bold,
           ),
         ),
@@ -411,16 +393,12 @@ class _StreakMilestonesSection extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: m.reached
                           ? VColors.tertiary.withValues(alpha: 0.2)
-                          : (isDark
-                              ? VColors.glassBackgroundDark
-                              : VColors.glassBackground),
+                          : theme.colorScheme.surface,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: m.reached
                             ? VColors.tertiary.withValues(alpha: 0.5)
-                            : (isDark
-                                ? VColors.glassBorderDark
-                                : VColors.glassBorder),
+                            : theme.colorScheme.outlineVariant,
                       ),
                     ),
                     child: Center(
@@ -429,9 +407,7 @@ class _StreakMilestonesSection extends StatelessWidget {
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: m.reached
                               ? VColors.tertiary
-                              : (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant),
+                              : theme.colorScheme.onSurfaceVariant,
                           fontWeight: m.reached
                               ? VFontWeight.bold
                               : VFontWeight.regular,
@@ -446,9 +422,7 @@ class _StreakMilestonesSection extends StatelessWidget {
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: m.reached
                           ? VColors.tertiary
-                          : (isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant),
+                          : theme.colorScheme.onSurfaceVariant,
                       fontSize: VFontSize.labelSm,
                     ),
                   ),

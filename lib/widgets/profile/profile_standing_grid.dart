@@ -36,9 +36,7 @@ class ProfileStandingGrid extends StatelessWidget {
       return Text(
         'No standing posts yet.',
         style: theme.textTheme.bodySmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       );
     }
@@ -48,7 +46,7 @@ class ProfileStandingGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.hub_outlined, size: VIconSize.md, color: VColors.primary),
+            Icon(Icons.hub_outlined, size: VIconSize.md, color: theme.colorScheme.primary),
             const SizedBox(width: VSpacing.xs),
             Text(
               'Standing',
@@ -61,9 +59,7 @@ class ProfileStandingGrid extends StatelessWidget {
               Text(
                 '+$overflow more',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
           ],
@@ -106,7 +102,7 @@ class ProfileStandingGrid extends StatelessWidget {
                       height: VIconSize.sm,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: VColors.primary,
+                        color: theme.colorScheme.primary,
                       ),
                     )
                   : const Icon(Icons.expand_more, size: VIconSize.md),

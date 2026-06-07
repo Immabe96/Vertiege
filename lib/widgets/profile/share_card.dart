@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../models/resident.dart';
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'cosmetic_avatar.dart';
 import 'name_banner.dart';
@@ -66,9 +65,9 @@ class _ShareCardState extends State<ShareCard> {
           padding: const EdgeInsets.all(20),
           margin: const EdgeInsets.all(VSpacing.lg),
           decoration: BoxDecoration(
-            color: VColors.glassBackground,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(VRadius.xxxl),
-            border: Border.all(color: VColors.glassBorder),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

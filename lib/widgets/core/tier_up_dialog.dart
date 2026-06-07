@@ -168,7 +168,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                         'You unlocked:',
                         style: theme.textTheme.labelMedium?.copyWith(
                           fontWeight: VFontWeight.bold,
-                          color: VColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: VSpacing.xs),
@@ -187,9 +187,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                                 child: Text(
                                   perk,
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ),
@@ -216,8 +214,8 @@ class _TierUpDialogState extends State<TierUpDialog> {
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
             shouldLoop: false,
-            colors: const [
-              VColors.primary,
+            colors: [
+              Theme.of(context).colorScheme.primary,
               VColors.tertiary,
               VColors.secondary,
               VColors.tierOldMoney,

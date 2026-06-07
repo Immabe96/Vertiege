@@ -694,16 +694,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Icon(
                 Icons.palette,
                 size: VIconSize.md,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: VSpacing.md),
               Text(
                 'Theme',
                 style: TextStyle(
                   fontSize: VFontSize.bodyMd,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -723,16 +721,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Icon(
                 Icons.text_fields,
                 size: VIconSize.md,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: VSpacing.md),
               Text(
                 'Text Size',
                 style: TextStyle(
                   fontSize: VFontSize.bodyMd,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -773,9 +769,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Icon(
                         Icons.contrast,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: VSpacing.md),
                       Expanded(
@@ -783,9 +777,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           'High contrast text',
                           style: TextStyle(
                             fontSize: VFontSize.bodyMd,
-                            color: isDark
-                                ? VColors.onSurfaceDark
-                                : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -825,9 +817,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Icon(
                             Icons.view_agenda_outlined,
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: VSpacing.md),
                           Expanded(
@@ -835,9 +825,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               'Compact chat',
                               style: TextStyle(
                                 fontSize: VFontSize.bodyMd,
-                                color: isDark
-                                    ? VColors.onSurfaceDark
-                                    : VColors.onSurface,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -872,9 +860,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final themeState = ref.watch(themeProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final variantColor = isDark
-        ? VColors.onSurfaceVariantDark
-        : VColors.onSurfaceVariant;
+    final variantColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return VHubPage(
       title: 'Settings',
@@ -1056,9 +1042,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(VRadius.md),
                     side: BorderSide(
-                      color: isDark
-                          ? VColors.outlineVariantDark
-                          : VColors.outlineVariant,
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
                   child: _appearancePanel(
@@ -1354,9 +1338,7 @@ class _ThemeSliderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final variantColor = isDark
-        ? VColors.onSurfaceVariantDark
-        : VColors.onSurfaceVariant;
+    final variantColor = Theme.of(context).colorScheme.onSurfaceVariant;
     return Row(
       children: [
         Icon(icon, color: variantColor, size: VIconSize.md),
@@ -1369,7 +1351,7 @@ class _ThemeSliderRow extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: VFontSize.bodyMd,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Slider(

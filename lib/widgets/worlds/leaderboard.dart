@@ -110,9 +110,9 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: VColors.glassBackground,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.md),
-          border: Border.all(color: VColors.glassBorder),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.lg),
@@ -148,9 +148,9 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: VColors.glassBackground,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: VColors.glassBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
@@ -244,10 +244,10 @@ class _RankBadge extends StatelessWidget {
         bg = VColors.tertiary;
         icon = Icons.emoji_events;
       case 2:
-        bg = VColors.outline;
+        bg = Theme.of(context).colorScheme.outline;
         icon = Icons.military_tech;
       case 3:
-        bg = VColors.outlineVariant;
+        bg = Theme.of(context).colorScheme.outlineVariant;
         icon = Icons.workspace_premium;
       default:
         return Container(

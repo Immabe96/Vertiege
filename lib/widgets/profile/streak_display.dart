@@ -26,7 +26,6 @@ class StreakDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final hasStreak = streakCount > 0;
     final next = _nextMilestone();
     final daysToNext = next != null ? next - streakCount : 0;
@@ -60,7 +59,7 @@ class StreakDisplay extends StatelessWidget {
                 Icons.local_fire_department,
                 color: hasStreak
                     ? VColors.warning
-                    : isDark ? VColors.outlineVariantDark : theme.colorScheme.outlineVariant,
+                    : theme.colorScheme.outlineVariant,
                 size: VIconSize.lg,
               ),
             ),
@@ -80,7 +79,7 @@ class StreakDisplay extends StatelessWidget {
                             fontWeight: VFontWeight.bold,
                             color: hasStreak
                                 ? VColors.warning
-                                : isDark ? VColors.onSurfaceVariantDark : theme.colorScheme.onSurfaceVariant,
+                                : theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -91,7 +90,7 @@ class StreakDisplay extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: VColors.primary.withValues(alpha: 0.15),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(
                               VRadius.pill,
                             ),
@@ -99,18 +98,18 @@ class StreakDisplay extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                               Icon(
                                 Icons.shield,
                                 size: 14,
-                                color: VColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 3),
                               Text(
                                 '$streakShields',
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontSize: VFontSize.labelSm,
                                   fontWeight: VFontWeight.bold,
-                                  color: VColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -133,7 +132,7 @@ class StreakDisplay extends StatelessWidget {
                               ? VColors.warning.withValues(
                                   alpha: 0.2 + (i * 0.08),
                                 )
-                              : isDark ? VColors.surfaceContainerHighestDark : theme.colorScheme.surfaceContainerHighest,
+                              : theme.colorScheme.surfaceContainerHighest,
                           border: isFilled
                               ? Border.all(
                                   color: VColors.warning.withValues(
@@ -141,7 +140,7 @@ class StreakDisplay extends StatelessWidget {
                                   ),
                                 )
                               : Border.all(
-                                  color: (isDark ? VColors.outlineVariantDark : theme.colorScheme.outlineVariant)
+                                  color: theme.colorScheme.outlineVariant
                                       .withValues(alpha: 0.2),
                                 ),
                         ),
@@ -168,7 +167,7 @@ class StreakDisplay extends StatelessWidget {
                     Text(
                       'Check in today to start your streak!',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: isDark ? VColors.outlineDark : theme.colorScheme.outline,
+                        color: theme.colorScheme.outline,
                       ),
                     )
                   else
@@ -184,9 +183,7 @@ class StreakDisplay extends StatelessWidget {
                     Text(
                       questNudge!,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

@@ -136,8 +136,8 @@ class _Fallback extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: VColors.surfaceContainerHigh,
-      child: const Center(
-        child: Icon(Icons.broken_image_outlined, color: VColors.onSurfaceVariant),
+        child: Center(
+          child: Icon(Icons.broken_image_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }

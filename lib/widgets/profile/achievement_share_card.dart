@@ -139,9 +139,9 @@ class AchievementShareCard extends StatelessWidget {
       width: 360,
       height: 360,
       decoration: BoxDecoration(
-        color: VColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(VRadius.xxxl),
-        border: Border.all(color: VColors.glassBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: _categoryColor.withValues(alpha: 0.18),
@@ -200,7 +200,7 @@ class AchievementShareCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: VFontSize.headlineMd,
                     fontWeight: VFontWeight.bold,
-                    color: VColors.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                     height: 1.2,
                   ),
                 ),
@@ -213,7 +213,7 @@ class AchievementShareCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: VFontSize.bodyMd,
-                    color: VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),
@@ -228,7 +228,7 @@ class AchievementShareCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [VColors.surfaceBright, VColors.surface],
+                  colors:                   [Theme.of(context).colorScheme.surfaceBright, Theme.of(context).colorScheme.surface],
                 ),
               ),
               padding: const EdgeInsets.symmetric(
@@ -277,7 +277,7 @@ class AchievementShareCard extends StatelessWidget {
                     'Earned by ${resident.name}',
                     style: TextStyle(
                       fontSize: VFontSize.bodyMd,
-                      color: VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -286,7 +286,7 @@ class AchievementShareCard extends StatelessWidget {
                     '${resident.tier.label}  •  $totalXp XP',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: VColors.outline,
+                      color: Theme.of(context).colorScheme.outline,
                       letterSpacing: 0,
                     ),
                   ),
@@ -298,7 +298,7 @@ class AchievementShareCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: VColors.outline,
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
                   const SizedBox(height: VSpacing.lg),

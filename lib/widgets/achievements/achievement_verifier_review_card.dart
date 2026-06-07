@@ -75,11 +75,11 @@ class _AchievementVerifierReviewCardState
             if (definition != null)
               AchievementBadgeAvatar(
                 achievement: definition,
-                accentColor: VColors.primary,
+                accentColor: Theme.of(context).colorScheme.primary,
                 size: VBadgeSize.avatar,
               )
             else
-              Icon(Icons.emoji_events, color: VColors.primary, size: VBadgeSize.avatar),
+              Icon(Icons.emoji_events, color: Theme.of(context).colorScheme.primary, size: VBadgeSize.avatar),
             const SizedBox(width: VSpacing.md),
             Expanded(
               child: Column(
@@ -95,25 +95,21 @@ class _AchievementVerifierReviewCardState
                   Text(
                     s.residentName,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: VFontWeight.semiBold,
                     ),
                   ),
                   Text(
                     '${tier.label} · ${s.residentTotalXp} XP total',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   if (submittedLabel != null)
                     Text(
                       'Submitted $submittedLabel',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                 ],
@@ -138,7 +134,7 @@ class _AchievementVerifierReviewCardState
           Text(
             s.achievementDescription!.trim(),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -180,9 +176,7 @@ class _AchievementVerifierReviewCardState
             'No image proof (manual / text-only submission).',
             style: theme.textTheme.bodySmall?.copyWith(
               fontStyle: FontStyle.italic,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -206,9 +200,7 @@ class _ResidentHistorySection extends StatelessWidget {
       return Text(
         'Loading resident history…',
         style: theme.textTheme.labelSmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       );
     }
@@ -218,9 +210,7 @@ class _ResidentHistorySection extends StatelessWidget {
       return Text(
         'First achievement submission on record for this resident.',
         style: theme.textTheme.labelSmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       );
     }
@@ -238,9 +228,7 @@ class _ResidentHistorySection extends StatelessWidget {
         Text(
           '${h.verifiedCount} verified · ${h.rejectedCount} rejected (all time)',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         if (h.recentRejections.isNotEmpty) ...[

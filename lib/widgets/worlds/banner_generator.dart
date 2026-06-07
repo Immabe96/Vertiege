@@ -93,14 +93,14 @@ class _BannerGeneratorState extends State<BannerGenerator> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: VColors.surface.withValues(alpha: 0.7),
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                       child: Text(
                         'Variant ${index + 1}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: VFontSize.labelSm,
-                          color: VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -135,20 +135,20 @@ class _GeneratingState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: VSpacing.lg),
-          const Text(
+          Text(
             'The Herald is generating banner variants...',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: VSpacing.sm),
-          const Text(
+          Text(
             'Analyzing world aesthetics and prestige patterns.',
             style: TextStyle(
               fontSize: VFontSize.labelSm,
-              color: VColors.outline,
+              color: Theme.of(context).colorScheme.outline,
             ),
             textAlign: TextAlign.center,
           ),

@@ -539,9 +539,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Text(
           'Type to search messages in #${_channelName ?? 'channel'}',
           style: TextStyle(
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       );
@@ -607,26 +605,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Icon(
               Icons.search,
               size: 64,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: VSpacing.md),
             Text(
               'Search worlds, people, and posts',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: VSpacing.xs),
             Text(
               'Type at least 2 characters',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark.withValues(alpha: 0.6)
-                    : VColors.onSurfaceVariant.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -642,9 +634,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Icon(
               Icons.search_off,
               size: VIconSize.xl,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: VSpacing.sm),
             Text('No results for "$_query"', style: theme.textTheme.bodyLarge),
@@ -677,9 +667,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (_category == _SearchCategory.all)
               Divider(
                 height: 1,
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
           ],
           if (_category == _SearchCategory.all ||
@@ -702,9 +690,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (_category == _SearchCategory.all)
               Divider(
                 height: 1,
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
           ],
           if (_category == _SearchCategory.all ||
@@ -741,17 +727,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               Icon(
                 Icons.history,
                 size: VIconSize.md,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: VSpacing.sm),
               Text(
                 'Recent searches',
                 style: theme.textTheme.labelLarge?.copyWith(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: VFontWeight.bold,
                 ),
               ),
@@ -820,7 +802,7 @@ class _SectionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: VSpacing.sm),
-          Icon(icon, size: VIconSize.md, color: VColors.primary),
+          Icon(icon, size: VIconSize.md, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: VSpacing.sm),
           Text(
             title,
@@ -835,13 +817,13 @@ class _SectionHeader extends StatelessWidget {
               vertical: 2,
             ),
             decoration: BoxDecoration(
-              color: VColors.primary.withValues(alpha: 0.15),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(VRadius.pill),
             ),
             child: Text(
               '$count',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: VFontWeight.bold,
               ),
             ),
@@ -868,9 +850,7 @@ class _EmptySection extends StatelessWidget {
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -989,9 +969,7 @@ class _PersonTile extends ConsumerWidget {
                 ? Text(
                     resident.profession!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   )
                 : null,

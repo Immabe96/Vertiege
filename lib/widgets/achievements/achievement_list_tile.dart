@@ -87,9 +87,7 @@ class AchievementListTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 2),
@@ -112,13 +110,13 @@ class AchievementListTile extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: VColors.primary.withValues(alpha: 0.12),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(VRadius.pill),
                   ),
                   child: Text(
                     'Auto',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: VFontWeight.semiBold,
                       fontSize: VFontSize.labelSm,
                     ),
@@ -149,9 +147,7 @@ class AchievementListTile extends StatelessWidget {
           ? Icon(
               FIcons.chevronRight,
               size: 18,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             )
           : Icon(Icons.check_circle, size: 20, color: accent),
     );
@@ -193,7 +189,7 @@ class _ProofThumbnail extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(
-            color: VColors.primary.withValues(alpha: 0.35),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
           ),
         ),
         child: image,

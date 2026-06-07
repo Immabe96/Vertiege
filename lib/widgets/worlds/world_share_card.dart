@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import '../../models/world.dart';
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import 'world_banner.dart';
@@ -54,9 +53,9 @@ class WorldShareCard extends StatelessWidget {
       width: 360,
       height: 640,
       decoration: BoxDecoration(
-        color: VColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(VRadius.xxxl),
-        border: Border.all(color: VColors.glassBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: _tierColor.withValues(alpha: 0.18),
@@ -89,7 +88,7 @@ class WorldShareCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [VColors.surfaceBright, VColors.surface],
+                  colors: [Theme.of(context).colorScheme.surfaceBright, Theme.of(context).colorScheme.surface],
                 ),
               ),
               padding: const EdgeInsets.symmetric(
@@ -153,7 +152,7 @@ class WorldShareCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: VFontSize.headlineLg,
                       fontWeight: VFontWeight.bold,
-                      color: VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                       height: 1.2,
                     ),
                   ),
@@ -168,7 +167,7 @@ class WorldShareCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: VFontSize.bodyMd,
-                      color: VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -188,7 +187,7 @@ class WorldShareCard extends StatelessWidget {
                       Container(
                         width: 1,
                         height: 32,
-                        color: VColors.outlineVariant,
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
                       _ShareStat(
                         icon: Icons.auto_awesome,
@@ -199,7 +198,7 @@ class WorldShareCard extends StatelessWidget {
                       Container(
                         width: 1,
                         height: 32,
-                        color: VColors.outlineVariant,
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
                       _ShareStat(
                         icon: Icons.local_fire_department,
@@ -261,7 +260,7 @@ class WorldShareCard extends StatelessWidget {
                     'Sovereign: ${world.sovereignName}',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: VColors.outline,
+                      color: Theme.of(context).colorScheme.outline,
                       letterSpacing: 0,
                     ),
                   ),
@@ -314,14 +313,14 @@ class _ShareStat extends StatelessWidget {
           style: TextStyle(
             fontSize: VFontSize.headlineMd,
             fontWeight: VFontWeight.bold,
-            color: VColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: VColors.outline,
+            color: Theme.of(context).colorScheme.outline,
             letterSpacing: 0,
           ),
         ),

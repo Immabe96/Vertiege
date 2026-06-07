@@ -35,18 +35,18 @@ class SeasonSnapshotCard extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.auto_awesome,
               size: VIconSize.md,
-              color: VColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: VSpacing.xs),
-            const Text(
+            Text(
               'SEASON 1',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
                 fontWeight: VFontWeight.semiBold,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 letterSpacing: 0,
               ),
             ),
@@ -55,10 +55,10 @@ class SeasonSnapshotCard extends ConsumerWidget {
         const SizedBox(height: VSpacing.sm),
         Text(
           'The Big Bang',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.bodyMd,
             fontWeight: VFontWeight.bold,
-            color: VColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -66,9 +66,9 @@ class SeasonSnapshotCard extends ConsumerWidget {
         const SizedBox(height: VSpacing.xs),
         Text(
           def.tagline,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: VColors.outline,
+            color: Theme.of(context).colorScheme.outline,
           ),
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
@@ -76,9 +76,9 @@ class SeasonSnapshotCard extends ConsumerWidget {
         const SizedBox(height: VSpacing.xs),
         Text(
           '$unclaimed open · $growing growing · $joinedCount joined',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: VColors.primary,
+            color: Theme.of(context).colorScheme.primary,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -86,9 +86,9 @@ class SeasonSnapshotCard extends ConsumerWidget {
         const SizedBox(height: VSpacing.xs),
         Text(
           CalmRanking.activeResidentsLabel(activeResidents),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: VColors.outline,
+            color: Theme.of(context).colorScheme.outline,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,

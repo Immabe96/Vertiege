@@ -174,7 +174,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
         expand: false,
         builder: (context, scrollController) {
           return Material(
-            color: isDark ? VColors.surfaceDark : VColors.surface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(VRadius.xl),
             ),
@@ -193,9 +193,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.outlineVariantDark
-                          : VColors.outlineVariant,
+                      color: Theme.of(context).colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(VRadius.pill),
                     ),
                   ),
@@ -224,9 +222,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                           Text(
                             widget.achievement.description,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: VSpacing.sm),
@@ -283,9 +279,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                                   ? 'Other residents can see this badge.'
                                   : 'Hidden from your profile wall.',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             value: profileVisible,
@@ -379,15 +373,13 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                             : VColors.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(VRadius.xl),
                         border: Border.all(
-                          color: isDark
-                              ? VColors.outlineVariantDark
-                              : VColors.outlineVariant,
+                          color: Theme.of(context).colorScheme.outlineVariant,
                         ),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
                           Icons.add_photo_alternate_outlined,
-                          color: VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           size: VIconSize.xl,
                         ),
                       ),

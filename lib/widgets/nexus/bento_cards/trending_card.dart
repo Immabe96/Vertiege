@@ -39,18 +39,18 @@ class TrendingCard extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.trending_up,
               size: VIconSize.sm,
-              color: VColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: VSpacing.xs),
-            const Text(
+            Text(
               'TRENDING WORLDS',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
                 fontWeight: VFontWeight.semiBold,
-                color: VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 letterSpacing: 0,
               ),
             ),
@@ -77,13 +77,13 @@ class TrendingCard extends ConsumerWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: VColors.primary.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(VRadius.sm),
                       ),
                       child: Icon(
                         iconData,
                         size: VIconSize.sm,
-                        color: VColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     const SizedBox(width: VSpacing.sm),
@@ -93,19 +93,19 @@ class TrendingCard extends ConsumerWidget {
                         children: [
                           Text(
                             world.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: VFontSize.bodyMd,
                               fontWeight: VFontWeight.bold,
-                              color: VColors.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             'Prestige ${world.prestige}  •  ${world.memberCount} members',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: VFontSize.labelSm,
-                              color: VColors.outline,
+                              color: Theme.of(context).colorScheme.outline,
                             ),
                           ),
                         ],

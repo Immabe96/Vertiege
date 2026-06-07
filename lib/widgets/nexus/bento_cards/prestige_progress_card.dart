@@ -65,46 +65,46 @@ class PrestigeProgressCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'YOUR TIER',
                         style: TextStyle(
                           fontSize: VFontSize.labelSm,
                           fontWeight: VFontWeight.semiBold,
-                          color: VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       Text(
                         tierLabel.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: VFontSize.labelSm,
                           fontWeight: VFontWeight.bold,
-                          color: VColors.onSurface,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         '$totalXp XP',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: VFontSize.headlineMd,
                           fontWeight: VFontWeight.bold,
-                          color: VColors.onSurface,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.help_outline,
                   size: VIconSize.sm,
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
             const SizedBox(height: VSpacing.xxs),
             Text(
               ProgressionGlossary.xpToNextTier(totalXp, tierNum),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: VFontSize.labelSm,
-                color: VColors.outline,
+                color: Theme.of(context).colorScheme.outline,
               ),
             ),
             const SizedBox(height: VSpacing.sm),
@@ -114,17 +114,17 @@ class PrestigeProgressCard extends ConsumerWidget {
                 child: LinearProgressIndicator(
                   value: progressFraction,
                   minHeight: 4,
-                  backgroundColor: VColors.glassBorder,
+                  backgroundColor: Theme.of(context).colorScheme.outlineVariant,
                   valueColor: AlwaysStoppedAnimation<Color>(tierColor),
                 ),
               )
             else
               ClipRRect(
                 borderRadius: BorderRadius.circular(VRadius.sm),
-                child: const LinearProgressIndicator(
+                child: LinearProgressIndicator(
                   value: 1.0,
                   minHeight: 4,
-                  backgroundColor: VColors.glassBorder,
+                  backgroundColor: Theme.of(context).colorScheme.outlineVariant,
                   valueColor: AlwaysStoppedAnimation<Color>(VColors.tierApex),
                 ),
               ),

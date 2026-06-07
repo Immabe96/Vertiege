@@ -281,7 +281,7 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                VColors.primary.withValues(alpha: 0.2),
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                 VColors.tertiary.withValues(alpha: 0.1),
               ],
             ),
@@ -309,7 +309,7 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
                   'Marketplace purchases route $taxRate% to this treasury',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -427,9 +427,7 @@ class _StatCard extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: VFontSize.labelSm,
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -485,9 +483,7 @@ class _TransactionTile extends StatelessWidget {
                     transaction.description,
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

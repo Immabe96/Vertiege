@@ -333,9 +333,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                         decoration: BoxDecoration(
                           color: i <= _stage - 1
                               ? VColors.tertiary
-                              : (isDark
-                                    ? VColors.glassBorderDark
-                                    : VColors.glassBorder),
+                              : (Theme.of(context).colorScheme.outlineVariant),
                           borderRadius: BorderRadius.circular(VRadius.sm),
                         ),
                       );
@@ -351,9 +349,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 left: VSpacing.sm,
                 child: IconButton(
                   icon: const Icon(VIcons.chevronRight, size: 20),
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   onPressed: _prevStage,
                 ),
               ),
@@ -420,7 +416,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.displayXl,
               fontWeight: VFontWeight.bold,
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
               height: VLineHeight.display,
             ),
           ),
@@ -441,9 +437,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: VLineHeight.body,
             ),
           ),
@@ -485,7 +479,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
               height: VLineHeight.headline,
             ),
           ),
@@ -494,9 +488,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Pick 1-2 signals so Vertiege can route your first world with intent.',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
@@ -543,9 +535,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
               '${_selectedInterests.length}/2 selected',
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -588,7 +578,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -596,9 +586,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'This is not a random recommendation. It is your first room, with a charter, roles, rules, and a live general channel.',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
@@ -658,9 +646,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                                   style: TextStyle(
                                     fontSize: VFontSize.headlineMd,
                                     fontWeight: VFontWeight.bold,
-                                    color: isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                                 Text(
@@ -681,9 +667,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                         foundation.premise,
                         style: TextStyle(
                           fontSize: VFontSize.bodyMd,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                           height: VLineHeight.body,
                         ),
                       ),
@@ -776,7 +760,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
               height: VLineHeight.headline,
             ),
           ),
@@ -785,9 +769,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Pick the first orientation action you want waiting after The Gate.',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
@@ -833,9 +815,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 fontSize: VFontSize.labelSm,
                 color: _selectedGoal != null
                     ? VColors.tertiary
-                    : (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant),
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -947,7 +927,7 @@ class _Card extends StatelessWidget {
             : VColors.surfaceContainerLow,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: child,
@@ -1016,14 +996,12 @@ class _InterestCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? glow.withValues(alpha: 0.12)
-              : (isDark
-                    ? VColors.glassBackgroundDark
-                    : VColors.glassBackground),
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.md),
           border: Border.all(
             color: isSelected
                 ? glow.withValues(alpha: 0.5)
-                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
+                : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -1068,9 +1046,7 @@ class _InterestCard extends StatelessWidget {
                       : VFontWeight.semiBold,
                   color: isSelected
                       ? glow
-                      : (isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant),
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: VSpacing.xs),
@@ -1080,9 +1056,7 @@ class _InterestCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: VFontSize.labelMd,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.2,
                 ),
               ),
@@ -1124,14 +1098,12 @@ class _GoalCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? VColors.tertiary.withValues(alpha: 0.12)
-              : (isDark
-                    ? VColors.glassBackgroundDark
-                    : VColors.glassBackground),
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(
             color: isSelected
                 ? VColors.tertiary.withValues(alpha: 0.5)
-                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
+                : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1160,7 +1132,7 @@ class _GoalCard extends StatelessWidget {
                       fontWeight: isSelected
                           ? VFontWeight.bold
                           : VFontWeight.semiBold,
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: VSpacing.xs),
@@ -1176,9 +1148,7 @@ class _GoalCard extends StatelessWidget {
                     goal.description,
                     style: TextStyle(
                       fontSize: VFontSize.labelMd,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.2,
                     ),
                   ),

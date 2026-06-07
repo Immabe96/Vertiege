@@ -32,11 +32,11 @@ class LuminaryNameplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     if (name.isEmpty) {
       return Text(
         'Traveler',
-        style: _buildStyle(tier, isDark: isDark),
+        style: _buildStyle(tier, colorScheme: colorScheme),
         textAlign: textAlign,
         maxLines: maxLines,
         overflow: overflow,
@@ -60,7 +60,7 @@ class LuminaryNameplate extends StatelessWidget {
       context,
       Text(
         name,
-        style: _buildStyle(tier, isDark: isDark),
+        style: _buildStyle(tier, colorScheme: colorScheme),
         textAlign: textAlign,
         maxLines: maxLines,
         overflow: overflow,
@@ -70,7 +70,7 @@ class LuminaryNameplate extends StatelessWidget {
 
   Widget _buildTitledNameplate(BuildContext context, Widget nameWidget) {
     if (title == null) return nameWidget;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: textAlign == TextAlign.center
@@ -83,7 +83,7 @@ class LuminaryNameplate extends StatelessWidget {
           style: TextStyle(
             fontSize: fontSize * 0.75,
             fontStyle: FontStyle.italic,
-            color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
           textAlign: textAlign,
           maxLines: 1,
@@ -93,7 +93,7 @@ class LuminaryNameplate extends StatelessWidget {
     );
   }
 
-  TextStyle _buildStyle(int tier, {bool isDark = false}) {
+  TextStyle _buildStyle(int tier, {ColorScheme? colorScheme}) {
     final baseStyle = TextStyle(fontSize: fontSize);
 
     switch (tier) {
@@ -112,10 +112,10 @@ class LuminaryNameplate extends StatelessWidget {
       case 3:
         return baseStyle.copyWith(
           fontWeight: VFontWeight.bold,
-          color: VColors.primary,
+          color: colorScheme?.primary ?? VColors.primary,
           shadows: [
             Shadow(
-              color: VColors.primary.withValues(alpha: 0.2),
+              color: (colorScheme?.primary ?? VColors.primary).withValues(alpha: 0.2),
               blurRadius: 8,
             ),
           ],
@@ -123,13 +123,13 @@ class LuminaryNameplate extends StatelessWidget {
       case 2:
         return baseStyle.copyWith(
           fontWeight: VFontWeight.semiBold,
-          color: VColors.primary,
+          color: colorScheme?.primary ?? VColors.primary,
         );
       case 1:
       default:
         return baseStyle.copyWith(
           fontWeight: VFontWeight.regular,
-          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+          color: colorScheme?.onSurface ?? VColors.onSurface,
         );
     }
   }

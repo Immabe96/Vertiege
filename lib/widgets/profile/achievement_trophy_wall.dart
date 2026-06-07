@@ -24,8 +24,6 @@ class AchievementTrophyWall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     final verified = achievements
         .where((a) => a.status == AchievementStatus.verified)
         .toList()
@@ -39,9 +37,7 @@ class AchievementTrophyWall extends StatelessWidget {
       return Text(
         'No verified achievements yet—submit proof from the achievements hub.',
         style: theme.textTheme.bodySmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       );
     }
@@ -57,7 +53,7 @@ class AchievementTrophyWall extends StatelessWidget {
             Text(
               '${verified.length} verified',
               style: theme.textTheme.labelMedium?.copyWith(
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: VFontWeight.bold,
               ),
             ),
@@ -147,10 +143,10 @@ class _TrophyCell extends StatelessWidget {
                       color: VColors.surfaceContainerHigh,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.visibility_off,
                       size: 12,
-                      color: VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),

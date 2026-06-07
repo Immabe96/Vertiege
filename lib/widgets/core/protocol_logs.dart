@@ -25,12 +25,12 @@ class ProtocolLogs extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: VSpacing.sm),
-              const Text(
+              Text(
                 'PROTOCOL LOGS',
                 style: TextStyle(
                   fontSize: VFontSize.headlineMd,
                   fontWeight: VFontWeight.semiBold,
-                  color: VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -41,10 +41,10 @@ class ProtocolLogs extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: VSpacing.xs),
               child: Text(
                 log,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'JetBrains Mono',
                   fontSize: VFontSize.labelSm,
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.6,
                 ),
               ),

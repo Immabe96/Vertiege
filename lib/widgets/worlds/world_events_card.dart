@@ -48,7 +48,7 @@ class WorldEventsCard extends ConsumerWidget {
               Icon(
                 Icons.event_note,
                 size: VIconSize.sm,
-                color: VColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: VSpacing.sm),
               Text(
@@ -87,7 +87,7 @@ class WorldEventsCard extends ConsumerWidget {
               leading: Icon(
                 isRsvp ? Icons.event_available : Icons.event,
                 size: VIconSize.md,
-                color: isRsvp ? VColors.primary : cs.onSurfaceVariant,
+                color: isRsvp ? Theme.of(context).colorScheme.primary : cs.onSurfaceVariant,
               ),
               title: Text(event.title, style: theme.textTheme.bodyMedium),
               subtitle: Text(

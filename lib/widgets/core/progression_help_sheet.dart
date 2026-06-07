@@ -17,7 +17,7 @@ class ProgressionHelpSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final shown = ProgressionGlossary.entriesFor(focus);
 
     return Padding(
@@ -98,8 +98,8 @@ class _EntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final border = highlighted
-        ? VColors.primary
-        : (isDark ? VColors.outlineVariantDark : VColors.outlineVariant);
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.outlineVariant;
 
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
@@ -134,9 +134,7 @@ class _EntryCard extends StatelessWidget {
           Text(
             entry.detail,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.45,
             ),
           ),

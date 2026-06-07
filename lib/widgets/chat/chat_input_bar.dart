@@ -103,26 +103,26 @@ class _ChatInputBarState extends State<ChatInputBar> {
       controller: widget.controller,
       onChanged: widget.onChanged,
       style: TextStyle(
-        color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: TextStyle(
-          color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        border: const UnderlineInputBorder(
-          borderSide: BorderSide(color: VColors.glassBorder),
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: VColors.glassBorder),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: VColors.primary),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
         filled: true,
         fillColor: widget.useCommuneStyle
             ? VCommuneColors.surfaceTertiaryOf(brightness)
-            : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
+            : Theme.of(context).colorScheme.surface,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: VSpacing.md,
@@ -204,7 +204,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 tooltip: 'GIF & stickers',
                 color: widget.useCommuneStyle
                     ? VCommuneColors.textMuted
-                    : (isDark ? VColors.onSurfaceVariantDark : VColors.outline),
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 iconSize: VIconSize.lg,
                 padding: EdgeInsets.zero,
               ),
@@ -231,7 +231,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                     : 'Attach image',
                 color: widget.useCommuneStyle
                     ? VCommuneColors.textMuted
-                    : (isDark ? VColors.onSurfaceVariantDark : VColors.outline),
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 iconSize: VIconSize.lg,
                 padding: EdgeInsets.zero,
               ),
@@ -248,9 +248,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                         : VColors.tertiary)
                     : (widget.useCommuneStyle
                         ? VCommuneColors.textMuted
-                        : (isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.outline)),
+                        : Theme.of(context).colorScheme.onSurfaceVariant),
                 iconSize: VIconSize.lg,
                 padding: EdgeInsets.zero,
               ),
@@ -264,7 +262,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
               widget.typingIndicator!,
               style: TextStyle(
                 fontSize: VFontSize.labelSm,
-                color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -399,16 +397,16 @@ class _ReplyQuoteBlock extends StatelessWidget {
         vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: VColors.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: VColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.reply_rounded,
             size: VIconSize.sm,
-            color: VColors.primary,
+            color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: VSpacing.xs),
           Expanded(
@@ -417,10 +415,10 @@ class _ReplyQuoteBlock extends StatelessWidget {
               children: [
                 Text(
                   'Replying to $replyToName',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: VFontSize.labelSm,
                     fontWeight: VFontWeight.semiBold,
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 if (replyToContent != null)
@@ -428,9 +426,7 @@ class _ReplyQuoteBlock extends StatelessWidget {
                     replyToContent!,
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.outline,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

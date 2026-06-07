@@ -211,7 +211,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: _prevStep,
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
@@ -370,9 +370,7 @@ class _ProfileTab extends StatelessWidget {
                         ? Icon(
                             Icons.person_outline,
                             size: 40,
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           )
                         : null,
                   ),
@@ -388,15 +386,13 @@ class _ProfileTab extends StatelessWidget {
                             : VColors.surfaceContainerHigh,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isDark
-                              ? VColors.outlineVariantDark
-                              : VColors.outlineVariant,
+                          color: Theme.of(context).colorScheme.outlineVariant,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.camera_alt,
                         size: 16,
-                        color: VColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -412,7 +408,7 @@ class _ProfileTab extends StatelessWidget {
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
             style: TextStyle(
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             decoration: InputDecoration(
               labelText: 'Display name',
@@ -434,7 +430,7 @@ class _ProfileTab extends StatelessWidget {
             textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.done,
             style: TextStyle(
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             decoration: InputDecoration(
               labelText: 'Bio',
@@ -453,9 +449,7 @@ class _ProfileTab extends StatelessWidget {
             'Profession (optional)',
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: VFontWeight.semiBold,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -475,7 +469,7 @@ class _ProfileTab extends StatelessWidget {
                 labelStyle: TextStyle(
                   color: selected
                       ? (isDark ? VColors.primaryLight : VColors.primary)
-                      : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
+                      : (Theme.of(context).colorScheme.onSurface),
                   fontWeight: selected ? VFontWeight.semiBold : null,
                 ),
                 backgroundColor: isDark
@@ -485,10 +479,10 @@ class _ProfileTab extends StatelessWidget {
                   color: selected
                       ? (isDark
                             ? VColors.primaryLight.withValues(alpha: 0.4)
-                            : VColors.primary.withValues(alpha: 0.4))
+                            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.4))
                       : (isDark
                             ? VColors.outlineVariantDark
-                            : VColors.outlineVariant),
+                            : Theme.of(context).colorScheme.outlineVariant),
                 ),
               );
             }).toList(),
@@ -506,9 +500,7 @@ class _ProfileTab extends StatelessWidget {
             'Self-declared — verification coming later.\nAll users start at the bottom and rank up.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -651,9 +643,7 @@ class _GateTabState extends State<_GateTab> {
           Text(
             'Question ${_currentIndex + 1} of ${_questions.length}',
             style: theme.textTheme.labelMedium?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -686,7 +676,7 @@ class _GateTabState extends State<_GateTab> {
                       border: Border.all(
                         color: isDark
                             ? VColors.outlineVariantDark
-                            : VColors.outlineVariant,
+                            : Theme.of(context).colorScheme.outlineVariant,
                       ),
                     ),
                     child: Row(
@@ -706,7 +696,7 @@ class _GateTabState extends State<_GateTab> {
                             _iconForInterest(option.$2),
                             color: isDark
                                 ? VColors.primaryLight
-                                : VColors.primary,
+                                : Theme.of(context).colorScheme.primary,
                             size: VIconSize.lg,
                           ),
                         ),
@@ -811,9 +801,7 @@ class _WorldTab extends ConsumerWidget {
             _starterWorldsCopy(ref),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.45,
             ),
           ),
@@ -850,9 +838,7 @@ class _WorldTab extends ConsumerWidget {
             'Recommended path: profile → join worlds → Nexus feed → achievement proof.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

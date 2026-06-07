@@ -593,7 +593,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
   Color _getPrestigeTierColor(int prestige) {
     if (prestige >= 40) return VColors.tierApex;
-    if (prestige >= 20) return VColors.primary;
+    if (prestige >= 20) return Theme.of(context).colorScheme.primary;
     return VColors.tierHustler;
   }
 
@@ -635,9 +635,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -1016,23 +1014,21 @@ class _StatChip extends StatelessWidget {
             borderRadius: BorderRadius.circular(VRadius.lg),
             child: Column(
                 children: [
-                  Icon(icon, size: VIconSize.md, color: VColors.primary),
+                  Icon(icon, size: VIconSize.md, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(height: VSpacing.xs),
                   Text(
                     value,
                     style: TextStyle(
                       fontSize: VFontSize.headlineSm,
                       fontWeight: VFontWeight.bold,
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     label,
                     style: TextStyle(
                       fontSize: VFontSize.labelMd,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -1072,11 +1068,9 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bgColor = isDark ? VColors.surfaceDark : VColors.surface;
-    final dividerColor = isDark ? VColors.outlineDark : VColors.outline;
-    final unselectedColor = isDark
-        ? VColors.onSurfaceVariantDark
-        : VColors.onSurfaceVariant;
+    final bgColor = Theme.of(context).colorScheme.surface;
+    final dividerColor = Theme.of(context).colorScheme.outline;
+    final unselectedColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return SizedBox(
       height: _tabBarHeight,

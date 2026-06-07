@@ -94,7 +94,7 @@ class PostItem extends ConsumerWidget {
           decoration: BoxDecoration(
             color: isVerifiedMoment
                 ? VColors.brand.withValues(alpha: 0.06)
-                : VColors.glassBackground,
+                : theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border(
               left: isVerifiedMoment
@@ -104,21 +104,21 @@ class PostItem extends ConsumerWidget {
                       color: VColors.tertiary.withValues(alpha: 0.5),
                       width: 3,
                     )
-                  : BorderSide(color: VColors.glassBorder),
+                  : BorderSide(color: theme.colorScheme.outlineVariant),
               top: BorderSide(
                 color: isVerifiedMoment
                     ? VColors.brand.withValues(alpha: 0.25)
-                    : VColors.glassBorder,
+                    : theme.colorScheme.outlineVariant,
               ),
               right: BorderSide(
                 color: isVerifiedMoment
                     ? VColors.brand.withValues(alpha: 0.25)
-                    : VColors.glassBorder,
+                    : theme.colorScheme.outlineVariant,
               ),
               bottom: BorderSide(
                 color: isVerifiedMoment
                     ? VColors.brand.withValues(alpha: 0.25)
-                    : VColors.glassBorder,
+                    : theme.colorScheme.outlineVariant,
               ),
             ),
           ),
@@ -344,14 +344,14 @@ class PostItem extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: VColors.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(VRadius.pill),
-                            border: Border.all(color: VColors.outlineVariant),
+                            border: Border.all(color: theme.colorScheme.outlineVariant),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(meta.icon, style: const TextStyle(fontSize: VFontSize.labelMd)),
                               const SizedBox(width: VSpacing.xxs),
-                              Text(meta.label, style: const TextStyle(fontSize: VFontSize.labelSm, color: VColors.onSurfaceVariant)),
+                              Text(meta.label, style: TextStyle(fontSize: VFontSize.labelSm, color: theme.colorScheme.onSurfaceVariant)),
                             ],
                           ),
                         );
@@ -530,8 +530,8 @@ class PostItem extends ConsumerWidget {
                     icon: const Icon(VIcons.user, size: VIconSize.sm),
                     label: const Text('View Profile'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: VColors.primary,
-                      side: const BorderSide(color: VColors.glassBorder),
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                   ),
                 ],
@@ -545,8 +545,8 @@ class PostItem extends ConsumerWidget {
                 icon: const Icon(VIcons.user, size: VIconSize.sm),
                 label: const Text('View My Profile'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: VColors.primary,
-                  side: const BorderSide(color: VColors.glassBorder),
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
               ),
             const SizedBox(height: VSpacing.lg),
@@ -703,7 +703,7 @@ class _RichPostContentState extends State<_RichPostContent> {
       fontWeight: VFontWeight.semiBold,
     );
     final hashtagStyle = textStyle?.copyWith(
-      color: VColors.primary,
+      color: widget.theme.colorScheme.primary,
       fontWeight: VFontWeight.semiBold,
     );
     final boldStyle = textStyle?.copyWith(fontWeight: VFontWeight.bold);
@@ -813,23 +813,24 @@ class _PollDisplay extends ConsumerWidget {
     final hasVoted =
         resident != null && poll.votedResidentIds.contains(resident.id);
     final totalVotes = poll.totalVotes;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: VColors.glassBackground,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(color: VColors.glassBorder),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             poll.question,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: VFontSize.headlineMd,
               fontWeight: VFontWeight.semiBold,
-              color: VColors.onSurface,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           if (poll.isMultiChoice)
@@ -839,7 +840,7 @@ class _PollDisplay extends ConsumerWidget {
                 'Choose as many as you like',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
-                  color: VColors.outline,
+                  color: theme.colorScheme.outline,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -868,12 +869,12 @@ class _PollDisplay extends ConsumerWidget {
                     vertical: VSpacing.sm + 2,
                   ),
                   decoration: BoxDecoration(
-                    color: VColors.glassBackground,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(VRadius.sm),
                     border: Border.all(
                       color: isSelected
                           ? VColors.tertiary
-                          : VColors.glassBorder,
+                          : theme.colorScheme.outlineVariant,
                     ),
                   ),
                   child: Stack(
@@ -910,16 +911,16 @@ class _PollDisplay extends ConsumerWidget {
                                 style: TextStyle(
                                   fontSize: VFontSize.bodyMd,
                                   fontWeight: VFontWeight.regular,
-                                  color: VColors.onSurface,
+                                  color: theme.colorScheme.onSurface,
                                 ),
                               ),
                             ),
                             if (showResults) ...[
                               Text(
                                 '${option.voteCount} vote${option.voteCount != 1 ? 's' : ''}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: VFontSize.labelSm,
-                                  color: VColors.onSurfaceVariant,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(width: VSpacing.xs),
@@ -945,9 +946,9 @@ class _PollDisplay extends ConsumerWidget {
             padding: const EdgeInsets.only(top: VSpacing.xs),
             child: Text(
               '$totalVotes vote${totalVotes != 1 ? 's' : ''}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: VFontSize.labelSm,
-                color: VColors.outline,
+                color: theme.colorScheme.outline,
               ),
             ),
           ),
@@ -1057,6 +1058,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         ClipRRect(
@@ -1087,7 +1089,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
           children: [
             Text(
               '${_currentPage + 1}/${widget.imageUris.length}',
-              style: const TextStyle(fontSize: VFontSize.labelSm, color: VColors.onSurfaceVariant),
+              style: TextStyle(fontSize: VFontSize.labelSm, color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(width: VSpacing.sm),
             ...widget.imageUris.asMap().entries.map((entry) {
@@ -1097,7 +1099,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: entry.key == _currentPage ? VColors.primary : VColors.outline.withValues(alpha: 0.3),
+                  color: entry.key == _currentPage ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.3),
                 ),
               );
             }),

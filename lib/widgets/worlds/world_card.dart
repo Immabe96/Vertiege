@@ -180,12 +180,12 @@ class _CardBody extends ConsumerWidget {
           const SizedBox(height: 2),
           Row(
             children: [
-              Icon(VIcons.users, size: 12, color: VColors.onSurfaceVariant),
+              Icon(VIcons.users, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 '${world.memberCount} ${world.memberCount == 1 ? 'member' : 'members'}',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: VColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(width: VSpacing.sm),

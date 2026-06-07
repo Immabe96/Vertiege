@@ -220,7 +220,7 @@ class _WorldMarketplaceScreenState
 
     return RefreshIndicator(
       onRefresh: _loadListings,
-      color: VColors.primary,
+      color: Theme.of(context).colorScheme.primary,
       child: Column(
         children: [
           _CategoryChips(
@@ -316,13 +316,13 @@ class _Chip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? VColors.primary.withValues(alpha: 0.15)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
             color: selected
-                ? VColors.primary
-                : VColors.outline.withValues(alpha: 0.3),
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -330,7 +330,7 @@ class _Chip extends StatelessWidget {
           style: TextStyle(
             fontSize: VFontSize.labelSm,
             fontWeight: selected ? VFontWeight.semiBold : VFontWeight.regular,
-            color: selected ? VColors.primary : null,
+            color: selected ? Theme.of(context).colorScheme.primary : null,
           ),
         ),
       ),
@@ -461,9 +461,7 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                     child: Icon(
                       Icons.image_outlined,
                       size: 48,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -503,9 +501,7 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontStyle: FontStyle.italic,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -533,9 +529,7 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                 Text(
                   'Includes $tax coin tax to world treasury ($taxRate%)',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
             ],
@@ -543,9 +537,7 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
             Text(
               'Seller: ${listing.sellerName}',
               style: TextStyle(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: VSpacing.sm),
@@ -555,14 +547,14 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                 vertical: VSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: VColors.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(VRadius.pill),
               ),
               child: Text(
                 listing.category.name[0].toUpperCase() +
                     listing.category.name.substring(1),
-                style: const TextStyle(
-                  color: VColors.primary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: VFontWeight.semiBold,
                   fontSize: VFontSize.labelSm,
                 ),
@@ -572,9 +564,7 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
             Text(
               listing.description,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: VSpacing.xl),
@@ -609,7 +599,7 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                   label: const Text('Contact Seller'),
                   style: FilledButton.styleFrom(
                     foregroundColor: VColors.onPrimary,
-                    backgroundColor: VColors.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),

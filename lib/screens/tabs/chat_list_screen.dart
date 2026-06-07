@@ -237,7 +237,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         child: Text(
           'Sign in to view chats',
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       );
@@ -563,7 +563,7 @@ class _ModeSwitch extends StatelessWidget {
             : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.pill),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: Row(
@@ -625,7 +625,7 @@ class _ModeButton extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? VColors.primary.withValues(alpha: 0.15)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(VRadius.pill),
         ),
@@ -636,20 +636,16 @@ class _ModeButton extends StatelessWidget {
               icon,
               size: VIconSize.sm,
               color: selected
-                  ? VColors.primary
-                  : (isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant),
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: VSpacing.xs),
             Text(
               showUnreadBadge ? '$label ($count unread)' : '$label $count',
               style: TextStyle(
                 color: selected
-                    ? VColors.primary
-                    : (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant),
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: selected || showUnreadBadge
                     ? VFontWeight.semiBold
                     : VFontWeight.regular,
@@ -719,10 +715,8 @@ class _ChannelTile extends StatelessWidget {
                 _icon,
                 size: VIconSize.md,
                 color: unreadCount > 0
-                    ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
-                    : (isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant),
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: VSpacing.sm),
               Expanded(
@@ -738,12 +732,8 @@ class _ChannelTile extends StatelessWidget {
                             ? VFontWeight.semiBold
                             : VFontWeight.regular,
                         color: unreadCount > 0
-                            ? (isDark
-                                  ? VColors.onSurfaceDark
-                                  : VColors.onSurface)
-                            : (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant),
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     if (hasTyping)
@@ -764,9 +754,7 @@ class _ChannelTile extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                   ],
@@ -780,7 +768,7 @@ class _ChannelTile extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   decoration: BoxDecoration(
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(VRadius.pill),
                   ),
                   alignment: Alignment.center,
@@ -824,7 +812,7 @@ class _WorldRail extends StatelessWidget {
     return Container(
       width: 88,
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceDark : VColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(right: BorderSide(color: theme.dividerColor)),
       ),
       child: ListView(
@@ -851,12 +839,12 @@ class _WorldRail extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? VColors.primary.withValues(alpha: 0.15)
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(VRadius.md),
                     border: isSelected
                         ? Border.all(
-                            color: VColors.primary.withValues(alpha: 0.4),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                           )
                         : null,
                   ),
@@ -871,10 +859,8 @@ class _WorldRail extends StatelessWidget {
                             size: 36,
                             useGlassContainer: false,
                             tintColor: isSelected
-                                ? VColors.primary
-                                : (isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant),
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           if (unread > 0)
                             Positioned(
@@ -913,10 +899,8 @@ class _WorldRail extends StatelessWidget {
                               ? VFontWeight.semiBold
                               : VFontWeight.regular,
                           color: isSelected
-                              ? VColors.primary
-                              : (isDark
-                                    ? VColors.onSurfaceVariantDark
-                                    : VColors.onSurfaceVariant),
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -960,7 +944,7 @@ class _WorldPanelHeader extends StatelessWidget {
         VSpacing.md,
         VSpacing.sm,
       ),
-      color: isDark ? VColors.surfaceDark : VColors.surface,
+      color: Theme.of(context).colorScheme.surface,
       child: Row(
         children: [
           Expanded(
@@ -980,9 +964,7 @@ class _WorldPanelHeader extends StatelessWidget {
                   '${onlineCount > 0 ? ' · $onlineCount online' : ''}'
                   ' · Lv.$prestige',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 if (activeResidents.isNotEmpty) ...[
@@ -1083,16 +1065,16 @@ class _EmptyChannels extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.tag, size: 48, color: VColors.onSurfaceVariant),
+          Icon(Icons.tag, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(height: VSpacing.md),
           const Text(
             'No channels yet',
             style: TextStyle(fontWeight: VFontWeight.semiBold),
           ),
           const SizedBox(height: VSpacing.xs),
-          const Text(
+          Text(
             'This world does not have a public channel.',
-            style: TextStyle(color: VColors.onSurfaceVariant),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -1197,10 +1179,10 @@ class _DmRoomTileState extends State<_DmRoomTile>
                     bottom: 0,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isDark ? VColors.surfaceDark : VColors.surface,
+                        color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isDark ? VColors.surfaceDark : VColors.surface,
+                          color: Theme.of(context).colorScheme.surface,
                           width: 2,
                         ),
                       ),
@@ -1226,12 +1208,8 @@ class _DmRoomTileState extends State<_DmRoomTile>
                                   ? VFontWeight.semiBold
                                   : VFontWeight.regular,
                               color: unreadCount > 0
-                                  ? (isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface)
-                                  : (isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface),
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Theme.of(context).colorScheme.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1241,31 +1219,25 @@ class _DmRoomTileState extends State<_DmRoomTile>
                           Text(
                             widget.timeLabel,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            lastMessage.isNotEmpty
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              lastMessage.isNotEmpty
                                 ? lastMessage
                                 : 'No messages yet',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: hasTyping
                                   ? VColors.success
                                   : (unreadCount > 0
-                                        ? (isDark
-                                              ? VColors.onSurfaceDark
-                                              : VColors.onSurface)
-                                        : (isDark
-                                              ? VColors.onSurfaceVariantDark
-                                              : VColors.onSurfaceVariant)),
+                                        ? Theme.of(context).colorScheme.onSurface
+                                        : Theme.of(context).colorScheme.onSurfaceVariant),
                               fontWeight: hasTyping
                                   ? VFontWeight.semiBold
                                   : (unreadCount > 0
@@ -1285,8 +1257,8 @@ class _DmRoomTileState extends State<_DmRoomTile>
                             child: Container(
                               width: 8,
                               height: 8,
-                              decoration: const BoxDecoration(
-                                color: VColors.primary,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),

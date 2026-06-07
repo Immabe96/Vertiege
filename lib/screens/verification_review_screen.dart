@@ -212,7 +212,7 @@ class _VerificationReviewScreenState
                           ),
                           child: Icon(
                             Icons.badge_outlined,
-                            color: VColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             size: VIconSize.md,
                           ),
                         ),
@@ -224,9 +224,7 @@ class _VerificationReviewScreenState
                               Text(
                                 s.residentName,
                                 style: theme.textTheme.titleSmall?.copyWith(
-                                  color: isDark
-                                      ? VColors.onSurfaceDark
-                                      : VColors.onSurface,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontWeight: VFontWeight.bold,
                                 ),
                               ),
@@ -237,7 +235,7 @@ class _VerificationReviewScreenState
                                     ? 'Identity: ${IdentityVerification.labelForProfession(s.profession)}'
                                     : 'Profession: ${s.profession}',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: VColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -277,9 +275,7 @@ class _VerificationReviewScreenState
                             ),
                             child: Icon(
                               Icons.broken_image_outlined,
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -522,9 +518,7 @@ class _VerificationReviewScreenState
                           Text(
                             post.residentName,
                             style: theme.textTheme.titleSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceDark
-                                  : VColors.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           Text(
@@ -579,7 +573,7 @@ class _VerificationReviewScreenState
                   child: Text(
                     post.content,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
@@ -616,9 +610,9 @@ class _VerifierMetricsBar extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: VSpacing.sm),
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: VColors.primary.withValues(alpha: 0.08),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(color: VColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,7 +653,7 @@ class _Card extends StatelessWidget {
             : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: child,

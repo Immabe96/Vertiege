@@ -159,9 +159,7 @@ class _SubmitAchievementScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark
-        ? VColors.onSurfaceVariantDark
-        : VColors.onSurfaceVariant;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final achievementNotifier = ref.read(achievementProvider.notifier);
     final visibleAchievements = _visibleAchievements(achievementNotifier);
     final selectedAchievement = achievements
@@ -198,7 +196,7 @@ class _SubmitAchievementScreenState
                     children: [
                       Icon(
                         Icons.verified_user_outlined,
-                        color: VColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: VIconSize.md,
                       ),
                       const SizedBox(width: VSpacing.sm),
@@ -341,7 +339,7 @@ class _SubmitAchievementScreenState
               Text(
                 selectedAchievement.proofHint!,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: VColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontStyle: FontStyle.italic,
                 ),
               ),

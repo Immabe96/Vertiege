@@ -24,10 +24,10 @@ class ReferralChip extends StatelessWidget {
               vertical: VSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: VColors.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(VRadius.md),
               border: Border.all(
-                color: VColors.primary.withValues(alpha: 0.2),
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -37,7 +37,7 @@ class ReferralChip extends StatelessWidget {
                 Icon(
                   Icons.people_alt,
                   size: VIconSize.sm + 2,
-                  color: VColors.primary,
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: VSpacing.sm),
                 Text(
@@ -51,7 +51,7 @@ class ReferralChip extends StatelessWidget {
                   referralCode,
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: VFontWeight.bold,
-                    color: VColors.primary,
+                    color: theme.colorScheme.primary,
                     fontFamily: VFont.mono,
                     letterSpacing: 2,
                   ),
@@ -65,13 +65,13 @@ class ReferralChip extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: VColors.primary.withValues(alpha: 0.15),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(VRadius.md),
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.copy,
                       size: VIconSize.sm,
-                      color: VColors.primary,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),

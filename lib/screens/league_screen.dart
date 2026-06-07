@@ -185,7 +185,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 style: TextStyle(
                   fontSize: VFontSize.bodyLg,
                   fontWeight: VFontWeight.semiBold,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: VSpacing.lg),
@@ -194,7 +194,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 style: TextStyle(
                   fontSize: VFontSize.bodyLg,
                   fontWeight: VFontWeight.semiBold,
-                  color: VColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],
@@ -224,9 +224,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             'Reset in ',
             style: TextStyle(
               fontSize: VFontSize.labelMd,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           Text(
@@ -331,7 +329,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   }) {
     Color? rowBackground;
     if (isCurrentUser) {
-      rowBackground = VColors.primary.withValues(alpha: 0.15);
+      rowBackground = Theme.of(context).colorScheme.primary.withValues(alpha: 0.15);
     } else if (isTop3) {
       switch (rank) {
         case 1:
@@ -359,14 +357,10 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           rankColor = const Color(0xFFCD7F32);
           break;
         default:
-          rankColor = isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant;
+          rankColor = Theme.of(context).colorScheme.onSurfaceVariant;
       }
     } else {
-      rankColor = isDark
-          ? VColors.onSurfaceVariantDark
-          : VColors.onSurfaceVariant;
+      rankColor = Theme.of(context).colorScheme.onSurfaceVariant;
     }
 
     return Container(
@@ -374,7 +368,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         color: rowBackground,
         borderRadius: BorderRadius.circular(VRadius.md),
         border: isCurrentUser
-            ? Border.all(color: VColors.primary.withValues(alpha: 0.3))
+            ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3))
             : null,
       ),
       padding: const EdgeInsets.symmetric(
@@ -414,7 +408,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 fontWeight: isCurrentUser
                     ? VFontWeight.semiBold
                     : VFontWeight.regular,
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -425,9 +419,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
             style: TextStyle(
               fontSize: VFontSize.labelMd,
               fontWeight: VFontWeight.semiBold,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           if (isDemotionZone && !isCurrentUser) ...[
@@ -458,7 +450,7 @@ class _Card extends StatelessWidget {
             : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: child,

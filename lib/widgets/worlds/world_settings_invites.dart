@@ -54,7 +54,7 @@ class WorldSettingsInvites extends StatelessWidget {
         const SizedBox(height: VSpacing.sm),
         Text(
           'Create and manage invitation links for this world.',
-          style: theme.textTheme.bodySmall?.copyWith(color: VColors.outline),
+          style: theme.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
         ),
         const SizedBox(height: VSpacing.md),
         if (residentId == sovereignId)
@@ -81,11 +81,11 @@ class WorldSettingsInvites extends StatelessWidget {
                 child: TextField(
                   readOnly: true,
                   controller: TextEditingController(text: generatedCode),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Invite Code',
-                    prefixIcon: Icon(Icons.vpn_key),
+                    prefixIcon: const Icon(Icons.vpn_key),
                     border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: VColors.glassBorder),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                   ),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -147,7 +147,7 @@ class _InviteRow extends StatelessWidget {
           children: [
             Icon(
               valid ? Icons.check_circle_outline : Icons.cancel_outlined,
-              color: valid ? VColors.primary : VColors.error,
+              color: valid ? Theme.of(context).colorScheme.primary : VColors.error,
               size: VIconSize.md,
             ),
             const SizedBox(width: VSpacing.sm),
@@ -157,10 +157,10 @@ class _InviteRow extends StatelessWidget {
                 children: [
                   Text(
                     invite.code,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: VFont.mono,
                       letterSpacing: 1,
-                      color: VColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
@@ -168,7 +168,7 @@ class _InviteRow extends StatelessWidget {
                     '${invite.isExpired ? '  ·  Expired' : ''}'
                     '${invite.isExhausted ? '  ·  Exhausted' : ''}',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.outline,
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
                 ],

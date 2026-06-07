@@ -255,7 +255,7 @@ class _CommentSheetState extends State<CommentSheet> {
                       Icon(
                         Icons.reply,
                         size: VIconSize.sm,
-                        color: VColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: VSpacing.xs),
                       Expanded(
@@ -263,7 +263,7 @@ class _CommentSheetState extends State<CommentSheet> {
                           'Replying to $_replyToName',
                           style: TextStyle(
                             fontSize: VFontSize.labelSm,
-                            color: VColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: VFontWeight.semiBold,
                           ),
                         ),
@@ -317,7 +317,7 @@ class _CommentSheetState extends State<CommentSheet> {
                       icon: const Icon(VIcons.send),
                       onPressed: _submitComment,
                       tooltip: 'Send comment',
-                      color: VColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       style: IconButton.styleFrom(
                         minimumSize: const Size(
                           VTouchTarget.iconButton,
@@ -355,12 +355,12 @@ class _CommentSheetState extends State<CommentSheet> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(VRadius.md),
             ),
             border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
           child: _buildThreadBody(
@@ -456,8 +456,6 @@ class _CommentTileState extends State<_CommentTile> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     const maxDepth = 5;
     final effectiveDepth = widget.depth > maxDepth ? maxDepth : widget.depth;
     final indent = effectiveDepth * VSpacing.md;
@@ -473,7 +471,7 @@ class _CommentTileState extends State<_CommentTile> {
               width: 2,
               height: 20,
               margin: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
-              color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           if (isDeeplyNested)
             Padding(
@@ -489,7 +487,7 @@ class _CommentTileState extends State<_CommentTile> {
                   'show parent',
                   style: TextStyle(
                     fontSize: VFontSize.labelSm,
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: VFontWeight.semiBold,
                   ),
                 ),
@@ -504,7 +502,7 @@ class _CommentTileState extends State<_CommentTile> {
                   'Show reply',
                   style: TextStyle(
                     fontSize: VFontSize.labelSm,
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: VFontWeight.semiBold,
                   ),
                 ),
@@ -529,12 +527,12 @@ class _CommentTileState extends State<_CommentTile> {
                           Row(
                             children: [
                               Text(
-                                widget.comment.residentName,
-                                style: TextStyle(
-                                  fontSize: VFontSize.labelSm,
-                                  fontWeight: VFontWeight.semiBold,
-                                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                                ),
+                               widget.comment.residentName,
+                               style: TextStyle(
+                                 fontSize: VFontSize.labelSm,
+                                 fontWeight: VFontWeight.semiBold,
+                                 color: Theme.of(context).colorScheme.onSurface,
+                               ),
                               ),
                               const SizedBox(width: VSpacing.xs),
                               TierBadge(tier: widget.comment.tierAtPosting, size: 14),
@@ -545,37 +543,37 @@ class _CommentTileState extends State<_CommentTile> {
                                     horizontal: VSpacing.xs,
                                     vertical: VSpacing.xxs,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: VColors.primary.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(VRadius.xs),
-                                  ),
-                                  child: const Text(
-                                    'OP',
-                                    style: TextStyle(
-                                      fontSize: VFontSize.labelSm,
-                                      fontWeight: VFontWeight.bold,
-                                      color: VColors.primary,
-                                    ),
-                                  ),
+                                   decoration: BoxDecoration(
+                                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                     borderRadius: BorderRadius.circular(VRadius.xs),
+                                   ),
+                                   child: Text(
+                                     'OP',
+                                     style: TextStyle(
+                                       fontSize: VFontSize.labelSm,
+                                       fontWeight: VFontWeight.bold,
+                                       color: Theme.of(context).colorScheme.primary,
+                                     ),
+                                   ),
                                 ),
                               const Spacer(),
                               Text(
-                                formatTimestamp(widget.comment.timestamp),
-                                style: TextStyle(
-                                  fontSize: VFontSize.labelSm,
-                                  color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
-                                ),
+                                 formatTimestamp(widget.comment.timestamp),
+                                 style: TextStyle(
+                                   fontSize: VFontSize.labelSm,
+                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: VSpacing.xxs),
                           Text(
-                            widget.comment.content,
-                            style: TextStyle(
-                              fontSize: VFontSize.bodyMd,
-                              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
-                              height: VLineHeight.body,
-                            ),
+                           widget.comment.content,
+                           style: TextStyle(
+                             fontSize: VFontSize.bodyMd,
+                             color: Theme.of(context).colorScheme.onSurface,
+                             height: VLineHeight.body,
+                           ),
                           ),
                           const SizedBox(height: VSpacing.xs),
                           Row(
@@ -583,25 +581,25 @@ class _CommentTileState extends State<_CommentTile> {
                               GestureDetector(
                                 onTap: () => widget.onReply(widget.comment.id, widget.comment.residentName),
                                 child: Text(
-                                  'Reply',
-                                  style: TextStyle(
-                                    fontSize: VFontSize.labelSm,
-                                    fontWeight: VFontWeight.semiBold,
-                                    color: VColors.primary,
-                                  ),
-                                ),
+                                   'Reply',
+                                   style: TextStyle(
+                                     fontSize: VFontSize.labelSm,
+                                     fontWeight: VFontWeight.semiBold,
+                                     color: Theme.of(context).colorScheme.primary,
+                                   ),
+                                 ),
                               ),
                               if (widget.depth > 0) ...[
                                 const SizedBox(width: VSpacing.sm),
                                 GestureDetector(
                                   onTap: () => setState(() => _collapsed = !_collapsed),
                                   child: Text(
-                                    _collapsed ? 'Expand' : 'Collapse',
-                                    style: TextStyle(
-                                      fontSize: VFontSize.labelSm,
-                                      color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
-                                    ),
-                                  ),
+                                     _collapsed ? 'Expand' : 'Collapse',
+                                     style: TextStyle(
+                                       fontSize: VFontSize.labelSm,
+                                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                     ),
+                                   ),
                                 ),
                               ],
                             ],

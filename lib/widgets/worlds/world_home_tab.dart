@@ -142,7 +142,7 @@ class _GroupMetaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final desc = world.description.trim();
 
     return VSurfaceCard(
@@ -222,7 +222,7 @@ class _MetaChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fg = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final fg = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -260,18 +260,18 @@ class _AdminAnnouncementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: VColors.primary.withValues(alpha: 0.45),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.45),
           width: 1.5,
         ),
         gradient: LinearGradient(
           colors: [
-            VColors.primary.withValues(alpha: isDark ? 0.18 : 0.08),
+            Theme.of(context).colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.08),
             Colors.transparent,
           ],
           begin: Alignment.topLeft,
@@ -285,16 +285,16 @@ class _AdminAnnouncementCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.campaign,
-                  color: VColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: VIconSize.md,
                 ),
                 const SizedBox(width: VSpacing.xs),
                 Text(
                   post.isDecree ? 'Admin announcement' : 'Pinned update',
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: VColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: VFontWeight.bold,
                   ),
                 ),
@@ -331,7 +331,7 @@ class _DiscussionPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return VSurfaceCard(
       child: Padding(

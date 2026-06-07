@@ -214,7 +214,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                       style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: VFontWeight.bold,
                         letterSpacing: 0.5,
-                        color: VColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: VSpacing.sm),
@@ -369,7 +369,7 @@ class _PendingAllyTile extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.check, color: VColors.primary),
+                    icon: Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
                     onPressed: () =>
                         ref.read(allyProvider.notifier).acceptRequest(ally.id),
                   ),
