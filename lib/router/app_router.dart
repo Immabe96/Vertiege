@@ -24,6 +24,7 @@ import '../screens/tabs/nexus_screen.dart';
 import '../screens/tabs/explore_screen.dart';
 import '../screens/tabs/chat_list_screen.dart';
 import '../screens/tabs/you_screen.dart';
+import '../screens/tabs/achievements_screen.dart';
 import '../ui_spike/spike_settings_page.dart';
 
 import '../screens/tabs/alerts_screen.dart';
@@ -32,7 +33,6 @@ import '../screens/world_channel_screen.dart';
 import '../screens/chat_room_screen.dart';
 import '../widgets/core/status_dot.dart';
 import '../screens/resident_profile_screen.dart';
-import '../screens/achievements/achievements_index.dart';
 import '../screens/achievements/achievement_category.dart';
 import '../screens/achievements/submit_achievement.dart';
 import '../screens/settings_screen.dart';
@@ -262,144 +262,161 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/identity',
-                builder: (context, state) => const YouScreen(),
+                path: '/achievements',
+                builder: (context, state) => const AchievementsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'submit',
+                    builder: (context, state) => const SubmitAchievementScreen(),
+                  ),
+                  GoRoute(
+                    path: ':category',
+                    builder: (context, state) => AchievementCategoryScreen(
+                      category: state.pathParameters['category']!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/explore',
-                builder: (context, state) => const ExploreScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'discover',
-                    builder: (context, state) => const WorldDiscoveryScreen(),
-                  ),
-                  GoRoute(
-                    path: ':worldId',
-                    builder: (context, state) => WorldDetailScreen(
-                      worldId: state.pathParameters['worldId']!,
-                    ),
-                    routes: [
-                      GoRoute(
-                        path: 'settings',
-                        builder: (context, state) => WorldSettingsScreen(
-                          worldId: state.pathParameters['worldId']!,
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'members',
-                        builder: (context, state) => WorldMembersScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          worldName:
-                              state.uri.queryParameters['name'] ?? 'World',
-                          sovereignId:
-                              state.uri.queryParameters['sovereign'] ?? '',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'marketplace',
-                        builder: (context, state) => WorldMarketplaceScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          isMember:
-                              state.uri.queryParameters['member'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'polls',
-                        builder: (context, state) => WorldPollsScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil:
-                              state.uri.queryParameters['admin'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'treasury',
-                        builder: (context, state) => WorldTreasuryScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil:
-                              state.uri.queryParameters['admin'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'challenges',
-                        builder: (context, state) => WorldChallengesScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil:
-                              state.uri.queryParameters['admin'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'jobs',
-                        builder: (context, state) => WorldJobsScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          canManage:
-                              state.uri.queryParameters['admin'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'archive',
-                        builder: (context, state) => WorldArchiveScreen(
-                          worldId: state.pathParameters['worldId']!,
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'academy',
-                        builder: (context, state) => WorldAcademyScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil:
-                              state.uri.queryParameters['admin'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'sanctuary',
-                        builder: (context, state) => WorldSanctuaryScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          isSovereignOrCouncil:
-                              state.uri.queryParameters['admin'] == 'true',
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'manage',
-                        builder: (context, state) => WorldManageScreen(
-                          worldId: state.pathParameters['worldId']!,
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'governance',
-                        builder: (context, state) => WorldGovernanceScreen(
-                          worldId: state.pathParameters['worldId']!,
-                          worldName: state.uri.queryParameters['name'],
-                        ),
-                      ),
-                      GoRoute(
-                        path: ':channelName',
-                        redirect: (context, state) {
-                          final worldId = state.pathParameters['worldId']!;
-                          final segment = state.pathParameters['channelName']!;
-                          final reserved = redirectReservedWorldSubRoute(
-                            worldId: worldId,
-                            segment: segment,
-                            query: state.uri.query,
-                          );
-                          if (reserved != null) return reserved;
-                          return redirectMissingChannelId(
-                            worldId: worldId,
-                            channelName: segment,
-                            queryParams: state.uri.queryParameters,
-                          );
-                        },
-                        builder: (context, state) => _WorldChannelRoute(
-                          worldId: state.pathParameters['worldId']!,
-                          channelId: state.uri.queryParameters['id'] ?? '',
-                          channelName: state.pathParameters['channelName']!,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                path: '/identity',
+                builder: (context, state) => const YouScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      // Explore routes (outside tab shell — accessed via deep links)
+      GoRoute(
+        path: '/explore',
+        builder: (context, state) => const ExploreScreen(),
+        routes: [
+          GoRoute(
+            path: 'discover',
+            builder: (context, state) => const WorldDiscoveryScreen(),
+          ),
+          GoRoute(
+            path: ':worldId',
+            builder: (context, state) => WorldDetailScreen(
+              worldId: state.pathParameters['worldId']!,
+            ),
+            routes: [
+              GoRoute(
+                path: 'settings',
+                builder: (context, state) => WorldSettingsScreen(
+                  worldId: state.pathParameters['worldId']!,
+                ),
+              ),
+              GoRoute(
+                path: 'members',
+                builder: (context, state) => WorldMembersScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  worldName:
+                      state.uri.queryParameters['name'] ?? 'World',
+                  sovereignId:
+                      state.uri.queryParameters['sovereign'] ?? '',
+                ),
+              ),
+              GoRoute(
+                path: 'marketplace',
+                builder: (context, state) => WorldMarketplaceScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  isMember:
+                      state.uri.queryParameters['member'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'polls',
+                builder: (context, state) => WorldPollsScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  isSovereignOrCouncil:
+                      state.uri.queryParameters['admin'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'treasury',
+                builder: (context, state) => WorldTreasuryScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  isSovereignOrCouncil:
+                      state.uri.queryParameters['admin'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'challenges',
+                builder: (context, state) => WorldChallengesScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  isSovereignOrCouncil:
+                      state.uri.queryParameters['admin'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'jobs',
+                builder: (context, state) => WorldJobsScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  canManage:
+                      state.uri.queryParameters['admin'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'archive',
+                builder: (context, state) => WorldArchiveScreen(
+                  worldId: state.pathParameters['worldId']!,
+                ),
+              ),
+              GoRoute(
+                path: 'academy',
+                builder: (context, state) => WorldAcademyScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  isSovereignOrCouncil:
+                      state.uri.queryParameters['admin'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'sanctuary',
+                builder: (context, state) => WorldSanctuaryScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  isSovereignOrCouncil:
+                      state.uri.queryParameters['admin'] == 'true',
+                ),
+              ),
+              GoRoute(
+                path: 'manage',
+                builder: (context, state) => WorldManageScreen(
+                  worldId: state.pathParameters['worldId']!,
+                ),
+              ),
+              GoRoute(
+                path: 'governance',
+                builder: (context, state) => WorldGovernanceScreen(
+                  worldId: state.pathParameters['worldId']!,
+                  worldName: state.uri.queryParameters['name'],
+                ),
+              ),
+              GoRoute(
+                path: ':channelName',
+                redirect: (context, state) {
+                  final worldId = state.pathParameters['worldId']!;
+                  final segment = state.pathParameters['channelName']!;
+                  final reserved = redirectReservedWorldSubRoute(
+                    worldId: worldId,
+                    segment: segment,
+                    query: state.uri.query,
+                  );
+                  if (reserved != null) return reserved;
+                  return redirectMissingChannelId(
+                    worldId: worldId,
+                    channelName: segment,
+                    queryParams: state.uri.queryParameters,
+                  );
+                },
+                builder: (context, state) => _WorldChannelRoute(
+                  worldId: state.pathParameters['worldId']!,
+                  channelId: state.uri.queryParameters['id'] ?? '',
+                  channelName: state.pathParameters['channelName']!,
+                ),
               ),
             ],
           ),
@@ -444,22 +461,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final q = state.uri.query;
           return q.isEmpty ? '/chat/$roomId' : '/chat/$roomId?$q';
         },
-      ),
-      vGoRoute(
-        path: '/achievements',
-        builder: (context, state) => const AchievementsIndexScreen(),
-        routes: [
-          vGoRoute(
-            path: 'submit',
-            builder: (context, state) => const SubmitAchievementScreen(),
-          ),
-          vGoRoute(
-            path: ':category',
-            builder: (context, state) => AchievementCategoryScreen(
-              category: state.pathParameters['category']!,
-            ),
-          ),
-        ],
       ),
       vGoRoute(
         path: '/shop',

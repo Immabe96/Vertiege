@@ -49,8 +49,8 @@ class _TabLayoutState extends ConsumerState<TabLayout>
     with TickerProviderStateMixin {
   static const Duration _fabAnimDuration = VAnimation.normal;
 
-  /// Visible tabs map to these shell branch indices (explore is branch 3, no tab).
-  static const _branchForTab = [0, 1, 2];
+  /// All 4 shell branches are visible tabs (Explore is no longer a shell branch).
+  static const _branchForTab = [0, 1, 2, 3];
 
   late AnimationController _fabController;
   late Animation<double> _fabScale;
@@ -176,8 +176,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
 
   int _visibleTabIndex(int shellIndex) {
     final i = _branchForTab.indexOf(shellIndex);
-    // Explore/world routes (branch 3) sit under Chat in the IA.
-    if (i < 0) return shellIndex == 3 ? 1 : 0;
+    if (i < 0) return 0;
     return i;
   }
 
@@ -231,6 +230,12 @@ class _MainBottomNav extends StatelessWidget {
       activeIcon: Icons.chat_bubble,
       label: 'Chat',
       semanticsLabel: 'Messages',
+    ),
+    (
+      icon: Icons.emoji_events_outlined,
+      activeIcon: Icons.emoji_events,
+      label: 'Achievements',
+      semanticsLabel: 'Achievements',
     ),
     (
       icon: Icons.account_circle_outlined,

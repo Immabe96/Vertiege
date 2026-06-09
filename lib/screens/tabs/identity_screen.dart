@@ -713,8 +713,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ),
               const SizedBox(height: VSpacing.sm),
-              _buildFeaturedAchievementsStrip(achievements.userAchievements),
-              _buildSeasonProgressChip(context),
             ] else
             Container(
               padding: const EdgeInsets.all(VSpacing.lg),
@@ -940,61 +938,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               const SizedBox(height: VSpacing.md),
             ],
 
-            _SectionHeader(
-              title: 'Honours',
-              theme: theme,
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton(
-                    onPressed: () => context.push('/achievements'),
-                    child: const Text('Hub'),
-                  ),
-                  const ProgressionHelpButton(
-                    focus: ProgressionFocus.repAndStanding,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-
-            // ── Honour stats (achievements · worlds · rep) ──
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: HonourStatChip(
-                      icon: Icons.emoji_events,
-                      value: '$verifiedAchievementCount',
-                      label: 'Verified',
-                      accent: VColors.tertiary,
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Expanded(
-                    child: HonourStatChip(
-                      icon: Icons.public,
-                      value: '${resident.joinedWorldIds.length}',
-                      label: 'Worlds',
-                      accent: Theme.of(context).colorScheme.primary,
-                      onTap: () => context.push('/explore'),
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.sm),
-                  Expanded(
-                    child: HonourStatChip(
-                      icon: Icons.military_tech,
-                      value: '$totalRep',
-                      label: 'World rep',
-                      accent: VColors.secondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-
             _SectionHeader(title: 'My worlds', theme: theme),
             const SizedBox(height: VSpacing.sm),
             JoinedWorldsRow(
@@ -1004,110 +947,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   .toList(),
             ),
             const SizedBox(height: VSpacing.lg),
-
-            _SectionHeader(title: 'Today', theme: theme),
-            const SizedBox(height: VSpacing.sm),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: resident.streakCount > 0
-                  ? StreakDisplay(
-                      streakCount: resident.streakCount,
-                      streakShields: resident.streakShields,
-                      questNudge: questNudge,
-                    )
-                  : Row(
-                      children: [
-                        Icon(
-                          Icons.local_fire_department_outlined,
-                          size: VIconSize.md,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: VSpacing.sm),
-                        Expanded(
-                          child: Text(
-                            'No active streak—start from daily quests.',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => context.push('/daily-quests'),
-                          child: const Text('Quests'),
-                        ),
-                      ],
-                    ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-
-            AchievementQueueSummary(
-              userAchievements: achievements.userAchievements,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                VSpacing.lg,
-                VSpacing.sm,
-                VSpacing.lg,
-                0,
-              ),
-              child: OutlinedButton.icon(
-                onPressed: () => context.push('/achievements/submit'),
-                icon: const Icon(Icons.workspace_premium_outlined, size: 18),
-                label: const Text('Submit achievement proof'),
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-
-            InkWell(
-              onTap: () => showTrophyCaseSheet(
-                context,
-                resident: resident,
-                achievements: achievements.userAchievements,
-                totalXp: currentXp,
-              ),
-              borderRadius: BorderRadius.circular(VRadius.lg),
-              child: TrophyCase(
-                resident: resident,
-                achievements: achievements.userAchievements,
-                totalXp: currentXp,
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: OutlinedButton.icon(
-                onPressed: () => showFeaturedAchievementsSheet(context, ref),
-                icon: const Icon(Icons.star_outline, size: VIconSize.sm),
-                label: const Text('Featured achievements'),
-              ),
-            ),
-            const SizedBox(height: VSpacing.lg),
-
-            if (professionBadgeIdsFor(resident.verifiedRoles).isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  VSpacing.lg,
-                  0,
-                  VSpacing.lg,
-                  VSpacing.sm,
-                ),
-                child: Text(
-                  'BADGES',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: VFontWeight.bold,
-                    letterSpacing: 0.5,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-                child: BadgeDisplay(
-                  earnedBadgeIds: professionBadgeIdsFor(resident.verifiedRoles),
-                ),
-              ),
-              const SizedBox(height: VSpacing.lg),
-            ],
 
             InkWell(
               onTap: () =>
