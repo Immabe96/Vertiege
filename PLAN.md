@@ -221,7 +221,45 @@ Optional polish from the S3 pattern table — not yet scheduled as a wave:
 
 ## Execution order (historical — S1 bootstrap)
 
-Used for the initial social-stack rescue; waves S1–S5 are complete. For new work, add a **Wave S6** section here before coding.
+Used for the initial social-stack rescue; waves S1–S6 are complete. For new work, add a **Wave S7** section here before coding.
+
+---
+
+## Wave S6 — chat polish + send-state ✅
+
+**Delivered:** 2026-06-09 · **12 commits on `develop`**
+
+Sequel to S5: cleaned up the chat experience after the social-stack rescue.
+
+| ID | Task | Status |
+|----|------|--------|
+| S6.A | Chat haptics + DM typing indicator + scroll-to-message on deep link | ✅ |
+| S6.B | Fix scroll-to-message offset for dividers; auto-scroll on remote arrival | ✅ |
+| S6.C | Float unread chat channels to top of world channel list | ✅ |
+| S6.D | Auto-scroll to new-since-visit divider on DM room open | ✅ |
+| S6.E | "typing…" label in DM list tile | ✅ |
+| S6.F | Thread typing indicator + disable empty send + haptic on reaction tap | ✅ |
+| S6.G | Channel tile typing + auto-scroll divider + "New" label on jump FAB | ✅ |
+| S6.H | Enable send button with image-only compose (`canSendOverride`) | ✅ |
+| S6.I | Achievement share haptic | ✅ |
+| S6.J | Read-receipt tooltip with formatted timestamp | ✅ |
+| S6.K | Unread dot pulse on 0→N transition in DM list | ✅ |
+| S6.L | Report action stub → toast | ✅ |
+| S6.M | "Sending…" label on optimistic insert | ✅ |
+| S6.N | Pinned banner dismiss + "Pinned" pill chip | ✅ |
+
+### Post-S6 backlog
+
+| Item | Notes |
+|------|--------|
+| Real Report flow | `reports` table + admin view (S6.L was a toast stub) |
+| Honest streak UI + server reconcile | `record_daily_check_in` exists; tighten Identity display |
+| World activity map (full) | S5 shipped preview avatars in Messages panel |
+| @AllResidents / nearby aliases | Broadcast mentions work; expand tests |
+| Voice messages | New feature |
+| Search-in-conversation | New feature |
+| Quick-reply from push notification | New feature |
+| "Last seen X ago" tooltip on profile | Different surface |
 
 ---
 
