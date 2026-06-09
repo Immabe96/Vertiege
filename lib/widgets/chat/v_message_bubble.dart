@@ -14,6 +14,8 @@ import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
 import 'chat_image.dart';
 import 'v_link_embed.dart';
+import '../../services/moderation_service.dart';
+import '../report_sheet.dart';
 import 'v_message_actions.dart';
 import 'v_message_content.dart';
 import 'v_achievement_attachment.dart';
@@ -656,6 +658,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
             onTogglePin: (pin) =>
                 _channel.onTogglePin?.call(widget.message.id, pin),
             onShareToFeed: _channel.onShareToFeed,
+            onReport: () => _showReportSheet(context),
           ),
           SizedBox(height: MediaQuery.paddingOf(context).bottom),
         ],
@@ -672,6 +675,31 @@ class _VMessageBubbleState extends State<VMessageBubble>
         'channelId': widget.message.channelId,
         'worldId': _channel.worldId,
         'channelName': _channel.channelName,
+      },
+    );
+  }
+
+  void _showReportSheet(BuildContext context) {
+    final msg = widget.message;
+    final reporterId = _isChannel
+        ? (_channel.currentUserId ?? '')
+        : _dm.currentUserId;
+    final worldId = _isChannel ? _channel.worldId : null;
+
+    ReportSheet.show(
+      context,
+      targetLabel: 'message',
+      onSubmit: (reason, details) {
+        Navigator.pop(context);
+        ModerationService.submitReport(
+          worldId: worldId,
+          messageId: msg.id,
+          channelId: msg.channelId,
+          reporterId: reporterId,
+          reason: reason.name,
+          details: details,
+        );
+        VFeedback.showMessage(context, 'Report submitted. Thank you.');
       },
     );
   }
@@ -748,6 +776,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
         onReply: () => _dm.onReply(msg),
         onEdit: () => _showEditDialog(context),
         onDelete: () => _dm.onDelete(msg),
+        onReport: () => _showReportSheet(context),
       ),
     );
   }

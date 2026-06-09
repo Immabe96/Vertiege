@@ -67,6 +67,7 @@ List<Widget> buildChannelMessageActions({
   required VoidCallback onOpenThread,
   void Function(bool pin)? onTogglePin,
   VoidCallback? onShareToFeed,
+  VoidCallback? onReport,
 }) {
   return [
     VTile(
@@ -110,8 +111,12 @@ List<Widget> buildChannelMessageActions({
       title: const Text('Report'),
       onPress: () {
         Navigator.pop(context);
-        Haptics.medium();
-        VFeedback.showMessage(context, 'Report submitted. Thank you.');
+        if (onReport != null) {
+          onReport();
+        } else {
+          Haptics.medium();
+          VFeedback.showMessage(context, 'Report submitted. Thank you.');
+        }
       },
     ),
   ];
@@ -124,6 +129,7 @@ List<Widget> buildDmMessageActions({
   required VoidCallback onReply,
   required VoidCallback onEdit,
   required VoidCallback onDelete,
+  VoidCallback? onReport,
 }) {
   return [
     VTile(
@@ -165,8 +171,12 @@ List<Widget> buildDmMessageActions({
       title: const Text('Report'),
       onPress: () {
         Navigator.pop(context);
-        Haptics.medium();
-        VFeedback.showMessage(context, 'Report submitted. Thank you.');
+        if (onReport != null) {
+          onReport();
+        } else {
+          Haptics.medium();
+          VFeedback.showMessage(context, 'Report submitted. Thank you.');
+        }
       },
     ),
   ];

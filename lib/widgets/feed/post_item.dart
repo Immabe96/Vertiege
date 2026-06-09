@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../models/post.dart';
-import '../../models/report.dart';
 import '../../config/awards.dart';
 import '../../services/permission_service.dart';
 import '../../services/moderation_service.dart';
@@ -18,10 +17,10 @@ import '../../ui/buttons/v_button.dart';
 import '../../ui/icons/v_icons.dart';
 import '../core/glass_sheet.dart';
 import '../core/tier_badge.dart';
+import '../report_sheet.dart';
 import '../shared/tier_icon.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
-import '../core/tab_aware_sheet.dart';
 import 'comment_sheet.dart';
 import 'post_action_bar.dart';
 import 'reaction_bar.dart';
@@ -576,99 +575,25 @@ class PostItem extends ConsumerWidget {
   void _onReport(BuildContext context, WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
-    showTabAwareModalBottomSheet(
-      context: context,
-      builder: (ctx) => _ReportSheet(
-        onSubmit: (reason, details) {
-          Navigator.pop(ctx);
-          ModerationService.submitReport(
-            worldId: post.worldId,
-            postId: post.id,
-            reporterId: resident.id,
-            reason: reason.name,
-            details: details,
-          );
-          VFeedback.showMessage(context, 'Report submitted. Thank you.');
-        },
-      ),
+    ReportSheet.show(
+      context,
+      targetLabel: 'post',
+      onSubmit: (reason, details) {
+        Navigator.pop(context);
+        ModerationService.submitReport(
+          worldId: post.worldId,
+          postId: post.id,
+          reporterId: resident.id,
+          reason: reason.name,
+          details: details,
+        );
+        VFeedback.showMessage(context, 'Report submitted. Thank you.');
+      },
     );
   }
 
   void _showComments(BuildContext context, WidgetRef ref) {
     openPostComments(context, postId: post.id);
-  }
-}
-
-class _ReportSheet extends StatefulWidget {
-  final void Function(ReportReason reason, String? details) onSubmit;
-
-  const _ReportSheet({required this.onSubmit});
-
-  @override
-  State<_ReportSheet> createState() => _ReportSheetState();
-}
-
-class _ReportSheetState extends State<_ReportSheet> {
-  ReportReason _reason = ReportReason.spam;
-  final _detailsController = TextEditingController();
-
-  @override
-  void dispose() {
-    _detailsController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Report post', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            children: ReportReason.values.map((r) {
-              final selected = _reason == r;
-              return ChoiceChip(
-                label: Text(r.name[0].toUpperCase() + r.name.substring(1)),
-                selected: selected,
-                onSelected: (_) => setState(() => _reason = r),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _detailsController,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              hintText: 'Additional details (optional)',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-          const SizedBox(height: 12),
-          VButton(
-            label: 'Submit Report',
-            onPressed: () => widget.onSubmit(
-              _reason,
-              _detailsController.text.trim().isEmpty
-                  ? null
-                  : _detailsController.text.trim(),
-            ),
-            isFullWidth: true,
-          ),
-        ],
-      ),
-    );
   }
 }
 

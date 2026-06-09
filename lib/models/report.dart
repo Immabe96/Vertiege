@@ -2,6 +2,17 @@ enum ReportReason { spam, harassment, hateSpeech, nsfw, misinformation, other }
 
 enum ReportStatus { pending, resolved, dismissed }
 
+extension ReportReasonLabel on ReportReason {
+  String get label => switch (this) {
+    ReportReason.spam => 'Spam',
+    ReportReason.harassment => 'Harassment',
+    ReportReason.hateSpeech => 'Hate Speech',
+    ReportReason.nsfw => 'NSFW Content',
+    ReportReason.misinformation => 'Misinformation',
+    ReportReason.other => 'Other',
+  };
+}
+
 class Report {
   final String id;
   final String worldId;

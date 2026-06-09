@@ -217,20 +217,29 @@ class ModerationService {
     return DateTime.now().isBefore(expiresAt);
   }
 
-  /// Submit a report against a post.
+  /// Submit a report against a post or a chat message.
+  /// At least one of [postId] or [messageId] must be provided.
+  /// [worldId] is required for post reports; optional for message reports
+  /// (e.g. DM messages where no world context exists).
   static Future<void> submitReport({
-    required String worldId,
-    required String postId,
+    String? worldId,
+    String? postId,
+    String? messageId,
+    String? channelId,
     required String reporterId,
     required String reason,
     String? details,
   }) async {
     if (!isSupabaseConfigured()) return;
+    assert(postId != null || messageId != null,
+        'At least one of postId or messageId is required');
     final client = getSupabase();
     await client.from('reports').insert({
       'id': generateId(),
-      'world_id': worldId,
-      'post_id': postId,
+      if (worldId != null) 'world_id': worldId,
+      if (postId != null) 'post_id': postId,
+      if (messageId != null) 'message_id': messageId,
+      if (channelId != null) 'channel_id': channelId,
       'reporter_id': reporterId,
       'reason': reason,
       'details': details,
