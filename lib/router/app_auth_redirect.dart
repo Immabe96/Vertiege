@@ -1,5 +1,7 @@
 /// Pure helpers for resident onboarding / gate redirects (testable without GoRouter).
 
+import '../screens/onboarding/the_gate_screen.dart' show gateCompletedCache;
+
 /// After session exists and resident load finished: route to onboarding or home.
 String? resolveResidentOnboardingRedirect({
   required bool hasSession,
@@ -15,7 +17,10 @@ String? resolveResidentOnboardingRedirect({
     return location == '/onboarding' ? null : '/onboarding';
   }
 
-  if (!gateCompleted) {
+  // If either the DB flag OR the local SharedPreferences flag says gate
+  // is complete, trust it.  The local flag is set immediately by
+  // markGateCompleted() and may be ahead of the async Supabase upsert.
+  if (!gateCompleted && !gateCompletedCache) {
     return location == '/onboarding' ? null : '/onboarding';
   }
 

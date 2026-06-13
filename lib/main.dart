@@ -8,6 +8,7 @@ import 'theme/theme_prefs.dart';
 import 'services/crash_reporter.dart';
 import 'services/supabase_bootstrap.dart';
 import 'services/firebase_messaging_handlers.dart';
+import 'screens/onboarding/the_gate_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 bool _handlingFlutterError = false;
@@ -37,6 +38,7 @@ void main() async {
   await dotenv.load(fileName: '.env', isOptional: true);
   await ThemePrefs.warmCache();
   await SupabaseBootstrap.initialize();
+  await loadGateCompletionStatus();
 
   runApp(const ProviderScope(child: VirtualStatusWorldsApp()));
 }
