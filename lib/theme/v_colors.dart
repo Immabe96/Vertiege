@@ -76,43 +76,45 @@ class VColors {
   static const onWarningContainer = Color(0xFF4A2E00);
   static const onWarningContainerDark = Color(0xFFFFDF8E);
 
-  static const surface = Color(0xFFFAFAF9);
-  static const surfaceDim = Color(0xFFF4F4F3);
+  // ── Light surfaces (Snapchat-clean white) ──
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceDim = Color(0xFFF5F5F5);
   static const surfaceBright = Color(0xFFFFFFFF);
   static const surfaceContainerLowest = Color(0xFFFFFFFF);
-  static const surfaceContainerLow = Color(0xFFF7F7F6);
-  static const surfaceContainer = Color(0xFFF0F0EF);
-  static const surfaceContainerHigh = Color(0xFFE8E8E7);
-  static const surfaceContainerHighest = Color(0xFFDCDCD9);
-  static const onSurface = Color(0xFF0F1117);
-  static const onSurfaceVariant = Color(0xFF52525B);
-  static const outline = Color(0xFF71717A);
-  static const outlineVariant = Color(0xFFE4E4E7);
-  static const inverseSurface = Color(0xFF0F1117);
+  static const surfaceContainerLow = Color(0xFFF5F5F5);
+  static const surfaceContainer = Color(0xFFEEEEEE);
+  static const surfaceContainerHigh = Color(0xFFE0E0E0);
+  static const surfaceContainerHighest = Color(0xFFD4D4D4);
+  static const onSurface = Color(0xFF000000);
+  static const onSurfaceVariant = Color(0xFF666666);
+  static const outline = Color(0xFFBBBBBB);
+  static const outlineVariant = Color(0xFFE5E5E5);
+  static const inverseSurface = Color(0xFF000000);
   static const onInverseSurface = Color(0xFFFFFFFF);
   static const inversePrimary = Color(0xFFFFFFFF);
 
-  /// Prestige Noir dark — elevated charcoal (not pure AMOLED black).
-  static const surfaceDark = Color(0xFF0F1117);
-  static const surfaceDimDark = Color(0xFF0F1117);
-  static const surfaceBrightDark = Color(0xFF141820);
-  static const surfaceContainerLowestDark = Color(0xFF0F1117);
-  static const surfaceContainerLowDark = Color(0xFF141820);
-  static const surfaceContainerDark = Color(0xFF1A1F2B);
-  static const surfaceContainerHighDark = Color(0xFF222836);
-  static const surfaceContainerHighestDark = Color(0xFF2A3142);
-  static const onSurfaceDark = Color(0xFFF4F4F5);
-  static const onSurfaceVariantDark = Color(0xFFA1A1AA);
-  static const outlineDark = Color(0xFF52525B);
-  static const outlineVariantDark = Color(0xFF2A3142);
+  // ── Dark surfaces (Snapchat-pure black) ──
+  static const surfaceDark = Color(0xFF000000);
+  static const surfaceDimDark = Color(0xFF000000);
+  static const surfaceBrightDark = Color(0xFF121212);
+  static const surfaceContainerLowestDark = Color(0xFF000000);
+  static const surfaceContainerLowDark = Color(0xFF0A0A0A);
+  static const surfaceContainerDark = Color(0xFF121212);
+  static const surfaceContainerHighDark = Color(0xFF1E1E1E);
+  static const surfaceContainerHighestDark = Color(0xFF2A2A2A);
+  static const onSurfaceDark = Color(0xFFFFFFFF);
+  static const onSurfaceVariantDark = Color(0xFFA0A0A0);
+  static const outlineDark = Color(0xFF333333);
+  static const outlineVariantDark = Color(0xFF222222);
   static const inverseSurfaceLight = Color(0xFFFFFFFF);
-  static const onInverseSurfaceDark = Color(0xFF0F1117);
-  static const inversePrimaryDark = Color(0xFF0F1117);
+  static const onInverseSurfaceDark = Color(0xFF000000);
+  static const inversePrimaryDark = Color(0xFF000000);
 
+  // ── Glass (card) surfaces ──
   static const glassBackground = Color(0xFFFFFFFF);
-  static const glassBorder = Color(0xFFE4E4E7);
-  static const glassBackgroundDark = Color(0xFF1A1F2B);
-  static const glassBorderDark = Color(0xFF2A3142);
+  static const glassBorder = Color(0xFFE5E5E5);
+  static const glassBackgroundDark = Color(0xFF121212);
+  static const glassBorderDark = Color(0xFF222222);
 
   static const gradientPrimary = LinearGradient(
     colors: [surfaceContainerLowest, surfaceContainerLow],
@@ -144,8 +146,8 @@ class VColors {
     end: Alignment.bottomRight,
   );
 
-  static const dark = Color(0xFF0F1117);
-  static const light = Color(0xFFFAFAF9);
+  static const dark = Color(0xFF000000);
+  static const light = Color(0xFFFFFFFF);
 
   static const tierHustler = Color(0xFFEF4444);
   static const tierHighRoller = Color(0xFF0EA5E9);

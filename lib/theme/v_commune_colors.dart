@@ -5,12 +5,12 @@ import 'v_colors.dart';
 /// Discord-style surface ladder for Commune chat surfaces.
 /// See docs/reference/DESIGN.md.
 abstract final class VCommuneColors {
-  // --- Dark ladder ---
-  static const Color surfacePrimary = Color(0xFF313338);
-  static const Color surfaceSecondary = Color(0xFF2B2D31);
-  static const Color surfaceSecondaryAlt = Color(0xFF232428);
-  static const Color surfaceTertiary = Color(0xFF1E1F22);
-  static const Color surfaceFloating = Color(0xFF111214);
+  // --- Dark ladder (Snapchat-pure black) ---
+  static const Color surfacePrimary = Color(0xFF121212);
+  static const Color surfaceSecondary = Color(0xFF1A1A1A);
+  static const Color surfaceSecondaryAlt = Color(0xFF222222);
+  static const Color surfaceTertiary = Color(0xFF0A0A0A);
+  static const Color surfaceFloating = Color(0xFF000000);
   static const Color textNormal = Color(0xFFDBDEE1);
   static const Color textMuted = Color(0xFF949BA4);
   static const Color headerPrimary = Color(0xFFF2F3F5);
@@ -20,16 +20,16 @@ abstract final class VCommuneColors {
   /// @mentions — brand accent, not link blue.
   static const Color textMention = VColors.brand;
 
-  // --- Light ladder (DCX-041) ---
+  // --- Light ladder (Snapchat-clean white) ---
   static const Color surfacePrimaryLight = Color(0xFFFFFFFF);
-  static const Color surfaceSecondaryLight = Color(0xFFF2F3F5);
-  static const Color surfaceSecondaryAltLight = Color(0xFFE3E5E8);
-  static const Color surfaceTertiaryLight = Color(0xFFE3E5E8);
-  static const Color surfaceFloatingLight = Color(0xFFDCDDDE);
-  static const Color textNormalLight = Color(0xFF313338);
-  static const Color textMutedLight = Color(0xFF5C5E66);
-  static const Color headerPrimaryLight = Color(0xFF060607);
-  static const Color headerSecondaryLight = Color(0xFF4E5058);
+  static const Color surfaceSecondaryLight = Color(0xFFF5F5F5);
+  static const Color surfaceSecondaryAltLight = Color(0xFFEEEEEE);
+  static const Color surfaceTertiaryLight = Color(0xFFE5E5E5);
+  static const Color surfaceFloatingLight = Color(0xFFE0E0E0);
+  static const Color textNormalLight = Color(0xFF000000);
+  static const Color textMutedLight = Color(0xFF666666);
+  static const Color headerPrimaryLight = Color(0xFF000000);
+  static const Color headerSecondaryLight = Color(0xFF444444);
   static const Color textLinkLight = Color(0xFF006CE7);
 
   // Interactive modifiers (on dark surfaces)
