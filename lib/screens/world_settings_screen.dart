@@ -611,7 +611,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                             return ChoiceChip(
                               label: Icon(
                                 choice.icon,
-                                size: 24,
+                                size: VIconSize.lg,
                                 color: isSelected
                                     ? colorScheme.onPrimaryContainer
                                     : colorScheme.onSurfaceVariant,
@@ -625,7 +625,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                               avatar: isSelected
                                   ? Icon(
                                       Icons.check_circle,
-                                      size: 16,
+                                      size: VIconSize.sm,
                                       color: colorScheme.onPrimaryContainer,
                                     )
                                   : null,
@@ -959,9 +959,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                                     if (!isCurrentUser && canMod)
                                       PopupMenuButton<String>(
                                         icon: Icon(
-                                          Icons.more_vert,
-                                          size: 18,
-                                          color: Theme.of(context).colorScheme.outlineVariant,
+                                           Icons.more_vert,
+                                           size: VIconSize.base,
+                                           color: Theme.of(context).colorScheme.outlineVariant,
                                         ),
                                         onSelected: (action) {
                                           switch (action) {

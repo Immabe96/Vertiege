@@ -192,7 +192,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
           CosmeticAvatar(
             imageUrl: imageUrl,
             seed: seed,
-            size: 24,
+            size: VIconSize.lg,
           ),
           const SizedBox(width: VSpacing.xs),
         ],
@@ -968,7 +968,7 @@ class _ReactionBar extends StatelessWidget {
               ),
               child: Icon(
                 Icons.add,
-                size: 14,
+                size: VIconSize.denseSm,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),

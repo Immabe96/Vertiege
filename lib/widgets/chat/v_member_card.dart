@@ -106,12 +106,12 @@ class VMemberCard extends StatelessWidget {
                             const SizedBox(width: VSpacing.xxs),
                             const Icon(
                               Icons.verified,
-                              size: 18,
+                              size: VIconSize.base,
                               color: VCommuneColors.textLink,
                             ),
                           ],
                           const SizedBox(width: VSpacing.xs),
-                          TierIcon(tier: tier, size: 20),
+                          TierIcon(tier: tier, size: VIconSize.md),
                         ],
                       ),
                       if (profession != null && profession!.isNotEmpty)
@@ -152,7 +152,7 @@ class VMemberCard extends StatelessWidget {
                 ),
                 if (onDismiss != null)
                   IconButton(
-                    icon: const Icon(Icons.close, size: 18),
+                    icon: const Icon(Icons.close, size: VIconSize.base),
                     onPressed: onDismiss,
                     tooltip: 'Close',
                   ),
@@ -167,7 +167,7 @@ class VMemberCard extends StatelessWidget {
                       onDismiss?.call();
                       context.push(residentProfilePath(residentId));
                     },
-                    icon: const Icon(Icons.person_outline, size: 18),
+                    icon: const Icon(Icons.person_outline, size: VIconSize.base),
                     label: const Text('Profile'),
                   ),
                 ),
@@ -179,7 +179,7 @@ class VMemberCard extends StatelessWidget {
                         onDismiss?.call();
                         onMessage!();
                       },
-                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                      icon: const Icon(Icons.chat_bubble_outline, size: VIconSize.base),
                       label: const Text('Message'),
                     ),
                   ),

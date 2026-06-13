@@ -43,7 +43,7 @@ class FeedSortDropdown extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sort, size: 14, color: mutedColor),
+            Icon(Icons.sort, size: VIconSize.denseSm, color: mutedColor),
             const SizedBox(width: 4),
             Text(
               label,
@@ -54,7 +54,7 @@ class FeedSortDropdown extends StatelessWidget {
             const SizedBox(width: 2),
             Icon(
               Icons.arrow_drop_down,
-              size: 16,
+              size: VIconSize.sm,
               color: mutedColor,
             ),
           ],

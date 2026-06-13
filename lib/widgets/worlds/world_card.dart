@@ -180,7 +180,7 @@ class _CardBody extends ConsumerWidget {
           const SizedBox(height: 2),
           Row(
             children: [
-              Icon(VIcons.users, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(VIcons.users, size: VIconSize.xs, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 '${world.memberCount} ${world.memberCount == 1 ? 'member' : 'members'}',

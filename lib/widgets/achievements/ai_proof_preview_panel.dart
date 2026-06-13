@@ -77,7 +77,7 @@ class AiProofPreviewPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, size: 18, color: Theme.of(context).colorScheme.primary),
+              Icon(Icons.auto_awesome, size: VIconSize.base, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Proof assist',
@@ -111,7 +111,7 @@ class AiProofPreviewPanel extends StatelessWidget {
                 children: [
                   Icon(
                     item.met ? Icons.check_circle : Icons.radio_button_unchecked,
-                    size: 16,
+                    size: VIconSize.sm,
                     color: item.met ? VColors.success : Theme.of(context).colorScheme.outline,
                   ),
                   const SizedBox(width: VSpacing.sm),

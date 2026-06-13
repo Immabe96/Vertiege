@@ -805,7 +805,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                                         const SizedBox(width: VSpacing.xxs),
                                         Icon(
                                           Icons.chevron_right,
-                                          size: 14,
+                                          size: VIconSize.denseSm,
                                           color: Theme.of(context).colorScheme.primary.withValues(
                                             alpha: 0.8,
                                           ),
@@ -991,7 +991,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                   children: [
                     Row(
                       children: [
-                        TierIcon(tier: tierValue, size: 28),
+                        TierIcon(tier: tierValue, size: VIconSize.lg),
                         const SizedBox(width: VSpacing.sm),
                         Text(
                           resident.tier.label,

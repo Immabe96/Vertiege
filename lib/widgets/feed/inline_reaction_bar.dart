@@ -84,7 +84,7 @@ class _QuickReaction extends StatelessWidget {
           padding: const EdgeInsets.all(VSpacing.xs),
           child: Icon(
             icon,
-            size: 18,
+            size: VIconSize.base,
             color: active
                 ? VCommuneColors.textLink
                 : VCommuneColors.textMuted,

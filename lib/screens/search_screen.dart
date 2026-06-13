@@ -755,7 +755,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       _focusNode.unfocus();
                     },
                     onDeleted: () => _removeRecentSearch(q),
-                    deleteIcon: const Icon(VIcons.x, size: 14),
+                    deleteIcon: const Icon(VIcons.x, size: VIconSize.denseSm),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -962,7 +962,7 @@ class _PersonTile extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: VSpacing.xs),
-                TierIcon(tier: resident.tier.value, size: 18),
+                TierIcon(tier: resident.tier.value, size: VIconSize.base),
               ],
             ),
             subtitle: resident.profession != null

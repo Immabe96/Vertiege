@@ -469,7 +469,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                         selected: isSelected,
                         onPressed: () =>
                             setState(() => _selectedIcon = choice.id),
-                        child: Icon(choice.icon, size: 22),
+                        child: Icon(choice.icon, size: VIconSize.lgMd),
                       );
                     }).toList(),
                   ),
@@ -536,7 +536,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
               label: 'Create World',
               isFullWidth: true,
               isLoading: _isCreating,
-              icon: Icon(VIcons.plus, size: 20),
+              icon: Icon(VIcons.plus, size: VIconSize.md),
               onPressed: _isFormReady ? _submit : null,
             ),
 

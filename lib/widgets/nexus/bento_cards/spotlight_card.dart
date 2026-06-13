@@ -51,7 +51,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
       children: [
         Row(
           children: [
-            Icon(VIcons.sparkles, color: VColors.tertiary, size: 16),
+            Icon(VIcons.sparkles, color: VColors.tertiary, size: VIconSize.sm),
             const SizedBox(width: VSpacing.xs),
             Text(
               'Resident Spotlight',

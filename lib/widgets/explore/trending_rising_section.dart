@@ -114,7 +114,7 @@ class TrendingRisingSection extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.people,
-                                  size: 12,
+                                  size: VIconSize.xs,
                                   color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
                                 ),
                                 const SizedBox(width: 2),

@@ -391,7 +391,7 @@ class _ProfileTab extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.camera_alt,
-                        size: 16,
+                        size: VIconSize.sm,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
@@ -709,7 +709,7 @@ class _GateTabState extends State<_GateTab> {
                             ),
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios, size: 16),
+                        const Icon(Icons.arrow_forward_ios, size: VIconSize.sm),
                       ],
                     ),
                   ),

@@ -55,7 +55,7 @@ class VPinMessageBanner extends StatelessWidget {
             children: [
               const Icon(
                 Icons.push_pin,
-                size: 14,
+                size: VIconSize.denseSm,
                 color: VColors.tertiary,
               ),
               const SizedBox(width: VSpacing.sm),

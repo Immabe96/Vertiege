@@ -43,7 +43,7 @@ class FeedTabChip extends StatelessWidget {
             if (icon != null) ...[
               Icon(
                 icon,
-                size: 14,
+                size: VIconSize.denseSm,
                 color: selected ? VColors.primary : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
               ),
               const SizedBox(width: 4),

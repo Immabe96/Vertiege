@@ -65,7 +65,7 @@ This charter governs how residents join, post, and participate. Council updates 
         children: [
           const Row(
             children: [
-              Icon(Icons.push_pin, size: 16, color: VColors.tertiary),
+              Icon(Icons.push_pin, size: VIconSize.sm, color: VColors.tertiary),
               SizedBox(width: VSpacing.xs),
               Text(
                 'Pinned · Constitution',

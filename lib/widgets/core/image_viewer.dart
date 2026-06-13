@@ -110,7 +110,7 @@ class _ImageViewerState extends State<ImageViewer> {
             ),
           ),
           child: const Center(
-            child: Icon(VIcons.x, color: VColors.onPrimary, size: 22),
+            child: Icon(VIcons.x, color: VColors.onPrimary, size: VIconSize.lgMd),
           ),
         ),
       ),

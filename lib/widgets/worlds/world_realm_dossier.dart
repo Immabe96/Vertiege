@@ -576,7 +576,7 @@ class _StandingSection extends StatelessWidget {
                   children: [
                     Icon(
                       active ? Icons.check_circle : Icons.circle_outlined,
-                      size: 16,
+                      size: VIconSize.sm,
                       color: active ? VColors.success : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: VSpacing.xs),
@@ -753,7 +753,7 @@ class _EconomySection extends StatelessWidget {
       enabled: enabled,
               titleColor: enabled ? null : Theme.of(context).colorScheme.onSurfaceVariant,
       trailing: (!enabled || showLock)
-          ? const Icon(Icons.lock_outline, size: 18)
+          ? const Icon(Icons.lock_outline, size: VIconSize.base)
           : null,
       onTap: enabled
           ? () {
@@ -944,7 +944,7 @@ class _OrientationSection extends StatelessWidget {
                         ),
                         Icon(
                           VIcons.chevronRight,
-                          size: 18,
+                          size: VIconSize.base,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ],
@@ -1104,13 +1104,13 @@ class _CouncilPreviewSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                          ),
+                           ),
                           Icon(
                             VIcons.chevronRight,
-                            size: 18,
+                            size: VIconSize.base,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
-                        ],
+                          ],
                       ),
                     ),
                   ),

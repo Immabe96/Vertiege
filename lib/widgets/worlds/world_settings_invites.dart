@@ -175,7 +175,7 @@ class _InviteRow extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.copy, size: 18),
+              icon: const Icon(Icons.copy, size: VIconSize.base),
               onPressed: () => onCopy(invite.code),
               tooltip: 'Copy link',
             ),

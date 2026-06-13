@@ -71,7 +71,7 @@ class WorldSettingsChannels extends ConsumerWidget {
             height: VTouchTarget.minimum,
             child: OutlinedButton.icon(
               onPressed: () => onCreate(context),
-              icon: const Icon(VIcons.plus, size: 18),
+              icon: const Icon(VIcons.plus, size: VIconSize.base),
               label: const Text('Add Channel'),
             ),
           ),
@@ -151,7 +151,7 @@ class _ChannelRow extends StatelessWidget {
                 IconButton(
                   icon: const Icon(
                     Icons.delete_outline,
-                    size: 18,
+                    size: VIconSize.base,
                     color: VColors.error,
                   ),
                   onPressed: onDelete,

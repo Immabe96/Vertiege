@@ -397,7 +397,7 @@ class _SubmitAchievementScreenState
                               padding: EdgeInsets.all(4),
                               child: Icon(
                                 Icons.close,
-                                size: 16,
+                                size: VIconSize.sm,
                                 color: VColors.onError,
                               ),
                             ),

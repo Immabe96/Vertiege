@@ -507,7 +507,7 @@ class _VerificationReviewScreenState
                           ? NetworkImage(post.residentAvatar)
                           : null,
                       child: post.residentAvatar.isEmpty
-                          ? const Icon(Icons.person, size: 16)
+                          ? const Icon(Icons.person, size: VIconSize.sm)
                           : null,
                     ),
                     const SizedBox(width: VSpacing.sm),

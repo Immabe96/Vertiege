@@ -51,7 +51,7 @@ class VChatBadgeReactions extends StatelessWidget {
               avatar: AchievementBadgeAvatar(
                 achievement: ach,
                 accentColor: meta.color,
-                size: 22,
+                size: VIconSize.lgMd,
                 showEarnedBadge: true,
               ),
               onPressed: () {

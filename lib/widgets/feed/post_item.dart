@@ -24,6 +24,7 @@ import '../profile/luminary_nameplate.dart';
 import 'comment_sheet.dart';
 import 'post_action_bar.dart';
 import 'reaction_bar.dart';
+import '../core/tab_aware_sheet.dart';
 import '../../state/world_mute_provider.dart';
 import 'heart_animation.dart';
 import 'post_image.dart';
@@ -177,7 +178,7 @@ class PostItem extends ConsumerWidget {
                             children: [
                               TierIcon(
                                 tier: post.tierAtPosting.value,
-                                size: 12,
+                                size: VIconSize.xs,
                               ),
                               const SizedBox(width: VSpacing.xs),
                               Text(
@@ -196,7 +197,7 @@ class PostItem extends ConsumerWidget {
                       PopupMenuButton<String>(
                         icon: Icon(
                           Icons.more_horiz,
-                          size: 20,
+                          size: VIconSize.md,
                           color: theme.colorScheme.outline,
                         ),
                         onSelected: (action) {
@@ -250,7 +251,7 @@ class PostItem extends ConsumerWidget {
                       children: [
                         Icon(
                           Icons.push_pin,
-                          size: 14,
+                          size: VIconSize.denseSm,
                           color: theme.colorScheme.tertiary,
                         ),
                         const SizedBox(width: VSpacing.xs),
@@ -268,7 +269,7 @@ class PostItem extends ConsumerWidget {
                       children: [
                         Icon(
                           Icons.campaign,
-                          size: 14,
+                          size: VIconSize.denseSm,
                           color: theme.colorScheme.primary,
                         ),
                         const SizedBox(width: VSpacing.xs),
@@ -479,7 +480,7 @@ class PostItem extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(width: VSpacing.xs),
-                TierBadge(tier: post.tierAtPosting.value, size: 20),
+                TierBadge(tier: post.tierAtPosting.value, size: VIconSize.md),
               ],
             ),
             const SizedBox(height: VSpacing.xs),
@@ -939,7 +940,7 @@ class _DecreeLabelState extends State<_DecreeLabel>
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(VIcons.sparkles, size: 14, color: VColors.tertiary),
+              Icon(VIcons.sparkles, size: VIconSize.denseSm, color: VColors.tertiary),
               SizedBox(width: 4),
               Text(
                 'SOVEREIGN DECREE',

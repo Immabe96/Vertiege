@@ -327,7 +327,7 @@ class AchievementShareCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.diamond,
-                          size: VIconSize.sm + 2,
+                          size: VIconSize.base,
                           color: _categoryColor.withValues(alpha: 0.8),
                         ),
                         const SizedBox(width: VSpacing.sm),

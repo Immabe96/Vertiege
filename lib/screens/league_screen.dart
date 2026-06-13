@@ -218,7 +218,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.timer_outlined, size: 20, color: VColors.tertiary),
+          const Icon(Icons.timer_outlined, size: VIconSize.md, color: VColors.tertiary),
           const SizedBox(width: VSpacing.sm),
           Text(
             'Reset in ',
@@ -252,7 +252,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         children: [
           Row(
             children: [
-              const Icon(VIcons.chevronUp, size: 16, color: VColors.success),
+              const Icon(VIcons.chevronUp, size: VIconSize.sm, color: VColors.success),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Top ${LeagueService.promotionCount} promoted',
@@ -266,7 +266,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           ),
           Row(
             children: [
-              const Icon(VIcons.chevronRight, size: 16, color: VColors.error),
+              const Icon(VIcons.chevronRight, size: VIconSize.sm, color: VColors.error),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Bottom ${LeagueService.demotionCount} demoted',
@@ -424,7 +424,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
           ),
           if (isDemotionZone && !isCurrentUser) ...[
             const SizedBox(width: VSpacing.xs),
-            const Icon(Icons.arrow_downward, size: 14, color: VColors.error),
+            const Icon(Icons.arrow_downward, size: VIconSize.denseSm, color: VColors.error),
           ],
         ],
       ),

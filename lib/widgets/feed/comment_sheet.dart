@@ -516,7 +516,7 @@ class _CommentTileState extends State<_CommentTile> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CosmeticAvatar(
-                      size: 28,
+                      size: VIconSize.lg,
                       seed: widget.comment.residentName,
                     ),
                     const SizedBox(width: VSpacing.sm),
@@ -535,7 +535,7 @@ class _CommentTileState extends State<_CommentTile> {
                                ),
                               ),
                               const SizedBox(width: VSpacing.xs),
-                              TierBadge(tier: widget.comment.tierAtPosting, size: 14),
+                               TierBadge(tier: widget.comment.tierAtPosting, size: VIconSize.denseSm),
                               if (widget.isOp)
                                 Container(
                                   margin: const EdgeInsets.only(left: VSpacing.xs),

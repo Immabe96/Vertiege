@@ -49,7 +49,7 @@ class VThreadIndicatorChip extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.forum_outlined,
-                      size: 14,
+                      size: VIconSize.denseSm,
                       color: VCommuneColors.textLink,
                     ),
                     const SizedBox(width: VSpacing.xs),

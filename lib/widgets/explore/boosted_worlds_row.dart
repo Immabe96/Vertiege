@@ -71,7 +71,7 @@ class BoostedWorldsRow extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.bolt, size: 12, color: VColors.tertiary),
+                            const Icon(Icons.bolt, size: VIconSize.xs, color: VColors.tertiary),
                             const SizedBox(width: 2),
                             Flexible(
                               child: Text(

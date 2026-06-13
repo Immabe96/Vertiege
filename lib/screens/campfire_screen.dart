@@ -262,7 +262,7 @@ class _CampfireTextSplitBar extends ConsumerWidget {
               ),
               Icon(
                 Icons.open_in_new,
-                size: 14,
+                size: VIconSize.denseSm,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ],
@@ -407,7 +407,7 @@ class _ParticipantContent extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.mic_off,
-                    size: 12,
+                    size: VIconSize.xs,
                     color: VColors.onPrimary,
                   ),
                 ),

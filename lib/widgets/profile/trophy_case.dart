@@ -204,7 +204,7 @@ class _TimelineItem extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: TierIcon(tier: tier.value, size: 22),
+                child: TierIcon(tier: tier.value, size: VIconSize.lgMd),
               ),
             ),
             if (!isLast)
@@ -320,7 +320,7 @@ class _PrestigeStarsSection extends StatelessWidget {
                   child: const Icon(
                     VIcons.sparkles,
                     color: VColors.tertiary,
-                    size: 24,
+                    size: VIconSize.lg,
                   ),
                 ),
               ),

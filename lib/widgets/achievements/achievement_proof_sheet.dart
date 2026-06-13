@@ -352,7 +352,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                                     padding: EdgeInsets.all(4),
                                     child: Icon(
                                       Icons.close,
-                                      size: 16,
+                                      size: VIconSize.sm,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -419,7 +419,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         else
-                          const Icon(VIcons.upload, size: 18),
+                          const Icon(VIcons.upload, size: VIconSize.base),
                         const SizedBox(width: VSpacing.sm),
                         Text(
                           _isUploading

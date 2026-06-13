@@ -414,7 +414,7 @@ class _ChannelTile extends StatelessWidget {
             children: [
               Icon(
                 lockedReason != null ? Icons.lock_outline : _icon,
-                size: 20,
+                size: VIconSize.md,
                 color: lockedReason != null
                     ? theme.colorScheme.onSurfaceVariant
                     : unreadCount > 0
@@ -457,7 +457,7 @@ class _ChannelTile extends StatelessWidget {
                               ),
                               child: Icon(
                                 Icons.notifications_off_outlined,
-                                size: 16,
+                                size: VIconSize.sm,
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
@@ -536,7 +536,7 @@ class _CreateChannelRowWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.add,
-                size: 18,
+                size: VIconSize.base,
                 color: theme.colorScheme.primary,
               ),
               const SizedBox(width: VSpacing.sm),

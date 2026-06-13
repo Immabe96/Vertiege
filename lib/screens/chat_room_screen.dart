@@ -1220,7 +1220,7 @@ class _ImagePreview extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => Icon(
                 Icons.broken_image,
-                size: 32,
+                size: VIconSize.xl,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),

@@ -348,7 +348,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 top: VSpacing.sm,
                 left: VSpacing.sm,
                 child: IconButton(
-                  icon: const Icon(VIcons.chevronRight, size: 20),
+                  icon: const Icon(VIcons.chevronRight, size: VIconSize.md),
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   onPressed: _prevStage,
                 ),
@@ -632,7 +632,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                             ),
                             child: Icon(
                               WorldAssets.iconForWorld(world.assetKey),
-                              size: 24,
+                              size: VIconSize.lg,
                               color: accent,
                             ),
                           ),
@@ -1031,7 +1031,7 @@ class _InterestCard extends StatelessWidget {
                 ),
                 child: Icon(
                   interest.icon,
-                  size: 22,
+                  size: VIconSize.lgMd,
                   color: isSelected ? glow : glow.withValues(alpha: 0.6),
                 ),
               ),
@@ -1062,7 +1062,7 @@ class _InterestCard extends StatelessWidget {
               ),
               if (isSelected) ...[
                 const SizedBox(height: VSpacing.xs),
-                Icon(VIcons.badgeCheck, size: 16, color: glow),
+                Icon(VIcons.badgeCheck, size: VIconSize.sm, color: glow),
               ],
             ],
           ),
@@ -1118,7 +1118,7 @@ class _GoalCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(VRadius.lg),
               ),
-              child: Icon(goal.icon, size: 22, color: VColors.tertiary),
+              child: Icon(goal.icon, size: VIconSize.lgMd, color: VColors.tertiary),
             ),
             const SizedBox(width: VSpacing.md),
             Expanded(
@@ -1156,7 +1156,7 @@ class _GoalCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(VIcons.badgeCheck, size: 22, color: VColors.tertiary),
+              Icon(VIcons.badgeCheck, size: VIconSize.lgMd, color: VColors.tertiary),
           ],
         ),
       ),

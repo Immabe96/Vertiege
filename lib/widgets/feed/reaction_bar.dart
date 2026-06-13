@@ -252,7 +252,7 @@ class _ReactionBarState extends State<ReactionBar> {
                                 if (!isUnlocked)
                                   Icon(
                                     Icons.lock,
-                                    size: 12,
+                                    size: VIconSize.xs,
                                     color: theme.colorScheme.outline,
                                   ),
                               ],
@@ -349,7 +349,7 @@ class _BadgeReactionChip extends StatelessWidget {
       avatar: AchievementBadgeAvatar(
         achievement: achievement,
         accentColor: accentColor,
-        size: 22,
+        size: VIconSize.lgMd,
         showEarnedBadge: true,
       ),
       onPressed: onTap,
@@ -417,7 +417,7 @@ class _ReactionChipState extends State<_ReactionChip>
       scale: _scale,
       child: InputChip(
         label: Text('${widget.count}'),
-        avatar: Icon(widget.icon, size: 16),
+        avatar: Icon(widget.icon, size: VIconSize.sm),
         onPressed: _burst,
         backgroundColor: widget.isActive
             ? theme.colorScheme.primaryContainer

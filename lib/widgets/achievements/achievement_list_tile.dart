@@ -146,10 +146,10 @@ class AchievementListTile extends StatelessWidget {
       suffix: canOpen
           ? Icon(
               FIcons.chevronRight,
-              size: 18,
+              size: VIconSize.base,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             )
-          : Icon(Icons.check_circle, size: 20, color: accent),
+          : Icon(Icons.check_circle, size: VIconSize.md, color: accent),
     );
   }
 }
@@ -207,7 +207,7 @@ class _ThumbFallback extends StatelessWidget {
       width: 44,
       height: 44,
       color: VColors.surfaceContainerHigh,
-      child: const Icon(Icons.image_outlined, size: 20),
+      child: const Icon(Icons.image_outlined, size: VIconSize.md),
     );
   }
 }

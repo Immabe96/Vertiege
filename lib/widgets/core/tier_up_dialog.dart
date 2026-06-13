@@ -136,7 +136,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                     const SizedBox(width: VSpacing.md),
                     Icon(
                       Icons.arrow_forward,
-                      size: 32,
+                      size: VIconSize.xl,
                       color: VColors.success,
                     ),
                     const SizedBox(width: VSpacing.md),
@@ -179,7 +179,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                             children: [
                               Icon(
                                 Icons.check_circle,
-                                size: 16,
+                                size: VIconSize.sm,
                                 color: VColors.success,
                               ),
                               const SizedBox(width: VSpacing.xs),

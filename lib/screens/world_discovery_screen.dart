@@ -117,7 +117,7 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(VIcons.x, size: 18),
+                        icon: Icon(VIcons.x, size: VIconSize.base),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {});
@@ -293,7 +293,7 @@ class _WorldDiscoveryScreenState extends ConsumerState<WorldDiscoveryScreen> {
               child: VButton(
                 label: 'Create World',
                 isFullWidth: true,
-                icon: Icon(VIcons.plus, size: 18),
+                icon: Icon(VIcons.plus, size: VIconSize.base),
                 onPressed: () => context.push('/create-world'),
               ),
             )

@@ -236,7 +236,7 @@ class WorldShareCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.diamond,
-                          size: VIconSize.sm + 2,
+                          size: VIconSize.base,
                           color: _tierColor.withValues(alpha: 0.8),
                         ),
                         const SizedBox(width: VSpacing.sm),

@@ -106,7 +106,7 @@ class WorldMemberRow extends StatelessWidget {
                               child: CosmeticAvatar(
                                 imageUrl: member.resident.avatarUrl,
                                 seed: member.resident.id,
-                                size: 32,
+                                size: VIconSize.xl,
                               ),
                             ),
                             if (hasStreak && flameColor != null)

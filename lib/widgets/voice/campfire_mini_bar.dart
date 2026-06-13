@@ -73,7 +73,7 @@ class CampfireChannelBar extends ConsumerWidget {
               ),
               const Icon(
                 Icons.arrow_forward_ios,
-                size: 12,
+                size: VIconSize.xs,
                 color: VColors.success,
               ),
             ],

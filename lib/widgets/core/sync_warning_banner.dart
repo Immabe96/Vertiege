@@ -25,7 +25,7 @@ class SyncWarningBanner extends StatelessWidget {
         padding: const EdgeInsets.all(VSpacing.sm),
         child: Row(
           children: [
-            const Icon(Icons.cloud_off, size: 18, color: VColors.warning),
+            const Icon(Icons.cloud_off, size: VIconSize.base, color: VColors.warning),
             const SizedBox(width: VSpacing.sm),
             Expanded(
               child: Text(message, style: theme.textTheme.bodySmall),

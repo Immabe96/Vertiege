@@ -43,7 +43,7 @@ class SubscriptionBadge extends StatelessWidget {
         children: [
           Icon(
             isSovereign ? Icons.diamond : Icons.star,
-            size: 14,
+            size: VIconSize.denseSm,
             color: VColors.onTertiary,
           ),
           const SizedBox(width: VSpacing.xs),

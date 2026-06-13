@@ -34,15 +34,17 @@ class VRadius {
 class VIconSize {
   VIconSize._();
   static const double xs = 12;
+  static const double denseSm = 14;
   static const double sm = 16;
+  static const double base = 18;
   static const double md = 20;
+  static const double lgMd = 22;
   static const double lg = 24;
   static const double xl = 32;
 
   /// Dense list icon steps for channel rows (DCX-038): 20 / 16 / 14.
   static const double denseLg = 20;
   static const double denseMd = 16;
-  static const double denseSm = 14;
 }
 
 /// Raster profession / achievement badge display sizes (~10% above legacy defaults).

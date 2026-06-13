@@ -145,7 +145,7 @@ class _TrophyCell extends StatelessWidget {
                     ),
                     child:  Icon(
                       Icons.visibility_off,
-                      size: 12,
+                      size: VIconSize.xs,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),

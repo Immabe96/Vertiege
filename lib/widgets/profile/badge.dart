@@ -24,9 +24,9 @@ class Badge extends StatelessWidget {
               imagePath: imagePath,
               size: VBadgeSize.decorationChip,
               errorBuilder: (_, _, _) =>
-                  const Icon(VIcons.sparkles, size: 16),
+                  const Icon(VIcons.sparkles, size: VIconSize.sm),
             )
-          : const Icon(VIcons.sparkles, size: 16),
+          : const Icon(VIcons.sparkles, size: VIconSize.sm),
       label: Text(label, style: const TextStyle(fontSize: VFontSize.labelSm)),
       backgroundColor: hasRaster ? Colors.transparent : chipBg,
       side: BorderSide.none,

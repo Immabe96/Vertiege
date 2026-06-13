@@ -258,7 +258,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
           padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
           child: Column(
             children: [
-              Icon(icon, color: VColors.primary, size: 28),
+              Icon(icon, color: VColors.primary, size: VIconSize.lg),
               const SizedBox(height: VSpacing.xs),
               Text(
                 label,

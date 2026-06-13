@@ -145,7 +145,7 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 ),
                 child: Icon(
                   _illustrationIcon(),
-                  size: 32,
+                  size: VIconSize.xl,
                   color: variantColor,
                 ),
               ),

@@ -714,7 +714,7 @@ class _PostInputState extends ConsumerState<PostInput>
                     top: 0,
                     right: 0,
                     child: IconButton(
-                      icon: const Icon(Icons.close, size: 18),
+                      icon: const Icon(Icons.close, size: VIconSize.base),
                       onPressed: () => setState(() => _imageUri = null),
                       style: IconButton.styleFrom(
                         backgroundColor: theme.colorScheme.error,

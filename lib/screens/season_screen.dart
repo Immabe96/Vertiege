@@ -250,7 +250,7 @@ class _LowPressureNote extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.self_improvement, size: 18, color: VColors.tertiary),
+          const Icon(Icons.self_improvement, size: VIconSize.base, color: VColors.tertiary),
           const SizedBox(width: VSpacing.sm),
           Expanded(
             child: Text(
@@ -326,7 +326,7 @@ class _SeasonGuideExpansion extends StatelessWidget {
                           children: [
                             const Icon(
                               Icons.bolt,
-                              size: 16,
+                              size: VIconSize.sm,
                               color: VColors.tertiary,
                             ),
                             const SizedBox(width: VSpacing.xs),

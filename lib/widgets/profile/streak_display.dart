@@ -100,7 +100,7 @@ class StreakDisplay extends StatelessWidget {
                             children: [
                                Icon(
                                 Icons.shield,
-                                size: 14,
+                                size: VIconSize.denseSm,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 3),
@@ -147,7 +147,7 @@ class StreakDisplay extends StatelessWidget {
                         child: isFilled
                             ? Icon(
                                 Icons.check,
-                                size: 12,
+                                size: VIconSize.xs,
                                 color: VColors.warning,
                               )
                             : null,

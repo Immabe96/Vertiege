@@ -121,7 +121,7 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                           child: const Icon(
                             Icons.star,
                             color: VColors.tertiary,
-                            size: 24,
+                            size: VIconSize.lg,
                           ),
                         ),
                       ),
@@ -217,7 +217,7 @@ class _PrestigePerkRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: VColors.tertiary),
+          Icon(icon, size: VIconSize.sm, color: VColors.tertiary),
           const SizedBox(width: VSpacing.xs),
           Expanded(
             child: Text(

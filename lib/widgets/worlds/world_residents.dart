@@ -211,7 +211,7 @@ class _ResidentRow extends StatelessWidget {
                           const SizedBox(width: VSpacing.xs),
                           Icon(
                             Icons.auto_awesome,
-                            size: 14,
+                            size: VIconSize.denseSm,
                             color: theme.colorScheme.primary,
                           ),
                         ],
