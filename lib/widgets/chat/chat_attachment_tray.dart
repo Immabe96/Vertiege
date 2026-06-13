@@ -4,11 +4,12 @@ import 'package:vertiege/ui/ui.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 
-/// + attachment tray — image, achievement share (DCX-059).
+/// + attachment tray — camera, image, achievement share (DCX-059).
 void showChatAttachmentTray(
   BuildContext context, {
   VoidCallback? onAttachImage,
   VoidCallback? onShareAchievement,
+  VoidCallback? onCamera,
 }) {
   showVSheet(
     context,
@@ -32,6 +33,15 @@ void showChatAttachmentTray(
             ),
           ),
           const SizedBox(height: VSpacing.md),
+          if (onCamera != null)
+            VTile(
+              prefix: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Camera'),
+              onPress: () {
+                Navigator.pop(context);
+                onCamera();
+              },
+            ),
           if (onAttachImage != null)
             VTile(
               prefix: const Icon(Icons.image_outlined),
@@ -53,6 +63,6 @@ void showChatAttachmentTray(
         ],
       ),
     ),
-    maxSize: 0.35,
+    maxSize: 0.4,
   );
 }

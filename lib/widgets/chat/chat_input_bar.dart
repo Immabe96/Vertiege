@@ -235,8 +235,42 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 iconSize: VIconSize.lg,
                 padding: EdgeInsets.zero,
               ),
+            if (widget.showAttach)
+              IconButton(
+                icon: const Icon(Icons.camera_alt_outlined),
+                onPressed: widget.onAttach,
+                tooltip: 'Camera',
+                color: widget.useCommuneStyle
+                    ? VCommuneColors.textMuted
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                iconSize: VIconSize.lg,
+                padding: EdgeInsets.zero,
+              ),
             Expanded(child: field),
             const SizedBox(width: VSpacing.sm),
+            IconButton(
+              icon: const Icon(Icons.emoji_emotions_outlined),
+              onPressed: () {
+                // Toggle emoji keyboard on supported platforms.
+                // For now, insert a common emoji as a quick action.
+                final controller = widget.controller;
+                final text = controller.text;
+                final sel = controller.selection;
+                final insertAt = sel.baseOffset < 0 ? text.length : sel.baseOffset;
+                final next = text.replaceRange(insertAt, insertAt, '😊');
+                controller.value = TextEditingValue(
+                  text: next,
+                  selection: TextSelection.collapsed(offset: insertAt + 1),
+                );
+              },
+              tooltip: 'Emoji',
+              color: widget.useCommuneStyle
+                  ? VCommuneColors.textMuted
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              iconSize: VIconSize.lg,
+              padding: EdgeInsets.zero,
+            ),
+            const SizedBox(width: VSpacing.xs),
             Opacity(
               opacity: _canSend ? 1.0 : 0.5,
               child: IconButton(
