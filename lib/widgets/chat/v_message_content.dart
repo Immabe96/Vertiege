@@ -27,6 +27,18 @@ class VMessageContent extends StatelessWidget {
   static final _mentionPattern = RegExp(r'@(\w+)');
   static final _urlPattern = RegExp(r'https?://[^\s<>]+', caseSensitive: false);
 
+  /// Detects if a message is emoji-only (1-8 emoji characters, no text).
+  static final _emojiOnlyPattern = RegExp(
+    r'^[\p{Emoji_Presentation}\p{Emoji}\uFE0F\u200D\U0001F1E0-\U0001F1FF]{1,8}$',
+    unicode: true,
+  );
+
+  static bool isEmojiOnly(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return false;
+    return _emojiOnlyPattern.hasMatch(trimmed);
+  }
+
   /// Preprocess Discord-style spoilers into inline markers for parsing.
   static String preprocessSpoilers(String raw) {
     return raw.replaceAllMapped(_spoilerPattern, (m) => '§SPOILER§${m[1]}§/SPOILER§');
@@ -34,6 +46,18 @@ class VMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Emoji-only messages: render at 2x size for visual delight.
+    if (isEmojiOnly(content)) {
+      return Text(
+        content.trim(),
+        style: TextStyle(
+          fontSize: VFontSize.displayLg,
+          color: textColor,
+          height: 1.2,
+        ),
+      );
+    }
+
     final handle = accentMentionHandle?.trim();
     if (handle != null &&
         handle.isNotEmpty &&

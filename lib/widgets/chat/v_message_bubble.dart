@@ -120,6 +120,8 @@ class _VMessageBubbleState extends State<VMessageBubble>
   late final Animation<double> _opacity;
   late final Animation<Offset> _slide;
   bool _hasAnimated = false;
+  double _swipeOffset = 0;
+  bool _swiping = false;
 
   bool get _isChannel => widget.mode == VMessageBubbleMode.channel;
 
@@ -374,106 +376,173 @@ class _VMessageBubbleState extends State<VMessageBubble>
           ),
           SizedBox(height: compact ? 2 : VSpacing.xs),
         ],
-        GestureDetector(
-          onLongPress: () => _showDmMessageOptions(context),
-          onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity != null &&
-                details.primaryVelocity! < -300) {
-              _dm.onReply(msg);
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: VSpacing.sm,
-              vertical: compact ? VSpacing.xs : VSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: bubbleColor,
-              borderRadius: borderRadius,
-            ),
-            child: Column(
-              crossAxisAlignment: alignment,
-              children: [
-                if (msg.hasReply) ...[
-                  _ReplyPreview(
-                    senderName: msg.replyToSenderName ?? 'Unknown',
-                    content: msg.replyToContent ?? '',
-                    isMe: isMe,
-                    textColor: textColor,
-                  ),
-                  const SizedBox(height: VSpacing.xs),
-                ],
-                if (_dmImageUrls(msg).isNotEmpty)
-                  ChatImageGrid(urls: _dmImageUrls(msg)),
-                if (msg.content.isNotEmpty) ...[
-                  if (_dmImageUrls(msg).isNotEmpty)
-                    const SizedBox(height: VSpacing.xs),
-                  msg.isDeleted
-                      ? Text(
-                          msg.content,
-                          style: TextStyle(
-                            fontSize: VFontSize.bodyMd,
-                            color: timestampColor,
-                            fontStyle: FontStyle.italic,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final replyIconSize = 28.0;
+            final swipeThreshold = 48.0;
+            return GestureDetector(
+              onLongPress: () => _showDmMessageOptions(context),
+              onHorizontalDragStart: (_) {
+                setState(() {
+                  _swiping = true;
+                  _swipeOffset = 0;
+                });
+              },
+              onHorizontalDragUpdate: (details) {
+                final delta = details.delta.dx;
+                setState(() {
+                  _swipeOffset = (_swipeOffset + delta).clamp(-swipeThreshold * 1.5, 0);
+                });
+              },
+              onHorizontalDragEnd: (details) {
+                if (_swipeOffset < -swipeThreshold) {
+                  _dm.onReply(msg);
+                }
+                setState(() {
+                  _swipeOffset = 0;
+                  _swiping = false;
+                });
+              },
+              onHorizontalDragCancel: () {
+                setState(() {
+                  _swipeOffset = 0;
+                  _swiping = false;
+                });
+              },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Reply icon revealed during swipe
+                  if (_swipeOffset < -8)
+                    Positioned(
+                      left: -replyIconSize - VSpacing.xs,
+                      top: 0,
+                      bottom: 0,
+                      child: Opacity(
+                        opacity: (_swipeOffset.abs() / swipeThreshold).clamp(0.0, 1.0),
+                        child: SizedBox(
+                          width: replyIconSize,
+                          height: replyIconSize,
+                          child: Icon(
+                            Icons.reply_rounded,
+                            size: replyIconSize,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
-                        )
-                      : VMessageContent(
-                          content: msg.content,
-                          textColor: textColor,
-                        ),
-                ],
-                VLinkEmbed.forMessageContent(msg.content) ??
-                    const SizedBox.shrink(),
-                if (!showHeader || isMe)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        formatTimestamp(msg.createdAt),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: timestampColor,
-                          fontSize: VFontSize.labelSm,
                         ),
                       ),
-                      if (msg.isEdited) ...[
-                        const SizedBox(width: VSpacing.xs),
-                        Text(
-                          '(edited)',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: timestampColor,
-                            fontSize: VFontSize.labelSm,
+                    ),
+                  // Message bubble with press highlight + swipe offset
+                  Transform.translate(
+                    offset: Offset(_swipeOffset, 0),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {},
+                        highlightColor: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.06),
+                        splashColor: Colors.transparent,
+                        borderRadius: borderRadius,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: VSpacing.sm,
+                            vertical: compact ? VSpacing.xs : VSpacing.sm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: bubbleColor,
+                            borderRadius: borderRadius,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: alignment,
+                            children: [
+                              if (msg.hasReply) ...[
+                                _ReplyPreview(
+                                  senderName: msg.replyToSenderName ?? 'Unknown',
+                                  content: msg.replyToContent ?? '',
+                                  isMe: isMe,
+                                  textColor: textColor,
+                                ),
+                                const SizedBox(height: VSpacing.xs),
+                              ],
+                              if (_dmImageUrls(msg).isNotEmpty)
+                                ChatImageGrid(urls: _dmImageUrls(msg)),
+                              if (msg.content.isNotEmpty) ...[
+                                if (_dmImageUrls(msg).isNotEmpty)
+                                  const SizedBox(height: VSpacing.xs),
+                                msg.isDeleted
+                                    ? Text(
+                                        msg.content,
+                                        style: TextStyle(
+                                          fontSize: VFontSize.bodyMd,
+                                          color: timestampColor,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      )
+                                    : VMessageContent(
+                                        content: msg.content,
+                                        textColor: textColor,
+                                      ),
+                              ],
+                              VLinkEmbed.forMessageContent(msg.content) ??
+                                  const SizedBox.shrink(),
+                              if (!showHeader || isMe)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      formatTimestamp(msg.createdAt),
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        color: timestampColor,
+                                        fontSize: VFontSize.labelSm,
+                                      ),
+                                    ),
+                                    if (msg.isEdited) ...[
+                                      const SizedBox(width: VSpacing.xs),
+                                      Text(
+                                        '(edited)',
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: timestampColor,
+                                          fontSize: VFontSize.labelSm,
+                                        ),
+                                      ),
+                                    ],
+                                    if (isMe && widget.showReadReceipt) ...[
+                                      const SizedBox(width: VSpacing.xs),
+                                      if (widget.readReceiptTooltip != null)
+                                        Tooltip(
+                                          message: widget.readReceiptTooltip!,
+                                          child: Text(
+                                            'Seen',
+                                            style: theme.textTheme.labelSmall?.copyWith(
+                                              color: timestampColor,
+                                              fontSize: VFontSize.labelSm,
+                                              fontWeight: VFontWeight.semiBold,
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        Text(
+                                          'Seen',
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: timestampColor,
+                                            fontSize: VFontSize.labelSm,
+                                            fontWeight: VFontWeight.semiBold,
+                                          ),
+                                        ),
+                                    ],
+                                  ],
+                                ),
+                            ],
                           ),
                         ),
-                      ],
-                      if (isMe && widget.showReadReceipt) ...[
-                        const SizedBox(width: VSpacing.xs),
-                        if (widget.readReceiptTooltip != null)
-                          Tooltip(
-                            message: widget.readReceiptTooltip!,
-                            child: Text(
-                              'Seen',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: timestampColor,
-                                fontSize: VFontSize.labelSm,
-                                fontWeight: VFontWeight.semiBold,
-                              ),
-                            ),
-                          )
-                        else
-                          Text(
-                            'Seen',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: timestampColor,
-                              fontSize: VFontSize.labelSm,
-                              fontWeight: VFontWeight.semiBold,
-                            ),
-                          ),
-                      ],
-                    ],
+                      ),
+                    ),
                   ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         ),
         if (msg.hasReactions)
           _ReactionBar(

@@ -15,7 +15,74 @@ class ChatImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _NetworkOrFileImage(url: url);
+    return GestureDetector(
+      onTap: () => _openFullScreen(context),
+      child: _NetworkOrFileImage(url: url),
+    );
+  }
+
+  void _openFullScreen(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        transitionDuration: const Duration(milliseconds: 250),
+        reverseTransitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (_, __, ___) => _FullScreenImageViewer(url: url),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+}
+
+class _FullScreenImageViewer extends StatefulWidget {
+  final String url;
+  const _FullScreenImageViewer({required this.url});
+
+  @override
+  State<_FullScreenImageViewer> createState() => _FullScreenImageViewerState();
+}
+
+class _FullScreenImageViewerState extends State<_FullScreenImageViewer> {
+  double _scale = 1.0;
+  double _previousScale = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onScaleStart: (_) => _previousScale = _scale,
+      onScaleUpdate: (details) {
+        setState(() {
+          _scale = (_previousScale * details.scale).clamp(0.5, 5.0);
+        });
+      },
+      onDoubleTap: () {
+        setState(() {
+          _scale = _scale > 1.0 ? 1.0 : 2.0;
+        });
+      },
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 5.0,
+          child: Center(
+            child: widget.url.startsWith('https://') ||
+                    widget.url.startsWith('http://')
+                ? Image.network(
+                    widget.url,
+                    fit: BoxFit.contain,
+                  )
+                : Image.file(
+                    File(widget.url),
+                    fit: BoxFit.contain,
+                  ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
