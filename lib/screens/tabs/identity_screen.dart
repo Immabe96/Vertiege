@@ -306,7 +306,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                               ),
                             ),
                             if (IdentityVerification.isVerified(resident)) ...[
-                              const SizedBox(width: 4),
+                              const SizedBox(width: VSpacing.xs),
                               Tooltip(
                                 message: 'Verified resident',
                                 child: Icon(
@@ -318,7 +318,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                             ],
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: VSpacing.xxs),
                         Text(
                           resident.tier.label,
                           style: TextStyle(
@@ -802,7 +802,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                                                 fontWeight: VFontWeight.bold,
                                               ),
                                         ),
-                                        const SizedBox(width: 2),
+                                        const SizedBox(width: VSpacing.xxs),
                                         Icon(
                                           Icons.chevron_right,
                                           size: 14,
