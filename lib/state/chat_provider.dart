@@ -275,7 +275,7 @@ class ChatNotifier extends Notifier<ChatState> {
         dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
         messagesLoadErrors: errors,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..[roomId] = userFacingLoadError(
           e,
@@ -827,7 +827,7 @@ class ChatNotifier extends Notifier<ChatState> {
         },
         messagesLoadErrors: errors,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..[channelId] = userFacingLoadError(
           e,
@@ -1093,7 +1093,7 @@ class ChatNotifier extends Notifier<ChatState> {
         },
         messagesLoadErrors: errors,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..[threadId] = userFacingLoadError(
           e,

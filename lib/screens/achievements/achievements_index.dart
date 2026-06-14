@@ -53,7 +53,7 @@ class AchievementsIndexScreen extends ConsumerWidget {
 
     return VHubPage(
       title: 'Achievements',
-      showBack: true,
+      showBack: false,
       headerActions: [
         VHeaderAction(
           icon: Icon(VIcons.plus),

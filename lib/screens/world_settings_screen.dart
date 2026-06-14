@@ -23,6 +23,7 @@ import '../utils/tier_utils.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/screen_loading.dart';
 import '../services/rank_service.dart';
+import '../repositories/world_repository.dart';
 import '../models/rank.dart';
 import '../widgets/worlds/banner_generator.dart';
 import '../widgets/worlds/world_admin_breadcrumb.dart';
@@ -373,14 +374,26 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
       ),
     );
 
-    if (confirmed == true && mounted) {
-      final resident = ref.read(residentProvider).resident;
-      if (resident != null) {
-        ref.read(residentProvider.notifier).leaveWorld(widget.worldId);
-      }
+    if (confirmed != true || !mounted) return;
 
+    final resident = ref.read(residentProvider).resident;
+    if (resident == null) return;
+
+    // Optimistic local state update.
+    ref.read(residentProvider.notifier).leaveWorld(widget.worldId);
+
+    // Persist to server; if it fails the mutation outbox retries.
+    final result = await WorldRepository().leaveWorld(
+      worldId: widget.worldId,
+      residentId: resident.id,
+    );
+
+    if (!mounted) return;
+
+    if (result.isFailure) {
+      VFeedback.showMessage(context, 'Delete failed — will retry shortly.');
+    } else {
       context.go('/explore');
-
       VFeedback.showMessage(context, 'World has been deleted.');
     }
   }

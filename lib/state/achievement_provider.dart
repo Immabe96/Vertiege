@@ -207,7 +207,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
         );
         await loadAchievements();
         await ref.read(residentProvider.notifier).refreshGamificationFromServer();
-      } catch (e) {
+      } catch (e, stackTrace) {
         debugPrint('autoAwardAchievement server grant failed: $e');
         return;
       }
@@ -388,7 +388,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
             .map((e) => _fromJson(e as Map<String, dynamic>))
             .toList();
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       localFailed = true;
       debugPrint('loadAchievements local cache failed: $e');
     }
@@ -407,7 +407,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
           List<Map<String, dynamic>>.from(rows),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       cloudFailed = true;
       debugPrint('loadAchievements cloud sync failed: $e');
     }

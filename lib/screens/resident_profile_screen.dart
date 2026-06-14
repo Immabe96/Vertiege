@@ -201,6 +201,37 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     return ListView(
       padding: const EdgeInsets.all(VSpacing.lg),
       children: [
+        // Cover image banner.
+        if (resident.coverImageUrl != null &&
+            resident.coverImageUrl!.isNotEmpty) ...[
+          FadeIn(
+            delayMs: 30,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(VRadius.lg),
+              child: SizedBox(
+                height: 160,
+                width: double.infinity,
+                child: Image.network(
+                  resident.coverImageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: isDark
+                        ? VColors.surfaceContainerHigh
+                        : VColors.surfaceContainer,
+                    child: Center(
+                      child: Icon(
+                        Icons.landscape,
+                        size: VIconSize.xl,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: VSpacing.md),
+        ],
         FadeIn(
           delayMs: 60,
           child: Container(

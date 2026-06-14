@@ -75,6 +75,7 @@ class Resident {
   final bool leaderboardOptOut;
   final String presenceMode;
   final String? customStatus;
+  final String? coverImageUrl;
 
   const Resident({
     required this.id,
@@ -117,6 +118,7 @@ class Resident {
     this.leaderboardOptOut = false,
     this.presenceMode = 'online',
     this.customStatus,
+    this.coverImageUrl,
   });
 
   /// Unique referral code derived from the resident's ID — first 8 chars,
@@ -166,6 +168,7 @@ class Resident {
     bool? leaderboardOptOut,
     String? presenceMode,
     String? customStatus,
+    String? coverImageUrl,
   }) => Resident(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -207,5 +210,6 @@ class Resident {
     leaderboardOptOut: leaderboardOptOut ?? this.leaderboardOptOut,
     presenceMode: presenceMode ?? this.presenceMode,
     customStatus: customStatus ?? this.customStatus,
+    coverImageUrl: coverImageUrl ?? this.coverImageUrl,
   );
 }

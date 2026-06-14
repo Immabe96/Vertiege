@@ -294,7 +294,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       state = state.copyWith(resident: merged);
       _lastStreakCount = merged.streakCount;
       _persist();
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('refreshGamificationFromServer failed: $e');
     }
   }
@@ -428,7 +428,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       }
 
       return actualXp;
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('award_activity_xp failed: $e');
       return 0;
     }
@@ -998,7 +998,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
           await _notifyPrestigeAscension(r, newStars);
           return true;
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         debugPrint('ascend_prestige failed: $e');
       }
     }

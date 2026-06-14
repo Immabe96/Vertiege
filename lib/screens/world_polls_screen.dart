@@ -161,14 +161,9 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
                   if (context.mounted) _loadPolls();
                 } catch (e) {
                   if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          e is StateError
-                              ? e.message
-                              : 'Could not create poll.',
-                        ),
-                      ),
+                    VFeedback.showMessage(
+                      ctx,
+                      e is StateError ? e.message : 'Could not create poll.',
                     );
                   }
                 }

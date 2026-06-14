@@ -71,7 +71,7 @@ class _HeartAnimationState extends State<HeartAnimation>
               child: const Icon(
                 Icons.favorite,
                 size: 60,
-                color: VColors.tertiary,
+                color: VColors.error,
               ),
             ),
           );
@@ -82,28 +82,15 @@ class _HeartAnimationState extends State<HeartAnimation>
 }
 
 class HeartAnimationOverlay {
-  static OverlayEntry? _entry;
-
   static void show(BuildContext context, Offset tapPosition) {
-    _entry = OverlayEntry(
-      builder: (_) => Stack(
-        children: [
-          HeartAnimation(
-            tapPosition: tapPosition,
-            onDone: () {
-              _entry?.remove();
-              _entry = null;
-            },
-          ),
-        ],
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => HeartAnimation(
+        tapPosition: tapPosition,
+        onDone: () => entry.remove(),
       ),
     );
 
-    Overlay.of(context).insert(_entry!);
-  }
-
-  static void dismiss() {
-    _entry?.remove();
-    _entry = null;
+    Overlay.of(context).insert(entry);
   }
 }

@@ -220,6 +220,7 @@ class ProfileService {
       lastSeenAt: parseLastSeenMs(data['last_seen_at']) ?? 0,
       presenceMode: data['presence_mode'] as String? ?? 'online',
       customStatus: data['custom_status'] as String?,
+      coverImageUrl: data['cover_image_url'] as String?,
     );
   }
 

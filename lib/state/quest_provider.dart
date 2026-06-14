@@ -172,7 +172,7 @@ class QuestNotifier extends Notifier<QuestState> {
           claimed: row['claimed'] as bool? ?? false,
         );
       }).toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('daily quests cloud load failed: $e');
       return null;
     }
@@ -189,7 +189,7 @@ class QuestNotifier extends Notifier<QuestState> {
           'p_target': quest.target,
         },
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('upsert_daily_quest_progress failed: $e');
     }
   }
@@ -225,7 +225,7 @@ class QuestNotifier extends Notifier<QuestState> {
         if (awarded) {
           await ref.read(residentProvider.notifier).refreshGamificationFromServer();
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         debugPrint('claim_daily_quest failed: $e');
       }
     }

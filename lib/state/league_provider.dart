@@ -145,7 +145,7 @@ class LeagueNotifier extends Notifier<LeagueState> {
         standings: standings,
         isLoading: false,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       state = state.copyWith(
         isLoading: false,
         error: userFacingLoadError(
@@ -163,7 +163,7 @@ class LeagueNotifier extends Notifier<LeagueState> {
     try {
       await LeagueService.addXP(residentId, amount);
       await refreshStandings();
-    } catch (e) {
+    } catch (e, stackTrace) {
       state = state.copyWith(error: e.toString());
     }
   }
@@ -197,7 +197,7 @@ class LeagueNotifier extends Notifier<LeagueState> {
         ),
         error: null,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       state = state.copyWith(error: e.toString());
     }
   }

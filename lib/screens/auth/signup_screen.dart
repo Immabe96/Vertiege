@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,6 +9,8 @@ import '../../services/supabase_bootstrap.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../widgets/auth/auth_fields.dart';
+import '../../widgets/auth/auth_social_buttons.dart';
+import '../../legal/app_legal.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -114,6 +117,78 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       if (!mounted) return;
       setState(() {
         _errorMessage = 'Something went wrong. Please try again.';
+      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      if (!await SupabaseBootstrap.ensureReady()) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              SupabaseBootstrap.messageFor(SupabaseBootstrap.lastResult) ??
+              'Cloud sign-up is unavailable.';
+        });
+        return;
+      }
+
+      final launched = await AuthService.signInWithGoogle();
+      if (!mounted) return;
+      if (!launched) {
+        setState(() {
+          _errorMessage =
+              'Could not open Google sign-in. Check that a browser is installed.';
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage =
+            'Google sign-in failed. Use email/password or try again later.';
+      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      if (!await SupabaseBootstrap.ensureReady()) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              SupabaseBootstrap.messageFor(SupabaseBootstrap.lastResult) ??
+              'Cloud sign-up is unavailable.';
+        });
+        return;
+      }
+
+      final launched = await AuthService.signInWithApple();
+      if (!mounted) return;
+      if (!launched) {
+        setState(() => _errorMessage = 'Could not open Apple sign-in.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Apple sign-in failed. Try email/password instead.';
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -233,6 +308,49 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       isLoading: _isLoading,
                       icon: const Icon(VIcons.arrowLeft),
                       onPressed: _isValid ? _handleSignUp : null,
+                    ),
+                    const SizedBox(height: VSpacing.lg),
+                    AuthSocialButtons(
+                      isLoading: _isLoading,
+                      isDark: isDark,
+                      onGoogle: _handleGoogleSignIn,
+                      onApple: _handleAppleSignIn,
+                    ),
+                    const SizedBox(height: VSpacing.lg),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        text: 'By signing up, you agree to our ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? VColors.onSurfaceVariantDark
+                              : VColors.onSurfaceVariant,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Terms of Service',
+                            style: TextStyle(
+                              color: VColors.tertiary,
+                              fontWeight: VFontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () =>
+                                  AppLegal.showTermsOfService(context),
+                          ),
+                          const TextSpan(text: ' and '),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: TextStyle(
+                              color: VColors.tertiary,
+                              fontWeight: VFontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () =>
+                                  AppLegal.showPrivacyPolicy(context),
+                          ),
+                          const TextSpan(text: '.'),
+                        ],
+                      ),
                     ),
                   ],
                 ),

@@ -193,30 +193,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     try {
       final worldState = ref.read(worldProvider);
       final worldIds = worldState.worlds.keys.toList();
-      final allMembers = <String, _ResidentEntry>{};
 
-      for (final worldId in worldIds) {
-        try {
-          final members = await WorldService.getMembers(worldId);
-          for (final m in members) {
-            final id = m['resident_id'] as String?;
-            final name = m['resident_name'] as String?;
-            final profession = m['profession'] as String?;
-            final tierValue = m['standing'] as int?;
-            if (id != null && name != null && !allMembers.containsKey(id)) {
-              allMembers[id] = _ResidentEntry(
-                resident: Resident(
-                  id: id,
-                  name: name,
-                  tier: ResidentTier.fromValue(tierValue ?? 1),
-                  profession: profession,
-                  avatarUrl: '',
-                ),
-                rep: m['rep'] ?? 0,
-              );
-            }
+      // Parallelize member fetches across all worlds.
+      final results = await Future.wait([
+        for (final worldId in worldIds)
+          WorldService.getMembers(worldId).catchError((_) => <Map<String, dynamic>>[]),
+      ]);
+
+      final allMembers = <String, _ResidentEntry>{};
+      for (final members in results) {
+        for (final m in members) {
+          final id = m['resident_id'] as String?;
+          final name = m['resident_name'] as String?;
+          final profession = m['profession'] as String?;
+          final tierValue = m['standing'] as int?;
+          if (id != null && name != null && !allMembers.containsKey(id)) {
+            allMembers[id] = _ResidentEntry(
+              resident: Resident(
+                id: id,
+                name: name,
+                tier: ResidentTier.fromValue(tierValue ?? 1),
+                profession: profession,
+                avatarUrl: '',
+              ),
+              rep: m['rep'] ?? 0,
+            );
           }
-        } catch (_) {}
+        }
       }
 
       if (mounted) {

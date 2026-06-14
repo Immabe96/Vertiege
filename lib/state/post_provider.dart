@@ -937,7 +937,7 @@ class PostNotifier extends Notifier<PostState> {
         hasMorePosts: joinedResult?.hasMore ?? false,
       );
       _persist();
-    } catch (e) {
+    } catch (e, stackTrace) {
       final joinedResult = await _loadPostsFromJoinedWorlds();
       if (joinedResult != null) {
         state = state.copyWith(
@@ -992,7 +992,7 @@ class PostNotifier extends Notifier<PostState> {
         hasMorePosts: _hasMore,
       );
       _persist();
-    } catch (e) {
+    } catch (e, stackTrace) {
       state = state.copyWith(isLoadingMore: false);
     }
   }
@@ -1014,7 +1014,7 @@ class PostNotifier extends Notifier<PostState> {
       );
       final posts = remote.map(_postFromJson).toList();
       state = state.copyWith(followingPosts: posts, clearError: true);
-    } catch (e) {
+    } catch (e, stackTrace) {
       state = state.copyWith(
         followingPosts: [],
         error: userFacingLoadError(
