@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/achievement.dart';
 import '../state/resident_provider.dart';
-import '../state/achievement_provider.dart';
 import '../state/world_provider.dart';
+import '../state/leaderboard_provider.dart';
 import '../theme/v_colors.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
@@ -24,6 +23,14 @@ class HallOfAscensionScreen extends ConsumerStatefulWidget {
 }
 
 class _HallOfAscensionScreenState extends ConsumerState<HallOfAscensionScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(leaderboardProvider.notifier).loadLeaderboard();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
@@ -292,25 +299,33 @@ Color _rankGlowColor(int rank) {
 class _XpLeaderboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final achievementState = ref.watch(achievementProvider);
-    final resident = ref.watch(residentProvider).resident;
+    final leaderboardState = ref.watch(leaderboardProvider);
 
-    if (resident == null) {
+    if (leaderboardState.isLoading) {
       return const ScreenLoading.list();
     }
 
-    final entries = <_LeaderEntry>[
-      _LeaderEntry(
-        id: resident.id,
-        name: resident.name,
-        tier: resident.tier.value,
-        avatarUrl: resident.avatarUrl,
-        score: achievementState.totalXp,
-        title: resident.title,
-      ),
-    ]..sort((a, b) => b.score.compareTo(a.score));
+    if (leaderboardState.error != null) {
+      return AppErrorState(
+        message: leaderboardState.error!,
+        onRetry: () => ref.read(leaderboardProvider.notifier).loadLeaderboard(),
+      );
+    }
 
-    return _buildLeaderboardList(context, ref, entries.take(20).toList());
+    final entries = leaderboardState.xpEntries
+        .map(
+          (e) => _LeaderEntry(
+            id: e.userId,
+            name: e.name,
+            tier: e.tier,
+            avatarUrl: e.avatarUrl,
+            score: e.totalXp,
+            title: e.title,
+          ),
+        )
+        .toList();
+
+    return _buildLeaderboardList(context, ref, entries);
   }
 }
 
@@ -345,25 +360,33 @@ class _PrestigeLeaderboard extends ConsumerWidget {
 class _AchievementLeaderboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final achievementState = ref.watch(achievementProvider);
-    final resident = ref.watch(residentProvider).resident;
-    final verifiedCount = achievementState.userAchievements
-        .where((a) => a.status == AchievementStatus.verified)
-        .length;
+    final leaderboardState = ref.watch(leaderboardProvider);
 
-    final entries = <_LeaderEntry>[
-      if (resident != null)
-        _LeaderEntry(
-          id: resident.id,
-          name: resident.name,
-          tier: resident.tier.value,
-          avatarUrl: resident.avatarUrl,
-          score: verifiedCount,
-          title: resident.title,
-        ),
-    ]..sort((a, b) => b.score.compareTo(a.score));
+    if (leaderboardState.isLoading) {
+      return const ScreenLoading.list();
+    }
 
-    return _buildLeaderboardList(context, ref, entries.take(20).toList());
+    if (leaderboardState.error != null) {
+      return AppErrorState(
+        message: leaderboardState.error!,
+        onRetry: () => ref.read(leaderboardProvider.notifier).loadLeaderboard(),
+      );
+    }
+
+    final entries = leaderboardState.achievementEntries
+        .map(
+          (e) => _LeaderEntry(
+            id: e.userId,
+            name: e.name,
+            tier: e.tier,
+            avatarUrl: e.avatarUrl,
+            score: e.totalXp,
+            title: e.title,
+          ),
+        )
+        .toList();
+
+    return _buildLeaderboardList(context, ref, entries);
   }
 }
 
@@ -372,21 +395,33 @@ class _AchievementLeaderboard extends ConsumerWidget {
 class _ReferralLeaderboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final resident = ref.watch(residentProvider).resident;
+    final leaderboardState = ref.watch(leaderboardProvider);
 
-    final entries = <_LeaderEntry>[
-      if (resident != null)
-        _LeaderEntry(
-          id: resident.id,
-          name: resident.name,
-          tier: resident.tier.value,
-          avatarUrl: resident.avatarUrl,
-          score: resident.referredBy != null ? 1 : 0,
-          title: resident.title,
-        ),
-    ]..sort((a, b) => b.score.compareTo(a.score));
+    if (leaderboardState.isLoading) {
+      return const ScreenLoading.list();
+    }
 
-    return _buildLeaderboardList(context, ref, entries.take(20).toList());
+    if (leaderboardState.error != null) {
+      return AppErrorState(
+        message: leaderboardState.error!,
+        onRetry: () => ref.read(leaderboardProvider.notifier).loadLeaderboard(),
+      );
+    }
+
+    final entries = leaderboardState.referralEntries
+        .map(
+          (e) => _LeaderEntry(
+            id: e.userId,
+            name: e.name,
+            tier: e.tier,
+            avatarUrl: e.avatarUrl,
+            score: e.totalXp,
+            title: e.title,
+          ),
+        )
+        .toList();
+
+    return _buildLeaderboardList(context, ref, entries);
   }
 }
 

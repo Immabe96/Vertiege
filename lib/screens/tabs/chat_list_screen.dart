@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
@@ -16,6 +17,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../services/world_mute_prefs.dart';
+import '../../services/dm_room_mute_prefs.dart';
 import '../../utils/chat_unread.dart';
 import '../../utils/chat_channel_sort.dart';
 import '../../utils/channel_typing_label.dart';
@@ -46,6 +48,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   _ChatMode _mode = _ChatMode.worlds;
   String? _selectedWorldId;
   Set<String> _mutedWorldIds = {};
+  Set<String> _mutedDmRoomIds = {};
   final Map<String, List<Map<String, dynamic>>> _activeResidentsByWorld = {};
   final Map<String, int> _onlineCountByWorld = {};
   final TextEditingController _dmSearchController = TextEditingController();
@@ -111,6 +114,8 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         }
         final muted = await WorldMutePrefs.load();
         if (mounted) setState(() => _mutedWorldIds = muted);
+        final mutedDm = await DmRoomMutePrefs.load();
+        if (mounted) setState(() => _mutedDmRoomIds = mutedDm);
       });
     }
 
@@ -540,14 +545,60 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           typingByRoom[roomId] ?? const <String>{},
           currentUserId: currentUserId,
         );
-        return _DmRoomTile(
-          room: room,
-          currentUserId: currentUserId,
-          otherName: _otherName(room, currentUserId),
-          otherAvatar: _otherAvatar(room),
-          presence: _presence(room),
-          timeLabel: _timeLabel(room['last_message_at'] as String?),
-          typingLabel: typingLabel,
+        final unreadCount = room['unread_count'] as int? ?? 0;
+        final isMuted = _mutedDmRoomIds.contains(roomId);
+        
+        return Dismissible(
+          key: ValueKey(roomId),
+          direction: DismissDirection.horizontal,
+          confirmDismiss: (direction) async {
+            if (direction == DismissDirection.startToEnd) {
+              HapticFeedback.lightImpact();
+              if (unreadCount > 0) {
+                ref.read(chatProvider.notifier).markDmRead(
+                      roomId: roomId!,
+                      residentId: currentUserId,
+                    );
+              } else {
+                ref.read(chatProvider.notifier).markDmUnread(
+                      roomId: roomId!,
+                      residentId: currentUserId,
+                    );
+              }
+              return false;
+            } else {
+              HapticFeedback.lightImpact();
+              if (roomId != null) {
+                final muted = await DmRoomMutePrefs.toggle(roomId);
+                if (mounted) {
+                  setState(() => _mutedDmRoomIds = muted);
+                }
+              }
+              return false;
+            }
+          },
+          background: _SwipeBackground(
+            color: unreadCount > 0 ? VColors.success : theme.colorScheme.outline,
+            icon: unreadCount > 0 ? Icons.mark_email_read : Icons.mark_email_unread,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: VSpacing.lg),
+          ),
+          secondaryBackground: _SwipeBackground(
+            color: isMuted ? VColors.success : theme.colorScheme.outline.withValues(alpha: 0.45),
+            icon: isMuted ? Icons.notifications : Icons.notifications_off,
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: VSpacing.lg),
+          ),
+          child: _DmRoomTile(
+            room: room,
+            currentUserId: currentUserId,
+            otherName: _otherName(room, currentUserId),
+            otherAvatar: _otherAvatar(room),
+            presence: _presence(room),
+            timeLabel: _timeLabel(room['last_message_at'] as String?),
+            typingLabel: typingLabel,
+            isMuted: isMuted,
+          ),
         );
       },
     );
@@ -1156,6 +1207,7 @@ class _DmRoomTile extends StatefulWidget {
   final Presence presence;
   final String timeLabel;
   final String? typingLabel;
+  final bool isMuted;
 
   const _DmRoomTile({
     required this.room,
@@ -1165,6 +1217,7 @@ class _DmRoomTile extends StatefulWidget {
     required this.presence,
     required this.timeLabel,
     this.typingLabel,
+    this.isMuted = false,
   });
 
   @override
@@ -1337,6 +1390,37 @@ class _DmRoomTileState extends State<_DmRoomTile>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SwipeBackground extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final AlignmentGeometry alignment;
+  final EdgeInsetsGeometry padding;
+
+  const _SwipeBackground({
+    required this.color,
+    required this.icon,
+    required this.alignment,
+    required this.padding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(VRadius.xl),
+      ),
+      alignment: alignment,
+      padding: padding,
+      child: Icon(
+        icon,
+        size: VIconSize.lg,
+        color: Colors.white,
       ),
     );
   }

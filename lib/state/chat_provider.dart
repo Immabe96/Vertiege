@@ -1048,6 +1048,21 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(dmRooms: updatedRooms);
   }
 
+  Future<void> markDmUnread({
+    required String roomId,
+    required String residentId,
+  }) async {
+    final reads = Map<String, DateTime>.from(state.channelReads)
+      ..remove(roomId);
+    state = state.copyWith(channelReads: reads);
+    final updatedRooms = state.dmRooms.map((room) {
+      if (room['id'] != roomId) return room;
+      final currentCount = (room['unread_count'] as int?) ?? 0;
+      return {...room, 'unread_count': currentCount + 1};
+    }).toList();
+    state = state.copyWith(dmRooms: updatedRooms);
+  }
+
   /// Persist last-opened channel for resume (DCX-021).
   Future<void> rememberLastChannel({
     required String worldId,
