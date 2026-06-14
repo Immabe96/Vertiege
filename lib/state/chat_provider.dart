@@ -1511,6 +1511,129 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  // Thread message edit
+  Future<void> editThreadMessage({
+    required String threadId,
+    required String messageId,
+    required String newContent,
+  }) async {
+    final messages = state.channelMessages[threadId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final updatedMsg = msg.copyWith(
+      content: newContent,
+      isEdited: true,
+      editedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, threadId: updatedMessages},
+    );
+
+    try {
+      await ChatService.editMessage(
+        messageId: messageId,
+        newContent: newContent,
+      );
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, threadId: revertedMessages},
+      );
+      rethrow;
+    }
+  }
+
+  // Thread message delete
+  Future<void> deleteThreadMessage({
+    required String threadId,
+    required String messageId,
+  }) async {
+    final messages = state.channelMessages[threadId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final updatedMsg = msg.copyWith(
+      content: 'This message was deleted',
+      isDeleted: true,
+    );
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, threadId: updatedMessages},
+    );
+
+    try {
+      await ChatService.deleteMessage(messageId: messageId);
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, threadId: revertedMessages},
+      );
+      rethrow;
+    }
+  }
+
+  // Thread message reaction
+  Future<void> toggleThreadReaction({
+    required String threadId,
+    required String messageId,
+    required String userId,
+    required String emoji,
+  }) async {
+    final messages = state.channelMessages[threadId] ?? [];
+    final msgIndex = messages.indexWhere((m) => m.id == messageId);
+    if (msgIndex == -1) return;
+
+    final msg = messages[msgIndex];
+    final currentReactions = Map<String, List<String>>.from(msg.reactions);
+    final users = List<String>.from(currentReactions[emoji] ?? []);
+    final adding = !users.contains(userId);
+
+    if (adding) {
+      currentReactions[emoji] = [...users, userId];
+    } else {
+      users.remove(userId);
+      if (users.isEmpty) {
+        currentReactions.remove(emoji);
+      } else {
+        currentReactions[emoji] = users;
+      }
+    }
+
+    final updatedMsg = msg.copyWith(reactions: currentReactions);
+    final updatedMessages = List<ChannelMessage>.from(messages);
+    updatedMessages[msgIndex] = updatedMsg;
+
+    state = state.copyWith(
+      channelMessages: {...state.channelMessages, threadId: updatedMessages},
+    );
+
+    try {
+      await ChatService.toggleReaction(
+        messageId: messageId,
+        userId: userId,
+        emoji: emoji,
+        add: adding,
+      );
+    } catch (_) {
+      final revertedMessages = List<ChannelMessage>.from(messages);
+      revertedMessages[msgIndex] = msg;
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, threadId: revertedMessages},
+      );
+      rethrow;
+    }
+  }
+
   List<ChannelMessage> _toChannelMessages(List<Map<String, dynamic>> raw) => raw
       .map(
         (e) => ChannelMessage(

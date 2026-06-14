@@ -72,10 +72,6 @@ class PostItem extends ConsumerWidget {
               final position = box.localToGlobal(details.localPosition);
               HeartAnimationOverlay.show(context, position);
             }
-            ref
-                .read(postProvider.notifier)
-                .toggleReaction(post.id, 'heart', resident.id);
-            HapticFeedback.mediumImpact();
           }
         },
         onDoubleTap: () {

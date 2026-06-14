@@ -48,6 +48,14 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Set<String> _mutedWorldIds = {};
   final Map<String, List<Map<String, dynamic>>> _activeResidentsByWorld = {};
   final Map<String, int> _onlineCountByWorld = {};
+  final TextEditingController _dmSearchController = TextEditingController();
+  String _dmSearchQuery = '';
+
+  @override
+  void dispose() {
+    _dmSearchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +277,56 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               ? const ScreenLoading.list()
               : chatState.dmRooms.isEmpty
               ? _buildEmptyDmState()
-              : _buildRoomList(theme, isDark, chatState.dmRooms, residentId),
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        VSpacing.md,
+                        0,
+                        VSpacing.md,
+                        VSpacing.sm,
+                      ),
+                      child: TextField(
+                        controller: _dmSearchController,
+                        onChanged: (value) => setState(() => _dmSearchQuery = value),
+                        decoration: InputDecoration(
+                          hintText: 'Search direct messages...',
+                          prefixIcon: const Icon(Icons.search, size: VIconSize.sm),
+                          suffixIcon: _dmSearchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: VIconSize.sm),
+                                  onPressed: () {
+                                    _dmSearchController.clear();
+                                    setState(() => _dmSearchQuery = '');
+                                  },
+                                )
+                              : null,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.md,
+                            vertical: VSpacing.sm,
+                          ),
+                          filled: true,
+                          fillColor: isDark
+                              ? VColors.surfaceContainerDark
+                              : VColors.surfaceContainerLow,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(VRadius.pill),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildRoomList(
+                        theme,
+                        isDark,
+                        chatState.dmRooms,
+                        residentId,
+                        searchQuery: _dmSearchQuery,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ],
     );
@@ -459,16 +516,25 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     ThemeData theme,
     bool isDark,
     List<Map<String, dynamic>> rooms,
-    String currentUserId,
-  ) {
+    String currentUserId, {
+    String searchQuery = '',
+  }) {
     final typingByRoom = ref.watch(
       chatProvider.select((s) => s.typingUsers),
     );
+    
+    final filteredRooms = searchQuery.isEmpty
+        ? rooms
+        : rooms.where((room) {
+            final name = _otherName(room, currentUserId).toLowerCase();
+            return name.contains(searchQuery.toLowerCase());
+          }).toList();
+    
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
-      itemCount: rooms.length,
+      itemCount: filteredRooms.length,
       itemBuilder: (context, index) {
-        final room = rooms[index];
+        final room = filteredRooms[index];
         final roomId = room['id'] as String?;
         final typingLabel = channelTypingLabel(
           typingByRoom[roomId] ?? const <String>{},

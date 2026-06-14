@@ -11,19 +11,20 @@ import '../state/resident_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_commune_chat_theme.dart';
 import '../theme/v_tokens.dart';
+import '../utils/date_format.dart';
 import '../widgets/chat/chat_date_separator.dart';
 import '../widgets/chat/chat_image.dart';
 import '../widgets/chat/chat_input_bar.dart';
 import '../widgets/chat/chat_message_grouper.dart';
 import '../widgets/chat/scroll_fab.dart';
+import '../widgets/chat/v_message_bubble.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/core/screen_loading.dart';
-import '../utils/date_format.dart';
-import '../widgets/profile/cosmetic_avatar.dart';
-import '../widgets/profile/luminary_nameplate.dart';
 import '../services/chat_notification_scope.dart';
 import '../widgets/core/v_feedback.dart';
+import '../widgets/profile/cosmetic_avatar.dart';
+import '../widgets/profile/luminary_nameplate.dart';
 
 class ThreadScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -48,6 +49,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   final _scrollFabTracker = ChatScrollFabTracker();
+  final Set<String> _animatedMessageIds = {};
 
   @override
   void initState() {
@@ -263,133 +265,29 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
         return ChatDateSeparator(label: item.dateLabel);
       case ChatItemType.firstInGroup:
       case ChatItemType.subsequent:
-        return _buildThreadReply(item.message!, residentId);
+        return VMessageBubble(
+          message: item.message!,
+          isMe: item.message!.senderId == residentId,
+          showHeader: item.type == ChatItemType.firstInGroup,
+          animatedMessageIds: _animatedMessageIds,
+          mode: VMessageBubbleMode.channel,
+          channelConfig: VChannelBubbleConfig(
+            worldId: widget.worldId,
+            channelName: widget.channelName,
+            currentUserId: residentId,
+            onReaction: (msg, emoji) async {
+              ref.read(chatProvider.notifier).toggleThreadReaction(
+                    threadId: widget.parentMessage.id,
+                    messageId: msg.id,
+                    userId: residentId,
+                    emoji: emoji,
+                  );
+            },
+          ),
+        );
     }
   }
 
-  Widget _buildThreadReply(ChannelMessage message, String residentId) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isMe = message.senderId == residentId;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: VSpacing.sm),
-      child: Align(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.75,
-          ),
-          child: Column(
-            crossAxisAlignment: isMe
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CosmeticAvatar(
-                    imageUrl: message.senderAvatar,
-                    seed: message.senderId,
-                    size: 20,
-                  ),
-                  const SizedBox(width: VSpacing.xs),
-                  LuminaryNameplate(
-                    name: message.senderName,
-                    tier: 1,
-                    fontSize: VFontSize.labelSm,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isMe
-                      ? Theme.of(context).colorScheme.primary
-                      : (isDark
-                            ? VColors.surfaceContainerDark
-                            : VColors.surfaceContainerLow),
-                  borderRadius: isMe
-                      ? const BorderRadius.only(
-                          topLeft: Radius.circular(VRadius.xl),
-                          topRight: Radius.circular(VRadius.xl),
-                          bottomLeft: Radius.circular(VRadius.xl),
-                          bottomRight: Radius.circular(VRadius.sm),
-                        )
-                      : const BorderRadius.only(
-                          topLeft: Radius.circular(VRadius.xl),
-                          topRight: Radius.circular(VRadius.xl),
-                          bottomRight: Radius.circular(VRadius.xl),
-                          bottomLeft: Radius.circular(VRadius.sm),
-                        ),
-                  border: isMe
-                      ? null
-                      : Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                ),
-                child: MarkdownBody(
-                  data: message.content,
-                  styleSheet: _markdownStyle(
-                    textColor: isMe
-                        ? VColors.onPrimary
-                        : Theme.of(context).colorScheme.onSurface,
-                    isDark: isDark,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                formatTimestamp(message.createdAt),
-                style: theme.textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  MarkdownStyleSheet _markdownStyle({
-    required Color textColor,
-    required bool isDark,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return MarkdownStyleSheet(
-      p: TextStyle(
-        fontSize: VFontSize.bodyMd,
-        color: textColor,
-        height: VLineHeight.body,
-      ),
-      code: TextStyle(
-        fontSize: VFontSize.bodyMd - 2,
-        color: textColor,
-        backgroundColor: isDark
-            ? VColors.surfaceContainerHighDark
-            : VColors.surfaceContainerHigh,
-        fontFamily: 'monospace',
-      ),
-      codeblockDecoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerHighDark
-            : VColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(VRadius.md),
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-        ),
-      ),
-      a: TextStyle(
-        fontSize: VFontSize.bodyMd,
-        color: colorScheme.primary,
-        decoration: TextDecoration.underline,
-      ),
-    );
-  }
 }
 
 class _ParentMessageCard extends StatelessWidget {
