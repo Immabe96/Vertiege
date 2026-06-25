@@ -64,7 +64,7 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 | ID | Task | Scope | Notes | Status |
 |----|------|-------|-------|--------|
-| S7.15 | Migrate tab roots to FScaffold + FHeader | 6 tab roots | nexus, explore, chat, you, world_channel, create_post | Deferred |
+| S7.15 | Migrate tab roots to FScaffold + FHeader | 6 tab roots | nexus, explore, chat, you, world_channel, create_post | ✅ (already migrated) |
 | S7.16 | Replace SnackBar with VFeedback/Forui toaster | 1 file | world_polls_screen.dart fixed | ✅ |
 | S7.17 | Replace raw TextField with FTextField | Auth screens | Zero FTextField usage in production | Deferred |
 | S7.18 | Replace raw showDialog with FDialog | Dialog screens | Zero FDialog usage; all Material dialogs | Deferred |
