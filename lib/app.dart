@@ -17,7 +17,7 @@ import 'state/quest_provider.dart';
 import 'state/league_provider.dart';
 import 'state/ally_provider.dart';
 import 'state/chat_provider.dart';
-import 'theme/app_theme.dart';
+import 'theme/v_theme.dart';
 import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
 import 'router/navigation_keys.dart';
@@ -653,8 +653,8 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: AppTheme.lightFor(themeState),
-      darkTheme: AppTheme.darkFor(themeState),
+      theme: themeState.useCommunePreset ? VTheme.lightCommune : VTheme.light,
+      darkTheme: themeState.useCommunePreset ? VTheme.darkCommune : VTheme.dark,
       themeMode: themeState.themeMode,
       routerConfig: router,
       builder: (context, child) {

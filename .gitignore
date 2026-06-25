@@ -1,91 +1,80 @@
-# Local JDK for ci-local.ps1 (optional download)
-.jdk/
 
+# Android Studio will place build artifacts here
+# Android release signing
+# Environment file (contains secrets)
+# Flutter/Dart/Pub related
+# IntelliJ related
+# Local AI-agent/tooling state
+# Local JDK for ci-local.ps1 (optional download)
 # Miscellaneous
+# Obfuscation related
+# One-off badge generation scratch (use scripts/image_gen.py + check_core_achievement_assets.py)
+# Symbolication related
+# The .vscode folder contains launch configuration and tasks you configure in
+# Understand-Anything (commit knowledge-graph.json if sharing with team)
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+# withoutbg batch backups (regenerable; originals before matte removal)
+#.vscode/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/xcshareddata/swiftpm/
 *.class
+*.iml
+*.ipr
+*.iws
 *.log
 *.pyc
+*.swiftpm/
 *.swp
 .DS_Store
 .atom/
 .build/
 .buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
 .dart_tool/
+.env
 .flutter-plugins-dependencies
+.history
+.idea/
+.jdk/
 .pub-cache/
 .pub/
-/build/
-/releases/*.apk
-/releases/*.aab
-/coverage/
-node_modules/
-analyze_output.txt
-android/hs_err_pid*.log
-supabase/.temp/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
+.svn/
+.swiftpm/
+.understand-anything/diff-overlay.json
+.understand-anything/intermediate/
+/.agents/
+/.claude-flow/
+/.claude/
+/.codex/
+/.cursor-plugin
+/.mcp.json
+/.superpowers/
+/.swarm/
+/AGENTS.md
+/CLAUDE.md
 /android/app/debug
 /android/app/profile
 /android/app/release
-android/build/
-
-# Environment file (contains secrets)
-.env
-
-# Android release signing
-/android/upload-keystore.jks
 /android/key.properties
-
-# withoutbg batch backups (regenerable; originals before matte removal)
+/android/upload-keystore.jks
 /assets/staging/withoutbg-backup/
-
-# One-off badge generation scratch (use scripts/image_gen.py + check_core_achievement_assets.py)
+/build/
+/coverage/
+/releases/*.aab
+/releases/*.apk
+/ruvector.db
+/understand-anything-plugin
+analyze_output.txt
+android/build/
+android/hs_err_pid*.log
+app.*.map.json
+app.*.symbols
+build_output.txt
+migrate_working_dir/
+node_modules/
 scripts/core_badge_chunk_*.json
 scripts/core_badge_jobs.json
 scripts/missing_badges.json
 scripts/missing_core_ids.json
-
-# Understand-Anything (commit knowledge-graph.json if sharing with team)
-.understand-anything/intermediate/
-.understand-anything/diff-overlay.json
-/understand-anything-plugin
-/.cursor-plugin
-
-# Local AI-agent/tooling state
-/.agents/
-/.claude/
-/.claude-flow/
-/.codex/
-/.superpowers/
-/.swarm/
-/.mcp.json
-/AGENTS.md
-/CLAUDE.md
-/ruvector.db
-*.swiftpm/
-**/xcshareddata/swiftpm/
+supabase/.temp/

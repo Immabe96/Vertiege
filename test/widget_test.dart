@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:vertiege/theme/app_theme.dart';
+import 'package:vertiege/theme/v_theme.dart';
 import 'package:vertiege/widgets/core/empty_state.dart';
 import 'package:vertiege/widgets/explore/section_header.dart';
 import 'package:vertiege/widgets/chat/scroll_fab.dart';
@@ -9,9 +9,9 @@ import 'package:vertiege/widgets/chat/scroll_fab.dart';
 void main() {
   testWidgets('App theme is compact light mode', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.theme, home: const SizedBox()),
+      MaterialApp(theme: VTheme.light, home: const SizedBox()),
     );
-    expect(AppTheme.theme.brightness, Brightness.light);
+    expect(VTheme.light.brightness, Brightness.light);
   });
 
   testWidgets('ExploreSectionHeader renders', (WidgetTester tester) async {
