@@ -1,19 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../state/resident_provider.dart';
-import '../state/notification_provider.dart';
-import '../state/post_provider.dart';
-import '../state/chat_provider.dart';
 import '../services/supabase.dart';
-import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
-import '../services/invite_service.dart';
-import '../services/chat_service.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/onboarding/the_gate_screen.dart';
 import '../screens/subscription_screen.dart';
@@ -29,7 +20,6 @@ import '../ui_spike/spike_settings_page.dart';
 
 import '../screens/tabs/alerts_screen.dart';
 import '../screens/world_detail_screen.dart';
-import '../screens/world_channel_screen.dart';
 import '../screens/chat_room_screen.dart';
 import '../widgets/core/status_dot.dart';
 import '../screens/resident_profile_screen.dart';
@@ -40,24 +30,20 @@ import '../screens/create_world_screen.dart';
 import '../screens/world_settings_screen.dart';
 import '../screens/world_members_screen.dart';
 import 'app_auth_redirect.dart';
-import 'notification_navigation.dart';
 import 'deep_link_redirects.dart';
 import 'world_route_redirects.dart';
+import 'deep_link_handlers.dart';
 import '../screens/search_screen.dart';
 import '../screens/connections_screen.dart';
 import '../screens/cosmetics_shop_screen.dart';
 import '../screens/hall_of_ascension_screen.dart';
 import '../screens/journey/ascension_path_screen.dart';
-import '../screens/season_screen.dart';
 import '../screens/auth/verifier_login_screen.dart';
 import '../screens/verification_review_screen.dart';
 import '../services/admin_access_service.dart';
 import '../screens/audit_log_screen.dart';
-import '../screens/campfire_screen.dart';
-import '../screens/thread_screen.dart';
 import '../screens/post_comments_screen.dart';
-import '../screens/challenges_screen.dart';
-import '../screens/daily_quests_screen.dart';
+import '../screens/thread_screen.dart';
 import '../screens/world_marketplace_screen.dart';
 import '../screens/world_polls_screen.dart';
 import '../screens/world_treasury_screen.dart';
@@ -68,8 +54,6 @@ import '../screens/world_jobs_screen.dart';
 import '../screens/world_archive_screen.dart';
 import '../screens/world_academy_screen.dart';
 import '../screens/world_sanctuary_screen.dart';
-import '../router/world_navigation.dart';
-import '../screens/league_screen.dart';
 import '../screens/progress_hub_screen.dart';
 import '../screens/coin_history_screen.dart';
 import 'progress_navigation.dart';
@@ -412,7 +396,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     queryParams: state.uri.queryParameters,
                   );
                 },
-                builder: (context, state) => _WorldChannelRoute(
+                  builder: (context, state) => WorldChannelRouteHandler(
                   worldId: state.pathParameters['worldId']!,
                   channelId: state.uri.queryParameters['id'] ?? '',
                   channelName: state.pathParameters['channelName']!,
@@ -532,7 +516,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       vGoRoute(
         path: '/campfire/:channelId',
         slideUp: true,
-        builder: (context, state) => _CampfireRoute(
+        builder: (context, state) => CampfireRouteHandler(
           channelId: state.pathParameters['channelId']!,
           channelName: state.uri.queryParameters['name'] ?? 'Campfire',
           worldId: state.uri.queryParameters['worldId'] ?? '',
@@ -545,7 +529,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final parentMessage = extra?['message'] as ChannelMessage?;
           if (parentMessage == null) {
-            return _ThreadDeepLinkScreen(
+            return ThreadDeepLinkScreen(
               messageId: state.pathParameters['messageId']!,
             );
           }
@@ -579,19 +563,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/invite/:code',
         builder: (context, state) =>
-            _AcceptInviteScreen(code: state.pathParameters['code']!),
+            AcceptInviteScreen(code: state.pathParameters['code']!),
       ),
       // Deep-link: notifications
       GoRoute(
         path: '/notifications/:id',
         builder: (context, state) =>
-            _NotificationDeepLink(notificationId: state.pathParameters['id']!),
+            NotificationDeepLink(notificationId: state.pathParameters['id']!),
       ),
       // Deep-link: post detail
       GoRoute(
         path: '/post/:postId',
         builder: (context, state) =>
-            _PostDeepLink(postId: state.pathParameters['postId']!),
+            PostDeepLink(postId: state.pathParameters['postId']!),
       ),
       GoRoute(
         path: '/post/:postId/comments',
@@ -602,404 +586,3 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-/// Remembers last channel when deep-linking into a world channel.
-class _WorldChannelRoute extends ConsumerStatefulWidget {
-  final String worldId;
-  final String channelId;
-  final String channelName;
-
-  const _WorldChannelRoute({
-    required this.worldId,
-    required this.channelId,
-    required this.channelName,
-  });
-
-  @override
-  ConsumerState<_WorldChannelRoute> createState() => _WorldChannelRouteState();
-}
-
-class _WorldChannelRouteState extends ConsumerState<_WorldChannelRoute> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (widget.channelId.isNotEmpty) {
-        ref.read(chatProvider.notifier).rememberLastChannel(
-          worldId: widget.worldId,
-          channelId: widget.channelId,
-        );
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WorldChannelScreen(
-      worldId: widget.worldId,
-      channelId: widget.channelId,
-      channelName: widget.channelName,
-    );
-  }
-}
-
-class _CampfireRoute extends ConsumerStatefulWidget {
-  final String channelId;
-  final String channelName;
-  final String worldId;
-  final String worldName;
-
-  const _CampfireRoute({
-    required this.channelId,
-    required this.channelName,
-    required this.worldId,
-    required this.worldName,
-  });
-
-  @override
-  ConsumerState<_CampfireRoute> createState() => _CampfireRouteState();
-}
-
-class _CampfireRouteState extends ConsumerState<_CampfireRoute> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (widget.worldId.isEmpty) return;
-      ref.read(chatProvider.notifier).rememberLastChannel(
-        worldId: widget.worldId,
-        channelId: widget.channelId,
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CampfireScreen(
-      channelId: widget.channelId,
-      channelName: widget.channelName,
-      worldId: widget.worldId,
-      worldName: widget.worldName,
-    );
-  }
-}
-
-class _AcceptInviteScreen extends ConsumerStatefulWidget {
-  final String code;
-
-  const _AcceptInviteScreen({required this.code});
-
-  @override
-  ConsumerState<_AcceptInviteScreen> createState() =>
-      _AcceptInviteScreenState();
-}
-
-class _AcceptInviteScreenState extends ConsumerState<_AcceptInviteScreen> {
-  bool _loading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _accept();
-  }
-
-  Future<void> _accept() async {
-    unawaited(
-      AnalyticsService.logEvent(
-        AnalyticsEvents.inviteOpened,
-        parameters: {'has_code': widget.code.isNotEmpty},
-      ),
-    );
-    final invite = await InviteService.validateInvite(widget.code);
-    if (!mounted) return;
-    if (invite == null || !invite.isValid) {
-      setState(() {
-        _loading = false;
-        _error = 'Invalid or expired invite code.';
-      });
-      return;
-    }
-
-    final resident = ref.read(residentProvider).resident;
-    if (!mounted) return;
-    if (resident == null || !resident.gateCompleted) {
-      await InviteService.savePendingInviteCode(widget.code);
-      unawaited(AnalyticsService.logEvent(AnalyticsEvents.inviteSavedPending));
-      if (!mounted) return;
-      final hasSession = maybeSupabase()?.auth.currentSession != null;
-      context.go(hasSession ? '/onboarding' : '/login');
-      return;
-    }
-
-    final result = await InviteService.redeemInviteCode(
-      code: widget.code,
-      residentId: resident.id,
-      residentName: resident.name,
-    );
-    if (!mounted) return;
-    if (!result.succeeded) {
-      unawaited(AnalyticsService.logEvent(AnalyticsEvents.inviteRedeemFailed));
-      setState(() {
-        _loading = false;
-        _error = result.errorMessage ?? 'Something went wrong';
-      });
-      return;
-    }
-    await ref.read(residentProvider.notifier).joinWorld(result.worldId!);
-    unawaited(
-      AnalyticsService.logEvent(
-        AnalyticsEvents.inviteCompleted,
-        parameters: {'world_id': result.worldId!},
-      ),
-    );
-    if (!mounted) return;
-    context.go(exploreWorldPath(result.worldId!));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Accept Invite')),
-      body: Center(
-        child: _loading
-            ? const FCircularProgress()
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.link_off,
-                    size: 64,
-                    color: theme.colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _error ?? 'Something went wrong',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-class _ThreadDeepLinkScreen extends StatefulWidget {
-  final String messageId;
-
-  const _ThreadDeepLinkScreen({required this.messageId});
-
-  @override
-  State<_ThreadDeepLinkScreen> createState() => _ThreadDeepLinkScreenState();
-}
-
-class _ThreadDeepLinkScreenState extends State<_ThreadDeepLinkScreen> {
-  late final Future<ChannelMessage?> _messageFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _messageFuture = _loadMessage();
-  }
-
-  Future<ChannelMessage?> _loadMessage() async {
-    final row = await ChatService.getChannelMessage(widget.messageId);
-    if (row == null) return null;
-    return ChannelMessage(
-      id: row['id'] ?? '',
-      channelId: row['channel_id'] ?? '',
-      senderId: row['sender_id'] ?? '',
-      senderName: row['sender_name'] ?? '',
-      senderAvatar: row['sender_avatar'],
-      content: row['content'] ?? '',
-      imageUrl: row['image_url'],
-      isPinned: row['is_pinned'] ?? false,
-      threadId: row['thread_id'],
-      threadCount: row['thread_count'] ?? 0,
-      isThreadStarter: row['is_thread_starter'] ?? false,
-      createdAt:
-          DateTime.tryParse(
-            row['created_at']?.toString() ?? '',
-          )?.millisecondsSinceEpoch ??
-          0,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<ChannelMessage?>(
-      future: _messageFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Thread')),
-            body: const Center(child: FCircularProgress()),
-          );
-        }
-
-        final message = snapshot.data;
-        if (message == null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Thread')),
-            body: AppEmptyState(
-              title: 'Thread unavailable',
-              description:
-                  'The original message could not be found or is no longer available.',
-              icon: Icons.forum_outlined,
-              variant: EmptyStateVariant.error,
-              actionLabel: 'Back to Nexus',
-              onAction: () => context.go('/'),
-            ),
-          );
-        }
-
-        return ThreadScreen(
-          channelId: message.channelId,
-          worldId: '',
-          parentMessage: message,
-          channelName: 'Thread',
-        );
-      },
-    );
-  }
-}
-
-/// Deep-link handler for notification taps.
-///
-/// Reads the notification from the provider, marks it read,
-/// and redirects to the relevant target screen.
-class _NotificationDeepLink extends ConsumerStatefulWidget {
-  final String notificationId;
-
-  const _NotificationDeepLink({required this.notificationId});
-
-  @override
-  ConsumerState<_NotificationDeepLink> createState() =>
-      _NotificationDeepLinkState();
-}
-
-class _NotificationDeepLinkState extends ConsumerState<_NotificationDeepLink> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _redirect());
-  }
-
-  Future<void> _redirect() async {
-    final notifs = ref.read(notificationProvider).notifications;
-    final notif = notifs
-        .where((n) => n.id == widget.notificationId)
-        .firstOrNull;
-
-    if (notif != null && !notif.read) {
-      ref.read(notificationProvider.notifier).markRead(widget.notificationId);
-    }
-
-    if (!context.mounted) return;
-    if (notif != null) {
-      final route = routeForNotification(notif);
-      if (route != null && route.isNotEmpty) {
-        context.go(route);
-        return;
-      }
-    }
-    context.go('/notifications');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: AppEmptyState(
-          title: 'Opening...',
-          icon: Icons.open_in_new,
-          actionLabel: 'Go Home',
-          onAction: () => context.go('/'),
-        ),
-      ),
-    );
-  }
-}
-
-/// Deep-link handler for post detail links.
-///
-/// Resolves the post's world and navigates to the world detail feed
-/// where the post can be viewed in context.
-class _PostDeepLink extends ConsumerStatefulWidget {
-  final String postId;
-
-  const _PostDeepLink({required this.postId});
-
-  @override
-  ConsumerState<_PostDeepLink> createState() => _PostDeepLinkState();
-}
-
-class _PostDeepLinkState extends ConsumerState<_PostDeepLink> {
-  bool _loading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _resolve();
-  }
-
-  Future<void> _resolve() async {
-    try {
-      final posts = ref.read(postProvider).posts;
-      var post = posts.where((p) => p.id == widget.postId).firstOrNull;
-      if (post == null && isSupabaseConfigured()) {
-        final row = await getSupabase()
-            .from('posts')
-            .select('world_id')
-            .eq('id', widget.postId)
-            .maybeSingle();
-        final worldId = row?['world_id'] as String?;
-        if (worldId != null && mounted) {
-          await ref
-              .read(postProvider.notifier)
-              .ensurePostVisible(widget.postId);
-          if (!mounted) return;
-          context.go(exploreWorldPath(worldId, postId: widget.postId));
-          return;
-        }
-      }
-      if (post != null && mounted) {
-        await ref.read(postProvider.notifier).ensurePostVisible(widget.postId);
-        if (!mounted) return;
-        context.go(exploreWorldPath(post.worldId, postId: widget.postId));
-        return;
-      }
-      if (mounted) context.go('/notifications');
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = 'Post not found';
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    return Scaffold(
-      appBar: AppBar(title: const Text('Post')),
-      body: AppEmptyState(
-        title: 'Post unavailable',
-        description: _error ?? 'This post could not be found.',
-        icon: Icons.article_outlined,
-        variant: EmptyStateVariant.error,
-        actionLabel: 'Go Home',
-        onAction: () => context.go('/'),
-      ),
-    );
-  }
-}
