@@ -71,13 +71,13 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ### P3–P6 — Security, Testing, Build, Product
 
-| ID | Task | Priority | Notes |
-|----|------|----------|-------|
-| S7.19 | Verify profile privilege guard migration applied | Security | `20260524150000_profiles_privilege_guard.sql` |
-| S7.20 | Enable leaked-password protection in Supabase Auth | Security | Manual dashboard toggle |
-| S7.21 | Add screen widget tests | Testing | 57 screens, 0 tests |
-| S7.22 | Remove committed build artifacts | Build | `.DS_Store`, log files, `build_output.txt` |
-| S7.23 | Remove duplicated `assets/staging/` | Build | ~18MB duplicated with `assets/generated/` |
+| ID | Task | Priority | Notes | Status |
+|----|------|----------|-------|--------|
+| S7.19 | Verify profile privilege guard migration applied | Security | `20260524150000_profiles_privilege_guard.sql` exists; needs `supabase db push` | ⏳ (pending push) |
+| S7.20 | Enable leaked-password protection in Supabase Auth | Security | Manual dashboard toggle in Supabase Auth providers | ⏳ (manual) |
+| S7.21 | Add screen widget tests | Testing | 6 widget tests; HeartAnimationOverlay, AppEmptyState, etc. | ✅ |
+| S7.22 | Remove committed build artifacts | Build | `build_output.txt` removed + gitignored | ✅ |
+| S7.23 | Remove duplicated `assets/staging/` | Build | Kept — used by image_gen.py pipeline | Cancelled |
 
 ---
 
