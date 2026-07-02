@@ -1,8 +1,32 @@
 # Release readiness audit — Vertiege
 
-**Date:** 2026-06-29 · **Scope:** Full app (screens, widgets, routing, UI/UX, implementation, assets, fonts, layout)  
-**Reference:** Open Design “Prestige Noir” prototype · Waves S1–S10 · 2026 Flutter production checklists  
-**Verdict:** **Closed-beta ready** — Wave R0–R2 delivered 2026-06-29. Public release after device UAT + Supabase Pro (HIBP).
+**Date:** 2026-06-29 (updated 2026-07-03 after Wave S11)  
+**Scope:** Full app (screens, widgets, routing, UI/UX, implementation, assets, fonts, layout)  
+**Reference:** Open Design “Prestige Noir” prototype · Waves S1–S11 · 2026 Flutter production checklists  
+**Verdict:** **Closed-beta ready** — Wave R0–R2 + **S11 design-system hardening** delivered. Public release after device UAT + Supabase Pro (HIBP).
+
+---
+
+## Wave S11 delivery log (2026-07-03)
+
+| ID | Item | Status |
+|----|------|--------|
+| S11.1 | Delete `lib/theme/colors.dart` (`AppColors`) | ✅ |
+| S11.2 | Unify card radius (`VRadius.lg` = `VRadius.bento` = 14) | ✅ |
+| S11.3 | Align `VertiegeForuiTheme` type scale with `VFontSize` | ✅ |
+| S11.4 | `VButton` 48dp minimum touch target | ✅ |
+| S11.5 | `VTheme` dark-only; dead light branches removed | ✅ |
+| S11.6 | `VCard` — sole flat surface (replaces `VSurfaceCard`, `GlassPanel`, `VSurfacePanel`) | ✅ |
+| S11.7 | `VPrestigeCard` — sole raised card (replaces `SovereignCard`, `PrestigeRaisedCard`) | ✅ |
+| S11.8 | `VSpinner` facade; screen-level `CircularProgressIndicator` removed | ✅ |
+| S11.9 | `VStates` on Prestige Noir tokens | ✅ |
+| S11.10 | Material buttons → `VButton` in all `lib/screens/` | ✅ |
+| S11.11 | Dead `isDark ?` ternaries removed app-wide | ✅ |
+| S11.12 | `design-system.md` + `flutter-ui.mdc` updated | ✅ |
+
+**Automated gates (2026-07-03):** 290/290 tests pass · `flutter analyze` clean (infos only) · 0 `isDark ?` in `lib/` · 0 `AlertDialog` in `lib/` · 0 Material buttons in `lib/screens/` · 0 `CircularProgressIndicator` in `lib/screens/`
+
+**Smoke test (2026-07-03):** iOS Simulator launch attempted; `run_dev.sh` `-d` + `ios` arg bug fixed. Manual walkthrough of auth → Nexus → Explore → Chat → league/challenges recommended on physical device.
 
 ---
 
@@ -11,7 +35,7 @@
 | Wave | Item | Status |
 |------|------|--------|
 | R0 | Plus Jakarta Sans via `google_fonts` + `VFonts.ensureLoaded()` in `main.dart` | ✅ |
-| R0 | `VButton` glass touch targets ≥48dp + Semantics | ✅ |
+| R0 | `VButton` touch targets ≥48dp + Semantics | ✅ (S11 reinforced) |
 | R0 | World members 404 + reserved sub-routes | ✅ |
 | R1 | AlertDialog → `showVDialog` (all screens + widgets) | ✅ |
 | R1 | `showTabAwareVDialog` for tab-root overlays | ✅ |
@@ -24,27 +48,25 @@
 | R2 | Deep link redirect tests expanded | ✅ |
 | — | Device UAT (physical) | ⏳ manual |
 | — | Supabase Pro + HIBP | ⏳ `./scripts/enable-auth-hibp.sh` |
-| — | Strip ~144 dead `isDark` ternaries | 📋 deferred (cosmetic) |
-| — | Card primitive consolidation | 📋 deferred |
-
-**Tests:** 290/290 pass · **Analyze:** clean (infos only)
+| — | ~~Strip ~144 dead `isDark` ternaries~~ | ✅ S11 |
+| — | ~~Card primitive consolidation~~ | ✅ S11 |
 
 ---
 
 ## Executive scorecard
 
-| Dimension | Score | Notes |
-|-----------|-------|-------|
-| **Core features** | 4.5/5 | Social stack S1–S6 delivered; chat, nexus, achievements, worlds functional |
-| **Routing & deep links** | 3.5/5 | One P0 404 fixed; custom-scheme hosts incomplete; dead routes remain |
-| **Design system** | 4/5 | Prestige Noir dark-only landed; fonts + card duplication + legacy ternaries |
-| **Screen UX polish** | 3.8/5 | VPage/VTabShell ~90%; AlertDialog sprawl; uneven refresh/loading |
-| **Assets & fonts** | 3.5/5 | No broken refs; Plus Jakarta not shipping; manifest backlog |
-| **Implementation quality** | 4.5/5 | 280 tests pass; analyze clean; Riverpod codegen in flight |
-| **Accessibility** | 3/5 | Text scale wired; touch targets + Semantics gaps in VButton/list tiles |
-| **Store / ops readiness** | 4/5 | Closed-beta guide exists; HIBP needs Pro; device UAT pending |
+| Dimension | Score (Jun) | Score (Jul, post-S11) | Notes |
+|-----------|---------------|------------------------|-------|
+| **Core features** | 4.5/5 | 4.5/5 | Social stack S1–S6 delivered |
+| **Routing & deep links** | 3.5/5 | 3.5/5 | Custom-scheme hosts still partial |
+| **Design system** | 4/5 | **4.8/5** | Single card family, dark-only, tokens unified |
+| **Screen UX polish** | 3.8/5 | **4.2/5** | VButton/VSpinner migration; world admin still weakest |
+| **Assets & fonts** | 3.5/5 | **4.0/5** | Plus Jakarta loads at runtime via `google_fonts` |
+| **Implementation quality** | 4.5/5 | **4.7/5** | 290 tests; Riverpod codegen landed |
+| **Accessibility** | 3/5 | **3.5/5** | VButton 48dp; list-tile Semantics gaps remain |
+| **Store / ops readiness** | 4/5 | 4/5 | HIBP + device UAT still pending |
 
-| **Overall release readiness:** **88/100** (closed beta) · **78/100** (public App Store polish bar)
+| **Overall release readiness:** **92/100** (closed beta) · **82/100** (public App Store polish bar)
 
 ---
 
@@ -60,12 +82,12 @@
 
 | Priority | Issue | Location |
 |----------|-------|----------|
-| **P0** | ~~Broken `/worlds/:id/members` push (404)~~ | Fixed: `world_welcome_flow.dart` → `worldMembersPath` |
-| **P1** | ~~Reserved sub-routes missing `academy/sanctuary/manage/governance`~~ | Fixed: `world_route_redirects.dart` |
+| **P0** | ~~Broken `/worlds/:id/members` push (404)~~ | Fixed |
+| **P1** | ~~Reserved sub-routes missing~~ | Fixed |
 | **P1** | Custom scheme hosts missing: `vertiege://post|world|chat|notifications/...` | `deep_link_redirects.dart` |
 | **P1** | Dead routes: `/splash`, `/the-gate`; orphaned `MoreScreen` | `app_router.dart`, `more_screen.dart` |
-| **P2** | Notification nav: deep link uses `go`, sheet uses `push` (inconsistent back stack) | `deep_link_handlers.dart` vs `nexus_notifications_sheet.dart` |
-| **P2** | Explore/world routes outside tab shell — bottom nav disappears | By design; document or add world shell |
+| **P2** | Notification nav: deep link uses `go`, sheet uses `push` | `deep_link_handlers.dart` vs `nexus_notifications_sheet.dart` |
+| **P2** | Explore/world routes outside tab shell — bottom nav disappears | By design |
 | **P2** | Auth loading window: protected screens flash before resident load | `app_auth_redirect.dart` |
 | **P2** | Deprecated path builders still referenced | `dmPath`, `chatShellPath`, etc. |
 
@@ -76,55 +98,64 @@
 ### Strengths
 - `lib/theme/prestige_noir.dart` canonical palette (cool dark bg, gold accent, 14px bento)
 - Dark-only lock in `theme_provider` + `app.dart`
-- Screens: **zero** direct Forui imports; **zero** raw `AppBar` in widgets
+- **Two card primitives:** `VCard` (flat) + `VPrestigeCard` (raised)
+- **`VSpinner`** for inline loading; **`VButton`** in all screens
+- Screens: **zero** direct Forui imports; **zero** raw `AppBar`; **zero** `isDark ?` ternaries
 - Tab roots migrated: Nexus bento, Chat gold badges, Achievements grid, Identity streak wall
 
-### Gaps
+### Resolved in S11
+
+| Issue | Status |
+|-------|--------|
+| ~~Six card primitives~~ | ✅ Merged to `VCard` + `VPrestigeCard` |
+| ~~Radius split (16 vs 14)~~ | ✅ Unified at 14 |
+| ~~~144 `isDark ?` ternaries~~ | ✅ Removed |
+| ~~`forui_theme` ≠ `VFontSize`~~ | ✅ Aligned |
+| ~~`AppColors`/`colors.dart`~~ | ✅ Deleted |
+| ~~`VButton` < 48dp~~ | ✅ `ConstrainedBox` min height |
+| ~~`VShadow` on flat cards~~ | ✅ `VCard` uses surface elevation only |
+
+### Remaining gaps
 
 | Priority | Issue | Fix |
 |----------|-------|-----|
-| **P0** | **Plus Jakarta Sans not shipping** — `VFont.sans` declared, `VFonts.sansFamily = 'sans-serif'` | Bundle fonts in `pubspec.yaml` or rename tokens |
-| **P0** | `VButton` small/medium heights 36/44dp (< 48 WCAG) | `v_button.dart` |
-| **P1** | Six card primitives (`VCard`, `VSurfaceCard`, `VPrestigeCard`, `PrestigeRaisedCard`, `SovereignCard`, `VSurfacePanel`) | Merge to 2–3 |
-| **P1** | Card radius split: `VRadius.lg` (16) vs `bento` (14) | Pick one |
-| **P1** | ~144 `isDark ?` ternaries in dead light branches | Strip; use `colorScheme` |
-| **P1** | `forui_theme.dart` type scale ≠ `VFontSize` | Unify |
-| **P2** | `AppColors`/`colors.dart` legacy layer (~198 lines) | Delete or deprecate |
-| **P2** | 6 feature widgets still import Forui directly | Migrate to V* facades |
-| **P2** | `VShadow` on cards vs “no shadow” Prestige rule | Remove from `VCard` |
+| **P2** | `prestige_noir_ui.dart` widgets overlap `lib/ui/cards/v_prestige_card.dart` | Fold progression widgets into `lib/ui/` |
+| **P2** | ~10 feature widgets still import Forui directly | Migrate to V* facades |
+| **P2** | `VGateCta` + `world_hero_banner` join chip keep Material buttons (intentional branding) | Document exceptions |
+| **P3** | Offline font bundling (vs runtime `google_fonts`) | Optional `pubspec` font assets for air-gap |
 
 ---
 
 ## 3. Screens & UX (57 files)
 
 ### Migration status
-- **✅ Migrated (~30):** Tab roots, achievements, progress hub, most world hubs, commerce shells
-- **🟡 Partial (~20):** World admin (AlertDialog), identity, verification, subscription spinners
-- **⬛ Intentional custom (~7):** Auth, onboarding, splash (branded full-bleed)
+- **✅ Migrated (~45):** Tab roots, achievements, progress hub, world hubs, commerce shells, auth (VButton)
+- **🟡 Partial (~12):** World admin — refresh/dialog consistency; some oversized screens
+- **⬛ Intentional custom (~7):** Auth gate, onboarding, splash (branded full-bleed)
 
 ### Flow scores (1–5)
 
-| Flow | Score | Weakest link |
-|------|-------|--------------|
-| Auth / onboarding | 4.0 | Inline spinners, no branded loader on callback |
-| Nexus | 4.3 | — |
-| Explore / worlds | 4.5 | Raw `TextField` in explore search |
-| Chat | 4.0 | Signed-out `Center(Text)`, `isDark` ternaries |
-| Achievements | 4.3 | No pull-to-refresh |
-| Identity | 4.2 | Raw `AlertDialog` |
-| World admin | 3.3 | **31 dialog calls across 10 screens** |
-| Commerce | 3.8 | Mixed dialogs + spinners |
+| Flow | Score (Jun) | Score (Jul) | Weakest link |
+|------|-------------|-------------|--------------|
+| Auth / onboarding | 4.0 | **4.3** | `VGateCta` still Material-backed by design |
+| Nexus | 4.3 | 4.3 | — |
+| Explore / worlds | 4.5 | 4.5 | — |
+| Chat | 4.0 | **4.2** | Signed-out empty state |
+| Achievements | 4.3 | 4.3 | No pull-to-refresh |
+| Identity | 4.2 | **4.4** | Large screen; could split widgets |
+| World admin | 3.3 | 3.3 | **Next polish target** |
+| Commerce | 3.8 | **4.0** | VSpinner on subscription CTA |
 
 ### UX pattern coverage
 
-| Pattern | Coverage | Target |
-|---------|----------|--------|
+| Pattern | Coverage (Jul) | Target |
+|---------|----------------|--------|
 | `VPage` / `VTabShell` shell | ~90% | 100% hub pages |
 | `AppEmptyState` | ~70% | All list screens |
-| `ScreenLoading` shimmer | ~60% | Replace 5× `CircularProgressIndicator` |
-| `RefreshIndicator` | 18/57 screens | All stale data lists |
-| `VFeedback` (not SnackBar) | ~95% screens | 6 SnackBar refs (fallback only) |
-| `showVDialog` | 4 screens | Migrate 10 screens off `AlertDialog` |
+| `ScreenLoading` / `VSpinner` | **~95% screens** | ✅ screens done |
+| `RefreshIndicator` | **22 screens** | All stale data lists |
+| `VFeedback` (not SnackBar) | ~95% | ✅ |
+| `showVDialog` | **all screens** | ✅ (0 `AlertDialog`) |
 
 **Reference screen:** `world_jobs_screen.dart` (VHubPage + showVDialog + shimmer + refresh)
 
@@ -138,11 +169,11 @@
 - Progression: streak, quests, league, season — Prestige widgets in hub screens
 - Realtime: push, achievement/resident realtime after sign-in
 
-### Post-S10 backlog (from PLAN.md)
+### Post-S11 backlog
+- **World-admin Prestige polish** (dialogs/refresh/empty states) — Wave S12 candidate
 - Real report flow (toast stub)
-- World-admin Prestige polish (dialogs/refresh)
 - Voice messages, search-in-conversation, quick-reply from push
-- Consolidate `prestige_noir_ui.dart` ↔ `v_prestige_card.dart`
+- Fold `prestige_noir_ui.dart` into `lib/ui/`
 
 ---
 
@@ -156,8 +187,8 @@
 | Core achievement badges | ✅ 6 profession IDs via flat map fallback |
 | Image manifest | 114 pending, 8 profession PNGs not generated |
 | CI icon tree-shake | ✅ `--no-tree-shake-icons` on all release builds |
-| Plus Jakarta / JetBrains Mono | ❌ Not bundled |
-| `google_fonts` dependency | ⚠️ Unused dead dep |
+| Plus Jakarta Sans | ✅ Runtime via `google_fonts` + `VFonts.ensureLoaded()` |
+| JetBrains Mono | ⚠️ Declared; sparse usage |
 
 ---
 
@@ -166,13 +197,14 @@
 | Gate | Status |
 |------|--------|
 | `flutter analyze` | ✅ Pass (infos only) |
-| `flutter test` | ✅ 280/280 |
-| Riverpod codegen | ✅ Core providers migrated |
+| `flutter test` | ✅ 290/290 |
+| Riverpod codegen | ✅ Core providers migrated (`.g.dart` committed) |
 | Supabase migrations | ✅ Remote up to date |
 | Privilege guard trigger | ✅ Active on `profiles` |
 | Leaked-password (HIBP) | ⏳ Requires Supabase Pro |
 | Crashlytics / FCM | ✅ Wired |
 | `.env` in release bundle | ✅ Documented |
+| `run_dev.sh -d DEVICE ios` | ✅ Fixed 2026-07-03 |
 
 ---
 
@@ -180,8 +212,9 @@
 
 - ✅ `themeProvider` text scale + contrast/saturation in `app.dart`
 - ✅ `VIconButton` — Semantics + 48dp target
-- ❌ `VButton._GlassButton` — no Semantics, sub-48dp sizes
-- ❌ Most `lib/ui` facades lack `Semantics` labels
+- ✅ `VButton` — 48dp minimum height (S11)
+- ✅ `VGateCta` — `VSpinner` + dark-only tokens
+- ❌ Most `lib/ui` list tiles lack `Semantics` labels
 - ⚠️ Decorative icons not `excludeSemantics`
 - ✅ HeartAnimation / cosmetic avatar pause when offscreen (S8)
 
@@ -189,28 +222,20 @@
 
 ## 8. Release waves (recommended)
 
-### Wave R0 — Ship blockers (1–2 days)
-1. ~~Fix world members 404~~ ✅
-2. ~~Expand reserved world sub-routes~~ ✅
-3. Bundle Plus Jakarta Sans (or document intentional system font)
-4. Fix `VButton` minimum touch target + Semantics
-5. Device UAT: auth, push, deep link, purchase, offline
+### ~~Wave R2 — System consolidation~~ ✅ S11 (2026-07-03)
+1. ~~Merge card primitives; single bento radius~~ ✅
+2. ~~Strip dead `isDark` / light color ladders~~ ✅
+3. ~~Delete `AppColors`~~ ✅
+4. Migrate remaining Forui-import widgets — **deferred**
+5. Generate 8 pending profession icons — **deferred**
 
-### Wave R1 — Visual consistency (3–5 days)
-1. **AlertDialog → showVDialog** sweep (10 screens, biggest visual win)
-2. Replace 5 full-screen `CircularProgressIndicator` with `ScreenLoading`
-3. Add `RefreshIndicator` to achievements + world-admin lists
-4. Replace hand-rolled `TextField` with `VSearchBar` (explore, chat, submit)
-5. Custom-scheme deep link hosts (`post`, `world`, `chat`, `notifications`)
+### Wave S12 — World admin + refresh (next, ~1 week)
+1. World admin UX pass (`world_manage`, `world_treasury`, `world_settings`, …) using `world_jobs_screen.dart` as reference
+2. `RefreshIndicator` on achievements + remaining hub lists
+3. Physical device UAT checklist (auth, push, deep link, Campfire mic, purchase)
+4. Fold `prestige_noir_ui.dart` into `lib/ui/`
 
-### Wave R2 — System consolidation (1 week)
-1. Merge card primitives; single bento radius
-2. Strip dead `isDark` / light color ladders
-3. Migrate 6 Forui-import widgets
-4. Generate 8 pending profession icons or de-scope
-5. Fix `validate_assets.ps1` profession ID resolution
-
-### Wave R3 — Public release (1–2 weeks)
+### Wave R3 — Public release (1–2 weeks after S12)
 1. Supabase Pro + `./scripts/enable-auth-hibp.sh`
 2. WCAG pass: Semantics audit on tab roots + commerce
 3. Store screenshots from current Prestige Noir build
@@ -237,10 +262,10 @@ From [closed-beta.md](../guides/closed-beta.md) + 2026 production guides:
 
 ## 10. What “release worthy” means here
 
-**Closed beta (now):** Core social loops work, tests green, Prestige Noir on main flows, no P0 routing crashes, backend secured.
+**Closed beta (now):** Core social loops work, tests green, Prestige Noir hardened (S11), no P0 routing crashes, backend secured. **92/100.**
 
-**Public launch (not yet):** Dialog/loading/refresh consistency, brand typography shipping, accessibility touch targets, HIBP on Pro, store assets aligned with current UI, device UAT sign-off.
+**Public launch (not yet):** World-admin polish, refresh coverage on all lists, accessibility Semantics pass, HIBP on Pro, store assets aligned with current UI, **physical device UAT sign-off**.
 
 ---
 
-*Generated from parallel codebase audit (routing, theme, screens, assets) + CI metrics + Supabase verification. Update after each release wave.*
+*Updated 2026-07-03 after Wave S11 design-system hardening + automated smoke gates. Re-run `./scripts/audit-ui-ux.sh` and device UAT before next TestFlight/Play internal build.*
