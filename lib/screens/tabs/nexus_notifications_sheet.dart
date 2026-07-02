@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../ui/buttons/v_icon_button.dart';
 
 class NexusNotificationsSheet extends ConsumerStatefulWidget {
   const NexusNotificationsSheet({super.key});
@@ -27,7 +28,6 @@ class _NexusNotificationsSheetState
     final notifState = ref.watch(notificationProvider);
     final notifications = notifState.notifications;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final hasUnread = notifications.any((n) => !n.read);
 
     final sheetHeight = MediaQuery.sizeOf(context).height * 0.65;
@@ -49,11 +49,9 @@ class _NexusNotificationsSheetState
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color:
-                        (isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant)
-                            .withValues(alpha: 0.3),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(VRadius.pill),
                   ),
                 ),
@@ -74,9 +72,10 @@ class _NexusNotificationsSheetState
                     },
                     variant: ButtonVariant.text,
                   ),
-                IconButton(
-                  icon: const Icon(VIcons.x),
+                VIconButton(
+                  semanticsLabel: 'Close notifications',
                   onPressed: () => Navigator.of(context).pop(),
+                  child: const Icon(VIcons.x),
                 ),
               ],
             ),
@@ -91,9 +90,7 @@ class _NexusNotificationsSheetState
                         Icon(
                           Icons.notifications_outlined,
                           size: 48,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: VSpacing.md),
                         Text(
@@ -106,9 +103,7 @@ class _NexusNotificationsSheetState
                         Text(
                           'No notifications yet',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -135,7 +130,6 @@ class NotificationList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return ListView.builder(
       controller: scrollController,
@@ -159,15 +153,9 @@ class NotificationList extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(VSpacing.md),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? VColors.glassBackgroundDark
-                      : VColors.glassBackground,
+                  color: VColors.glassBackgroundDark,
                   borderRadius: BorderRadius.circular(VRadius.lg),
-                  border: Border.all(
-                    color: isDark
-                        ? VColors.glassBorderDark
-                        : VColors.glassBorder,
-                  ),
+                  border: Border.all(color: VColors.glassBorderDark),
                 ),
                 child: Row(
                   children: [
@@ -198,12 +186,8 @@ class NotificationList extends ConsumerWidget {
                                   ? VFontWeight.semiBold
                                   : VFontWeight.regular,
                               color: unread
-                                  ? (isDark
-                                        ? VColors.onSurfaceDark
-                                        : VColors.onSurface)
-                                  : (isDark
-                                        ? VColors.onSurfaceVariantDark
-                                        : VColors.onSurfaceVariant),
+                                  ? theme.colorScheme.onSurface
+                                  : theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: VSpacing.xxs),
@@ -212,9 +196,7 @@ class NotificationList extends ConsumerWidget {
                               DateTime.fromMillisecondsSinceEpoch(n.createdAt),
                             ),
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -259,6 +241,7 @@ class NotificationList extends ConsumerWidget {
       NotificationType.jobApplicationRejected => VColors.error,
       NotificationType.governanceProposalApproved => VColors.success,
       NotificationType.governanceProposalRejected => VColors.error,
+      NotificationType.unknown => VColors.primary,
     };
   }
 
@@ -284,6 +267,7 @@ class NotificationList extends ConsumerWidget {
       NotificationType.jobApplicationRejected => Icons.work_off_outlined,
       NotificationType.governanceProposalApproved => Icons.how_to_vote,
       NotificationType.governanceProposalRejected => Icons.block,
+      NotificationType.unknown => Icons.notifications_outlined,
     };
   }
 }

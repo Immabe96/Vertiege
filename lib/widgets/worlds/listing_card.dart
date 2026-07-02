@@ -18,7 +18,6 @@ class ListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,
@@ -151,7 +150,6 @@ class _ListingImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AspectRatio(
       aspectRatio: 1.2,
@@ -163,27 +161,23 @@ class _ListingImage extends StatelessWidget {
               child: Image.network(
                 listing.imageUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _Placeholder(isDark: isDark),
+                errorBuilder: (_, _, _) => const _Placeholder(),
               ),
             )
-          : _Placeholder(isDark: isDark),
+          : const _Placeholder(),
     );
   }
 }
 
 class _Placeholder extends StatelessWidget {
-  final bool isDark;
-
-  const _Placeholder({required this.isDark});
+  const _Placeholder();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerHighDark
-            : VColors.surfaceContainerHigh,
-        borderRadius: const BorderRadius.vertical(
+      decoration: const BoxDecoration(
+        color: VColors.surfaceContainerHighDark,
+        borderRadius: BorderRadius.vertical(
           top: Radius.circular(VRadius.lg),
         ),
       ),

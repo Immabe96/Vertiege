@@ -47,6 +47,7 @@ import 'widgets/core/mutation_outbox_sync_banner.dart';
 import 'widgets/core/offline_banner.dart';
 import 'widgets/core/v_app_banner.dart';
 import 'widgets/core/v_feedback.dart';
+import 'ui/buttons/v_button.dart';
 import 'widgets/nexus/nexus_moment_sheet.dart';
 
 class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
@@ -59,7 +60,7 @@ class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
 
 class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     with WidgetsBindingObserver {
-  bool _showSplash = false;
+  final bool _showSplash = false;
   bool _isOnline = true;
   bool _supabaseBootstrapFailed = false;
   String? _maintenanceBanner;
@@ -162,7 +163,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
     if (!mounted) return;
     unawaited(ref.read(residentProvider.notifier).loadResident());
-    unawaited(ref.read(worldProvider.notifier).loadWorlds());
   }
 
   /// Staggered secondary loads so Nexus stays responsive after sign-in.
@@ -170,6 +170,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     Future<void>.delayed(const Duration(milliseconds: 600), () {
       if (!mounted) return;
       unawaited(_safeLoad('posts', ref.read(postProvider.notifier).loadPosts));
+      unawaited(_safeLoad('worlds', ref.read(worldProvider.notifier).loadWorlds));
     });
     Future<void>.delayed(const Duration(milliseconds: 900), () {
       if (!mounted) return;
@@ -206,7 +207,11 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
           ),
         );
       }
-      unawaited(_safeInitServices());
+      unawaited(_safeInitResidentServices());
+    });
+    Future<void>.delayed(const Duration(milliseconds: 2500), () {
+      if (!mounted) return;
+      unawaited(_safeInitStore());
     });
   }
 
@@ -224,7 +229,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         unawaited(_bootstrapServices().then((_) => afterReady()));
       });
     } else {
-      Future<void>.delayed(const Duration(milliseconds: 500), () => afterReady());
+      Future<void>.delayed(const Duration(milliseconds: 500), afterReady);
     }
     Future<void>.delayed(const Duration(milliseconds: 800), () {
       final resident = ref.read(residentProvider).resident;
@@ -233,15 +238,22 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     });
   }
 
-  Future<void> _safeInitServices() async {
+  Future<void> _safeInitResidentServices() async {
+    try {
+      final resident = ref.read(residentProvider).resident;
+      if (resident != null) {
+        await _initializeResidentServices(resident.id);
+      }
+    } catch (e) {
+      debugPrint('Resident services init failed: $e');
+    }
+  }
+
+  Future<void> _safeInitStore() async {
     try {
       await StoreService.init();
     } catch (e) {
       debugPrint('StoreService init failed: $e');
-    }
-    final resident = ref.read(residentProvider).resident;
-    if (resident != null) {
-      await _initializeResidentServices(resident.id);
     }
   }
 
@@ -508,6 +520,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     NotificationType.jobApplicationRejected => 'Role application',
     NotificationType.governanceProposalApproved => 'Proposal approved',
     NotificationType.governanceProposalRejected => 'Proposal declined',
+    NotificationType.unknown => '',
   };
 
   String? _routeForNotification(AppNotification notification) =>
@@ -636,13 +649,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     final themeState = ref.watch(themeProvider);
     final textScaler = TextScaler.linear(themeState.textScale);
 
-    final platformBrightness = MediaQuery.platformBrightnessOf(context);
-    final useDarkForui = switch (themeState.scheme) {
-      ThemeScheme.light => false,
-      ThemeScheme.dark => true,
-      ThemeScheme.system => platformBrightness == Brightness.dark,
-    };
-
     return MaterialApp.router(
       title: 'Vertiege',
       debugShowCheckedModeBanner: false,
@@ -653,9 +659,9 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: themeState.useCommunePreset ? VTheme.lightCommune : VTheme.light,
-      darkTheme: themeState.useCommunePreset ? VTheme.darkCommune : VTheme.dark,
-      themeMode: themeState.themeMode,
+      theme: VTheme.dark,
+      darkTheme: VTheme.dark,
+      themeMode: ThemeMode.dark,
       routerConfig: router,
       builder: (context, child) {
         final shell = _applyA11yColorAdjustments(
@@ -667,7 +673,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
           Column(
             children: [
               if (_buildBlocked)
-                VAppBanner(
+                const VAppBanner(
                   variant: .destructive,
                   message:
                       'This build is outdated (v$kAppBuildNumber). '
@@ -679,12 +685,14 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
                 VAppBanner(
                   message:
                       'Cloud sync is unavailable. Check .env and network, then restart.',
-                  action: TextButton(
+                  action: VButton(
+                    label: 'Retry',
                     onPressed: () {
                       setState(() => _supabaseBootstrapFailed = false);
                       unawaited(_bootstrapServices());
                     },
-                    child: const Text('Retry'),
+                    variant: ButtonVariant.text,
+                    size: ButtonSize.small,
                   ),
                 ),
               const MutationOutboxSyncBanner(),
@@ -697,7 +705,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
               ),
             ],
           ),
-          isDark: useDarkForui,
         ),
         );
         if (!_showSplash) return shell;
@@ -732,14 +739,10 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     BuildContext context,
     TextScaler textScaler,
     ThemeState themeState,
-    Widget child, {
-    required bool isDark,
-  }) {
+    Widget child,
+  ) {
     final materialColor = Theme.of(context).colorScheme.surface;
-    final forui = VertiegeForuiTheme.forPreset(
-      isDark: isDark,
-      commune: themeState.useCommunePreset,
-    );
+    final forui = VertiegeForuiTheme.dark;
     return FTheme(
       data: forui,
       child: FToaster(

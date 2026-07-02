@@ -1,8 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/favorite_channel_prefs.dart';
 
-class FavoriteChannelNotifier extends Notifier<Map<String, Set<String>>> {
+part 'favorite_channel_provider.g.dart';
+
+@Riverpod(name: 'favoriteChannelProvider', keepAlive: true)
+class FavoriteChannelNotifier extends _$FavoriteChannelNotifier {
   @override
   Map<String, Set<String>> build() {
     Future.microtask(_load);
@@ -25,8 +29,3 @@ class FavoriteChannelNotifier extends Notifier<Map<String, Set<String>>> {
     state = {...state, worldId: updated};
   }
 }
-
-final favoriteChannelProvider =
-    NotifierProvider<FavoriteChannelNotifier, Map<String, Set<String>>>(
-      FavoriteChannelNotifier.new,
-    );

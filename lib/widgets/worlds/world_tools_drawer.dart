@@ -28,10 +28,9 @@ class WorldToolsDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      backgroundColor: VColors.surfaceDark,
       child: SafeArea(
         child: WorldToolsPanel(
           world: world,

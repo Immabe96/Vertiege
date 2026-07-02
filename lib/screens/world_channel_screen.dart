@@ -595,8 +595,7 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                 : Stack(
                     children: [
                       ListView.builder(
-                        controller: _scrollController,
-                        cacheExtent: 480,
+                        cacheExtent: 480.0, controller: _scrollController,
                         addAutomaticKeepAlives: false,
                         padding: const EdgeInsets.symmetric(
                           horizontal: VSpacing.sm,
@@ -655,12 +654,12 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
               color: VColors.warning.withValues(alpha: 0.10),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline,
                     size: VIconSize.sm,
                     color: VColors.warning,
                   ),
-                  SizedBox(width: VSpacing.sm),
+                  const SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Text(
                       'This announcement channel is read-only for your rank.',
@@ -931,7 +930,7 @@ class _FoundationPanel extends StatelessWidget {
                 fontSize: VFontSize.headlineMd,
                 fontWeight: VFontWeight.bold,
               ),
-              h3: TextStyle(
+              h3: const TextStyle(
                 color: VColors.tertiary,
                 fontSize: VFontSize.bodyLg,
                 fontWeight: VFontWeight.semiBold,
@@ -970,7 +969,6 @@ class _ChannelImagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,

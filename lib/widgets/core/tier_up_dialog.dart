@@ -1,4 +1,4 @@
-﻿import 'package:confetti/confetti.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../../theme/v_colors.dart';
@@ -104,7 +104,6 @@ class _TierUpDialogState extends State<TierUpDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -134,7 +133,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                       opacity: 0.5,
                     ),
                     const SizedBox(width: VSpacing.md),
-                    Icon(
+                    const Icon(
                       Icons.arrow_forward,
                       size: VIconSize.xl,
                       color: VColors.success,
@@ -153,9 +152,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                 Container(
                   padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? VColors.surfaceDark
-                        : VColors.surfaceContainerLow,
+                    color: VColors.surfaceDark,
                     borderRadius: BorderRadius.circular(VRadius.md),
                     border: Border.all(
                       color: _tierColor(widget.newTier).withValues(alpha: 0.3),
@@ -177,7 +174,7 @@ class _TierUpDialogState extends State<TierUpDialog> {
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.check_circle,
                                 size: VIconSize.sm,
                                 color: VColors.success,
@@ -213,7 +210,6 @@ class _TierUpDialogState extends State<TierUpDialog> {
           child: ConfettiWidget(
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
             colors: [
               Theme.of(context).colorScheme.primary,
               VColors.tertiary,

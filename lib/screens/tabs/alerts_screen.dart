@@ -15,7 +15,6 @@ import '../../widgets/core/screen_loading.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/buttons/v_button.dart';
 import '../../theme/v_colors.dart';
 
 enum _DateGroup { today, thisWeek, earlier }
@@ -105,14 +104,12 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
     if (notifState.isLoading) {
       return const VHubPage(
         title: 'Alerts',
-        showBack: false,
         body: ScreenLoading.list(),
       );
     }
 
     return VHubPage(
       title: 'Alerts',
-      showBack: false,
       headerActions: [
         if (hasUnread)
           AnimatedBuilder(
@@ -148,14 +145,12 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen>
                     title: 'All caught up!',
                     description: 'You have no notifications yet.',
                     icon: Icons.notifications_outlined,
-                    variant: EmptyStateVariant.default_,
                   )
                 : notifications.isEmpty
-                ? Center(
-                    child: Text(
-                      notifState.error ?? 'No notifications',
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                ? AppErrorState(
+                    message: notifState.error,
+                    onRetry: () =>
+                        ref.read(notificationProvider.notifier).loadNotifications(),
                   )
                 : _buildNotificationList(context, notifications, ref, theme),
           ),
@@ -349,7 +344,6 @@ class _NotificationSliverList extends StatelessWidget {
             ),
             child: Dismissible(
               key: ValueKey(n.id),
-              direction: DismissDirection.horizontal,
               confirmDismiss: (direction) async {
                 if (direction == DismissDirection.startToEnd) {
                   // Swipe right → mark as read, keep in list.
@@ -363,11 +357,11 @@ class _NotificationSliverList extends StatelessWidget {
                   return true;
                 }
               },
-              background: _SwipeBackground(
+              background: const _SwipeBackground(
                 color: VColors.success,
                 icon: Icons.check,
                 alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: VSpacing.lg),
+                padding: EdgeInsets.only(left: VSpacing.lg),
               ),
               secondaryBackground: _SwipeBackground(
                 color: theme.colorScheme.outline.withValues(alpha: 0.45),
@@ -412,6 +406,7 @@ class _NotificationSliverList extends StatelessWidget {
       NotificationType.jobApplicationRejected => VColors.error,
       NotificationType.governanceProposalApproved => VColors.success,
       NotificationType.governanceProposalRejected => VColors.error,
+      NotificationType.unknown => VColors.primary,
     };
   }
 }
@@ -435,7 +430,6 @@ class _SwipeBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: color,
@@ -472,7 +466,6 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final n = notification;
     final unread = !n.read;
 
@@ -597,6 +590,7 @@ class _NotificationCard extends StatelessWidget {
       NotificationType.jobApplicationRejected => Icons.work_off_outlined,
       NotificationType.governanceProposalApproved => Icons.how_to_vote,
       NotificationType.governanceProposalRejected => Icons.block,
+      NotificationType.unknown => Icons.notifications_outlined,
     };
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/challenge.dart';
 import '../services/challenge_service.dart';
 import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
+
+part 'challenge_provider.g.dart';
 
 class ChallengeData {
   final String id;
@@ -99,7 +102,8 @@ class ChallengeState {
   }
 }
 
-class ChallengeNotifier extends Notifier<ChallengeState> {
+@Riverpod(name: 'challengeProvider', keepAlive: true)
+class ChallengeNotifier extends _$ChallengeNotifier {
   @override
   ChallengeState build() {
     return const ChallengeState();
@@ -187,12 +191,12 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
       if (challenge.type != eventType) {
         continue;
       }
-      final progress = state.userProgress[challenge.id];
-      if (progress != null && progress.completed) continue;
+      final currentProgress = state.userProgress[challenge.id];
+      if (currentProgress != null && currentProgress.completed) continue;
 
       await ChallengeService.updateProgress(challenge.id, 1);
 
-      final newCurrentValue = (progress?.currentValue ?? 0) + 1;
+      final newCurrentValue = (currentProgress?.currentValue ?? 0) + 1;
       final newProgress = ChallengeProgressData(
         challengeId: challenge.id,
         currentValue: newCurrentValue,
@@ -254,7 +258,3 @@ class ChallengeNotifier extends Notifier<ChallengeState> {
     }
   }
 }
-
-final challengeProvider = NotifierProvider<ChallengeNotifier, ChallengeState>(
-  ChallengeNotifier.new,
-);

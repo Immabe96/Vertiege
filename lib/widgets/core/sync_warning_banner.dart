@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 
 /// Non-blocking banner when data loaded from cache or sync partially failed.
 class SyncWarningBanner extends StatelessWidget {
@@ -31,7 +32,12 @@ class SyncWarningBanner extends StatelessWidget {
               child: Text(message, style: theme.textTheme.bodySmall),
             ),
             if (onRetry != null)
-              TextButton(onPressed: onRetry, child: const Text('Retry')),
+              VButton(
+                label: 'Retry',
+                variant: ButtonVariant.text,
+                size: ButtonSize.small,
+                onPressed: onRetry,
+              ),
           ],
         ),
       ),

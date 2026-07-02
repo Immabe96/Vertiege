@@ -110,7 +110,7 @@ class _IdentityVerificationCardState
                     ),
                   ),
                   if (verified)
-                    Icon(VIcons.badgeCheck, color: VColors.brand, size: 22),
+                    const Icon(VIcons.badgeCheck, color: VColors.brand, size: 22),
                 ],
               ),
               const SizedBox(height: VSpacing.xs),

@@ -38,10 +38,6 @@ class FeatureFlags {
   /// When true, subscriptions verify via the verify-subscription-purchase edge function.
   static bool get receiptEdgeVerify => RemoteConfigService.getBool(
         'receipt_edge_verify',
-        fallback: const bool.fromEnvironment(
-          'RECEIPT_EDGE_VERIFY',
-          defaultValue: false,
-        ),
       );
 
   // ── UI knobs ──
@@ -53,7 +49,7 @@ class FeatureFlags {
       RemoteConfigService.getBool('post_outbox_enabled', fallback: true);
 
   static bool get verboseErrors =>
-      RemoteConfigService.getBool('verbose_errors', fallback: false);
+      RemoteConfigService.getBool('verbose_errors');
 
   // ── Pagination ──
 
@@ -77,21 +73,21 @@ class FeatureFlags {
       final platformKey = defaultTargetPlatform == TargetPlatform.iOS
           ? 'minimum_build_ios'
           : 'minimum_build_android';
-      final platformMin = RemoteConfigService.getInt(platformKey, fallback: 0);
+      final platformMin = RemoteConfigService.getInt(platformKey);
       if (platformMin > 0) return platformMin;
     }
     return RemoteConfigService.getInt('minimum_build', fallback: 1);
   }
 
   static String get maintenanceBanner =>
-      RemoteConfigService.getString('maintenance_banner', fallback: '');
+      RemoteConfigService.getString('maintenance_banner');
 
   /// When > 0 and message non-empty, show one-shot What's New after splash.
   static int get whatsNewBuild =>
-      RemoteConfigService.getInt('whats_new_build', fallback: 0);
+      RemoteConfigService.getInt('whats_new_build');
 
   static String get whatsNewMessage =>
-      RemoteConfigService.getString('whats_new_message', fallback: '');
+      RemoteConfigService.getString('whats_new_message');
 
   /// Beta feedback form URL (Settings).
   static String get betaFeedbackUrl => RemoteConfigService.getString(

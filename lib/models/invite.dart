@@ -69,4 +69,15 @@ class WorldInvite {
     expiresAt: json['expiresAt'],
     createdAt: json['createdAt'] ?? 0,
   );
+
+  static WorldInvite fromSupabase(Map<String, dynamic> data) => WorldInvite(
+    id: data['id']?.toString() ?? '',
+    worldId: data['world_id']?.toString() ?? '',
+    code: data['code']?.toString() ?? '',
+    createdBy: data['created_by']?.toString() ?? '',
+    maxUses: data['max_uses'] as int? ?? 0,
+    uses: data['uses'] as int? ?? 0,
+    expiresAt: data['expires_at'] as int?,
+    createdAt: data['created_at'] as int? ?? 0,
+  );
 }

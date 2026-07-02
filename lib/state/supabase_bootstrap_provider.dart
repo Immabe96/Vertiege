@@ -1,12 +1,15 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/supabase.dart';
 import '../services/supabase_bootstrap.dart';
 
+part 'supabase_bootstrap_provider.g.dart';
+
 /// Whether Supabase finished initializing (or was already ready).
-final supabaseBootstrapProvider = Provider<SupabaseBootstrapResult>((ref) {
+@Riverpod(name: 'supabaseBootstrapProvider', keepAlive: true)
+SupabaseBootstrapResult supabaseBootstrap(Ref ref) {
   if (maybeSupabase() != null) {
     return SupabaseBootstrapResult.ready;
   }
   return SupabaseBootstrap.lastResult;
-});
+}

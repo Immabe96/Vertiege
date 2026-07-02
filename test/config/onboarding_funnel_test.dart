@@ -14,9 +14,8 @@ void main() {
     test('tracks completion', () {
       final resident = _resident();
       final achievements = [
-        UserAchievement(
+        const UserAchievement(
           achievementId: 'a1',
-          status: AchievementStatus.submitted,
           proofUris: ['file://proof.jpg'],
           submittedAt: 1,
         ),

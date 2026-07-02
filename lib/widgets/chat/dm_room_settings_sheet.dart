@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/chat_provider.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/feedback/v_states.dart';
 import '../../ui/overlays/v_sheet.dart';
 import '../../widgets/core/v_feedback.dart';
 
@@ -102,7 +103,7 @@ class _DmRoomSettingsSheetState extends ConsumerState<DmRoomSettingsSheet> {
           ),
           const SizedBox(height: VSpacing.md),
           if (_loading)
-            const Center(child: CircularProgressIndicator())
+            const Center(child: VSpinner())
           else
             ..._options.map(
               (option) => RadioListTile<int?>(
@@ -111,7 +112,7 @@ class _DmRoomSettingsSheetState extends ConsumerState<DmRoomSettingsSheet> {
                 value: option.seconds,
                 groupValue: _selectedSeconds,
                 title: Text(option.label),
-                onChanged: (value) => _select(value),
+                onChanged: _select,
               ),
             ),
         ],

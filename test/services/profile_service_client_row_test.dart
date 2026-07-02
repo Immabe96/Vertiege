@@ -4,12 +4,10 @@ import 'package:vertiege/services/profile_service.dart';
 
 void main() {
   test('client profile row omits tier and sovereign_coins', () {
-    final resident = Resident(
+    final resident = const Resident(
       id: 'u1',
       name: 'Test',
       tier: ResidentTier.apex,
-      bio: '',
-      avatarUrl: '',
       sovereignCoins: 99999,
       gateCompleted: true,
     );

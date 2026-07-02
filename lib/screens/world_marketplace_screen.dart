@@ -19,11 +19,9 @@ import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/worlds/world_admin_breadcrumb.dart';
-import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/new_user_context_hint.dart';
 import '../../widgets/core/quiet_gate_tile.dart';
 import '../../widgets/core/tab_aware_sheet.dart';
-import '../../ui/icons/v_icons.dart';
 
 class WorldMarketplaceScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -418,7 +416,6 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final world = ref.watch(worldProvider).worlds[widget.worldId];
     final isOwner = resident?.id == listing.sellerId;
@@ -433,9 +430,9 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
     final tax = canBuy ? (listing.coinPrice! * taxRate / 100).floor() : 0;
 
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surface,
-        borderRadius: const BorderRadius.vertical(
+      decoration: const BoxDecoration(
+        color: VColors.surfaceContainerDark,
+        borderRadius: BorderRadius.vertical(
           top: Radius.circular(VRadius.xl),
         ),
       ),
@@ -453,11 +450,9 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 200,
-                    color: isDark
-                        ? VColors.surfaceContainerHighDark
-                        : VColors.surfaceContainerHigh,
+                    color: VColors.surfaceContainerHighDark,
                     child: Icon(
                       Icons.image_outlined,
                       size: 48,
@@ -574,18 +569,14 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: VSpacing.sm),
-              FilledButton.icon(
+              VButton(
+                label: 'Buy for ${listing.coinPrice} coins',
+                isFullWidth: true,
+                isLoading: _purchasing,
+                icon: const Icon(Icons.shopping_cart_checkout),
                 onPressed: _purchasing || balance < listing.coinPrice!
                     ? null
                     : _purchase,
-                icon: _purchasing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.shopping_cart_checkout),
-                label: Text('Buy for ${listing.coinPrice} coins'),
               ),
               const SizedBox(height: VSpacing.sm),
             ],
@@ -593,18 +584,19 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
               Semantics(
                 button: true,
                 label: 'Contact seller about ${listing.title}',
-                child: FilledButton.icon(
-                  onPressed: _contactSeller,
+                child: VButton(
+                  label: 'Contact Seller',
+                  isFullWidth: true,
                   icon: const Icon(VIcons.message),
-                  label: const Text('Contact Seller'),
-                  style: FilledButton.styleFrom(
-                    foregroundColor: VColors.onPrimary,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                  ),
+                  onPressed: _contactSeller,
                 ),
               ),
             if (isOwner && listing.status == ListingStatus.active)
-              OutlinedButton.icon(
+              VButton(
+                label: 'Cancel Listing',
+                variant: ButtonVariant.outlined,
+                isFullWidth: true,
+                icon: const Icon(Icons.cancel_outlined),
                 onPressed: () async {
                   final success = await MarketplaceService.cancelListing(
                     listing.id,
@@ -618,12 +610,6 @@ class _ListingDetailSheetState extends ConsumerState<_ListingDetailSheet> {
                     }
                   }
                 },
-                icon: const Icon(Icons.cancel_outlined),
-                label: const Text('Cancel Listing'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: VColors.error,
-                  side: const BorderSide(color: VColors.error),
-                ),
               ),
             if (listing.status == ListingStatus.sold)
               Container(

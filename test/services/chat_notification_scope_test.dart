@@ -16,7 +16,7 @@ void main() {
 
   test('suppresses mention notifications for the active channel', () {
     ChatNotificationScope.setActiveChannel(channelId: 'chan-1');
-    final notification = AppNotification(
+    final notification = const AppNotification(
       id: 'n1',
       type: NotificationType.mention,
       message: 'Ping',

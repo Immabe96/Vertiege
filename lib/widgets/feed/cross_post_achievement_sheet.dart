@@ -9,6 +9,7 @@ import '../../state/chat_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../../ui/overlays/v_sheet.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/feed/badge_reaction_picker.dart';
@@ -231,13 +232,15 @@ class _CrossPostAchievementSheetState
             ],
           ],
           const SizedBox(height: VSpacing.lg),
-          FilledButton(
+          VButton(
             onPressed: _sending ||
                     _selectedWorldId == null ||
                     _selectedChannelId == null
                 ? null
                 : _send,
-            child: Text(_sending ? 'Posting…' : 'Post to channel'),
+            isLoading: _sending,
+            label: 'Post to channel',
+            isFullWidth: true,
           ),
         ],
       ),

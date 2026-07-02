@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vertiege/ui/ui.dart';
 import 'package:go_router/go_router.dart';
@@ -8,23 +7,13 @@ import '../../models/world.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../services/access_control.dart';
-import '../../services/store_service.dart';
 import '../../services/legacy_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
 import '../core/fade_in.dart';
-import '../core/sovereign_card.dart';
-import '../../ui/icons/v_icons.dart';
 import 'world_icon.dart';
 import 'world_banner.dart';
-import '../../widgets/core/v_feedback.dart';
-
-CardTier _getPrestigeTier(int prestige) {
-  if (prestige >= 600) return CardTier.apex;
-  if (prestige >= 300) return CardTier.elite;
-  return CardTier.hustler;
-}
 
 class WorldCard extends ConsumerWidget {
   final World world;
@@ -46,7 +35,6 @@ class WorldCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final resident = ref.watch(residentProvider).resident;
     final isLocked = resident != null && !canAccessWorld(resident, world);
-    final tier = _getPrestigeTier(world.prestige);
     final layout = wide
         ? _WideLayout(world: world, isLocked: isLocked, plainStyle: plainStyle)
         : _SquareLayout(world: world, isLocked: isLocked, plainStyle: plainStyle);
@@ -54,7 +42,7 @@ class WorldCard extends ConsumerWidget {
     if (plainStyle) {
       return FadeIn(
         delayMs: index * 40,
-        child: VSurfaceCard(
+        child: VCard(
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -69,8 +57,7 @@ class WorldCard extends ConsumerWidget {
 
     return FadeIn(
       delayMs: index * 60,
-      child: SovereignCard(
-        tier: tier,
+      child: VPrestigeCard(
         onTap: () => context.push(exploreWorldPath(world.id)),
         child: layout,
       ),
@@ -99,7 +86,6 @@ class _SquareLayout extends StatelessWidget {
       children: [
         _BannerThumbnail(
           world: world,
-          compact: false,
           plainStyle: plainStyle,
         ),
         _CardBody(world: world, isLocked: isLocked),
@@ -156,7 +142,6 @@ class _CardBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final canBoost = false;
     final worldAlliances = ref.watch(worldProvider).alliances
         .where((a) => a.worldId1 == world.id || a.worldId2 == world.id)
         .toList();
@@ -234,39 +219,9 @@ class _CardBody extends ConsumerWidget {
                 ),
             ],
           ),
-          if (canBoost) ...[
-            const SizedBox(height: VSpacing.sm),
-            SizedBox(
-              width: double.infinity,
-              height: VTouchTarget.iconButton,
-              child: OutlinedButton.icon(
-                onPressed: () => _handleBoost(context, ref),
-                icon: const Icon(VIcons.rocket, size: VIconSize.sm),
-                label: const Text('Boost'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: VColors.tertiary,
-                  side: const BorderSide(color: VColors.tertiary),
-                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
-                  textStyle: const TextStyle(fontSize: VFontSize.labelSm),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
-  }
-
-  Future<void> _handleBoost(BuildContext context, WidgetRef ref) async {
-    HapticFeedback.mediumImpact();
-    final result = await ref.read(worldProvider.notifier).boostWorld(world.id);
-    if (!context.mounted) return;
-
-    if (result == StorePurchaseState.purchased) {
-      VFeedback.showMessage(context, '${world.name} boosted! +${World.boostActivityPoints} activity pts — improved Discover ranking.',);
-    } else if (result == StorePurchaseState.error) {
-      VFeedback.showMessage(context, 'Boost failed. Please try again.');
-    }
   }
 }
 

@@ -24,7 +24,6 @@ class ProfileAchievementShowcase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     if (entries.isEmpty) return const SizedBox.shrink();
 
     final featured = entries
@@ -48,7 +47,7 @@ class ProfileAchievementShowcase extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.emoji_events, size: VIconSize.md, color: VColors.tertiary),
+            const Icon(Icons.emoji_events, size: VIconSize.md, color: VColors.tertiary),
             const SizedBox(width: VSpacing.xs),
             Text(
               'Achievements',
@@ -60,9 +59,7 @@ class ProfileAchievementShowcase extends StatelessWidget {
             Text(
               '${entries.length} verified',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: VColors.onSurfaceVariantDark,
               ),
             ),
           ],

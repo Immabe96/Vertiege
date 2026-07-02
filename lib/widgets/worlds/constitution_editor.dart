@@ -35,7 +35,6 @@ class _ConstitutionEditorState extends State<ConstitutionEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +48,6 @@ class _ConstitutionEditorState extends State<ConstitutionEditor> {
         const SizedBox(height: VSpacing.lg),
         _Section(
           title: 'Admission',
-          isDark: isDark,
           child: Column(
             children: [
               _RadioTile(
@@ -112,7 +110,6 @@ class _ConstitutionEditorState extends State<ConstitutionEditor> {
         const SizedBox(height: VSpacing.md),
         _Section(
           title: 'Permissions',
-          isDark: isDark,
           child: Column(
             children: [
               _DropdownTile(
@@ -163,7 +160,6 @@ class _ConstitutionEditorState extends State<ConstitutionEditor> {
         const SizedBox(height: VSpacing.md),
         _Section(
           title: 'Content Types',
-          isDark: isDark,
           child: Wrap(
             spacing: VSpacing.sm,
             runSpacing: VSpacing.sm,
@@ -270,7 +266,6 @@ class _ConstitutionEditorState extends State<ConstitutionEditor> {
         const SizedBox(height: VSpacing.md),
         _Section(
           title: 'Advanced',
-          isDark: isDark,
           child: Column(
             children: [
               _SwitchTile(
@@ -315,10 +310,9 @@ class _ConstitutionEditorState extends State<ConstitutionEditor> {
 
 class _Section extends StatelessWidget {
   final String title;
-  final bool isDark;
   final Widget child;
 
-  const _Section({required this.title, required this.isDark, required this.child});
+  const _Section({required this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +320,7 @@ class _Section extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
       ),
       child: Column(
@@ -334,9 +328,9 @@ class _Section extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: VFontWeight.semiBold,
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: VColors.onSurfaceDark,
             ),
           ),
           const SizedBox(height: VSpacing.sm),

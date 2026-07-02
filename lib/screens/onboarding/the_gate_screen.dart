@@ -12,10 +12,10 @@ import '../../services/invite_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../state/achievement_provider.dart';
 import '../../state/world_provider.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../utils/world_foundations.dart';
 import 'package:vertiege/ui/ui.dart';
 
@@ -294,9 +294,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      backgroundColor: PrestigeNoir.bg,
       body: SafeArea(
         child: Stack(
           children: [
@@ -332,8 +331,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: i <= _stage - 1
-                              ? VColors.tertiary
-                              : (Theme.of(context).colorScheme.outlineVariant),
+                              ? VColors.brand
+                              : PrestigeNoir.border,
                           borderRadius: BorderRadius.circular(VRadius.sm),
                         ),
                       );
@@ -364,7 +363,6 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage1() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(VSpacing.xl),
       child: Column(
@@ -414,21 +412,20 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Welcome to\nthe Realm',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: VFontSize.displayXl,
+              fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-              height: VLineHeight.display,
+              color: PrestigeNoir.foreground,
+              height: VLineHeight.headline,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: VSpacing.lg),
-
-          // ── Subtitle ──────────────────────────────────────
-          Text(
+          const Text(
             'Your sovereign journey begins',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: VFontSize.bodyLg,
-              color: VColors.tertiary,
+              color: VColors.brand,
             ),
           ),
           const SizedBox(height: VSpacing.xs),
@@ -437,8 +434,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: VLineHeight.body,
+              color: PrestigeNoir.muted,
+              height: 1.55,
             ),
           ),
 
@@ -462,7 +459,6 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage2() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.lg,
@@ -479,8 +475,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: PrestigeNoir.foreground,
               height: VLineHeight.headline,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -488,7 +485,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Pick 1-2 signals so Vertiege can route your first world with intent.',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.muted,
+              height: 1.55,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
@@ -549,7 +547,6 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage3() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     // Pick the first selected interest, or default to build
     final interest = _selectedInterests.isNotEmpty
         ? _selectedInterests.first
@@ -578,7 +575,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: PrestigeNoir.foreground,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -586,7 +584,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'This is not a random recommendation. It is your first room, with a charter, roles, rules, and a live general channel.',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.muted,
+              height: 1.55,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
@@ -594,7 +593,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
           // ── World card preview ────────────────────────────
           _Card(
             padding: EdgeInsets.zero,
-            borderRadius: BorderRadius.circular(VRadius.md),
+            borderRadius: BorderRadius.circular(VRadius.bento),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -743,7 +742,6 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
   // ═══════════════════════════════════════════════════════════════
 
   Widget _buildStage4() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.lg,
@@ -760,8 +758,9 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             style: TextStyle(
               fontSize: VFontSize.headlineLg,
               fontWeight: VFontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: PrestigeNoir.foreground,
               height: VLineHeight.headline,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -769,7 +768,8 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             'Pick the first orientation action you want waiting after The Gate.',
             style: TextStyle(
               fontSize: VFontSize.bodyMd,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.muted,
+              height: 1.55,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
@@ -898,7 +898,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: VColors.tertiary.withValues(alpha: opacity),
+              color: VColors.brand.withValues(alpha: opacity),
             ),
           ),
         ),
@@ -918,17 +918,12 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.xl),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        color: PrestigeNoir.surfaceRaised,
+        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.bento),
+        border: Border.all(color: PrestigeNoir.borderLight),
       ),
       child: child,
     );
@@ -982,7 +977,6 @@ class _InterestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - VSpacing.lg * 2 - VSpacing.sm) / 2;
     final glow = interest.glowColor;
@@ -996,12 +990,12 @@ class _InterestCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? glow.withValues(alpha: 0.12)
-              : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(VRadius.md),
+              : PrestigeNoir.surfaceRaised,
+          borderRadius: BorderRadius.circular(VRadius.bento),
           border: Border.all(
             color: isSelected
                 ? glow.withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outlineVariant,
+                : PrestigeNoir.border,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -1046,7 +1040,7 @@ class _InterestCard extends StatelessWidget {
                       : VFontWeight.semiBold,
                   color: isSelected
                       ? glow
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      : PrestigeNoir.muted,
                 ),
               ),
               const SizedBox(height: VSpacing.xs),
@@ -1054,9 +1048,9 @@ class _InterestCard extends StatelessWidget {
                 interest.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.labelMd,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: PrestigeNoir.mutedDim,
                   height: 1.2,
                 ),
               ),
@@ -1089,7 +1083,6 @@ class _GoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -1097,13 +1090,13 @@ class _GoalCard extends StatelessWidget {
         padding: const EdgeInsets.all(VSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? VColors.tertiary.withValues(alpha: 0.12)
-              : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(VRadius.lg),
+              ? VColors.brand.withValues(alpha: 0.12)
+              : PrestigeNoir.surfaceRaised,
+          borderRadius: BorderRadius.circular(VRadius.bento),
           border: Border.all(
             color: isSelected
-                ? VColors.tertiary.withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outlineVariant,
+                ? VColors.brand.withValues(alpha: 0.5)
+                : PrestigeNoir.border,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1113,12 +1106,12 @@ class _GoalCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: VColors.tertiary.withValues(
+                color: VColors.brand.withValues(
                   alpha: isSelected ? 0.25 : 0.08,
                 ),
                 borderRadius: BorderRadius.circular(VRadius.lg),
               ),
-              child: Icon(goal.icon, size: VIconSize.lgMd, color: VColors.tertiary),
+              child: Icon(goal.icon, size: VIconSize.lgMd, color: VColors.brand),
             ),
             const SizedBox(width: VSpacing.md),
             Expanded(
@@ -1132,7 +1125,7 @@ class _GoalCard extends StatelessWidget {
                       fontWeight: isSelected
                           ? VFontWeight.bold
                           : VFontWeight.semiBold,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: PrestigeNoir.foreground,
                     ),
                   ),
                   const SizedBox(height: VSpacing.xs),
@@ -1140,15 +1133,15 @@ class _GoalCard extends StatelessWidget {
                     '+${goal.xp} XP bonus',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: VColors.tertiary.withValues(alpha: 0.8),
+                      color: VColors.brand.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(height: VSpacing.xs),
                   Text(
                     goal.description,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.labelMd,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: PrestigeNoir.muted,
                       height: 1.2,
                     ),
                   ),
@@ -1156,7 +1149,7 @@ class _GoalCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(VIcons.badgeCheck, size: VIconSize.lgMd, color: VColors.tertiary),
+              const Icon(VIcons.badgeCheck, size: VIconSize.lgMd, color: VColors.brand),
           ],
         ),
       ),

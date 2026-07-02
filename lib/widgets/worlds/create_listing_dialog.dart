@@ -11,6 +11,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../../ui/buttons/v_button.dart';
 import '../core/new_user_context_hint.dart';
 
 class CreateListingDialog extends ConsumerStatefulWidget {
@@ -132,17 +133,16 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Dialog(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(VSpacing.lg),
         decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceContainerDark : VColors.surface,
+          color: VColors.surfaceContainerDark,
           borderRadius: BorderRadius.circular(VRadius.xl),
           border: Border.all(
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            color: VColors.glassBorderDark,
           ),
         ),
         child: Form(
@@ -222,7 +222,6 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
                     hintText: 'e.g. Negotiable, DM for price',
                     border: OutlineInputBorder(),
                   ),
-                  maxLines: 1,
                 ),
                 const SizedBox(height: VSpacing.md),
                 TextFormField(
@@ -255,14 +254,13 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
                   },
                 ),
                 const SizedBox(height: VSpacing.md),
-                OutlinedButton.icon(
-                  onPressed: _pickImage,
+                VButton(
+                  label: _imagePath != null
+                      ? 'Image selected'
+                      : 'Upload Image (optional)',
                   icon: const Icon(Icons.image_outlined),
-                  label: Text(
-                    _imagePath != null
-                        ? 'Image selected'
-                        : 'Upload Image (optional)',
-                  ),
+                  variant: ButtonVariant.outlined,
+                  onPressed: _pickImage,
                 ),
                 if (_imagePath != null) ...[
                   const SizedBox(height: VSpacing.sm),
@@ -277,15 +275,10 @@ class _CreateListingDialogState extends ConsumerState<CreateListingDialog> {
                   ),
                 ],
                 const SizedBox(height: VSpacing.lg),
-                FilledButton(
+                VButton(
+                  label: 'Create Listing',
+                  isLoading: _isSubmitting,
                   onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Create Listing'),
                 ),
               ],
             ),

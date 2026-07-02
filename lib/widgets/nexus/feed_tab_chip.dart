@@ -19,7 +19,6 @@ class FeedTabChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -29,12 +28,12 @@ class FeedTabChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? VColors.primary.withValues(alpha: 0.18)
-              : (isDark ? VColors.glassBackgroundDark : VColors.glassBackground),
+              : VColors.glassBackgroundDark,
           borderRadius: BorderRadius.circular(VRadius.pill),
           border: Border.all(
             color: selected
                 ? VColors.primary.withValues(alpha: 0.35)
-                : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
+                : VColors.glassBorderDark,
           ),
         ),
         child: Row(
@@ -44,7 +43,7 @@ class FeedTabChip extends StatelessWidget {
               Icon(
                 icon,
                 size: VIconSize.denseSm,
-                color: selected ? VColors.primary : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+                color: selected ? VColors.primary : VColors.onSurfaceVariantDark,
               ),
               const SizedBox(width: 4),
             ],
@@ -52,8 +51,8 @@ class FeedTabChip extends StatelessWidget {
               label,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: selected
-                    ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
-                    : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+                    ? VColors.onSurfaceDark
+                    : VColors.onSurfaceVariantDark,
                 fontWeight: selected ? VFontWeight.semiBold : FontWeight.normal,
               ),
             ),

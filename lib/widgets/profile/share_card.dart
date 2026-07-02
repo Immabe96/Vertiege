@@ -40,7 +40,12 @@ class _ShareCardState extends State<ShareCard> {
     final pngBytes = byteData.buffer.asUint8List();
     final tempFile = await _writeTempFile(pngBytes);
     if (tempFile != null) {
-      await Share.shareXFiles([XFile(tempFile)], text: 'Check out my profile!');
+      try {
+        await Share.shareXFiles([XFile(tempFile)], text: 'Check out my profile!');
+      } finally {
+        final file = File(tempFile);
+        if (await file.exists()) await file.delete();
+      }
     }
   }
 

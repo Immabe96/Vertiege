@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -28,8 +28,8 @@ class ChatImage extends StatelessWidget {
         barrierColor: Colors.black,
         transitionDuration: const Duration(milliseconds: 250),
         reverseTransitionDuration: const Duration(milliseconds: 200),
-        pageBuilder: (_, __, ___) => _FullScreenImageViewer(url: url),
-        transitionsBuilder: (_, animation, __, child) {
+        pageBuilder: (_, _, _) => _FullScreenImageViewer(url: url),
+        transitionsBuilder: (_, animation, _, child) {
           return FadeTransition(opacity: animation, child: child);
         },
       ),

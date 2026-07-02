@@ -3,8 +3,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
-import '../../widgets/identity/honour_stat_chip.dart';
-import '../../models/achievement.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../services/auth_service.dart';
@@ -13,35 +11,25 @@ import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../state/achievement_provider.dart';
-import '../../state/quest_provider.dart';
 import '../../state/post_provider.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
+import '../../ui/overlays/v_dialog.dart';
 import '../../utils/haptics.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
-import '../../ui/buttons/v_button.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
-import '../../widgets/profile/badge_display.dart';
 import '../../widgets/profile/edit_profile_sheet.dart';
 import '../../state/ally_provider.dart';
 import '../../widgets/shared/progress_bar.dart';
 import '../../router/search_navigation.dart';
-import '../../widgets/profile/streak_display.dart';
 import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/subscription_badge.dart';
-import '../../widgets/achievements/achievement_queue_summary.dart';
-import '../../widgets/profile/trophy_case.dart';
 import '../../utils/presence_utils.dart';
 import '../../widgets/core/status_dot.dart';
-import '../../widgets/profile/trophy_case_sheet.dart';
-import '../../widgets/profile/featured_achievements_sheet.dart';
 import '../../services/resident_status_service.dart';
 import '../../widgets/profile/status_picker.dart';
-import '../../config/achievements.dart' as ach_config;
-import '../../widgets/achievements/achievement_category_meta.dart';
-import '../../widgets/achievements/achievement_icon.dart';
 import '../../utils/profile_share.dart';
 import '../../router/world_navigation.dart';
 import '../../widgets/core/screen_loading.dart';
@@ -57,12 +45,12 @@ import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/onboarding_funnel_sync.dart';
 import '../../config/identity_verification.dart';
 import '../../widgets/identity/identity_verification_card.dart';
+import '../../widgets/identity/streak_stats_row.dart';
 import '../../widgets/onboarding/first_steps_card.dart';
-import '../../config/achievements.dart';
+import '../../widgets/profile/achievement_trophy_wall.dart';
 import '../../config/progression_glossary.dart';
+import '../../config/achievements.dart';
 import '../../widgets/core/progression_help_button.dart';
-import '../../config/cosmetics.dart';
-import '../../widgets/core/v_feedback.dart';
 
 /// Refreshes honour-wall data (resident, achievements, posts).
 ///
@@ -107,7 +95,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   bool _funnelOpenedWorld = false;
   bool _funnelOpenedNexus = false;
   bool _tierPerksExpanded = false;
-  bool _progressionExpanded = false;
+  bool _progressionExpanded = true;
   static const double _avatarRadius = 48;
 
   Widget _wrapShell({
@@ -185,34 +173,32 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     super.dispose();
   }
 
-  void _confirmSignOut() {
-    showDialog(
+  Future<void> _confirmSignOut() async {
+    final confirmed = await showVDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(VRadius.xl),
-        ),
-        title: const Text('Sign out?'),
-        content: const Text(
-          'You\'ll need to sign in again to access your worlds and progress.',
-        ),
-        actions: [
+      title: 'Sign out?',
+      content: const Text(
+        'You\'ll need to sign in again to access your worlds and progress.',
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => Navigator.pop(context, false),
             variant: ButtonVariant.text,
           ),
           VButton(
             label: 'Sign Out',
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await AuthService.signOut(ref: ref);
-              if (mounted) context.go('/login');
-            },
+            onPressed: () => Navigator.pop(context, true),
           ),
-        ],
-      ),
+        ]),
+      ],
     );
+
+    if (confirmed == true) {
+      await AuthService.signOut(ref: ref);
+      if (mounted) context.go('/login');
+    }
   }
 
   void _showEditProfileSheet(Resident resident) {
@@ -242,7 +228,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final updated = await showStatusPicker(context, current: current);
     if (updated == null || !mounted) return;
     await ResidentStatusService.upsertStatus(updated);
-    await ref.read(residentProvider.notifier).updateResidentStatus(
+    await ref
+        .read(residentProvider.notifier)
+        .updateResidentStatus(
           presenceMode: ResidentStatusService.presenceModeStorage(
             updated.presence,
           ),
@@ -256,7 +244,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     int currentXp,
     int tierValue,
   ) {
-    final brightness = Theme.of(context).brightness;
     final presence = presenceFromStatusFields(
       presenceMode: resident.presenceMode,
       lastSeenRaw: resident.lastSeenAt,
@@ -272,11 +259,14 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
         : statusLabel;
 
     return Material(
-      color: VCommuneColors.surfaceSecondaryOf(brightness),
-      borderRadius: BorderRadius.circular(VRadius.lg),
+      color: PrestigeNoir.surfaceRaised,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(VRadius.bento),
+        side: const BorderSide(color: PrestigeNoir.borderLight),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _showEditProfileSheet(resident),
-        borderRadius: BorderRadius.circular(VRadius.lg),
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
@@ -301,13 +291,12 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                               child: LuminaryNameplate(
                                 name: resident.name,
                                 tier: tierValue,
-                                fontSize: VFontSize.bodyLg,
                                 title: resident.title,
                               ),
                             ),
                             if (IdentityVerification.isVerified(resident)) ...[
                               const SizedBox(width: VSpacing.xs),
-                              Tooltip(
+                              const Tooltip(
                                 message: 'Verified resident',
                                 child: Icon(
                                   VIcons.badgeCheck,
@@ -321,18 +310,18 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                         const SizedBox(height: VSpacing.xxs),
                         Text(
                           resident.tier.label,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: VFontSize.labelSm,
-                            color: VCommuneColors.textMutedOf(brightness),
+                            color: PrestigeNoir.muted,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.edit_outlined,
                     size: VIconSize.md,
-                    color: VCommuneColors.textMutedOf(brightness),
+                    color: PrestigeNoir.muted,
                   ),
                 ],
               ),
@@ -349,25 +338,25 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       Expanded(
                         child: Text(
                           statusText,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: VFontSize.labelSm,
-                            color: VCommuneColors.textMutedOf(brightness),
+                            color: PrestigeNoir.muted,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.edit_outlined,
                         size: VIconSize.sm,
-                        color: VCommuneColors.textMutedOf(brightness),
+                        color: PrestigeNoir.muted,
                       ),
                       const SizedBox(width: VSpacing.sm),
                       Text(
                         '${resident.sovereignCoins} coins',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: VFontSize.labelSm,
-                          color: VCommuneColors.textLinkOf(brightness),
+                          color: VColors.brand,
                           fontWeight: VFontWeight.semiBold,
                         ),
                       ),
@@ -376,136 +365,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeaturedAchievementsStrip(
-    List<UserAchievement> userAchievements,
-  ) {
-    final featured = userAchievements
-        .where((a) => a.status == AchievementStatus.verified)
-        .where((a) => a.featuredOrder != null && a.featuredOrder! <= 3)
-        .toList()
-      ..sort((a, b) => (a.featuredOrder ?? 99).compareTo(b.featuredOrder ?? 99));
-    if (featured.isEmpty) return const SizedBox.shrink();
-
-    return SizedBox(
-      height: 88,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-        itemCount: featured.length,
-        separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
-        itemBuilder: (context, index) {
-          final ua = featured[index];
-          final ach = ach_config.achievementForId(ua.achievementId);
-          if (ach == null) return const SizedBox.shrink();
-          final meta = metaForCategory(ach.category);
-          final brightness = Theme.of(context).brightness;
-          return Material(
-            color: VCommuneColors.surfaceSecondaryOf(brightness),
-            borderRadius: BorderRadius.circular(VRadius.md),
-            child: InkWell(
-              onTap: () => context.push('/achievements'),
-              borderRadius: BorderRadius.circular(VRadius.md),
-              child: Padding(
-                padding: const EdgeInsets.all(VSpacing.sm),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AchievementBadgeAvatar(
-                      achievement: ach,
-                      accentColor: meta.color,
-                      size: 40,
-                      showEarnedBadge: true,
-                    ),
-                    const SizedBox(width: VSpacing.xs),
-                    SizedBox(
-                      width: 96,
-                      child: Text(
-                        ach.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: VFontSize.labelSm,
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSeasonProgressChip(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final seasonEnd = DateTime.utc(2026, 12, 31);
-    final daysLeft = seasonEnd.difference(DateTime.now().toUtc()).inDays;
-    final progressLabel = daysLeft > 0 ? '$daysLeft days left' : 'Season ending';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        VSpacing.md,
-        VSpacing.sm,
-        VSpacing.md,
-        0,
-      ),
-      child: Material(
-        color: VCommuneColors.surfaceSecondaryOf(brightness),
-        borderRadius: BorderRadius.circular(VRadius.pill),
-        child: InkWell(
-          onTap: () => context.push('/season'),
-          borderRadius: BorderRadius.circular(VRadius.pill),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: VSpacing.md,
-              vertical: VSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.emoji_events_outlined,
-                  size: VIconSize.sm,
-                  color: VColors.tertiary,
-                ),
-                const SizedBox(width: VSpacing.xs),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Season 1: The Big Bang',
-                        style: TextStyle(
-                          fontSize: VFontSize.labelSm,
-                          fontWeight: VFontWeight.semiBold,
-                          color: VCommuneColors.headerSecondaryOf(brightness),
-                        ),
-                      ),
-                      Text(
-                        progressLabel,
-                        style: TextStyle(
-                          fontSize: VFontSize.labelSm,
-                          color: VCommuneColors.textMutedOf(brightness),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  size: VIconSize.sm,
-                  color: VCommuneColors.textMutedOf(brightness),
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -552,20 +411,12 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final residentState = ref.watch(residentProvider);
     final resident = residentState.resident;
     final achievements = ref.watch(achievementProvider);
-    final questState = ref.watch(questProvider);
-    final incompleteQuests = questState.quests
-        .where((q) => !q.isComplete)
-        .length;
-    final questNudge = incompleteQuests > 0
-        ? 'Finish today\'s daily quests to keep momentum.'
-        : null;
     if (!_funnelOpenedWorld || !_funnelOpenedNexus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _loadFunnelPrefs();
       });
     }
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     ref.listen<ResidentState>(residentProvider, (prev, next) {
       if (prev?.resident != null &&
           next.resident != null &&
@@ -601,15 +452,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     }
     _previousXp = currentXp;
 
-    final verifiedAchievementCount = achievements.userAchievements
-        .where((a) => a.status == AchievementStatus.verified)
-        .length;
     final allyCount = ref.watch(allyProvider).allies.length;
-
-    final totalRep = resident.worldStandings.values.fold<int>(
-      0,
-      (sum, ws) => sum + ws.rep,
-    );
 
     final tierValue = resident.tier.value;
     final nextTierValue = tierValue + 1;
@@ -638,22 +481,22 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
     final headerActions = [
       VAccessibleHeaderAction(
         label: 'Preview public profile',
-        icon: Icon(VIcons.user),
+        icon: const Icon(VIcons.user),
         onPress: () => context.push(residentProfilePath(resident.id)),
       ),
       VAccessibleHeaderAction(
         label: 'Search residents',
-        icon: Icon(VIcons.search),
+        icon: const Icon(VIcons.search),
         onPress: () => openGlobalSearch(context),
       ),
       VAccessibleHeaderAction(
         label: 'Refresh honour wall',
-        icon: Icon(VIcons.rotateCw),
+        icon: const Icon(VIcons.rotateCw),
         onPress: refreshHonourWall,
       ),
       VAccessibleHeaderAction(
         label: 'Settings',
-        icon: Icon(VIcons.settings),
+        icon: const Icon(VIcons.settings),
         onPress: () => context.push('/settings'),
       ),
     ];
@@ -713,209 +556,230 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ),
               const SizedBox(height: VSpacing.sm),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                child: StreakStatsRow(
+                  streakCount: resident.streakCount,
+                  streakShields: resident.streakShields,
+                ),
+              ),
+              const SizedBox(height: VSpacing.md),
             ] else
-            Container(
-              padding: const EdgeInsets.all(VSpacing.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Avatar with tier-colored glow
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                          blurRadius: 24,
-                          spreadRadius: 4,
+              Container(
+                padding: const EdgeInsets.all(VSpacing.lg),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Avatar with tier-colored glow
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.2),
+                            blurRadius: 24,
+                            spreadRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Hero(
+                        tag: 'avatar-${resident.id}',
+                        child: CosmeticAvatar(
+                          totalXp: currentXp,
+                          size: _avatarRadius * 2,
+                          imageUrl: resident.avatarUrl,
+                          seed: resident.id,
                         ),
-                      ],
-                    ),
-                    child: Hero(
-                      tag: 'avatar-${resident.id}',
-                      child: CosmeticAvatar(
-                        totalXp: currentXp,
-                        size: _avatarRadius * 2,
-                        imageUrl: resident.avatarUrl,
-                        seed: resident.id,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: VSpacing.md),
+                    const SizedBox(height: VSpacing.md),
 
-                  // Name with tier badge
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.center,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: constraints.maxWidth,
+                    // Name with tier badge
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: constraints.maxWidth,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                LuminaryNameplate(
+                                  name: resident.name,
+                                  tier: resident.tier.value,
+                                  fontSize: VFontSize.headlineMd,
+                                  textAlign: TextAlign.center,
+                                  title: resident.title,
+                                ),
+                                const SizedBox(width: VSpacing.sm),
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        context.push('/ascension-path'),
+                                    borderRadius: BorderRadius.circular(
+                                      VRadius.pill,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: VSpacing.sm,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(
+                                          VRadius.pill,
+                                        ),
+                                        border: Border.all(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          TierIcon(tier: tierValue, size: 18),
+                                          const SizedBox(width: VSpacing.xxs),
+                                          Text(
+                                            resident.tier.label,
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
+                                                  fontWeight: VFontWeight.bold,
+                                                ),
+                                          ),
+                                          const SizedBox(width: VSpacing.xxs),
+                                          Icon(
+                                            Icons.chevron_right,
+                                            size: VIconSize.denseSm,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withValues(alpha: 0.8),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                    // Top X% indicator
+                    if (tierValue >= 2)
+                      Padding(
+                        padding: const EdgeInsets.only(top: VSpacing.xs),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: VColors.tertiary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(VRadius.pill),
+                            border: Border.all(
+                              color: VColors.tertiary.withValues(alpha: 0.25),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              LuminaryNameplate(
-                                name: resident.name,
-                                tier: resident.tier.value,
-                                fontSize: VFontSize.headlineMd,
-                                textAlign: TextAlign.center,
-                                title: resident.title,
+                              const Icon(
+                                Icons.emoji_events,
+                                size: VIconSize.xs,
+                                color: VColors.tertiary,
                               ),
-                              const SizedBox(width: VSpacing.sm),
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => context.push('/ascension-path'),
-                                  borderRadius: BorderRadius.circular(
-                                    VRadius.pill,
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: VSpacing.sm,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primary.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        VRadius.pill,
-                                      ),
-                                      border: Border.all(
-                                        color: Theme.of(context).colorScheme.primary.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TierIcon(tier: tierValue, size: 18),
-                                        const SizedBox(width: VSpacing.xxs),
-                                        Text(
-                                          resident.tier.label,
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                color: Theme.of(context).colorScheme.primary,
-                                                fontWeight: VFontWeight.bold,
-                                              ),
-                                        ),
-                                        const SizedBox(width: VSpacing.xxs),
-                                        Icon(
-                                          Icons.chevron_right,
-                                          size: VIconSize.denseSm,
-                                          color: Theme.of(context).colorScheme.primary.withValues(
-                                            alpha: 0.8,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                              const SizedBox(width: VSpacing.xxs),
+                              Text(
+                                _topPercentLabel(tierValue),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: VColors.tertiary,
+                                  fontWeight: VFontWeight.semiBold,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
 
-                  // Top X% indicator
-                  if (tierValue >= 2)
-                    Padding(
-                      padding: const EdgeInsets.only(top: VSpacing.xs),
-                      child: Container(
+                    // Subscription badge
+                    if (_subscriptionTier != SubscriptionTier.resident)
+                      Padding(
+                        padding: const EdgeInsets.only(top: VSpacing.xs),
+                        child: SubscriptionBadge(tier: _subscriptionTier),
+                      ),
+
+                    // Bio
+                    if (resident.bio.isNotEmpty) ...[
+                      const SizedBox(height: VSpacing.md),
+                      Text(
+                        resident.bio,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+
+                    // Profession
+                    if (resident.profession != null &&
+                        resident.profession!.isNotEmpty) ...[
+                      const SizedBox(height: VSpacing.sm),
+                      Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: VSpacing.sm,
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: VColors.tertiary.withValues(alpha: 0.12),
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(VRadius.pill),
                           border: Border.all(
-                            color: VColors.tertiary.withValues(alpha: 0.25),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.emoji_events,
-                              size: VIconSize.xs,
-                              color: VColors.tertiary,
+                            ProfessionIcon(
+                              profession: resident.profession,
+                              size: VBadgeSize.professionInline,
+                              fallbackColor: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: VSpacing.xxs),
                             Text(
-                              _topPercentLabel(tierValue),
+                              resident.profession!,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: VColors.tertiary,
-                                fontWeight: VFontWeight.semiBold,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-
-                  // Subscription badge
-                  if (_subscriptionTier != SubscriptionTier.resident)
-                    Padding(
-                      padding: const EdgeInsets.only(top: VSpacing.xs),
-                      child: SubscriptionBadge(tier: _subscriptionTier),
-                    ),
-
-                  // Bio
-                  if (resident.bio.isNotEmpty) ...[
-                    const SizedBox(height: VSpacing.md),
-                    Text(
-                      resident.bio,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                    ],
                   ],
-
-                  // Profession
-                  if (resident.profession != null &&
-                      resident.profession!.isNotEmpty) ...[
-                    const SizedBox(height: VSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: VSpacing.sm,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(VRadius.pill),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ProfessionIcon(
-                            profession: resident.profession,
-                            size: VBadgeSize.professionInline,
-                            fallbackColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: VSpacing.xxs),
-                          Text(
-                            resident.profession!,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
 
             if (!_funnelDismissed &&
                 !OnboardingFunnel.isComplete(
@@ -948,6 +812,22 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             ),
             const SizedBox(height: VSpacing.lg),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(title: 'Trophy wall', theme: theme),
+                  const SizedBox(height: VSpacing.sm),
+                  AchievementTrophyWall(
+                    achievements: achievements.userAchievements,
+                    maxVisible: 8,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: VSpacing.lg),
+
             InkWell(
               onTap: () =>
                   setState(() => _progressionExpanded = !_progressionExpanded),
@@ -964,7 +844,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                       _progressionExpanded
                           ? Icons.expand_less
                           : Icons.expand_more,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -973,87 +853,88 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             if (_progressionExpanded) ...[
               const SizedBox(height: VSpacing.sm),
               Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: Container(
-                padding: const EdgeInsets.all(VSpacing.md),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? VColors.surfaceContainerDark
-                      : VColors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(VRadius.lg),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+                child: Container(
+                  padding: const EdgeInsets.all(VSpacing.md),
+                  decoration: BoxDecoration(
+                    color: VColors.surfaceContainerDark,
+                    borderRadius: BorderRadius.circular(VRadius.lg),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    ),
                   ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        TierIcon(tier: tierValue, size: VIconSize.lg),
-                        const SizedBox(width: VSpacing.sm),
-                        Text(
-                          resident.tier.label,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: VFontWeight.semiBold,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          TierIcon(tier: tierValue),
+                          const SizedBox(width: VSpacing.sm),
+                          Text(
+                            resident.tier.label,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: VFontWeight.semiBold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: VSpacing.sm),
-                    SovereignProgressBar(
-                      progress: tierProgress,
-                      color: Theme.of(context).colorScheme.primary,
-                      label: resident.tier.label,
-                      trailing: nextThreshold != null ? nextTierName : 'Max',
-                    ),
-                    const SizedBox(height: VSpacing.xs),
-                    Text(
-                      ProgressionGlossary.xpToNextTier(currentXp, tierValue),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ],
                       ),
-                    ),
-                    InkWell(
-                      onTap: () => setState(
-                        () => _tierPerksExpanded = !_tierPerksExpanded,
+                      const SizedBox(height: VSpacing.sm),
+                      SovereignProgressBar(
+                        progress: tierProgress,
+                        color: VColors.brand,
+                        label: resident.tier.label,
+                        trailing: nextThreshold != null ? nextTierName : 'Max',
                       ),
-                      borderRadius: BorderRadius.circular(VRadius.sm),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: VSpacing.sm,
+                      const SizedBox(height: VSpacing.xs),
+                      Text(
+                        ProgressionGlossary.xpToNextTier(currentXp, tierValue),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Tier perks',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: VFontWeight.semiBold,
+                      ),
+                      InkWell(
+                        onTap: () => setState(
+                          () => _tierPerksExpanded = !_tierPerksExpanded,
+                        ),
+                        borderRadius: BorderRadius.circular(VRadius.sm),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: VSpacing.sm,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Tier perks',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: VFontWeight.semiBold,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Icon(
-                              _tierPerksExpanded
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ],
+                              Icon(
+                                _tierPerksExpanded
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    if (_tierPerksExpanded)
-                      _PerksCard(
-                        tier: tierValue,
-                        isDark: isDark,
-                        showHeader: false,
-                      ),
-                  ],
+                      if (_tierPerksExpanded)
+                        _PerksCard(
+                          tier: tierValue,
+                          showHeader: false,
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
               const SizedBox(height: VSpacing.xl),
             ],
 
@@ -1063,15 +944,23 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => _showEditProfileSheet(resident),
+                    child: VButton(
+                      label: 'Edit Profile',
                       icon: const Icon(VIcons.edit, size: VIconSize.md),
-                      label: const Text('Edit Profile'),
+                      isFullWidth: true,
+                      onPressed: () => _showEditProfileSheet(resident),
                     ),
                   ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: VButton(
+                      label: 'Share',
+                      icon: const Icon(
+                        Icons.share_outlined,
+                        size: VIconSize.md,
+                      ),
+                      variant: ButtonVariant.outlined,
+                      isFullWidth: true,
                       onPressed: () {
                         final referralCode = resident.referralCode.isNotEmpty
                             ? resident.referralCode
@@ -1091,11 +980,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                           ),
                         );
                       },
-                      icon: const Icon(
-                        Icons.share_outlined,
-                        size: VIconSize.md,
-                      ),
-                      label: const Text('Share'),
                     ),
                   ),
                 ],
@@ -1122,7 +1006,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.auto_awesome,
                             size: VIconSize.md,
                             color: VColors.tertiary,
@@ -1155,7 +1039,9 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                               Text(
                                 world['name'] as String,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               Text(
@@ -1311,7 +1197,7 @@ class _SectionHeader extends StatelessWidget {
               ),
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
@@ -1320,12 +1206,10 @@ class _SectionHeader extends StatelessWidget {
 
 class _PerksCard extends ConsumerWidget {
   final int tier;
-  final bool isDark;
   final bool showHeader;
 
   const _PerksCard({
     required this.tier,
-    required this.isDark,
     this.showHeader = true,
   });
 
@@ -1341,7 +1225,7 @@ class _PerksCard extends ConsumerWidget {
     final hasLounge = tier >= 3;
     final hasVote = tier >= 4;
 
-    Widget _tile(IconData icon, String title, String value) {
+    Widget tile(IconData icon, String title, String value) {
       return Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: VSpacing.md,
@@ -1362,9 +1246,7 @@ class _PerksCard extends ConsumerWidget {
             Text(
               value,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: VFontWeight.semiBold,
               ),
             ),
@@ -1373,7 +1255,7 @@ class _PerksCard extends ConsumerWidget {
       );
     }
 
-    Widget _divider() {
+    Widget divider() {
       return Divider(
         height: 1,
         indent: VSpacing.lg + VSpacing.sm,
@@ -1384,31 +1266,31 @@ class _PerksCard extends ConsumerWidget {
     final perksTiles = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _tile(
+        tile(
           Icons.trending_up,
           'XP Multiplier',
           'x${multiplier.toStringAsFixed(2)}',
         ),
-        _divider(),
-        _tile(Icons.monetization_on, 'Daily Coin Bonus', '+$coinBonus'),
-        _divider(),
-        _tile(Icons.emoji_emotions, 'Custom Reactions', '$reactionSlots slots'),
-        _divider(),
-        _tile(
+        divider(),
+        tile(Icons.monetization_on, 'Daily Coin Bonus', '+$coinBonus'),
+        divider(),
+        tile(Icons.emoji_emotions, 'Custom Reactions', '$reactionSlots slots'),
+        divider(),
+        tile(
           Icons.push_pin,
           'Post Pins',
           pinLimit > 0 ? '$pinLimit available' : 'Locked',
         ),
-        _divider(),
-        _tile(Icons.language, 'World Creation', '$worldLimit worlds'),
-        _divider(),
-        _tile(
+        divider(),
+        tile(Icons.language, 'World Creation', '$worldLimit worlds'),
+        divider(),
+        tile(
           Icons.local_bar,
           'Lounge Access',
           hasLounge ? 'Unlocked' : 'Locked',
         ),
-        _divider(),
-        _tile(
+        divider(),
+        tile(
           Icons.how_to_vote,
           'Governance Vote',
           hasVote ? 'Unlocked' : 'Locked',
@@ -1422,12 +1304,12 @@ class _PerksCard extends ConsumerWidget {
 
     final perksBody = Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.2),
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.2),
         ),
       ),
       child: perksTiles,
@@ -1450,9 +1332,7 @@ class _PerksCard extends ConsumerWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: VFontWeight.bold,
                 letterSpacing: 0.5,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

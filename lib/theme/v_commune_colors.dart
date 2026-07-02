@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'v_colors.dart';
+import 'prestige_noir.dart';
 
-/// Discord-style surface ladder for Commune chat surfaces.
-/// See docs/reference/DESIGN.md.
+/// Commune chat surface ladder — aligned with Prestige Noir (dark-only app).
 abstract final class VCommuneColors {
-  // --- Dark ladder (Snapchat-pure black) ---
-  static const Color surfacePrimary = Color(0xFF121212);
-  static const Color surfaceSecondary = Color(0xFF1A1A1A);
-  static const Color surfaceSecondaryAlt = Color(0xFF222222);
-  static const Color surfaceTertiary = Color(0xFF0A0A0A);
-  static const Color surfaceFloating = Color(0xFF000000);
-  static const Color textNormal = Color(0xFFDBDEE1);
-  static const Color textMuted = Color(0xFF949BA4);
-  static const Color headerPrimary = Color(0xFFF2F3F5);
-  static const Color headerSecondary = Color(0xFFB5BAC1);
+  // --- Dark ladder (Prestige Noir) ---
+  static const Color surfacePrimary = PrestigeNoir.bg;
+  static const Color surfaceSecondary = PrestigeNoir.surface;
+  static const Color surfaceSecondaryAlt = PrestigeNoir.surfaceRaised;
+  static const Color surfaceTertiary = PrestigeNoir.chrome;
+  static const Color surfaceFloating = PrestigeNoir.bg;
+  static const Color textNormal = PrestigeNoir.foreground;
+  static const Color textMuted = PrestigeNoir.muted;
+  static const Color headerPrimary = PrestigeNoir.foreground;
+  static const Color headerSecondary = PrestigeNoir.mutedDim;
   static const Color textLink = Color(0xFF00A8FC);
 
   /// @mentions — brand accent, not link blue.
@@ -54,35 +54,25 @@ abstract final class VCommuneColors {
   static Color dividerSubtle = Colors.white.withValues(alpha: 0.10);
   static Color dividerSubtleLight = Colors.black.withValues(alpha: 0.08);
 
-  static Color surfacePrimaryOf(Brightness brightness) =>
-      brightness == Brightness.dark ? surfacePrimary : surfacePrimaryLight;
+  static Color surfacePrimaryOf(Brightness brightness) => surfacePrimary;
 
-  static Color textNormalOf(Brightness brightness) =>
-      brightness == Brightness.dark ? textNormal : textNormalLight;
+  static Color textNormalOf(Brightness brightness) => textNormal;
 
-  static Color textMutedOf(Brightness brightness) =>
-      brightness == Brightness.dark ? textMuted : textMutedLight;
+  static Color textMutedOf(Brightness brightness) => textMuted;
 
-  static Color headerPrimaryOf(Brightness brightness) =>
-      brightness == Brightness.dark ? headerPrimary : headerPrimaryLight;
+  static Color headerPrimaryOf(Brightness brightness) => headerPrimary;
 
-  static Color dividerOf(Brightness brightness) =>
-      brightness == Brightness.dark ? dividerSubtle : dividerSubtleLight;
+  static Color dividerOf(Brightness brightness) => dividerSubtle;
 
   static Color textLinkOf(Brightness brightness) =>
       brightness == Brightness.dark ? textLink : textLinkLight;
 
-  static Color surfaceSecondaryOf(Brightness brightness) =>
-      brightness == Brightness.dark ? surfaceSecondary : surfaceSecondaryLight;
+  static Color surfaceSecondaryOf(Brightness brightness) => surfaceSecondary;
 
   static Color surfaceSecondaryAltOf(Brightness brightness) =>
-      brightness == Brightness.dark
-          ? surfaceSecondaryAlt
-          : surfaceSecondaryAltLight;
+      surfaceSecondaryAlt;
 
-  static Color surfaceTertiaryOf(Brightness brightness) =>
-      brightness == Brightness.dark ? surfaceTertiary : surfaceTertiaryLight;
+  static Color surfaceTertiaryOf(Brightness brightness) => surfaceTertiary;
 
-  static Color headerSecondaryOf(Brightness brightness) =>
-      brightness == Brightness.dark ? headerSecondary : headerSecondaryLight;
+  static Color headerSecondaryOf(Brightness brightness) => headerSecondary;
 }

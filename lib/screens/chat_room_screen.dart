@@ -16,8 +16,8 @@ import '../services/chat_density_prefs.dart';
 import '../state/chat_density_provider.dart';
 import '../state/chat_provider.dart';
 import '../state/resident_provider.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
-import '../theme/v_commune_chat_theme.dart';
 import '../theme/v_tokens.dart';
 import '../utils/chat_new_since_visit.dart';
 import '../utils/presence_utils.dart';
@@ -36,7 +36,6 @@ import '../widgets/chat/v_achievement_attachment.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/core/status_dot.dart';
 import '../widgets/core/empty_state.dart';
-import '../widgets/core/v_feedback.dart';
 import '../widgets/chat/dm_room_settings_sheet.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
@@ -276,7 +275,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     super.deactivate();
   }
 
-  @override
   Future<void> _refreshPartnerRead() async {
     final resident = ref.read(residentProvider).resident;
     final rooms = ref.read(chatProvider).dmRooms;
@@ -333,10 +331,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     return latest?.id;
   }
 
+  @override
   void dispose() {
-    unawaited(_partnerPresenceChannel?.unsubscribe());
+    _partnerPresenceChannel?.unsubscribe();
     _partnerPresenceChannel = null;
-    unawaited(_partnerReadChannel?.unsubscribe());
+    _partnerReadChannel?.unsubscribe();
     _partnerReadChannel = null;
     _controller.dispose();
     _scrollController.removeListener(_onScroll);
@@ -544,7 +543,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final messages = ref.watch(dmRoomMessagesProvider(widget.roomId));
     final messagesLoadError = ref.watch(
@@ -617,13 +615,21 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         : _readReceiptMessageId(messages, resident.id);
 
     return ColoredBox(
-      color: VCommuneChatTheme.backgroundColor,
+      color: PrestigeNoir.bg,
       child: VScaffold(
       header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
             label: 'Back to messages',
-            icon: Icon(VIcons.chevronLeft),
+            icon: Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: PrestigeNoir.surfaceRaised,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(VIcons.chevronLeft, size: 18),
+            ),
             onPress: () {
               if (context.canPop()) context.pop();
             },
@@ -631,7 +637,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         ],
         title: _buildHeaderTitle(
           theme,
-          isDark,
           recipientName,
           recipientAvatar,
           recipientId,
@@ -642,7 +647,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         suffixes: [
           VAccessibleHeaderAction(
             label: 'Chat settings',
-            icon: const Icon(Icons.timer_outlined),
+            icon: Icon(
+              Icons.timer_outlined,
+              size: 20,
+              color: PrestigeNoir.muted,
+            ),
             onPress: () => showDmRoomSettingsSheet(
               context,
               roomId: widget.roomId,
@@ -697,7 +706,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                             final item = displayItems[adjustedIndex];
                             return _buildItem(
                               theme,
-                              isDark,
                               item,
                               resident?.id ?? '',
                               compact: chatCompact,
@@ -713,13 +721,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                           left: 0,
                           right: 0,
                           child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                            child: VSpinner(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -770,7 +773,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   Widget _buildHeaderTitle(
     ThemeData theme,
-    bool isDark,
     String recipientName,
     String? recipientAvatar,
     String? recipientId,
@@ -786,57 +788,61 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           size: 32,
         ),
         const SizedBox(width: VSpacing.sm),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              recipientName.isNotEmpty ? recipientName : 'Chat',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: VFontWeight.semiBold,
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isTyping) ...[
-                  _TypingDots(isDark: isDark),
-                  const SizedBox(width: VSpacing.xs),
-                ] else
-                  StatusDot(presence: presence, size: 6, borderWidth: 1),
-                const SizedBox(width: VSpacing.xs),
-                Flexible(
-                  child: Text(
-                    isTyping
-                        ? 'typing…'
-                        : (customStatus?.trim().isNotEmpty == true
-                            ? customStatus!.trim()
-                            : switch (presence) {
-                                Presence.online => 'Online',
-                                Presence.idle => 'Idle',
-                                Presence.dnd => 'Do not disturb',
-                                Presence.offline => 'Offline',
-                              }),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: isTyping
-                          ? VColors.success
-                          : (customStatus?.trim().isNotEmpty == true
-                              ? Theme.of(context).colorScheme.onSurfaceVariant
-                              : switch (presence) {
-                                  Presence.online => VColors.success,
-                                  Presence.idle => VColors.warning,
-                                  Presence.dnd => VColors.error,
-                                  Presence.offline => Theme.of(context).colorScheme.onSurfaceVariant,
-                                }),
-                      fontSize: VFontSize.labelSm,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                recipientName.isNotEmpty ? recipientName : 'Chat',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                  color: PrestigeNoir.foreground,
+                  fontSize: 15,
                 ),
-              ],
-            ),
-          ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isTyping) ...[
+                    const _TypingDots(),
+                    const SizedBox(width: VSpacing.xs),
+                  ] else
+                    StatusDot(presence: presence, size: 6, borderWidth: 1),
+                  const SizedBox(width: VSpacing.xs),
+                  Flexible(
+                    child: Text(
+                      isTyping
+                          ? 'typing…'
+                          : (customStatus?.trim().isNotEmpty == true
+                              ? customStatus!.trim()
+                              : switch (presence) {
+                                  Presence.online => 'Online',
+                                  Presence.idle => 'Idle',
+                                  Presence.dnd => 'Do not disturb',
+                                  Presence.offline => 'Offline',
+                                }),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isTyping
+                            ? VColors.success
+                            : (customStatus?.trim().isNotEmpty == true
+                                ? PrestigeNoir.muted
+                                : switch (presence) {
+                                    Presence.online => VColors.success,
+                                    Presence.idle => VColors.warning,
+                                    Presence.dnd => VColors.error,
+                                    Presence.offline => PrestigeNoir.mutedDim,
+                                  }),
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -869,7 +875,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
   Widget _buildItem(
     ThemeData theme,
-    bool isDark,
     ChatDisplayItem item,
     String residentId, {
     bool compact = false,
@@ -1063,8 +1068,6 @@ class _TypingIndicatorState extends State<_TypingIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(
@@ -1081,16 +1084,14 @@ class _TypingIndicatorState extends State<_TypingIndicator>
               vertical: VSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: PrestigeNoir.surfaceRaised,
               borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(VRadius.lg),
-                bottomRight: Radius.circular(VRadius.lg),
-                bottomLeft: Radius.circular(VRadius.lg),
-                topLeft: Radius.circular(VRadius.sm),
+                topRight: Radius.circular(14),
+                bottomRight: Radius.circular(14),
+                bottomLeft: Radius.circular(4),
+                topLeft: Radius.circular(14),
               ),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
+              border: Border.all(color: PrestigeNoir.borderLight),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1126,9 +1127,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
 }
 
 class _TypingDots extends StatefulWidget {
-  final bool isDark;
-
-  const _TypingDots({required this.isDark});
+  const _TypingDots();
 
   @override
   State<_TypingDots> createState() => _TypingDotsState();
@@ -1155,11 +1154,9 @@ class _TypingDotsState extends State<_TypingDots>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = widget.isDark;
-    final base = isDark ? VColors.success : VColors.success;
+    const base = VColors.success;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: List.generate(3, (i) {
         final delay = i * 0.15;
         return AnimatedBuilder(
@@ -1192,7 +1189,6 @@ class _ImagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final file = File(path);
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -1201,12 +1197,10 @@ class _ImagePreview extends StatelessWidget {
         VSpacing.xs,
         0,
       ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+      decoration: const BoxDecoration(
+        color: PrestigeNoir.surface,
         border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
+          bottom: BorderSide(color: PrestigeNoir.border),
         ),
       ),
       child: Row(

@@ -9,7 +9,7 @@ import '../../state/chat_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../../ui/buttons/v_button.dart';
 
 /// Compact general-channel preview — preview + open CTA (no composer).
@@ -54,7 +54,6 @@ class _WorldFeedChatTeaserState extends ConsumerState<WorldFeedChatTeaser> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final channels =
         ref.watch(channelProvider).channelsByWorld[widget.worldId] ?? [];
     _ensureGeneralLoaded(channels);
@@ -79,14 +78,13 @@ class _WorldFeedChatTeaserState extends ConsumerState<WorldFeedChatTeaser> {
         VSpacing.md,
         VSpacing.sm,
       ),
-      child: VSurfacePanel(
-        padding: const EdgeInsets.all(VSpacing.md),
+      child: VCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.forum_outlined,
                   size: VIconSize.sm,
                   color: VColors.tertiary,
@@ -109,9 +107,7 @@ class _WorldFeedChatTeaserState extends ConsumerState<WorldFeedChatTeaser> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: VColors.onSurfaceVariantDark,
               ),
             ),
             const SizedBox(height: VSpacing.sm),

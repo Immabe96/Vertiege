@@ -114,7 +114,9 @@ class InviteService {
         .eq('code', code)
         .maybeSingle();
     if (data == null) return null;
-    return _toInvite(data);
+    final invite = _toInvite(data);
+    if (!invite.isValid) return null;
+    return invite;
   }
 
   static Future<bool> acceptInvite(
@@ -128,14 +130,30 @@ class InviteService {
     }
     final client = getSupabase();
 
-    // Increment uses
-    final current = await client
+    // Fetch current invite state to validate expiry and usage
+    final invite = await client
         .from('invites')
-        .select('uses')
+        .select('uses,max_uses,expires_at')
         .eq('id', inviteId)
         .maybeSingle();
-    final newUses = ((current?['uses'] as int?) ?? 0) + 1;
-    await client.from('invites').update({'uses': newUses}).eq('id', inviteId);
+
+    if (invite == null) return false;
+
+    final uses = invite['uses'] as int? ?? 0;
+    final maxUses = invite['max_uses'] as int? ?? 0;
+    final expiresAt = invite['expires_at'] as int?;
+
+    if (maxUses > 0 && uses >= maxUses) return false;
+    if (expiresAt != null && DateTime.now().millisecondsSinceEpoch > expiresAt) {
+      return false;
+    }
+
+    // Increment uses
+    await client
+        .from('invites')
+        .update({'uses': uses + 1})
+        .eq('id', inviteId)
+        .eq('uses', uses);
 
     // Add resident to world members
     try {
@@ -160,7 +178,7 @@ class InviteService {
         .select()
         .eq('world_id', worldId)
         .order('created_at', ascending: false);
-    return (data as List).map((e) => _toInvite(e)).toList();
+    return (data as List).cast<Map<String, dynamic>>().map(_toInvite).toList();
   }
 
   static String _generateCode() {
@@ -174,19 +192,19 @@ class InviteService {
   }
 
   static WorldInvite _toInvite(Map<String, dynamic> data) => WorldInvite(
-    id: data['id'] ?? '',
-    worldId: data['world_id'] ?? '',
-    code: data['code'] ?? '',
-    createdBy: data['created_by'] ?? '',
-    maxUses: data['max_uses'] ?? 0,
-    uses: data['uses'] ?? 0,
+    id: data['id']?.toString() ?? '',
+    worldId: data['world_id']?.toString() ?? '',
+    code: data['code']?.toString() ?? '',
+    createdBy: data['created_by']?.toString() ?? '',
+    maxUses: data['max_uses'] as int? ?? 0,
+    uses: data['uses'] as int? ?? 0,
     expiresAt: data['expires_at'] != null
         ? DateTime.tryParse(
             data['expires_at'].toString(),
           )?.millisecondsSinceEpoch
         : null,
     createdAt:
-        DateTime.tryParse(data['created_at'] ?? '')?.millisecondsSinceEpoch ??
+        DateTime.tryParse(data['created_at']?.toString() ?? '')?.millisecondsSinceEpoch ??
         0,
   );
 }

@@ -18,6 +18,7 @@ class SubscriptionService {
 
   static SubscriptionTier? _cachedTier;
   static String? _cachedUserId;
+  static Future<SubscriptionTier>? _pendingVerification;
 
   /// Verifies subscription tier from Supabase (server-side).
   /// Caches result in memory only — never persists to SharedPreferences.
@@ -25,6 +26,16 @@ class SubscriptionService {
     if (_cachedUserId == userId && _cachedTier != null) {
       return _cachedTier!;
     }
+    if (_pendingVerification != null) return _pendingVerification!;
+    _pendingVerification = _doVerifySubscription(userId);
+    try {
+      return await _pendingVerification!;
+    } finally {
+      _pendingVerification = null;
+    }
+  }
+
+  static Future<SubscriptionTier> _doVerifySubscription(String userId) async {
 
     try {
       final client = maybeSupabase();

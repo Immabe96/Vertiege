@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,7 +93,7 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     required WorldFeatures features,
     required Resident? resident,
   }) {
-    final rows = <_ChannelListRow>[_ChannelListHeaderRow()];
+    final rows = <_ChannelListRow>[const _ChannelListHeaderRow()];
     final ungrouped = channels.where((c) => c.wardId == null).toList();
     final wardMap = <String, List<WorldChannel>>{};
     for (final c in channels) {
@@ -191,8 +191,8 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     );
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: VSpacing.md),
       cacheExtent: kChannelListCacheExtent,
+      padding: const EdgeInsets.only(bottom: VSpacing.md),
       itemCount: rows.length,
       itemBuilder: (context, index) {
         final row = rows[index];
@@ -330,7 +330,6 @@ class _WardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Semantics(
       button: true,
       expanded: expanded,
@@ -349,17 +348,15 @@ class _WardHeader extends StatelessWidget {
               Icon(
                 expanded ? Icons.arrow_drop_down : Icons.chevron_right,
                 size: VIconSize.sm,
-                color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
+                color: VColors.onSurfaceVariantDark,
               ),
               const SizedBox(width: VSpacing.xs),
               Text(
                 wardName.toUpperCase(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontWeight: VFontWeight.semiBold,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: VColors.onSurfaceVariantDark,
                   letterSpacing: 0,
                 ),
               ),
@@ -398,7 +395,6 @@ class _ChannelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,
@@ -418,7 +414,7 @@ class _ChannelTile extends StatelessWidget {
                 color: lockedReason != null
                     ? theme.colorScheme.onSurfaceVariant
                     : unreadCount > 0
-                        ? (isDark ? VColors.onSurfaceDark : VColors.onSurface)
+                        ? (VColors.onSurfaceDark)
                         : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: VSpacing.sm),

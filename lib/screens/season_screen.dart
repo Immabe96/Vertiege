@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/core/v_surface_card.dart';
 import '../router/world_navigation.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../models/season.dart';
@@ -10,6 +9,7 @@ import '../services/season_cohort_service.dart';
 import '../services/season_service.dart';
 import '../state/world_provider.dart';
 import '../state/resident_provider.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../utils/world_assets.dart';
@@ -55,7 +55,6 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
     final rankings = season.scores;
     final isLoaded = !worldState.isLoading;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final resident = ref.watch(residentProvider).resident;
     final lowPressure = resident?.leaderboardOptOut ?? false;
@@ -135,7 +134,7 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
               if (rankings.isNotEmpty)
                 SliverToBoxAdapter(child: _PodiumSection(rankings: rankings)),
               if (rankings.length > 3)
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: _SectionHeader(title: 'Full Rankings'),
                 ),
               if (rankings.length > 3)
@@ -146,7 +145,7 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                   }, childCount: rankings.length - 3),
                 ),
               if (myRankedWorlds.isNotEmpty) ...[
-                SliverToBoxAdapter(child: _SectionHeader(title: 'Your Worlds')),
+                const SliverToBoxAdapter(child: _SectionHeader(title: 'Your Worlds')),
                 SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final score = myRankedWorlds[index];
@@ -157,14 +156,14 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
               const SliverToBoxAdapter(child: SizedBox(height: VSpacing.xxl)),
             ],
           )
-        : _buildLoading(isDark);
+        : _buildLoading();
 
     if (widget.embedInHub) return body;
 
     return VHubPage(title: 'Season 1', showBack: true, body: body);
   }
 
-  Widget _buildLoading(bool isDark) {
+  Widget _buildLoading() {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,
@@ -178,13 +177,9 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
         child: Container(
           height: 80,
           decoration: BoxDecoration(
-            color: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(VRadius.xl),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-            ),
+            color: PrestigeNoir.surfaceRaised,
+            borderRadius: BorderRadius.circular(VRadius.bento),
+            border: Border.all(color: PrestigeNoir.borderLight),
           ),
           child: const Pulse(borderRadius: 0),
         ),
@@ -201,11 +196,10 @@ class _SeasonCohortCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return VSurfaceCard(
-      padding: const EdgeInsets.all(VSpacing.md),
+    return VPrestigeCard(
       child: Row(
         children: [
-          const Icon(Icons.groups_outlined, color: VColors.tertiary),
+          const Icon(Icons.groups_outlined, color: VColors.brand),
           const SizedBox(width: VSpacing.sm),
           Expanded(
             child: Column(
@@ -243,14 +237,14 @@ class _LowPressureNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return VSurfaceCard(
+    return VPrestigeCard(
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.md,
         vertical: VSpacing.sm,
       ),
       child: Row(
         children: [
-          const Icon(Icons.self_improvement, size: VIconSize.base, color: VColors.tertiary),
+          const Icon(Icons.self_improvement, size: VIconSize.base, color: VColors.brand),
           const SizedBox(width: VSpacing.sm),
           Expanded(
             child: Text(
@@ -258,9 +252,10 @@ class _LowPressureNote extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
           ),
-          TextButton(
+          VButton(
+            label: 'Settings',
             onPressed: () => context.push('/settings'),
-            child: const Text('Settings'),
+            variant: ButtonVariant.text,
           ),
         ],
       ),
@@ -283,7 +278,7 @@ class _SeasonGuideExpansion extends StatelessWidget {
         VSpacing.md,
         VSpacing.md,
       ),
-      child: VSurfaceCard(
+      child: VPrestigeCard(
         padding: EdgeInsets.zero,
         child: Theme(
           data: theme.copyWith(dividerColor: Colors.transparent),
@@ -296,7 +291,6 @@ class _SeasonGuideExpansion extends StatelessWidget {
                 color: theme.colorScheme.outline,
               ),
             ),
-            initiallyExpanded: false,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -327,7 +321,7 @@ class _SeasonGuideExpansion extends StatelessWidget {
                             const Icon(
                               Icons.bolt,
                               size: VIconSize.sm,
-                              color: VColors.tertiary,
+                              color: VColors.brand,
                             ),
                             const SizedBox(width: VSpacing.xs),
                             Expanded(
@@ -364,7 +358,6 @@ class _SeasonHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
@@ -378,8 +371,8 @@ class _SeasonHero extends StatelessWidget {
           center: Alignment.topCenter,
           radius: 1.5,
           colors: [
-            VColors.tertiary.withValues(alpha: 0.08),
-            VColors.tertiary.withValues(alpha: 0.03),
+            VColors.brand.withValues(alpha: 0.08),
+            VColors.brand.withValues(alpha: 0.03),
             Colors.transparent,
           ],
         ),
@@ -393,7 +386,7 @@ class _SeasonHero extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: VFontWeight.bold,
                 letterSpacing: 1.5,
-                color: VColors.tertiary.withValues(alpha: 0.8),
+                color: VColors.brand.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -405,7 +398,7 @@ class _SeasonHero extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.displayLarge?.copyWith(
                 fontWeight: VFontWeight.bold,
-                color: VColors.tertiary,
+                color: VColors.brand,
               ),
             ),
           ),
@@ -427,7 +420,7 @@ class _SeasonHero extends StatelessWidget {
               '$unclaimedCount realms awaiting sovereigns · $growingCount worlds growing',
               textAlign: TextAlign.center,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: VColors.tertiary,
+                color: VColors.brand,
               ),
             ),
           ),
@@ -458,7 +451,6 @@ class _SeasonProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.xl,
@@ -474,30 +466,20 @@ class _SeasonProgress extends StatelessWidget {
                 'Week ${season.currentWeek} of 4',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: VFontWeight.semiBold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: PrestigeNoir.foreground,
                 ),
               ),
               Text(
                 '${(season.progress * 100).round()}%',
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: VFontWeight.bold,
-                  color: VColors.tertiary,
+                  color: VColors.brand,
                 ),
               ),
             ],
           ),
           const SizedBox(height: VSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(VRadius.sm),
-            child: LinearProgressIndicator(
-              value: season.progress,
-              minHeight: 6,
-              backgroundColor: isDark
-                  ? VColors.surfaceContainerHighDark
-                  : VColors.surfaceContainerHigh,
-              valueColor: const AlwaysStoppedAnimation<Color>(VColors.tertiary),
-            ),
-          ),
+          VPrestigeProgressBar(value: season.progress, height: 6),
         ],
       ),
     );
@@ -520,9 +502,9 @@ class _CountdownBanner extends StatelessWidget {
           vertical: VSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: VColors.tertiary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(VRadius.xl),
-          border: Border.all(color: VColors.tertiary.withValues(alpha: 0.2)),
+          color: PrestigeNoir.accentSoft,
+          borderRadius: BorderRadius.circular(VRadius.bento),
+          border: Border.all(color: VColors.brand.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -530,14 +512,14 @@ class _CountdownBanner extends StatelessWidget {
             const Icon(
               Icons.hourglass_bottom,
               size: VIconSize.md,
-              color: VColors.tertiary,
+              color: VColors.brand,
             ),
             const SizedBox(width: VSpacing.sm),
             Text(
               '${season.daysRemaining} days remaining in this season',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: VFontWeight.semiBold,
-                color: VColors.tertiary,
+                color: VColors.brand,
               ),
             ),
           ],
@@ -571,7 +553,7 @@ class _PodiumSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _SectionHeader(title: 'Leaderboard'),
+          const _SectionHeader(title: 'Leaderboard'),
           const SizedBox(height: VSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -589,7 +571,7 @@ class _PodiumSection extends StatelessWidget {
                       ? 180.0
                       : 150.0,
                   medalColor: isGold
-                      ? VColors.tertiary
+                      ? VColors.brand
                       : isSilver
                       ? VColors.secondary
                       : VColors.warning,
@@ -624,62 +606,53 @@ class _PodiumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
       child: GestureDetector(
         onTap: () => context.push(exploreWorldPath(score.worldId)),
-        child: Container(
+        child: SizedBox(
           height: height,
-          decoration: BoxDecoration(
-            color: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(VRadius.xl),
-            border: Border.all(color: medalColor.withValues(alpha: 0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: medalColor.withValues(alpha: 0.12),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '#${score.rank}',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontWeight: VFontWeight.bold,
-                  color: medalColor,
-                ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              Icon(medalIcon, size: VIconSize.xl, color: medalColor),
-              const SizedBox(height: VSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
-                child: Text(
-                  score.worldName,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+          child: VPrestigeCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: VSpacing.sm,
+              vertical: VSpacing.md,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '#${score.rank}',
+                  style: theme.textTheme.headlineLarge?.copyWith(
                     fontWeight: VFontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: medalColor,
                   ),
                 ),
-              ),
-              const SizedBox(height: VSpacing.xs),
-              Text(
-                '${score.compositeScore} pts',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: VFontWeight.semiBold,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                const SizedBox(height: VSpacing.xs),
+                Icon(medalIcon, size: VIconSize.xl, color: medalColor),
+                const SizedBox(height: VSpacing.sm),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm),
+                  child: Text(
+                    score.worldName,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: VFontWeight.bold,
+                      color: PrestigeNoir.foreground,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: VSpacing.xs),
+                Text(
+                  '${score.compositeScore} pts',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                    color: PrestigeNoir.muted,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -708,7 +681,7 @@ class _SectionHeader extends StatelessWidget {
             width: 3,
             height: 20,
             decoration: BoxDecoration(
-              color: VColors.tertiary,
+              color: VColors.brand,
               borderRadius: BorderRadius.circular(VRadius.sm),
             ),
           ),
@@ -718,7 +691,7 @@ class _SectionHeader extends StatelessWidget {
               title,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: VFontWeight.semiBold,
-                color: Theme.of(context).colorScheme.primary,
+                color: PrestigeNoir.foreground,
               ),
             ),
           ),
@@ -749,7 +722,6 @@ class _RankingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final worldIcon = WorldAssets.iconForWorld(score.worldId);
     final worldAccent = WorldAssets.accentForWorld(score.worldId);
 
@@ -760,20 +732,7 @@ class _RankingRow extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () => context.push(exploreWorldPath(score.worldId)),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: VSpacing.lg,
-            vertical: VSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(VRadius.xl),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-            ),
-          ),
+        child: VPrestigeCard(
           child: Row(
             children: [
               SizedBox(
@@ -784,8 +743,8 @@ class _RankingRow extends StatelessWidget {
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: VFontWeight.bold,
                     color: score.rank <= 3
-                        ? VColors.tertiary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ? VColors.brand
+                        : PrestigeNoir.muted,
                   ),
                 ),
               ),
@@ -795,7 +754,7 @@ class _RankingRow extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   color: worldAccent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(VRadius.lg),
+                  borderRadius: BorderRadius.circular(VRadius.bento),
                   border: Border.all(color: worldAccent.withValues(alpha: 0.2)),
                 ),
                 child: Icon(worldIcon, size: VIconSize.md, color: worldAccent),
@@ -811,7 +770,7 @@ class _RankingRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: VFontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: PrestigeNoir.foreground,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -820,7 +779,7 @@ class _RankingRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: PrestigeNoir.muted,
                       ),
                     ),
                   ],
@@ -833,7 +792,7 @@ class _RankingRow extends StatelessWidget {
                     '${score.compositeScore}',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: VFontWeight.bold,
-                      color: VColors.tertiary,
+                      color: VColors.brand,
                     ),
                   ),
                   Row(
@@ -848,7 +807,7 @@ class _RankingRow extends StatelessWidget {
                       Text(
                         'pts',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: PrestigeNoir.muted,
                         ),
                       ),
                     ],

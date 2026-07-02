@@ -1,4 +1,4 @@
-﻿import 'package:confetti/confetti.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../../theme/v_colors.dart';
@@ -60,7 +60,6 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -140,9 +139,7 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                 Container(
                   padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? VColors.surfaceDark
-                        : VColors.surfaceContainerLow,
+                    color: VColors.surfaceDark,
                     borderRadius: BorderRadius.circular(VRadius.md),
                     border: Border.all(
                       color: VColors.tertiary.withValues(alpha: 0.3),
@@ -159,7 +156,7 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                         ),
                       ),
                       const SizedBox(height: VSpacing.xs),
-                      _PrestigePerkRow(
+                      const _PrestigePerkRow(
                         icon: Icons.badge,
                         text: 'Exclusive prestige frame unlocked',
                       ),
@@ -167,7 +164,7 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
                         icon: Icons.star,
                         text: 'Prestige star ${widget.newPrestigeStars} earned',
                       ),
-                      _PrestigePerkRow(
+                      const _PrestigePerkRow(
                         icon: Icons.refresh,
                         text: 'XP reset — climb the tiers again!',
                       ),
@@ -189,7 +186,6 @@ class _PrestigeUpDialogState extends State<PrestigeUpDialog> {
           child: ConfettiWidget(
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
             colors: const [
               VColors.tertiary,
               VColors.secondary,
@@ -212,7 +208,6 @@ class _PrestigePerkRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -223,7 +218,7 @@ class _PrestigePerkRow extends StatelessWidget {
             child: Text(
               text,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                color: VColors.onSurfaceDark,
               ),
             ),
           ),

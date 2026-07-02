@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_tokens.dart';
 import '../core/broken_media.dart';
 import '../core/shimmer.dart';
@@ -24,7 +24,6 @@ class MediaGrid extends StatelessWidget {
         crossAxisCount: 3,
         crossAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
         mainAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
-        childAspectRatio: 1,
       ),
       itemCount: images.length,
       itemBuilder: (context, index) {

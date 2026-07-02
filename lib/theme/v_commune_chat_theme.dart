@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import 'prestige_noir.dart';
 import 'v_colors.dart';
 import 'v_commune_colors.dart';
 import 'v_fonts.dart';
@@ -12,14 +13,26 @@ abstract final class VCommuneChatTheme {
       VCommuneColors.surfacePrimaryOf(brightness);
 
   static Color receivedBubbleColorOf(Brightness brightness) =>
-      VCommuneColors.surfaceSecondaryOf(brightness);
+      brightness == Brightness.dark
+          ? PrestigeNoir.surfaceRaised
+          : VCommuneColors.surfaceSecondaryLight;
 
-  static Color get sentBubbleColor => VColors.brand;
+  static Color sentBubbleColorOf(Brightness brightness) =>
+      brightness == Brightness.dark
+          ? PrestigeNoir.accentSoft
+          : VColors.brandSoft(brightness);
+
+  static Color get sentBubbleColor => PrestigeNoir.accentSoft;
 
   static Color receivedTextColorOf(Brightness brightness) =>
       VCommuneColors.textNormalOf(brightness);
 
-  static Color get sentTextColor => VColors.onBrand;
+  static Color sentTextColorOf(Brightness brightness) =>
+      brightness == Brightness.dark
+          ? PrestigeNoir.foreground
+          : VColors.onBrand;
+
+  static Color get sentTextColor => PrestigeNoir.foreground;
 
   static Color timestampMutedOf(Brightness brightness) =>
       VCommuneColors.textMutedOf(brightness);

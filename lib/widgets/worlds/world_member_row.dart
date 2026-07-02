@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_tokens.dart';
 import '../../theme/v_colors.dart';
 import '../../models/resident.dart';
@@ -35,7 +35,6 @@ class WorldMemberRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final cs = theme.colorScheme;
     final displayMembers = members.take(8).toList();
     final remaining = members.length - displayMembers.length;
@@ -88,7 +87,7 @@ class WorldMemberRow extends StatelessWidget {
                                 border: Border.all(
                                   color: isCouncil
                                       ? VColors.tertiary
-                                      : isDark ? VColors.surfaceDark : cs.surface,
+                                      : VColors.surfaceDark,
                                   width: isCouncil ? 2.5 : 2,
                                 ),
                                 boxShadow: isCouncil
@@ -98,7 +97,6 @@ class WorldMemberRow extends StatelessWidget {
                                             alpha: 0.35,
                                           ),
                                           blurRadius: 4,
-                                          spreadRadius: 0,
                                         ),
                                       ]
                                     : null,
@@ -115,10 +113,8 @@ class WorldMemberRow extends StatelessWidget {
                                 top: -4,
                                 child: Container(
                                   padding: const EdgeInsets.all(1),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? VColors.surfaceDark
-                                        : cs.surface,
+                                  decoration: const BoxDecoration(
+                                    color: VColors.surfaceDark,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(

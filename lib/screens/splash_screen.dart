@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../ui/feedback/v_states.dart';
 import '../utils/brand_assets.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -74,7 +75,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: AnimatedBuilder(
         animation: _controller,
@@ -104,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               child: Stack(
                 fit: StackFit.expand,
-                children: [_buildDecorativeShapes(), child!],
+                children: [_buildDecorativeShapes(), child ?? const SizedBox.shrink()],
               ),
             ),
           );
@@ -174,15 +174,10 @@ class _SplashScreenState extends State<SplashScreen>
               // Loading indicator — gold accent
               Opacity(
                 opacity: _loaderFade.value,
-                child: SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation(
-                      VColors.tertiary.withValues(alpha: 0.8),
-                    ),
-                  ),
+                child: VSpinner(
+                  size: 28,
+                  strokeWidth: 2.5,
+                  color: VColors.tertiary.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -198,7 +193,7 @@ class _SplashScreenState extends State<SplashScreen>
       child: Stack(
         children: [
           // Top-right large shape — gold
-          Positioned(
+          const Positioned(
             top: -120,
             right: -80,
             child: _DecoShape(
@@ -220,7 +215,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
           // Top-left small shape — gold
-          Positioned(
+          const Positioned(
             top: 80,
             left: -40,
             child: _DecoShape(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -26,10 +27,7 @@ class VAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final fallbackColor = _seedColor(fallbackSeed ?? '', isDark);
+    final fallbackColor = _seedColor(fallbackSeed ?? '');
 
     Widget avatar = Container(
       width: size,
@@ -53,10 +51,14 @@ class VAvatar extends StatelessWidget {
         height: size,
         decoration: const BoxDecoration(shape: BoxShape.circle),
         child: ClipOval(
-          child: Image.network(
-            imageUrl!,
+          child: CachedNetworkImage(
+            imageUrl: imageUrl!,
+            width: size,
+            height: size,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => avatar,
+            memCacheWidth: size.round(),
+            memCacheHeight: size.round(),
+            errorWidget: (_, _, _) => avatar,
           ),
         ),
       );
@@ -113,8 +115,8 @@ class VAvatar extends StatelessWidget {
     return result;
   }
 
-  Color _seedColor(String seed, bool isDark) {
-    if (seed.isEmpty) return isDark ? VColors.primaryLight : VColors.primary;
+  Color _seedColor(String seed) {
+    if (seed.isEmpty) return VColors.primaryLight;
     final hash = seed.hashCode.abs();
     final colors = [
       VColors.primary,

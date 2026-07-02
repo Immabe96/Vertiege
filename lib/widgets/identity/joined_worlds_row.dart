@@ -16,7 +16,6 @@ class JoinedWorldsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (worlds.isEmpty) {
       return Padding(
@@ -24,9 +23,7 @@ class JoinedWorldsRow extends StatelessWidget {
         child: Text(
           'No worlds joined yet — explore and join a community.',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: VColors.onSurfaceVariantDark,
           ),
         ),
       );
@@ -62,9 +59,7 @@ class JoinedWorldsRow extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: VFontWeight.semiBold,
-                      color: isDark
-                          ? VColors.onSurfaceDark
-                          : VColors.onSurface,
+                      color: VColors.onSurfaceDark,
                     ),
                   ),
                 ],

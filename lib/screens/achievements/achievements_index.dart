@@ -53,10 +53,9 @@ class AchievementsIndexScreen extends ConsumerWidget {
 
     return VHubPage(
       title: 'Achievements',
-      showBack: false,
       headerActions: [
         VHeaderAction(
-          icon: Icon(VIcons.plus),
+          icon: const Icon(VIcons.plus),
           onPress: () => context.push('/achievements/submit'),
         ),
       ],
@@ -76,18 +75,18 @@ class AchievementsIndexScreen extends ConsumerWidget {
                 child: ScreenLoading.list(),
               ),
             _StatsHeroCard(
-              totalXp: totalXp,
               verifiedCount: verifiedCount,
               pendingCount: pendingCount,
+              availableCount: (config.achievementCatalogSize - verifiedCount)
+                  .clamp(0, config.achievementCatalogSize),
               tierLabel: currentTier.label,
-              catalogSize: config.achievementCatalogSize,
               isDark: isDark,
             ),
             if (state.error != null) ...[
               const SizedBox(height: VSpacing.sm),
               SyncWarningBanner(
                 message: state.error!,
-                onRetry: () => notifier.loadAchievements(),
+                onRetry: notifier.loadAchievements,
               ),
             ],
             if (nextTierInfo != null) ...[
@@ -100,42 +99,50 @@ class AchievementsIndexScreen extends ConsumerWidget {
                 'Recently verified',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: VFontWeight.semiBold,
+                  letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: VSpacing.sm),
-              SizedBox(
-                height: 108,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: recentVerified.take(8).length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(width: VSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final ua = recentVerified[index];
-                    final ach = config.achievements
-                        .where((a) => a.id == ua.achievementId)
-                        .firstOrNull;
-                    if (ach == null) return const SizedBox.shrink();
-                    return _RecentVerifiedChip(achievement: ach);
-                  },
-                ),
-              ),
+              ...recentVerified.take(5).map((ua) {
+                final ach = config.achievements
+                    .where((a) => a.id == ua.achievementId)
+                    .firstOrNull;
+                if (ach == null) return const SizedBox.shrink();
+                return _RecentVerifiedRow(achievement: ach);
+              }),
             ],
             const SizedBox(height: VSpacing.lg),
-            VSectionList(
-              title: 'Browse by category',
-              children: [
-                for (final entry in categoryEntries)
-                  VAchievementCategoryTile(
-                    category: entry.key,
-                    meta: entry.value,
-                    progress: notifier.getCategoryProgress(entry.key.name),
-                    onTap: () => showAchievementCategorySheet(
-                      context,
-                      category: entry.key,
-                    ),
-                  ),
-              ],
+            Text(
+              'Browse by category',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: VFontWeight.semiBold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const spacing = VSpacing.sm;
+                final cellWidth = (constraints.maxWidth - spacing) / 2;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: [
+                    for (final entry in categoryEntries)
+                      SizedBox(
+                        width: cellWidth,
+                        child: _CategoryGridCard(
+                          meta: entry.value,
+                          progress: notifier.getCategoryProgress(entry.key.name),
+                          onTap: () => showAchievementCategorySheet(
+                            context,
+                            category: entry.key,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -184,26 +191,24 @@ class _NextTierInfo {
 }
 
 class _StatsHeroCard extends StatelessWidget {
-  final int totalXp;
   final int verifiedCount;
   final int pendingCount;
+  final int availableCount;
   final String tierLabel;
-  final int catalogSize;
   final bool isDark;
 
   const _StatsHeroCard({
-    required this.totalXp,
     required this.verifiedCount,
     required this.pendingCount,
+    required this.availableCount,
     required this.tierLabel,
-    required this.catalogSize,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return VSurfaceCard(
+    return VCard(
         padding: const EdgeInsets.symmetric(
           horizontal: VSpacing.lg,
           vertical: VSpacing.md,
@@ -234,9 +239,10 @@ class _StatsHeroCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  '$catalogSize achievements',
+                  tierLabel,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: VColors.brand,
+                    fontWeight: VFontWeight.semiBold,
                   ),
                 ),
               ],
@@ -244,13 +250,6 @@ class _StatsHeroCard extends StatelessWidget {
             const SizedBox(height: VSpacing.md),
             Row(
               children: [
-                Expanded(
-                  child: _StatCell(
-                    value: '$totalXp',
-                    label: 'Total XP',
-                    color: VColors.warning,
-                  ),
-                ),
                 Expanded(
                   child: _StatCell(
                     value: '$verifiedCount',
@@ -263,6 +262,13 @@ class _StatsHeroCard extends StatelessWidget {
                     value: '$pendingCount',
                     label: 'Pending',
                     color: VColors.secondary,
+                  ),
+                ),
+                Expanded(
+                  child: _StatCell(
+                    value: '$availableCount',
+                    label: 'Available',
+                    color: VColors.brand,
                   ),
                 ),
               ],
@@ -319,7 +325,7 @@ class _NextTierProgress extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return VSurfaceCard(
+    return VCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -334,9 +340,9 @@ class _NextTierProgress extends StatelessWidget {
               borderRadius: BorderRadius.circular(VRadius.sm),
               child: LinearProgressIndicator(
                 value: info.progress,
-                minHeight: 8,
+                minHeight: 4,
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                  VColors.warning,
+                  VColors.brand,
                 ),
                 backgroundColor: isDark
                     ? VColors.surfaceContainerHighDark
@@ -358,7 +364,7 @@ class _NextTierProgress extends StatelessWidget {
                 Text(
                   info.nextTierName,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: VColors.warning,
+                    color: VColors.brand,
                     fontWeight: VFontWeight.bold,
                   ),
                 ),
@@ -370,41 +376,113 @@ class _NextTierProgress extends StatelessWidget {
   }
 }
 
-class _RecentVerifiedChip extends StatelessWidget {
+class _RecentVerifiedRow extends StatelessWidget {
   final Achievement achievement;
 
-  const _RecentVerifiedChip({required this.achievement});
+  const _RecentVerifiedRow({required this.achievement});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final meta = metaForCategory(achievement.category);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: VColors.brandSoft(theme.brightness),
+              borderRadius: BorderRadius.circular(VRadius.md),
+            ),
+            alignment: Alignment.center,
+            child: AchievementBadgeAvatar(
+              achievement: achievement,
+              accentColor: VColors.success,
+              size: 28,
+              status: AchievementStatus.verified,
+            ),
+          ),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  achievement.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                  ),
+                ),
+                Text(
+                  meta.label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryGridCard extends StatelessWidget {
+  final AchievementCategoryMeta meta;
+  final ({int earned, int total, int xp}) progress;
+  final VoidCallback onTap;
+
+  const _CategoryGridCard({
+    required this.meta,
+    required this.progress,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return SizedBox(
-      width: 88,
-      child: VSurfaceCard(
-          padding: const EdgeInsets.all(VSpacing.sm),
+    return Material(
+      color: isDark
+          ? VColors.surfaceContainerDark
+          : VColors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(VRadius.md),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AchievementBadgeAvatar(
-                achievement: achievement,
-                accentColor: VColors.success,
-                size: VBadgeSize.avatarCompact,
-                status: AchievementStatus.verified,
-              ),
-              const SizedBox(height: VSpacing.xs),
+              Icon(meta.icon, color: meta.color, size: VIconSize.lg),
+              const SizedBox(height: VSpacing.sm),
               Text(
-                achievement.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
+                meta.label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: VFontWeight.semiBold,
+                ),
+              ),
+              const SizedBox(height: VSpacing.xxs),
+              Text(
+                '${progress.earned} earned',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: VFontSize.labelSm,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
+        ),
       ),
     );
   }

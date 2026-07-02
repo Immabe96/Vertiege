@@ -6,7 +6,6 @@ WorldChannel _ch(String id, String name) => WorldChannel(
   id: id,
   worldId: 'w1',
   name: name,
-  channelType: ChannelType.text,
 );
 
 void main() {

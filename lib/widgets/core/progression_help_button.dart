@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import '../../config/progression_glossary.dart';
 import '../../services/contextual_help_prefs.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import 'progression_help_sheet.dart';
 
 /// Opens [ProgressionHelpSheet] for the given topic.
@@ -53,11 +54,12 @@ class ProgressionHelpLink extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.data != true) return const SizedBox.shrink();
         return Align(
-          alignment: Alignment.center,
-          child: TextButton.icon(
+          child: VButton(
+            variant: ButtonVariant.text,
+            size: ButtonSize.small,
             onPressed: () => showProgressionHelp(context, focus: focus),
             icon: const Icon(FIcons.info, size: VIconSize.sm),
-            label: Text(label),
+            label: label,
           ),
         );
       },

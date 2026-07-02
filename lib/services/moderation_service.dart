@@ -236,10 +236,10 @@ class ModerationService {
     final client = getSupabase();
     await client.from('reports').insert({
       'id': generateId(),
-      if (worldId != null) 'world_id': worldId,
-      if (postId != null) 'post_id': postId,
-      if (messageId != null) 'message_id': messageId,
-      if (channelId != null) 'channel_id': channelId,
+      'world_id': ?worldId,
+      'post_id': ?postId,
+      'message_id': ?messageId,
+      'channel_id': ?channelId,
       'reporter_id': reporterId,
       'reason': reason,
       'details': details,

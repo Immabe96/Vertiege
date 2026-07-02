@@ -10,12 +10,13 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     _timestamps.putIfAbsent(key, () => []);
 
+    final effectiveMax = _limits[key] ?? maxCalls;
     final cutoff = now - windowMs;
     _timestamps[key] = _timestamps[key]!
         .where((ts) => ts > cutoff)
         .toList();
 
-    if (_timestamps[key]!.length >= maxCalls) {
+    if (_timestamps[key]!.length >= effectiveMax) {
       return false;
     }
 

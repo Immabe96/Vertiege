@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../services/season_service.dart';
 import '../../theme/v_colors.dart';
@@ -12,7 +12,6 @@ class SeasonBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final season = SeasonService.getCurrentSeason(worlds: worlds);
     final subtitle = SeasonService.bannerSubtitle(season.scores);
 
@@ -23,13 +22,9 @@ class SeasonBanner extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(VSpacing.lg),
           decoration: BoxDecoration(
-            color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+            color: VColors.glassBackgroundDark,
             borderRadius: BorderRadius.circular(VRadius.lg),
-            border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.tertiary.withValues(
-                alpha: 0.3 * 2,
-              ),
-            ),
+            border: Border.all(color: VColors.glassBorderDark),
             boxShadow: [
               BoxShadow(
                 color: VColors.tertiary.withValues(alpha: 0.06),
@@ -56,7 +51,7 @@ class SeasonBanner extends StatelessWidget {
                   children: [
                     Text(
                       season.name.toUpperCase(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: VFontSize.bodyMd,
                         fontWeight: VFontWeight.bold,
                         color: VColors.tertiary,
@@ -65,9 +60,9 @@ class SeasonBanner extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: VFontSize.labelSm,
-                        color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                        color: VColors.onSurfaceVariantDark,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -88,7 +83,7 @@ class SeasonBanner extends StatelessWidget {
                     color: VColors.tertiary.withValues(alpha: 0.25),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'VIEW SEASON RANKINGS',
                   style: TextStyle(
                     fontSize: VFontSize.labelSm,

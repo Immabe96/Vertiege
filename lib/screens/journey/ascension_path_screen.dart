@@ -9,16 +9,15 @@ import '../../theme/v_colors.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
-import '../../widgets/core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../../widgets/journey/progress_trail.dart';
-import '../../ui/icons/v_icons.dart';
 
 class AscensionPathScreen extends ConsumerWidget {
   const AscensionPathScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     final resident = ref.watch(residentProvider).resident;
     final achievementState = ref.watch(achievementProvider);
 
@@ -56,7 +55,7 @@ class AscensionPathScreen extends ConsumerWidget {
         child: Column(
           children: [
             // Title
-            Text(
+            const Text(
               'Ascension Path',
               style: TextStyle(
                 fontSize: VFontSize.displayXl,
@@ -71,9 +70,7 @@ class AscensionPathScreen extends ConsumerWidget {
               'Your journey through the tiers',
               style: TextStyle(
                 fontSize: VFontSize.bodyMd,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -84,8 +81,7 @@ class AscensionPathScreen extends ConsumerWidget {
             const SizedBox(height: VSpacing.lg),
 
             // XP Stats
-            VSurfacePanel(
-              useBlur: false,
+            VCard(
               padding: const EdgeInsets.all(VSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +125,7 @@ class AscensionPathScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: VFontSize.bodyMd,
                           fontWeight: VFontWeight.bold,
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -142,16 +136,14 @@ class AscensionPathScreen extends ConsumerWidget {
                     children: [
                       Text(
                         tierNum < 5 ? 'Next Tier' : 'Max Tier',
-                        style: TextStyle(fontSize: VFontSize.bodyMd),
+                        style: const TextStyle(fontSize: VFontSize.bodyMd),
                       ),
                       Text(
                         tierNum < 5 ? '$xpToNext XP needed' : 'Sovereign',
                         style: TextStyle(
                           fontSize: VFontSize.bodyMd,
                           fontWeight: VFontWeight.bold,
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -169,9 +161,7 @@ class AscensionPathScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: VFontSize.bodyMd,
                           fontWeight: VFontWeight.bold,
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -182,9 +172,7 @@ class AscensionPathScreen extends ConsumerWidget {
                       '$verifiedCount of ${{1: 0, 2: 500, 3: 2000, 4: 10000, 5: 50000}[tierNum + 1] ?? 0} XP from achievements',
                       style: TextStyle(
                         fontSize: VFontSize.labelSm,
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -194,24 +182,12 @@ class AscensionPathScreen extends ConsumerWidget {
             const SizedBox(height: VSpacing.lg),
 
             // Button to Hall of Ascension
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => context.push('/hall-of-ascension'),
-                icon: const Icon(VIcons.chart, size: VIconSize.md),
-                label: const Text(
-                  'View Hall of Ascension',
-                  style: TextStyle(
-                    fontSize: VFontSize.bodyMd,
-                    fontWeight: VFontWeight.semiBold,
-                  ),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: VColors.tertiary,
-                  foregroundColor: VColors.onTertiary,
-                  padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
-                ),
-              ),
+            VButton(
+              label: 'View Hall of Ascension',
+              icon: const Icon(VIcons.chart, size: VIconSize.md),
+              isFullWidth: true,
+              size: ButtonSize.large,
+              onPressed: () => context.push('/hall-of-ascension'),
             ),
           ],
         ),

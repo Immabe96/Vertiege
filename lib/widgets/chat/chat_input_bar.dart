@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../../ui/icons/v_icons.dart';
 import 'chat_attachment_tray.dart';
 
@@ -98,7 +98,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
     final composer = TextField(
       controller: widget.controller,
       onChanged: widget.onChanged,
@@ -191,7 +190,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
           replyToContent: widget.replyToContent,
           onCancelReply: widget.onCancelReply,
           useCommuneStyle: widget.useCommuneStyle,
-          isDark: isDark,
         ),
         if (widget.replyToName != null) const SizedBox(height: VSpacing.xs),
         Row(
@@ -319,8 +317,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 child: content,
               ),
             )
-          : VSurfacePanel(
-              blur: 10,
+          : VCard(
               borderRadius: BorderRadius.zero,
               padding: const EdgeInsets.fromLTRB(
                 VSpacing.sm,
@@ -347,14 +344,12 @@ class _ReplyQuoteBlock extends StatelessWidget {
   final String? replyToContent;
   final VoidCallback? onCancelReply;
   final bool useCommuneStyle;
-  final bool isDark;
 
   const _ReplyQuoteBlock({
     required this.replyToName,
     this.replyToContent,
     this.onCancelReply,
     required this.useCommuneStyle,
-    required this.isDark,
   });
 
   @override

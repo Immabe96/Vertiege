@@ -1,4 +1,5 @@
 /// Selectable resident professions and links to achievements / worlds.
+library;
 
 /// Empty option in profile pickers.
 const String kNoProfession = '';

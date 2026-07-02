@@ -58,12 +58,16 @@ class VButton extends StatelessWidget {
       variant: variant,
     );
 
-    final button = FButton(
-      variant: fVariant,
-      size: fSize,
-      onPress: isLoading ? null : onPressed,
-      mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-      child: child,
+    // WCAG touch target: every button hit area is at least 48dp tall.
+    final button = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: VTouchTarget.minimum),
+      child: FButton(
+        variant: fVariant,
+        size: fSize,
+        onPress: isLoading ? null : onPressed,
+        mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
+        child: child,
+      ),
     );
 
     return isFullWidth
@@ -125,8 +129,8 @@ class _GlassButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final height = switch (size) {
-      ButtonSize.small => 36.0,
-      ButtonSize.medium => 44.0,
+      ButtonSize.small => VTouchTarget.minimum,
+      ButtonSize.medium => VTouchTarget.minimum,
       ButtonSize.large => 52.0,
     };
 
@@ -136,9 +140,13 @@ class _GlassButton extends StatelessWidget {
       ButtonSize.large => const EdgeInsets.symmetric(horizontal: VSpacing.xxl),
     };
 
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
+    return Semantics(
+      button: true,
+      enabled: onPressed != null && !isLoading,
+      label: label,
+      child: GestureDetector(
+        onTap: isLoading ? null : onPressed,
+        child: Container(
         width: isFullWidth ? double.infinity : null,
         height: height,
         padding: padding,
@@ -153,6 +161,7 @@ class _GlassButton extends StatelessWidget {
           isLoading: isLoading,
           icon: icon,
           variant: ButtonVariant.glass,
+        ),
         ),
       ),
     );

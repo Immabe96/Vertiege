@@ -40,12 +40,14 @@ Future<void> showNotificationPermissionSheet(BuildContext context) async {
               },
             ),
             const SizedBox(height: VSpacing.sm),
-            TextButton(
+            VButton(
+              label: 'Not now',
+              variant: ButtonVariant.text,
+              isFullWidth: true,
               onPressed: () async {
                 await NotificationOnboardingPrefs.markCompleted();
                 if (ctx.mounted) Navigator.pop(ctx);
               },
-              child: const Text('Not now'),
             ),
           ],
         ),

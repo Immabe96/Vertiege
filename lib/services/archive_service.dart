@@ -61,8 +61,8 @@ class ArchiveService {
           'title': title,
           'content': content,
           'category': category,
-          if (tags != null) 'tags': tags,
-          if (citations != null) 'citations': citations,
+          'tags': ?tags,
+          'citations': ?citations,
         })
         .select()
         .single();
@@ -86,8 +86,8 @@ class ArchiveService {
         .update({
           'title': title,
           'content': content,
-          if (category != null) 'category': category,
-          if (tags != null) 'tags': tags,
+          'category': ?category,
+          'tags': ?tags,
           'updated_at': DateTime.now().toIso8601String(),
         })
         .eq('id', id);

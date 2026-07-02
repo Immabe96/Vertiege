@@ -32,7 +32,6 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         error,
         stackTrace,
         reason: 'background FCM handler',
-        fatal: false,
       );
     } catch (_) {}
   }

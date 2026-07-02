@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../models/channel_mute_mode.dart';
@@ -19,6 +20,10 @@ import '../utils/id_generator.dart';
 import '../utils/provider_errors.dart';
 import '../utils/rate_limiter.dart';
 import 'resident_provider.dart';
+
+part 'chat_provider.g.dart';
+
+
 
 class ChatState {
   final List<Map<String, dynamic>> dmRooms;
@@ -121,7 +126,8 @@ class ChatState {
   }
 }
 
-class ChatNotifier extends Notifier<ChatState> {
+@Riverpod(name: 'chatProvider', keepAlive: true)
+class ChatNotifier extends _$ChatNotifier {
   final Map<String, RealtimeChannel> _subscriptions = {};
   final Map<String, RealtimeChannel> _dmSubscriptions = {};
   final Map<String, void Function(String, String, bool)> _typingListeners = {};
@@ -136,7 +142,11 @@ class ChatNotifier extends Notifier<ChatState> {
   @override
   ChatState build() {
     listenSelf((previous, next) {
-      unawaited(_persistMessages(next));
+      if (previous == null) return;
+      if (previous.dmMessages != next.dmMessages ||
+          previous.channelMessages != next.channelMessages) {
+        unawaited(_persistMessages(next));
+      }
     });
     unawaited(_loadCachedMessages());
     ref.onDispose(_dispose);
@@ -1824,14 +1834,13 @@ class ChatNotifier extends Notifier<ChatState> {
       dates.map((key, value) => MapEntry(key, value.toIso8601String()));
 
   void clearForSignOut() {
+    for (final roomId in _typingListeners.keys.toList()) {
+      unsubscribeFromTyping(roomId);
+    }
     unsubscribeAll();
     state = const ChatState();
   }
 }
-
-final chatProvider = NotifierProvider<ChatNotifier, ChatState>(
-  ChatNotifier.new,
-);
 
 /// Narrow watch for a single DM thread (avoids rebuilding on unrelated rooms).
 final dmRoomMessagesProvider = Provider.family<List<ChannelMessage>, String>((

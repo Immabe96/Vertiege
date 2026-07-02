@@ -19,7 +19,7 @@ class DossierCollapsibleSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return VSurfaceCard(
+    return VCard(
       child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(

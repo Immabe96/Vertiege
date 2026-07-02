@@ -194,7 +194,6 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
   /// Builds the world limit reached view when user has used all creation slots.
   Widget _buildWorldLimitReachedView(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final resident = ref.read(residentProvider).resident;
     final limit = resident?.worldCreationLimit ?? 1;
 
@@ -213,11 +212,11 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: ListView(
         padding: const EdgeInsets.all(VSpacing.md),
         children: [
-          VSurfaceCard(
+          VCard(
             padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
-                Icon(Icons.diamond_outlined, size: 64, color: VColors.tertiary),
+                const Icon(Icons.diamond_outlined, size: 64, color: VColors.tertiary),
                 const SizedBox(height: VSpacing.md),
                 Text(
                   'World Limit Reached',
@@ -231,33 +230,22 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   'You have created $limit world(s). Upgrade your tier to unlock more.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: VColors.onSurfaceVariantDark,
                   ),
                 ),
                 const SizedBox(height: VSpacing.xl),
                 if (nextTierLimit != null) ...[
-                  SizedBox(
-                    height: 48,
-                    child: FilledButton.icon(
-                      onPressed: () => context.push('/achievements'),
-                      icon: const Icon(VIcons.trophy),
-                      label: const Text('Go to Achievements'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: VColors.tertiary,
-                        foregroundColor: VColors.onTertiary,
-                      ),
-                    ),
+                  VButton(
+                    label: 'Go to Achievements',
+                    icon: const Icon(VIcons.trophy),
+                    onPressed: () => context.push('/achievements'),
                   ),
                   const SizedBox(height: VSpacing.sm),
                   Text(
                     'Reach the next tier to create up to $nextTierLimit worlds.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                   ),
                 ],
@@ -271,7 +259,6 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
   Widget _buildLockedView(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final totalXp = ref.watch(achievementProvider).totalXp;
     final progress = (totalXp / _requiredXp).clamp(0.0, 1.0);
     final remaining = _requiredXp - totalXp;
@@ -282,11 +269,11 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
       body: ListView(
         padding: const EdgeInsets.all(VSpacing.md),
         children: [
-          VSurfaceCard(
+          VCard(
             padding: const EdgeInsets.all(VSpacing.xl),
             child: Column(
               children: [
-                Icon(Icons.lock_outline, size: 64, color: VColors.tertiary),
+                const Icon(Icons.lock_outline, size: 64, color: VColors.tertiary),
                 const SizedBox(height: VSpacing.md),
                 Text(
                   'High Roller Required',
@@ -300,9 +287,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   'Only residents who have reached High Roller tier (500+ XP) can create custom dominion worlds.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: VColors.onSurfaceVariantDark,
                   ),
                 ),
                 const SizedBox(height: VSpacing.lg),
@@ -312,9 +297,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 16,
-                    backgroundColor: isDark
-                        ? VColors.glassBackgroundDark
-                        : VColors.glassBackground,
+                    backgroundColor: VColors.glassBackgroundDark,
                     valueColor: const AlwaysStoppedAnimation(VColors.tertiary),
                   ),
                 ),
@@ -331,33 +314,22 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   Text(
                     '$remaining XP to go',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                   ),
                 ],
                 const SizedBox(height: VSpacing.xl),
-                SizedBox(
-                  height: 48,
-                  child: FilledButton.icon(
-                    onPressed: () => context.go('/achievements'),
-                    icon: const Icon(VIcons.trophy),
-                    label: const Text('Go to Achievements'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: VColors.tertiary,
-                      foregroundColor: VColors.onTertiary,
-                    ),
-                  ),
+                VButton(
+                  label: 'Go to Achievements',
+                  icon: const Icon(VIcons.trophy),
+                  onPressed: () => context.go('/achievements'),
                 ),
                 const SizedBox(height: VSpacing.sm),
                 Text(
                   'Submit achievements and earn XP to unlock world creation.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: VColors.onSurfaceVariantDark,
                   ),
                 ),
               ],
@@ -371,7 +343,6 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // ── Level gate: must be High Roller (tier >= 2) ─────────────
     if (!_canCreateWorld) {
@@ -392,7 +363,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
           padding: const EdgeInsets.all(VSpacing.md),
           children: [
             // ── World Details ──────────────────────────────────────
-            VSurfaceCard(
+            VCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -479,7 +450,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: VSpacing.md),
 
-            VSurfaceCard(
+            VCard(
               child: DominionTypePicker(
                 selected: _selectedDominionType,
                 onSelected: (type) =>
@@ -489,7 +460,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
 
             const SizedBox(height: VSpacing.md),
 
-            VSurfaceCard(
+            VCard(
               child: Theme(
                 data: theme.copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
@@ -501,12 +472,9 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
                   subtitle: Text(
                     '${_channelToggles.values.where((v) => v).length} selected',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                   ),
-                  initiallyExpanded: false,
                   children: _defaultChannels
                       .map(
                         (channel) => Padding(
@@ -536,7 +504,7 @@ class _CreateWorldScreenState extends ConsumerState<CreateWorldScreen> {
               label: 'Create World',
               isFullWidth: true,
               isLoading: _isCreating,
-              icon: Icon(VIcons.plus, size: VIconSize.md),
+              icon: const Icon(VIcons.plus, size: VIconSize.md),
               onPressed: _isFormReady ? _submit : null,
             ),
 

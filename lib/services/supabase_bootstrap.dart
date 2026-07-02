@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http_io;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'app_check_service.dart';
 import 'crash_reporter.dart';
+import 'supabase_app_check.dart';
 
 /// Result of [SupabaseBootstrap.initialize].
 enum SupabaseBootstrapResult {
@@ -15,10 +18,30 @@ enum SupabaseBootstrapResult {
   failed,
 }
 
+/// [http.Client] that injects Firebase App Check tokens into outgoing
+/// Supabase requests. Gracefully degrades when App Check is unavailable.
+class _AppCheckClient extends http.BaseClient {
+  _AppCheckClient(this._inner);
+
+  final http.Client _inner;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (AppCheckService.isActivated) {
+      final token = await SupabaseAppCheck.token();
+      if (token != null) {
+        request.headers['X-Firebase-AppCheck'] = token;
+      }
+    }
+    return _inner.send(request);
+  }
+}
+
 /// Initializes Supabase from `.env` (bundled asset or local file).
 abstract final class SupabaseBootstrap {
   static SupabaseBootstrapResult _lastResult = SupabaseBootstrapResult.pending;
   static bool _initialized = false;
+  static Future<SupabaseBootstrapResult>? _initFuture;
 
   static SupabaseBootstrapResult get lastResult => _lastResult;
 
@@ -51,9 +74,15 @@ abstract final class SupabaseBootstrap {
   }
 
   static Future<SupabaseBootstrapResult> initialize() async {
+    if (_initFuture != null) return _initFuture!;
     if (_initialized && _lastResult == SupabaseBootstrapResult.ready) {
       return _lastResult;
     }
+    _initFuture = _doInitialize();
+    return _initFuture!;
+  }
+
+  static Future<SupabaseBootstrapResult> _doInitialize() async {
 
     final url = dotenv.env['SUPABASE_URL']?.trim() ?? '';
     final anonKey = dotenv.env['SUPABASE_ANON_KEY']?.trim() ?? '';
@@ -66,11 +95,11 @@ abstract final class SupabaseBootstrap {
     }
 
     try {
-      final httpClient = http_io.IOClient(
+      final httpClient = _AppCheckClient(http_io.IOClient(
         HttpClient()
           ..connectionTimeout = const Duration(seconds: 8)
           ..idleTimeout = const Duration(seconds: 15),
-      );
+      ));
       await Supabase.initialize(
         url: url,
         anonKey: anonKey,

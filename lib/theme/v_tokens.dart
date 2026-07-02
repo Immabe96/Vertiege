@@ -20,7 +20,11 @@ class VRadius {
   /// Commune card radius — 8px (DCX-029).
   static const double sm = 8;
   static const double md = 12;
-  static const double lg = 16;
+  /// Unified card radius — bento / prestige cards (Open Design prototype).
+  /// `lg` and `bento` are intentionally the same value (14) so the whole app
+  /// shares one card radius.
+  static const double bento = 14;
+  static const double lg = bento;
   static const double xl = 18;
   static const double xxl = 20;
   static const double xxxl = 24;

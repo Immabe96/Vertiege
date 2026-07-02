@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'config/image_cache_policy.dart';
 import 'theme/theme_prefs.dart';
+import 'theme/v_fonts.dart';
 import 'services/crash_reporter.dart';
 import 'services/supabase_bootstrap.dart';
 import 'services/firebase_messaging_handlers.dart';
@@ -35,8 +36,9 @@ void main() async {
     return true;
   };
 
-  await dotenv.load(fileName: '.env', isOptional: true);
+  await dotenv.load(isOptional: true);
   await ThemePrefs.warmCache();
+  await VFonts.ensureLoaded();
   await SupabaseBootstrap.initialize();
   await loadGateCompletionStatus();
 

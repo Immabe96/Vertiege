@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
@@ -96,7 +96,6 @@ class WorldShareCard extends StatelessWidget {
                 vertical: VSpacing.lg,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Tier badge with glow
                   Container(

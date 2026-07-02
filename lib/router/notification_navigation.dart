@@ -68,6 +68,8 @@ String? routeForNotification(AppNotification notification) {
         return '/explore/${Uri.encodeComponent(worldId)}/governance';
       }
       return '/notifications';
+    case NotificationType.unknown:
+      return '/notifications';
   }
 }
 

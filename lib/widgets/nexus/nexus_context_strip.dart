@@ -6,7 +6,6 @@ import '../../theme/v_commune_colors.dart';
 import '../../theme/v_context_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/progression_help_button.dart';
-import '../../config/progression_glossary.dart';
 
 /// Achievement-first context chips at the top of Nexus (DCX-091).
 class NexusContextStrip extends StatelessWidget {
@@ -45,10 +44,8 @@ class NexusContextStrip extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              ProgressionHelpButton(
-                focus: ProgressionFocus.overview,
+              const ProgressionHelpButton(
                 tooltip: 'How XP, tier & rep work',
-                iconSize: VIconSize.md,
               ),
             ],
           ),

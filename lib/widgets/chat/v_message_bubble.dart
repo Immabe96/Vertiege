@@ -121,7 +121,6 @@ class _VMessageBubbleState extends State<VMessageBubble>
   late final Animation<Offset> _slide;
   bool _hasAnimated = false;
   double _swipeOffset = 0;
-  bool _swiping = false;
 
   bool get _isChannel => widget.mode == VMessageBubbleMode.channel;
 
@@ -349,14 +348,14 @@ class _VMessageBubbleState extends State<VMessageBubble>
     final compact = widget.compact;
 
     final bubbleColor = isMe
-        ? VCommuneChatTheme.sentBubbleColor
+        ? VCommuneChatTheme.sentBubbleColorOf(brightness)
         : VCommuneChatTheme.receivedBubbleColorOf(brightness);
 
     final textColor = isMe
-        ? VCommuneChatTheme.sentTextColor
+        ? VCommuneChatTheme.sentTextColorOf(brightness)
         : VCommuneChatTheme.receivedTextColorOf(brightness);
     final timestampColor = isMe
-        ? VCommuneChatTheme.sentTextColor.withValues(alpha: 0.6)
+        ? VCommuneChatTheme.sentTextColorOf(brightness).withValues(alpha: 0.6)
         : VCommuneChatTheme.timestampMutedOf(brightness);
 
     final borderRadius = isMe
@@ -373,6 +372,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
             imageUrl: widget.message.senderAvatar,
             seed: widget.message.senderId,
             name: widget.message.senderName,
+            nameColor: VColors.brand,
           ),
           SizedBox(height: compact ? 2 : VSpacing.xs),
         ],
@@ -384,7 +384,6 @@ class _VMessageBubbleState extends State<VMessageBubble>
               onLongPress: () => _showDmMessageOptions(context),
               onHorizontalDragStart: (_) {
                 setState(() {
-                  _swiping = true;
                   _swipeOffset = 0;
                 });
               },
@@ -400,13 +399,11 @@ class _VMessageBubbleState extends State<VMessageBubble>
                 }
                 setState(() {
                   _swipeOffset = 0;
-                  _swiping = false;
                 });
               },
               onHorizontalDragCancel: () {
                 setState(() {
                   _swipeOffset = 0;
-                  _swiping = false;
                 });
               },
               child: Stack(
@@ -596,7 +593,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
             textColor: textColor,
             accentMentionHandle: _channel.selfMentionHandle,
           ),
-        if (embed != null) embed,
+        ?embed,
       ],
     );
   }
@@ -784,7 +781,6 @@ class _VMessageBubbleState extends State<VMessageBubble>
             imageUrl: widget.message.senderAvatar,
             seed: widget.message.senderId,
             name: widget.message.senderName,
-            tier: 1,
             nameColor: _channel.senderNameColor,
           ),
           SizedBox(height: compact ? 2 : 4),
@@ -852,21 +848,20 @@ class _VMessageBubbleState extends State<VMessageBubble>
 
   void _showEditDialog(BuildContext context) {
     final controller = TextEditingController(text: widget.message.content);
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: const Text('Edit Message'),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainer,
-          ),
+      title: 'Edit Message',
+      content: TextField(
+        controller: controller,
+        maxLines: 3,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          filled: true,
+          fillColor: Theme.of(context).colorScheme.surfaceContainer,
         ),
-        actions: [
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
             onPressed: () => Navigator.pop(context),
@@ -882,9 +877,9 @@ class _VMessageBubbleState extends State<VMessageBubble>
               Navigator.pop(context);
             },
           ),
-        ],
-      ),
-    );
+        ]),
+      ],
+    ).whenComplete(controller.dispose);
   }
 
   void _showEmojiPicker(BuildContext context) {
@@ -970,7 +965,6 @@ class _ReactionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(top: VSpacing.xs),

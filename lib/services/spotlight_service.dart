@@ -28,8 +28,22 @@ class SpotlightEntry {
 
 class SpotlightService {
   static final Map<String, _SpotlightCache> _cache = {};
+  static final Map<String, Future<Resident?>> _pendingSelections = {};
 
   static Future<Resident?> getSpotlightResident(String worldId) async {
+    if (_pendingSelections.containsKey(worldId)) {
+      return _pendingSelections[worldId];
+    }
+    final future = _doGetSpotlightResident(worldId);
+    _pendingSelections[worldId] = future;
+    try {
+      return await future;
+    } finally {
+      _pendingSelections.remove(worldId);
+    }
+  }
+
+  static Future<Resident?> _doGetSpotlightResident(String worldId) async {
     final today = DateTime.now();
     final todayKey = '${worldId}_${today.year}_${today.month}_${today.day}';
 
@@ -46,7 +60,7 @@ class SpotlightService {
       final candidates = await _getCandidates(worldId, alreadySpotlighted);
 
       if (candidates.isEmpty) {
-        _cache[todayKey] = _SpotlightCache(residentId: null);
+        _cache[todayKey] = const _SpotlightCache();
         return null;
       }
 
@@ -62,7 +76,7 @@ class SpotlightService {
 
       return selected;
     } catch (_) {
-      _cache[todayKey] = _SpotlightCache(residentId: null);
+      _cache[todayKey] = const _SpotlightCache();
       return null;
     }
   }
@@ -98,8 +112,8 @@ class SpotlightService {
         .select()
         .contains('joined_world_ids', '["$worldId"]')
         .limit(100);
-    return (data as List)
-        .map((e) => _residentFromProfile(e))
+    return (data as List).cast<Map<String, dynamic>>()
+        .map(_residentFromProfile)
         .toList();
   }
 
@@ -127,11 +141,12 @@ class SpotlightService {
     double score = 0;
     score += resident.streakCount * 2;
     if (resident.lastCheckIn != null) {
-      final daysSince = DateTime.now().difference(
-        DateTime.parse(resident.lastCheckIn!),
-      ).inDays;
-      if (daysSince <= 7) score += 20;
-      else if (daysSince <= 14) score += 10;
+      final lastCheckIn = _tryParseDate(resident.lastCheckIn!);
+      if (lastCheckIn == null) return score;
+      final daysSince = DateTime.now().difference(lastCheckIn).inDays;
+      if (daysSince <= 7) {
+        score += 20;
+      } else if (daysSince <= 14) score += 10;
     }
     return score;
   }
@@ -144,6 +159,14 @@ class SpotlightService {
       'world_id': worldId,
       'spotlighted_at': DateTime.now().toIso8601String(),
     });
+  }
+
+  static DateTime? _tryParseDate(String value) {
+    try {
+      return DateTime.parse(value);
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<Resident?> _fetchResident(String residentId) async {

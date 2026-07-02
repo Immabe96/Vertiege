@@ -5,7 +5,7 @@ import 'package:vertiege/router/world_navigation.dart';
 void main() {
   group('worldChannelDestinationPath', () {
     test('routes voice channels to Campfire', () {
-      final channel = WorldChannel(
+      final channel = const WorldChannel(
         id: 'w-campfire',
         worldId: 'w1',
         name: 'campfire',
@@ -23,11 +23,10 @@ void main() {
     });
 
     test('routes text channels to world channel screen', () {
-      final channel = WorldChannel(
+      final channel = const WorldChannel(
         id: 'w-lounge',
         worldId: 'w1',
         name: 'lounge',
-        channelType: ChannelType.text,
       );
       final path = worldChannelDestinationPath('w1', channel);
       expect(path, startsWith('/explore/w1/lounge'));

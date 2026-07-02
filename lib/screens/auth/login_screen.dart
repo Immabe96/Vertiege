@@ -13,10 +13,11 @@ import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../services/supabase_bootstrap.dart';
 import '../../widgets/auth/auth_error_card.dart';
-import '../../theme/v_colors.dart';
-import '../../theme/v_commune_colors.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_tokens.dart';
 import 'package:vertiege/ui/ui.dart';
+import '../../widgets/auth/auth_fields.dart';
+import '../../widgets/auth/auth_prestige_shell.dart';
 import '../../widgets/auth/auth_social_buttons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -75,7 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool get _isValid {
     final email = _emailController.text.trim();
     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) &&
-        _passwordController.text.length >= 6;
+        _passwordController.text.length >= 8;
   }
 
   void _setLoading(bool value) {
@@ -248,8 +249,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final emailController = TextEditingController(
       text: _emailController.text.trim(),
     );
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final result = await showVDialog<bool>(
       context: context,
       title: 'Reset password',
@@ -259,32 +258,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         children: [
           const Text(
             'Enter your email address. We will send you a password reset link.',
+            style: TextStyle(color: PrestigeNoir.muted),
           ),
           const SizedBox(height: VSpacing.md),
           TextField(
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-              labelText: 'Email',
-              hintText: 'you@example.com',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(VRadius.md),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(VRadius.md),
-                borderSide: BorderSide(
-                  color: isDark ? VColors.outlineDark : VColors.outline,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(VRadius.md),
-                borderSide: const BorderSide(
-                  color: VColors.primary,
-                  width: 2,
-                ),
-              ),
-              isDense: true,
-            ),
+            style: const TextStyle(color: PrestigeNoir.foreground),
+            decoration: prestigeAuthFieldDecoration(hint: 'you@example.com'),
           ),
         ],
       ),
@@ -327,70 +308,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     emailController.dispose();
   }
 
-  InputDecoration _fieldDecoration(
-    BuildContext context, {
-    required String label,
-    String? hint,
-    Widget? suffixIcon,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(VRadius.md),
-    );
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      suffixIcon: suffixIcon,
-      border: border,
-      enabledBorder: border.copyWith(
-        borderSide: BorderSide(
-          color: isDark ? VColors.outlineDark : VColors.outline,
-        ),
-      ),
-      focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: VColors.primary, width: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: isDark
-          ? VCommuneColors.surfaceTertiary
-          : VCommuneColors.surfaceSecondaryLight,
+      backgroundColor: PrestigeNoir.bg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(VSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: VSpacing.lg,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Vertiege',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: VFontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+                  const AuthPrestigeBrandHeader(),
+                  const SizedBox(height: 24),
+                  AuthPrestigeModeSwitch(
+                    activeMode: AuthPrestigeMode.signIn,
+                    isLoading: _isLoading,
+                    onSignIn: () {},
+                    onSignUp: () => context.go('/signup'),
                   ),
-                  const SizedBox(height: VSpacing.xs),
-                  Text(
-                    'Welcome back',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: VSpacing.xl),
+                  const SizedBox(height: 24),
                   if (_errorMessage != null) ...[
                     AuthErrorCard(message: _errorMessage!),
                     const SizedBox(height: VSpacing.md),
                   ],
+                  const PrestigeAuthFieldLabel(label: 'Email or Username'),
                   TextField(
                     controller: _emailController,
                     focusNode: _emailFocus,
@@ -398,33 +345,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
                     autocorrect: false,
+                    style: const TextStyle(color: PrestigeNoir.foreground),
                     textInputAction: TextInputAction.next,
                     onChanged: (_) => setState(() => _errorMessage = null),
                     onSubmitted: (_) => _passwordFocus.requestFocus(),
-                    decoration: _fieldDecoration(
-                      context,
-                      label: 'Email',
-                      hint: 'you@example.com',
+                    decoration: prestigeAuthFieldDecoration(
+                      hint: 'raven@voidwalker.io',
                     ),
                   ),
-                  const SizedBox(height: VSpacing.md),
+                  const SizedBox(height: VSpacing.lg),
+                  const PrestigeAuthFieldLabel(label: 'Password'),
                   TextField(
                     controller: _passwordController,
                     focusNode: _passwordFocus,
                     enabled: !_isLoading,
                     obscureText: _obscurePassword,
                     autofillHints: const [AutofillHints.password],
+                    style: const TextStyle(color: PrestigeNoir.foreground),
                     textInputAction: TextInputAction.done,
                     onChanged: (_) => setState(() => _errorMessage = null),
                     onSubmitted: _isValid ? (_) => _handleLogin() : null,
-                    decoration: _fieldDecoration(
-                      context,
-                      label: 'Password',
+                    decoration: prestigeAuthFieldDecoration(
+                      hint: '••••••••',
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
+                          color: PrestigeNoir.muted,
                         ),
                         onPressed: () => setState(
                           () => _obscurePassword = !_obscurePassword,
@@ -432,42 +380,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: VSpacing.lg),
-                  VButton(
-                    label: 'Sign In',
-                    isFullWidth: true,
-                    isLoading: _isLoading,
-                    onPressed: _isValid ? _handleLogin : null,
-                  ),
                   const SizedBox(height: VSpacing.sm),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: TextButton(
+                    child: VButton(
+                      label: 'Forgot password?',
+                      variant: ButtonVariant.text,
+                      size: ButtonSize.small,
                       onPressed: _isLoading ? null : _showForgotPassword,
-                      child: const Text('Forgot password?'),
                     ),
+                  ),
+                  const SizedBox(height: VSpacing.sm),
+                  AuthPrestigePrimaryButton(
+                    label: 'Sign In',
+                    isLoading: _isLoading,
+                    onPressed: _isValid ? _handleLogin : null,
                   ),
                   const SizedBox(height: VSpacing.lg),
                   AuthSocialButtons(
                     isLoading: _isLoading,
-                    isDark: isDark,
                     onGoogle: _handleGoogleSignIn,
                     onApple: _handleAppleSignIn,
                   ),
                   const SizedBox(height: VSpacing.lg),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Don't have an account? "),
-                      TextButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () => context.go('/signup'),
-                        child: const Text('Sign Up'),
-                      ),
-                    ],
-                  ),
-                  TextButton(
+                  VButton(
+                    label: AdminAccessService.isCurrentSessionVerifier()
+                        ? 'Open staff review'
+                        : 'Staff sign-in',
+                    variant: ButtonVariant.text,
+                    size: ButtonSize.small,
                     onPressed: _isLoading
                         ? null
                         : () {
@@ -477,11 +418,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               context.go('/verifier/login');
                             }
                           },
-                    child: Text(
-                      AdminAccessService.isCurrentSessionVerifier()
-                          ? 'Open staff review'
-                          : 'Staff sign-in',
-                    ),
                   ),
                 ],
               ),

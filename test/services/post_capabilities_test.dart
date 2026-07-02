@@ -5,10 +5,9 @@ import 'package:vertiege/services/post_capabilities.dart';
 void main() {
   group('PostCapabilities', () {
     test('denies announcement for regular resident', () {
-      final resident = Resident(
+      final resident = const Resident(
         id: 'r1',
         name: 'Test',
-        tier: ResidentTier.hustlers,
         joinedWorldIds: ['w1'],
       );
       final result = PostCapabilities.check(
@@ -22,10 +21,9 @@ void main() {
     });
 
     test('allows announcement for sovereign', () {
-      final resident = Resident(
+      final resident = const Resident(
         id: 'sovereign',
         name: 'Sovereign',
-        tier: ResidentTier.hustlers,
         joinedWorldIds: ['w1'],
       );
       final result = PostCapabilities.check(

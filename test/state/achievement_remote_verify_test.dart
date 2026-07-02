@@ -14,7 +14,6 @@ void main() {
       userAchievements: const [
         UserAchievement(
           achievementId: 'a1',
-          status: AchievementStatus.submitted,
         ),
       ],
     );

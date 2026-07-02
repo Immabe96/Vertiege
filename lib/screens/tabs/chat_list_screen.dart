@@ -126,12 +126,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       headerActions: [
         VAccessibleHeaderAction(
           label: 'Explore worlds',
-          icon: Icon(VIcons.globe),
+          icon: const Icon(VIcons.globe),
           onPress: () => context.push('/explore'),
         ),
         VAccessibleHeaderAction(
           label: 'New direct message',
-          icon: Icon(VIcons.userPlus),
+          icon: const Icon(VIcons.userPlus),
           onPress: () => openGlobalSearch(context),
         ),
       ],
@@ -246,13 +246,18 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     ChatState chatState,
   ) {
     if (residentId == null) {
-      return Center(
-        child: Text(
-          'Sign in to view chats',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          AppEmptyState(
+            title: 'Sign in to view chats',
+            description: 'Your worlds and direct messages appear here once you are signed in.',
+            icon: Icons.forum_outlined,
+            illustration: EmptyStateIllustration.chat,
+            actionLabel: 'Sign in',
+            onAction: () => context.go('/login'),
           ),
-        ),
+        ],
       );
     }
 
@@ -291,34 +296,15 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                         VSpacing.md,
                         VSpacing.sm,
                       ),
-                      child: TextField(
+                      child: VSearchBar(
                         controller: _dmSearchController,
-                        onChanged: (value) => setState(() => _dmSearchQuery = value),
-                        decoration: InputDecoration(
-                          hintText: 'Search direct messages...',
-                          prefixIcon: const Icon(Icons.search, size: VIconSize.sm),
-                          suffixIcon: _dmSearchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, size: VIconSize.sm),
-                                  onPressed: () {
-                                    _dmSearchController.clear();
-                                    setState(() => _dmSearchQuery = '');
-                                  },
-                                )
-                              : null,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: VSpacing.md,
-                            vertical: VSpacing.sm,
-                          ),
-                          filled: true,
-                          fillColor: isDark
-                              ? VColors.surfaceContainerDark
-                              : VColors.surfaceContainerLow,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.pill),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
+                        hintText: 'Search direct messages...',
+                        onChanged: (value) =>
+                            setState(() => _dmSearchQuery = value),
+                        onClear: () {
+                          _dmSearchController.clear();
+                          setState(() => _dmSearchQuery = '');
+                        },
                       ),
                     ),
                     Expanded(
@@ -443,7 +429,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                         ),
                         children: [
                           if (announcementChannels.isNotEmpty) ...[
-                            _ChannelGroupHeader(label: 'Foundation'),
+                            const _ChannelGroupHeader(label: 'Foundation'),
                             ...announcementChannels.map((channel) {
                               final unreadCount = ref
                                   .read(chatProvider.notifier)
@@ -464,7 +450,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                             }),
                           ],
                           if (chatChannels.isNotEmpty) ...[
-                            _ChannelGroupHeader(label: 'Chat'),
+                            const _ChannelGroupHeader(label: 'Chat'),
                             ...chatChannels.map((channel) {
                               final unreadCount = ref
                                   .read(chatProvider.notifier)
@@ -550,7 +536,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         
         return Dismissible(
           key: ValueKey(roomId),
-          direction: DismissDirection.horizontal,
           confirmDismiss: (direction) async {
             if (direction == DismissDirection.startToEnd) {
               HapticFeedback.lightImpact();
@@ -729,8 +714,6 @@ class _ModeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -742,7 +725,7 @@ class _ModeButton extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+              ? VColors.brandSoft(Theme.of(context).brightness)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(VRadius.pill),
         ),
@@ -753,7 +736,7 @@ class _ModeButton extends StatelessWidget {
               icon,
               size: VIconSize.sm,
               color: selected
-                  ? Theme.of(context).colorScheme.primary
+                  ? VColors.brand
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: VSpacing.xs),
@@ -761,7 +744,7 @@ class _ModeButton extends StatelessWidget {
               showUnreadBadge ? '$label ($count unread)' : '$label $count',
               style: TextStyle(
                 color: selected
-                    ? Theme.of(context).colorScheme.primary
+                    ? VColors.brand
                     : Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: selected || showUnreadBadge
                     ? VFontWeight.semiBold
@@ -813,7 +796,6 @@ class _ChannelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final hasTyping = typingLabel != null;
     return Material(
       color: Colors.transparent,
@@ -885,14 +867,14 @@ class _ChannelTile extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: VColors.brand,
                     borderRadius: BorderRadius.circular(VRadius.pill),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     unreadCount > 99 ? '99+' : '$unreadCount',
                     style: const TextStyle(
-                      color: VColors.onPrimary,
+                      color: VColors.onBrand,
                       fontSize: VFontSize.labelSm,
                       fontWeight: VFontWeight.bold,
                     ),
@@ -924,7 +906,6 @@ class _WorldRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       width: 88,
@@ -956,12 +937,12 @@ class _WorldRail extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+                        ? VColors.brandSoft(Theme.of(context).brightness)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(VRadius.md),
                     border: isSelected
                         ? Border.all(
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                            color: VColors.brand.withValues(alpha: 0.4),
                           )
                         : null,
                   ),
@@ -976,7 +957,7 @@ class _WorldRail extends StatelessWidget {
                             size: 36,
                             useGlassContainer: false,
                             tintColor: isSelected
-                                ? Theme.of(context).colorScheme.primary
+                                ? VColors.brand
                                 : Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           if (unread > 0)
@@ -1052,7 +1033,6 @@ class _WorldPanelHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -1168,16 +1148,28 @@ class _ChannelGroupHeader extends StatelessWidget {
   }
 }
 
-class _EmptyChannels extends ConsumerWidget {
+class _EmptyChannels extends ConsumerStatefulWidget {
   final String worldId;
 
   const _EmptyChannels({required this.worldId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Future.microtask(() {
-      ref.read(channelProvider.notifier).ensureDefaultChannels(worldId);
+  ConsumerState<_EmptyChannels> createState() => _EmptyChannelsState();
+}
+
+class _EmptyChannelsState extends ConsumerState<_EmptyChannels> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(channelProvider.notifier).ensureDefaultChannels(widget.worldId);
+      }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1271,7 +1263,6 @@ class _DmRoomTileState extends State<_DmRoomTile>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final hasTyping = widget.typingLabel != null;
     final lastMessage = hasTyping
         ? widget.typingLabel!
@@ -1292,7 +1283,7 @@ class _DmRoomTileState extends State<_DmRoomTile>
             children: [
               Stack(
                 children: [
-                  CosmeticAvatar(imageUrl: widget.otherAvatar, size: 48),
+                  CosmeticAvatar(imageUrl: widget.otherAvatar),
                   Positioned(
                     right: 0,
                     bottom: 0,

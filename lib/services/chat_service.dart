@@ -140,19 +140,18 @@ class ChatService {
   ) async {
     if (!isSupabaseConfigured() || roomIds.isEmpty) return {};
     final client = getSupabase();
+    final data = await client
+        .from('chat_messages')
+        .select('room_id, sender_id, created_at')
+        .inFilter('room_id', roomIds)
+        .order('created_at', ascending: false);
+    final seen = <String>{};
     final senders = <String, String>{};
-    for (final roomId in roomIds) {
-      try {
-        final row = await client
-            .from('chat_messages')
-            .select('sender_id')
-            .eq('room_id', roomId)
-            .order('created_at', ascending: false)
-            .limit(1)
-            .maybeSingle();
-        final senderId = row?['sender_id'] as String?;
-        if (senderId != null) senders[roomId] = senderId;
-      } catch (_) {}
+    for (final row in data) {
+      final roomId = row['room_id'] as String?;
+      final senderId = row['sender_id'] as String?;
+      if (roomId == null || senderId == null || !seen.add(roomId)) continue;
+      senders[roomId] = senderId;
     }
     return senders;
   }
@@ -525,11 +524,6 @@ class ChatService {
       'room_id': roomId,
       'last_read_at': now,
     });
-    await client.from('channel_reads').upsert({
-      'resident_id': residentId,
-      'channel_id': roomId,
-      'last_read_at': now,
-    });
     unawaited(recordMessageReadsForRoom(roomId: roomId, residentId: residentId));
   }
 
@@ -544,7 +538,8 @@ class ChatService {
           .from('chat_messages')
           .select('id')
           .eq('room_id', roomId)
-          .neq('sender_id', residentId);
+          .neq('sender_id', residentId)
+          .limit(200);
       final ids = (data as List)
           .map((row) => row['id'] as String?)
           .whereType<String>()
@@ -898,34 +893,6 @@ class ChatService {
       throw StateError('Supabase is not configured; reaction was not saved.');
     }
     final client = getSupabase();
-    final dmMessage = await client
-        .from('chat_messages')
-        .select('reactions')
-        .eq('id', messageId)
-        .maybeSingle();
-    if (dmMessage != null) {
-      final raw = dmMessage['reactions'];
-      final reactions = raw is Map<String, dynamic>
-          ? raw.map((key, value) => MapEntry(key, List<String>.from(value)))
-          : <String, List<String>>{};
-      final users = List<String>.from(reactions[emoji] ?? const <String>[]);
-      if (add) {
-        if (!users.contains(userId)) users.add(userId);
-        reactions[emoji] = users;
-      } else {
-        users.remove(userId);
-        if (users.isEmpty) {
-          reactions.remove(emoji);
-        } else {
-          reactions[emoji] = users;
-        }
-      }
-      await client
-          .from('chat_messages')
-          .update({'reactions': reactions})
-          .eq('id', messageId);
-      return;
-    }
     if (add) {
       await client.rpc(
         'add_reaction',

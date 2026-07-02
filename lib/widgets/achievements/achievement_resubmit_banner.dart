@@ -13,14 +13,13 @@ class AchievementResubmitBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final parsed = parseRejectFeedback(reviewerNotes);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: VColors.error.withValues(alpha: isDark ? 0.12 : 0.08),
+        color: VColors.error.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(color: VColors.error.withValues(alpha: 0.35)),
       ),
@@ -53,7 +52,7 @@ class AchievementResubmitBanner extends StatelessWidget {
           Text(
             parsed.message,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+              color: VColors.onSurfaceDark,
             ),
           ),
           const SizedBox(height: VSpacing.md),
@@ -75,9 +74,7 @@ class AchievementResubmitBanner extends StatelessWidget {
                     child: Text(
                       step,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: VColors.onSurfaceVariantDark,
                       ),
                     ),
                   ),

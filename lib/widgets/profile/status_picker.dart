@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../core/status_dot.dart';
 import '../core/tab_aware_sheet.dart';
 
@@ -120,7 +121,7 @@ class _StatusPickerSheetState extends State<_StatusPickerSheet> {
             ),
           ),
           const SizedBox(height: VSpacing.sm),
-          FilledButton(onPressed: _save, child: const Text('Save')),
+          VButton(label: 'Save', onPressed: _save, isFullWidth: true),
         ],
       ),
     );

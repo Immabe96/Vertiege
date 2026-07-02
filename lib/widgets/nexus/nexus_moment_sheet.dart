@@ -71,7 +71,7 @@ class _NexusMomentSheetState extends ConsumerState<NexusMomentSheet> {
             worldId: 'nexus',
             residentId: resident.id,
             residentName: resident.name,
-            residentAvatar: resident.avatarUrl ?? '',
+            residentAvatar: resident.avatarUrl,
             content: content,
             tierValue: resident.tier.value,
           );

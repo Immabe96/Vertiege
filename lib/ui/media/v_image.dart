@@ -1,8 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 
-/// Standard image widget with fallback chain:
-/// 1. Supabase/network image
+/// Standard image widget with caching and fallback chain:
+/// 1. Cached network image (Supabase or external URL)
 /// 2. Bundled asset
 /// 3. Category placeholder (colored container with icon)
 /// 4. Minimal icon empty state
@@ -32,17 +33,13 @@ class VImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     Widget placeholder = Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         color:
             placeholderColor?.withValues(alpha: 0.12) ??
-            (isDark
-                ? VColors.surfaceContainerHighestDark.withValues(alpha: 0.3)
-                : VColors.surfaceContainerHighest.withValues(alpha: 0.3)),
+            VColors.surfaceContainerHighestDark.withValues(alpha: 0.3),
         borderRadius: borderRadius,
       ),
       child: Icon(
@@ -50,28 +47,27 @@ class VImage extends StatelessWidget {
         size: (width != null && height != null)
             ? (width! < height! ? width! * 0.4 : height! * 0.4)
             : 32,
-        color:
-            placeholderColor ??
-            (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+        color: placeholderColor ?? VColors.onSurfaceVariantDark,
       ),
     );
 
-    Widget imageWidget;
+    Widget? imageWidget;
     if (imageUrl != null && imageUrl!.isNotEmpty) {
+      final cacheWidth = width != null ? width!.round() : null;
+      final cacheHeight = height != null ? height!.round() : null;
       imageWidget = ClipRRect(
         borderRadius: borderRadius ?? BorderRadius.zero,
-        child: Image.network(
-          imageUrl!,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl!,
           width: width,
           height: height,
           fit: fit,
-          loadingBuilder: showLoadingIndicator
-              ? (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return placeholder;
-                }
+          memCacheWidth: cacheWidth,
+          memCacheHeight: cacheHeight,
+          placeholder: showLoadingIndicator
+              ? (context, url) => placeholder
               : null,
-          errorBuilder: (context, error, stackTrace) {
+          errorWidget: (context, url, error) {
             if (assetPath != null) {
               return Image.asset(
                 assetPath!,
@@ -96,13 +92,14 @@ class VImage extends StatelessWidget {
           errorBuilder: (context, error, stackTrace) => placeholder,
         ),
       );
-    } else {
-      imageWidget = placeholder;
     }
 
-    if (borderRadius != null && imageWidget is! ClipRRect) {
-      return ClipRRect(borderRadius: borderRadius!, child: imageWidget);
+    if (imageWidget != null) {
+      if (borderRadius != null && imageWidget is! ClipRRect) {
+        return ClipRRect(borderRadius: borderRadius!, child: imageWidget);
+      }
+      return imageWidget;
     }
-    return imageWidget;
+    return placeholder;
   }
 }

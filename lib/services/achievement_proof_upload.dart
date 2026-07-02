@@ -40,7 +40,6 @@ class AchievementProofUpload {
         quality: 82,
         minWidth: 1600,
         minHeight: 1600,
-        format: CompressFormat.jpeg,
       );
       return result?.path ?? filePath;
     } catch (_) {

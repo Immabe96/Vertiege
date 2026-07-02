@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/tiers.dart';
 import '../../models/resident.dart';
@@ -28,7 +28,6 @@ class WorldResidents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final preview = members.take(5).toList();
 
     return Column(
@@ -43,16 +42,16 @@ class WorldResidents extends StatelessWidget {
         if (isLoading)
           ...List.generate(
             3,
-            (_) => Padding(
-              padding: const EdgeInsets.only(bottom: VSpacing.sm),
+            (_) => const Padding(
+              padding: EdgeInsets.only(bottom: VSpacing.sm),
               child: Row(
                 children: [
-                  const Pulse(
+                  Pulse(
                     width: 40,
                     height: 40,
                     borderRadius: VRadius.pill,
                   ),
-                  const SizedBox(width: VSpacing.sm),
+                  SizedBox(width: VSpacing.sm),
                   Expanded(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -61,13 +60,11 @@ class WorldResidents extends StatelessWidget {
                         Pulse(
                           width: 120,
                           height: VFontSize.bodyMd,
-                          borderRadius: VRadius.sm,
                         ),
-                        const SizedBox(height: VSpacing.xs),
+                        SizedBox(height: VSpacing.xs),
                         Pulse(
                           width: 72,
                           height: VFontSize.labelSm,
-                          borderRadius: VRadius.sm,
                         ),
                       ],
                     ),
@@ -80,9 +77,7 @@ class WorldResidents extends StatelessWidget {
           Text(
             'No residents yet',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: VColors.onSurfaceVariantDark,
             ),
           )
         else
@@ -156,10 +151,7 @@ class _ResidentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark
-        ? VColors.onSurfaceVariantDark
-        : VColors.onSurfaceVariant;
+    final muted = VColors.onSurfaceVariantDark;
 
     return Material(
       color: Colors.transparent,
@@ -168,7 +160,6 @@ class _ResidentRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Stack(
                 alignment: Alignment.center,

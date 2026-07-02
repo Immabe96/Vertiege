@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -30,7 +30,7 @@ class ExploreSectionHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: VFontSize.headlineLg,
                 fontWeight: VFontWeight.semiBold,
                 color: VColors.primary,

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:livekit_client/livekit_client.dart';
 import '../services/voice_service.dart';
+
+part 'voice_provider.g.dart';
 
 class VoiceState {
   final List<Participant> participants;
@@ -58,7 +61,8 @@ class VoiceState {
   );
 }
 
-class VoiceNotifier extends Notifier<VoiceState> {
+@Riverpod(name: 'voiceProvider', keepAlive: true)
+class VoiceNotifier extends _$VoiceNotifier {
   StreamSubscription<List<Participant>>? _sub;
 
   @override
@@ -158,7 +162,3 @@ class VoiceNotifier extends Notifier<VoiceState> {
     );
   }
 }
-
-final voiceProvider = NotifierProvider<VoiceNotifier, VoiceState>(
-  VoiceNotifier.new,
-);

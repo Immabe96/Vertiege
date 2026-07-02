@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../services/leaderboard_service.dart';
 import 'resident_provider.dart';
+
+part 'leaderboard_provider.g.dart';
 
 enum LeaderboardTab { xp, achievements, referrals }
 
@@ -56,7 +59,8 @@ class LeaderboardState {
   }
 }
 
-class LeaderboardNotifier extends Notifier<LeaderboardState> {
+@Riverpod(name: 'leaderboardProvider', keepAlive: true)
+class LeaderboardNotifier extends _$LeaderboardNotifier {
   @override
   LeaderboardState build() => const LeaderboardState();
 
@@ -73,13 +77,13 @@ class LeaderboardNotifier extends Notifier<LeaderboardState> {
       final residentId = ref.read(residentProvider).resident?.id;
 
       final results = await Future.wait([
-        LeaderboardService.getGlobalLeaderboard(limit: 50),
-        LeaderboardService.getAchievementLeaderboard(limit: 50),
-        LeaderboardService.getReferralLeaderboard(limit: 50),
+        LeaderboardService.getGlobalLeaderboard(),
+        LeaderboardService.getAchievementLeaderboard(),
+        LeaderboardService.getReferralLeaderboard(),
         if (residentId != null)
           LeaderboardService.getMyRank(residentId)
         else
-          Future.value(null),
+          Future.value(),
       ]);
 
       state = state.copyWith(
@@ -97,8 +101,3 @@ class LeaderboardNotifier extends Notifier<LeaderboardState> {
     }
   }
 }
-
-final leaderboardProvider =
-    NotifierProvider<LeaderboardNotifier, LeaderboardState>(
-  LeaderboardNotifier.new,
-);

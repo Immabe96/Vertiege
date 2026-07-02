@@ -104,15 +104,12 @@ class _SeasonNarrativeBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: VColors.glassBackgroundDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-        ),
+        border: Border.all(color: VColors.glassBorderDark),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,9 +128,11 @@ class _SeasonNarrativeBanner extends StatelessWidget {
           const SizedBox(height: VSpacing.sm),
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton(
+            child: VButton(
+              label: 'View season standings',
+              variant: ButtonVariant.text,
+              size: ButtonSize.small,
               onPressed: onOpenSeason,
-              child: const Text('View season standings'),
             ),
           ),
         ],
@@ -152,7 +151,6 @@ class _PrestigeHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final prestigeStars = resident.prestigeStars as int;
     final prestigeTitle = prestigeStars == 0
         ? 'Apex'
@@ -192,7 +190,7 @@ class _PrestigeHeader extends ConsumerWidget {
                     children: [
                       Text(
                         prestigeTitle,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: VFontSize.headlineLg,
                           fontWeight: VFontWeight.bold,
                           color: VColors.tertiary,
@@ -202,11 +200,9 @@ class _PrestigeHeader extends ConsumerWidget {
                         prestigeStars == 0
                             ? 'Reach 50,000 XP to ascend'
                             : 'Prestige Level $prestigeStars',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: VFontSize.bodySm,
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: VColors.onSurfaceVariantDark,
                         ),
                       ),
                     ],
@@ -216,29 +212,22 @@ class _PrestigeHeader extends ConsumerWidget {
             ),
             if (canAscend) ...[
               const SizedBox(height: VSpacing.md),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () async {
-                    final success = await ref
-                        .read(residentProvider.notifier)
-                        .ascendToPrestige();
-                    if (success && context.mounted) {
-                      PrestigeUpDialog.show(
-                        context,
-                        prestigeLevel: 1,
-                        newPrestigeStars: prestigeStars + 1,
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.auto_awesome),
-                  label: const Text('ASCEND TO PRESTIGE'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: VColors.tertiary,
-                    foregroundColor: VColors.onTertiary,
-                    padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
-                  ),
-                ),
+              VButton(
+                label: 'ASCEND TO PRESTIGE',
+                isFullWidth: true,
+                icon: const Icon(Icons.auto_awesome),
+                onPressed: () async {
+                  final success = await ref
+                      .read(residentProvider.notifier)
+                      .ascendToPrestige();
+                  if (success && context.mounted) {
+                    PrestigeUpDialog.show(
+                      context,
+                      prestigeLevel: 1,
+                      newPrestigeStars: prestigeStars + 1,
+                    );
+                  }
+                },
               ),
             ],
           ],
@@ -268,7 +257,7 @@ class _LeaderEntry {
   });
 }
 
-Color _rankColor(int rank, {required bool isDark}) {
+Color _rankColor(int rank) {
   switch (rank) {
     case 1:
       return VColors.tertiary;
@@ -277,7 +266,7 @@ Color _rankColor(int rank, {required bool isDark}) {
     case 3:
       return VColors.secondary;
     default:
-      return isDark ? VColors.glassBorderDark : VColors.glassBorder;
+      return VColors.glassBorderDark;
   }
 }
 
@@ -432,7 +421,6 @@ Widget _buildLeaderboardList(
   WidgetRef ref,
   List<_LeaderEntry> entries,
 ) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
   if (entries.isEmpty) {
     return const AppEmptyState(
       title: 'No rankings yet',
@@ -478,16 +466,10 @@ Widget _buildLeaderboardList(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: _rankColor(
-                        rank,
-                        isDark: isDark,
-                      ).withValues(alpha: 0.15),
+                      color: _rankColor(rank).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(VRadius.sm),
                       border: isTop3
-                          ? Border.all(
-                              color: _rankColor(rank, isDark: isDark),
-                              width: 1.5,
-                            )
+                          ? Border.all(color: _rankColor(rank), width: 1.5)
                           : null,
                     ),
                     child: Center(
@@ -496,7 +478,7 @@ Widget _buildLeaderboardList(
                         style: TextStyle(
                           fontSize: VFontSize.headlineMd,
                           fontWeight: VFontWeight.bold,
-                          color: _rankColor(rank, isDark: isDark),
+                          color: _rankColor(rank),
                         ),
                       ),
                     ),
@@ -518,7 +500,7 @@ Widget _buildLeaderboardList(
                   // Score
                   Text(
                     '${entry.score}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.headlineMd,
                       fontWeight: VFontWeight.bold,
                       color: VColors.tertiary,
@@ -543,21 +525,12 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border:
-            border ??
-            Border.all(
-              color: isDark
-                  ? VColors.outlineVariantDark
-                  : VColors.outlineVariant,
-            ),
+        border: border ?? Border.all(color: VColors.outlineVariantDark),
       ),
       child: child,
     );

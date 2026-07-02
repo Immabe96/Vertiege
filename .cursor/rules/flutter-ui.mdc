@@ -21,11 +21,10 @@ When building or reviewing **UI, screens, widgets, theme, Forui, light/dark mode
 ## Quick rules
 
 - Prefer **Forui** (`FScaffold`, `FHeader`, `FTile`, `FButton`, `FTextField`) over raw Material on **new** code.
-- Keep **light and dark** in sync: `themeProvider` + `VertiegeForuiTheme` + `VTheme`.
-- Do not add new `isDark ? VColors.foo : VColors.bar` — use `colorScheme` or `context.theme.colors`.
+- Do not add new `isDark ? VColors.foo : VColors.bar` — app is **dark-only**; use `colorScheme`, `context.theme.colors`, or `PrestigeNoir` / `context.v*`.
 - Hub sub-pages: **`VHubPage`**. Tab roots are legacy Material until migrated (see UI audit Tier A).
 
 ## Audits
 
-- `docs/audits/2026-05-24-cursor-swarm-ui-ux-audit.md`
+- `docs/audits/2026-06-29-release-readiness-audit.md`
 - `./scripts/audit-ui-ux.sh`

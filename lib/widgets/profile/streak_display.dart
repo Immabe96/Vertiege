@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -145,7 +145,7 @@ class StreakDisplay extends StatelessWidget {
                                 ),
                         ),
                         child: isFilled
-                            ? Icon(
+                            ? const Icon(
                                 Icons.check,
                                 size: VIconSize.xs,
                                 color: VColors.warning,

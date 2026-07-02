@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/report.dart';
 import '../ui/ui.dart';
-import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 
 /// Shared reason-picker bottom sheet for reporting posts and chat messages.
@@ -25,10 +24,9 @@ class ReportSheet extends StatefulWidget {
     required void Function(ReportReason reason, String? details) onSubmit,
     String targetLabel = 'post',
   }) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => ReportSheet(
+    return showVSheet(
+      context,
+      ReportSheet(
         onSubmit: onSubmit,
         targetLabel: targetLabel,
       ),

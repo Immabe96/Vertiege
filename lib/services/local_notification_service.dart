@@ -69,7 +69,6 @@ class LocalNotificationService {
         _channelGeneral,
         'Vertiege',
         description: 'Likes, comments, and world updates',
-        importance: Importance.defaultImportance,
       ),
     );
 
@@ -240,7 +239,7 @@ class LocalNotificationService {
         return chatShellPath(roomId);
       }
       return routeFromRemoteMessage(
-        RemoteMessage(data: data.map((k, v) => MapEntry('$k', '$v'))),
+        RemoteMessage(data: data.map((k, v) => MapEntry(k, '$v'))),
       );
     } catch (_) {
       return null;

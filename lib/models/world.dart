@@ -443,9 +443,6 @@ class World extends WorldBase {
 
   static DominionType? _parseDominionType(String? raw) {
     if (raw == null || raw.isEmpty) return null;
-    if (raw == 'academy' || raw == 'archive') {
-      return DominionType.sanctuary;
-    }
     return DominionType.values.firstWhere(
       (t) => t.name == raw,
       orElse: () => DominionType.sanctuary,

@@ -57,11 +57,12 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
         });
       }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _loading = false;
           _error = 'Failed to load audit log';
         });
+      }
     }
   }
 
@@ -107,8 +108,9 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     final amount = details['amount'];
     if (amount != null) return '$amount coins';
     final action = details['action'] as String?;
-    if (action != null)
+    if (action != null) {
       return 'Rank ${action == 'assign' ? 'assigned' : 'removed'}';
+    }
     return null;
   }
 
@@ -346,17 +348,12 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
+        border: Border.all(color: VColors.outlineVariantDark),
       ),
       child: child,
     );

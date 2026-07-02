@@ -1,5 +1,5 @@
-﻿import 'package:flutter/material.dart';
-import 'glass_panel.dart';
+import 'package:flutter/material.dart';
+import '../../ui/cards/v_card.dart';
 import 'screen_loading.dart';
 import 'shimmer.dart';
 import '../../theme/v_tokens.dart';
@@ -9,19 +9,19 @@ class VLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VSurfacePanel(
-      padding: const EdgeInsets.all(VSpacing.lg),
+    return const VCard(
+      padding: EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Pulse(width: 150, height: VFontSize.headlineMd),
-          const SizedBox(height: VSpacing.sm),
-          const Pulse(height: VFontSize.bodyMd),
-          const SizedBox(height: VSpacing.xs),
-          const Pulse(width: double.infinity, height: VFontSize.bodyMd),
-          const SizedBox(height: VSpacing.md),
+          Pulse(width: 150, height: VFontSize.headlineMd),
+          SizedBox(height: VSpacing.sm),
+          Pulse(height: VFontSize.bodyMd),
+          SizedBox(height: VSpacing.xs),
+          Pulse(height: VFontSize.bodyMd),
+          SizedBox(height: VSpacing.md),
           Row(
-            children: const [
+            children: [
               Pulse(width: 60, height: 20),
               SizedBox(width: VSpacing.sm),
               Pulse(width: 40, height: 20),

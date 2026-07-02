@@ -23,15 +23,13 @@ class LoadState<T> {
         error = null,
         stackTrace = null;
 
-  const LoadState.loading({T? data})
+  const LoadState.loading({this.data})
       : status = LoadStateStatus.loading,
-        data = data,
         error = null,
         stackTrace = null;
 
-  const LoadState.loaded(T data)
+  const LoadState.loaded(T this.data)
       : status = LoadStateStatus.loaded,
-        data = data,
         error = null,
         stackTrace = null;
 
@@ -41,11 +39,9 @@ class LoadState<T> {
         error = null,
         stackTrace = null;
 
-  const LoadState.error(Object error, [StackTrace? stackTrace])
+  const LoadState.error(Object this.error, [this.stackTrace])
       : status = LoadStateStatus.error,
-        data = null,
-        error = error,
-        stackTrace = stackTrace;
+        data = null;
 
   bool get isLoading => status == LoadStateStatus.loading;
   bool get isLoaded => status == LoadStateStatus.loaded;

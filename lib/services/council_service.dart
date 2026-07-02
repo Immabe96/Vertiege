@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../utils/presence_utils.dart';
 import 'supabase.dart';
 
 class CouncilMember {
@@ -86,7 +87,7 @@ class CouncilService {
 
     // Check sovereign inactivity
     final sovProfile = profileMap[sovereignId];
-    final sovLastSeen = sovProfile?['last_seen_at'] as int? ?? 0;
+    final sovLastSeen = parseLastSeenMs(sovProfile?['last_seen_at']) ?? 0;
     final sovereignInactive = sovLastSeen > 0 && sovLastSeen < cutoff;
 
     // Collect active council members (excluding sovereign for election purposes)
@@ -96,7 +97,7 @@ class CouncilService {
     for (final m in members) {
       final rid = m['resident_id'] as String;
       final profile = profileMap[rid];
-      final lastSeen = profile?['last_seen_at'] as int? ?? 0;
+      final lastSeen = parseLastSeenMs(profile?['last_seen_at']) ?? 0;
       final tier = profile?['tier'] as int? ?? 1;
 
       if (lastSeen > 0 && lastSeen < cutoff) {
@@ -186,10 +187,9 @@ class CouncilService {
   static Future<void> _ejectMember(String worldId, String residentId) async {
     if (!isSupabaseConfigured()) return;
     final client = getSupabase();
-    // Drop rep just below council threshold
     await client
         .from('world_members')
-        .update({'rep': ejectedRep})
+        .update({'rep': ejectedRep, 'resident_name': ''})
         .eq('world_id', worldId)
         .eq('resident_id', residentId);
   }

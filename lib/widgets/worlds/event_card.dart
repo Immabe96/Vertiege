@@ -6,7 +6,8 @@ import '../../theme/v_tokens.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../utils/date_format.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
+import '../../ui/ui.dart';
 
 /// Glass card showing an event post with title, date/time, RSVP button.
 class EventCard extends ConsumerWidget {
@@ -23,7 +24,7 @@ class EventCard extends ConsumerWidget {
         ? formatTimestamp(post.eventStartsAt!)
         : 'Date pending';
 
-    return VSurfacePanel(
+    return VCard(
       padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,27 +94,21 @@ class EventCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              FilledButton.icon(
-                onPressed: () {
-                  if (resident != null) {
-                    ref
-                        .read(postProvider.notifier)
-                        .toggleEventRsvp(post.id, resident.id);
-                  }
-                },
+              VButton(
+                label: hasRsvp ? 'GOING' : 'ATTEND',
                 icon: Icon(
                   hasRsvp ? Icons.event_available : Icons.event,
                   size: VIconSize.sm,
                 ),
-                label: Text(hasRsvp ? 'GOING' : 'ATTEND'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: hasRsvp
-                      ? Theme.of(context).colorScheme.primary
-                      : VColors.tertiary,
-                  foregroundColor: hasRsvp
-                      ? VColors.onPrimary
-                      : VColors.onTertiary,
-                ),
+                onPressed: resident == null
+                    ? null
+                    : () {
+                        ref
+                            .read(postProvider.notifier)
+                            .toggleEventRsvp(post.id, resident.id);
+                      },
+                variant: ButtonVariant.filled,
+                size: ButtonSize.small,
               ),
             ],
           ),

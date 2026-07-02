@@ -5,6 +5,7 @@ import '../../config/tiers.dart';
 import '../../router/world_navigation.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../../utils/standing_display_color.dart';
 import '../core/status_dot.dart';
 import '../profile/cosmetic_avatar.dart';
@@ -80,7 +81,7 @@ class VMemberCard extends StatelessWidget {
                       Positioned(
                         right: -2,
                         bottom: -2,
-                        child: StatusDot(presence: presence!, size: 12),
+                        child: StatusDot(presence: presence!),
                       ),
                   ],
                 ),
@@ -162,25 +163,28 @@ class VMemberCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: VButton(
+                    variant: ButtonVariant.outlined,
+                    isFullWidth: true,
                     onPressed: () {
                       onDismiss?.call();
                       context.push(residentProfilePath(residentId));
                     },
                     icon: const Icon(Icons.person_outline, size: VIconSize.base),
-                    label: const Text('Profile'),
+                    label: 'Profile',
                   ),
                 ),
                 if (onMessage != null) ...[
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
-                    child: FilledButton.icon(
+                    child: VButton(
+                      isFullWidth: true,
                       onPressed: () {
                         onDismiss?.call();
                         onMessage!();
                       },
                       icon: const Icon(Icons.chat_bubble_outline, size: VIconSize.base),
-                      label: const Text('Message'),
+                      label: 'Message',
                     ),
                   ),
                 ],

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:vertiege/ui/ui.dart';
 
 import '../../models/world.dart';
@@ -8,6 +8,7 @@ import '../../theme/v_tokens.dart';
 /// Pinned toolbar for world detail — no edge-to-edge banner or text-on-image.
 class WorldHeroBanner extends StatelessWidget {
   final World world;
+  /// Retained for caller compatibility; app is dark-only.
   final bool isDark;
   final Color prestigeTierColor;
   final bool isJoined;
@@ -23,7 +24,7 @@ class WorldHeroBanner extends StatelessWidget {
   const WorldHeroBanner({
     super.key,
     required this.world,
-    required this.isDark,
+    this.isDark = true,
     required this.prestigeTierColor,
     required this.isJoined,
     required this.innerBoxIsScrolled,
@@ -40,9 +41,9 @@ class WorldHeroBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final collapsed = innerBoxIsScrolled;
-    final fg = isDark ? VColors.onSurfaceDark : VColors.onSurface;
-    final bg = isDark ? VColors.surfaceDark : VColors.surface;
-    final divider = isDark ? VColors.outlineDark : VColors.outline;
+    final fg = VColors.onSurfaceDark;
+    final bg = VColors.surfaceDark;
+    final divider = VColors.outlineDark;
 
     return SliverAppBar(
       pinned: true,
@@ -52,7 +53,7 @@ class WorldHeroBanner extends StatelessWidget {
       foregroundColor: fg,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(VIcons.chevronLeft),
+        icon: const Icon(VIcons.chevronLeft),
         tooltip: 'Back',
         onPressed: onBack,
       ),
@@ -70,26 +71,24 @@ class WorldHeroBanner extends StatelessWidget {
               'World',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: VFontWeight.medium,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: VColors.onSurfaceVariantDark,
               ),
             ),
       actions: [
         if (onOpenTools != null)
           IconButton(
-            icon: Icon(VIcons.ellipsis),
+            icon: const Icon(VIcons.ellipsis),
             tooltip: 'World tools',
             onPressed: onOpenTools,
           ),
         IconButton(
-          icon: Icon(VIcons.share),
+          icon: const Icon(VIcons.share),
           tooltip: 'Share world',
           onPressed: onShare,
         ),
         if (onSettings != null)
           IconButton(
-            icon: Icon(VIcons.settings),
+            icon: const Icon(VIcons.settings),
             tooltip: 'World settings',
             onPressed: onSettings,
           ),

@@ -51,10 +51,10 @@ class PostService {
     int limit = 20,
   }) async {
     if (!isSupabaseConfigured()) {
-      return PaginatedResult(items: [], hasMore: false);
+      return const PaginatedResult(items: [], hasMore: false);
     }
     if (worldId != null && !_isUuid(worldId)) {
-      return PaginatedResult(items: [], hasMore: false);
+      return const PaginatedResult(items: [], hasMore: false);
     }
 
     final client = getSupabase();
@@ -128,7 +128,9 @@ class PostService {
       'resident_id': residentId,
       'content': content,
     });
-    await client.rpc('increment_comment_count', params: {'post_id': postId});
+    try {
+      await client.rpc('increment_comment_count', params: {'post_id': postId});
+    } catch (_) {}
   }
 
   static bool _isUuid(String value) => validators.isUuid(value);

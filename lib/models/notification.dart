@@ -1,4 +1,5 @@
 enum NotificationType {
+  unknown,
   like,
   comment,
   worldUnlocked,
@@ -105,7 +106,7 @@ class AppNotification {
         NotificationType.governanceProposalRejected,
       'governance_proposal_rejected' =>
         NotificationType.governanceProposalRejected,
-      _ => NotificationType.like,
+      _ => NotificationType.unknown,
     };
   }
 

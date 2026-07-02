@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../state/league_provider.dart';
 import '../../../state/resident_provider.dart';
@@ -60,7 +60,7 @@ class LeagueCard extends ConsumerWidget {
       );
     }
 
-    final tierColor = LeagueService.getTierColor(userLeague!.tier);
+    final tierColor = LeagueService.getTierColor(userLeague.tier);
     final tierIcon = LeagueService.getTierIcon(userLeague.tier);
     final calmLabel = CalmRanking.leagueBandLabel(
       rank: userLeague.rank,

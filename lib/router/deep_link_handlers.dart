@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import '../models/message.dart';
-import '../models/notification.dart';
 import '../services/chat_service.dart';
 import '../services/invite_service.dart';
 import '../services/supabase.dart';
+import '../services/notification_service.dart';
 import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
 import '../state/resident_provider.dart';
@@ -27,7 +27,7 @@ class WorldChannelRouteHandler extends ConsumerStatefulWidget {
   final String channelId;
   final String channelName;
 
-  const WorldChannelRouteHandler({
+  const WorldChannelRouteHandler({super.key, 
     required this.worldId,
     required this.channelId,
     required this.channelName,
@@ -70,7 +70,7 @@ class CampfireRouteHandler extends ConsumerStatefulWidget {
   final String worldId;
   final String worldName;
 
-  const CampfireRouteHandler({
+  const CampfireRouteHandler({super.key, 
     required this.channelId,
     required this.channelName,
     required this.worldId,
@@ -110,7 +110,7 @@ class _CampfireRouteHandlerState extends ConsumerState<CampfireRouteHandler> {
 class AcceptInviteScreen extends ConsumerStatefulWidget {
   final String code;
 
-  const AcceptInviteScreen({required this.code});
+  const AcceptInviteScreen({super.key, required this.code});
 
   @override
   ConsumerState<AcceptInviteScreen> createState() =>
@@ -212,7 +212,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
 class ThreadDeepLinkScreen extends StatefulWidget {
   final String messageId;
 
-  const ThreadDeepLinkScreen({required this.messageId});
+  const ThreadDeepLinkScreen({super.key, required this.messageId});
 
   @override
   State<ThreadDeepLinkScreen> createState() => _ThreadDeepLinkScreenState();
@@ -292,7 +292,7 @@ class _ThreadDeepLinkScreenState extends State<ThreadDeepLinkScreen> {
 class NotificationDeepLink extends ConsumerStatefulWidget {
   final String notificationId;
 
-  const NotificationDeepLink({required this.notificationId});
+  const NotificationDeepLink({super.key, required this.notificationId});
 
   @override
   ConsumerState<NotificationDeepLink> createState() =>
@@ -307,9 +307,23 @@ class _NotificationDeepLinkState extends ConsumerState<NotificationDeepLink> {
   }
 
   Future<void> _redirect() async {
-    final notifs = ref.read(notificationProvider).notifications;
-    final notif =
+    var notifs = ref.read(notificationProvider).notifications;
+    var notif =
         notifs.where((n) => n.id == widget.notificationId).firstOrNull;
+
+    // Fallback: fetch from server if not in memory
+    if (notif == null && isSupabaseConfigured()) {
+      try {
+        final residentId = ref.read(residentProvider).resident?.id;
+        if (residentId != null) {
+          final serverNotifs =
+              await NotificationService.getNotifications(residentId);
+          notif = serverNotifs
+              .where((n) => n.id == widget.notificationId)
+              .firstOrNull;
+        }
+      } catch (_) {}
+    }
 
     if (notif != null && !notif.read) {
       ref.read(notificationProvider.notifier).markRead(widget.notificationId);
@@ -345,7 +359,7 @@ class _NotificationDeepLinkState extends ConsumerState<NotificationDeepLink> {
 class PostDeepLink extends ConsumerStatefulWidget {
   final String postId;
 
-  const PostDeepLink({required this.postId});
+  const PostDeepLink({super.key, required this.postId});
 
   @override
   ConsumerState<PostDeepLink> createState() => _PostDeepLinkState();

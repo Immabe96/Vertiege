@@ -13,7 +13,6 @@ class ProofRequirementsBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final min = achievement.effectiveMinImages;
     final max = achievement.effectiveMaxImages;
 
@@ -31,14 +30,10 @@ class ProofRequirementsBanner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerHighDark
-            : VColors.surfaceContainerHigh,
+        color: VColors.surfaceContainerHighDark,
         borderRadius: BorderRadius.circular(VRadius.md),
         border: Border.all(
-          color: isDark
-              ? VColors.outlineVariantDark.withValues(alpha: 0.4)
-              : VColors.outlineVariant.withValues(alpha: 0.5),
+          color: VColors.outlineVariantDark.withValues(alpha: 0.4),
         ),
       ),
       child: Column(
@@ -54,9 +49,7 @@ class ProofRequirementsBanner extends StatelessWidget {
           Text(
             requirement,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: VColors.onSurfaceVariantDark,
             ),
           ),
           if (achievement.proofHint != null &&

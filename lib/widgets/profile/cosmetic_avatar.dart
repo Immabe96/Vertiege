@@ -53,10 +53,23 @@ class _CosmeticAvatarState extends State<CosmeticAvatar>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
+    );
     _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(CosmeticAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.frameId != oldWidget.frameId) {
+      if (widget.frameId != null && !_controller.isAnimating) {
+        _controller.repeat(reverse: true);
+      } else if (widget.frameId == null && _controller.isAnimating) {
+        _controller.stop();
+      }
+    }
   }
 
   @override

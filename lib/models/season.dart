@@ -68,7 +68,9 @@ class Season {
   /// Which week of the season we are in (1-indexed, max 4).
   int get currentWeek => (daysElapsed ~/ 7).clamp(0, 3) + 1;
 
-  double get progress => (daysElapsed / totalDays).clamp(0.0, 1.0);
+  double get progress => totalDays > 0
+      ? (daysElapsed / totalDays).clamp(0.0, 1.0)
+      : 0.0;
 
   /// Whether this season has ended.
   bool get hasEnded => DateTime.now().isAfter(endDate);

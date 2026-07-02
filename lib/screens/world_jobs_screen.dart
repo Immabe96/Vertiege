@@ -77,94 +77,94 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
     var minStanding = 3;
     var minTier = 2;
 
-    final ok = await showVDialog<bool>(
-      context: context,
-      title: 'Post a role',
-      scrollContent: true,
-      maxContentHeight: 360,
-      content: StatefulBuilder(
-        builder: (ctx, setLocal) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: title,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            TextField(
-              controller: desc,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: VSpacing.sm),
-            TextField(
-              controller: role,
-              decoration: const InputDecoration(
-                labelText: 'Role label',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            DropdownButtonFormField<int>(
-              value: minStanding,
-              decoration: const InputDecoration(
-                labelText: 'Min standing',
-                border: OutlineInputBorder(),
-              ),
-              items: standingLevels
-                  .map(
-                    (s) => DropdownMenuItem(
-                      value: s.level,
-                      child: Text(s.title),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (v) => setLocal(() => minStanding = v ?? 3),
-            ),
-            DropdownButtonFormField<int>(
-              value: minTier,
-              decoration: const InputDecoration(
-                labelText: 'Min global tier',
-                border: OutlineInputBorder(),
-              ),
-              items: tierNames.entries
-                  .map(
-                    (e) => DropdownMenuItem(
-                      value: e.key,
-                      child: Text(e.value),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (v) => setLocal(() => minTier = v ?? 2),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Cancel',
-            variant: ButtonVariant.text,
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          VButton(
-            label: 'Post',
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ]),
-      ],
-    );
-
-    if (ok != true) return;
-    if (title.text.trim().isEmpty || desc.text.trim().isEmpty) return;
-
     try {
+      final ok = await showVDialog<bool>(
+        context: context,
+        title: 'Post a role',
+        scrollContent: true,
+        maxContentHeight: 360,
+        content: StatefulBuilder(
+          builder: (ctx, setLocal) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: title,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              TextField(
+                controller: desc,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: VSpacing.sm),
+              TextField(
+                controller: role,
+                decoration: const InputDecoration(
+                  labelText: 'Role label',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              DropdownButtonFormField<int>(
+                initialValue: minStanding,
+                decoration: const InputDecoration(
+                  labelText: 'Min standing',
+                  border: OutlineInputBorder(),
+                ),
+                items: standingLevels
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s.level,
+                        child: Text(s.title),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setLocal(() => minStanding = v ?? 3),
+              ),
+              DropdownButtonFormField<int>(
+                initialValue: minTier,
+                decoration: const InputDecoration(
+                  labelText: 'Min global tier',
+                  border: OutlineInputBorder(),
+                ),
+                items: tierNames.entries
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e.key,
+                        child: Text(e.value),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setLocal(() => minTier = v ?? 2),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              variant: ButtonVariant.text,
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            VButton(
+              label: 'Post',
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ]),
+        ],
+      );
+
+      if (ok != true) return;
+      if (title.text.trim().isEmpty || desc.text.trim().isEmpty) return;
+
       final job = await WorldJobService.createJob(
         worldId: widget.worldId,
         title: title.text.trim(),
@@ -184,41 +184,46 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       if (mounted) {
         VFeedback.showError(context, 'Could not post role: $e');
       }
+    } finally {
+      title.dispose();
+      desc.dispose();
+      role.dispose();
     }
   }
 
   Future<void> _showApplyDialog(WorldJob job) async {
     final message = TextEditingController();
 
-    final ok = await showVDialog<bool>(
-      context: context,
-      title: 'Apply for ${job.title}',
-      content: TextField(
-        controller: message,
-        maxLines: 4,
-        decoration: const InputDecoration(
-          labelText: 'Why you\'re a fit (optional)',
-          border: OutlineInputBorder(),
-          alignLabelWithHint: true,
-        ),
-      ),
-      actions: [
-        vDialogActionsRow([
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Submit application'),
-          ),
-        ]),
-      ],
-    );
-
-    if (ok != true) return;
-
     try {
+      final ok = await showVDialog<bool>(
+        context: context,
+        title: 'Apply for ${job.title}',
+        content: TextField(
+          controller: message,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: 'Why you\'re a fit (optional)',
+            border: OutlineInputBorder(),
+            alignLabelWithHint: true,
+          ),
+        ),
+        actions: [
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              variant: ButtonVariant.text,
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            VButton(
+              label: 'Submit application',
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ]),
+        ],
+      );
+
+      if (ok != true) return;
+
       await WorldJobService.applyToJob(
         jobId: job.id,
         message: message.text.trim(),
@@ -231,6 +236,8 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       if (mounted) {
         VFeedback.showError(context, '$e');
       }
+    } finally {
+      message.dispose();
     }
   }
 
@@ -268,7 +275,9 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                VButton(
+                  label: 'Decline',
+                  variant: ButtonVariant.text,
                   onPressed: () async {
                     final rejected = await WorldJobService.rejectApplication(
                       app.id,
@@ -285,10 +294,10 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                       );
                     }
                   },
-                  child: const Text('Decline'),
                 ),
                 const SizedBox(width: VSpacing.sm),
-                FilledButton(
+                VButton(
+                  label: 'Accept',
                   onPressed: () async {
                     final accepted = await WorldJobService.acceptApplication(
                       app.id,
@@ -308,7 +317,6 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                       );
                     }
                   },
-                  child: const Text('Accept'),
                 ),
               ],
             ),
@@ -318,9 +326,10 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       ),
       actions: [
         vDialogActionsRow([
-          TextButton(
+          VButton(
+            label: 'Close',
+            variant: ButtonVariant.text,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
           ),
         ]),
       ],
@@ -339,7 +348,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       headerActions: widget.canManage
           ? [
               VHeaderAction(
-                icon: Icon(VIcons.plus),
+                icon: const Icon(VIcons.plus),
                 onPress: _showCreateDialog,
               ),
             ]
@@ -347,7 +356,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          NewUserContextHint(
+          const NewUserContextHint(
             message:
                 'Roles respect world standing and tier. Apply when you qualify; council can review applicants.',
             icon: Icons.work_outline,
@@ -396,7 +405,7 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
           final eligible = _isEligible(resident, world, job);
           final myStatus = _myApplicationByJob[job.id];
           final hasApplied = myStatus != null;
-          return VSurfaceCard(
+          return VCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -456,9 +465,9 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                     const SizedBox(height: VSpacing.sm),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: FilledButton(
+                      child: VButton(
+                        label: 'Apply',
                         onPressed: () => _showApplyDialog(job),
-                        child: const Text('Apply'),
                       ),
                     ),
                   ],
@@ -467,11 +476,16 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                     Wrap(
                       spacing: VSpacing.sm,
                       children: [
-                        TextButton(
+                        VButton(
+                          label: 'Applicants',
+                          variant: ButtonVariant.text,
+                          size: ButtonSize.small,
                           onPressed: () => _showApplicants(job),
-                          child: const Text('Applicants'),
                         ),
-                        TextButton(
+                        VButton(
+                          label: 'Mark filled',
+                          variant: ButtonVariant.text,
+                          size: ButtonSize.small,
                           onPressed: () async {
                             await WorldJobService.updateStatus(
                               job.id,
@@ -479,9 +493,11 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                             );
                             _load();
                           },
-                          child: const Text('Mark filled'),
                         ),
-                        TextButton(
+                        VButton(
+                          label: 'Close',
+                          variant: ButtonVariant.text,
+                          size: ButtonSize.small,
                           onPressed: () async {
                             await WorldJobService.updateStatus(
                               job.id,
@@ -489,7 +505,6 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
                             );
                             _load();
                           },
-                          child: const Text('Close'),
                         ),
                       ],
                     ),

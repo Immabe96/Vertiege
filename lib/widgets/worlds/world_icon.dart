@@ -1,4 +1,3 @@
-﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -33,7 +32,6 @@ class WorldIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconColor = tintColor ?? WorldAssets.accentForWorld(worldId);
     final rasterPath = WorldAssets.iconImageForWorld(worldId);
     final emblemSize = useGlassContainer ? size * 0.72 : size * 0.88;
@@ -60,15 +58,14 @@ class WorldIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: VColors.glassBackgroundDark,
         borderRadius: circular ? null : BorderRadius.circular(VRadius.xl),
         shape: circular ? BoxShape.circle : BoxShape.rectangle,
-        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
+        border: Border.all(color: VColors.glassBorderDark),
         boxShadow: [
           BoxShadow(
             color: iconColor.withValues(alpha: 0.5),
             blurRadius: 8,
-            spreadRadius: 0,
           ),
         ],
       ),

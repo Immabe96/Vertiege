@@ -15,8 +15,10 @@ class AllyService {
     final existing = await client
         .from('allies')
         .select()
-        .or('requester_id.eq.$requesterId,requester_id.eq.$receiverId')
-        .or('receiver_id.eq.$requesterId,receiver_id.eq.$receiverId')
+        .or(
+          'and(requester_id.eq.$requesterId,receiver_id.eq.$receiverId),'
+          'and(requester_id.eq.$receiverId,receiver_id.eq.$requesterId)',
+        )
         .maybeSingle();
 
     if (existing != null) return;

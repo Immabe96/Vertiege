@@ -3,71 +3,42 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 
 import 'v_colors.dart';
-import 'v_commune_colors.dart';
 import 'v_fonts.dart';
+import 'v_tokens.dart';
+import 'prestige_noir.dart';
 
 class VertiegeForuiTheme {
   VertiegeForuiTheme._();
 
-  static FThemeData get light => _build(isDark: false, commune: false);
-  static FThemeData get dark => _build(isDark: true, commune: false);
-  static FThemeData get lightCommune => _build(isDark: false, commune: true);
-  static FThemeData get darkCommune => _build(isDark: true, commune: true);
+  /// Prestige Noir — sole app theme (dark-only).
+  static FThemeData get dark => _build();
 
+  /// Legacy aliases — all resolve to Prestige Noir dark.
+  static FThemeData get light => dark;
+  static FThemeData get lightCommune => dark;
+  static FThemeData get darkCommune => dark;
+
+  @Deprecated('App is dark-only Prestige Noir')
   static FThemeData forPreset({required bool isDark, required bool commune}) =>
-      _build(isDark: isDark, commune: commune);
+      dark;
 
-  static FThemeData _build({required bool isDark, required bool commune}) {
-    final bg = commune
-        ? VCommuneColors.surfacePrimaryOf(
-            isDark ? Brightness.dark : Brightness.light,
-          )
-        : (isDark ? VColors.surfaceDark : VColors.surface);
-    final fg = commune
-        ? VCommuneColors.textNormalOf(
-            isDark ? Brightness.dark : Brightness.light,
-          )
-        : (isDark ? VColors.onSurfaceDark : VColors.onSurface);
-    final card = commune
-        ? (isDark
-              ? VCommuneColors.surfaceSecondary
-              : VCommuneColors.surfaceSecondaryLight)
-        : (isDark
-              ? VColors.surfaceContainerDark
-              : VColors.surfaceContainerLowest);
-    final muted = commune
-        ? (isDark
-              ? VCommuneColors.surfaceTertiary
-              : VCommuneColors.surfaceTertiaryLight)
-        : (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer);
-    final mutedFg = commune
-        ? VCommuneColors.textMutedOf(
-            isDark ? Brightness.dark : Brightness.light,
-          )
-        : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant);
-    final border = commune
-        ? VCommuneColors.dividerOf(
-            isDark ? Brightness.dark : Brightness.light,
-          )
-        : (isDark ? VColors.outlineVariantDark : VColors.outlineVariant);
+  static FThemeData _build() {
+    const bg = PrestigeNoir.bg;
+    const fg = PrestigeNoir.foreground;
+    const card = PrestigeNoir.surface;
+    const muted = PrestigeNoir.surfaceRaised;
+    const mutedFg = PrestigeNoir.muted;
+    const border = PrestigeNoir.borderLight;
 
     final colors = FColors(
-      brightness: isDark ? Brightness.dark : Brightness.light,
-      systemOverlayStyle: isDark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
-      barrier: isDark ? const Color(0xAA000000) : const Color(0x33000000),
+      brightness: Brightness.dark,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
+      barrier: const Color(0xAA000000),
       background: bg,
       foreground: fg,
-      primary: isDark ? VColors.brandLight : VColors.brand,
+      primary: VColors.brand,
       primaryForeground: VColors.onBrand,
-      secondary: isDark
-          ? (commune
-                ? VCommuneColors.surfaceSecondaryAlt
-                : VColors.surfaceContainerHighDark)
-          : (commune
-                ? VCommuneColors.surfaceSecondaryAltLight
-                : VColors.surfaceContainerLow),
+      secondary: PrestigeNoir.surfaceRaised,
       secondaryForeground: fg,
       muted: muted,
       mutedForeground: mutedFg,
@@ -80,9 +51,7 @@ class VertiegeForuiTheme {
     );
 
     return FThemeData(
-      debugLabel: commune
-          ? (isDark ? 'Vertiege Commune Dark' : 'Vertiege Commune Light')
-          : (isDark ? 'Vertiege Prestige Noir' : 'Vertiege Light Forui'),
+      debugLabel: 'Vertiege Prestige Noir',
       colors: colors,
       touch: true,
       typography:
@@ -91,23 +60,39 @@ class VertiegeForuiTheme {
             touch: false,
             fontFamily: VFonts.sansFamily,
           ).copyWith(
-            xs3: const TextStyle(fontSize: 9, height: 1),
-            xs2: const TextStyle(fontSize: 11, height: 1),
-            xs: const TextStyle(fontSize: 12, height: 1.15),
+            // Aligned with VFontSize / VLineHeight (single type scale).
+            xs3: const TextStyle(fontSize: 9, height: VLineHeight.label),
+            xs2: const TextStyle(
+              fontSize: VFontSize.labelSm,
+              height: VLineHeight.label,
+            ),
+            xs: const TextStyle(fontSize: VFontSize.labelMd, height: 1.15),
             sm: TextStyle(
-              fontSize: 14,
-              height: 1.35,
+              fontSize: VFontSize.bodyMd,
+              height: VLineHeight.body,
               color: fg,
             ),
             md: TextStyle(
-              fontSize: 16,
-              height: 1.45,
+              fontSize: VFontSize.bodyLg,
+              height: VLineHeight.bodyLg,
               color: fg,
             ),
-            lg: const TextStyle(fontSize: 18, height: 1.35),
-            xl: const TextStyle(fontSize: 20, height: 1.3),
-            xl2: const TextStyle(fontSize: 24, height: 1.25),
-            xl3: const TextStyle(fontSize: 28, height: 1.2),
+            lg: const TextStyle(
+              fontSize: VFontSize.headlineSm,
+              height: VLineHeight.headline,
+            ),
+            xl: const TextStyle(
+              fontSize: VFontSize.headlineMd,
+              height: VLineHeight.headline,
+            ),
+            xl2: const TextStyle(
+              fontSize: VFontSize.headlineLg,
+              height: VLineHeight.headline,
+            ),
+            xl3: const TextStyle(
+              fontSize: VFontSize.displayLg,
+              height: VLineHeight.display,
+            ),
           ),
     );
   }

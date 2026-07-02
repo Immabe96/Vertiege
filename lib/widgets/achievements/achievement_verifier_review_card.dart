@@ -56,7 +56,6 @@ class _AchievementVerifierReviewCardState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final s = widget.submission;
     final definition = ach_config.achievements
         .where((a) => a.id == s.achievementId)
@@ -76,7 +75,6 @@ class _AchievementVerifierReviewCardState
               AchievementBadgeAvatar(
                 achievement: definition,
                 accentColor: Theme.of(context).colorScheme.primary,
-                size: VBadgeSize.avatar,
               )
             else
               Icon(Icons.emoji_events, color: Theme.of(context).colorScheme.primary, size: VBadgeSize.avatar),
@@ -116,12 +114,12 @@ class _AchievementVerifierReviewCardState
               ),
             ),
             IconButton(
-              icon: Icon(Icons.close, color: VColors.error),
+              icon: const Icon(Icons.close, color: VColors.error),
               tooltip: 'Reject',
               onPressed: widget.onReject,
             ),
             IconButton(
-              icon: Icon(Icons.check, color: VColors.success),
+              icon: const Icon(Icons.check, color: VColors.success),
               tooltip: 'Approve',
               onPressed: widget.onApprove,
             ),
@@ -194,7 +192,6 @@ class _ResidentHistorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (loading) {
       return Text(

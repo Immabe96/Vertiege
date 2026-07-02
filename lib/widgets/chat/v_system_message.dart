@@ -13,7 +13,6 @@ class VSystemMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.center,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: VSpacing.xs),
         padding: const EdgeInsets.symmetric(

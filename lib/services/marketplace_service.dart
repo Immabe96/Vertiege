@@ -72,7 +72,7 @@ class MarketplaceService {
       'p_price_note': priceNote ?? '',
       'p_category': category.name,
       'p_image_url': imageUrl ?? '',
-      if (coinPrice != null) 'p_coin_price': coinPrice,
+      'p_coin_price': ?coinPrice,
     });
 
     if (result == null) return null;

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../services/season_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/v_surface_card.dart';
+import '../../ui/cards/v_card.dart';
 
 /// Live season narrative from [global_seasons] on Nexus (Wave 20).
 class SeasonNexusBanner extends StatelessWidget {
@@ -20,7 +20,6 @@ class SeasonNexusBanner extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
         return Padding(
           padding: const EdgeInsets.fromLTRB(
             VSpacing.md,
@@ -33,8 +32,7 @@ class SeasonNexusBanner extends StatelessWidget {
             child: InkWell(
               onTap: () => context.push('/season'),
               borderRadius: BorderRadius.circular(VRadius.lg),
-              child: VSurfaceCard(
-                padding: const EdgeInsets.all(VSpacing.md),
+              child: VCard(
                 child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -50,9 +48,7 @@ class SeasonNexusBanner extends StatelessWidget {
                   Text(
                     data.tagline,
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                   ),
                 ],

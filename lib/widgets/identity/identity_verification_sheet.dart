@@ -140,10 +140,12 @@ class _IdentityVerificationSheetState
               ),
             )
           else
-            OutlinedButton.icon(
+            VButton(
+              variant: ButtonVariant.outlined,
+              isFullWidth: true,
               onPressed: _pickProof,
               icon: const Icon(Icons.add_a_photo_outlined),
-              label: Text('Add ${_documentType.label} photo'),
+              label: 'Add ${_documentType.label} photo',
             ),
           const SizedBox(height: VSpacing.lg),
           VButton(

@@ -6,6 +6,7 @@ import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../../utils/verified_moment.dart';
 
 /// Public standing posts on a resident profile (Nexus + world feed).
@@ -28,7 +29,6 @@ class ProfileStandingGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final visible = posts.take(maxVisible).toList();
     final overflow = posts.length - visible.length;
 
@@ -81,7 +81,6 @@ class ProfileStandingGrid extends StatelessWidget {
                   post: post,
                   width: cellWidth,
                   height: cellWidth * aspect,
-                  isDark: isDark,
                   onTap: () => context.push(
                     exploreWorldPath(post.worldId, postId: post.id),
                   ),
@@ -93,20 +92,12 @@ class ProfileStandingGrid extends StatelessWidget {
         if (hasMore && onLoadMore != null) ...[
           const SizedBox(height: VSpacing.md),
           Align(
-            alignment: Alignment.center,
-            child: TextButton.icon(
+            child: VButton(
+              variant: ButtonVariant.text,
               onPressed: isLoadingMore ? null : onLoadMore,
-              icon: isLoadingMore
-                  ? SizedBox(
-                      width: VIconSize.sm,
-                      height: VIconSize.sm,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: theme.colorScheme.primary,
-                      ),
-                    )
-                  : const Icon(Icons.expand_more, size: VIconSize.md),
-              label: Text(isLoadingMore ? 'Loading…' : 'Load more standing'),
+              isLoading: isLoadingMore,
+              icon: const Icon(Icons.expand_more, size: VIconSize.md),
+              label: 'Load more standing',
             ),
           ),
         ],
@@ -119,14 +110,12 @@ class _StandingCell extends StatelessWidget {
   final Post post;
   final double width;
   final double height;
-  final bool isDark;
   final VoidCallback onTap;
 
   const _StandingCell({
     required this.post,
     required this.width,
     required this.height,
-    required this.isDark,
     required this.onTap,
   });
 
@@ -139,9 +128,7 @@ class _StandingCell extends StatelessWidget {
         : (snippet.length > 72 ? '${snippet.substring(0, 72)}…' : snippet);
 
     return Material(
-      color: isDark
-          ? VCommuneColors.surfaceSecondary
-          : VCommuneColors.surfaceSecondaryLight,
+      color: VCommuneColors.surfaceSecondary,
       borderRadius: BorderRadius.circular(VRadius.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -155,14 +142,14 @@ class _StandingCell extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (verified)
-                  Row(
+                  const Row(
                     children: [
                       Icon(
                         Icons.verified,
                         size: VIconSize.sm,
                         color: VColors.brand,
                       ),
-                      const SizedBox(width: 2),
+                      SizedBox(width: 2),
                       Text(
                         'Verified',
                         style: TextStyle(
@@ -178,11 +165,9 @@ class _StandingCell extends StatelessWidget {
                     preview,
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VCommuneColors.textNormal
-                          : VCommuneColors.textNormalLight,
+                      color: VCommuneColors.textNormal,
                       height: 1.25,
                     ),
                   ),
@@ -190,11 +175,9 @@ class _StandingCell extends StatelessWidget {
                 if (post.reactions.isNotEmpty)
                   Text(
                     '${post.reactions.values.fold<int>(0, (a, b) => a + b)} reactions',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VCommuneColors.textMuted
-                          : VCommuneColors.textMutedLight,
+                      color: VCommuneColors.textMuted,
                     ),
                   ),
               ],

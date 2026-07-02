@@ -17,7 +17,6 @@ class WorldGrowthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final growth = WorldCapabilityMatrix.worldGrowth(world);
     final isDominion = world.type == WorldType.dominion;
     final capacity = isDominion
@@ -33,12 +32,10 @@ class WorldGrowthCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: isDark ? 0.25 : 0.35),
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.25),
         ),
       ),
       child: Column(
@@ -95,9 +92,7 @@ class WorldGrowthCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: growth.isMax ? 1.0 : growth.fraction,
                 minHeight: 8,
-                backgroundColor: isDark
-                    ? VColors.surfaceContainerHighDark
-                    : VColors.surfaceContainerHigh,
+                backgroundColor: VColors.surfaceContainerHighDark,
               ),
             ),
             const SizedBox(height: VSpacing.xs),
@@ -134,9 +129,9 @@ class WorldGrowthCard extends StatelessWidget {
               runSpacing: VSpacing.xxs,
               children: [
                 if (WorldCapabilityMatrix.worldHasTreasury(world))
-                  _FeatureChip(label: 'Treasury open'),
+                  const _FeatureChip(label: 'Treasury open'),
                 if (WorldCapabilityMatrix.worldHasMarketplace(world))
-                  _FeatureChip(label: 'Marketplace open'),
+                  const _FeatureChip(label: 'Marketplace open'),
               ],
             ),
           ],

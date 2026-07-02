@@ -17,20 +17,19 @@ class SovereignErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.lg,
         vertical: VSpacing.md,
       ),
-      color: (isDark ? VColors.errorContainerDark : VColors.errorContainer).withValues(alpha: 0.8),
+      color: VColors.errorContainerDark.withValues(alpha: 0.8),
       child: SafeArea(
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.warning_rounded,
-              color: isDark ? VColors.onErrorContainerDark : VColors.onErrorContainer,
+              color: VColors.onErrorContainerDark,
               size: VIconSize.md,
             ),
             const SizedBox(width: VSpacing.sm),
@@ -41,18 +40,18 @@ class SovereignErrorBanner extends StatelessWidget {
                 children: [
                   Text(
                     message,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.labelSm,
                       fontWeight: VFontWeight.semiBold,
-                      color: isDark ? VColors.onErrorContainerDark : VColors.onErrorContainer,
+                      color: VColors.onErrorContainerDark,
                     ),
                   ),
                   if (code != null)
                     Text(
                       code!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: VFontSize.labelSm,
-              color: isDark ? VColors.onErrorContainerDark : VColors.onErrorContainer,
+                        color: VColors.onErrorContainerDark,
                       ),
                     ),
                 ],

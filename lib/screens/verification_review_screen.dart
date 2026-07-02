@@ -12,6 +12,8 @@ import '../widgets/achievements/achievement_verifier_review_card.dart';
 import '../state/post_provider.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../ui/buttons/v_button.dart';
+import '../ui/overlays/v_dialog.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/screen_loading.dart';
 
@@ -95,10 +97,10 @@ class _VerificationReviewScreenState
 
   Future<void> _reject(VerificationSubmission s) async {
     final notesController = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reject verification?'),
+    try {
+      final confirmed = await showVDialog<bool>(
+        context: context,
+        title: 'Reject verification?',
         content: TextField(
           controller: notesController,
           decoration: const InputDecoration(
@@ -108,28 +110,31 @@ class _VerificationReviewScreenState
           maxLines: 2,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              variant: ButtonVariant.text,
+              onPressed: () => Navigator.pop(context, false),
             ),
-            child: const Text('Reject'),
-          ),
+            VButton(
+              label: 'Reject',
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ]),
         ],
-      ),
-    );
-    if (confirmed == true) {
-      await VerificationService.reject(
-        s.id,
-        notes: notesController.text.trim().isEmpty
-            ? null
-            : notesController.text.trim(),
       );
-      _load();
+
+      if (confirmed == true) {
+        await VerificationService.reject(
+          s.id,
+          notes: notesController.text.trim().isEmpty
+              ? null
+              : notesController.text.trim(),
+        );
+        _load();
+      }
+    } finally {
+      notesController.dispose();
     }
   }
 
@@ -224,7 +229,9 @@ class _VerificationReviewScreenState
                               Text(
                                 s.residentName,
                                 style: theme.textTheme.titleSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                   fontWeight: VFontWeight.bold,
                                 ),
                               ),
@@ -242,12 +249,12 @@ class _VerificationReviewScreenState
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.close, color: VColors.error),
+                          icon: const Icon(Icons.close, color: VColors.error),
                           tooltip: 'Reject',
                           onPressed: () => _reject(s),
                         ),
                         IconButton(
-                          icon: Icon(Icons.check, color: VColors.success),
+                          icon: const Icon(Icons.check, color: VColors.success),
                           tooltip: 'Approve',
                           onPressed: () => _approve(s),
                         ),
@@ -275,7 +282,9 @@ class _VerificationReviewScreenState
                             ),
                             child: Icon(
                               Icons.broken_image_outlined,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -293,10 +302,10 @@ class _VerificationReviewScreenState
 
   Future<void> _approveAchievement(PendingAchievementSubmission s) async {
     final notesController = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Approve achievement?'),
+    try {
+      final confirmed = await showVDialog<bool>(
+        context: context,
+        title: 'Approve achievement?',
         content: TextField(
           controller: notesController,
           decoration: const InputDecoration(
@@ -306,88 +315,87 @@ class _VerificationReviewScreenState
           maxLines: 3,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Approve'),
-          ),
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              variant: ButtonVariant.text,
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            VButton(
+              label: 'Approve',
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ]),
         ],
-      ),
-    );
-    if (confirmed != true) return;
-    await AchievementReviewService.approve(
-      userId: s.userId,
-      achievementId: s.achievementId,
-      reviewerNotes: notesController.text.trim().isEmpty
-          ? null
-          : notesController.text.trim(),
-    );
-    notesController.dispose();
-    _loadAchievements();
+      );
+      if (confirmed != true) return;
+      await AchievementReviewService.approve(
+        userId: s.userId,
+        achievementId: s.achievementId,
+        reviewerNotes: notesController.text.trim().isEmpty
+            ? null
+            : notesController.text.trim(),
+      );
+      _loadAchievements();
+    } finally {
+      notesController.dispose();
+    }
   }
 
   Future<void> _rejectAchievement(PendingAchievementSubmission s) async {
     var reasonCode = achievementRejectReasons.first.code;
     final notesController = TextEditingController();
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showVDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setLocal) => AlertDialog(
-          title: const Text('Reject achievement?'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                DropdownButtonFormField<String>(
-                  value: reasonCode,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: achievementRejectReasons
-                      .map(
-                        (r) => DropdownMenuItem(
-                          value: r.code,
-                          child: Text(r.label),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (v) =>
-                      setLocal(() => reasonCode = v ?? reasonCode),
+      title: 'Reject achievement?',
+      content: StatefulBuilder(
+        builder: (ctx, setLocal) => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DropdownButtonFormField<String>(
+                initialValue: reasonCode,
+                decoration: const InputDecoration(
+                  labelText: 'Reason',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.md),
-                TextField(
-                  controller: notesController,
-                  decoration: InputDecoration(
-                    hintText: reasonCode == 'custom'
-                        ? 'Your message to the resident'
-                        : 'Extra note (optional)',
-                    border: const OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(ctx).colorScheme.error,
+                items: achievementRejectReasons
+                    .map(
+                      (r) =>
+                          DropdownMenuItem(value: r.code, child: Text(r.label)),
+                    )
+                    .toList(),
+                onChanged: (v) => setLocal(() => reasonCode = v ?? reasonCode),
               ),
-              child: const Text('Reject'),
-            ),
-          ],
+              const SizedBox(height: VSpacing.md),
+              TextField(
+                controller: notesController,
+                decoration: InputDecoration(
+                  hintText: reasonCode == 'custom'
+                      ? 'Your message to the resident'
+                      : 'Extra note (optional)',
+                  border: const OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
         ),
       ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            variant: ButtonVariant.text,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          VButton(
+            label: 'Reject',
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ]),
+      ],
     );
     if (confirmed == true) {
       final note = buildRejectNote(
@@ -540,7 +548,7 @@ class _VerificationReviewScreenState
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.delete_outline,
                             color: VColors.error,
                           ),
@@ -548,7 +556,7 @@ class _VerificationReviewScreenState
                           onPressed: () => _removePost(post),
                         ),
                         IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.check_circle_outline,
                             color: VColors.success,
                           ),
@@ -612,7 +620,9 @@ class _VerifierMetricsBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -652,9 +662,7 @@ class _Card extends StatelessWidget {
             ? VColors.surfaceContainerDark
             : VColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: child,
     );

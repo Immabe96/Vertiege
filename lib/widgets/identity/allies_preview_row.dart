@@ -92,7 +92,7 @@ class _AlliesPreviewRowState extends ConsumerState<AlliesPreviewRow> {
                 VSpacing.sm,
               ),
               itemCount: preview.length,
-              separatorBuilder: (_, __) => const SizedBox(width: VSpacing.sm),
+              separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
               itemBuilder: (context, index) {
                 final ally = preview[index];
                 final otherId = ally.otherId(resident.id);

@@ -36,7 +36,6 @@ class AchievementVerifierChecklist extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final items = reviewerChecklistFor(achievement);
 
     return Column(
@@ -55,21 +54,17 @@ class AchievementVerifierChecklist extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.check_box_outline_blank,
                   size: VIconSize.sm,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: VColors.onSurfaceVariantDark,
                 ),
                 const SizedBox(width: VSpacing.xs),
                 Expanded(
                   child: Text(
                     line,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                   ),
                 ),

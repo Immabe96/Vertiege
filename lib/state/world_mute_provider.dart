@@ -1,8 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/world_mute_prefs.dart';
 
-class WorldMuteNotifier extends Notifier<Set<String>> {
+part 'world_mute_provider.g.dart';
+
+@Riverpod(name: 'worldMuteProvider', keepAlive: true)
+class WorldMuteNotifier extends _$WorldMuteNotifier {
   @override
   Set<String> build() {
     Future.microtask(_load);
@@ -19,6 +23,3 @@ class WorldMuteNotifier extends Notifier<Set<String>> {
     state = await WorldMutePrefs.toggle(worldId);
   }
 }
-
-final worldMuteProvider =
-    NotifierProvider<WorldMuteNotifier, Set<String>>(WorldMuteNotifier.new);

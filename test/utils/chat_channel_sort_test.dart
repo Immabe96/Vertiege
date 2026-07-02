@@ -12,9 +12,6 @@ WorldChannel _channel({
   name: id,
   channelType: type,
   position: position,
-  isDefault: false,
-  createdAt: 0,
-  foundationMarkdown: '',
   foundationVersion: '',
 );
 

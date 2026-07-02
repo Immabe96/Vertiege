@@ -1,6 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
 class BrokenMediaTile extends StatelessWidget {

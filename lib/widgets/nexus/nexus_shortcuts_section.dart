@@ -8,10 +8,13 @@ import '../../router/world_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../services/nexus_bento_order.dart';
 import '../../services/nexus_shortcut_prefs.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_context_colors.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/v_motion.dart';
 import 'bento_grid.dart';
+import 'bento_cards/streak_card.dart';
 import 'bento_cards/challenges_card.dart';
 import 'bento_cards/daily_quest_card.dart';
 import 'bento_cards/league_card.dart';
@@ -97,14 +100,29 @@ class NexusShortcutsSection extends ConsumerWidget {
                   size: BentoSize.medium,
                 ),
                 BentoCard(
+                  child: const StreakCard(),
+                  onTap: () =>
+                      _openShortcut(context, 'streak', '/progress?tab=quests'),
+                ),
+                BentoCard(
                   child: const DailyQuestCard(),
-                  size: BentoSize.small,
+                  size: BentoSize.medium,
                   onTap: () =>
                       _openShortcut(context, 'quest', '/progress?tab=quests'),
                 ),
+                if (!hideLeague)
+                  BentoCard(
+                    child: const LeagueCard(),
+                    onTap: () =>
+                        _openShortcut(context, 'league', leaguesPath()),
+                  ),
+                BentoCard(
+                  child: const ChallengesCard(),
+                  onTap: () =>
+                      _openShortcut(context, 'challenges', '/progress?tab=world'),
+                ),
                 BentoCard(
                   child: const SeasonSnapshotCard(),
-                  size: BentoSize.small,
                   onTap: () =>
                       _openShortcut(context, 'season', '/progress?tab=season'),
                 ),
@@ -112,19 +130,6 @@ class NexusShortcutsSection extends ConsumerWidget {
                   child: SpotlightCard(),
                   size: BentoSize.medium,
                 ),
-                BentoCard(
-                  child: const ChallengesCard(),
-                  size: BentoSize.small,
-                  onTap: () =>
-                      _openShortcut(context, 'challenges', '/progress?tab=world'),
-                ),
-                if (!hideLeague)
-                  BentoCard(
-                    child: const LeagueCard(),
-                    size: BentoSize.small,
-                    onTap: () =>
-                        _openShortcut(context, 'league', leaguesPath()),
-                  ),
                 const BentoCard(
                   child: TrendingCard(),
                   size: BentoSize.medium,
@@ -266,11 +271,10 @@ class _ShortcutsOverflowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: context.vSurfaceContainer,
+      color: PrestigeNoir.surfaceRaised,
       borderRadius: BorderRadius.circular(VRadius.lg),
       child: PopupMenuButton<_ShortcutDef>(
         tooltip: 'More shortcuts',
-        padding: const EdgeInsets.all(VSpacing.sm),
         icon: Icon(Icons.more_horiz, color: context.vOnSurfaceVariant),
         onSelected: onSelect,
         itemBuilder: (context) => [
@@ -322,7 +326,7 @@ class _CompactShortcut extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tile = Material(
-      color: context.vSurfaceContainer,
+      color: PrestigeNoir.surfaceRaised,
       borderRadius: BorderRadius.circular(VRadius.lg),
       child: InkWell(
         onTap: onTap,
@@ -341,7 +345,7 @@ class _CompactShortcut extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: VIconSize.md, color: context.vPrimary),
+                Icon(icon, size: VIconSize.md, color: VColors.brand),
                 const SizedBox(height: VSpacing.xxs),
                 Flexible(
                   child: Text(

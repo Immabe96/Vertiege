@@ -78,7 +78,7 @@ class FirebaseCrashReporter implements CrashReporter {
 
   @override
   void recordError(Object error, StackTrace stack, {String? hint}) {
-    _crashlytics.recordError(error, stack, reason: hint, fatal: false);
+    _crashlytics.recordError(error, stack, reason: hint);
   }
 
   @override

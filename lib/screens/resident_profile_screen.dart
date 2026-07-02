@@ -12,13 +12,13 @@ import '../models/post.dart';
 import '../repositories/post_repository.dart';
 import '../services/profile_service.dart';
 import '../services/chat_service.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
-import '../ui/icons/v_icons.dart';
 import '../widgets/profile/badge_display.dart';
 import '../widgets/profile/profile_achievement_showcase.dart';
 import '../widgets/profile/profile_standing_grid.dart';
@@ -94,7 +94,6 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       try {
         standingPosts = await _postRepository.publishedPostsByResident(
           widget.residentId,
-          limit: _standingPageSize,
         );
       } catch (_) {
         standingPosts = [];
@@ -118,7 +117,6 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
     try {
       final next = await _postRepository.publishedPostsByResident(
         widget.residentId,
-        limit: _standingPageSize,
         offset: _standingPosts.length,
       );
       if (!mounted) return;
@@ -137,7 +135,6 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
   Widget build(BuildContext context) {
     final achievements = ref.watch(achievementProvider);
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return VHubPage(
       title: _profile?.name ?? 'Resident',
@@ -145,9 +142,10 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       headerActions: _profile == null
           ? const []
           : [
-              IconButton(
+              VIconButton(
+                semanticsLabel: 'Share profile',
                 tooltip: 'Share profile',
-                icon: const Icon(Icons.share_outlined),
+                child: const Icon(Icons.share_outlined),
                 onPressed: () {
                   final p = _profile!;
                   SharePlus.instance.share(
@@ -182,19 +180,19 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: VSpacing.lg),
-                  FilledButton.icon(
-                    onPressed: _loadProfile,
+                  VButton(
+                    label: 'Retry',
                     icon: const Icon(VIcons.arrowLeft),
-                    label: const Text('Retry'),
+                    onPressed: _loadProfile,
                   ),
                 ],
               ),
             )
-          : _buildBody(theme, achievements, isDark),
+          : _buildBody(theme, achievements),
     );
   }
 
-  Widget _buildBody(ThemeData theme, dynamic achievements, bool isDark) {
+  Widget _buildBody(ThemeData theme, dynamic achievements) {
     final resident = _profile!;
     final isOwnProfile = resident.id == ref.read(residentProvider).resident?.id;
     final totalXp = resident.totalXp;
@@ -207,22 +205,20 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           FadeIn(
             delayMs: 30,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(VRadius.lg),
+              borderRadius: BorderRadius.circular(VRadius.bento),
               child: SizedBox(
                 height: 160,
                 width: double.infinity,
                 child: Image.network(
                   resident.coverImageUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: isDark
-                        ? VColors.surfaceContainerHigh
-                        : VColors.surfaceContainer,
-                    child: Center(
+                  errorBuilder: (_, _, _) => Container(
+                    color: PrestigeNoir.surfaceRaised,
+                    child: const Center(
                       child: Icon(
                         Icons.landscape,
                         size: VIconSize.xl,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: PrestigeNoir.muted,
                       ),
                     ),
                   ),
@@ -234,17 +230,8 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
         ],
         FadeIn(
           delayMs: 60,
-          child: Container(
+          child: VPrestigeCard(
             padding: const EdgeInsets.all(VSpacing.lg),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(VRadius.lg),
-              border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-              ),
-            ),
             child: Column(
               children: [
                 Hero(
@@ -275,9 +262,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(VRadius.pill),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
+                      border: Border.all(color: PrestigeNoir.borderLight),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -307,7 +292,7 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                     Text(
                       resident.tier.label,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: VColors.brand,
                         fontWeight: VFontWeight.semiBold,
                       ),
                     ),
@@ -353,7 +338,10 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FilledButton.icon(
+                VButton(
+                  label: 'Message',
+                  isFullWidth: true,
+                  icon: const Icon(VIcons.message),
                   onPressed: () async {
                     final currentId = ref.read(residentProvider).resident?.id;
                     if (currentId == null) return;
@@ -366,13 +354,6 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       context.push(dmPath(room['id'] as String));
                     }
                   },
-                  icon: const Icon(VIcons.message),
-                  label: const Text('Message'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: VSpacing.md,
-                    ),
-                  ),
                 ),
                 const SizedBox(height: VSpacing.sm),
                 Row(
@@ -392,38 +373,29 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                           r.receiverId == resident.id,
                     );
                     if (isAlly) {
-                      return OutlinedButton.icon(
-                        onPressed: null,
-                        icon: const Icon(VIcons.handshake),
-                        label: const Text('Allies'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: VColors.success,
-                          side: const BorderSide(color: VColors.success),
-                        ),
+                      return const VButton(
+                        label: 'Allies',
+                        variant: ButtonVariant.outlined,
+                        icon: Icon(VIcons.handshake),
                       );
                     }
                     if (isPending) {
-                      return OutlinedButton.icon(
-                        onPressed: null,
-                        icon: const Icon(VIcons.handshake),
-                        label: const Text('Pending'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                        ),
+                      return const VButton(
+                        label: 'Pending',
+                        variant: ButtonVariant.outlined,
+                        icon: Icon(VIcons.handshake),
                       );
                     }
-                    return OutlinedButton.icon(
+                    return VButton(
+                      label: 'Ally',
+                      variant: ButtonVariant.outlined,
+                      icon: const Icon(VIcons.handshake),
                       onPressed: () => ref
                           .read(allyProvider.notifier)
                           .sendRequest(
                             requesterId: currentId,
                             receiverId: resident.id,
                           ),
-                      icon: const Icon(VIcons.handshake),
-                      label: const Text('Ally'),
                     );
                   },
                 ),
@@ -438,25 +410,21 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                       ),
                     );
                     return isFollowing
-                        ? OutlinedButton.icon(
+                        ? VButton(
+                            label: 'Unfollow',
+                            variant: ButtonVariant.outlined,
+                            icon: const Icon(VIcons.userMinus),
                             onPressed: () => ref
                                 .read(residentProvider.notifier)
                                 .unfollow(resident.id),
-                            icon: const Icon(VIcons.userMinus),
-                            label: const Text('Unfollow'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                              side: BorderSide(
-                                color: Theme.of(context).colorScheme.outlineVariant,
-                              ),
-                            ),
                           )
-                        : OutlinedButton.icon(
+                        : VButton(
+                            label: 'Follow',
+                            variant: ButtonVariant.outlined,
+                            icon: const Icon(VIcons.userPlus),
                             onPressed: () => ref
                                 .read(residentProvider.notifier)
                                 .follow(resident.id),
-                            icon: const Icon(VIcons.userPlus),
-                            label: const Text('Follow'),
                           );
                   },
                 ),
@@ -471,17 +439,8 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           const SizedBox(height: VSpacing.lg),
           FadeIn(
             delayMs: 140,
-            child: Container(
+            child: VPrestigeCard(
               padding: const EdgeInsets.all(VSpacing.lg),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(VRadius.xl),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                ),
-              ),
               child: ProfileAchievementShowcase(
                 entries: _publicAchievements,
                 highlightAchievementId: widget.highlightAchievementId,
@@ -492,22 +451,12 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           const SizedBox(height: VSpacing.lg),
           FadeIn(
             delayMs: 140,
-            child: Container(
-              width: double.infinity,
+            child: VPrestigeCard(
               padding: const EdgeInsets.all(VSpacing.lg),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(VRadius.xl),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                ),
-              ),
               child: Text(
                 'No public achievements yet.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: PrestigeNoir.muted,
                 ),
               ),
             ),
@@ -517,17 +466,8 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
         const SizedBox(height: VSpacing.lg),
         FadeIn(
           delayMs: 160,
-          child: Container(
+          child: VPrestigeCard(
             padding: const EdgeInsets.all(VSpacing.lg),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(VRadius.xl),
-              border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-              ),
-            ),
             child: ProfileStandingGrid(
               posts: _standingPosts,
               maxVisible: _standingPosts.length,
@@ -542,26 +482,17 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
           const SizedBox(height: VSpacing.lg),
           FadeIn(
             delayMs: 180,
-            child: Container(
+            child: VPrestigeCard(
               padding: const EdgeInsets.all(VSpacing.lg),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(VRadius.xl),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                ),
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.emoji_events,
                         size: VIconSize.md,
-                        color: VColors.tertiary,
+                        color: VColors.brand,
                       ),
                       const SizedBox(width: VSpacing.xs),
                       Text(

@@ -22,7 +22,6 @@ Future<void> showMessageReactionPicker(
   required void Function(String emoji) onPick,
   List<String> emojis = kDefaultReactionEmojis,
 }) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
   return showModalBottomSheet(
     context: context,
     builder: (_) => SafeArea(
@@ -41,9 +40,7 @@ Future<void> showMessageReactionPicker(
                   child: Container(
                     padding: const EdgeInsets.all(VSpacing.sm),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.surfaceContainerDark
-                          : VColors.surfaceContainer,
+                      color: VColors.surfaceContainerDark,
                       borderRadius: BorderRadius.circular(VRadius.md),
                     ),
                     child: Text(

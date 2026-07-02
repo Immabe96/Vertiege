@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../config/tiers.dart';
 import '../config/world_page_ia.dart';
-import '../models/world.dart';
-import '../models/post.dart';
 import '../models/alliance.dart';
-import '../services/world_service.dart';
-import '../services/storage_service.dart';
+import '../models/post.dart';
+import '../models/world.dart';
 import '../services/council_service.dart';
 import '../services/prestige_service.dart';
+import '../services/storage_service.dart';
+import '../services/world_service.dart';
 import '../services/store_service.dart';
 import '../utils/id_generator.dart';
 import '../utils/rate_limiter.dart';
 import 'channel_provider.dart';
+
+part 'world_provider.g.dart';
 
 class WorldState {
   final Map<String, World> worlds;
@@ -42,7 +45,8 @@ class WorldState {
   );
 }
 
-class WorldNotifier extends Notifier<WorldState> {
+@Riverpod(name: 'worldProvider', keepAlive: true)
+class WorldNotifier extends _$WorldNotifier {
   @override
   WorldState build() {
     // Load local config worlds immediately — no network needed
@@ -419,6 +423,4 @@ class WorldNotifier extends Notifier<WorldState> {
   }
 }
 
-final worldProvider = NotifierProvider<WorldNotifier, WorldState>(
-  WorldNotifier.new,
-);
+

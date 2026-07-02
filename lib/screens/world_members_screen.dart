@@ -15,11 +15,7 @@ import '../utils/tier_utils.dart';
 import '../services/crash_reporter.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/empty_state.dart';
-import '../ui/buttons/v_button.dart';
-import '../ui/icons/v_icons.dart';
 import '../widgets/core/screen_loading.dart';
-import '../widgets/worlds/world_admin_breadcrumb.dart';
-import '../widgets/core/v_feedback.dart';
 import '../widgets/worlds/world_admin_breadcrumb.dart';
 
 class WorldMembersScreen extends ConsumerStatefulWidget {
@@ -97,7 +93,6 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = _filtered;
     final currentResident = ref.watch(residentProvider).resident;
     final currentResidentId = currentResident?.id;
@@ -191,9 +186,9 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                                                 ?.copyWith(
                                                   fontWeight:
                                                       VFontWeight.semiBold,
-                                                  color: isDark
-                                                      ? VColors.onSurfaceDark
-                                                      : VColors.onSurface,
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface,
                                                 ),
                                           ),
                                         ),
@@ -278,24 +273,23 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                               ),
                               const SizedBox(width: VSpacing.sm),
                               if (canManageRanks)
-                                IconButton(
+                                VIconButton(
+                                  semanticsLabel: 'Manage ranks',
                                   tooltip: 'Manage ranks',
-                                  icon: const Icon(
-                                    Icons.admin_panel_settings_outlined,
-                                    size: VIconSize.md,
-                                  ),
-                                  color: VColors.tertiary,
                                   onPressed: () => _showRankManager(
                                     residentId: residentId,
                                     residentName: name,
+                                  ),
+                                  child: const Icon(
+                                    Icons.admin_panel_settings_outlined,
+                                    size: VIconSize.md,
+                                    color: VColors.tertiary,
                                   ),
                                 )
                               else
                                 Icon(
                                   Icons.chevron_right,
-                                  color: isDark
-                                      ? VColors.outlineVariantDark
-                                      : VColors.outlineVariant,
+                                  color: theme.colorScheme.outlineVariant,
                                   size: VIconSize.lg,
                                 ),
                             ],
@@ -328,7 +322,6 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     final selected = (_rankIdsByResident[residentId] ?? const <String>[])
         .toSet();
     final original = Set<String>.from(selected);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final sheetMaxHeight = MediaQuery.sizeOf(context).height * 0.65;
 
@@ -350,7 +343,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
                 Text(
                   'Ranks for $residentName',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: VFontWeight.bold,
                   ),
                 ),
@@ -445,28 +438,28 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
     return enabled;
   }
 
-  void _showSearch(BuildContext context) {
-    showDialog(
+  Future<void> _showSearch(BuildContext context) async {
+    await showVDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Search members'),
-        content: TextField(
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Search by name...'),
-          onChanged: (v) => setState(() => _search = v),
-        ),
-        actions: [
+      title: 'Search members',
+      content: TextField(
+        autofocus: true,
+        decoration: const InputDecoration(hintText: 'Search by name...'),
+        onChanged: (v) => setState(() => _search = v),
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Clear',
             onPressed: () {
               setState(() => _search = '');
-              Navigator.pop(ctx);
+              Navigator.pop(context);
             },
             variant: ButtonVariant.text,
           ),
-          VButton(label: 'Done', onPressed: () => Navigator.pop(ctx)),
-        ],
-      ),
+          VButton(label: 'Done', onPressed: () => Navigator.pop(context)),
+        ]),
+      ],
     );
   }
 }
@@ -501,22 +494,17 @@ class _MoreRanksChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: VColors.glassBackgroundDark,
         borderRadius: BorderRadius.circular(VRadius.pill),
-        border: Border.all(
-          color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-        ),
+        border: Border.all(color: VColors.glassBorderDark),
       ),
       child: Text(
         '+$count',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: isDark
-              ? VColors.onSurfaceVariantDark
-              : VColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -556,17 +544,12 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerDark,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
+        border: Border.all(color: VColors.outlineVariantDark),
       ),
       child: child,
     );

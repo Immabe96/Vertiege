@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/event.dart';
 import '../services/storage_service.dart';
 import '../utils/id_generator.dart';
+
+part 'event_provider.g.dart';
 
 class EventState {
   final Map<String, List<WorldEvent>> eventsByWorld;
@@ -19,7 +22,8 @@ class EventState {
   );
 }
 
-class EventNotifier extends Notifier<EventState> {
+@Riverpod(name: 'eventProvider', keepAlive: true)
+class EventNotifier extends _$EventNotifier {
   @override
   EventState build() => const EventState();
 
@@ -112,7 +116,3 @@ class EventNotifier extends Notifier<EventState> {
     state = const EventState();
   }
 }
-
-final eventProvider = NotifierProvider<EventNotifier, EventState>(
-  EventNotifier.new,
-);

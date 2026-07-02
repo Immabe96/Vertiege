@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../ui/feedback/v_states.dart';
+
 /// Wraps [child] in a [RepaintBoundary] and captures it as a PNG when tapped.
 ///
 /// Usage:
@@ -106,7 +108,7 @@ class _ShareButtonState extends State<ShareButton> {
                     ), // matches card radius
                   ),
                   child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                    child: VSpinner(strokeWidth: 2.5),
                   ),
                 ),
               ),

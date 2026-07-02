@@ -5,11 +5,13 @@ import 'package:vertiege/ui/ui.dart';
 import '../../state/league_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../services/league_service.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../utils/calm_ranking.dart';
+import '../../widgets/progression/prestige_noir_ui.dart';
 
 class LeagueScreen extends ConsumerStatefulWidget {
   final bool embedInHub;
@@ -60,8 +62,6 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
   @override
   Widget build(BuildContext context) {
     final leagueState = ref.watch(leagueProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final body = leagueState.isLoading
         ? const ScreenLoading.list()
@@ -78,14 +78,14 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(VSpacing.md),
+                    padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       children: [
-                        _buildLeagueHeader(leagueState, isDark),
+                        _buildRankHero(leagueState),
                         const SizedBox(height: VSpacing.md),
-                        _buildCountdown(isDark),
+                        _buildSeasonInfo(leagueState),
                         const SizedBox(height: VSpacing.md),
-                        _buildPromotionInfo(isDark),
+                        _buildPromotionInfo(),
                       ],
                     ),
                   ),
@@ -93,7 +93,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 if (!leagueState.isLoading && leagueState.standings.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(VSpacing.md),
+                      padding: const EdgeInsets.all(VSpacing.lg),
                       child: AppEmptyState(
                         title: 'No standings yet',
                         description:
@@ -105,13 +105,29 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                       ),
                     ),
                   )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.md,
+                else ...[
+                  const SliverToBoxAdapter(
+                    child: PrestigeSectionLabel(
+                      'Standings',
+                      padding: EdgeInsets.fromLTRB(
+                        VSpacing.lg,
+                        0,
+                        VSpacing.lg,
+                        VSpacing.sm,
+                      ),
                     ),
-                    sliver: _buildStandingsList(leagueState, isDark),
                   ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+                    sliver: _buildStandingsList(leagueState),
+                  ),
+                ],
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(VSpacing.lg),
+                    child: _buildRewardsSection(),
+                  ),
+                ),
                 const SliverToBoxAdapter(child: SizedBox(height: VSpacing.xxl)),
               ],
             ),
@@ -120,11 +136,11 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     if (widget.embedInHub) return body;
 
     return VHubPage(
-      title: 'Ascension Leagues',
+      title: 'League',
       showBack: true,
       headerActions: [
         VHeaderAction(
-          icon: Icon(VIcons.rotateCw),
+          icon: const Icon(VIcons.rotateCw),
           onPress: () => ref.read(leagueProvider.notifier).loadLeague(),
         ),
       ],
@@ -146,55 +162,183 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
 
   String _standingRankLabel(int rank, int cohortSize, bool lowPressure) {
     if (lowPressure) return '—';
-    if (rank <= 3) return '#$rank';
+    if (rank <= 3) return '$rank';
     return CalmRanking.leagueBandLabel(rank: rank, cohortSize: cohortSize) ??
-        '·';
+        '$rank';
   }
 
-  Widget _buildLeagueHeader(LeagueState state, bool isDark) {
+  String _formatTier(String tier) {
+    if (tier.isEmpty) return 'Bronze';
+    return tier[0].toUpperCase() + tier.substring(1).toLowerCase();
+  }
+
+  Widget _buildRankHero(LeagueState state) {
     final userLeague = state.userLeague;
-    if (userLeague == null) {
-      return const SizedBox.shrink();
-    }
+    if (userLeague == null) return const SizedBox.shrink();
 
     final tierColor = LeagueService.getTierColor(userLeague.tier);
-    final tierIcon = LeagueService.getTierIcon(userLeague.tier);
+    final rankLabel = _leagueRankLabel(ref, userLeague);
 
-    return _Card(
-      useBlur: false,
+    return VPrestigeCard(
       padding: const EdgeInsets.all(VSpacing.lg),
-      child: Column(
+      backgroundGradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [PrestigeNoir.surfaceRaised, Color(0xFF1A1E24)],
+      ),
+      child: Stack(
         children: [
-          Icon(tierIcon, size: 48, color: tierColor),
-          const SizedBox(height: VSpacing.sm),
-          Text(
-            userLeague.tier.toUpperCase(),
-            style: TextStyle(
-              fontSize: VFontSize.headlineLg,
-              fontWeight: VFontWeight.bold,
-              color: tierColor,
-              letterSpacing: 2,
+          Positioned(
+            top: -20,
+            right: -20,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: VColors.brand.withValues(alpha: 0.30),
+              ),
             ),
           ),
-          const SizedBox(height: VSpacing.xs),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [VColors.brand, VColors.brandLight],
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '#${userLeague.rank}',
+                      style: const TextStyle(
+                        fontSize: VFontSize.headlineMd,
+                        fontWeight: VFontWeight.extraBold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: VSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _formatTier(userLeague.tier),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: VFontWeight.extraBold,
+                            color: tierColor,
+                            letterSpacing: -0.02 * 24,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          rankLabel,
+                          style: const TextStyle(
+                            fontSize: VFontSize.labelMd,
+                            color: PrestigeNoir.muted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: VSpacing.lg),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatItem(
+                    value: '${userLeague.weeklyXp}',
+                    label: 'Points',
+                    color: PrestigeNoir.foreground,
+                  ),
+                  _StatItem(
+                    value: '${userLeague.rank}',
+                    label: 'Rank',
+                    color: VColors.brand,
+                  ),
+                  _StatItem(
+                    value: '${state.standings.length}',
+                    label: 'Cohort',
+                    color: PrestigeNoir.foreground,
+                  ),
+                  _StatItem(
+                    value: '${LeagueService.promotionCount}',
+                    label: 'Promote',
+                    color: VColors.success,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSeasonInfo(LeagueState state) {
+    final days = _timeRemaining.inDays;
+    final hours = _timeRemaining.inHours % 24;
+    final minutes = _timeRemaining.inMinutes % 60;
+    final seasonLabel = state.currentSeason != null
+        ? 'Weekly league'
+        : 'League season';
+
+    return VPrestigeCard(
+      padding: const EdgeInsets.all(VSpacing.lg),
+      child: Row(
+        children: [
+          const Icon(Icons.hourglass_top, size: 20, color: VColors.warning),
+          const SizedBox(width: VSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  seasonLabel,
+                  style: const TextStyle(
+                    fontSize: VFontSize.bodyMd,
+                    fontWeight: VFontWeight.semiBold,
+                    color: PrestigeNoir.foreground,
+                  ),
+                ),
+                Text(
+                  '$days days · ${hours}h ${minutes}m remaining',
+                  style: const TextStyle(
+                    fontSize: VFontSize.labelMd,
+                    color: VColors.warning,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                _leagueRankLabel(ref, userLeague),
+                '+2,500',
                 style: TextStyle(
                   fontSize: VFontSize.bodyLg,
-                  fontWeight: VFontWeight.semiBold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: VFontWeight.bold,
+                  color: VColors.brand,
                 ),
               ),
-              const SizedBox(width: VSpacing.lg),
               Text(
-                '${userLeague.weeklyXp} XP',
+                'Season reward',
                 style: TextStyle(
-                  fontSize: VFontSize.bodyLg,
-                  fontWeight: VFontWeight.semiBold,
-                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: VFontSize.labelSm,
+                  color: PrestigeNoir.mutedDim,
                 ),
               ),
             ],
@@ -204,45 +348,8 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     );
   }
 
-  Widget _buildCountdown(bool isDark) {
-    final days = _timeRemaining.inDays;
-    final hours = _timeRemaining.inHours % 24;
-    final minutes = _timeRemaining.inMinutes % 60;
-
-    return _Card(
-      useBlur: false,
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.lg,
-        vertical: VSpacing.md,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.timer_outlined, size: VIconSize.md, color: VColors.tertiary),
-          const SizedBox(width: VSpacing.sm),
-          Text(
-            'Reset in ',
-            style: TextStyle(
-              fontSize: VFontSize.labelMd,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            '${days}d ${hours}h ${minutes}m',
-            style: const TextStyle(
-              fontSize: VFontSize.labelMd,
-              fontWeight: VFontWeight.bold,
-              color: VColors.tertiary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPromotionInfo(bool isDark) {
-    return _Card(
-      useBlur: false,
+  Widget _buildPromotionInfo() {
+    return VPrestigeCard(
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.lg,
         vertical: VSpacing.sm,
@@ -256,7 +363,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Top ${LeagueService.promotionCount} promoted',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.labelSm,
                   color: VColors.success,
                   fontWeight: VFontWeight.semiBold,
@@ -270,7 +377,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Bottom ${LeagueService.demotionCount} demoted',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.labelSm,
                   color: VColors.error,
                   fontWeight: VFontWeight.semiBold,
@@ -283,7 +390,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     );
   }
 
-  Widget _buildStandingsList(LeagueState state, bool isDark) {
+  Widget _buildStandingsList(LeagueState state) {
     final standings = state.standings;
     final residentId = ref.read(residentProvider).resident?.id;
     final lowPressure =
@@ -296,21 +403,18 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
         final rank = index + 1;
         final isCurrentUser = participant.userId == residentId;
         final isTop3 = rank <= 3;
-        final isPromotionZone = rank <= LeagueService.promotionCount;
         final isDemotionZone =
             rank > (standings.length - LeagueService.demotionCount);
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: VSpacing.xs),
+          padding: const EdgeInsets.only(bottom: 4),
           child: _buildStandingRow(
             participant: participant,
             rank: rank,
             rankLabel: _standingRankLabel(rank, standings.length, lowPressure),
             isCurrentUser: isCurrentUser,
             isTop3: isTop3,
-            isPromotionZone: isPromotionZone,
             isDemotionZone: isDemotionZone,
-            isDark: isDark,
           ),
         );
       }, childCount: standings.length),
@@ -323,137 +427,230 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
     required String rankLabel,
     required bool isCurrentUser,
     required bool isTop3,
-    required bool isPromotionZone,
     required bool isDemotionZone,
-    required bool isDark,
   }) {
-    Color? rowBackground;
-    if (isCurrentUser) {
-      rowBackground = Theme.of(context).colorScheme.primary.withValues(alpha: 0.15);
-    } else if (isTop3) {
-      switch (rank) {
-        case 1:
-          rowBackground = const Color(0xFFFFD700).withValues(alpha: 0.15);
-          break;
-        case 2:
-          rowBackground = const Color(0xFFC0C0C0).withValues(alpha: 0.15);
-          break;
-        case 3:
-          rowBackground = const Color(0xFFCD7F32).withValues(alpha: 0.15);
-          break;
-      }
-    }
+    final posColor = isCurrentUser || isTop3
+        ? VColors.brand
+        : PrestigeNoir.muted;
 
-    Color rankColor;
-    if (isTop3) {
-      switch (rank) {
-        case 1:
-          rankColor = const Color(0xFFFFD700);
-          break;
-        case 2:
-          rankColor = const Color(0xFFC0C0C0);
-          break;
-        case 3:
-          rankColor = const Color(0xFFCD7F32);
-          break;
-        default:
-          rankColor = Theme.of(context).colorScheme.onSurfaceVariant;
-      }
-    } else {
-      rankColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    }
-
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: rowBackground,
+        color: isCurrentUser ? PrestigeNoir.accentSoft : Colors.transparent,
         borderRadius: BorderRadius.circular(VRadius.md),
         border: isCurrentUser
-            ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3))
+            ? Border.all(color: VColors.brand.withValues(alpha: 0.30))
             : null,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.md,
-        vertical: VSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 72,
-            child: Text(
-              rankLabel,
-              style: TextStyle(
-                fontSize: rank <= 3 ? VFontSize.bodyMd : VFontSize.labelSm,
-                fontWeight: rank <= 3 ? VFontWeight.bold : VFontWeight.medium,
-                color: rankColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: VSpacing.md,
+          vertical: VSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: Text(
+                rankLabel,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: VFontSize.bodyMd,
+                  fontWeight: VFontWeight.bold,
+                  color: posColor,
+                ),
               ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(width: VSpacing.sm),
-          VAvatar(
-            imageUrl: participant.avatarUrl.isNotEmpty
-                ? participant.avatarUrl
-                : null,
-            fallbackSeed: participant.name,
-            size: 32,
-          ),
-          const SizedBox(width: VSpacing.sm),
-          Expanded(
-            child: Text(
-              participant.name,
-              style: TextStyle(
-                fontSize: VFontSize.bodyMd,
-                fontWeight: isCurrentUser
-                    ? VFontWeight.semiBold
-                    : VFontWeight.regular,
-                color: Theme.of(context).colorScheme.onSurface,
+            const SizedBox(width: VSpacing.sm),
+            VAvatar(
+              imageUrl: participant.avatarUrl.isNotEmpty
+                  ? participant.avatarUrl
+                  : null,
+              fallbackSeed: participant.name,
+              size: 32,
+            ),
+            const SizedBox(width: VSpacing.sm),
+            Expanded(
+              child: Text(
+                participant.name,
+                style: TextStyle(
+                  fontSize: VFontSize.labelMd,
+                  fontWeight: isCurrentUser
+                      ? VFontWeight.semiBold
+                      : VFontWeight.regular,
+                  color: PrestigeNoir.foreground,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(width: VSpacing.sm),
-          Text(
-            '${participant.weeklyXp} XP',
-            style: TextStyle(
-              fontSize: VFontSize.labelMd,
-              fontWeight: VFontWeight.semiBold,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          if (isDemotionZone && !isCurrentUser) ...[
             const SizedBox(width: VSpacing.xs),
-            const Icon(Icons.arrow_downward, size: VIconSize.denseSm, color: VColors.error),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: PrestigeNoir.surfaceRaised,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: PrestigeNoir.borderLight),
+              ),
+              child: Text(
+                _formatTier(participant.leagueTier),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: PrestigeNoir.mutedDim,
+                ),
+              ),
+            ),
+            const SizedBox(width: VSpacing.sm),
+            Text(
+              '${participant.weeklyXp}',
+              style: TextStyle(
+                fontSize: VFontSize.labelMd,
+                fontWeight: VFontWeight.bold,
+                color: isCurrentUser ? VColors.brand : PrestigeNoir.muted,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            if (isDemotionZone && !isCurrentUser) ...[
+              const SizedBox(width: VSpacing.xs),
+              const Icon(
+                Icons.arrow_downward,
+                size: VIconSize.denseSm,
+                color: VColors.error,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildRewardsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const PrestigeSectionLabel(
+          'Top 10 season rewards',
+          padding: EdgeInsets.zero,
+        ),
+        const SizedBox(height: VSpacing.sm),
+        const Row(
+          children: [
+            Expanded(
+              child: _RewardCard(
+                icon: '👑',
+                name: 'Apex Crown',
+                desc: '#1 · Exclusive title',
+              ),
+            ),
+            SizedBox(width: VSpacing.sm),
+            Expanded(
+              child: _RewardCard(
+                icon: '💎',
+                name: 'Diamond Pack',
+                desc: '#2-3 · 500 coins',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: VSpacing.sm),
+        const Row(
+          children: [
+            Expanded(
+              child: _RewardCard(
+                icon: '⚡',
+                name: 'Elite Boost',
+                desc: '#4-10 · 2× XP 3 days',
+              ),
+            ),
+            SizedBox(width: VSpacing.sm),
+            Expanded(
+              child: _RewardCard(
+                icon: '🎖️',
+                name: 'Participation',
+                desc: 'All · Season badge',
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
-class _Card extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final bool useBlur;
+class _StatItem extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color color;
 
-  const _Card({required this.child, this.padding, this.useBlur = false});
+  const _StatItem({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
-      decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: VFontWeight.extraBold,
+            color: color,
+          ),
         ),
+        const SizedBox(height: 2),
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 10,
+            color: PrestigeNoir.mutedDim,
+            letterSpacing: 0.05 * 10,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RewardCard extends StatelessWidget {
+  final String icon;
+  final String name;
+  final String desc;
+
+  const _RewardCard({
+    required this.icon,
+    required this.name,
+    required this.desc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return VPrestigeCard(
+      padding: const EdgeInsets.all(VSpacing.md),
+      child: Column(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 24)),
+          const SizedBox(height: 6),
+          Text(
+            name,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: VFontSize.labelMd,
+              fontWeight: VFontWeight.semiBold,
+              color: PrestigeNoir.foreground,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            desc,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 10,
+              color: PrestigeNoir.mutedDim,
+            ),
+          ),
+        ],
       ),
-      child: child,
     );
   }
 }

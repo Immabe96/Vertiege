@@ -44,3 +44,7 @@ supabase db push --linked --yes
 ```
 
 Applied locally: `20260521120000` … `20260524150000` (including `profiles_privilege_guard`).
+
+**2026-06-29 verify:** `supabase migration list --linked` shows all local versions applied on remote (`db push` → up to date). Trigger `profiles_guard_privileged_columns` is enabled on `public.profiles`.
+
+**Auth (remote):** `password_min_length` = 8. Leaked-password (HIBP) requires Pro — run `./scripts/enable-auth-hibp.sh` after upgrade.

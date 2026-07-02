@@ -1,105 +1,62 @@
 import 'package:flutter/material.dart';
-import '../../theme/v_colors.dart';
+
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_tokens.dart';
 
+/// Surface elevation via lightness, not drop shadow (DCX-031).
+enum VSurfaceElevation { low, medium, high, floating }
+
+/// Canonical flat Prestige Noir surface card.
+///
+/// This is the single flat-card primitive — it replaces the former
+/// `VSurfaceCard`, `VSurfacePanel` and `GlassPanel`. For raised bento /
+/// hero cards use [VPrestigeCard] instead.
 class VCard extends StatelessWidget {
-  final Widget? child;
-  final Widget? title;
-  final Widget? subtitle;
-  final Widget? leading;
-  final Widget? trailing;
-  final EdgeInsetsGeometry? padding;
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VSurfaceElevation elevation;
+  final BorderRadius? borderRadius;
+  final Border? border;
   final VoidCallback? onTap;
-  final bool isGlass;
-  final Color? backgroundColor;
-  final double? borderRadius;
 
   const VCard({
     super.key,
-    this.child,
-    this.title,
-    this.subtitle,
-    this.leading,
-    this.trailing,
-    this.padding,
-    this.onTap,
-    this.isGlass = false,
-    this.backgroundColor,
+    required this.child,
+    this.padding = const EdgeInsets.all(VSpacing.md),
+    this.elevation = VSurfaceElevation.medium,
     this.borderRadius,
+    this.border,
+    this.onTap,
   });
+
+  Color get _surfaceColor => switch (elevation) {
+    VSurfaceElevation.low => PrestigeNoir.bg,
+    VSurfaceElevation.medium => PrestigeNoir.surface,
+    VSurfaceElevation.high => PrestigeNoir.surfaceRaised,
+    VSurfaceElevation.floating => PrestigeNoir.chrome,
+  };
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final defaultBg =
-        backgroundColor ??
-        (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow);
-
-    final defaultBorder = isGlass
-        ? Border.all(
-            color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-          )
-        : Border.all(
-            color: isDark
-                ? VColors.outlineVariantDark.withValues(alpha: 0.2)
-                : VColors.outlineVariant.withValues(alpha: 0.3),
-          );
-
-    final cardContent = Padding(
-      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
-      child: _buildContent(context),
-    );
-
+    final radius = borderRadius ?? BorderRadius.circular(VRadius.bento);
     final card = Container(
       decoration: BoxDecoration(
-        color: defaultBg,
-        borderRadius: BorderRadius.circular(borderRadius ?? VRadius.lg),
-        border: defaultBorder,
-        boxShadow: isGlass ? null : VShadow.sm,
+        color: _surfaceColor,
+        borderRadius: radius,
+        border: border ?? Border.all(color: PrestigeNoir.borderLight),
       ),
-      child: cardContent,
+      padding: padding,
+      child: child,
     );
 
-    if (onTap != null) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(borderRadius ?? VRadius.lg),
-          child: card,
-        ),
-      );
-    }
-
-    return card;
-  }
-
-  Widget _buildContent(BuildContext context) {
-    if (child != null) return child!;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (leading != null) ...[leading!, const SizedBox(width: VSpacing.md)],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (title != null) title!,
-              if (subtitle != null) ...[
-                const SizedBox(height: VSpacing.xs),
-                subtitle!,
-              ],
-            ],
-          ),
-        ),
-        if (trailing != null) ...[
-          const SizedBox(width: VSpacing.md),
-          trailing!,
-        ],
-      ],
+    if (onTap == null) return card;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius,
+        child: card,
+      ),
     );
   }
 }

@@ -1,12 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../router/app_router.dart';
 import '../router/world_route_redirects.dart';
 
+part 'commune_shell_provider.g.dart';
+
 /// Current matched path from [GoRouter] (refreshes on navigation).
-final routerPathProvider = Provider<String>((ref) {
+@Riverpod(name: 'routerPathProvider', keepAlive: true)
+String routerPath(Ref ref) {
   final router = ref.watch(appRouterProvider);
   void listener() {
     ref.invalidateSelf();
@@ -15,13 +19,14 @@ final routerPathProvider = Provider<String>((ref) {
   router.routerDelegate.addListener(listener);
   ref.onDispose(() => router.routerDelegate.removeListener(listener));
   return router.routerDelegate.currentConfiguration.uri.path;
-});
+}
 
 /// True when bottom tab bar should be hidden (immersive chat / voice).
-final hideBottomNavProvider = Provider<bool>((ref) {
+@Riverpod(name: 'hideBottomNavProvider', keepAlive: true)
+bool hideBottomNav(Ref ref) {
   final path = ref.watch(routerPathProvider);
   return communeImmersivePath(path);
-});
+}
 
 @visibleForTesting
 bool communeImmersivePath(String path) {

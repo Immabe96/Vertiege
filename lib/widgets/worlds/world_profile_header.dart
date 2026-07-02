@@ -29,8 +29,7 @@ class WorldCompactHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    final muted = VColors.onSurfaceVariantDark;
 
     return Material(
       color: Colors.transparent,
@@ -56,7 +55,7 @@ class WorldCompactHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: VFontWeight.bold,
-                    color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                    color: VColors.onSurfaceDark,
                   ),
                 ),
               ),
@@ -112,9 +111,8 @@ class WorldProfileHeader extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
-    final surface = isDark ? VColors.surfaceContainerLowDark : VColors.surfaceContainerLow;
+    final muted = VColors.onSurfaceVariantDark;
+    final surface = VColors.surfaceContainerLowDark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -123,7 +121,7 @@ class WorldProfileHeader extends StatelessWidget {
         VSpacing.md,
         VSpacing.xs,
       ),
-      child: VSurfaceCard(
+      child: VCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -255,7 +253,7 @@ class WorldProfileHeader extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: VSpacing.md),
-              Align(
+              const Align(
                 alignment: Alignment.centerRight,
                 child: ProgressionHelpButton(
                   focus: ProgressionFocus.worldPrestige,

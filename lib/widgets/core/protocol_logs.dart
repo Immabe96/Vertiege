@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import 'glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 
 class ProtocolLogs extends StatelessWidget {
   final List<String> logs;
@@ -9,7 +9,7 @@ class ProtocolLogs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VSurfacePanel(
+    return VCard(
       padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

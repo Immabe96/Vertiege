@@ -307,6 +307,7 @@ class VoiceService {
     VoicePresenceService.stopHeartbeat();
     _currentRoom?.removeListener(_onConnectionChange);
     _currentRoom?.removeListener(_onRoomUpdate);
+    _currentRoom?.disconnect();
     _currentRoom = null;
     _participants.clear();
     _participantsController?.close();

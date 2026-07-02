@@ -16,7 +16,6 @@ void main() {
   const lowTier = Resident(
     id: 'u2',
     name: 'Low',
-    tier: ResidentTier.hustlers,
     joinedWorldIds: ['w1'],
     worldStandings: {'w1': WorldStanding(rep: 100)},
   );

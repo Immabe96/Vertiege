@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../config/tiers.dart';
@@ -27,7 +28,6 @@ import '../widgets/worlds/world_shop_tab.dart';
 import '../widgets/worlds/world_tools_panel.dart';
 import '../widgets/core/sync_warning_banner.dart';
 import '../widgets/worlds/world_feed_tab.dart';
-import '../widgets/core/glass_sheet.dart';
 import '../widgets/worlds/world_detail_members.dart';
 import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
@@ -52,7 +52,6 @@ import '../models/resident.dart';
 import '../models/world.dart' show World;
 import '../widgets/worlds/world_share_card.dart';
 import '../widgets/shared/share_button.dart';
-import '../widgets/core/v_feedback.dart';
 
 class WorldDetailScreen extends ConsumerStatefulWidget {
   final String worldId;
@@ -560,34 +559,31 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     });
   }
 
-  void _showLeaveConfirmation() {
+  Future<void> _showLeaveConfirmation() async {
     final world = ref.read(worldProvider).worlds[widget.worldId];
-    final theme = Theme.of(context);
-    showDialog(
+    await showVDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Leave ${world?.name ?? widget.worldId}?'),
-        content: const Text(
-          'You will lose all your standing and rep in this world. This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+      title: 'Leave ${world?.name ?? widget.worldId}?',
+      content: const Text(
+        'You will lose all your standing and rep in this world. This action cannot be undone.',
+      ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            variant: ButtonVariant.text,
+            onPressed: () => Navigator.pop(context),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
-            ),
+          VButton(
+            label: 'Leave',
             onPressed: () {
               _animateJoinButton();
               ref.read(residentProvider.notifier).leaveWorld(widget.worldId);
-              Navigator.pop(ctx);
+              Navigator.pop(context);
             },
-            child: const Text('Leave'),
           ),
-        ],
-      ),
+        ]),
+      ],
     );
   }
 
@@ -615,33 +611,25 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     );
   }
 
-  void _showWorldShareSheet(World world) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    showDialog(
+  Future<void> _showWorldShareSheet(World world) async {
+    await showVDialog<void>(
       context: context,
-      builder: (ctx) => Dialog(
-        insetPadding: const EdgeInsets.all(VSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ShareButton(
-              shareText: 'Join me in ${world.name} on Vertiege!',
-              onShared: () => Navigator.of(ctx).pop(),
-              child: WorldShareCard(world: world),
-            ),
-            const SizedBox(height: VSpacing.md),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
-        ),
+      title: 'Share world',
+      scrollContent: true,
+      content: ShareButton(
+        shareText: 'Join me in ${world.name} on Vertiege!',
+        onShared: () => Navigator.pop(context),
+        child: WorldShareCard(world: world),
       ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            variant: ButtonVariant.text,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ]),
+      ],
     );
   }
 
@@ -939,7 +927,6 @@ class _WorldStatsStripState extends State<_WorldStatsStrip> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,
@@ -955,7 +942,6 @@ class _WorldStatsStripState extends State<_WorldStatsStrip> {
               value: '${widget.members}',
               label: 'Residents',
               onTap: widget.onMembersTap,
-              isDark: isDark,
             ),
           ),
           const SizedBox(width: VSpacing.sm),
@@ -964,7 +950,6 @@ class _WorldStatsStripState extends State<_WorldStatsStrip> {
               icon: Icons.forum_outlined,
               value: '${widget.posts}',
               label: 'Posts',
-              isDark: isDark,
             ),
           ),
           const SizedBox(width: VSpacing.sm),
@@ -973,7 +958,6 @@ class _WorldStatsStripState extends State<_WorldStatsStrip> {
               icon: Icons.event_available_outlined,
               value: '${widget.events}',
               label: 'Events',
-              isDark: isDark,
             ),
           ),
         ],
@@ -986,56 +970,48 @@ class _StatChip extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
-  final bool isDark;
   final VoidCallback? onTap;
 
   const _StatChip({
     required this.icon,
     required this.value,
     required this.label,
-    required this.isDark,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return VSurfaceCard(
+    return VPrestigeCard(
       padding: const EdgeInsets.symmetric(
         horizontal: VSpacing.sm,
         vertical: VSpacing.md,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: Semantics(
-          button: onTap != null,
-          label: onTap != null ? '$label, $value' : null,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            child: Column(
-                children: [
-                  Icon(icon, size: VIconSize.md, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(height: VSpacing.xs),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: VFontSize.headlineSm,
-                      fontWeight: VFontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: VFontSize.labelMd,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+      onTap: onTap,
+      child: Semantics(
+        button: onTap != null,
+        label: onTap != null ? '$label, $value' : null,
+        child: Column(
+          children: [
+            Icon(icon, size: VIconSize.md, color: VColors.brand),
+            const SizedBox(height: VSpacing.xs),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: VFontSize.headlineSm,
+                fontWeight: VFontWeight.bold,
+                color: PrestigeNoir.foreground,
               ),
             ),
-          ),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: VFontSize.labelMd,
+                color: PrestigeNoir.muted,
+              ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
@@ -1066,33 +1042,27 @@ class _WorldTabBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final bgColor = Theme.of(context).colorScheme.surface;
-    final dividerColor = Theme.of(context).colorScheme.outline;
-    final unselectedColor = Theme.of(context).colorScheme.onSurfaceVariant;
-
     return SizedBox(
       height: _tabBarHeight,
       child: ColoredBox(
-        color: bgColor.withValues(alpha: 0.96),
+        color: PrestigeNoir.chrome.withValues(alpha: 0.96),
         child: DecoratedBox(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             border: Border(
-              bottom: BorderSide(color: dividerColor),
-              top: BorderSide(color: dividerColor.withValues(alpha: 0.6)),
+              bottom: BorderSide(color: PrestigeNoir.border),
+              top: BorderSide(color: PrestigeNoir.borderLight),
             ),
           ),
           child: TabBar(
             controller: controller,
             labelColor: color,
-            unselectedLabelColor: unselectedColor,
-            indicatorColor: color,
-            labelStyle: TextStyle(
+            unselectedLabelColor: PrestigeNoir.muted,
+            indicatorColor: VColors.brand,
+            labelStyle: const TextStyle(
               fontSize: VFontSize.labelSm,
               fontWeight: VFontWeight.semiBold,
             ),
-            unselectedLabelStyle: TextStyle(
+            unselectedLabelStyle: const TextStyle(
               fontSize: VFontSize.labelSm,
               fontWeight: VFontWeight.regular,
             ),

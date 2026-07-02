@@ -30,7 +30,7 @@ class TextParser {
 
   /// Alphanumeric handle used in @mentions for a display name.
   static String mentionHandleForName(String name) =>
-      name.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+      name.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '');
 
   static bool messageMentionsHandle(String text, String handle) {
     final normalized = handle.trim();

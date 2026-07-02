@@ -22,7 +22,6 @@ class TrendingRisingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,11 +70,11 @@ class TrendingRisingSection extends StatelessWidget {
                   width: 220,
                   padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
-                    color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+                    color: VColors.glassBackgroundDark,
                     borderRadius: BorderRadius.circular(
                       VRadius.md,
                     ),
-                    border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
+                    border: Border.all(color: VColors.glassBorderDark),
                   ),
                   child: Row(
                     children: [
@@ -104,7 +103,7 @@ class TrendingRisingSection extends StatelessWidget {
                               world.name,
                               style: theme.textTheme.labelLarge?.copyWith(
                                 fontWeight: VFontWeight.bold,
-                                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                                color: VColors.onSurfaceDark,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -112,16 +111,16 @@ class TrendingRisingSection extends StatelessWidget {
                             const SizedBox(height: 2),
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.people,
                                   size: VIconSize.xs,
-                                  color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
+                                  color: VColors.onSurfaceVariantDark,
                                 ),
                                 const SizedBox(width: 2),
                                 Text(
                                   '${world.memberCount}',
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: isDark ? VColors.onSurfaceVariantDark : VColors.outline,
+                                    color: VColors.onSurfaceVariantDark,
                                   ),
                                 ),
                                 const SizedBox(width: VSpacing.sm),

@@ -90,7 +90,7 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
       event,
       parameters: {
         'world_id': widget.worldId,
-        if (tile != null) 'tile': tile,
+        'tile': ?tile,
       },
     );
   }
@@ -119,8 +119,6 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final foundation = foundationForWorld(widget.world);
     final features = ref.read(worldProvider.notifier).featuresForWorld(widget.worldId);
     final news = _newsPosts.take(3).toList();
@@ -141,7 +139,6 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
             world: widget.world,
             foundation: foundation,
             isJoined: widget.isJoined,
-            isDark: isDark,
             onJoin: () {
               _logTile(AnalyticsEvents.worldDossierCharterCta);
               widget.onJoin();
@@ -152,7 +149,6 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
             const SizedBox(height: VSpacing.md),
             _SafetyDisclaimerSection(
               disclaimer: foundation.safetyDisclaimer!.trim(),
-              isDark: isDark,
             ),
           ],
           const SizedBox(height: VSpacing.md),
@@ -161,7 +157,6 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
             worldId: widget.worldId,
             resident: widget.resident,
             isJoined: widget.isJoined,
-            isDark: isDark,
           ),
           const SizedBox(height: VSpacing.md),
           _EconomySection(
@@ -190,7 +185,6 @@ class _WorldRealmDossierState extends ConsumerState<WorldRealmDossier> {
             initiallyExpanded: news.isNotEmpty,
             child: _NewsSection(
               posts: news,
-              isDark: isDark,
               onOpenPost: (postId) {
                 _logTile(
                   AnalyticsEvents.worldDossierNewsOpen,
@@ -283,7 +277,6 @@ class _TypeLeadSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (world.type == WorldType.dominion) {
       return WorldGrowthCard(world: world);
@@ -293,7 +286,7 @@ class _TypeLeadSection extends StatelessWidget {
         ? 'Verified ${world.requiredProfession}'
         : 'Tier ${world.requiredTier ?? 1} · ${tierNames[world.requiredTier ?? 1] ?? 'Open'}';
 
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -345,14 +338,12 @@ class _CharterSection extends StatelessWidget {
   final World world;
   final WorldFoundation foundation;
   final bool isJoined;
-  final bool isDark;
   final VoidCallback onJoin;
 
   const _CharterSection({
     required this.world,
     required this.foundation,
     required this.isJoined,
-    required this.isDark,
     required this.onJoin,
   });
 
@@ -363,7 +354,7 @@ class _CharterSection extends StatelessWidget {
         ? 'Verified ${world.requiredProfession} residents'
         : 'Tier ${world.requiredTier ?? 1} ${tierNames[world.requiredTier ?? 1] ?? ''}';
 
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -398,11 +389,12 @@ class _CharterSection extends StatelessWidget {
               _BulletBlock(title: 'Culture', items: foundation.culture),
             ] else ...[
               const SizedBox(height: VSpacing.md),
-              OutlinedButton(
+              VButton(
+                label: 'Preview charter',
+                variant: ButtonVariant.outlined,
                 onPressed: () {
                   showWorldConstitutionPreview(context, world: world);
                 },
-                child: const Text('Preview charter'),
               ),
               const SizedBox(height: VSpacing.sm),
               VButton(
@@ -427,23 +419,21 @@ class _CharterSection extends StatelessWidget {
 
 class _SafetyDisclaimerSection extends StatelessWidget {
   final String disclaimer;
-  final bool isDark;
 
   const _SafetyDisclaimerSection({
     required this.disclaimer,
-    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
+            const Icon(
               Icons.health_and_safety_outlined,
               color: VColors.warning,
               size: VIconSize.md,
@@ -519,14 +509,12 @@ class _StandingSection extends StatelessWidget {
   final String worldId;
   final Resident? resident;
   final bool isJoined;
-  final bool isDark;
 
   const _StandingSection({
     required this.world,
     required this.worldId,
     required this.resident,
     required this.isJoined,
-    required this.isDark,
   });
 
   @override
@@ -537,7 +525,7 @@ class _StandingSection extends StatelessWidget {
         : null;
     final current = rep != null ? getStanding(rep) : null;
 
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -799,12 +787,10 @@ class _KnowledgeSection extends StatelessWidget {
 
 class _NewsSection extends StatelessWidget {
   final List<Post> posts;
-  final bool isDark;
   final ValueChanged<String> onOpenPost;
 
   const _NewsSection({
     required this.posts,
-    required this.isDark,
     required this.onOpenPost,
   });
 
@@ -996,10 +982,9 @@ class _CouncilPreviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final leaders = _leaders();
 
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -1014,7 +999,10 @@ class _CouncilPreviewSection extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                TextButton(
+                VButton(
+                  label: 'Full roster',
+                  variant: ButtonVariant.text,
+                  size: ButtonSize.small,
                   onPressed: () => context.push(
                     worldMembersPath(
                       worldId,
@@ -1022,7 +1010,6 @@ class _CouncilPreviewSection extends StatelessWidget {
                       sovereignId: world.sovereignId,
                     ),
                   ),
-                  child: const Text('Full roster'),
                 ),
               ],
             ),
@@ -1031,11 +1018,7 @@ class _CouncilPreviewSection extends StatelessWidget {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(VSpacing.lg),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
+                  child: VSpinner(size: 24),
                 ),
               )
             else if (leaders.isEmpty)
@@ -1186,7 +1169,6 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final showPolls = FeatureFlags.polls;
 
     return Column(
@@ -1196,10 +1178,10 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
           if (_pollLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: VSpacing.sm),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              child: Center(child: VSpinner()),
             )
           else if (_activePoll != null)
-            VSurfaceCard(
+            VCard(
               child: Padding(
                 padding: const EdgeInsets.all(VSpacing.md),
                 child: Column(
@@ -1244,9 +1226,10 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
                       );
                     }),
                     const SizedBox(height: VSpacing.sm),
-                    TextButton(
+                    VButton(
+                      label: 'Vote or view all polls',
+                      variant: ButtonVariant.text,
                       onPressed: _openPolls,
-                      child: const Text('Vote or view all polls'),
                     ),
                   ],
                 ),
@@ -1254,7 +1237,7 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
             )
           else
             VAlert(
-              icon: Icon(VIcons.info),
+              icon: const Icon(VIcons.info),
               title: const Text('Governance voting'),
               subtitle: Text(
                 'No active polls. Council and sovereign can create votes when needed.',
@@ -1276,7 +1259,7 @@ class _GovernanceSectionState extends State<_GovernanceSection> {
           ),
         ] else
           VAlert(
-            icon: Icon(VIcons.info),
+            icon: const Icon(VIcons.info),
             title: const Text('Governance voting'),
             subtitle: Text(
               widget.isJoined

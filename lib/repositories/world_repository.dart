@@ -17,7 +17,7 @@ class WorldRepository {
     required String residentName,
   }) async {
     final remoteWorldIds = worldIds
-        .where((id) => WorldService.isRemoteWorldId(id))
+        .where(WorldService.isRemoteWorldId)
         .toList();
     if (remoteWorldIds.isEmpty) {
       return const RepositoryResult.success(null);
@@ -41,7 +41,18 @@ class WorldRepository {
       );
       return const RepositoryResult.success(null);
     } catch (error, stackTrace) {
+      // Only enqueue worlds that aren't already joined
+      final client = getSupabase();
+      final existing = await client
+          .from('world_members')
+          .select('world_id')
+          .eq('resident_id', residentId);
+      final joinedIds = (existing as List)
+          .map((r) => r['world_id']?.toString())
+          .whereType<String>()
+          .toSet();
       for (final worldId in remoteWorldIds) {
+        if (joinedIds.contains(worldId)) continue;
         await MutationOutboxService.enqueue(joinWorldMutation, {
           'worldId': worldId,
           'residentId': residentId,

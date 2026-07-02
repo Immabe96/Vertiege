@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import 'glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import 'shimmer.dart';
 
 enum ScreenLoadingType { feed, list, grid, profile, detail }
@@ -59,13 +59,13 @@ class ScreenLoading extends StatelessWidget {
             childAspectRatio: 0.85,
           ),
           itemCount: itemCount,
-          itemBuilder: (_, _) => VSurfacePanel(
-            padding: const EdgeInsets.all(VSpacing.md),
+          itemBuilder: (_, _) => const VCard(
+            padding: EdgeInsets.all(VSpacing.md),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Pulse(width: double.infinity, height: 14),
+              children: [
+                Pulse(height: 14),
                 SizedBox(height: VSpacing.sm),
                 Pulse(width: 80, height: 12),
               ],
@@ -73,9 +73,9 @@ class ScreenLoading extends StatelessWidget {
           ),
         );
       case ScreenLoadingType.profile:
-        return _ProfileShimmer();
+        return const _ProfileShimmer();
       case ScreenLoadingType.detail:
-        return _DetailShimmer();
+        return const _DetailShimmer();
     }
   }
 }
@@ -90,7 +90,7 @@ class _ProfileShimmer extends StatelessWidget {
         horizontal: VSpacing.lg,
         vertical: VSpacing.xl,
       ),
-      child: VSurfacePanel(
+      child: VCard(
         padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           children: [
@@ -105,13 +105,11 @@ class _ProfileShimmer extends StatelessWidget {
             const Pulse(
               width: 160,
               height: 20,
-              borderRadius: VRadius.sm,
             ),
             const SizedBox(height: VSpacing.sm),
             const Pulse(
               width: 100,
               height: 14,
-              borderRadius: VRadius.sm,
             ),
             const SizedBox(height: VSpacing.xl),
             Row(
@@ -119,9 +117,9 @@ class _ProfileShimmer extends StatelessWidget {
               children: List.generate(3, (_) => const _StatShimmer()),
             ),
             const SizedBox(height: VSpacing.xl),
-            const Pulse(height: 14, borderRadius: VRadius.sm),
+            const Pulse(height: 14),
             const SizedBox(height: VSpacing.sm),
-            const Pulse(height: 14, borderRadius: VRadius.sm),
+            const Pulse(height: 14),
           ],
         ),
       ),
@@ -134,11 +132,11 @@ class _StatShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Pulse(width: 48, height: 22, borderRadius: VRadius.sm),
+    return const Column(
+      children: [
+        Pulse(width: 48, height: 22),
         SizedBox(height: VSpacing.xs),
-        Pulse(width: 36, height: 12, borderRadius: VRadius.sm),
+        Pulse(width: 36, height: 12),
       ],
     );
   }
@@ -155,33 +153,30 @@ class _DetailShimmer extends StatelessWidget {
           height: 200,
           color: VColors.surfaceContainerHighest.withValues(alpha: 0.3),
         ),
-        Padding(
-          padding: const EdgeInsets.all(VSpacing.md),
-          child: VSurfacePanel(
-            padding: const EdgeInsets.all(VSpacing.lg),
+        const Padding(
+          padding: EdgeInsets.all(VSpacing.md),
+          child: VCard(
+            padding: EdgeInsets.all(VSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Pulse(
+                Pulse(
                   width: 200,
                   height: 24,
-                  borderRadius: VRadius.sm,
                 ),
-                const SizedBox(height: VSpacing.sm),
-                const Pulse(
+                SizedBox(height: VSpacing.sm),
+                Pulse(
                   width: 120,
                   height: 14,
-                  borderRadius: VRadius.sm,
                 ),
-                const SizedBox(height: VSpacing.lg),
-                const Pulse(height: 14, borderRadius: VRadius.sm),
-                const SizedBox(height: VSpacing.sm),
-                const Pulse(height: 14, borderRadius: VRadius.sm),
-                const SizedBox(height: VSpacing.sm),
-                const Pulse(
+                SizedBox(height: VSpacing.lg),
+                Pulse(height: 14),
+                SizedBox(height: VSpacing.sm),
+                Pulse(height: 14),
+                SizedBox(height: VSpacing.sm),
+                Pulse(
                   width: 200,
                   height: 14,
-                  borderRadius: VRadius.sm,
                 ),
               ],
             ),

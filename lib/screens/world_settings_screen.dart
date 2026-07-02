@@ -14,7 +14,6 @@ import '../services/quiet_hours_service.dart';
 import '../services/invite_service.dart';
 import '../services/permission_service.dart';
 import '../services/world_service.dart';
-import '../services/store_service.dart';
 import '../models/world.dart';
 import '../config/tiers.dart';
 import '../models/invite.dart';
@@ -29,7 +28,6 @@ import '../widgets/worlds/banner_generator.dart';
 import '../widgets/worlds/world_admin_breadcrumb.dart';
 import '../widgets/worlds/world_settings_channels.dart';
 import '../widgets/worlds/world_settings_invites.dart';
-import '../widgets/core/v_feedback.dart';
 
 final _iconChoices = const [
   (icon: Icons.public, id: 'public'),
@@ -196,22 +194,20 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   }
 
   Future<void> _banMember(String residentId, String name) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showVDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Ban $name?'),
-        content: const Text(
-          'They will be removed from the world and cannot rejoin.',
-        ),
-        actions: [
+      title: 'Ban $name?',
+      content: const Text('They will be removed from the world and cannot rejoin.'),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(context, false),
             variant: ButtonVariant.text,
           ),
-          VButton(onPressed: () => Navigator.pop(ctx, true), label: 'Ban'),
-        ],
-      ),
+          VButton(onPressed: () => Navigator.pop(context, true), label: 'Ban'),
+        ]),
+      ],
     );
     if (confirmed == true) {
       ref
@@ -229,47 +225,52 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     VFeedback.showMessage(context, 'Channel "$name" deleted');
   }
 
-  void _renameChannel(String channelId, String currentName) {
+  Future<void> _renameChannel(String channelId, String currentName) async {
     final controller = TextEditingController(text: currentName);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rename Channel'),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Rename Channel',
         content: TextField(
           controller: controller,
           autofocus: true,
           decoration: _ghostInputDecoration(hintText: 'New channel name'),
         ),
         actions: [
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Rename',
-            onPressed: () {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                ref
-                    .read(channelProvider.notifier)
-                    .renameChannel(widget.worldId, channelId, name);
-                Navigator.pop(ctx);
-              }
-            },
-          ),
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(context),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Rename',
+              onPressed: () {
+                final name = controller.text.trim();
+                if (name.isNotEmpty) {
+                  ref
+                      .read(channelProvider.notifier)
+                      .renameChannel(widget.worldId, channelId, name);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ]),
         ],
-      ),
-    );
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 
-  void _showCreateChannel(BuildContext context) {
+  Future<void> _showCreateChannel(BuildContext context) async {
     final nameController = TextEditingController();
     final descController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Create Channel'),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Create Channel',
+        scrollContent: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -288,33 +289,38 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
           ],
         ),
         actions: [
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Create',
-            onPressed: () {
-              final name = nameController.text.trim();
-              if (name.isNotEmpty) {
-                ref
-                    .read(channelProvider.notifier)
-                    .createChannel(
-                      worldId: widget.worldId,
-                      name: name,
-                      description: descController.text.trim().isEmpty
-                          ? null
-                          : descController.text.trim(),
-                    );
-                Navigator.pop(ctx);
-                VFeedback.showMessage(context, 'Channel "$name" created');
-              }
-            },
-          ),
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(context),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Create',
+              onPressed: () {
+                final name = nameController.text.trim();
+                if (name.isNotEmpty) {
+                  ref
+                      .read(channelProvider.notifier)
+                      .createChannel(
+                        worldId: widget.worldId,
+                        name: name,
+                        description: descController.text.trim().isEmpty
+                            ? null
+                            : descController.text.trim(),
+                      );
+                  Navigator.pop(context);
+                  VFeedback.showMessage(context, 'Channel "$name" created');
+                }
+              },
+            ),
+          ]),
         ],
-      ),
-    );
+      );
+    } finally {
+      nameController.dispose();
+      descController.dispose();
+    }
   }
 
   Future<void> _generateInvite() async {
@@ -355,23 +361,23 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   }
 
   Future<void> _deleteWorld() async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showVDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete World?'),
-        content: const Text(
-          'This action is irreversible. All channels, messages, and '
-          'data associated with this world will be permanently deleted.',
-        ),
-        actions: [
+      title: 'Delete World?',
+      content: const Text(
+        'This action is irreversible. All channels, messages, and '
+        'data associated with this world will be permanently deleted.',
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(context, false),
             variant: ButtonVariant.text,
           ),
-          VButton(onPressed: () => Navigator.pop(ctx, true), label: 'Delete'),
-        ],
-      ),
+          VButton(onPressed: () => Navigator.pop(context, true), label: 'Delete'),
+        ]),
+      ],
     );
 
     if (confirmed != true || !mounted) return;
@@ -383,7 +389,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     ref.read(residentProvider.notifier).leaveWorld(widget.worldId);
 
     // Persist to server; if it fails the mutation outbox retries.
-    final result = await WorldRepository().leaveWorld(
+    final result = await const WorldRepository().leaveWorld(
       worldId: widget.worldId,
       residentId: resident.id,
     );
@@ -401,7 +407,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   void _showBannerGenerator() {
     final world = ref.read(worldProvider).worlds[widget.worldId];
     if (world == null) return;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
@@ -410,7 +415,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
         child: Container(
           constraints: const BoxConstraints(maxHeight: 600),
           decoration: BoxDecoration(
-            color: isDark ? VColors.surfaceDark : VColors.surface,
+            color: VColors.surfaceDark,
             borderRadius: BorderRadius.circular(VRadius.xl),
             border: Border.all(
               color: Theme.of(context).colorScheme.outlineVariant,
@@ -479,7 +484,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   // ── Section header builder ──────────────────────────────────────
 
   Widget _sectionHeader(IconData icon, String title) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Icon(icon, color: VColors.tertiary, size: VIconSize.md),
@@ -513,7 +517,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     String? hintText,
     Widget? prefixIcon,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hintText,
       prefixIcon: prefixIcon,
@@ -538,7 +541,6 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final world = ref.watch(worldProvider).worlds[widget.worldId];
     final resident = ref.watch(residentProvider).resident;
 
@@ -651,22 +653,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                         const SizedBox(height: VSpacing.xl),
 
                         // Publish button
-                        SizedBox(
-                          width: double.infinity,
-                          height: VTouchTarget.minimum,
-                          child: FilledButton.icon(
-                            onPressed: _isSaving ? null : _saveSettings,
-                            icon: _isSaving
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Icon(Icons.save),
-                            label: Text(
-                              _isSaving ? 'SAVING...' : 'PUBLISH CHANGES',
-                            ),
-                          ),
+                        VButton(
+                          label: 'PUBLISH CHANGES',
+                          isFullWidth: true,
+                          isLoading: _isSaving,
+                          icon: const Icon(Icons.save),
+                          onPressed: _isSaving ? null : _saveSettings,
                         ),
                       ],
                     ),
@@ -689,18 +681,12 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
-                        SizedBox(
-                          width: double.infinity,
-                          height: VTouchTarget.minimum,
-                          child: OutlinedButton.icon(
-                            onPressed: () => _showBannerGenerator(),
-                            icon: const Icon(VIcons.sparkles),
-                            label: const Text('Regenerate Banner'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: VColors.tertiary,
-                              side: const BorderSide(color: VColors.tertiary),
-                            ),
-                          ),
+                        VButton(
+                          label: 'Regenerate Banner',
+                          variant: ButtonVariant.outlined,
+                          isFullWidth: true,
+                          icon: const Icon(VIcons.sparkles),
+                          onPressed: _showBannerGenerator,
                         ),
                       ],
                     ),
@@ -715,9 +701,9 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       worldId: widget.worldId,
                       sovereignId: world.sovereignId,
                       residentId: resident?.id,
-                      onRename: (id, name) => _renameChannel(id, name),
-                      onDelete: (id, name) => _deleteChannel(id, name),
-                      onCreate: (ctx) => _showCreateChannel(ctx),
+                      onRename: _renameChannel,
+                      onDelete: _deleteChannel,
+                      onCreate: _showCreateChannel,
                     ),
                   ),
 
@@ -1191,9 +1177,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.errorContainerDark
-                          : VColors.errorContainer,
+                      color: VColors.errorContainerDark,
                       borderRadius: BorderRadius.circular(VRadius.xl),
                       border: Border.all(
                         color: VColors.error.withValues(alpha: 0.3),
@@ -1204,7 +1188,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.warning_amber_rounded,
                               color: VColors.error,
                               size: VIconSize.md,
@@ -1227,20 +1211,14 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           ),
                         ),
                         const SizedBox(height: VSpacing.md),
-                        SizedBox(
-                          width: double.infinity,
-                          height: VTouchTarget.minimum,
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: VColors.error,
-                              side: const BorderSide(color: VColors.error),
-                            ),
-                            onPressed: resident?.id == world.sovereignId
-                                ? _deleteWorld
-                                : null,
-                            icon: const Icon(Icons.delete_forever),
-                            label: const Text('Delete World'),
-                          ),
+                        VButton(
+                          label: 'Delete World',
+                          variant: ButtonVariant.outlined,
+                          isFullWidth: true,
+                          icon: const Icon(Icons.delete_forever),
+                          onPressed: resident?.id == world.sovereignId
+                              ? _deleteWorld
+                              : null,
                         ),
                       ],
                     ),
@@ -1269,7 +1247,6 @@ class _BoostWorldCard extends ConsumerWidget {
     if (world == null) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final cs = theme.colorScheme;
     final currentLevel = getWorldLevel(world.activityScore);
     final nextLevel = (currentLevel + 1).clamp(1, 10);
@@ -1281,10 +1258,6 @@ class _BoostWorldCard extends ConsumerWidget {
         ? (progress / range).clamp(0.0, 1.0)
         : 1.0;
     final isMaxLevel = currentLevel >= 10;
-
-    const paidBoostsEnabled = false;
-    const canBoost = false;
-
     return _Card(
       padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
@@ -1292,7 +1265,7 @@ class _BoostWorldCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.rocket_launch,
                 color: VColors.tertiary,
                 size: VIconSize.md,
@@ -1368,7 +1341,7 @@ class _BoostWorldCard extends ConsumerWidget {
           // Boost info row
           Row(
             children: [
-              Icon(Icons.bolt, size: 16, color: VColors.tertiary),
+              const Icon(Icons.bolt, size: 16, color: VColors.tertiary),
               const SizedBox(width: 4),
               Text(
                 'Earn activity through posts, jobs, trades, and participation',
@@ -1389,61 +1362,14 @@ class _BoostWorldCard extends ConsumerWidget {
           const SizedBox(height: VSpacing.md),
 
           // Boost button
-          SizedBox(
-            width: double.infinity,
-            height: VTouchTarget.minimum,
-            child: FilledButton.icon(
-              onPressed: canBoost
-                  ? () => _handleBoost(context, ref, world)
-                  : null,
-              icon: const Icon(VIcons.rocket, size: 20),
-              label: Text(
-                paidBoostsEnabled ? 'Boost World' : 'Paid boosts disabled',
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: canBoost ? VColors.tertiary : null,
-                foregroundColor: canBoost
-                    ? (isDark ? VColors.onSurfaceDark : VColors.onTertiary)
-                    : null,
-              ),
-            ),
+          const VButton(
+            label: 'Paid boosts disabled',
+            isFullWidth: true,
+            icon: Icon(VIcons.rocket, size: 20),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _handleBoost(
-    BuildContext context,
-    WidgetRef ref,
-    World world,
-  ) async {
-    final result = await ref.read(worldProvider.notifier).boostWorld(worldId);
-
-    if (!context.mounted) return;
-
-    switch (result) {
-      case StorePurchaseState.purchased:
-        final updated = ref.read(worldProvider).worlds[worldId];
-        final newLevel = updated != null
-            ? getWorldLevel(updated.activityScore)
-            : null;
-        VFeedback.showMessage(
-          context,
-          newLevel != null && newLevel > getWorldLevel(world.activityScore)
-              ? 'Boost applied! World advanced to Level $newLevel!'
-              : 'Boost applied! +${World.boostActivityPoints} activity points.',
-        );
-      case StorePurchaseState.error:
-        VFeedback.showMessage(
-          context,
-          'Boost purchase failed. Please try again.',
-        );
-      case StorePurchaseState.disabled:
-        break;
-      default:
-        break;
-    }
   }
 }
 
@@ -1467,56 +1393,53 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
 
   Future<void> _load() async {
     final ranks = await RankService.fetchWorldRanks(widget.worldId);
-    if (mounted)
+    if (mounted) {
       setState(() {
         _ranks = ranks;
         _loading = false;
       });
+    }
   }
 
-  void _showCreateDialog() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Future<void> _showCreateDialog() async {
     final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark
-            ? VColors.surfaceContainerHighDark
-            : VColors.surfaceContainerHigh,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(VRadius.pill),
-        ),
-        title: const Text('Create Rank'),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Create Rank',
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(hintText: 'Rank name'),
           autofocus: true,
         ),
         actions: [
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Create',
-            onPressed: () async {
-              final name = controller.text.trim();
-              if (name.isEmpty) return;
-              await RankService.createRank(worldId: widget.worldId, name: name);
-              Navigator.pop(ctx);
-              _load();
-            },
-          ),
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(context),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Create',
+              onPressed: () async {
+                final name = controller.text.trim();
+                if (name.isEmpty) return;
+                await RankService.createRank(worldId: widget.worldId, name: name);
+                if (!mounted) return;
+                Navigator.pop(context);
+                _load();
+              },
+            ),
+          ]),
         ],
-      ),
-    );
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return _Card(
       padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
@@ -1539,10 +1462,12 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
                   ),
                 ),
               ),
-              TextButton.icon(
-                onPressed: _showCreateDialog,
+              VButton(
+                label: 'Create',
+                variant: ButtonVariant.text,
+                size: ButtonSize.small,
                 icon: const Icon(VIcons.plus, size: VIconSize.sm),
-                label: const Text('Create'),
+                onPressed: _showCreateDialog,
               ),
             ],
           ),
@@ -1596,13 +1521,10 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: padding ?? const EdgeInsets.all(VSpacing.lg),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerDark,
         borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: Theme.of(context).colorScheme.outlineVariant,

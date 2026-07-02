@@ -7,6 +7,9 @@ import '../services/world_service.dart';
 class OnboardingFunnel {
   OnboardingFunnel._();
 
+  /// Server-side auto-proof marker — not a user-uploaded URI.
+  static const autoProofUri = 'auto';
+
   static bool profileReady(Resident resident) =>
       resident.name.trim().length >= 2;
 
@@ -18,7 +21,7 @@ class OnboardingFunnel {
       if (ua.submittedAt == null) continue;
       final proofs = ua.proofUris;
       if (proofs.isEmpty) continue;
-      if (proofs.length == 1 && proofs.first == 'auto') continue;
+      if (proofs.length == 1 && proofs.first == autoProofUri) continue;
       return true;
     }
     return false;

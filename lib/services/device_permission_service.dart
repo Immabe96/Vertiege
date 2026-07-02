@@ -39,10 +39,7 @@ class DevicePermissionService {
     var settings = await messaging.getNotificationSettings();
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
       settings = await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
+        
       );
     }
 
@@ -110,9 +107,11 @@ class DevicePermissionService {
                 },
               ),
               const SizedBox(height: VSpacing.sm),
-              TextButton(
+              VButton(
+                label: 'Not now',
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Not now'),
+                variant: ButtonVariant.text,
+                isFullWidth: true,
               ),
             ],
           ),

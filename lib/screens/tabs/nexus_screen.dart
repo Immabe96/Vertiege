@@ -95,7 +95,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
         label: 'Search residents and worlds',
-        icon: Icon(VIcons.search),
+        icon: const Icon(VIcons.search),
         onPress: () => openGlobalSearch(context),
       ),
       VAccessibleHeaderAction(
@@ -110,7 +110,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
             return Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(VIcons.bell),
+                const Icon(VIcons.bell),
                 if (unread > 0)
                   Positioned(
                     right: -4,

@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/ally.dart';
 import '../services/ally_service.dart';
 import '../utils/haptics.dart';
+
+part 'ally_provider.g.dart';
 
 class AllyState {
   final List<Ally> allies;
@@ -30,7 +33,8 @@ class AllyState {
   );
 }
 
-class AllyNotifier extends Notifier<AllyState> {
+@Riverpod(name: 'allyProvider', keepAlive: true)
+class AllyNotifier extends _$AllyNotifier {
   @override
   AllyState build() => const AllyState();
 
@@ -94,8 +98,6 @@ class AllyNotifier extends Notifier<AllyState> {
     );
   }
 
-  /// Returns the relationship status between current resident and another.
-  /// null = no relationship, AllegianceStatus = current state.
   Future<AllegianceStatus?> relationshipStatus(
     String residentId,
     String otherId,
@@ -112,7 +114,3 @@ class AllyNotifier extends Notifier<AllyState> {
     state = const AllyState();
   }
 }
-
-final allyProvider = NotifierProvider<AllyNotifier, AllyState>(
-  AllyNotifier.new,
-);

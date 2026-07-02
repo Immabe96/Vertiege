@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/notification.dart';
 import '../services/storage_service.dart';
 import '../services/notification_service.dart';
@@ -13,6 +14,8 @@ import '../services/re_engagement_push_copy.dart';
 import '../utils/id_generator.dart';
 import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
+
+part 'notification_provider.g.dart';
 
 class NotificationState {
   final List<AppNotification> notifications;
@@ -40,7 +43,8 @@ class NotificationState {
   );
 }
 
-class NotificationNotifier extends Notifier<NotificationState> {
+@Riverpod(name: 'notificationProvider', keepAlive: true)
+class NotificationNotifier extends _$NotificationNotifier {
   StreamSubscription<AppNotification>? _realtimeSubscription;
   String? _realtimeResidentId;
   int _unreadCount = 0;
@@ -56,7 +60,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     return const NotificationState();
   }
 
-  void addNotification({
+  Future<void> addNotification({
     required NotificationType type,
     required String message,
     String? recipientId,
@@ -220,7 +224,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
     return const [];
   }
 
-  int get unreadCount => _unreadCount;
+  int get unreadCount => state.notifications.where((n) => !n.read).length;
 
   Future<void> _subscribeRealtime(String residentId) async {
     if (_realtimeResidentId == residentId) return;
@@ -262,8 +266,6 @@ class NotificationNotifier extends Notifier<NotificationState> {
       type: NotificationType.ranking,
       message: message,
       worldId: worldId,
-      showInLocalInbox: true,
-      persistRemote: false,
     );
   }
 
@@ -277,8 +279,6 @@ class NotificationNotifier extends Notifier<NotificationState> {
     addNotification(
       type: NotificationType.streakReminder,
       message: scheduleMsg,
-      showInLocalInbox: true,
-      persistRemote: false,
     );
   }
 
@@ -294,8 +294,6 @@ class NotificationNotifier extends Notifier<NotificationState> {
       message: '$count residents reacted to your post!',
       postId: postId,
       worldId: worldId,
-      showInLocalInbox: true,
-      persistRemote: false,
     );
   }
 
@@ -346,8 +344,3 @@ class NotificationNotifier extends Notifier<NotificationState> {
     'createdAt': n.createdAt,
   };
 }
-
-final notificationProvider =
-    NotifierProvider<NotificationNotifier, NotificationState>(
-      NotificationNotifier.new,
-    );

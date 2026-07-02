@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../router/world_navigation.dart';
 import '../../../theme/v_tokens.dart';
@@ -6,6 +6,7 @@ import '../../../theme/v_colors.dart';
 import '../../../models/resident.dart';
 import '../../../services/spotlight_service.dart';
 import '../../../widgets/profile/cosmetic_avatar.dart';
+import '../../../ui/feedback/v_states.dart';
 import '../../../ui/icons/v_icons.dart';
 
 class SpotlightCard extends StatefulWidget {
@@ -51,7 +52,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
       children: [
         Row(
           children: [
-            Icon(VIcons.sparkles, color: VColors.tertiary, size: VIconSize.sm),
+            const Icon(VIcons.sparkles, color: VColors.tertiary, size: VIconSize.sm),
             const SizedBox(width: VSpacing.xs),
             Text(
               'Resident Spotlight',
@@ -66,7 +67,7 @@ class _SpotlightCardState extends State<SpotlightCard> {
         if (_isLoading)
           const SizedBox(
             height: 60,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            child: Center(child: VSpinner()),
           )
         else if (_spotlightResident == null)
           Container(

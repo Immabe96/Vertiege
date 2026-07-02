@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'v_commune_colors.dart';
 import 'v_tokens.dart';
 
-/// Typography tokens — system sans for now so login never sync-loads Google Fonts.
-///
-/// Plus Jakarta via `google_fonts` can be re-enabled with bundled assets once
-/// startup profiling is clean on device.
+/// Typography — Plus Jakarta Sans (Prestige Noir brand).
 class VFonts {
   VFonts._();
 
-  static const String sansFamily = 'sans-serif';
+  static const String sansFamily = 'Plus Jakarta Sans';
 
-  static Future<void> ensureLoaded() async {}
+  /// Prefetch weights used across the app before first frame.
+  static Future<void> ensureLoaded() async {
+    await GoogleFonts.pendingFonts([
+      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w400),
+      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w500),
+      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+    ]);
+  }
 
   static TextStyle sans({
     double? fontSize,
@@ -22,8 +28,7 @@ class VFonts {
     FontStyle? fontStyle,
     double? letterSpacing,
   }) =>
-      TextStyle(
-        fontFamily: sansFamily,
+      GoogleFonts.plusJakartaSans(
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
@@ -32,7 +37,8 @@ class VFonts {
         letterSpacing: letterSpacing,
       );
 
-  static TextTheme apply(TextTheme theme) => theme;
+  static TextTheme apply(TextTheme theme) =>
+      GoogleFonts.plusJakartaSansTextTheme(theme);
 
   /// Commune chat typography by role (DCX-027).
   static TextStyle chat({
@@ -41,20 +47,11 @@ class VFonts {
     double? fontSize,
     FontWeight? fontWeight,
   }) {
-    final isDark = brightness == Brightness.dark;
     final color = switch (role) {
-      VChatTextRole.normal => isDark
-          ? VCommuneColors.textNormal
-          : VCommuneColors.textNormalLight,
-      VChatTextRole.muted => isDark
-          ? VCommuneColors.textMuted
-          : VCommuneColors.textMutedLight,
-      VChatTextRole.headerPrimary => isDark
-          ? VCommuneColors.headerPrimary
-          : VCommuneColors.headerPrimaryLight,
-      VChatTextRole.headerSecondary => isDark
-          ? VCommuneColors.headerSecondary
-          : VCommuneColors.headerSecondaryLight,
+      VChatTextRole.normal => VCommuneColors.textNormal,
+      VChatTextRole.muted => VCommuneColors.textMuted,
+      VChatTextRole.headerPrimary => VCommuneColors.headerPrimary,
+      VChatTextRole.headerSecondary => VCommuneColors.headerSecondary,
       VChatTextRole.link => VCommuneColors.textLinkOf(brightness),
       VChatTextRole.mention => VCommuneColors.textMention,
     };

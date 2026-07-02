@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../config/achievements.dart';
 import '../../../config/progression_glossary.dart';
@@ -125,7 +125,7 @@ class PrestigeProgressCard extends ConsumerWidget {
                   value: 1.0,
                   minHeight: 4,
                   backgroundColor: Theme.of(context).colorScheme.outlineVariant,
-                  valueColor: AlwaysStoppedAnimation<Color>(VColors.tierApex),
+                  valueColor: const AlwaysStoppedAnimation<Color>(VColors.tierApex),
                 ),
               ),
           ],

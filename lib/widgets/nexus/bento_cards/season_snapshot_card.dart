@@ -1,11 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../config/season_catalog.dart';
 import '../../../services/season_service.dart';
 import '../../../state/resident_provider.dart';
 import '../../../state/world_provider.dart';
-import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
 import '../../../utils/calm_ranking.dart';
 

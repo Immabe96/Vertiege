@@ -62,7 +62,6 @@ import '../screens/twin_seal_setup_screen.dart';
 import '../models/message.dart';
 import '../widgets/core/empty_state.dart';
 import '../screens/auth/auth_callback.dart';
-import '../screens/splash_screen.dart';
 import 'go_router_refresh.dart';
 import 'navigation_keys.dart';
 import 'v_page_transitions.dart';
@@ -80,7 +79,7 @@ final goRouterRefreshProvider = Provider<GoRouterRefresh>((ref) {
         s.resident?.tier.value,
       ),
     ),
-    (_, __) => refresh.refresh(),
+    (_, _) => refresh.refresh(),
   );
   final client = maybeSupabase();
   if (client != null) {
@@ -127,8 +126,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final residentsRedirect = redirectResidentsHostDeepLink(uri, location);
       if (residentsRedirect != null) return residentsRedirect;
 
-      // Never interrupt deep-link auth callbacks or splash
-      if (location == '/auth/callback' || location == '/splash') return null;
+      final postRedirect = redirectPostHostDeepLink(uri, location);
+      if (postRedirect != null) return postRedirect;
+
+      final worldRedirect = redirectWorldHostDeepLink(uri, location);
+      if (worldRedirect != null) return worldRedirect;
+
+      final chatRedirect = redirectChatHostDeepLink(uri, location);
+      if (chatRedirect != null) return chatRedirect;
+
+      final notificationsRedirect =
+          redirectNotificationsHostDeepLink(uri, location);
+      if (notificationsRedirect != null) return notificationsRedirect;
+
+      // Never interrupt deep-link auth callbacks
+      if (location == '/auth/callback') return null;
 
       final isVerifierRoute = location.startsWith('/verifier');
       final isVerifierLogin = location == '/verifier/login';
@@ -189,10 +201,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/signup',
@@ -483,19 +491,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/season',
-        redirect: (_, __) => progressPath(tab: ProgressTab.season),
+        redirect: (_, _) => progressPath(tab: ProgressTab.season),
       ),
       GoRoute(
         path: '/challenges',
-        redirect: (_, __) => progressPath(tab: ProgressTab.world),
+        redirect: (_, _) => progressPath(tab: ProgressTab.world),
       ),
       GoRoute(
         path: '/daily-quests',
-        redirect: (_, __) => progressPath(tab: ProgressTab.quests),
+        redirect: (_, _) => progressPath(tab: ProgressTab.quests),
       ),
       GoRoute(
         path: '/leagues',
-        redirect: (_, __) => progressPath(tab: ProgressTab.league),
+        redirect: (_, _) => progressPath(tab: ProgressTab.league),
       ),
       vGoRoute(
         path: '/coin-history',

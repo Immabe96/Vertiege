@@ -41,7 +41,7 @@ class SanctuaryService {
           'world_id': worldId,
           'resident_id': userId,
           'mood_level': moodLevel,
-          if (moodNote != null) 'mood_note': moodNote,
+          'mood_note': ?moodNote,
         })
         .select()
         .single();

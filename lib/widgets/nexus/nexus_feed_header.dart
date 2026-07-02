@@ -37,7 +37,7 @@ class NexusFeedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: isDark ? context.vSurface : context.vSurface,
+      color: context.vSurface,
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,
         VSpacing.xs,

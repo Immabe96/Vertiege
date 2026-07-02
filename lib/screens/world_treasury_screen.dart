@@ -9,9 +9,7 @@ import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/screen_loading.dart';
-import '../../widgets/core/v_feedback.dart';
 import '../../widgets/core/empty_state.dart';
-import '../ui/buttons/v_button.dart';
 import '../../widgets/core/new_user_context_hint.dart';
 import '../../widgets/core/progression_help_button.dart';
 import '../../config/progression_glossary.dart';
@@ -72,7 +70,7 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
     }
   }
 
-  void _showDonateDialog() {
+  Future<void> _showDonateDialog() async {
     final resident = ref.read(residentProvider).resident;
     final world = ref.read(worldProvider).worlds[widget.worldId];
     if (world != null) {
@@ -90,10 +88,11 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
     final amountController = TextEditingController();
     final descController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Donate to Treasury'),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Donate to Treasury',
+        scrollContent: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -116,41 +115,46 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
           ],
         ),
         actions: [
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.of(ctx).pop(),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Donate',
-            onPressed: () async {
-              final amount = int.tryParse(amountController.text);
-              if (amount == null || amount <= 0) return;
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.of(context).pop(),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Donate',
+              onPressed: () async {
+                final amount = int.tryParse(amountController.text);
+                if (amount == null || amount <= 0) return;
 
-              await TreasuryService.donate(
-                widget.worldId,
-                amount,
-                descController.text.trim(),
-              );
-              if (context.mounted) {
-                Navigator.of(ctx).pop();
+                await TreasuryService.donate(
+                  widget.worldId,
+                  amount,
+                  descController.text.trim(),
+                );
+                if (!mounted) return;
+                Navigator.of(context).pop();
                 _loadData();
-              }
-            },
-          ),
+              },
+            ),
+          ]),
         ],
-      ),
-    );
+      );
+    } finally {
+      amountController.dispose();
+      descController.dispose();
+    }
   }
 
-  void _showWithdrawDialog() {
+  Future<void> _showWithdrawDialog() async {
     final amountController = TextEditingController();
     final descController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Withdraw from Treasury'),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Withdraw from Treasury',
+        scrollContent: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -173,24 +177,25 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
           ],
         ),
         actions: [
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.of(ctx).pop(),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Withdraw',
-            onPressed: () async {
-              final amount = int.tryParse(amountController.text);
-              if (amount == null || amount <= 0) return;
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.of(context).pop(),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Withdraw',
+              onPressed: () async {
+                final amount = int.tryParse(amountController.text);
+                if (amount == null || amount <= 0) return;
 
-              final result = await TreasuryService.withdraw(
-                widget.worldId,
-                amount,
-                descController.text.trim(),
-              );
-              if (context.mounted) {
-                Navigator.of(ctx).pop();
+                final result = await TreasuryService.withdraw(
+                  widget.worldId,
+                  amount,
+                  descController.text.trim(),
+                );
+                if (!mounted) return;
+                Navigator.of(context).pop();
                 if (!result.ok) {
                   VFeedback.showMessage(
                     context,
@@ -198,12 +203,15 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
                   );
                 }
                 _loadData();
-              }
-            },
-          ),
+              },
+            ),
+          ]),
         ],
-      ),
-    );
+      );
+    } finally {
+      amountController.dispose();
+      descController.dispose();
+    }
   }
 
   @override
@@ -257,18 +265,34 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
     }
 
     if (_loadError != null) {
-      return AppErrorState(message: _loadError, onRetry: _loadData);
+      return RefreshIndicator(
+        onRefresh: _loadData,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            AppErrorState(message: _loadError, onRetry: _loadData),
+          ],
+        ),
+      );
     }
 
     if (_treasury == null) {
-      return AppEmptyState(
-        title: 'No treasury yet',
-        description: widget.isSovereignOrCouncil
-            ? 'World treasury will appear here once funded. Residents can donate when it is active.'
-            : 'This world has not opened a treasury yet. Check back after the sovereign sets one up.',
-        icon: Icons.account_balance_outlined,
-        actionLabel: widget.isSovereignOrCouncil ? 'Refresh' : null,
-        onAction: widget.isSovereignOrCouncil ? _loadData : null,
+      return RefreshIndicator(
+        onRefresh: _loadData,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            AppEmptyState(
+              title: 'No treasury yet',
+              description: widget.isSovereignOrCouncil
+                  ? 'World treasury will appear here once funded. Residents can donate when it is active.'
+                  : 'This world has not opened a treasury yet. Check back after the sovereign sets one up.',
+              icon: Icons.account_balance_outlined,
+              actionLabel: widget.isSovereignOrCouncil ? 'Refresh' : null,
+              onAction: widget.isSovereignOrCouncil ? _loadData : null,
+            ),
+          ],
+        ),
       );
     }
 
@@ -335,19 +359,22 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: FilledButton.icon(
-                      onPressed: _showDonateDialog,
+                    child: VButton(
+                      label: 'Donate',
                       icon: const Icon(Icons.volunteer_activism),
-                      label: const Text('Donate'),
+                      isFullWidth: true,
+                      onPressed: _showDonateDialog,
                     ),
                   ),
                   if (widget.isSovereignOrCouncil) ...[
                     const SizedBox(width: VSpacing.sm),
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _showWithdrawDialog,
+                      child: VButton(
+                        label: 'Withdraw',
                         icon: const Icon(Icons.money_off),
-                        label: const Text('Withdraw'),
+                        variant: ButtonVariant.outlined,
+                        isFullWidth: true,
+                        onPressed: _showWithdrawDialog,
                       ),
                     ),
                   ],
@@ -371,23 +398,32 @@ class _WorldTreasuryScreenState extends ConsumerState<WorldTreasuryScreen> {
         ),
         const SizedBox(height: VSpacing.sm),
         Expanded(
-          child: _transactions.isEmpty
-              ? AppEmptyState(
-                  title: 'No transactions yet',
-                  description:
-                      'Donations, withdrawals, and rewards show up here.',
-                  icon: Icons.receipt_long_outlined,
-                  actionLabel: 'Donate',
-                  onAction: _showDonateDialog,
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-                  itemCount: _transactions.length,
-                  itemBuilder: (context, index) {
-                    final tx = _transactions[index];
-                    return _TransactionTile(transaction: tx);
-                  },
-                ),
+          child: RefreshIndicator(
+            onRefresh: _loadData,
+            child: _transactions.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      AppEmptyState(
+                        title: 'No transactions yet',
+                        description:
+                            'Donations, withdrawals, and rewards show up here.',
+                        icon: Icons.receipt_long_outlined,
+                        actionLabel: 'Donate',
+                        onAction: _showDonateDialog,
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: VSpacing.md),
+                    itemCount: _transactions.length,
+                    itemBuilder: (context, index) {
+                      final tx = _transactions[index];
+                      return _TransactionTile(transaction: tx);
+                    },
+                  ),
+          ),
         ),
       ],
     );
@@ -409,7 +445,6 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -442,13 +477,11 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       margin: const EdgeInsets.only(bottom: VSpacing.xs),
       padding: const EdgeInsets.all(VSpacing.sm),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceDark : VColors.surfaceContainer,
+        color: VColors.surfaceDark,
         borderRadius: BorderRadius.circular(VRadius.md),
       ),
       child: Row(

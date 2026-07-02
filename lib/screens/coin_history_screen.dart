@@ -55,7 +55,7 @@ class _CoinHistoryScreenState extends State<CoinHistoryScreen> {
       title: 'Coin history',
       showBack: true,
       headerActions: [
-        VHeaderAction(icon: Icon(VIcons.rotateCw), onPress: _load),
+        VHeaderAction(icon: const Icon(VIcons.rotateCw), onPress: _load),
       ],
       body: _loading
           ? const ScreenLoading.list()
@@ -72,7 +72,7 @@ class _CoinHistoryScreenState extends State<CoinHistoryScreen> {
               child: ListView.separated(
                 padding: const EdgeInsets.all(VSpacing.md),
                 itemCount: _rows!.length,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, _) =>
                     const SizedBox(height: VSpacing.sm),
                 itemBuilder: (context, index) {
                   final tx = _rows![index];

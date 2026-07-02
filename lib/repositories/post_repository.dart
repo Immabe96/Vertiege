@@ -76,7 +76,7 @@ class PostRepository {
       final raw = await client.rpc(
         'list_nexus_posts_cursor',
         params: {
-          if (cursor != null) 'p_cursor': cursor,
+          'p_cursor': ?cursor,
           'p_limit': limit,
         },
       );
@@ -159,7 +159,7 @@ class PostRepository {
       'list_posts_cursor',
       params: {
         'p_world_id': worldId,
-        if (cursor != null) 'p_cursor': cursor,
+        'p_cursor': ?cursor,
         'p_limit': limit,
       },
     );
@@ -408,7 +408,7 @@ class PostRepository {
     await MutationOutboxService.replay((mutation) async {
       switch (mutation.type) {
         case createPostMutation:
-          await getSupabase().from('posts').upsert(mutation.payload);
+          await getSupabase().rpc('create_post', params: mutation.payload);
           break;
         case editPostMutation:
           await editPost(
@@ -525,8 +525,46 @@ class PostRepository {
       reactions: Map<String, int>.from(json['reactions'] ?? {}),
       isAnnouncement: json['is_announcement'] == true,
       isPinned: json['is_pinned'] == true,
+      isEdited: json['is_edited'] == true,
+      isDecree: json['is_decree'] == true,
       status: json['status']?.toString() ?? 'published',
       repostOf: json['repost_of'] as String? ?? json['repostOf'] as String?,
+      mentions: (json['mentions'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      hashtags: (json['hashtags'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      poll: json['poll'] != null
+          ? Poll.fromJson(json['poll'] as Map<String, dynamic>)
+          : null,
+      eventTitle: json['event_title'] as String?,
+      eventStartsAt: json['event_starts_at'] as int?,
+      eventRsvpIds: (json['event_rsvp_ids'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      scheduledFor: json['scheduled_for'] != null
+          ? DateTime.tryParse(json['scheduled_for'].toString())
+          : null,
+      awards: (json['awards'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      comments: (json['comments'] as List<dynamic>?)
+              ?.map((e) => Comment(
+                    id: e['id']?.toString() ?? '',
+                    residentId: e['residentId']?.toString() ?? '',
+                    residentName: e['residentName']?.toString() ?? '',
+                    content: e['content']?.toString() ?? '',
+                    timestamp: e['timestamp'] as int? ?? 0,
+                    parentId: e['parentId'] as String?,
+                    tierAtPosting: e['tierAtPosting'] as int? ?? 1,
+                  ))
+              .toList() ??
+          const [],
     );
   }
 

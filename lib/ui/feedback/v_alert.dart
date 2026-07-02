@@ -17,7 +17,6 @@ class VAlert extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FAlert(
-      variant: FAlertVariant.primary,
       icon: icon ?? const SizedBox.shrink(),
       title: title,
       subtitle: subtitle,

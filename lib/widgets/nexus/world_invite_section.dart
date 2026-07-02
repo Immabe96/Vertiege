@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../../ui/buttons/v_button.dart';
 
 class WorldInviteSection extends StatelessWidget {
@@ -51,8 +51,7 @@ class WorldInviteSection extends StatelessWidget {
             final memberLabel = '${world.memberCount} members';
             return Padding(
               padding: const EdgeInsets.only(bottom: VSpacing.sm),
-              child: VSurfacePanel(
-                useBlur: false,
+              child: VCard(
                 padding: const EdgeInsets.all(VSpacing.md),
                 child: Row(
                   children: [

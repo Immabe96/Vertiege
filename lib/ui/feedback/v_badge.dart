@@ -17,12 +17,11 @@ class VBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final badgeColor = color ?? VColors.primary;
 
     final bgColor = isOutlined
         ? Colors.transparent
-        : badgeColor.withValues(alpha: isDark ? 0.15 : 0.1);
+        : badgeColor.withValues(alpha: 0.15);
 
     final textColor = isOutlined ? badgeColor : badgeColor;
 

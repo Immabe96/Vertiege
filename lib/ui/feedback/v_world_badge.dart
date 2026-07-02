@@ -27,15 +27,12 @@ class VWorldBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconData = WorldAssets.iconForWorld(worldId);
 
     final icon = Icon(
       iconData,
       size: iconSize,
-      color: isSelected
-          ? VColors.primary
-          : (isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant),
+      color: isSelected ? VColors.primary : VColors.onSurfaceVariantDark,
     );
 
     if (!showName) {
@@ -57,9 +54,7 @@ class VWorldBadge extends StatelessWidget {
               fontWeight: isSelected
                   ? VFontWeight.semiBold
                   : VFontWeight.regular,
-              color: isSelected
-                  ? VColors.primary
-                  : (isDark ? VColors.onSurfaceDark : VColors.onSurface),
+              color: isSelected ? VColors.primary : VColors.onSurfaceDark,
             ),
           ),
         ),

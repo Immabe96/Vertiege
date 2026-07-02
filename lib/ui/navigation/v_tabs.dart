@@ -26,7 +26,6 @@ class VTabs extends StatelessWidget {
     return FTabs(
       expands: expands,
       scrollable: scrollable,
-      control: const FTabControl.managed(),
       children: [
         for (final tab in tabs)
           FTabEntry(label: tab.label, child: tab.child),

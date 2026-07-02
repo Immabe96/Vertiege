@@ -28,7 +28,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
   List<WorldChallenge> _challenges = [];
   bool _loading = true;
   String? _loadError;
-  bool _showActiveOnly = true;
+  final bool _showActiveOnly = true;
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
     }
   }
 
-  void _showCreateChallengeDialog() {
+  Future<void> _showCreateChallengeDialog() async {
     final titleController = TextEditingController();
     final descController = TextEditingController();
     final targetController = TextEditingController();
@@ -72,112 +72,104 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
     String challengeType = 'individual';
     String challengeScope = 'world';
 
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Create Challenge'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
-                  ),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Create Challenge',
+        scrollContent: true,
+        content: StatefulBuilder(
+          builder: (ctx, setDialogState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.lg),
-                TextField(
-                  controller: descController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
+              ),
+              const SizedBox(height: VSpacing.lg),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.lg),
-                VSelect<String>(
-                  value: challengeType,
-                  onChanged: (v) {
-                    if (v != null) setDialogState(() => challengeType = v);
-                  },
-                  format: (value) =>
-                      value == 'individual' ? 'Individual' : 'Collective',
-                  label: const Text('Type'),
-                  hint: 'Select type',
-                  items: const [
-                    VSelectItem(
-                      value: 'individual',
-                      title: Text('Individual'),
-                    ),
-                    VSelectItem(
-                      value: 'collective',
-                      title: Text('Collective'),
-                    ),
-                  ],
+                maxLines: 2,
+              ),
+              const SizedBox(height: VSpacing.lg),
+              VSelect<String>(
+                value: challengeType,
+                onChanged: (v) {
+                  if (v != null) setDialogState(() => challengeType = v);
+                },
+                format: (value) =>
+                    value == 'individual' ? 'Individual' : 'Collective',
+                label: const Text('Type'),
+                hint: 'Select type',
+                items: const [
+                  VSelectItem(value: 'individual', title: Text('Individual')),
+                  VSelectItem(value: 'collective', title: Text('Collective')),
+                ],
+              ),
+              const SizedBox(height: VSpacing.lg),
+              VSelect<String>(
+                value: challengeScope,
+                onChanged: (v) {
+                  if (v != null) setDialogState(() => challengeScope = v);
+                },
+                format: (value) =>
+                    value == 'season' ? 'Season cohort' : 'World',
+                label: const Text('Scope'),
+                hint: 'Select scope',
+                items: const [
+                  VSelectItem(value: 'world', title: Text('World')),
+                  VSelectItem(value: 'season', title: Text('Season cohort')),
+                ],
+              ),
+              const SizedBox(height: VSpacing.lg),
+              TextField(
+                controller: targetController,
+                decoration: const InputDecoration(
+                  labelText: 'Target Value',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.lg),
-                VSelect<String>(
-                  value: challengeScope,
-                  onChanged: (v) {
-                    if (v != null) setDialogState(() => challengeScope = v);
-                  },
-                  format: (value) =>
-                      value == 'season' ? 'Season cohort' : 'World',
-                  label: const Text('Scope'),
-                  hint: 'Select scope',
-                  items: const [
-                    VSelectItem(value: 'world', title: Text('World')),
-                    VSelectItem(
-                      value: 'season',
-                      title: Text('Season cohort'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: VSpacing.lg),
-                TextField(
-                  controller: targetController,
-                  decoration: const InputDecoration(
-                    labelText: 'Target Value',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: VSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: rewardXpController,
-                        decoration: const InputDecoration(
-                          labelText: 'XP Reward',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: VSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: rewardXpController,
+                      decoration: const InputDecoration(
+                        labelText: 'XP Reward',
+                        border: OutlineInputBorder(),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: rewardCurrencyController,
-                        decoration: const InputDecoration(
-                          labelText: 'Currency Reward',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: rewardCurrencyController,
+                      decoration: const InputDecoration(
+                        labelText: 'Currency Reward',
+                        border: OutlineInputBorder(),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          actions: [
+        ),
+        actions: [
+          vDialogActionsRow([
             VButton(
               label: 'Cancel',
-              onPressed: () => Navigator.of(ctx).pop(),
+              onPressed: () => Navigator.pop(context),
               variant: ButtonVariant.text,
             ),
             VButton(
@@ -195,19 +187,23 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
                   scope: challengeScope,
                   targetValue: target,
                   rewardXp: int.tryParse(rewardXpController.text) ?? 0,
-                  rewardCurrency:
-                      int.tryParse(rewardCurrencyController.text) ?? 0,
+                  rewardCurrency: int.tryParse(rewardCurrencyController.text) ?? 0,
                 );
-                if (context.mounted) {
-                  Navigator.of(ctx).pop();
-                  _loadChallenges();
-                }
+                if (!mounted) return;
+                Navigator.pop(context);
+                _loadChallenges();
               },
             ),
-          ],
-        ),
-      ),
-    );
+          ]),
+        ],
+      );
+    } finally {
+      titleController.dispose();
+      descController.dispose();
+      targetController.dispose();
+      rewardXpController.dispose();
+      rewardCurrencyController.dispose();
+    }
   }
 
   @override
@@ -243,16 +239,25 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
     }
 
     if (_challenges.isEmpty) {
-      return AppEmptyState(
-        title: 'No challenges yet',
-        description: widget.isSovereignOrCouncil
-            ? 'Set a goal for residents—create the first world challenge.'
-            : 'No active challenges right now. Join in when council launches one.',
-        icon: Icons.flag_outlined,
-        actionLabel: widget.isSovereignOrCouncil ? 'Create Challenge' : null,
-        onAction: widget.isSovereignOrCouncil
-            ? _showCreateChallengeDialog
-            : null,
+      return RefreshIndicator(
+        onRefresh: _loadChallenges,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            AppEmptyState(
+              title: 'No challenges yet',
+              description: widget.isSovereignOrCouncil
+                  ? 'Set a goal for residents—create the first world challenge.'
+                  : 'No active challenges right now. Join in when council launches one.',
+              icon: Icons.flag_outlined,
+              actionLabel:
+                  widget.isSovereignOrCouncil ? 'Create Challenge' : null,
+              onAction: widget.isSovereignOrCouncil
+                  ? _showCreateChallengeDialog
+                  : null,
+            ),
+          ],
+        ),
       );
     }
 
@@ -277,19 +282,22 @@ class _WorldChallengesScreenState extends ConsumerState<WorldChallengesScreen> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-            itemCount: _challenges.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: VSpacing.sm),
-                child: _ChallengeCard(
-                  challenge: _challenges[index],
-                  isSovereignOrCouncil: widget.isSovereignOrCouncil,
-                  onToggle: _loadChallenges,
-                ),
-              );
-            },
+          child: RefreshIndicator(
+            onRefresh: _loadChallenges,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+              itemCount: _challenges.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: VSpacing.sm),
+                  child: _ChallengeCard(
+                    challenge: _challenges[index],
+                    isSovereignOrCouncil: widget.isSovereignOrCouncil,
+                    onToggle: _loadChallenges,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -311,14 +319,13 @@ class _ChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final pct = challenge.progressPct;
     final isCompleted = challenge.isCompleted;
 
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
       ),
       child: Column(
@@ -359,15 +366,13 @@ class _ChallengeCard extends StatelessWidget {
           Text(
             challenge.description,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
           LinearProgressIndicator(
             value: pct,
-            backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+            backgroundColor: VColors.surfaceDark,
             valueColor: AlwaysStoppedAnimation(
               isCompleted ? VColors.success : VColors.primary,
             ),

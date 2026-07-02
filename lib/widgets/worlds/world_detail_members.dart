@@ -1,11 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../state/world_provider.dart';
 import '../../utils/world_presence.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import 'leaderboard.dart';
 import 'world_events_card.dart';
 import 'world_member_row.dart';
@@ -31,9 +31,8 @@ class WorldDetailMembers extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Member avatars wrapped in GlassPanel
-        VSurfacePanel(
-          padding: const EdgeInsets.all(VSpacing.md),
+        // Member avatars wrapped in VCard
+        VCard(
           child: WorldMemberRow(
             members: members,
             isLoading: membersLoading,

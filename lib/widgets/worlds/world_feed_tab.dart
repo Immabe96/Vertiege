@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/post.dart';
 import '../../models/world.dart';
@@ -8,7 +8,7 @@ import '../../utils/v_motion.dart';
 import '../../models/resident.dart';
 import '../../services/permission_service.dart';
 import '../core/empty_state.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../feed/post_input.dart';
 import '../feed/post_item.dart';
 import 'event_card.dart';
@@ -19,9 +19,9 @@ import '../../models/channel.dart';
 
 class WorldFeedTab extends ConsumerStatefulWidget {
   final String worldId;
-  final dynamic world;
+  final World? world;
   final Resident? resident;
-  final List<dynamic> posts;
+  final List<Post> posts;
   final ColorScheme cs;
 
   /// When true, builds a single [ListView] for [NestedScrollView] tab bodies.
@@ -131,7 +131,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
   void _verifyHighlightPost() {
     final highlightId = widget.highlightPostId;
     if (highlightId == null || _reportedMissingHighlight) return;
-    final found = widget.posts.any((p) => (p as Post).id == highlightId);
+    final found = widget.posts.any((p) => (p).id == highlightId);
     if (!found) {
       _reportedMissingHighlight = true;
       widget.onHighlightMissing?.call();
@@ -210,7 +210,6 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
     final onJoin = widget.onJoin;
     final channels = widget.channels;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final eventPosts = posts
         .where((p) => (p as dynamic).isEvent == true)
         .toList();
@@ -226,25 +225,20 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
         ? PostInput(worldId: worldId, sovereignId: world.sovereignId)
         : Padding(
             padding: const EdgeInsets.all(VSpacing.md),
-            child: VSurfacePanel(
-              padding: const EdgeInsets.all(VSpacing.md),
+            child: VCard(
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.lock,
                     size: VIconSize.md,
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                    color: VColors.onSurfaceVariantDark,
                   ),
                   const SizedBox(width: VSpacing.sm + 4),
                   Expanded(
                     child: Text(
                       'Member+ required to post',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? VColors.onSurfaceVariantDark
-                            : VColors.onSurfaceVariant,
+                        color: VColors.onSurfaceVariantDark,
                       ),
                     ),
                   ),
@@ -296,7 +290,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
             children: List.generate(
               regularPosts.length,
               (index) => _postTile(
-                regularPosts[index] as Post,
+                regularPosts[index],
                 index,
                 worldId,
                 highlightPostId,
@@ -310,7 +304,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
         if (isArchive) const ArchiveWorldBanner(),
         postHeader,
         ...feedExtras,
-        if (eventCarousel != null) eventCarousel,
+        ?eventCarousel,
         postsSection,
         const SizedBox(height: VSpacing.xxl + VSpacing.xxl),
       ],
@@ -321,7 +315,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
         children: [
           postHeader,
           ...feedExtras,
-          if (eventCarousel != null) eventCarousel,
+          ?eventCarousel,
           Expanded(child: postsSection),
         ],
       );

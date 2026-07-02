@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/post.dart';
 import '../../services/world_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/feedback/v_states.dart';
 import '../../utils/v_motion.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
@@ -43,7 +43,7 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
   FeedSort _sort = FeedSort.latest;
   late final ScrollController _scrollController;
   bool _showScrollFab = false;
-  bool _shortcutsExpanded = false;
+  bool _shortcutsExpanded = true;
 
   @override
   void initState() {
@@ -102,7 +102,6 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
     ref.listen<int>(scrollToTopProvider, (_, next) => _scrollToTop());
     final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final posts = ref.watch(
       postProvider.select((postState) {
@@ -204,7 +203,7 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                 ],
                 SliverToBoxAdapter(
                   child: NexusFeedHeader(
-                    isDark: isDark,
+                    isDark: true,
                     allSelected: _tab == _NexusFeedTab.all,
                     verifiedSelected: _tab == _NexusFeedTab.verified,
                     followingSelected: _tab == _NexusFeedTab.following,
@@ -260,7 +259,7 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                   const SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.all(VSpacing.md),
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(child: VSpinner()),
                     ),
                   )
                 else if (posts.isNotEmpty && !postHasMore)
@@ -271,9 +270,7 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                         child: Text(
                           'You\'re all caught up',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: VCommuneColors.textMutedOf(
-                              isDark ? Brightness.dark : Brightness.light,
-                            ),
+                            color: VCommuneColors.textMutedOf(Brightness.dark),
                           ),
                         ),
                       ),

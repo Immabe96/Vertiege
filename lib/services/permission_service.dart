@@ -37,8 +37,9 @@ class WorldPermissions {
     String? sovereignId, {
     WorldConstitution constitution = const WorldConstitution(),
   }) {
-    if (_standingLevel(resident, worldId, sovereignId) < _postMinStanding)
+    if (_standingLevel(resident, worldId, sovereignId) < _postMinStanding) {
       return false;
+    }
     // Constitution posting rule: council-only means council (level 7) required
     if (constitution.posting == 'council-only') {
       return _standingLevel(resident, worldId, sovereignId) >=

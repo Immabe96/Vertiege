@@ -40,18 +40,8 @@ class WorldPoll {
     'created_at': createdAt.toIso8601String(),
   };
 
-  factory WorldPoll.fromJson(Map<String, dynamic> json) => WorldPoll(
-    id: json['id'] ?? '',
-    worldId: json['world_id'] ?? '',
-    channelId: json['channel_id'],
-    question: json['question'] ?? '',
-    options: (json['options'] as List?)?.map((e) => e.toString()).toList() ?? [],
-    results: _parseResults(json['results']),
-    createdBy: json['created_by'] ?? '',
-    expiresAt: json['expires_at'],
-    isClosed: json['is_closed'] == true,
-    createdAt: _parseDate(json['created_at']),
-  );
+  factory WorldPoll.fromJson(Map<String, dynamic> json) =>
+      WorldPoll.fromSupabase(json);
 
   static WorldPoll fromSupabase(Map<String, dynamic> data) => WorldPoll(
     id: data['id'] ?? '',

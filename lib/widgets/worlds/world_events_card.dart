@@ -1,12 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../state/event_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../services/permission_service.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../ui/overlays/v_dialog.dart';
 
 class WorldEventsCard extends ConsumerWidget {
   final String worldId;
@@ -59,10 +59,12 @@ class WorldEventsCard extends ConsumerWidget {
               ),
               const Spacer(),
               if (canCreate)
-                TextButton.icon(
-                  onPressed: () => _showCreateEvent(context, ref),
+                VButton(
+                  label: 'Create',
                   icon: const Icon(VIcons.plus, size: VIconSize.xs),
-                  label: const Text('Create'),
+                  variant: ButtonVariant.text,
+                  size: ButtonSize.small,
+                  onPressed: () => _showCreateEvent(context, ref),
                 ),
             ],
           ),
@@ -118,36 +120,37 @@ class WorldEventsCard extends ConsumerWidget {
   void _showCreateEvent(BuildContext context, WidgetRef ref) {
     final titleCtrl = TextEditingController();
     final descCtrl = TextEditingController();
-    showDialog(
+    showVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Create Event'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleCtrl,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Event title',
-                border: OutlineInputBorder(),
-              ),
+      title: 'Create Event',
+      scrollContent: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: titleCtrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Event title',
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: descCtrl,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                hintText: 'Description',
-                border: OutlineInputBorder(),
-              ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: descCtrl,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              hintText: 'Description',
+              border: OutlineInputBorder(),
             ),
-          ],
-        ),
-        actions: [
+          ),
+        ],
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             variant: ButtonVariant.text,
           ),
           VButton(
@@ -157,9 +160,7 @@ class WorldEventsCard extends ConsumerWidget {
               if (title.isEmpty) return;
               final resident = ref.read(residentProvider).resident;
               if (resident == null) return;
-              ref
-                  .read(eventProvider.notifier)
-                  .createEvent(
+              ref.read(eventProvider.notifier).createEvent(
                     worldId: worldId,
                     title: title,
                     description: descCtrl.text.trim(),
@@ -169,11 +170,14 @@ class WorldEventsCard extends ConsumerWidget {
                         .add(const Duration(hours: 1))
                         .millisecondsSinceEpoch,
                   );
-              Navigator.pop(ctx);
+              Navigator.pop(context);
             },
           ),
-        ],
-      ),
-    );
+        ]),
+      ],
+    ).whenComplete(() {
+      titleCtrl.dispose();
+      descCtrl.dispose();
+    });
   }
 }

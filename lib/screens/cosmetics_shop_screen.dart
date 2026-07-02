@@ -7,12 +7,11 @@ import '../services/marketplace_service.dart';
 import '../services/cosmetic_purchase_service.dart';
 import '../state/resident_provider.dart';
 import 'package:vertiege/ui/ui.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/worlds/listing_card.dart';
 import '../widgets/core/shimmer.dart';
-import '../widgets/core/empty_state.dart';
-import '../widgets/core/v_feedback.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 
 enum _ShopCategory { cosmetics }
@@ -40,8 +39,9 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
             vertical: VSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: VColors.tertiary.withValues(alpha: 0.15),
+            color: PrestigeNoir.accentSoft,
             borderRadius: BorderRadius.circular(VRadius.pill),
+            border: Border.all(color: VColors.brand.withValues(alpha: 0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -49,7 +49,7 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
               const Icon(
                 Icons.monetization_on,
                 size: VIconSize.sm,
-                color: VColors.tertiary,
+                color: VColors.brand,
               ),
               const SizedBox(width: VSpacing.xs),
               Text(
@@ -57,7 +57,7 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
                 style: const TextStyle(
                   fontSize: VFontSize.bodyMd,
                   fontWeight: VFontWeight.bold,
-                  color: VColors.tertiary,
+                  color: VColors.brand,
                 ),
               ),
             ],
@@ -187,8 +187,6 @@ class _ShopGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (items.isEmpty) {
       return Center(
@@ -257,12 +255,11 @@ class _ShopCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: canAfford ? () => _buyItem(context, ref, item) : null,
       onLongPress: () => _previewItem(context, ref, item),
-      child: VSurfaceCard(
+      child: VPrestigeCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -326,10 +323,10 @@ class _ShopCard extends ConsumerWidget {
               const Spacer(),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.monetization_on,
                     size: VIconSize.xs,
-                    color: VColors.tertiary,
+                    color: VColors.brand,
                   ),
                   const SizedBox(width: 2),
                   Text(
@@ -337,7 +334,7 @@ class _ShopCard extends ConsumerWidget {
                     style: const TextStyle(
                       fontSize: VFontSize.labelSm,
                       fontWeight: VFontWeight.bold,
-                      color: VColors.tertiary,
+                      color: VColors.brand,
                     ),
                   ),
                   const Spacer(),
@@ -397,7 +394,7 @@ class _ShopCard extends ConsumerWidget {
               '${item.price} coins · ${item.subtype}',
               style: Theme.of(
                 context,
-              ).textTheme.labelMedium?.copyWith(color: VColors.tertiary),
+              ).textTheme.labelMedium?.copyWith(color: VColors.brand),
             ),
           ],
         ),
@@ -462,7 +459,7 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
       _error = null;
     });
     try {
-      final listings = await MarketplaceService.getAllActiveListings(limit: 50);
+      final listings = await MarketplaceService.getAllActiveListings();
       if (mounted) {
         setState(() {
           _listings = listings;
@@ -489,9 +486,6 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     if (_loading) {
       return GridView.builder(
         padding: const EdgeInsets.all(VSpacing.md),
@@ -505,10 +499,9 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(VRadius.lg),
+              color: PrestigeNoir.surfaceRaised,
+              borderRadius: BorderRadius.circular(VRadius.bento),
+              border: Border.all(color: PrestigeNoir.borderLight),
             ),
             child: const Column(
               children: [
@@ -536,14 +529,14 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: VColors.error),
+            const Icon(Icons.error_outline, size: 48, color: VColors.error),
             const SizedBox(height: VSpacing.md),
             Text(_error!, style: const TextStyle(color: VColors.error)),
             const SizedBox(height: VSpacing.md),
-            FilledButton.icon(
-              onPressed: _loadListings,
+            VButton(
+              label: 'Retry',
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              onPressed: _loadListings,
             ),
           ],
         ),
@@ -609,13 +602,12 @@ class _DominionListingDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(VRadius.xl),
+      decoration: const BoxDecoration(
+        color: PrestigeNoir.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(VRadius.bento),
         ),
       ),
       padding: const EdgeInsets.all(VSpacing.lg),
@@ -626,21 +618,19 @@ class _DominionListingDetailSheet extends StatelessWidget {
           children: [
             if (listing.imageUrl != null) ...[
               ClipRRect(
-                borderRadius: BorderRadius.circular(VRadius.lg),
+                borderRadius: BorderRadius.circular(VRadius.bento),
                 child: Image.network(
                   listing.imageUrl!,
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 200,
-                    color: isDark
-                        ? VColors.surfaceContainerHighDark
-                        : VColors.surfaceContainerHigh,
+                    color: PrestigeNoir.surfaceRaised,
                     child: Icon(
                       Icons.image_outlined,
                       size: 48,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: PrestigeNoir.muted,
                     ),
                   ),
                 ),
@@ -657,14 +647,14 @@ class _DominionListingDetailSheet extends StatelessWidget {
             if (listing.price != null)
               Row(
                 children: [
-                  Icon(Icons.sell, size: VIconSize.sm, color: VColors.tertiary),
+                  const Icon(Icons.sell, size: VIconSize.sm, color: VColors.brand),
                   const SizedBox(width: VSpacing.xs),
                   Text(
                     listing.price!,
                     style: const TextStyle(
                       fontSize: VFontSize.bodyLg,
                       fontWeight: VFontWeight.bold,
-                      color: VColors.tertiary,
+                      color: VColors.brand,
                     ),
                   ),
                 ],
@@ -694,14 +684,15 @@ class _DominionListingDetailSheet extends StatelessWidget {
                 vertical: VSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: PrestigeNoir.accentSoft,
                 borderRadius: BorderRadius.circular(VRadius.pill),
+                border: Border.all(color: VColors.brand.withValues(alpha: 0.25)),
               ),
               child: Text(
                 listing.category.name[0].toUpperCase() +
                     listing.category.name.substring(1),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                style: const TextStyle(
+                  color: VColors.brand,
                   fontWeight: VFontWeight.semiBold,
                   fontSize: VFontSize.labelSm,
                 ),
@@ -715,13 +706,13 @@ class _DominionListingDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: VSpacing.xl),
-            FilledButton.icon(
+            VButton(
+              label: 'View in World',
+              icon: const Icon(Icons.open_in_new),
               onPressed: () {
                 context.push(exploreWorldPath(listing.worldId));
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.open_in_new),
-              label: const Text('View in World'),
             ),
             const SizedBox(height: VSpacing.md),
           ],

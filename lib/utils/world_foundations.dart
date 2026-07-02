@@ -128,7 +128,7 @@ ${foundation.entryPrompt}
 String _constitutionSummary(World world) {
   final c = world.constitution;
   final admission = switch (c.admission) {
-    'invite' => 'Invite-only',
+    'invite' || 'invite-only' => 'Invite-only',
     'application' => 'Application required',
     'paid' => 'Paid entry',
     _ => 'Open admission',

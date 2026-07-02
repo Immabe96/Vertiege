@@ -19,6 +19,8 @@ class PushTokenService {
   static final StreamController<RemoteMessage> _foregroundMessages =
       StreamController<RemoteMessage>.broadcast();
   static StreamSubscription<String>? _tokenRefreshSubscription;
+  static StreamSubscription<RemoteMessage>? _onMessageSubscription;
+  static StreamSubscription<RemoteMessage>? _onMessageOpenedAppSubscription;
   static bool _messageHandlersRegistered = false;
   static String? _residentId;
 
@@ -120,7 +122,7 @@ class PushTokenService {
     if (_messageHandlersRegistered) return;
     _messageHandlersRegistered = true;
 
-    FirebaseMessaging.onMessage.listen((message) {
+    _onMessageSubscription = FirebaseMessaging.onMessage.listen((message) {
       unawaited(_recordMessageEvent('notification_foreground', message));
       _foregroundMessages.add(message);
       CrashReporter.instance.addBreadcrumb(
@@ -129,7 +131,8 @@ class PushTokenService {
       );
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    _onMessageOpenedAppSubscription =
+        FirebaseMessaging.onMessageOpenedApp.listen((message) {
       unawaited(_recordMessageEvent('notification_opened', message));
       final route = routeFromRemoteMessage(message);
       if (route != null) _notificationRoutes.add(route);
@@ -150,6 +153,13 @@ class PushTokenService {
   }
 
   static Future<void> clearForResident() async {
+    // Cancel message handler subscriptions
+    await _onMessageSubscription?.cancel();
+    _onMessageSubscription = null;
+    await _onMessageOpenedAppSubscription?.cancel();
+    _onMessageOpenedAppSubscription = null;
+    _messageHandlersRegistered = false;
+
     if (!FirebaseBootstrap.isInitialized || kIsWeb) {
       _residentId = null;
       return;

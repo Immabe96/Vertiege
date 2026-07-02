@@ -8,6 +8,7 @@ import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../../ui/overlays/v_sheet.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../widgets/worlds/world_icon.dart';
@@ -141,7 +142,7 @@ class _CrossPostToFeedSheetState extends ConsumerState<CrossPostToFeedSheet> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: targets.length,
-                separatorBuilder: (_, __) => const SizedBox(width: VSpacing.sm),
+                separatorBuilder: (_, _) => const SizedBox(width: VSpacing.sm),
                 itemBuilder: (_, i) {
                   final id = targets[i];
                   final isNexus = WorldService.localOnlyWorldIds.contains(id);
@@ -196,9 +197,11 @@ class _CrossPostToFeedSheetState extends ConsumerState<CrossPostToFeedSheet> {
             ),
           ],
           const SizedBox(height: VSpacing.lg),
-          FilledButton(
+          VButton(
             onPressed: _posting || _selectedWorldId == null ? null : _post,
-            child: Text(_posting ? 'Posting…' : 'Post to feed'),
+            isLoading: _posting,
+            label: 'Post to feed',
+            isFullWidth: true,
           ),
         ],
       ),

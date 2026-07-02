@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../services/mutation_outbox_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/feedback/v_states.dart';
 
 /// Quiet strip when the mutation outbox has pending items (Wave 21).
 class MutationOutboxSyncBanner extends StatefulWidget {
@@ -51,11 +52,7 @@ class _MutationOutboxSyncBannerState extends State<MutationOutboxSyncBanner> {
         ),
         child: Row(
           children: [
-            const SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+            const VSpinner(size: 14),
             const SizedBox(width: VSpacing.sm),
             Expanded(
               child: Text(

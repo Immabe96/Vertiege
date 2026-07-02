@@ -66,8 +66,6 @@ Future<void> showVSheet(
     context: context,
     side: side,
     mainAxisMaxRatio: maxSize,
-    draggable: true,
-    barrierDismissible: true,
     builder: (sheetContext) => vSheetSurface(
       sheetContext,
       SingleChildScrollView(child: child),
@@ -97,8 +95,6 @@ void showVSideSheet(
     context: context,
     side: FLayout.ltr,
     mainAxisMaxRatio: maxSize,
-    draggable: true,
-    barrierDismissible: true,
     builder: (sheetContext) => vSheetSurface(
       sheetContext,
       SingleChildScrollView(child: child),

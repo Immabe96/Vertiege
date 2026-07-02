@@ -30,7 +30,7 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
   List<WorldPoll> _polls = [];
   bool _loading = true;
   String? _loadError;
-  bool _showActiveOnly = true;
+  final bool _showActiveOnly = true;
   bool _canCreatePoll = false;
 
   @override
@@ -86,60 +86,61 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     }
   }
 
-  void _showCreatePollDialog() {
+  Future<void> _showCreatePollDialog() async {
     final questionController = TextEditingController();
     final options = ['', '', ''];
 
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Create Poll'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: questionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Question',
-                    border: OutlineInputBorder(),
-                  ),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Create Poll',
+        scrollContent: true,
+        content: StatefulBuilder(
+          builder: (ctx, setDialogState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: questionController,
+                decoration: const InputDecoration(
+                  labelText: 'Question',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 16),
-                const Text('Options'),
-                const SizedBox(height: 8),
-                ...options.asMap().entries.map((e) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: TextField(
-                      onChanged: (v) {
-                        options[e.key] = v;
-                        setDialogState(() {});
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Option ${e.key + 1}',
-                        border: const OutlineInputBorder(),
-                      ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Options'),
+              const SizedBox(height: 8),
+              ...options.asMap().entries.map((e) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: TextField(
+                    onChanged: (v) {
+                      options[e.key] = v;
+                      setDialogState(() {});
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Option ${e.key + 1}',
+                      border: const OutlineInputBorder(),
                     ),
-                  );
-                }),
-                VButton(
-                  label: 'Add Option',
-                  onPressed: () {
-                    options.add('');
-                    setDialogState(() {});
-                  },
-                  icon: const Icon(VIcons.plus),
-                  variant: ButtonVariant.text,
-                ),
-              ],
-            ),
+                  ),
+                );
+              }),
+              VButton(
+                label: 'Add Option',
+                onPressed: () {
+                  options.add('');
+                  setDialogState(() {});
+                },
+                icon: const Icon(VIcons.plus),
+                variant: ButtonVariant.text,
+              ),
+            ],
           ),
-          actions: [
+        ),
+        actions: [
+          vDialogActionsRow([
             VButton(
               label: 'Cancel',
-              onPressed: () => Navigator.of(ctx).pop(),
+              onPressed: () => Navigator.pop(context),
               variant: ButtonVariant.text,
             ),
             VButton(
@@ -157,22 +158,24 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
                     question: questionController.text.trim(),
                     options: validOptions,
                   );
-                  if (ctx.mounted) Navigator.of(ctx).pop();
-                  if (context.mounted) _loadPolls();
+                  if (!mounted) return;
+                  Navigator.pop(context);
+                  _loadPolls();
                 } catch (e) {
-                  if (ctx.mounted) {
-                    VFeedback.showMessage(
-                      ctx,
-                      e is StateError ? e.message : 'Could not create poll.',
-                    );
-                  }
+                  if (!mounted) return;
+                  VFeedback.showMessage(
+                    context,
+                    e is StateError ? e.message : 'Could not create poll.',
+                  );
                 }
               },
             ),
-          ],
-        ),
-      ),
-    );
+          ]),
+        ],
+      );
+    } finally {
+      questionController.dispose();
+    }
   }
 
   @override
@@ -211,14 +214,23 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
     }
 
     if (_polls.isEmpty) {
-      return AppEmptyState(
-        title: 'No polls yet',
-        description: _canCreatePoll
-            ? 'Ask the world a question—create the first poll.'
-            : 'No active polls right now. Check back when council posts one.',
-        icon: Icons.how_to_vote_outlined,
-        actionLabel: widget.isSovereignOrCouncil ? 'Create Poll' : null,
-        onAction: widget.isSovereignOrCouncil ? _showCreatePollDialog : null,
+      return RefreshIndicator(
+        onRefresh: _loadPolls,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            AppEmptyState(
+              title: 'No polls yet',
+              description: _canCreatePoll
+                  ? 'Ask the world a question—create the first poll.'
+                  : 'No active polls right now. Check back when council posts one.',
+              icon: Icons.how_to_vote_outlined,
+              actionLabel: widget.isSovereignOrCouncil ? 'Create Poll' : null,
+              onAction:
+                  widget.isSovereignOrCouncil ? _showCreatePollDialog : null,
+            ),
+          ],
+        ),
       );
     }
 
@@ -243,20 +255,23 @@ class _WorldPollsScreenState extends ConsumerState<WorldPollsScreen> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-            itemCount: _polls.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: VSpacing.sm),
-                child: _PollCard(
-                  poll: _polls[index],
-                  onVote: () => _loadPolls(),
-                  onClose: () => _loadPolls(),
-                  isSovereignOrCouncil: widget.isSovereignOrCouncil,
-                ),
-              );
-            },
+          child: RefreshIndicator(
+            onRefresh: _loadPolls,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+              itemCount: _polls.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: VSpacing.sm),
+                  child: _PollCard(
+                    poll: _polls[index],
+                    onVote: _loadPolls,
+                    onClose: _loadPolls,
+                    isSovereignOrCouncil: widget.isSovereignOrCouncil,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -287,13 +302,12 @@ class _PollCardState extends State<_PollCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final isActive = widget.poll.isActive;
 
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: isActive
@@ -328,9 +342,7 @@ class _PollCardState extends State<_PollCard> {
                     widget.poll.isClosed ? 'Closed' : 'Expired',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -359,7 +371,7 @@ class _PollCardState extends State<_PollCard> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? VColors.primary.withValues(alpha: 0.1)
-                        : (isDark ? VColors.surfaceDark : VColors.surface),
+                        : VColors.surfaceDark,
                     borderRadius: BorderRadius.circular(VRadius.md),
                     border: Border.all(
                       color: isSelected ? VColors.primary : Colors.transparent,
@@ -394,9 +406,7 @@ class _PollCardState extends State<_PollCard> {
                             '$pct%',
                             style: TextStyle(
                               fontSize: VFontSize.labelSm,
-                              color: isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -412,9 +422,7 @@ class _PollCardState extends State<_PollCard> {
             '${widget.poll.totalVotes} vote${widget.poll.totalVotes == 1 ? '' : 's'}',
             style: TextStyle(
               fontSize: VFontSize.labelSm,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           if (widget.isSovereignOrCouncil && isActive)

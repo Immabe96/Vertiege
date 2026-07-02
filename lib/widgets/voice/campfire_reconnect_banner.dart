@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/voice_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/feedback/v_states.dart';
 
 /// Shown while LiveKit is reconnecting with exponential backoff (Wave 19).
 class CampfireReconnectBanner extends ConsumerWidget {
@@ -16,11 +17,8 @@ class CampfireReconnectBanner extends ConsumerWidget {
     );
     if (!reconnecting) return const SizedBox.shrink();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark
-        ? VColors.warningContainerDark
-        : VColors.warningContainer;
-    final foreground = isDark ? VColors.onSurfaceDark : VColors.onSurface;
+    const background = VColors.warningContainerDark;
+    const foreground = VColors.onSurfaceDark;
 
     return Material(
       color: background.withValues(alpha: 0.95),
@@ -34,16 +32,12 @@ class CampfireReconnectBanner extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: VIconSize.sm,
-                height: VIconSize.sm,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: foreground.withValues(alpha: 0.9),
-                ),
+              VSpinner(
+                size: VIconSize.sm,
+                color: foreground.withValues(alpha: 0.9),
               ),
               const SizedBox(width: VSpacing.sm),
-              Text(
+              const Text(
                 'Reconnecting…',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,

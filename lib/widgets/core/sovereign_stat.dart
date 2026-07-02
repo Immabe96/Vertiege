@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 
 class SovereignStat extends StatelessWidget {
   final IconData icon;
@@ -23,8 +23,7 @@ class SovereignStat extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: VSurfacePanel(
-        useBlur: false,
+      child: VCard(
         padding: const EdgeInsets.symmetric(
           vertical: VSpacing.lg,
           horizontal: VSpacing.sm,

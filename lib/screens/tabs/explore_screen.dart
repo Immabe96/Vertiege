@@ -9,9 +9,9 @@ import '../../services/access_control.dart';
 import '../../services/admin_access_service.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/icons/v_icons.dart';
 import '../../utils/provider_errors.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/v_accessible.dart';
@@ -42,7 +42,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final state = ref.watch(worldProvider);
     final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final worlds = state.worlds.values.toList();
     final isLoading = worlds.isEmpty && state.isLoading;
 
@@ -100,7 +99,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
         label: 'Discover Worlds',
-        icon: Icon(VIcons.compass),
+        icon: const Icon(VIcons.compass),
         onPress: () => context.push(exploreDiscoverPath()),
       ),
       if (AdminAccessService.canCreateWorld(
@@ -108,7 +107,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       ))
         VAccessibleHeaderAction(
           label: 'Create World',
-          icon: Icon(VIcons.plus),
+          icon: const Icon(VIcons.plus),
           onPress: () => context.push('/create-world'),
         ),
     ];
@@ -178,6 +177,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                               'Featured worlds',
                               style: theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: VFontWeight.bold,
+                                color: PrestigeNoir.foreground,
                               ),
                             ),
                           ),
@@ -194,55 +194,14 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         VSpacing.md,
                         VSpacing.md,
                       ),
-                      child: TextField(
+                      child: VSearchBar(
                         controller: _searchController,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Search worlds...',
-                          hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(
-                                    VIcons.x,
-                                    size: VIconSize.md,
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() => _searchQuery = '');
-                                  },
-                                )
-                              : null,
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.pill),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.outlineVariant,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.pill),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.outlineVariant,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(VRadius.pill),
-                            borderSide: const BorderSide(
-                              color: VColors.primary,
-                            ),
-                          ),
-                          isDense: true,
-                        ),
+                        hintText: 'Search worlds...',
                         onChanged: (v) => setState(() => _searchQuery = v),
+                        onClear: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
                       ),
                     ),
                   ),
@@ -259,17 +218,17 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.local_fire_department,
                                 size: VIconSize.sm,
-                                color: VColors.tertiary,
+                                color: VColors.brand,
                               ),
                               const SizedBox(width: VSpacing.xs),
                               Text(
                                 'Trending',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: VFontWeight.semiBold,
-                                  color: VColors.tertiary,
+                                  color: VColors.brand,
                                 ),
                               ),
                             ],
@@ -361,7 +320,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.check_circle,
                               size: VIconSize.sm,
                               color: VColors.success,
@@ -504,9 +463,7 @@ class _WorldListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final typeColor = _typeColor(world.type);
-    final typeIcon = _typeIcon(world.type);
     final typeLabel = _typeLabel(world.type);
     final lockReason = _lockReason(world, resident);
 
@@ -514,15 +471,9 @@ class _WorldListCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: isLocked ? null : () => context.push(exploreWorldPath(world.id)),
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-          ),
+        borderRadius: BorderRadius.circular(VRadius.bento),
+        child: VPrestigeCard(
+          padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -572,7 +523,7 @@ class _WorldListCard extends StatelessWidget {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.lock,
                                         size: VIconSize.xs,
                                         color: VColors.error,
@@ -701,7 +652,7 @@ class _WorldListCard extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.info_outline,
                                 size: VIconSize.sm,
                                 color: VColors.error,
@@ -721,14 +672,12 @@ class _WorldListCard extends StatelessWidget {
                       ],
                       if (!isLocked) ...[
                         const SizedBox(height: VSpacing.md),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            onPressed: () =>
-                                context.push(exploreWorldPath(world.id)),
-                            icon: const Icon(VIcons.arrowLeft),
-                            label: const Text('Enter World'),
-                          ),
+                        VButton(
+                          label: 'Enter World',
+                          icon: const Icon(VIcons.arrowLeft),
+                          isFullWidth: true,
+                          onPressed: () =>
+                              context.push(exploreWorldPath(world.id)),
                         ),
                       ],
                     ],
@@ -766,17 +715,9 @@ class _WorldListCard extends StatelessWidget {
 
   Color _typeColor(WorldType type) {
     return switch (type) {
-      WorldType.wealth => VColors.tertiary,
-      WorldType.profession => VColors.primary,
+      WorldType.wealth => VColors.brand,
+      WorldType.profession => VColors.secondary,
       WorldType.dominion => VColors.success,
-    };
-  }
-
-  IconData _typeIcon(WorldType type) {
-    return switch (type) {
-      WorldType.wealth => Icons.diamond,
-      WorldType.profession => Icons.work,
-      WorldType.dominion => Icons.shield,
     };
   }
 
@@ -798,7 +739,6 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -806,11 +746,9 @@ class _InfoChip extends StatelessWidget {
         vertical: VSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: PrestigeNoir.surfaceRaised,
         borderRadius: BorderRadius.circular(VRadius.pill),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: PrestigeNoir.borderLight),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -841,36 +779,27 @@ class _TrendingWorldCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => context.push(exploreWorldPath(world.id)),
-      child: Container(
+      child: SizedBox(
         width: 160,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.sm),
+        child: VPrestigeCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.local_fire_department,
                     size: VIconSize.sm,
-                    color: VColors.tertiary,
+                    color: VColors.brand,
                   ),
                   const SizedBox(width: VSpacing.xxs),
                   Text(
                     '${world.activityScore}',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.tertiary,
+                      color: VColors.brand,
                       fontWeight: VFontWeight.semiBold,
                     ),
                   ),
@@ -883,14 +812,14 @@ class _TrendingWorldCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: VFontWeight.semiBold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: PrestigeNoir.foreground,
                 ),
               ),
               const Spacer(),
               Text(
                 '${world.memberCount} members',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: PrestigeNoir.muted,
                 ),
               ),
             ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
 /// Inline hint for tier × standing gates (G3).
@@ -17,7 +16,6 @@ class WorldCapabilityHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(

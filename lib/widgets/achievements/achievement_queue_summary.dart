@@ -23,7 +23,6 @@ class AchievementQueueSummary extends StatelessWidget {
     if (pending == 0 && rejected == 0) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(VSpacing.lg, 0, VSpacing.lg, VSpacing.sm),
@@ -36,9 +35,7 @@ class AchievementQueueSummary extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(VSpacing.md),
             decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
+              color: VColors.surfaceContainerDark,
               borderRadius: BorderRadius.circular(VRadius.lg),
               border: Border.all(
                 color: rejected > 0
@@ -61,12 +58,10 @@ class AchievementQueueSummary extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.chevron_right,
                   size: VIconSize.md,
-                  color: isDark
-                      ? VColors.onSurfaceVariantDark
-                      : VColors.onSurfaceVariant,
+                  color: VColors.onSurfaceVariantDark,
                 ),
               ],
             ),

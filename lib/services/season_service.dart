@@ -64,7 +64,7 @@ class SeasonService {
   /// Season 1 — The Big Bang: world growth leaderboard (not league brackets).
   static Season getCurrentSeason({List<World>? worlds}) {
     final def = SeasonCatalog.active;
-    final startDate = DateTime.utc(2026, 1, 1);
+    final startDate = DateTime.utc(2026);
     final endDate = DateTime.utc(2026, 12, 31, 23, 59, 59);
 
     final eligibleWorlds = worlds

@@ -55,13 +55,23 @@ if (Test-Path $manifestPath) {
 
 # ── Core achievement badge PNGs (Wave 20 CI gate) ─────────────────────────
 $coreIdsPath = Join-Path $root "lib\config\core_achievement_badge_ids.dart"
+$worldAssetsPath = Join-Path $root "lib\utils\world_assets.dart"
 $coreBadgeMissing = [System.Collections.Generic.List[string]]::new()
-if (Test-Path $coreIdsPath) {
+if ((Test-Path $coreIdsPath) -and (Test-Path $worldAssetsPath)) {
     $coreContent = Get-Content $coreIdsPath -Raw
+    $worldAssetsContent = Get-Content $worldAssetsPath -Raw
+    $badgeMap = @{}
+    [regex]::Matches($worldAssetsContent, "'([^']+)': 'assets/generated/([^']+)'") | ForEach-Object {
+        $badgeMap[$_.Groups[1].Value] = $_.Groups[2].Value
+    }
     [regex]::Matches($coreContent, "'([a-z0-9-]+)'") | ForEach-Object {
         $id = $_.Groups[1].Value
         if ($id.Length -lt 3) { return }
-        $rel = "assets/generated/achievements/$id.png"
+        $rel = if ($badgeMap.ContainsKey($id)) {
+            "assets/generated/$($badgeMap[$id])"
+        } else {
+            "assets/generated/achievements/$id.png"
+        }
         $full = Join-Path $root ($rel -replace "/", "\")
         if (-not (Test-Path $full)) {
             $coreBadgeMissing.Add($rel.Replace("\", "/"))

@@ -30,7 +30,7 @@ class ChannelMentionSuggestions extends StatelessWidget {
           shrinkWrap: true,
           padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
           itemCount: suggestions.length,
-          separatorBuilder: (_, __) => Divider(
+          separatorBuilder: (_, _) => Divider(
             height: 1,
             color: VCommuneColors.dividerOf(brightness),
           ),

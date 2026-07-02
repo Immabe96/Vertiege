@@ -19,7 +19,6 @@ class AppProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fraction = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,18 +29,18 @@ class AppProgressBar extends StatelessWidget {
             children: [
               Text(
                 label!,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.labelMd,
                   fontWeight: VFontWeight.bold,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: VColors.onSurfaceDark,
                 ),
               ),
               Text(
                 '$current/$max',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.labelSm,
                   fontWeight: VFontWeight.regular,
-                  color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                  color: VColors.onSurfaceVariantDark,
                 ),
               ),
             ],
@@ -53,7 +52,7 @@ class AppProgressBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: fraction,
             minHeight: height,
-            backgroundColor: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
+            backgroundColor: VColors.surfaceContainerHighestDark,
             valueColor: const AlwaysStoppedAnimation<Color>(
               VColors.primary,
             ),
@@ -81,7 +80,6 @@ class SovereignProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final barColor = color ?? VColors.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -93,10 +91,10 @@ class SovereignProgressBar extends StatelessWidget {
               if (label != null)
                 Text(
                   label!.toUpperCase(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: VFontSize.labelSm,
                     fontWeight: VFontWeight.regular,
-                    color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                    color: VColors.onSurfaceVariantDark,
                     letterSpacing: 0,
                   ),
                 ),
@@ -119,7 +117,7 @@ class SovereignProgressBar extends StatelessWidget {
             height: 4,
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
-              backgroundColor: (isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest).withValues(
+              backgroundColor: VColors.surfaceContainerHighestDark.withValues(
                 alpha: 0.3,
               ),
               valueColor: AlwaysStoppedAnimation<Color>(barColor),

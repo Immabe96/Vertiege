@@ -1,4 +1,4 @@
-﻿import 'dart:ui' as ui;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -25,7 +25,6 @@ class ImageViewer extends StatefulWidget {
   }) {
     return showGeneralDialog<void>(
       context: context,
-      barrierColor: VColors.scrimDark,
       barrierDismissible: true,
       barrierLabel: 'Image viewer',
       transitionDuration: const Duration(milliseconds: 300),

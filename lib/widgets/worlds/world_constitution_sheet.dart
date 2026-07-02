@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vertiege/ui/ui.dart';
 
 import '../../models/world.dart';
 import '../../theme/v_tokens.dart';
-import '../core/v_dialog.dart';
 
 /// Read-only constitution preview before joining a world (Wave 17).
 Future<bool?> showWorldConstitutionPreview(
@@ -40,13 +40,14 @@ Future<bool?> showWorldConstitutionPreview(
     ),
     actions: [
       vDialogActionsRow([
-        TextButton(
+        VButton(
+          label: 'Not now',
+          variant: ButtonVariant.text,
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Not now'),
         ),
-        FilledButton(
+        VButton(
+          label: 'Join world',
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Join world'),
         ),
       ]),
     ],

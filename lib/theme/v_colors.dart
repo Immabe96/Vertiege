@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'prestige_noir.dart';
 import 'v_commune_colors.dart';
 
 /// Vertiege color system — Material 3 + Prestige Noir brand.
@@ -53,6 +54,10 @@ class VColors {
   static const onTertiaryContainer = onBrandContainer;
   static const onTertiaryContainerDark = onBrandContainerDark;
 
+  /// ~14% brand tint for active pills, rails, and selected chips.
+  static Color brandSoft(Brightness brightness) =>
+      brand.withValues(alpha: brightness == Brightness.dark ? 0.14 : 0.10);
+
   /// Hyperlinks and external actions — not brand chrome.
   static const link = Color(0xFF2563EB);
   static const linkDark = Color(0xFF6CB4FF);
@@ -93,19 +98,19 @@ class VColors {
   static const onInverseSurface = Color(0xFFFFFFFF);
   static const inversePrimary = Color(0xFFFFFFFF);
 
-  // ── Dark surfaces (Snapchat-pure black) ──
-  static const surfaceDark = Color(0xFF000000);
-  static const surfaceDimDark = Color(0xFF000000);
-  static const surfaceBrightDark = Color(0xFF121212);
-  static const surfaceContainerLowestDark = Color(0xFF000000);
-  static const surfaceContainerLowDark = Color(0xFF0A0A0A);
-  static const surfaceContainerDark = Color(0xFF121212);
-  static const surfaceContainerHighDark = Color(0xFF1E1E1E);
-  static const surfaceContainerHighestDark = Color(0xFF2A2A2A);
-  static const onSurfaceDark = Color(0xFFFFFFFF);
-  static const onSurfaceVariantDark = Color(0xFFA0A0A0);
-  static const outlineDark = Color(0xFF333333);
-  static const outlineVariantDark = Color(0xFF222222);
+  // ── Dark surfaces (Prestige Noir — Open Design) ──
+  static const surfaceDark = PrestigeNoir.bg;
+  static const surfaceDimDark = PrestigeNoir.bg;
+  static const surfaceBrightDark = PrestigeNoir.surface;
+  static const surfaceContainerLowestDark = PrestigeNoir.bg;
+  static const surfaceContainerLowDark = PrestigeNoir.chrome;
+  static const surfaceContainerDark = PrestigeNoir.surface;
+  static const surfaceContainerHighDark = PrestigeNoir.surfaceRaised;
+  static const surfaceContainerHighestDark = Color(0xFF262A32);
+  static const onSurfaceDark = PrestigeNoir.foreground;
+  static const onSurfaceVariantDark = PrestigeNoir.muted;
+  static const outlineDark = PrestigeNoir.border;
+  static const outlineVariantDark = PrestigeNoir.borderLight;
   static const inverseSurfaceLight = Color(0xFFFFFFFF);
   static const onInverseSurfaceDark = Color(0xFF000000);
   static const inversePrimaryDark = Color(0xFF000000);
@@ -113,11 +118,17 @@ class VColors {
   // ── Glass (card) surfaces ──
   static const glassBackground = Color(0xFFFFFFFF);
   static const glassBorder = Color(0xFFE5E5E5);
-  static const glassBackgroundDark = Color(0xFF121212);
-  static const glassBorderDark = Color(0xFF222222);
+  static const glassBackgroundDark = PrestigeNoir.surface;
+  static const glassBorderDark = PrestigeNoir.borderLight;
 
   static const gradientPrimary = LinearGradient(
     colors: [surfaceContainerLowest, surfaceContainerLow],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const gradientPrimaryDark = LinearGradient(
+    colors: [surfaceContainerLowestDark, surfaceContainerLowDark],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -146,7 +157,7 @@ class VColors {
     end: Alignment.bottomRight,
   );
 
-  static const dark = Color(0xFF000000);
+  static const dark = PrestigeNoir.bg;
   static const light = Color(0xFFFFFFFF);
 
   static const tierHustler = Color(0xFFEF4444);

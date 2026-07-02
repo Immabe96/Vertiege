@@ -40,7 +40,8 @@ StandingLevel getStanding(int rep) {
   final next = idx < standingLevels.length - 1
       ? standingLevels[idx + 1]
       : standing;
-  return (current: rep - standing.minRep, max: next.minRep - standing.minRep);
+  final maxVal = next.minRep - standing.minRep;
+  return (current: rep - standing.minRep, max: maxVal > 0 ? maxVal : 1);
 }
 
 // World level thresholds — activityScore needed per level (dominion worlds only)
@@ -117,9 +118,7 @@ WorldFeatures getUnlockedFeatures(int prestige) {
 }
 
 WorldFeatures getWorldFeatures(int prestige, WorldType type) {
-  final clamped = type == WorldType.dominion
-      ? prestige.clamp(1, 50)
-      : prestige.clamp(1, 50);
+  final clamped = prestige.clamp(1, 50);
   return getUnlockedFeatures(clamped);
 }
 

@@ -75,8 +75,9 @@ class ModerationFilter {
       final capsCount = text.runes.where((r) => r >= 65 && r <= 90).length;
       if (capsCount / text.length > 0.5) return 'Content appears to be spam';
     }
-    if (RegExp(r'(.)\1{5,}').hasMatch(text))
+    if (RegExp(r'(.)\1{5,}').hasMatch(text)) {
       return 'Content appears to be spam';
+    }
     // More than 3 repeated words
     final words = text.toLowerCase().split(RegExp(r'\s+'));
     for (final word in {...words}) {

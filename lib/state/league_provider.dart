@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../services/league_service.dart';
 import '../utils/provider_errors.dart';
 import 'resident_provider.dart';
+
+part 'league_provider.g.dart';
 
 class LeagueParticipant {
   final String userId;
@@ -95,7 +98,8 @@ class LeagueState {
   );
 }
 
-class LeagueNotifier extends Notifier<LeagueState> {
+@Riverpod(name: 'leagueProvider', keepAlive: true)
+class LeagueNotifier extends _$LeagueNotifier {
   @override
   LeagueState build() {
     return const LeagueState();
@@ -145,7 +149,7 @@ class LeagueNotifier extends Notifier<LeagueState> {
         standings: standings,
         isLoading: false,
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: userFacingLoadError(
@@ -163,7 +167,7 @@ class LeagueNotifier extends Notifier<LeagueState> {
     try {
       await LeagueService.addXP(residentId, amount);
       await refreshStandings();
-    } catch (e, stackTrace) {
+    } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
@@ -195,9 +199,8 @@ class LeagueNotifier extends Notifier<LeagueState> {
           rank: displayRank,
           weeklyXp: updatedWeeklyXp,
         ),
-        error: null,
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
@@ -206,7 +209,3 @@ class LeagueNotifier extends Notifier<LeagueState> {
     state = const LeagueState();
   }
 }
-
-final leagueProvider = NotifierProvider<LeagueNotifier, LeagueState>(
-  LeagueNotifier.new,
-);

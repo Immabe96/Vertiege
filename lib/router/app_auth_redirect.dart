@@ -1,4 +1,5 @@
 /// Pure helpers for resident onboarding / gate redirects (testable without GoRouter).
+library;
 
 import '../screens/onboarding/the_gate_screen.dart' show gateCompletedCache;
 

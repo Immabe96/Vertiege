@@ -81,7 +81,7 @@ class ChannelThreadListSheet extends ConsumerWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: threads.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (_, index) {
                   final message = threads[index];
                   final threadId = message.id;

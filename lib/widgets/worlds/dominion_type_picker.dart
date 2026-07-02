@@ -18,7 +18,6 @@ class DominionTypePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +66,6 @@ class _DominionTypeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -76,7 +74,7 @@ class _DominionTypeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-              : (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer),
+              : (VColors.surfaceContainerDark),
           borderRadius: BorderRadius.circular(VRadius.lg),
           border: Border.all(
             color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,

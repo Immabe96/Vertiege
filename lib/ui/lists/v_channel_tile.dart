@@ -86,9 +86,9 @@ class VChannelTile extends StatelessWidget {
                         height: VLineHeight.label,
                       ),
                     ),
-                    if (subtitle != null && subtitle!.isNotEmpty)
+                    if (subtitle != null && subtitle.isNotEmpty)
                       Text(
-                        subtitle!,
+                        subtitle,
                         maxLines: isLocked ? 2 : 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

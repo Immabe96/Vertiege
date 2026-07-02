@@ -33,9 +33,6 @@ class WorldChannelShortcuts extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     void open(WorldChannel channel) {
       context.push(worldChannelDestinationPath(worldId, channel));
     }
@@ -60,22 +57,18 @@ class WorldChannelShortcuts extends StatelessWidget {
               ),
               label: const Text('General'),
               onPressed: () => open(general!),
-              backgroundColor: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
+              backgroundColor: VColors.surfaceContainerDark,
             ),
           if (announcements != null)
             ActionChip(
-              avatar: Icon(
+              avatar: const Icon(
                 Icons.campaign_outlined,
                 size: VIconSize.sm,
                 color: VColors.tertiary,
               ),
               label: const Text('Announcements'),
               onPressed: () => open(announcements!),
-              backgroundColor: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
+              backgroundColor: VColors.surfaceContainerDark,
             ),
         ],
       ),

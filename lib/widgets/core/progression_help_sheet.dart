@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/progression_glossary.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import 'glass_sheet.dart';
 
 /// Bottom sheet explaining XP, tier, rep, world prestige, and world level.
@@ -16,7 +17,6 @@ class ProgressionHelpSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final shown = ProgressionGlossary.entriesFor(focus);
 
@@ -64,17 +64,17 @@ class ProgressionHelpSheet extends StatelessWidget {
                 entry: entry,
                 highlighted: focus != ProgressionFocus.overview &&
                     entry.focus == focus,
-                isDark: isDark,
               ),
             ),
           ),
           if (focus != ProgressionFocus.overview) ...[
-            TextButton(
+            VButton(
+              variant: ButtonVariant.text,
+              label: 'See all topics',
               onPressed: () {
                 Navigator.of(context).pop();
                 showProgressionHelp(context);
               },
-              child: const Text('See all topics'),
             ),
           ],
         ],
@@ -86,12 +86,10 @@ class ProgressionHelpSheet extends StatelessWidget {
 class _EntryCard extends StatelessWidget {
   final ProgressionEntry entry;
   final bool highlighted;
-  final bool isDark;
 
   const _EntryCard({
     required this.entry,
     required this.highlighted,
-    required this.isDark,
   });
 
   @override
@@ -104,9 +102,7 @@ class _EntryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerLowDark
-            : VColors.surfaceContainerLow,
+        color: VColors.surfaceContainerLowDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
         border: Border.all(
           color: border.withValues(alpha: highlighted ? 0.6 : 0.35),

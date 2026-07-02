@@ -25,7 +25,6 @@ Future<void> showWorldWelcomeFlow(
 
   await showDialog<void>(
     context: context,
-    barrierDismissible: true,
     builder: (ctx) => WorldWelcomeFlow(
       world: world,
       onComplete: () async {
@@ -90,7 +89,6 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final channels =
         ref.watch(channelProvider).channelsByWorld[widget.world.id] ?? [];
@@ -100,7 +98,7 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         padding: const EdgeInsets.all(VSpacing.lg),
         decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceContainerDark : Theme.of(context).colorScheme.surface,
+          color: VColors.surfaceContainerDark,
           borderRadius: BorderRadius.circular(VRadius.xl),
         ),
         child: Column(
@@ -146,18 +144,16 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _WelcomeStep(world: widget.world, isDark: isDark),
+                  _WelcomeStep(world: widget.world),
                   _RulesStep(
                     world: widget.world,
                     acknowledged: _rulesAcknowledged,
                     onChanged: (v) => setState(() => _rulesAcknowledged = v),
-                    isDark: isDark,
                   ),
                   _ChannelPicksStep(
                     world: widget.world,
                     resident: resident,
                     channels: channels,
-                    isDark: isDark,
                   ),
                 ],
               ),
@@ -176,9 +172,8 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
 
 class _WelcomeStep extends StatelessWidget {
   final World world;
-  final bool isDark;
 
-  const _WelcomeStep({required this.world, required this.isDark});
+  const _WelcomeStep({required this.world});
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +227,7 @@ class _WelcomeStep extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(VSpacing.md),
               decoration: BoxDecoration(
-                color: isDark ? VColors.surfaceDark : VColors.surfaceContainer,
+                color: VColors.surfaceDark,
                 borderRadius: BorderRadius.circular(VRadius.md),
               ),
               child: Row(
@@ -278,13 +273,11 @@ class _RulesStep extends StatelessWidget {
   final World world;
   final bool acknowledged;
   final ValueChanged<bool> onChanged;
-  final bool isDark;
 
   const _RulesStep({
     required this.world,
     required this.acknowledged,
     required this.onChanged,
-    required this.isDark,
   });
 
   @override
@@ -305,7 +298,7 @@ class _RulesStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(VSpacing.md),
             decoration: BoxDecoration(
-              color: isDark ? VColors.surfaceDark : VColors.surfaceContainer,
+              color: VColors.surfaceDark,
               borderRadius: BorderRadius.circular(VRadius.md),
             ),
             child: Column(
@@ -378,13 +371,11 @@ class _ChannelPicksStep extends StatelessWidget {
   final World world;
   final Resident? resident;
   final List<WorldChannel> channels;
-  final bool isDark;
 
   const _ChannelPicksStep({
     required this.world,
     required this.resident,
     required this.channels,
-    required this.isDark,
   });
 
   @override
@@ -448,7 +439,13 @@ class _ChannelPicksStep extends StatelessWidget {
             subtitle: 'Browse who\'s in this world',
             onTap: () {
               Navigator.of(context).pop();
-              context.push('/worlds/${world.id}/members');
+              context.push(
+                worldMembersPath(
+                  world.id,
+                  worldName: world.name,
+                  sovereignId: world.sovereignId,
+                ),
+              );
             },
           ),
         ],
@@ -472,14 +469,13 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(VSpacing.md),
         decoration: BoxDecoration(
-          color: isDark ? VColors.surfaceDark : VColors.surfaceContainer,
+          color: VColors.surfaceDark,
           borderRadius: BorderRadius.circular(VRadius.md),
         ),
         child: Row(

@@ -213,7 +213,6 @@ class _SpoilerChipState extends State<_SpoilerChip> {
                 : [
                     Shadow(
                       color: widget.textColor.withValues(alpha: 0.9),
-                      offset: Offset.zero,
                       blurRadius: 8,
                     ),
                   ],

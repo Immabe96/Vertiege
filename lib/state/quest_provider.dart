@@ -3,12 +3,15 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/storage_service.dart';
 import '../services/analytics_events.dart';
 import '../services/analytics_service.dart';
 import '../services/supabase.dart';
 import 'resident_provider.dart';
+
+part 'quest_provider.g.dart';
 
 class Quest {
   final String id;
@@ -81,7 +84,8 @@ class QuestState {
       quests.fold(0, (sum, q) => sum + (q.claimed ? 0 : q.xpReward));
 }
 
-class QuestNotifier extends Notifier<QuestState> {
+@Riverpod(name: 'questProvider', keepAlive: true)
+class QuestNotifier extends _$QuestNotifier {
   static const _templates = [
     ('post_quest', 'Post in any world', 'create', 1),
     ('react_quest', 'React to 3 posts', 'local_fire_department', 3),
@@ -134,7 +138,7 @@ class QuestNotifier extends Notifier<QuestState> {
       } catch (_) {}
     }
 
-    final quests = _templates.map((t) => Quest.fromTemplate(t)).toList();
+    final quests = _templates.map(Quest.fromTemplate).toList();
     state = QuestState(quests: quests, dateKey: dateKey);
     _persist();
     _syncAllToCloud();
@@ -172,7 +176,7 @@ class QuestNotifier extends Notifier<QuestState> {
           claimed: row['claimed'] as bool? ?? false,
         );
       }).toList();
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('daily quests cloud load failed: $e');
       return null;
     }
@@ -189,7 +193,7 @@ class QuestNotifier extends Notifier<QuestState> {
           'p_target': quest.target,
         },
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('upsert_daily_quest_progress failed: $e');
     }
   }
@@ -225,7 +229,7 @@ class QuestNotifier extends Notifier<QuestState> {
         if (awarded) {
           await ref.read(residentProvider.notifier).refreshGamificationFromServer();
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         debugPrint('claim_daily_quest failed: $e');
       }
     }
@@ -277,7 +281,3 @@ class QuestNotifier extends Notifier<QuestState> {
     state = const QuestState();
   }
 }
-
-final questProvider = NotifierProvider<QuestNotifier, QuestState>(
-  QuestNotifier.new,
-);

@@ -37,7 +37,7 @@ class PostCommentsScreen extends ConsumerWidget {
             prefixes: [
               VAccessibleHeaderAction(
                 label: 'Back',
-                icon: Icon(VIcons.chevronLeft),
+                icon: const Icon(VIcons.chevronLeft),
                 onPress: () {
                   if (context.canPop()) context.pop();
                 },
@@ -58,7 +58,7 @@ class PostCommentsScreen extends ConsumerWidget {
           prefixes: [
             VAccessibleHeaderAction(
               label: 'Back to feed',
-              icon: Icon(VIcons.chevronLeft),
+              icon: const Icon(VIcons.chevronLeft),
               onPress: () {
                 if (context.canPop()) context.pop();
               },

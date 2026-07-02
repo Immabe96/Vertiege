@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/channel.dart';
 import '../services/world_service.dart';
 import '../utils/id_generator.dart';
 import '../utils/provider_errors.dart';
+
+part 'channel_provider.g.dart';
 
 class ChannelState {
   final Map<String, List<WorldChannel>> channelsByWorld;
@@ -27,19 +29,19 @@ class ChannelState {
   );
 }
 
-class ChannelNotifier extends Notifier<ChannelState> {
+@Riverpod(name: 'channelProvider', keepAlive: true)
+class ChannelNotifier extends _$ChannelNotifier {
   @override
   ChannelState build() => const ChannelState();
 
   Future<void> loadChannels(String worldId, {bool force = false}) async {
     if (!force && state.channelsByWorld.containsKey(worldId)) return;
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
     try {
       final channels = await WorldService.getChannels(worldId);
       state = state.copyWith(
         isLoading: false,
         channelsByWorld: {...state.channelsByWorld, worldId: channels},
-        error: null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -124,7 +126,3 @@ class ChannelNotifier extends Notifier<ChannelState> {
     state = const ChannelState();
   }
 }
-
-final channelProvider = NotifierProvider<ChannelNotifier, ChannelState>(
-  ChannelNotifier.new,
-);

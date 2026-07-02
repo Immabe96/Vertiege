@@ -49,6 +49,12 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
     );
   }
 
+  Future<void> _refresh(String worldId) async {
+    await ref.read(worldProvider.notifier).loadWorlds();
+    if (!mounted) return;
+    await ref.read(channelProvider.notifier).loadChannels(worldId);
+  }
+
   @override
   Widget build(BuildContext context) {
     final worldId = widget.worldId;
@@ -122,10 +128,13 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
         sectionTitle: 'Manage',
       ),
       showBack: true,
-      body: ListView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(VSpacing.md),
-        children: [
+      body: RefreshIndicator(
+        onRefresh: () => _refresh(worldId),
+        child: ListView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(VSpacing.md),
+          children: [
           if (!isJoined)
             const Padding(
               padding: EdgeInsets.only(bottom: VSpacing.md),
@@ -171,7 +180,7 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                   gate: (lounge == null && campfire == null)
                       ? 'No social channels in this world yet.'
                       : (loungeGate != null && campfireGate != null)
-                      ? loungeGate ?? campfireGate
+                      ? loungeGate
                       : null,
                   onOpen: (lounge != null || campfire != null)
                       ? () => _openLoungeCampfirePicker(
@@ -277,7 +286,8 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                 ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

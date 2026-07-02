@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/shimmer.dart';
@@ -8,12 +8,11 @@ class ShimmerWorldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
+        color: VColors.glassBackgroundDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(color: isDark ? VColors.glassBorderDark : VColors.glassBorder),
+        border: Border.all(color: VColors.glassBorderDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
@@ -32,24 +31,20 @@ class ShimmerWorldCard extends StatelessWidget {
                     Pulse(
                       width: MediaQuery.of(context).size.width * 0.25,
                       height: VFontSize.bodyMd,
-                      borderRadius: VRadius.sm,
                     ),
                     const SizedBox(height: VSpacing.sm),
                     Pulse(
                       width: MediaQuery.of(context).size.width * 0.18,
                       height: VFontSize.labelMd,
-                      borderRadius: VRadius.sm,
                     ),
                     const SizedBox(height: VSpacing.sm),
                     const Pulse(
                       height: VFontSize.labelMd,
-                      borderRadius: VRadius.sm,
                     ),
                     const SizedBox(height: VSpacing.xs),
                     Pulse(
                       width: MediaQuery.of(context).size.width * 0.22,
                       height: VFontSize.labelMd,
-                      borderRadius: VRadius.sm,
                     ),
                     const SizedBox(height: VSpacing.sm),
                     const Row(
@@ -57,13 +52,11 @@ class ShimmerWorldCard extends StatelessWidget {
                         Pulse(
                           width: 50,
                           height: 20,
-                          borderRadius: VRadius.sm,
                         ),
                         SizedBox(width: VSpacing.xs),
                         Pulse(
                           width: 36,
                           height: 20,
-                          borderRadius: VRadius.sm,
                         ),
                       ],
                     ),

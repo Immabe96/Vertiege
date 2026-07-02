@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../models/achievement.dart';
 import '../../router/world_navigation.dart';
 import '../../models/resident.dart';
@@ -254,7 +254,7 @@ class AchievementShareCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.auto_awesome,
                           size: VIconSize.sm,
                           color: VColors.tertiary,
@@ -262,7 +262,7 @@ class AchievementShareCard extends StatelessWidget {
                         const SizedBox(width: VSpacing.sm),
                         Text(
                           '+${achievement.xpValue} XP',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: VFontSize.labelSm,
                             fontWeight: VFontWeight.bold,
                             color: VColors.tertiary,

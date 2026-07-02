@@ -28,7 +28,7 @@ List<Post> sortNexusFeedPosts(List<Post> source, FeedSort sort) {
     final totalReactions =
         post.reactions.values.fold<int>(0, (s, c) => s + c) + post.comments.length;
     final ageMs = now - post.timestamp;
-    final ageHours = ageMs / (1000 * 60 * 60);
+    final ageHours = (ageMs / (1000 * 60 * 60)).clamp(0.0, double.infinity);
     return totalReactions / math.pow(ageHours + 2, 1.5);
   }
 

@@ -51,8 +51,7 @@ class VWorldRail extends StatelessWidget {
               const SizedBox(height: VSpacing.sm),
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
-                  cacheExtent: 240,
+                  cacheExtent: 240.0, padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
                   itemCount: worlds.length,
                   separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
                   itemBuilder: (context, index) {

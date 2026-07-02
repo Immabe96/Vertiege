@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/onboarding/the_gate_screen.dart';
-import '../models/resident.dart';
-import '../models/world.dart';
-import '../models/notification.dart';
 import '../config/identity_verification.dart';
 import '../config/tiers.dart';
+import '../models/notification.dart';
+import '../models/resident.dart';
+import '../models/world.dart';
+import '../screens/onboarding/the_gate_screen.dart';
 import '../services/media_service.dart';
 import '../services/profile_service.dart';
 import '../services/storage_service.dart';
@@ -22,7 +23,6 @@ import '../services/analytics_service.dart';
 import '../utils/gamification_reconcile.dart';
 import '../utils/haptics.dart';
 import '../utils/local_date.dart';
-import '../utils/streak_check_in.dart';
 import '../services/onboarding_funnel_sync.dart';
 import '../services/world_activity_service.dart';
 import 'achievement_provider.dart';
@@ -30,6 +30,8 @@ import 'world_provider.dart';
 import 'post_provider.dart';
 import 'notification_provider.dart';
 import 'league_provider.dart';
+
+part 'resident_provider.g.dart';
 
 class ResidentState {
   final Resident? resident;
@@ -62,7 +64,8 @@ class ResidentState {
   );
 }
 
-class ResidentNotifier extends Notifier<ResidentState> {
+@Riverpod(name: 'residentProvider', keepAlive: true)
+class ResidentNotifier extends _$ResidentNotifier {
   final WorldRepository _worldRepository = const WorldRepository();
 
   int _lastStreakCount = 0;
@@ -101,7 +104,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
   Future<void> _loadResidentCore() async {
     final userId = maybeSupabase()?.auth.currentUser?.id;
     if (userId == null) {
-      state = const ResidentState(isLoading: false);
+      state = const ResidentState();
       return;
     }
     // Fetch from Supabase first
@@ -115,7 +118,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
           : remote;
       _lastStreakCount = resident.streakCount;
       _lastJoinedWorldsCount = resident.joinedWorldIds.length;
-      state = ResidentState(resident: resident, isLoading: false);
+      state = ResidentState(resident: resident);
       unawaited(_syncGatePrefsFromProfile(resident));
       unawaited(OnboardingFunnelSync.pullFromServer(userId));
       unawaited(ProfileService.syncDeviceTimezone(userId));
@@ -126,11 +129,10 @@ class ResidentNotifier extends Notifier<ResidentState> {
     // Fallback to local cache (gamification may be stale until back online).
     final cached = await _cachedResidentFor(userId);
     if (cached != null) {
-      state = ResidentState(resident: cached, isLoading: false);
+      state = ResidentState(resident: cached);
       return;
     }
     state = const ResidentState(
-      isLoading: false,
       loadError: 'Profile not found. Try signing in again.',
     );
   }
@@ -142,14 +144,12 @@ class ResidentNotifier extends Notifier<ResidentState> {
       if (cached != null) {
         state = ResidentState(
           resident: cached,
-          isLoading: false,
           loadError: 'Showing cached profile (connection slow).',
         );
         return;
       }
     }
     state = const ResidentState(
-      isLoading: false,
       loadError: 'Loading your profile timed out. Check connection and retry.',
     );
   }
@@ -161,14 +161,12 @@ class ResidentNotifier extends Notifier<ResidentState> {
       if (cached != null) {
         state = ResidentState(
           resident: cached,
-          isLoading: false,
           loadError: 'Showing cached profile (offline).',
         );
         return;
       }
     }
     state = const ResidentState(
-      isLoading: false,
       loadError: 'Could not load your profile. Pull to refresh.',
     );
   }
@@ -294,7 +292,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       state = state.copyWith(resident: merged);
       _lastStreakCount = merged.streakCount;
       _persist();
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('refreshGamificationFromServer failed: $e');
     }
   }
@@ -428,7 +426,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
       }
 
       return actualXp;
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('award_activity_xp failed: $e');
       return 0;
     }
@@ -544,6 +542,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
 
       state = state.copyWith(resident: r.copyWith(totalXp: newTotalXp));
       _persist();
+      await refreshGamificationFromServer();
 
       if (newTier.value > r.tier.value) {
         await _performTierUpgrade(r, newTier);
@@ -998,7 +997,7 @@ class ResidentNotifier extends Notifier<ResidentState> {
           await _notifyPrestigeAscension(r, newStars);
           return true;
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         debugPrint('ascend_prestige failed: $e');
       }
     }
@@ -1223,17 +1222,14 @@ class ResidentNotifier extends Notifier<ResidentState> {
   }
 
   void clearForSignOut() {
-    state = const ResidentState(isLoading: false, resident: null);
+    state = const ResidentState();
   }
 }
 
-final residentProvider = NotifierProvider<ResidentNotifier, ResidentState>(
-  ResidentNotifier.new,
-);
-
 /// Side-effect listener — must not run inside [ResidentNotifier.build] (self-dependency).
-final residentMilestoneListenerProvider = Provider<void>((ref) {
+@Riverpod(name: 'residentMilestoneListenerProvider', keepAlive: true)
+void residentMilestoneListener(Ref ref) {
   ref.listen<ResidentState>(residentProvider, (previous, next) {
     ref.read(residentProvider.notifier).handleResidentMilestones(previous, next);
   });
-});
+}

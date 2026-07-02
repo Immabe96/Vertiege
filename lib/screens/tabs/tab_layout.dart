@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../state/commune_shell_provider.dart';
@@ -9,11 +8,10 @@ import '../../state/notification_provider.dart';
 import '../../state/tab_shell_overlay_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/core/campfire_mini_bar.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../utils/v_motion.dart';
 import '../../utils/v_haptics.dart';
-import '../../widgets/core/glass_sheet.dart';
 import '../../widgets/feed/post_input.dart';
 
 class ScrollToTopNotifier extends Notifier<int> {
@@ -107,12 +105,10 @@ class _TabLayoutState extends ConsumerState<TabLayout>
       }
     }
 
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final footerBorder = isDark ? VColors.outlineDark : VColors.outline;
+    final footerBorder = VColors.outlineVariantDark;
 
     return ColoredBox(
-      color: isDark ? VColors.surfaceDark : VColors.surface,
+      color: PrestigeNoir.bg,
       child: Column(
         children: [
           Expanded(
@@ -132,9 +128,11 @@ class _TabLayoutState extends ConsumerState<TabLayout>
                         child: Semantics(
                           label: 'Compose post',
                           button: true,
-                          child: FButton.icon(
-                            variant: FButtonVariant.primary,
-                            onPress: fabConfig.onPressed,
+                          child: FloatingActionButton(
+                            onPressed: fabConfig.onPressed,
+                            backgroundColor: VColors.brand,
+                            foregroundColor: VColors.onBrand,
+                            elevation: 4,
                             child: Icon(
                               fabConfig.icon,
                               size: VIconSize.lg,
@@ -150,6 +148,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
           if (!hideNav)
             DecoratedBox(
               decoration: BoxDecoration(
+                color: PrestigeNoir.chrome,
                 border: Border(top: BorderSide(color: footerBorder)),
               ),
               child: _MainBottomNav(
@@ -200,7 +199,6 @@ class _TabLayoutState extends ConsumerState<TabLayout>
     showAppSheet(
       context,
       PostInput(worldId: worldId, showWorldSelector: true),
-      maxSize: 0.95,
     );
   }
 }
@@ -250,7 +248,6 @@ class _MainBottomNav extends StatelessWidget {
     return VBottomNavigationBar(
       index: index,
       onChange: onTabTap,
-      safeAreaBottom: true,
       children: [
         for (var i = 0; i < _destinations.length; i++)
           _navItem(

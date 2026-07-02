@@ -25,7 +25,7 @@ class VerifiedMomentBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             VIcons.badgeCheck,
             size: VIconSize.sm,
             color: VColors.brand,

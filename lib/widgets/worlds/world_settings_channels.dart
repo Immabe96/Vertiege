@@ -1,11 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../models/channel.dart';
-import '../../widgets/core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../../state/channel_provider.dart';
 import '../../ui/icons/v_icons.dart';
+import '../../ui/buttons/v_button.dart';
 
 class WorldSettingsChannels extends ConsumerWidget {
   final String worldId;
@@ -66,14 +67,12 @@ class WorldSettingsChannels extends ConsumerWidget {
           ),
         const SizedBox(height: VSpacing.sm),
         if (residentId == sovereignId)
-          SizedBox(
-            width: double.infinity,
-            height: VTouchTarget.minimum,
-            child: OutlinedButton.icon(
-              onPressed: () => onCreate(context),
-              icon: const Icon(VIcons.plus, size: VIconSize.base),
-              label: const Text('Add Channel'),
-            ),
+          VButton(
+            label: 'Add Channel',
+            icon: const Icon(VIcons.plus, size: VIconSize.base),
+            variant: ButtonVariant.outlined,
+            isFullWidth: true,
+            onPressed: () => onCreate(context),
           ),
       ],
     );
@@ -98,8 +97,7 @@ class _ChannelRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: VSpacing.sm),
-      child: VSurfacePanel(
-        padding: const EdgeInsets.all(VSpacing.md),
+      child: VCard(
         borderRadius: BorderRadius.circular(VRadius.xl),
         child: InkWell(
           onTap: channel.isDefault ? null : onRename,

@@ -8,12 +8,11 @@ import '../router/world_navigation.dart';
 import '../state/channel_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/voice_provider.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
-import '../theme/v_commune_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
-import '../widgets/profile/cosmetic_avatar.dart';
 import '../services/device_permission_service.dart';
 import '../widgets/voice/campfire_reconnect_banner.dart';
 
@@ -74,17 +73,14 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
     final participants = voiceState.participants;
     final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark
-        ? VCommuneColors.surfaceTertiary
-        : VCommuneColors.surfaceTertiaryLight;
+    final anyoneSpeaking = participants.any((p) => p.isSpeaking);
 
     return VScaffold(
       header: VNestedHeader(
         prefixes: [
           VAccessibleHeaderAction(
             label: 'Leave voice channel',
-            icon: Icon(VIcons.chevronLeft),
+            icon: const Icon(VIcons.chevronLeft),
             onPress: () {
               if (context.canPop()) context.pop();
             },
@@ -97,23 +93,29 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
               widget.channelName,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: VFontWeight.bold,
-                color: VColors.warning,
+                color: PrestigeNoir.foreground,
+                letterSpacing: -0.2,
               ),
             ),
             Text(
-              widget.worldName,
+              voiceState.isConnected
+                  ? '${participants.length} listening · ${widget.worldName}'
+                  : widget.worldName,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: PrestigeNoir.muted,
+                fontSize: 11,
               ),
             ),
           ],
         ),
       ),
       child: ColoredBox(
-        color: bg,
+        color: PrestigeNoir.bg,
         child: Column(
           children: [
             const CampfireReconnectBanner(),
+            if (voiceState.isConnected && !voiceState.isConnecting)
+              _VoiceVisualizer(active: anyoneSpeaking),
             Expanded(
               child: resident == null
                   ? const AppEmptyState(
@@ -134,12 +136,12 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const CircularProgressIndicator(strokeWidth: 2),
+                          const VSpinner(size: 32, color: VColors.brand),
                           const SizedBox(height: VSpacing.lg),
                           Text(
                             'Joining Campfire...',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: PrestigeNoir.muted,
                             ),
                           ),
                         ],
@@ -153,30 +155,63 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                           Icon(
                             Icons.local_fire_department,
                             size: 64,
-                            color: VColors.warning,
+                            color: VColors.brand.withValues(alpha: 0.85),
                           ),
                           const SizedBox(height: VSpacing.lg),
                           Text(
                             'Waiting for others to join...',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: PrestigeNoir.muted,
                             ),
                           ),
                         ],
                       ),
                     )
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(VSpacing.lg),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: VSpacing.sm,
-                            crossAxisSpacing: VSpacing.sm,
-                            childAspectRatio: 0.85,
+                  : CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              VSpacing.md,
+                              VSpacing.md,
+                              VSpacing.md,
+                              VSpacing.sm,
+                            ),
+                            child: Text(
+                              'IN VOICE · ${participants.length}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: PrestigeNoir.mutedDim,
+                                fontWeight: VFontWeight.semiBold,
+                                letterSpacing: 0.8,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
-                      itemCount: participants.length,
-                      itemBuilder: (_, i) =>
-                          _ParticipantTile(participant: participants[i]),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.md,
+                          ),
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: 2.6,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (_, i) => _VoiceParticipantTile(
+                                participant: participants[i],
+                              ),
+                              childCount: participants.length,
+                            ),
+                          ),
+                        ),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: VSpacing.md),
+                        ),
+                      ],
                     ),
             ),
             _CampfireTextSplitBar(
@@ -186,6 +221,280 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
             const _CampfireControls(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Animated gold bar visualizer (Open Design campfire.html).
+class _VoiceVisualizer extends StatefulWidget {
+  final bool active;
+
+  const _VoiceVisualizer({required this.active});
+
+  @override
+  State<_VoiceVisualizer> createState() => _VoiceVisualizerState();
+}
+
+class _VoiceVisualizerState extends State<_VoiceVisualizer>
+    with SingleTickerProviderStateMixin {
+  static const _barHeights = <double>[
+    24, 40, 32, 52, 20, 48, 36, 28, 44, 18, 38, 30, 46, 22, 42,
+  ];
+
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    if (widget.active) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant _VoiceVisualizer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!widget.active) {
+      _controller.stop();
+      _controller.value = 0.5;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+    return Container(
+      height: 100,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0A0B0D),
+        border: Border(bottom: BorderSide(color: PrestigeNoir.border)),
+      ),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_barHeights.length, (i) {
+              final base = _barHeights[i];
+              final phase = (i * 0.1) % 1.0;
+              final pulse = reduceMotion || !widget.active
+                  ? 0.75
+                  : 0.7 + 0.3 * ((_controller.value + phase) % 1.0);
+              final height = base * pulse;
+              final isPeak = i == 3 || i == 5 || i == 12;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Container(
+                  width: 4,
+                  height: height,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: isPeak
+                          ? [
+                              VColors.brand,
+                              VColors.warning.withValues(alpha: 0.5),
+                            ]
+                          : [
+                              VColors.brand,
+                              VColors.brand.withValues(alpha: 0.14),
+                            ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _VoiceParticipantTile extends StatefulWidget {
+  final Participant participant;
+
+  const _VoiceParticipantTile({required this.participant});
+
+  @override
+  State<_VoiceParticipantTile> createState() => _VoiceParticipantTileState();
+}
+
+class _VoiceParticipantTileState extends State<_VoiceParticipantTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ringController;
+  late final Animation<double> _ringOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _ringController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    _ringOpacity = Tween<double>(begin: 0.6, end: 1).animate(
+      CurvedAnimation(parent: _ringController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ringController.dispose();
+    super.dispose();
+  }
+
+  Color _avatarTint(String seed) {
+    final palette = [
+      (VColors.brand.withValues(alpha: 0.14), VColors.brand),
+      (VColors.success.withValues(alpha: 0.2), VColors.success),
+      (VColors.warning.withValues(alpha: 0.2), VColors.warning),
+      (VColors.error.withValues(alpha: 0.2), VColors.error),
+    ];
+    return palette[seed.hashCode.abs() % palette.length].$1;
+  }
+
+  Color _avatarFg(String seed) {
+    final palette = [
+      VColors.brand,
+      VColors.success,
+      VColors.warning,
+      VColors.error,
+    ];
+    return palette[seed.hashCode.abs() % palette.length];
+  }
+
+  String _statusLabel(bool isSpeaking, bool isMuted) {
+    if (isSpeaking) return 'Speaking';
+    if (isMuted) return 'Muted';
+    return 'Listening';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isSpeaking = widget.participant.isSpeaking;
+    final isMuted = !widget.participant.isMicrophoneEnabled();
+    final identity = widget.participant.identity;
+    final name = widget.participant.name.isNotEmpty
+        ? widget.participant.name
+        : identity;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+    return AnimatedBuilder(
+      animation: _ringOpacity,
+      builder: (context, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.sm + 2,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: PrestigeNoir.surfaceRaised,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSpeaking ? VColors.success : PrestigeNoir.borderLight,
+              width: 1,
+            ),
+            boxShadow: isSpeaking
+                ? [
+                    BoxShadow(
+                      color: VColors.success.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                    ),
+                  ]
+                : null,
+          ),
+          child: child,
+        );
+      },
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              if (isSpeaking)
+                AnimatedBuilder(
+                  animation: _ringOpacity,
+                  builder: (_, child) => Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: VColors.success.withValues(
+                          alpha: _ringOpacity.value,
+                        ),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _avatarTint(name),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initial,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: VFontWeight.bold,
+                    color: _avatarFg(name),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: VFontWeight.semiBold,
+                    color: PrestigeNoir.foreground,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  _statusLabel(isSpeaking, isMuted),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: PrestigeNoir.muted,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            isMuted ? Icons.mic_off_outlined : Icons.mic_none_outlined,
+            size: 20,
+            color: isMuted ? VColors.error : PrestigeNoir.muted,
+          ),
+        ],
       ),
     );
   }
@@ -224,7 +533,7 @@ class _CampfireTextSplitBar extends ConsumerWidget {
     if (textChannel == null) return const SizedBox.shrink();
 
     return Material(
-      color: VCommuneColors.surfaceSecondary,
+      color: const Color(0xFF0E1013),
       child: InkWell(
         onTap: () => context.push(
           worldChannelPath(worldId, textChannel),
@@ -235,17 +544,15 @@ class _CampfireTextSplitBar extends ConsumerWidget {
             horizontal: VSpacing.md,
             vertical: VSpacing.sm,
           ),
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25)),
-            ),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: PrestigeNoir.border)),
           ),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.forum_outlined,
                 size: VIconSize.sm,
-                color: Theme.of(context).colorScheme.primary,
+                color: VColors.brand,
               ),
               const SizedBox(width: VSpacing.sm),
               Expanded(
@@ -254,7 +561,7 @@ class _CampfireTextSplitBar extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: VFontSize.labelSm,
                     fontWeight: VFontWeight.medium,
-                    color: VCommuneColors.textNormal,
+                    color: PrestigeNoir.foreground,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -263,167 +570,12 @@ class _CampfireTextSplitBar extends ConsumerWidget {
               Icon(
                 Icons.open_in_new,
                 size: VIconSize.denseSm,
-                color: Theme.of(context).colorScheme.primary,
+                color: PrestigeNoir.muted,
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ParticipantTile extends StatefulWidget {
-  final Participant participant;
-  const _ParticipantTile({required this.participant});
-
-  @override
-  State<_ParticipantTile> createState() => _ParticipantTileState();
-}
-
-class _ParticipantTileState extends State<_ParticipantTile>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
-  late final Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.3, end: 0.7).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isSpeaking = widget.participant.isSpeaking;
-    final isMuted = !widget.participant.isMicrophoneEnabled();
-    final identity = widget.participant.identity;
-    final name = widget.participant.name.isNotEmpty
-        ? widget.participant.name
-        : identity;
-
-    return Container(
-      padding: const EdgeInsets.all(VSpacing.sm),
-      decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: isSpeaking
-            ? null
-            : Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                width: 1,
-              ),
-        boxShadow: isSpeaking
-            ? [
-                BoxShadow(
-                  color: VColors.success.withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                ),
-              ]
-            : null,
-      ),
-      child: isSpeaking
-          ? AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) {
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: VColors.success.withValues(
-                        alpha: _pulseAnimation.value,
-                      ),
-                      width: 2 + (_pulseAnimation.value * 2),
-                    ),
-                    borderRadius: BorderRadius.circular(VRadius.lg),
-                  ),
-                  padding: const EdgeInsets.all(VSpacing.sm),
-                  child: _ParticipantContent(
-                    isMuted: isMuted,
-                    name: name,
-                    theme: theme,
-                    isDark: isDark,
-                  ),
-                );
-              },
-            )
-          : _ParticipantContent(
-              isMuted: isMuted,
-              name: name,
-              theme: theme,
-              isDark: isDark,
-            ),
-    );
-  }
-}
-
-class _ParticipantContent extends StatelessWidget {
-  final bool isMuted;
-  final String name;
-  final ThemeData theme;
-  final bool isDark;
-
-  const _ParticipantContent({
-    required this.isMuted,
-    required this.name,
-    required this.theme,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            CosmeticAvatar(imageUrl: null, size: 56),
-            if (isMuted)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: const BoxDecoration(
-                    color: VColors.error,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.mic_off,
-                    size: VIconSize.xs,
-                    color: VColors.onPrimary,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: VSpacing.xs),
-        Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -435,68 +587,41 @@ class _CampfireControls extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final voiceState = ref.watch(voiceProvider);
     final notifier = ref.read(voiceProvider.notifier);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.xl,
-        vertical: VSpacing.lg,
+        horizontal: VSpacing.md,
+        vertical: VSpacing.md,
       ),
-      decoration: BoxDecoration(
-        color: isDark
-            ? VCommuneColors.surfaceFloating
-            : VCommuneColors.surfaceFloatingLight,
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? VCommuneColors.dividerSubtle
-                : VCommuneColors.dividerSubtleLight,
-          ),
-        ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0D0E11),
+        border: Border(top: BorderSide(color: PrestigeNoir.border)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
-            'Mute stops your mic. Deafen mutes you and silences others.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+          _ControlButton(
+            icon: voiceState.isMuted ? Icons.mic_off : Icons.mic,
+            label: voiceState.isMuted ? 'Unmute' : 'Mic',
+            active: !voiceState.isMuted,
+            onTap: notifier.toggleMute,
           ),
-          const SizedBox(height: VSpacing.sm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _ControlButton(
-                icon: voiceState.isMuted ? Icons.mic_off : Icons.mic,
-                label: voiceState.isMuted ? 'Unmute' : 'Mute',
-                subtitle: 'Your microphone',
-                active: !voiceState.isMuted,
-                onTap: () => notifier.toggleMute(),
-              ),
-              _ControlButton(
-                icon: voiceState.isDeafened
-                    ? Icons.hearing_disabled
-                    : Icons.hearing,
-                label: voiceState.isDeafened ? 'Undeafen' : 'Deafen',
-                subtitle: 'Mic + incoming audio',
-                active: !voiceState.isDeafened,
-                onTap: () => notifier.toggleDeafen(),
-              ),
-              _ControlButton(
-                icon: Icons.call_end,
-                label: 'Leave',
-                subtitle: 'End session',
-                active: false,
-                color: VColors.error,
-                onTap: () {
-                  notifier.leaveCampfire();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+          _ControlButton(
+            icon: voiceState.isDeafened
+                ? Icons.hearing_disabled
+                : Icons.hearing,
+            label: voiceState.isDeafened ? 'Undeafen' : 'Deafen',
+            active: !voiceState.isDeafened,
+            onTap: notifier.toggleDeafen,
+          ),
+          _ControlButton(
+            icon: Icons.call_end,
+            label: 'Leave',
+            danger: true,
+            onTap: () {
+              notifier.leaveCampfire();
+              Navigator.of(context).pop();
+            },
           ),
         ],
       ),
@@ -507,58 +632,53 @@ class _CampfireControls extends ConsumerWidget {
 class _ControlButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String? subtitle;
   final bool active;
-  final Color? color;
+  final bool danger;
   final VoidCallback onTap;
 
   const _ControlButton({
     required this.icon,
     required this.label,
-    this.subtitle,
-    required this.active,
-    this.color,
+    this.active = false,
+    this.danger = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c =
-        color ??
-        (active
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.onSurfaceVariant);
+    final iconBg = danger
+        ? VColors.error.withValues(alpha: 0.2)
+        : (active ? PrestigeNoir.accentSoft : PrestigeNoir.surfaceRaised);
+    final iconBorder = danger
+        ? VColors.error
+        : (active ? VColors.brand : PrestigeNoir.border);
+    final iconColor = danger
+        ? VColors.error
+        : (active ? VColors.brand : PrestigeNoir.muted);
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: c.withValues(alpha: 0.12),
+              color: iconBg,
               shape: BoxShape.circle,
+              border: Border.all(color: iconBorder),
             ),
-            child: Icon(icon, color: c, size: VIconSize.lg),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
-          const SizedBox(height: VSpacing.xs),
+          const SizedBox(height: 4),
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: c,
-              fontWeight: VFontWeight.semiBold,
+            style: const TextStyle(
+              color: PrestigeNoir.mutedDim,
+              fontSize: 10,
             ),
           ),
-          if (subtitle != null)
-            Text(
-              subtitle!,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontSize: 10,
-                color: c.withValues(alpha: 0.75),
-              ),
-            ),
         ],
       ),
     );

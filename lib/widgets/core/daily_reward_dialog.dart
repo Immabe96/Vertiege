@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../services/daily_reward_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 
 /// A celebratory glass-modal dialog shown once per day when the resident
 /// collects their daily resonance reward.
@@ -25,7 +26,6 @@ class DailyRewardDialog extends StatefulWidget {
   }) {
     return showGeneralDialog(
       context: context,
-      barrierDismissible: false,
       barrierLabel: 'Daily Reward',
       barrierColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
       transitionDuration: VAnimation.normal,
@@ -92,7 +92,6 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
     final theme = Theme.of(context);
 
     return PopScope(
-      canPop: true,
       child: Center(
         child: Container(
         margin: const EdgeInsets.symmetric(horizontal: VSpacing.xl),
@@ -113,7 +112,7 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
           mainAxisSize: MainAxisSize.min,
           children: [
             // Title
-            Text(
+            const Text(
               'DAILY RESONANCE',
               style: TextStyle(
                 fontSize: VFontSize.headlineMd,
@@ -175,37 +174,17 @@ class _DailyRewardDialogState extends State<DailyRewardDialog>
             const SizedBox(height: VSpacing.xl),
 
             // Collect button
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _onCollect,
-                style: FilledButton.styleFrom(
-                  backgroundColor: VColors.tertiary,
-                  foregroundColor: VColors.onTertiary,
-                  padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(VRadius.lg),
-                  ),
-                ),
-                child: Text(
-                  'COLLECT',
-                  style: TextStyle(
-                    fontSize: VFontSize.bodyLg,
-                    fontWeight: VFontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
+            VButton(
+              label: 'COLLECT',
+              onPressed: _onCollect,
+              isFullWidth: true,
+              size: ButtonSize.large,
             ),
             const SizedBox(height: VSpacing.sm),
-            TextButton(
+            VButton(
+              label: 'Not now',
+              variant: ButtonVariant.text,
               onPressed: _dismissWithoutCollecting,
-              child: Text(
-                'Not now',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
             ),
           ],
         ),

@@ -24,22 +24,22 @@ class YouScreen extends ConsumerWidget {
         if (residentId != null)
           VAccessibleHeaderAction(
             label: 'Preview public profile',
-            icon: Icon(VIcons.user),
+            icon: const Icon(VIcons.user),
             onPress: () => context.push(residentProfilePath(residentId)),
           ),
         VAccessibleHeaderAction(
           label: 'Search residents',
-          icon: Icon(VIcons.search),
+          icon: const Icon(VIcons.search),
           onPress: () => openGlobalSearch(context),
         ),
         VAccessibleHeaderAction(
           label: 'Refresh honour wall',
-          icon: Icon(VIcons.rotateCw),
+          icon: const Icon(VIcons.rotateCw),
           onPress: () => refreshHonourWallData(ref, context),
         ),
         VAccessibleHeaderAction(
           label: 'Settings',
-          icon: Icon(VIcons.settings),
+          icon: const Icon(VIcons.settings),
           onPress: () => context.push('/settings'),
         ),
       ],

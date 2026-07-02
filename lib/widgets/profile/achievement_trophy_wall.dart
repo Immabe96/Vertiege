@@ -5,6 +5,7 @@ import '../../config/achievements.dart' as ach_config;
 import '../../models/achievement.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../achievements/achievement_icon.dart';
 import '../../ui/overlays/v_sheet.dart';
 
@@ -59,9 +60,11 @@ class AchievementTrophyWall extends StatelessWidget {
             ),
             const Spacer(),
             if (onViewAll != null || overflow > 0)
-              TextButton(
+              VButton(
+                variant: ButtonVariant.text,
+                size: ButtonSize.small,
                 onPressed: onViewAll ?? () => context.push('/achievements'),
-                child: Text(overflow > 0 ? 'View all ($overflow more)' : 'View all'),
+                label: overflow > 0 ? 'View all ($overflow more)' : 'View all',
               ),
           ],
         ),

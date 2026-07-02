@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../theme/v_tokens.dart';
@@ -146,7 +147,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return VHubPage(
       title: 'The Vault',
@@ -164,13 +164,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: VColors.tertiary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(VRadius.md),
+                          color: PrestigeNoir.accentSoft,
+                          borderRadius: BorderRadius.circular(VRadius.bento),
+                          border: Border.all(
+                            color: VColors.brand.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: const Icon(
                           Icons.diamond_outlined,
                           size: 36,
-                          color: VColors.tertiary,
+                          color: VColors.brand,
                         ),
                       ),
                       const SizedBox(height: VSpacing.md),
@@ -179,18 +182,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         style: TextStyle(
                           fontSize: VFontSize.headlineLg,
                           fontWeight: VFontWeight.bold,
-                          color: isDark
-                              ? VColors.onSurfaceDark
-                              : VColors.onSurface,
+                          color: PrestigeNoir.foreground,
                         ),
                       ),
                       const SizedBox(height: VSpacing.xs),
                       Text(
                         'Unlock sovereign privileges',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                          color: PrestigeNoir.muted,
                         ),
                       ),
                     ],
@@ -205,7 +204,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     margin: const EdgeInsets.only(bottom: VSpacing.lg),
                     decoration: BoxDecoration(
                       color: VColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(VRadius.lg),
+                      borderRadius: BorderRadius.circular(VRadius.bento),
                       border: Border.all(
                         color: VColors.success.withValues(alpha: 0.3),
                       ),
@@ -252,10 +251,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     child: _TierCard(
                       tierName: benefits['label'] as String,
                       tierColor:
-                          (benefits['color'] as Color?) ??
-                          (isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant),
+                          (benefits['color'] as Color?) ?? PrestigeNoir.muted,
                       price: price,
                       pricePeriod: pricePeriod,
                       isActive: isActive,
@@ -279,9 +275,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     'Entitlements are verified on our servers after each purchase.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: PrestigeNoir.muted,
                       height: VLineHeight.body,
                     ),
                   ),
@@ -362,7 +356,6 @@ class _SubscriptionBenefitsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final rows =
         <({String feature, String resident, String patrician, String elite})>[
           (
@@ -402,18 +395,14 @@ class _SubscriptionBenefitsTable extends StatelessWidget {
         text,
         style: theme.textTheme.labelSmall?.copyWith(
           fontWeight: header ? VFontWeight.bold : VFontWeight.regular,
-          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+          color: header ? PrestigeNoir.foreground : PrestigeNoir.muted,
         ),
       ),
     );
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
-      ),
+    return VPrestigeCard(
+      padding: EdgeInsets.zero,
+      raised: false,
       child: Table(
         columnWidths: const {
           0: FlexColumnWidth(2),
@@ -423,10 +412,8 @@ class _SubscriptionBenefitsTable extends StatelessWidget {
         },
         children: [
           TableRow(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
+            decoration: const BoxDecoration(
+              color: PrestigeNoir.surfaceRaised,
             ),
             children: [
               cell('Benefit', header: true),
@@ -481,11 +468,9 @@ class _TierCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return _Card(
+    return VPrestigeCard(
       padding: const EdgeInsets.all(VSpacing.xl),
-      borderRadius: BorderRadius.circular(VRadius.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -531,10 +516,10 @@ class _TierCard extends StatelessWidget {
             children: [
               Text(
                 price,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: VFontSize.displayXl,
                   fontWeight: VFontWeight.bold,
-                  color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                  color: PrestigeNoir.foreground,
                 ),
               ),
               if (pricePeriod.isNotEmpty) ...[
@@ -544,9 +529,7 @@ class _TierCard extends StatelessWidget {
                   child: Text(
                     pricePeriod,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark.withValues(alpha: 0.5)
-                          : VColors.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: PrestigeNoir.muted.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -558,7 +541,7 @@ class _TierCard extends StatelessWidget {
           // ── Divider ─────────────────────────────────────────
           Container(
             height: 1,
-            color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
+            color: PrestigeNoir.borderLight,
           ),
           const SizedBox(height: VSpacing.lg),
 
@@ -576,10 +559,7 @@ class _TierCard extends StatelessWidget {
                     size: 18,
                     color: feature.included
                         ? VColors.success
-                        : (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant)
-                              .withValues(alpha: 0.4),
+                        : PrestigeNoir.muted.withValues(alpha: 0.4),
                   ),
                   const SizedBox(width: VSpacing.sm),
                   Expanded(
@@ -587,13 +567,8 @@ class _TierCard extends StatelessWidget {
                       feature.label,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: feature.included
-                            ? (isDark
-                                  ? VColors.onSurfaceVariantDark
-                                  : VColors.onSurfaceVariant)
-                            : (isDark
-                                      ? VColors.onSurfaceVariantDark
-                                      : VColors.onSurfaceVariant)
-                                  .withValues(alpha: 0.5),
+                            ? PrestigeNoir.muted
+                            : PrestigeNoir.muted.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -606,61 +581,20 @@ class _TierCard extends StatelessWidget {
 
           // ── Upgrade button ──────────────────────────────────
           if (onUpgrade != null)
-            SizedBox(
-              height: 48,
-              child: FilledButton.icon(
-                onPressed: isLoading ? null : onUpgrade,
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(VIcons.sparkles),
-                label: Text(isLoading ? 'Activating...' : 'UPGRADE'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: VColors.tertiary,
-                  foregroundColor: VColors.onTertiary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(VRadius.lg),
-                  ),
-                ),
-              ),
+            VButton(
+              label: 'UPGRADE',
+              icon: const Icon(VIcons.sparkles),
+              isLoading: isLoading,
+              isFullWidth: true,
+              onPressed: onUpgrade,
             )
           else if (isActive)
-            VButton(
+            const VButton(
               label: 'ACTIVE',
-              onPressed: null,
               variant: ButtonVariant.outlined,
             ),
         ],
       ),
-    );
-  }
-}
-
-class _Card extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final BorderRadiusGeometry? borderRadius;
-
-  const _Card({required this.child, this.padding, this.borderRadius});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: padding ?? const EdgeInsets.all(VSpacing.xl),
-      decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
-        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
-      ),
-      child: child,
     );
   }
 }

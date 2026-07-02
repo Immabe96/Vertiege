@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -120,7 +120,6 @@ class _ChatScrollFabState extends State<ChatScrollFab>
 
   Widget _buildCommuneStyle(bool showBadge, String badgeLabel) {
     return Material(
-      elevation: 0,
       color: VCommuneColors.surfaceFloating,
       borderRadius: BorderRadius.circular(VRadius.pill),
       child: InkWell(
@@ -175,8 +174,8 @@ class _ChatScrollFabState extends State<ChatScrollFab>
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: widget.onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(VSpacing.sm),
+        child: const Padding(
+          padding: EdgeInsets.all(VSpacing.sm),
           child: Icon(
             Icons.keyboard_arrow_down,
             size: VIconSize.lg,

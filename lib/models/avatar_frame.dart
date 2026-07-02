@@ -70,10 +70,11 @@ class AvatarFrame {
   ];
 
   static AvatarFrame? getById(String id) {
-    return predefined.firstWhere(
-      (f) => f.id == id,
-      orElse: () => predefined.first,
-    );
+    try {
+      return predefined.firstWhere((f) => f.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   Map<String, dynamic> toJson() => {

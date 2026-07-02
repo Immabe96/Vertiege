@@ -3,7 +3,7 @@ export 'buttons/v_button.dart';
 export 'buttons/v_gate_cta.dart';
 export 'buttons/v_icon_button.dart';
 export 'cards/v_card.dart';
-export 'cards/v_surface_card.dart';
+export 'cards/v_prestige_card.dart';
 export 'inputs/v_input.dart';
 export 'inputs/v_select.dart';
 export 'inputs/v_search_bar.dart';

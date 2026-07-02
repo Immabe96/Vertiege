@@ -22,7 +22,6 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/core/screen_loading.dart';
 import '../services/chat_notification_scope.dart';
-import '../widgets/core/v_feedback.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/profile/luminary_nameplate.dart';
 
@@ -174,7 +173,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
         prefixes: [
           VAccessibleHeaderAction(
             label: 'Back to channel',
-            icon: Icon(VIcons.chevronLeft),
+            icon: const Icon(VIcons.chevronLeft),
             onPress: () {
               if (context.canPop()) context.pop();
             },
@@ -215,7 +214,7 @@ class _ThreadScreenState extends ConsumerState<ThreadScreen>
                         .loadThreadMessages(threadId),
                   )
                 : messages.isEmpty
-                ? AppEmptyState(
+                ? const AppEmptyState(
                     title: 'No replies yet',
                     description: 'Be the first to reply in this thread',
                     icon: Icons.chat_bubble_outline,
@@ -325,7 +324,6 @@ class _ParentMessageCard extends StatelessWidget {
               const SizedBox(width: VSpacing.sm),
               LuminaryNameplate(
                 name: message.senderName,
-                tier: 1,
                 fontSize: VFontSize.bodyMd,
               ),
               const Spacer(),

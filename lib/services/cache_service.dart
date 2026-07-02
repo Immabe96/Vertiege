@@ -16,7 +16,7 @@ class CacheService {
 
   static Future<void> cacheFeed(List<Post> posts) async {
     if (posts.isEmpty) return;
-    final json = jsonEncode(posts.map((p) => _postToJson(p)).toList());
+    final json = jsonEncode(posts.map(_postToJson).toList());
     await StorageService.setString(_feedCacheKey, json);
   }
 

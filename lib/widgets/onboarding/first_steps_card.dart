@@ -9,6 +9,7 @@ import '../../router/world_navigation.dart';
 import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 
 /// Identity checklist for new residents (funnel 4→1→3→2).
 class FirstStepsCard extends StatelessWidget {
@@ -37,8 +38,7 @@ class FirstStepsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    const muted = VColors.onSurfaceVariantDark;
 
     final profileDone = OnboardingFunnel.profileReady(resident);
     final joinedDone = OnboardingFunnel.hasJoinedWorld(resident);
@@ -89,7 +89,6 @@ class FirstStepsCard extends StatelessWidget {
               _StepRow(
                 done: profileDone,
                 label: 'Create your identity',
-                onTap: null,
               ),
               _StepRow(
                 done: joinedDone,
@@ -149,8 +148,7 @@ class _StepRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    const muted = VColors.onSurfaceVariantDark;
 
     final row = Padding(
       padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
@@ -184,7 +182,12 @@ class _StepRow extends StatelessWidget {
             ),
           ),
           if (!done && onTap != null)
-            TextButton(onPressed: onTap, child: const Text('Go')),
+            VButton(
+              variant: ButtonVariant.text,
+              size: ButtonSize.small,
+              onPressed: onTap,
+              label: 'Go',
+            ),
         ],
       ),
     );

@@ -12,7 +12,6 @@ import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/empty_state.dart';
-import '../v_section_list.dart';
 
 /// Marketplace dominion — economy entry (formerly part of Manage).
 class WorldShopTab extends ConsumerWidget {
@@ -29,7 +28,6 @@ class WorldShopTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
     final showMarket = WorldCapabilityMatrix.worldHasMarketplace(world);
     final showTreasury = WorldCapabilityMatrix.worldHasTreasury(world);
@@ -48,7 +46,6 @@ class WorldShopTab extends ConsumerWidget {
         title: 'Join to use the shop',
         description: 'Listings, treasury, and trades unlock after you join.',
         icon: Icons.storefront_outlined,
-        variant: EmptyStateVariant.default_,
       );
     }
 
@@ -88,13 +85,11 @@ class WorldShopTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: VSpacing.xs),
-        Text(
+        const Text(
           'Trade, list items, and fund the world treasury.',
           style: TextStyle(
             fontSize: VFontSize.bodySm,
-            color: isDark
-                ? VColors.onSurfaceVariantDark
-                : VColors.onSurfaceVariant,
+            color: VColors.onSurfaceVariantDark,
           ),
         ),
         const SizedBox(height: VSpacing.md),
@@ -104,12 +99,11 @@ class WorldShopTab extends ConsumerWidget {
             description:
                 'This shop world needs more prestige before marketplace modules activate.',
             icon: Icons.hourglass_empty,
-            variant: EmptyStateVariant.default_,
           )
         else
           VSectionList(title: 'Open', children: links),
         const SizedBox(height: VSpacing.md),
-        VSurfaceCard(
+        VCard(
             child: Row(
               children: [
                 Icon(Icons.auto_awesome, color: prestigeColor),
@@ -124,11 +118,9 @@ class WorldShopTab extends ConsumerWidget {
                               isJoined: isJoined,
                             ) ??
                             '${ProgressionGlossary.worldPrestigeShort(world.prestige)} · listing rules apply'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.bodySm,
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                   ),
                 ),

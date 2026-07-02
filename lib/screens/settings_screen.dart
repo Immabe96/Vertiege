@@ -24,10 +24,10 @@ import '../services/supabase.dart';
 import '../services/chat_density_prefs.dart';
 import '../services/world_nav_prefs.dart';
 import '../state/chat_density_provider.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import 'package:vertiege/ui/ui.dart';
-import '../widgets/core/v_theme_scheme_picker.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -222,440 +222,445 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showChangeEmailDialog() {
+  Future<void> _showChangeEmailDialog() async {
     final controller = TextEditingController();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    showVDialog(
-      context: context,
-      title: 'Change Email',
-      content: TextField(
-        controller: controller,
-        keyboardType: TextInputType.emailAddress,
-        autofocus: true,
-        decoration: InputDecoration(
-          labelText: 'New email address',
-          prefixIcon: const Icon(Icons.email_outlined),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(VRadius.md),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(VRadius.md),
-            borderSide: BorderSide(
-              color: isDark ? VColors.outlineDark : VColors.outline,
+    try {
+      await showVDialog(
+        context: context,
+        title: 'Change Email',
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'New email address',
+            prefixIcon: const Icon(Icons.email_outlined),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(VRadius.md),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(VRadius.md),
+              borderSide: const BorderSide(color: VColors.outlineDark),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(VRadius.md),
+              borderSide: const BorderSide(color: VColors.primary, width: 2),
             ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(VRadius.md),
-            borderSide: const BorderSide(color: VColors.primary, width: 2),
-          ),
         ),
-      ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(context),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Update',
-            onPressed: () async {
-              final email = controller.text.trim();
-              if (email.isEmpty) return;
-              try {
-                final client = maybeSupabase();
-                if (client == null) {
+        actions: [
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(context),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Update',
+              onPressed: () async {
+                final email = controller.text.trim();
+                if (email.isEmpty) return;
+                try {
+                  final client = maybeSupabase();
+                  if (client == null) {
+                    if (context.mounted) {
+                      VFeedback.showError(
+                        context,
+                        'Cloud sync is unavailable. Check your connection and try again.',
+                      );
+                    }
+                    return;
+                  }
+                  await client.auth.updateUser(UserAttributes(email: email));
+                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) {
+                    VFeedback.showMessage(
+                      context,
+                      'Check your new email to confirm the change',
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) Navigator.pop(context);
                   if (context.mounted) {
                     VFeedback.showError(
                       context,
-                      'Cloud sync is unavailable. Check your connection and try again.',
+                      'Failed to update email: $e',
                     );
                   }
-                  return;
                 }
-                await client.auth.updateUser(UserAttributes(email: email));
-                if (context.mounted) Navigator.pop(context);
-                if (context.mounted) {
-                  VFeedback.showMessage(
-                    context,
-                    'Check your new email to confirm the change',
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) Navigator.pop(context);
-                if (context.mounted) {
-                  VFeedback.showError(context, 'Failed to update email: $e');
-                }
-              }
-            },
-          ),
-        ]),
-      ],
-    );
+              },
+            ),
+          ]),
+        ],
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 
-  void _showChangePasswordDialog() {
+  Future<void> _showChangePasswordDialog() async {
     final oldController = TextEditingController();
     final newController = TextEditingController();
     final confirmController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    showVDialog(
-      context: context,
-      title: 'Change Password',
-      content: Form(
-        key: formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: oldController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Current password',
-                prefixIcon: const Icon(Icons.lock_outline),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: BorderSide(
-                    color: isDark ? VColors.outlineDark : VColors.outline,
+    try {
+      final formKey = GlobalKey<FormState>();
+      await showVDialog(
+        context: context,
+        title: 'Change Password',
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: oldController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Current password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(color: VColors.outlineDark),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.primary,
-                    width: 2,
-                  ),
-                ),
+                validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
               ),
-              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-            ),
-            const SizedBox(height: VSpacing.sm),
-            TextFormField(
-              controller: newController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'New password',
-                prefixIcon: const Icon(VIcons.lock),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: BorderSide(
-                    color: isDark ? VColors.outlineDark : VColors.outline,
+              const SizedBox(height: VSpacing.sm),
+              TextFormField(
+                controller: newController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'New password',
+                  prefixIcon: const Icon(VIcons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(color: VColors.outlineDark),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.primary,
-                    width: 2,
-                  ),
-                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Required';
+                  if (v.length < 8) return 'At least 8 characters';
+                  return null;
+                },
               ),
-              validator: (v) {
-                if (v == null || v.isEmpty) return 'Required';
-                if (v.length < 8) return 'At least 8 characters';
-                return null;
-              },
-            ),
-            const SizedBox(height: VSpacing.sm),
-            TextFormField(
-              controller: confirmController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Confirm new password',
-                prefixIcon: const Icon(VIcons.lock),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: BorderSide(
-                    color: isDark ? VColors.outlineDark : VColors.outline,
+              const SizedBox(height: VSpacing.sm),
+              TextFormField(
+                controller: confirmController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Confirm new password',
+                  prefixIcon: const Icon(VIcons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(color: VColors.outlineDark),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.primary,
-                    width: 2,
-                  ),
-                ),
+                validator: (v) {
+                  if (v != newController.text) return 'Passwords do not match';
+                  return null;
+                },
               ),
-              validator: (v) {
-                if (v != newController.text) return 'Passwords do not match';
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(context),
-            variant: ButtonVariant.text,
+            ],
           ),
-          VButton(
-            label: 'Change',
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              try {
-                final client = maybeSupabase();
-                if (client == null) {
+        ),
+        actions: [
+          vDialogActionsRow([
+            VButton(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(context),
+              variant: ButtonVariant.text,
+            ),
+            VButton(
+              label: 'Change',
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                try {
+                  final client = maybeSupabase();
+                  if (client == null) {
+                    if (context.mounted) {
+                      VFeedback.showError(
+                        context,
+                        'Cloud sync is unavailable. Check your connection and try again.',
+                      );
+                    }
+                    return;
+                  }
+                  await client.auth.updateUser(
+                    UserAttributes(password: newController.text),
+                  );
+                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) {
+                    VFeedback.showMessage(
+                      context,
+                      'Password changed successfully',
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) Navigator.pop(context);
                   if (context.mounted) {
                     VFeedback.showError(
                       context,
-                      'Cloud sync is unavailable. Check your connection and try again.',
+                      'Failed to update password: $e',
                     );
                   }
-                  return;
-                }
-                await client.auth.updateUser(
-                  UserAttributes(password: newController.text),
-                );
-                if (context.mounted) Navigator.pop(context);
-                if (context.mounted) {
-                  VFeedback.showMessage(
-                    context,
-                    'Password changed successfully',
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) Navigator.pop(context);
-                if (context.mounted) {
-                  VFeedback.showError(context, 'Failed to update password: $e');
-                }
-              }
-            },
-          ),
-        ]),
-      ],
-    );
-  }
-
-  void _showDeleteAccountDialog() {
-    final controller = TextEditingController();
-    String confirmText = '';
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    showVDialog(
-      context: context,
-      title: 'Delete Account',
-      titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontWeight: VFontWeight.bold,
-        color: VColors.error,
-      ),
-      content: StatefulBuilder(
-        builder: (ctx, setDialogState) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'This action is permanent and cannot be undone. All your data, posts, and memberships will be permanently removed.',
-            ),
-            const SizedBox(height: VSpacing.md),
-            Text(
-              'Type DELETE to confirm',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: VFontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: 'Type DELETE here',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: BorderSide(
-                    color: isDark ? VColors.outlineDark : VColors.outline,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(color: VColors.error, width: 2),
-                ),
-              ),
-              onChanged: (v) => setDialogState(() => confirmText = v),
-            ),
-            const SizedBox(height: VSpacing.lg),
-            vDialogActionsRow([
-              VButton(
-                label: 'Cancel',
-                onPressed: () => Navigator.pop(context),
-                variant: ButtonVariant.text,
-              ),
-              VButton(
-                label: 'Delete My Account',
-                onPressed: confirmText.trim() == 'DELETE'
-                    ? () async {
-                        try {
-                          final client = maybeSupabase();
-                          if (client == null) {
-                            if (context.mounted) {
-                              VFeedback.showError(
-                                context,
-                                'Cloud sync is unavailable. Check your connection and try again.',
-                              );
-                            }
-                            return;
-                          }
-                          final user = client.auth.currentUser;
-                          if (user != null) {
-                            await client.functions.invoke('delete-account');
-                          }
-                          if (context.mounted) Navigator.pop(context);
-                          if (context.mounted) {
-                            await AuthService.signOut(ref: ref);
-                            if (context.mounted) {
-                              context.go('/login');
-                            }
-                          }
-                        } catch (e) {
-                          if (context.mounted) Navigator.pop(context);
-                          if (context.mounted) {
-                            VFeedback.showError(
-                              context,
-                              'Failed to delete account: $e',
-                            );
-                          }
-                        }
-                      }
-                    : null,
-              ),
-            ]),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showRestoreBackupDialog() {
-    final controller = TextEditingController();
-    String? validationError;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    showVDialog(
-      context: context,
-      title: 'Restore Backup',
-      content: StatefulBuilder(
-        builder: (ctx, setDialogState) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Paste your backup JSON below, then tap Validate & Restore.',
-            ),
-            const SizedBox(height: VSpacing.md),
-            TextField(
-              controller: controller,
-              maxLines: 8,
-              decoration: InputDecoration(
-                hintText: 'Paste JSON here...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: BorderSide(
-                    color: isDark ? VColors.outlineDark : VColors.outline,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(VRadius.md),
-                  borderSide: const BorderSide(
-                    color: VColors.primary,
-                    width: 2,
-                  ),
-                ),
-                errorText: validationError,
-                contentPadding: const EdgeInsets.all(VSpacing.md),
-              ),
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: VFontSize.bodyMd,
-              ),
-              onChanged: (_) {
-                if (validationError != null) {
-                  setDialogState(() => validationError = null);
                 }
               },
             ),
-            const SizedBox(height: VSpacing.lg),
-            vDialogActionsRow([
-              VButton(
-                label: 'Cancel',
-                onPressed: () => Navigator.pop(context),
-                variant: ButtonVariant.text,
+          ]),
+        ],
+      );
+    } finally {
+      oldController.dispose();
+      newController.dispose();
+      confirmController.dispose();
+    }
+  }
+
+  Future<void> _showDeleteAccountDialog() async {
+    final controller = TextEditingController();
+    try {
+      String confirmText = '';
+      final theme = Theme.of(context);
+      await showVDialog(
+        context: context,
+        title: 'Delete Account',
+        titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+          fontWeight: VFontWeight.bold,
+          color: VColors.error,
+        ),
+        content: StatefulBuilder(
+          builder: (ctx, setDialogState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'This action is permanent and cannot be undone. All your data, posts, and memberships will be permanently removed.',
               ),
-              VButton(
-                label: 'Validate & Restore',
-                onPressed: () async {
-                  final raw = controller.text.trim();
-                  if (raw.isEmpty) {
-                    setDialogState(
-                      () => validationError = 'Please paste backup JSON',
-                    );
-                    return;
-                  }
-                  try {
-                    final parsed = jsonDecode(raw);
-                    if (parsed is! Map<String, dynamic>) {
-                      setDialogState(
-                        () => validationError =
-                            'Invalid JSON: expected an object',
-                      );
-                      return;
-                    }
-                    if (!parsed.containsKey('backup')) {
-                      setDialogState(
-                        () => validationError =
-                            'Missing "backup" key — not a valid backup file',
-                      );
-                      return;
-                    }
-                    if (parsed['backup'] is! Map<String, dynamic>) {
-                      setDialogState(
-                        () => validationError = '"backup" must be an object',
-                      );
-                      return;
-                    }
-                  } catch (e) {
-                    setDialogState(
-                      () => validationError = 'Invalid JSON: ${e.toString()}',
-                    );
-                    return;
-                  }
-                  final success = await BackupService.restoreBackup(raw);
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                  if (mounted) {
-                    VFeedback.showMessage(
-                      context,
-                      success
-                          ? 'Backup restored successfully'
-                          : 'Restore failed — data may be corrupted',
-                    );
+              const SizedBox(height: VSpacing.md),
+              Text(
+                'Type DELETE to confirm',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: VFontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: VSpacing.sm),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: 'Type DELETE here',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(color: VColors.outlineDark),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(color: VColors.error, width: 2),
+                  ),
+                ),
+                onChanged: (v) => setDialogState(() => confirmText = v),
+              ),
+              const SizedBox(height: VSpacing.lg),
+              vDialogActionsRow([
+                VButton(
+                  label: 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                  variant: ButtonVariant.text,
+                ),
+                VButton(
+                  label: 'Delete My Account',
+                  onPressed: confirmText.trim() == 'DELETE'
+                      ? () async {
+                          try {
+                            final client = maybeSupabase();
+                            if (client == null) {
+                              if (context.mounted) {
+                                VFeedback.showError(
+                                  context,
+                                  'Cloud sync is unavailable. Check your connection and try again.',
+                                );
+                              }
+                              return;
+                            }
+                            final user = client.auth.currentUser;
+                            if (user != null) {
+                              await client.functions.invoke('delete-account');
+                            }
+                            if (context.mounted) Navigator.pop(context);
+                            if (context.mounted) {
+                              await AuthService.signOut(ref: ref);
+                              if (context.mounted) {
+                                context.go('/login');
+                              }
+                            }
+                          } catch (e) {
+                            if (context.mounted) Navigator.pop(context);
+                            if (context.mounted) {
+                              VFeedback.showError(
+                                context,
+                                'Failed to delete account: $e',
+                              );
+                            }
+                          }
+                        }
+                      : null,
+                ),
+              ]),
+            ],
+          ),
+        ),
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
+
+  Future<void> _showRestoreBackupDialog() async {
+    final controller = TextEditingController();
+    try {
+      String? validationError;
+      await showVDialog(
+        context: context,
+        title: 'Restore Backup',
+        content: StatefulBuilder(
+          builder: (ctx, setDialogState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Paste your backup JSON below, then tap Validate & Restore.',
+              ),
+              const SizedBox(height: VSpacing.md),
+              TextField(
+                controller: controller,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  hintText: 'Paste JSON here...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(color: VColors.outlineDark),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    borderSide: const BorderSide(
+                      color: VColors.primary,
+                      width: 2,
+                    ),
+                  ),
+                  errorText: validationError,
+                  contentPadding: const EdgeInsets.all(VSpacing.md),
+                ),
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: VFontSize.bodyMd,
+                ),
+                onChanged: (_) {
+                  if (validationError != null) {
+                    setDialogState(() => validationError = null);
                   }
                 },
               ),
-            ]),
-          ],
+              const SizedBox(height: VSpacing.lg),
+              vDialogActionsRow([
+                VButton(
+                  label: 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                  variant: ButtonVariant.text,
+                ),
+                VButton(
+                  label: 'Validate & Restore',
+                  onPressed: () async {
+                    final raw = controller.text.trim();
+                    if (raw.isEmpty) {
+                      setDialogState(
+                        () => validationError = 'Please paste backup JSON',
+                      );
+                      return;
+                    }
+                    try {
+                      final parsed = jsonDecode(raw);
+                      if (parsed is! Map<String, dynamic>) {
+                        setDialogState(
+                          () => validationError =
+                              'Invalid JSON: expected an object',
+                        );
+                        return;
+                      }
+                      if (!parsed.containsKey('backup')) {
+                        setDialogState(
+                          () => validationError =
+                              'Missing "backup" key — not a valid backup file',
+                        );
+                        return;
+                      }
+                      if (parsed['backup'] is! Map<String, dynamic>) {
+                        setDialogState(
+                          () => validationError = '"backup" must be an object',
+                        );
+                        return;
+                      }
+                    } catch (e) {
+                      setDialogState(
+                        () => validationError = 'Invalid JSON: ${e.toString()}',
+                      );
+                      return;
+                    }
+                    final success = await BackupService.restoreBackup(raw);
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    if (mounted) {
+                      VFeedback.showMessage(
+                        context,
+                        success
+                            ? 'Backup restored successfully'
+                            : 'Restore failed — data may be corrupted',
+                      );
+                    }
+                  },
+                ),
+              ]),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 
   void _showResetDataDialog() {
@@ -671,7 +676,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onConfirmed: () async {
           await StorageService.clearAll();
           if (context.mounted) Navigator.pop(context);
-          ref.read(themeProvider.notifier).setScheme(ThemeScheme.system);
           router.go('/onboarding');
         },
       ),
@@ -680,65 +684,88 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _appearancePanel({
     required ThemeData theme,
-    required bool isDark,
-    required ThemeScheme scheme,
   }) {
-    return Padding(
-      padding: const EdgeInsets.all(VSpacing.md),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.palette,
-                size: VIconSize.md,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.dark_mode,
+              size: VIconSize.md,
+              color: PrestigeNoir.accent,
+            ),
+            const SizedBox(width: VSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Prestige Noir',
+                    style: TextStyle(
+                      fontSize: VFontSize.bodyMd,
+                      fontWeight: VFontWeight.semiBold,
+                      color: PrestigeNoir.foreground,
+                    ),
+                  ),
+                  const Text(
+                    'Dark-only design — gold accent, cool-tinted surfaces',
+                    style: TextStyle(
+                      fontSize: VFontSize.labelSm,
+                      color: PrestigeNoir.muted,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: VSpacing.md),
-              Text(
-                'Theme',
-                style: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  color: Theme.of(context).colorScheme.onSurface,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: VSpacing.sm,
+                vertical: VSpacing.xxs,
+              ),
+              decoration: BoxDecoration(
+                color: PrestigeNoir.accentSoft,
+                borderRadius: BorderRadius.circular(VRadius.pill),
+                border: Border.all(
+                  color: PrestigeNoir.accent.withValues(alpha: 0.35),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.sm),
-          VThemeSchemePicker(
-            scheme: scheme,
-            darkPreset: ref.watch(themeProvider).darkPreset,
-            onSchemeChanged: (s) =>
-                ref.read(themeProvider.notifier).setScheme(s),
-            onDarkPresetChanged: (p) =>
-                ref.read(themeProvider.notifier).setDarkPreset(p),
-          ),
-          const SizedBox(height: VSpacing.md),
-          Row(
-            children: [
-              Icon(
-                Icons.text_fields,
-                size: VIconSize.md,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: VSpacing.md),
-              Text(
-                'Text Size',
+              child: const Text(
+                'Default',
                 style: TextStyle(
-                  fontSize: VFontSize.bodyMd,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: VFontSize.labelSm,
+                  fontWeight: VFontWeight.semiBold,
+                  color: PrestigeNoir.accent,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+        const SizedBox(height: VSpacing.md),
+        const Row(
+          children: [
+            Icon(
+              Icons.text_fields,
+              size: VIconSize.md,
+              color: PrestigeNoir.muted,
+            ),
+            SizedBox(width: VSpacing.md),
+            Text(
+              'Text Size',
+              style: TextStyle(
+                fontSize: VFontSize.bodyMd,
+                color: PrestigeNoir.foreground,
+              ),
+            ),
+          ],
+        ),
           const SizedBox(height: VSpacing.sm),
           Consumer(
             builder: (context, ref, _) {
-              final theme = ref.watch(themeProvider);
-              final textSize = theme.textSize;
-              final highContrast = theme.highContrast;
+              final themeState = ref.watch(themeProvider);
+              final textSize = themeState.textSize;
+              final highContrast = themeState.highContrast;
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -767,17 +794,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: VSpacing.sm),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.contrast,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: PrestigeNoir.muted,
                       ),
                       const SizedBox(width: VSpacing.md),
-                      Expanded(
+                      const Expanded(
                         child: Text(
                           'High contrast text',
                           style: TextStyle(
                             fontSize: VFontSize.bodyMd,
-              color: Theme.of(context).colorScheme.onSurface,
+                            color: PrestigeNoir.foreground,
                           ),
                         ),
                       ),
@@ -796,7 +823,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: ref.watch(themeProvider).saturation,
                     onChanged: (v) =>
                         ref.read(themeProvider.notifier).setSaturation(v),
-                    isDark: isDark,
                   ),
                   const SizedBox(height: VSpacing.sm),
                   _ThemeSliderRow(
@@ -805,7 +831,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: ref.watch(themeProvider).contrast,
                     onChanged: (v) =>
                         ref.read(themeProvider.notifier).setContrast(v),
-                    isDark: isDark,
                   ),
                   const SizedBox(height: VSpacing.sm),
                   Consumer(
@@ -815,17 +840,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           density == ChatMessageDensity.compact;
                       return Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.view_agenda_outlined,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: PrestigeNoir.muted,
                           ),
                           const SizedBox(width: VSpacing.md),
-                          Expanded(
+                          const Expanded(
                             child: Text(
                               'Compact chat',
                               style: TextStyle(
                                 fontSize: VFontSize.bodyMd,
-                                color: Theme.of(context).colorScheme.onSurface,
+                                color: PrestigeNoir.foreground,
                               ),
                             ),
                           ),
@@ -850,43 +875,67 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
           ),
         ],
-      ),
+      );
+  }
+
+  Widget _prestigeSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
+          child: VPrestigeSectionLabel(title: title),
+        ),
+        VPrestigeCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0)
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: PrestigeNoir.borderLight,
+                  ),
+                children[i],
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     _estimateCacheSize();
-    final themeState = ref.watch(themeProvider);
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final variantColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return VHubPage(
       title: 'Settings',
       showBack: true,
       body: RefreshIndicator(
         onRefresh: () async => _loadPrefs(),
+        color: PrestigeNoir.accent,
         child: ListView(
           padding: const EdgeInsets.all(VSpacing.md),
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            VSectionList(
-              title: 'About',
-              children: [
+            _prestigeSection('About', [
                 VTile(
                   title: Text(
                     'Version $kAppVersionLabel',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.bodySm,
-                      color: variantColor,
+                      color: PrestigeNoir.muted,
                     ),
                   ),
                   subtitle: Text(
                     'Build $kAppBuildNumber · $kPlatformBuildLabel',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: VFontSize.labelSm,
-                      color: variantColor,
+                      color: PrestigeNoir.mutedDim,
                     ),
                   ),
                 ),
@@ -895,12 +944,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: 'Credits',
                   onTap: _showCreditsDialog,
                 ),
-              ],
-            ),
+              ]),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Account',
-              children: [
+            _prestigeSection('Account', [
                 if (AdminAccessService.isCurrentSessionVerifier())
                   VSectionTile(
                     icon: Icons.verified_user_outlined,
@@ -938,12 +984,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   titleColor: VColors.error,
                   onTap: _showDeleteAccountDialog,
                 ),
-              ],
-            ),
+              ]),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Notifications',
-              children: [
+            _prestigeSection('Notifications', [
                 VSectionSwitchTile(
                   icon: Icons.notifications_active,
                   label: 'Push Notifications',
@@ -994,12 +1037,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                       : null,
                 ),
-              ],
-            ),
+              ]),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Progression',
-              children: [
+            _prestigeSection('Progression', [
                 VSectionSwitchTile(
                   icon: Icons.leaderboard_outlined,
                   label: 'Low-pressure mode',
@@ -1010,12 +1050,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ref.read(residentProvider.notifier).setLeaderboardOptOut(v);
                   },
                 ),
-              ],
-            ),
+              ]),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Worlds',
-              children: [
+            _prestigeSection('Worlds', [
                 VSectionSwitchTile(
                   icon: Icons.dynamic_feed,
                   label: 'Open joined worlds on Feed',
@@ -1027,29 +1064,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         }
                       : null,
                 ),
-              ],
-            ),
+              ]),
             const SizedBox(height: VSpacing.md),
             Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const VSectionLabel(title: 'Appearance'),
-                Card(
-                  margin: EdgeInsets.zero,
-                  elevation: 0,
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
-                  ),
-                  child: _appearancePanel(
-                    theme: theme,
-                    isDark: isDark,
-                    scheme: themeState.scheme,
-                  ),
+                const Padding(
+                  padding: EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
+                  child: VPrestigeSectionLabel(title: 'Appearance'),
+                ),
+                VPrestigeCard(
+                  child: _appearancePanel(theme: theme),
                 ),
               ],
             ),
@@ -1071,9 +1096,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: VSpacing.md),
-                    VSectionList(
-                      title: 'Tier Perks',
-                      children: [
+                    _prestigeSection('Tier Perks', [
                         VPerkTile(
                           icon: Icons.trending_up,
                           title: 'XP Multiplier',
@@ -1111,28 +1134,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: 'Governance Vote',
                           value: hasVote ? 'Unlocked' : 'Locked',
                         ),
-                      ],
-                    ),
+                      ]),
                   ],
                 );
               },
             ),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Help & legal',
-              children: [
+            _prestigeSection('Help & legal', [
                 VSectionTile(
                   icon: Icons.info_outline,
                   label: 'Privacy, terms & licenses',
                   detail: 'Open the More tab',
-                  onTap: () => context.go('/identity'),
+                  onTap: () => context.push('/identity'),
                 ),
-              ],
-            ),
+              ]),
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Data',
-              children: [
+            _prestigeSection('Data', [
                 VSectionTile(
                   icon: Icons.backup,
                   label: 'Create Backup',
@@ -1163,13 +1180,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     label: 'Discard failed sync ($_failedOutboxCount)',
                     onTap: _discardFailedOutbox,
                   ),
-              ],
-            ),
+              ]),
             if (kDebugMode) ...[
               const SizedBox(height: VSpacing.md),
-              VSectionList(
-                title: 'Developer',
-                children: [
+              _prestigeSection('Developer', [
                   VSectionTile(
                     icon: Icons.cloud_outlined,
                     label: FirebaseBootstrap.isInitialized
@@ -1183,13 +1197,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     detail: 'Debug wrapper smoke',
                     onTap: () => context.push('/debug/ui-spike'),
                   ),
-                ],
-              ),
+              ]),
             ],
             const SizedBox(height: VSpacing.md),
-            VSectionList(
-              title: 'Danger Zone',
-              children: [
+            _prestigeSection('Danger Zone', [
                 VSectionTile(
                   icon: Icons.delete_forever,
                   label: 'Reset All Data',
@@ -1197,8 +1208,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   titleColor: VColors.error,
                   onTap: _showResetDataDialog,
                 ),
-              ],
-            ),
+              ]),
           ],
         ),
       ),
@@ -1239,7 +1249,6 @@ class _ResetDataConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1274,9 +1283,7 @@ class _ResetDataConfirmationDialogState
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(VRadius.md),
-                      borderSide: BorderSide(
-                        color: isDark ? VColors.outlineDark : VColors.outline,
-                      ),
+                      borderSide: const BorderSide(color: VColors.outlineDark),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(VRadius.md),
@@ -1326,14 +1333,12 @@ class _ThemeSliderRow extends StatelessWidget {
   final String label;
   final double value;
   final ValueChanged<double> onChanged;
-  final bool isDark;
 
   const _ThemeSliderRow({
     required this.icon,
     required this.label,
     required this.value,
     required this.onChanged,
-    required this.isDark,
   });
 
   @override

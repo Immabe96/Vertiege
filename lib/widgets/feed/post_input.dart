@@ -1,4 +1,5 @@
-﻿import 'dart:convert';
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../shared/image_picker_widget.dart';
 import '../core/xp_toast.dart';
 import '../../widgets/core/v_feedback.dart';
@@ -45,7 +47,6 @@ class _ImagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (uri.startsWith('http')) {
       return Image.network(
         uri,
@@ -62,9 +63,9 @@ class _ImagePreview extends StatelessWidget {
       errorBuilder: (_, _, _) => Container(
         height: height,
         width: width,
-        color: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
+        color: VColors.surfaceContainerHighestDark,
         alignment: Alignment.center,
-        child: Icon(Icons.broken_image, color: isDark ? VColors.onSurfaceVariantDark : VColors.outline),
+        child: const Icon(Icons.broken_image, color: VColors.onSurfaceVariantDark),
       ),
     );
   }
@@ -82,6 +83,7 @@ class _PostInputState extends ConsumerState<PostInput>
   String? _imageUri;
   bool _isAnnouncement = false;
   bool _sent = false;
+  Timer? _sentResetTimer;
   String? _selectedWorldId;
   late final AnimationController _sendAnim;
   late final Animation<double> _sendScale;
@@ -112,6 +114,7 @@ class _PostInputState extends ConsumerState<PostInput>
 
   @override
   void dispose() {
+    _sentResetTimer?.cancel();
     _hideSuggestionsOverlay();
     _controller.dispose();
     _focusNode.dispose();
@@ -215,8 +218,6 @@ class _PostInputState extends ConsumerState<PostInput>
   void _showSuggestionsOverlay() {
     _hideSuggestionsOverlay();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     _suggestionOverlay = OverlayEntry(
       builder: (context) => Positioned(
         width: 200,
@@ -227,7 +228,7 @@ class _PostInputState extends ConsumerState<PostInput>
           child: Material(
             elevation: 8,
             borderRadius: BorderRadius.circular(VRadius.md),
-            color: isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest,
+            color: VColors.surfaceContainerHighestDark,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 180),
               child: ListView.builder(
@@ -245,9 +246,9 @@ class _PostInputState extends ConsumerState<PostInput>
                       ),
                       child: Text(
                         '$_suggestionType$suggestion',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: VFontSize.bodyMd,
-                          color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                          color: VColors.onSurfaceDark,
                         ),
                       ),
                     ),
@@ -382,7 +383,7 @@ class _PostInputState extends ConsumerState<PostInput>
       return;
     }
 
-    Future.delayed(const Duration(milliseconds: 600), () {
+    _sentResetTimer = Timer(const Duration(milliseconds: 600), () {
       if (mounted) setState(() => _sent = false);
     });
   }
@@ -461,25 +462,17 @@ class _PostInputState extends ConsumerState<PostInput>
                         ),
                       ),
                     ),
-                    TextButton(
+                    VButton(
+                      variant: ButtonVariant.text,
+                      size: ButtonSize.small,
                       onPressed: _discardDraft,
-                      child: Text(
-                        'Discard',
-                        style: TextStyle(
-                          color: theme.colorScheme.error,
-                          fontSize: VFontSize.labelMd,
-                        ),
-                      ),
+                      label: 'Discard',
                     ),
-                    TextButton(
+                    VButton(
+                      variant: ButtonVariant.text,
+                      size: ButtonSize.small,
                       onPressed: _continueDraft,
-                      child: Text(
-                        'Continue',
-                        style: TextStyle(
-                          fontSize: VFontSize.labelMd,
-                          fontWeight: VFontWeight.bold,
-                        ),
-                      ),
+                      label: 'Continue',
                     ),
                   ],
                 ),
@@ -490,8 +483,7 @@ class _PostInputState extends ConsumerState<PostInput>
               Padding(
                 padding: const EdgeInsets.only(bottom: VSpacing.sm),
                 child: DropdownButtonFormField<String>(
-                  initialValue: _selectedWorldId,
-                  isDense: true,
+                  value: _selectedWorldId,
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(

@@ -154,7 +154,8 @@ class ProfileService {
   }) async {
     if (!isSupabaseConfigured()) return [];
     // Strip characters that could interfere with PostgREST filter syntax
-    final safe = query.replaceAll(RegExp(r'[%,.*()]'), '');
+    final clean = query.replaceAll(RegExp(r'[%,.*()!~=><,;|&^$#@\[\]{}`"]'), '');
+    final safe = clean.replaceAll('_', r'\_');
     if (safe.isEmpty) return [];
     final client = getSupabase();
     final data = await client
@@ -162,7 +163,7 @@ class ProfileService {
         .select()
         .or('name.ilike.%$safe%,profession.ilike.%$safe%')
         .limit(limit);
-    return (data as List).map((e) => _toResident(e)).toList();
+    return (data as List).cast<Map<String, dynamic>>().map(_toResident).toList();
   }
 
   static Future<List<Resident>> getTopResidents({int limit = 5}) async {
@@ -174,7 +175,7 @@ class ProfileService {
         .order('tier', ascending: false)
         .order('streak_count', ascending: false)
         .limit(limit);
-    return (data as List).map((e) => _toResident(e)).toList();
+    return (data as List).cast<Map<String, dynamic>>().map(_toResident).toList();
   }
 
   static Resident _toResident(

@@ -53,7 +53,6 @@ class VInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,9 +63,7 @@ class VInput extends StatelessWidget {
             label!,
             style: theme.textTheme.labelMedium?.copyWith(
               fontWeight: VFontWeight.medium,
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: VColors.onSurfaceVariantDark,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -86,7 +83,7 @@ class VInput extends StatelessWidget {
           readOnly: readOnly,
           enabled: enabled,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+            color: VColors.onSurfaceDark,
           ),
           decoration: InputDecoration(
             hintText: hint,

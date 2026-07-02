@@ -9,6 +9,7 @@ import '../../services/treasury_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/feedback/v_states.dart';
 
 /// Compact treasury balance for world tools menu (DCX-137).
 class WorldTreasuryGlance extends StatefulWidget {
@@ -106,11 +107,7 @@ class _WorldTreasuryGlanceState extends State<WorldTreasuryGlance> {
                         ),
                       ),
                       if (_loading)
-                        const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                        const VSpinner()
                       else
                         Text(
                           _treasury != null

@@ -17,7 +17,6 @@ class CampfireMiniBar extends ConsumerWidget {
     if (voice.activeCampfireId == null) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final status = _statusLine(voice);
     final dotColor = voice.isConnected
@@ -39,15 +38,9 @@ class CampfireMiniBar extends ConsumerWidget {
               vertical: VSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
+              color: VColors.surfaceContainerDark,
               borderRadius: BorderRadius.circular(VRadius.pill),
-              border: Border.all(
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
-              ),
+              border: Border.all(color: VColors.outlineVariantDark),
               boxShadow: VShadow.lg,
             ),
             child: Row(
@@ -97,9 +90,7 @@ class CampfireMiniBar extends ConsumerWidget {
                   child: Text(
                     status,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isDark
-                          ? VColors.onSurfaceVariantDark
-                          : VColors.onSurfaceVariant,
+                      color: VColors.onSurfaceVariantDark,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

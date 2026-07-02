@@ -5,6 +5,7 @@ import '../../services/realtime_status_service.dart';
 import '../../services/supabase.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/feedback/v_states.dart';
 
 /// Thin banner shown on chat screens while Supabase Realtime is reconnecting.
 class ChatConnectionBanner extends ConsumerWidget {
@@ -19,11 +20,8 @@ class ChatConnectionBanner extends ConsumerWidget {
     final show = ref.watch(realtimeReconnectingProvider);
     if (!show) return const SizedBox.shrink();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark
-        ? VColors.warningContainerDark
-        : VColors.warningContainer;
-    final foreground = isDark ? VColors.onSurfaceDark : VColors.onSurface;
+    const background = VColors.warningContainerDark;
+    const foreground = VColors.onSurfaceDark;
 
     return Material(
       color: background.withValues(alpha: 0.95),
@@ -37,16 +35,12 @@ class ChatConnectionBanner extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: VIconSize.sm,
-                height: VIconSize.sm,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: foreground.withValues(alpha: 0.9),
-                ),
+              VSpinner(
+                size: VIconSize.sm,
+                color: foreground.withValues(alpha: 0.9),
               ),
               const SizedBox(width: VSpacing.sm),
-              Text(
+              const Text(
                 'Reconnecting…',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,

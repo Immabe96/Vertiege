@@ -16,15 +16,15 @@ import '../../services/invite_navigation.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
-import '../../theme/v_commune_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/id_generator.dart';
+import '../../widgets/auth/auth_prestige_shell.dart';
 import 'the_gate_screen.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/world_service.dart';
-import '../../ui/overlays/v_sheet.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -167,7 +167,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             profession: _selectedProfession.isEmpty
                 ? null
                 : _selectedProfession,
-            tier: ResidentTier.hustlers,
             joinedWorldIds: starterWorlds,
             onboardingCompleted: true,
             gateCompleted: true,
@@ -186,6 +185,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await OnboardingFunnelPrefs.markJustFinishedOnboarding();
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.onboardingCompleted));
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.gateCompleted));
+    if (!mounted) return;
     final route = await routeAfterAuth(ref, feedbackContext: context);
     if (mounted) context.go(route);
   }
@@ -193,46 +193,43 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? VCommuneColors.surfaceTertiary
-          : VCommuneColors.surfaceSecondaryLight,
+      backgroundColor: PrestigeNoir.bg,
       body: SafeArea(
         child: Column(
           children: [
-            // Progress header
             Padding(
-              padding: const EdgeInsets.all(VSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(28, VSpacing.md, 28, 0),
+              child: _ProgressDots(currentStep: _currentStep),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(28, VSpacing.lg, 28, 0),
               child: Row(
                 children: [
                   if (_currentStep > 0)
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: _prevStep,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: PrestigeNoir.foreground,
                     ),
-                  const SizedBox(width: VSpacing.sm),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _currentStep == 0
-                              ? 'Create your identity'
-                              : _currentStep == 1
-                              ? 'Find your path'
-                              : 'Welcome in',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: VFontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: VSpacing.sm),
-                        _ProgressDots(currentStep: _currentStep),
-                      ],
+                    child: Text(
+                      _currentStep == 0
+                          ? 'Create your identity'
+                          : _currentStep == 1
+                          ? 'Find your path'
+                          : 'Welcome in',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                        color: PrestigeNoir.foreground,
+                        letterSpacing: -0.3,
+                      ),
                     ),
                   ),
+                  if (_currentStep > 0)
+                    const SizedBox(width: 48),
                 ],
               ),
             ),
@@ -279,25 +276,28 @@ class _ProgressDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Row(
-      children: List.generate(3, (i) {
-        final isActive = i <= currentStep;
-        return Expanded(
-          child: Container(
-            height: 3,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? (isDark ? VColors.primaryLight : VColors.primary)
-                  : (isDark
-                        ? VColors.surfaceContainerHighDark
-                        : VColors.surfaceContainerHigh),
-              borderRadius: BorderRadius.circular(VRadius.xxs),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Row(
+        children: List.generate(3, (i) {
+          final isActive = i == currentStep;
+          final isDone = i < currentStep;
+          return Expanded(
+            child: Container(
+              height: 3,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? VColors.brand
+                    : isDone
+                    ? PrestigeNoir.accentSoft
+                    : PrestigeNoir.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
@@ -328,14 +328,37 @@ class _ProfileTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(VSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Avatar
+          const Text(
+            '🎭',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 56),
+          ),
+          const SizedBox(height: VSpacing.lg),
+          Text(
+            'Who are you?',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: VFontWeight.bold,
+              color: PrestigeNoir.foreground,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: VSpacing.sm),
+          Text(
+            'Choose your avatar and handle. You can change these later.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: PrestigeNoir.muted,
+              height: 1.55,
+            ),
+          ),
+          const SizedBox(height: VSpacing.xl),
           Center(
             child: GestureDetector(
               onTap: () => _showAvatarOptions(context),
@@ -346,31 +369,25 @@ class _ProfileTab extends StatelessWidget {
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: VColors.tertiary, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: VColors.tertiary.withValues(alpha: 0.25),
-                          blurRadius: 16,
-                          spreadRadius: 1,
-                        ),
-                      ],
+                      border: Border.all(
+                        color: isValid ? VColors.brand : PrestigeNoir.borderLight,
+                        width: 2,
+                      ),
+                      color: avatarFile == null
+                          ? PrestigeNoir.surfaceRaised
+                          : null,
                       image: avatarFile != null
                           ? DecorationImage(
                               image: FileImage(avatarFile!),
                               fit: BoxFit.cover,
                             )
                           : null,
-                      color: avatarFile == null
-                          ? (isDark
-                                ? VColors.surfaceContainerDark
-                                : VColors.surfaceContainer)
-                          : null,
                     ),
                     child: avatarFile == null
-                        ? Icon(
+                        ? const Icon(
                             Icons.person_outline,
                             size: 40,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: PrestigeNoir.muted,
                           )
                         : null,
                   ),
@@ -381,18 +398,14 @@ class _ProfileTab extends StatelessWidget {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? VColors.surfaceContainerHighDark
-                            : VColors.surfaceContainerHigh,
+                        color: PrestigeNoir.surface,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
+                        border: Border.all(color: PrestigeNoir.borderLight),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.camera_alt,
                         size: VIconSize.sm,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: VColors.brand,
                       ),
                     ),
                   ),
@@ -401,55 +414,33 @@ class _ProfileTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: VSpacing.xl),
-
-          // Name
+          const PrestigeOnboardingFieldLabel(label: 'Display name'),
           TextField(
             controller: nameController,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            decoration: InputDecoration(
-              labelText: 'Display name',
-              hintText: 'How should we call you?',
-              prefixIcon: const Icon(Icons.person_outline),
-              filled: true,
-              fillColor: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
-            ),
+            style: const TextStyle(color: PrestigeNoir.foreground),
+            decoration: _prestigeInputDecoration(hint: 'Choose your handle'),
           ),
           const SizedBox(height: VSpacing.lg),
-
-          // Bio
+          const PrestigeOnboardingFieldLabel(label: 'Bio'),
           TextField(
             controller: bioController,
             maxLines: 2,
             maxLength: 160,
             textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.done,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            decoration: InputDecoration(
-              labelText: 'Bio',
-              hintText: 'A few words about yourself...',
-              prefixIcon: const Icon(Icons.edit_note),
-              filled: true,
-              fillColor: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainerLow,
+            style: const TextStyle(color: PrestigeNoir.foreground),
+            decoration: _prestigeInputDecoration(
+              hint: 'A few words about yourself...',
             ),
           ),
           const SizedBox(height: VSpacing.xl),
-
-          // Profession
           Text(
             'Profession (optional)',
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: VFontWeight.semiBold,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.muted,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -463,36 +454,22 @@ class _ProfileTab extends StatelessWidget {
                 label: Text(label),
                 selected: selected,
                 onSelected: (_) => onProfessionChanged(p),
-                selectedColor: isDark
-                    ? VColors.primaryContainerDark
-                    : VColors.primaryContainer,
+                selectedColor: PrestigeNoir.accentSoft,
                 labelStyle: TextStyle(
-                  color: selected
-                      ? (isDark ? VColors.primaryLight : VColors.primary)
-                      : (Theme.of(context).colorScheme.onSurface),
+                  color: selected ? VColors.brand : PrestigeNoir.foreground,
                   fontWeight: selected ? VFontWeight.semiBold : null,
                 ),
-                backgroundColor: isDark
-                    ? VColors.surfaceContainerDark
-                    : VColors.surfaceContainerLow,
+                backgroundColor: PrestigeNoir.surfaceRaised,
                 side: BorderSide(
-                  color: selected
-                      ? (isDark
-                            ? VColors.primaryLight.withValues(alpha: 0.4)
-                            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.4))
-                      : (isDark
-                            ? VColors.outlineVariantDark
-                            : Theme.of(context).colorScheme.outlineVariant),
+                  color: selected ? VColors.brand : PrestigeNoir.border,
                 ),
               );
             }).toList(),
           ),
           const SizedBox(height: VSpacing.xxl),
-
-          // Next button
-          VButton(
+          AuthPrestigePrimaryButton(
             label: 'Continue to The Gate',
-            isFullWidth: true,
+            isLoading: false,
             onPressed: isValid ? onNext : null,
           ),
           const SizedBox(height: VSpacing.lg),
@@ -500,7 +477,7 @@ class _ProfileTab extends StatelessWidget {
             'Self-declared — verification coming later.\nAll users start at the bottom and rank up.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.mutedDim,
             ),
           ),
         ],
@@ -617,47 +594,41 @@ class _GateTabState extends State<_GateTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final question = _questions[_currentIndex];
     final progress = (_currentIndex + 1) / _questions.length;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(VSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Progress bar
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: isDark
-                ? VColors.surfaceContainerHighDark
-                : VColors.surfaceContainerHigh,
-            valueColor: AlwaysStoppedAnimation(
-              isDark ? VColors.primaryLight : VColors.primary,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: PrestigeNoir.border,
+              valueColor: const AlwaysStoppedAnimation(VColors.brand),
+              minHeight: 3,
             ),
-            minHeight: 4,
           ),
           const SizedBox(height: VSpacing.xl),
-
-          // Question number
           Text(
             'Question ${_currentIndex + 1} of ${_questions.length}',
             style: theme.textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.muted,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
-
-          // Question
           Text(
             question.text,
-            style: theme.textTheme.headlineMedium?.copyWith(
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: VFontWeight.bold,
+              color: PrestigeNoir.foreground,
+              letterSpacing: -0.3,
             ),
           ),
           const SizedBox(height: VSpacing.xl),
-
-          // Options
           ...question.options.map((option) {
             return Padding(
               padding: const EdgeInsets.only(bottom: VSpacing.md),
@@ -665,19 +636,13 @@ class _GateTabState extends State<_GateTab> {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () => _selectOption(option.$2),
-                  borderRadius: BorderRadius.circular(VRadius.lg),
+                  borderRadius: BorderRadius.circular(VRadius.bento),
                   child: Container(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? VColors.surfaceContainerDark
-                          : VColors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(VRadius.lg),
-                      border: Border.all(
-                        color: isDark
-                            ? VColors.outlineVariantDark
-                            : Theme.of(context).colorScheme.outlineVariant,
-                      ),
+                      color: PrestigeNoir.surfaceRaised,
+                      borderRadius: BorderRadius.circular(VRadius.bento),
+                      border: Border.all(color: PrestigeNoir.border),
                     ),
                     child: Row(
                       children: [
@@ -685,18 +650,12 @@ class _GateTabState extends State<_GateTab> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color:
-                                (isDark
-                                        ? VColors.primaryContainerDark
-                                        : VColors.primaryContainer)
-                                    .withValues(alpha: 0.3),
+                            color: PrestigeNoir.accentSoft,
                             borderRadius: BorderRadius.circular(VRadius.md),
                           ),
                           child: Icon(
                             _iconForInterest(option.$2),
-                            color: isDark
-                                ? VColors.primaryLight
-                                : Theme.of(context).colorScheme.primary,
+                            color: VColors.brand,
                             size: VIconSize.lg,
                           ),
                         ),
@@ -706,10 +665,15 @@ class _GateTabState extends State<_GateTab> {
                             option.$1,
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: VFontWeight.medium,
+                              color: PrestigeNoir.foreground,
                             ),
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios, size: VIconSize.sm),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: VIconSize.sm,
+                          color: PrestigeNoir.mutedDim,
+                        ),
                       ],
                     ),
                   ),
@@ -717,14 +681,10 @@ class _GateTabState extends State<_GateTab> {
               ),
             );
           }),
-
           const SizedBox(height: VSpacing.xl),
-
-          // Submit button (shown on last question)
           if (_currentIndex == _questions.length - 1)
-            VButton(
+            AuthPrestigePrimaryButton(
               label: 'Reveal Your World',
-              isFullWidth: true,
               isLoading: widget.isSubmitting,
               onPressed: widget.isSubmitting ? null : widget.onSubmit,
             ),
@@ -757,7 +717,6 @@ class _WorldTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = ref.watch(residentProvider).resident;
 
     final interestLabel = resident?.gateInterest != null
@@ -765,26 +724,13 @@ class _WorldTab extends ConsumerWidget {
         : null;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(VSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: VSpacing.lg),
       child: Column(
         children: [
-          const SizedBox(height: VSpacing.xxl),
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color:
-                  (isDark
-                          ? VColors.primaryContainerDark
-                          : VColors.primaryContainer)
-                      .withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.public,
-              size: 40,
-              color: isDark ? VColors.primaryLight : VColors.primary,
-            ),
+          const SizedBox(height: VSpacing.xl),
+          const Text(
+            '🌍',
+            style: TextStyle(fontSize: 56),
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
@@ -792,8 +738,10 @@ class _WorldTab extends ConsumerWidget {
                 ? 'Your path: $interestLabel'
                 : 'Welcome to Vertiege',
             textAlign: TextAlign.center,
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: VFontWeight.bold,
+              color: PrestigeNoir.foreground,
+              letterSpacing: -0.3,
             ),
           ),
           const SizedBox(height: VSpacing.sm),
@@ -801,19 +749,22 @@ class _WorldTab extends ConsumerWidget {
             _starterWorldsCopy(ref),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.45,
+              color: PrestigeNoir.muted,
+              height: 1.55,
             ),
           ),
-          const SizedBox(height: VSpacing.lg),
-          VButton(
+          const SizedBox(height: VSpacing.xl),
+          AuthPrestigePrimaryButton(
             label: 'Open Nexus',
-            isFullWidth: true,
-            icon: const Icon(Icons.home_outlined),
+            isLoading: false,
             onPressed: onEnter,
           ),
           const SizedBox(height: VSpacing.sm),
-          OutlinedButton.icon(
+          VButton(
+            label: 'Visit your world',
+            variant: ButtonVariant.outlined,
+            isFullWidth: true,
+            icon: const Icon(Icons.public),
             onPressed: () {
               final id = resident?.joinedWorldIds
                   .where(WorldService.isRemoteWorldId)
@@ -824,21 +775,21 @@ class _WorldTab extends ConsumerWidget {
                 context.push('/explore');
               }
             },
-            icon: const Icon(Icons.public),
-            label: const Text('Visit your world'),
           ),
           const SizedBox(height: VSpacing.sm),
-          OutlinedButton.icon(
-            onPressed: () => context.push('/achievements/submit'),
+          VButton(
+            label: 'Submit proof',
+            variant: ButtonVariant.outlined,
+            isFullWidth: true,
             icon: const Icon(Icons.verified_outlined),
-            label: const Text('Submit proof'),
+            onPressed: () => context.push('/achievements/submit'),
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
             'Recommended path: profile → join worlds → Nexus feed → achievement proof.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.mutedDim,
             ),
           ),
         ],
@@ -879,5 +830,52 @@ class _WorldTab extends ConsumerWidget {
     final extra = names.length > 2 ? ' (+${names.length - 2} more)' : '';
     return 'You start in $head$extra. Submit achievement proof in your worlds, '
         'then browse Nexus for updates.';
+  }
+}
+
+InputDecoration _prestigeInputDecoration({required String hint}) {
+  return InputDecoration(
+    hintText: hint,
+    filled: true,
+    fillColor: PrestigeNoir.surfaceRaised,
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: VSpacing.lg,
+      vertical: 14,
+    ),
+    hintStyle: const TextStyle(color: PrestigeNoir.mutedDim),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(VRadius.md),
+      borderSide: const BorderSide(color: PrestigeNoir.border),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(VRadius.md),
+      borderSide: const BorderSide(color: PrestigeNoir.border),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(VRadius.md),
+      borderSide: const BorderSide(color: VColors.brand, width: 1.5),
+    ),
+  );
+}
+
+class PrestigeOnboardingFieldLabel extends StatelessWidget {
+  const PrestigeOnboardingFieldLabel({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: VFontSize.labelMd,
+          fontWeight: VFontWeight.medium,
+          color: PrestigeNoir.muted,
+          letterSpacing: 0.4,
+        ),
+      ),
+    );
   }
 }

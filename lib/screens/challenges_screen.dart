@@ -5,14 +5,15 @@ import 'package:vertiege/ui/ui.dart';
 import '../../state/challenge_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
-import '../../widgets/core/v_feedback.dart';
 import '../../models/season_cohort.dart';
 import '../../services/season_cohort_service.dart';
+import '../../widgets/progression/prestige_noir_ui.dart';
 
 class ChallengesScreen extends ConsumerStatefulWidget {
   final bool embedInHub;
@@ -109,43 +110,77 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
             actionLabel: 'Refresh',
             onAction: _refresh,
           )
-        : ListView(
-            padding: const EdgeInsets.all(VSpacing.md),
-            children: [
-              const _ProgressionScopeNote(
-                title: 'World & season challenges',
-                body:
-                    'World challenges are per-realm goals. Season cohort challenges are shared with everyone in your world\'s active season group — different from weekly Ascension Leagues.',
-              ),
-              if (_cohort != null) _CohortBanner(cohort: _cohort!),
-              if (challengeState.activeChallenges.isNotEmpty) ...[
-                const _SectionLabel(title: 'World'),
-                ...challengeState.activeChallenges.map((challenge) {
-                  final progress = challengeState.userProgress[challenge.id];
-                  final isCompleted = challengeState.completedChallengeIds
-                      .contains(challenge.id);
-                  return _ChallengeCard(
-                    challenge: challenge,
-                    progress: progress,
-                    isCompleted: isCompleted,
-                  );
-                }),
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+            child: CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: _ProgressionScopeNote(
+                    title: 'World & season challenges',
+                    body:
+                        'World challenges are per-realm goals. Season cohort challenges are shared with everyone in your world\'s active season group — different from weekly Ascension Leagues.',
+                  ),
+                ),
+                if (_cohort != null)
+                  SliverToBoxAdapter(
+                    child: _CohortBanner(cohort: _cohort!),
+                  ),
+                if (challengeState.activeChallenges.isNotEmpty) ...[
+                  const SliverToBoxAdapter(
+                    child: PrestigeSectionLabel(
+                      'World',
+                      padding: EdgeInsets.only(bottom: VSpacing.sm),
+                    ),
+                  ),
+                  SliverList.builder(
+                    itemCount: challengeState.activeChallenges.length,
+                    itemBuilder: (context, index) {
+                      final challenge =
+                          challengeState.activeChallenges[index];
+                      final progress =
+                          challengeState.userProgress[challenge.id];
+                      final isCompleted =
+                          challengeState.completedChallengeIds
+                              .contains(challenge.id);
+                      return _ChallengeCard(
+                        challenge: challenge,
+                        progress: progress,
+                        isCompleted: isCompleted,
+                      );
+                    },
+                  ),
+                ],
+                if (challengeState.seasonChallenges.isNotEmpty) ...[
+                  const SliverToBoxAdapter(
+                    child: PrestigeSectionLabel(
+                      'Season cohort',
+                      padding: EdgeInsets.only(
+                        top: VSpacing.md,
+                        bottom: VSpacing.sm,
+                      ),
+                    ),
+                  ),
+                  SliverList.builder(
+                    itemCount: challengeState.seasonChallenges.length,
+                    itemBuilder: (context, index) {
+                      final challenge =
+                          challengeState.seasonChallenges[index];
+                      final progress =
+                          challengeState.userProgress[challenge.id];
+                      final isCompleted =
+                          challengeState.completedChallengeIds
+                              .contains(challenge.id);
+                      return _ChallengeCard(
+                        challenge: challenge,
+                        progress: progress,
+                        isCompleted: isCompleted,
+                      );
+                    },
+                  ),
+                ],
+                const SliverToBoxAdapter(child: SizedBox(height: VSpacing.lg)),
               ],
-              if (challengeState.seasonChallenges.isNotEmpty) ...[
-                const SizedBox(height: VSpacing.md),
-                const _SectionLabel(title: 'Season cohort'),
-                ...challengeState.seasonChallenges.map((challenge) {
-                  final progress = challengeState.userProgress[challenge.id];
-                  final isCompleted = challengeState.completedChallengeIds
-                      .contains(challenge.id);
-                  return _ChallengeCard(
-                    challenge: challenge,
-                    progress: progress,
-                    isCompleted: isCompleted,
-                  );
-                }),
-              ],
-            ],
+            ),
           );
 
     if (widget.embedInHub) return body;
@@ -154,7 +189,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
       title: _worldName == null ? 'World Challenges' : '$_worldName Challenges',
       showBack: true,
       headerActions: [
-        VHeaderAction(icon: Icon(VIcons.rotateCw), onPress: _refresh),
+        VHeaderAction(icon: const Icon(VIcons.rotateCw), onPress: _refresh),
       ],
       body: body,
     );
@@ -169,40 +204,32 @@ class _ProgressionScopeNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: VSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: VFontWeight.semiBold,
+      padding: const EdgeInsets.only(bottom: VSpacing.md, top: VSpacing.sm),
+      child: VPrestigeCard(
+        padding: const EdgeInsets.all(VSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: VFontSize.bodyMd,
+                fontWeight: VFontWeight.semiBold,
+                color: PrestigeNoir.foreground,
+              ),
             ),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(body, style: theme.textTheme.bodySmall?.copyWith(height: 1.35)),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String title;
-
-  const _SectionLabel({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: VSpacing.sm),
-      child: Text(
-        title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleSmall?.copyWith(fontWeight: VFontWeight.bold),
+            const SizedBox(height: VSpacing.xs),
+            Text(
+              body,
+              style: const TextStyle(
+                fontSize: VFontSize.labelMd,
+                color: PrestigeNoir.muted,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -215,46 +242,39 @@ class _CohortBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.only(bottom: VSpacing.md),
-      padding: const EdgeInsets.all(VSpacing.md),
-      decoration: BoxDecoration(
-        color: isDark
-            ? VColors.surfaceContainerDark
-            : VColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant,
-        ),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.groups_outlined, color: VColors.tertiary),
-          const SizedBox(width: VSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cohort.displayName,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: VFontWeight.semiBold,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: VSpacing.md),
+      child: VPrestigeCard(
+        padding: const EdgeInsets.all(VSpacing.lg),
+        child: Row(
+          children: [
+            const Icon(Icons.groups_outlined, color: VColors.brand),
+            const SizedBox(width: VSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cohort.displayName,
+                    style: const TextStyle(
+                      fontSize: VFontSize.bodyMd,
+                      fontWeight: VFontWeight.semiBold,
+                      color: PrestigeNoir.foreground,
+                    ),
                   ),
-                ),
-                Text(
-                  '${cohort.memberCount} member${cohort.memberCount == 1 ? '' : 's'} this season'
-                  '${cohort.matchBand != null ? ' · ${cohort.matchBand} band' : ''}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
+                  Text(
+                    '${cohort.memberCount} member${cohort.memberCount == 1 ? '' : 's'} this season'
+                    '${cohort.matchBand != null ? ' · ${cohort.matchBand} band' : ''}',
+                    style: const TextStyle(
+                      fontSize: VFontSize.labelMd,
+                      color: PrestigeNoir.muted,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -273,50 +293,48 @@ class _ChallengeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final currentValue = progress?.currentValue ?? 0;
     final targetValue = challenge.targetValue;
     final progressPercent = targetValue > 0
         ? (currentValue / targetValue).clamp(0.0, 1.0)
         : 0.0;
     final isCollective = challenge.type == 'collective';
+    final fillColor = isCompleted
+        ? VColors.success
+        : progressPercent > 0.5
+        ? VColors.brand
+        : VColors.warning;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: VSpacing.md),
-      decoration: BoxDecoration(
-        color: isDark ? VColors.glassBackgroundDark : VColors.glassBackground,
-        borderRadius: BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: isCompleted
-              ? VColors.success.withValues(alpha: 0.3)
-              : (isDark ? VColors.glassBorderDark : VColors.glassBorder),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(VSpacing.md),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: VSpacing.sm),
+      child: VPrestigeCard(
+        padding: const EdgeInsets.all(VSpacing.lg),
+        borderColor: isCompleted
+            ? VColors.success.withValues(alpha: 0.5)
+            : PrestigeNoir.borderLight,
+        backgroundColor: isCompleted
+            ? Color.alphaBlend(
+                VColors.success.withValues(alpha: 0.06),
+                PrestigeNoir.surfaceRaised,
+              )
+            : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(VSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? VColors.success.withValues(alpha: 0.15)
-                        : VColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                  ),
+                SizedBox(
+                  width: 40,
                   child: Icon(
                     isCompleted
                         ? Icons.check_circle
                         : Icons.emoji_events_outlined,
-                    size: VIconSize.md,
-                    color: isCompleted ? VColors.success : VColors.primary,
+                    size: 28,
+                    color: isCompleted ? VColors.success : VColors.brand,
                   ),
                 ),
-                const SizedBox(width: VSpacing.sm),
+                const SizedBox(width: VSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,8 +344,10 @@ class _ChallengeCard extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               challenge.title,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: VFontWeight.semiBold,
+                              style: const TextStyle(
+                                fontSize: VFontSize.bodyLg,
+                                fontWeight: VFontWeight.bold,
+                                color: PrestigeNoir.foreground,
                               ),
                             ),
                           ),
@@ -338,117 +358,98 @@ class _ChallengeCard extends ConsumerWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: VColors.tertiary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(
-                                  VRadius.pill,
-                                ),
+                                color: VColors.warning.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(VRadius.pill),
                               ),
-                              child: Text(
+                              child: const Text(
                                 'World goal',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: VColors.tertiary,
+                                style: TextStyle(
+                                  fontSize: VFontSize.labelSm,
+                                  color: VColors.warning,
                                   fontWeight: VFontWeight.semiBold,
                                 ),
                               ),
                             ),
                         ],
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         challenge.description,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? VColors.onSurfaceVariantDark
-                              : VColors.onSurfaceVariant,
+                        style: const TextStyle(
+                          fontSize: VFontSize.labelMd,
+                          color: PrestigeNoir.muted,
+                          height: 1.4,
                         ),
                       ),
+                      const SizedBox(height: VSpacing.sm),
+                      Row(
+                        children: [
+                          Text(
+                            '+${challenge.xpReward} XP',
+                            style: const TextStyle(
+                              fontSize: VFontSize.bodyMd,
+                              fontWeight: VFontWeight.bold,
+                              color: VColors.brand,
+                            ),
+                          ),
+                          const SizedBox(width: VSpacing.sm),
+                          Expanded(
+                            child: PrestigeXpBar(
+                              value: progressPercent,
+                              fillColor: fillColor,
+                            ),
+                          ),
+                          const SizedBox(width: VSpacing.sm),
+                          Text(
+                            isCollective
+                                ? '$currentValue / $targetValue'
+                                : '$currentValue/$targetValue',
+                            style: const TextStyle(
+                              fontSize: VFontSize.labelSm,
+                              color: PrestigeNoir.muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (challenge.cosmeticReward != null) ...[
+                        const SizedBox(height: VSpacing.xs),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.palette,
+                              size: VIconSize.xs,
+                              color: VColors.warning,
+                            ),
+                            const SizedBox(width: VSpacing.xxs),
+                            Text(
+                              'Reward: ${challenge.cosmeticReward}',
+                              style: const TextStyle(
+                                fontSize: VFontSize.labelSm,
+                                color: VColors.warning,
+                                fontWeight: VFontWeight.semiBold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: VSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(VRadius.pill),
-              child: LinearProgressIndicator(
-                value: progressPercent,
-                minHeight: 8,
-                backgroundColor: isDark
-                    ? VColors.surfaceContainerHighDark
-                    : VColors.surfaceContainerHigh,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isCompleted ? VColors.success : VColors.primary,
-                ),
-              ),
-            ),
-            const SizedBox(height: VSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  isCollective
-                      ? 'World progress $currentValue / $targetValue'
-                      : '$currentValue / $targetValue',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark
-                        ? VColors.onSurfaceVariantDark
-                        : VColors.onSurfaceVariant,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.star,
-                      size: VIconSize.xs,
-                      color: VColors.secondary,
-                    ),
-                    const SizedBox(width: VSpacing.xxs),
-                    Text(
-                      '+${challenge.xpReward} XP',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: VColors.secondary,
-                        fontWeight: VFontWeight.semiBold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            if (challenge.cosmeticReward != null) ...[
-              const SizedBox(height: VSpacing.xs),
-              Row(
-                children: [
-                  Icon(
-                    Icons.palette,
-                    size: VIconSize.xs,
-                    color: VColors.tertiary,
-                  ),
-                  const SizedBox(width: VSpacing.xxs),
-                  Text(
-                    'Reward: ${challenge.cosmeticReward}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.tertiary,
-                      fontWeight: VFontWeight.semiBold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
             if (isCompleted) ...[
               const SizedBox(height: VSpacing.md),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: isCompleted
-                      ? () {
-                          Haptics.light();
-                          ref
-                              .read(challengeProvider.notifier)
-                              .claimReward(challenge.id);
-                          VFeedback.showMessage(context, 'Reward claimed!');
-                        }
-                      : null,
-                  icon: const Icon(VIcons.gavel, size: VIconSize.md),
-                  label: const Text('Claim Reward'),
+                child: VButton(
+                  label: 'Claim reward',
+                  onPressed: () {
+                    Haptics.light();
+                    ref
+                        .read(challengeProvider.notifier)
+                        .claimReward(challenge.id);
+                    VFeedback.showMessage(context, 'Reward claimed!');
+                  },
                 ),
               ),
             ],

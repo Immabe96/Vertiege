@@ -37,7 +37,6 @@ class WorldToolsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -74,9 +73,7 @@ class WorldToolsPanel extends ConsumerWidget {
             child: Text(
               'Join this world to use tools and earn reputation here.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: VColors.onSurfaceVariantDark,
               ),
             ),
           )

@@ -581,7 +581,6 @@ const List<Achievement> _achievementCatalogRaw = [
     xpValue: 15,
     isFunny: true,
     icon: 'nightlight',
-    proofType: AchievementProofType.optional,
     proofHint: 'Fridge, snack, or receipt — bonus points for chaos.',
   ),
   Achievement(
@@ -626,7 +625,6 @@ const List<Achievement> _achievementCatalogRaw = [
     xpValue: 25,
     isFunny: true,
     icon: 'bolt',
-    proofType: AchievementProofType.optional,
     proofHint: 'The messier the evidence, the better.',
   ),
   Achievement(
@@ -649,7 +647,6 @@ const List<Achievement> _achievementCatalogRaw = [
     xpValue: 10,
     isFunny: true,
     icon: 'coffee',
-    proofType: AchievementProofType.optional,
   ),
   Achievement(
     id: 'life-found-love',
@@ -671,7 +668,6 @@ const List<Achievement> _achievementCatalogRaw = [
     xpValue: 30,
     isFunny: true,
     icon: 'mood',
-    proofType: AchievementProofType.optional,
     proofHint: 'Chat screenshot with names blurred is fine.',
   ),
   Achievement(
@@ -779,7 +775,6 @@ const List<Achievement> _achievementCatalogRaw = [
     description: 'Bounced back after serious burnout or hardship',
     xpValue: 250,
     icon: 'spa',
-    proofType: AchievementProofType.optional,
     proofHint: 'Share what recovery looked like for you — text is OK.',
   ),
   Achievement(

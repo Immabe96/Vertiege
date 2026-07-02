@@ -65,7 +65,7 @@ class WorldService {
       if (worldCurrencyName != null && worldCurrencyName.isNotEmpty)
         'world_currency_name': worldCurrencyName,
       'tax_rate': taxRate,
-      if (constitution != null) 'constitution': constitution,
+      'constitution': ?constitution,
       if (tags != null && tags.isNotEmpty) 'tags': tags,
       if (welcomeMessage != null && welcomeMessage.isNotEmpty)
         'welcome_message': welcomeMessage,
@@ -137,8 +137,9 @@ class WorldService {
     if (lore != null) updates['lore'] = lore;
     if (constitution != null) updates['constitution'] = constitution;
     if (tags != null) updates['tags'] = tags;
-    if (worldCurrencyName != null)
+    if (worldCurrencyName != null) {
       updates['world_currency_name'] = worldCurrencyName;
+    }
     if (taxRate != null) updates['tax_rate'] = taxRate;
     if (welcomeMessage != null) updates['welcome_message'] = welcomeMessage;
 
@@ -185,7 +186,8 @@ class WorldService {
     if (minPrestige > 0) q = q.gte('prestige', minPrestige);
     if (tags != null && tags.isNotEmpty) q = q.contains('tags', tags);
     if (query != null && query.isNotEmpty) {
-      q = q.or('name.ilike.*$query*,description.ilike.*$query*');
+      final escaped = query.replaceAll('%', r'\%').replaceAll('_', r'\_');
+      q = q.or('name.ilike.*$escaped*,description.ilike.*$escaped*');
     }
 
     final data = await q

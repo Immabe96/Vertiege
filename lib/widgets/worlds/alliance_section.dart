@@ -1,11 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 import '../../ui/buttons/v_button.dart';
 
 class AllianceSection extends ConsumerWidget {
@@ -20,7 +20,6 @@ class AllianceSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final alliances = ref
         .watch(worldProvider)
         .alliances
@@ -31,7 +30,7 @@ class AllianceSection extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-      child: VSurfacePanel(
+      child: VCard(
         padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,9 +83,7 @@ class AllianceSection extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(VSpacing.md),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? VColors.surfaceDark
-                        : VColors.surfaceContainer,
+                    color: VColors.surfaceDark,
                     borderRadius: BorderRadius.circular(VRadius.md),
                   ),
                   child: Row(
@@ -111,17 +108,17 @@ class AllianceSection extends ConsumerWidget {
                           children: [
                             Text(
                               allyName,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: VFontSize.headlineMd,
                                 fontWeight: VFontWeight.semiBold,
-                                color: isDark ? VColors.onSurfaceDark : VColors.onSurface,
+                                color: VColors.onSurfaceDark,
                               ),
                             ),
                             Text(
                               '$memberCount members',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: VFontSize.labelSm,
-                                color: isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant,
+                                color: VColors.onSurfaceVariantDark,
                               ),
                             ),
                           ],

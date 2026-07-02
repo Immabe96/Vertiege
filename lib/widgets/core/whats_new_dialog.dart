@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/feature_flags.dart';
 import '../../services/whats_new_service.dart';
-import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import 'v_dialog.dart';
 
 Future<void> showWhatsNewDialogIfNeeded(BuildContext context) async {
@@ -17,9 +17,10 @@ Future<void> showWhatsNewDialogIfNeeded(BuildContext context) async {
     title: "What's new",
     content: Text(message),
     actions: [
-      TextButton(
+      VButton(
+        label: 'Got it',
+        variant: ButtonVariant.text,
         onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Got it'),
       ),
     ],
   );

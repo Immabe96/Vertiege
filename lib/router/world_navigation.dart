@@ -56,7 +56,6 @@ String worldChannelDestinationPath(
   return worldChannelPath(worldId, channel);
 }
 
-@visibleForTesting
 String worldChannelPathFromParts(
   String worldId, {
   required String channelName,

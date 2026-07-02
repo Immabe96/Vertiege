@@ -4,6 +4,8 @@ class SeasonCatalog {
 
   static const activeSeasonId = 'season_1';
 
+  static final DateTime seasonEndDate = DateTime(2026, 12, 31);
+
   static const season1 = SeasonDefinition(
     id: activeSeasonId,
     name: 'Season 1: The Big Bang',

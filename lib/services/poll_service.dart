@@ -58,8 +58,8 @@ class PollService {
         'p_world_id': worldId,
         'p_question': question,
         'p_options': options,
-        if (channelId != null) 'p_channel_id': channelId,
-        if (expiresAt != null) 'p_expires_at': expiresAt,
+        'p_channel_id': ?channelId,
+        'p_expires_at': ?expiresAt,
       },
     );
 

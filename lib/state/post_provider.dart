@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/notification.dart';
 import '../models/post.dart';
 import '../models/resident.dart';
-import '../models/world.dart';
-import '../models/notification.dart';
 import '../models/sync_status.dart';
+import '../models/world.dart';
 import '../services/moderation_filter.dart';
 import '../services/permission_service.dart';
 import '../services/supabase.dart';
@@ -33,6 +34,8 @@ import 'resident_provider.dart';
 import 'notification_provider.dart';
 import 'quest_provider.dart';
 import 'achievement_provider.dart';
+
+part 'post_provider.g.dart';
 
 class PostState {
   final List<Post> posts;
@@ -94,7 +97,8 @@ class PostState {
   );
 }
 
-class PostNotifier extends Notifier<PostState> {
+@Riverpod(name: 'postProvider', keepAlive: true)
+class PostNotifier extends _$PostNotifier {
   final PostRepository _postsRepository = const PostRepository();
   RealtimeChannel? _realtimeChannel;
   RealtimeChannel? _nexusRealtimeChannel;
@@ -108,6 +112,7 @@ class PostNotifier extends Notifier<PostState> {
   String? _lastCursor;
   String? _nexusCursor;
   bool _hasMore = true;
+  bool _nexusHasMore = true;
 
   @override
   PostState build() {
@@ -526,7 +531,6 @@ class PostNotifier extends Notifier<PostState> {
               postId: postId,
               worldId: reactedPost.worldId,
               showInLocalInbox: false,
-              persistRemote: false,
             );
         final totalReactions = reactedPost.reactions.values.fold<int>(
           0,
@@ -635,7 +639,6 @@ class PostNotifier extends Notifier<PostState> {
             postId: postId,
             worldId: post.worldId,
             showInLocalInbox: false,
-            persistRemote: false,
           );
     }
   }
@@ -744,7 +747,6 @@ class PostNotifier extends Notifier<PostState> {
             postId: postId,
             worldId: awardedPost.worldId,
             showInLocalInbox: false,
-            persistRemote: false,
           );
     }
   }
@@ -857,7 +859,7 @@ class PostNotifier extends Notifier<PostState> {
           .eq('id', postId)
           .maybeSingle();
       if (row == null) return false;
-      final post = _postFromJson(row as Map<String, dynamic>);
+      final post = _postFromJson(row);
       state = state.copyWith(
         posts: [
           post,
@@ -937,7 +939,7 @@ class PostNotifier extends Notifier<PostState> {
         hasMorePosts: joinedResult?.hasMore ?? false,
       );
       _persist();
-    } catch (e, stackTrace) {
+    } catch (e) {
       final joinedResult = await _loadPostsFromJoinedWorlds();
       if (joinedResult != null) {
         state = state.copyWith(
@@ -992,7 +994,7 @@ class PostNotifier extends Notifier<PostState> {
         hasMorePosts: _hasMore,
       );
       _persist();
-    } catch (e, stackTrace) {
+    } catch (e) {
       state = state.copyWith(isLoadingMore: false);
     }
   }
@@ -1014,7 +1016,7 @@ class PostNotifier extends Notifier<PostState> {
       );
       final posts = remote.map(_postFromJson).toList();
       state = state.copyWith(followingPosts: posts, clearError: true);
-    } catch (e, stackTrace) {
+    } catch (e) {
       state = state.copyWith(
         followingPosts: [],
         error: userFacingLoadError(
@@ -1125,7 +1127,7 @@ class PostNotifier extends Notifier<PostState> {
             value: worldId,
           ),
           callback: (payload) {
-            _mergeRealtimePost(_postFromJson(payload.newRecord), isDelete: false);
+            _mergeRealtimePost(_postFromJson(payload.newRecord));
           },
         )
         .onPostgresChanges(
@@ -1138,7 +1140,7 @@ class PostNotifier extends Notifier<PostState> {
             value: worldId,
           ),
           callback: (payload) {
-            _mergeRealtimePost(_postFromJson(payload.newRecord), isDelete: false);
+            _mergeRealtimePost(_postFromJson(payload.newRecord));
           },
         )
         .onPostgresChanges(
@@ -1182,7 +1184,6 @@ class PostNotifier extends Notifier<PostState> {
             callback: (payload) {
               _mergeRealtimePost(
                 _postFromJson(payload.newRecord),
-                isDelete: false,
               );
             },
           )
@@ -1198,7 +1199,6 @@ class PostNotifier extends Notifier<PostState> {
             callback: (payload) {
               _mergeRealtimePost(
                 _postFromJson(payload.newRecord),
-                isDelete: false,
               );
             },
           )
@@ -1224,7 +1224,7 @@ class PostNotifier extends Notifier<PostState> {
   }
 
   Future<void> loadMoreNexusPosts() async {
-    if (!_hasMore || state.isLoadingMore) return;
+    if (!_nexusHasMore || state.isLoadingMore) return;
     state = state.copyWith(isLoadingMore: true);
     try {
       final joinedResult = await _loadPostsFromJoinedWorlds(append: true);
@@ -1259,12 +1259,11 @@ class PostNotifier extends Notifier<PostState> {
 
     final nexusResult = await _postsRepository.loadNexusPosts(
       cursor: append ? _nexusCursor : null,
-      limit: 25,
     );
 
     if (nexusResult.items.isNotEmpty || !append) {
       _nexusCursor = nexusResult.nextCursor;
-      _hasMore = nexusResult.hasMore;
+      _nexusHasMore = nexusResult.hasMore;
 
       final fetched = nexusResult.items.map(_postFromJson).toList();
       final merged = append
@@ -1297,7 +1296,7 @@ class PostNotifier extends Notifier<PostState> {
       }
     }
 
-    _hasMore = anyHasMore;
+    _nexusHasMore = anyHasMore;
 
     final sorted = posts.isEmpty
         ? <Post>[]
@@ -1457,11 +1456,17 @@ class PostNotifier extends Notifier<PostState> {
   void clearForSignOut() {
     unawaited(_realtimeChannel?.unsubscribe());
     _realtimeChannel = null;
+    unawaited(_nexusRealtimeChannel?.unsubscribe());
+    _nexusRealtimeChannel = null;
     _schedulerTimer?.cancel();
+    _userReactions.clear();
+    _hasMore = true;
+    _nexusHasMore = true;
+    _lastCursor = null;
+    _nexusCursor = null;
+    _currentLimit = 20;
     state = const PostState();
   }
 }
 
-final postProvider = NotifierProvider<PostNotifier, PostState>(
-  PostNotifier.new,
-);
+

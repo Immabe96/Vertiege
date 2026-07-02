@@ -1,6 +1,36 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../buttons/v_button.dart';
+
+/// Small inline progress spinner — the sanctioned facade for
+/// `CircularProgressIndicator` outside `lib/ui/`.
+class VSpinner extends StatelessWidget {
+  final double size;
+  final double strokeWidth;
+  final Color? color;
+
+  const VSpinner({
+    super.key,
+    this.size = 20,
+    this.strokeWidth = 2,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CircularProgressIndicator(
+        strokeWidth: strokeWidth,
+        color: color ?? PrestigeNoir.accent,
+      ),
+    );
+  }
+}
 
 class VEmptyState extends StatelessWidget {
   final String title;
@@ -21,7 +51,6 @@ class VEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: Padding(
@@ -32,18 +61,14 @@ class VEmptyState extends StatelessWidget {
             Container(
               width: 64,
               height: 64,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? VColors.surfaceContainerHighDark
-                    : VColors.surfaceContainerHigh,
+              decoration: const BoxDecoration(
+                color: PrestigeNoir.surfaceRaised,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: VIconSize.xl,
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: PrestigeNoir.muted,
               ),
             ),
             const SizedBox(height: VSpacing.lg),
@@ -58,17 +83,16 @@ class VEmptyState extends StatelessWidget {
             Text(
               description,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: PrestigeNoir.muted,
               ),
               textAlign: TextAlign.center,
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: VSpacing.lg),
-              FilledButton.tonal(
+              VButton(
+                label: actionLabel!,
                 onPressed: onAction,
-                child: Text(actionLabel!),
+                variant: ButtonVariant.tonal,
               ),
             ],
           ],
@@ -86,21 +110,18 @@ class VLoadingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(),
+          const VSpinner(size: 32, strokeWidth: 2.5),
           if (message != null) ...[
             const SizedBox(height: VSpacing.md),
             Text(
               message!,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: PrestigeNoir.muted,
               ),
             ),
           ],
@@ -141,9 +162,10 @@ class VErrorState extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: VSpacing.lg),
-              FilledButton.tonal(
+              VButton(
+                label: actionLabel ?? 'Retry',
                 onPressed: onRetry,
-                child: Text(actionLabel ?? 'Retry'),
+                variant: ButtonVariant.tonal,
               ),
             ],
           ],

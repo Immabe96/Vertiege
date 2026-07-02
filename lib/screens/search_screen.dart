@@ -20,11 +20,9 @@ import '../models/message.dart';
 import '../state/ally_provider.dart';
 import '../services/resident_search_service.dart';
 import '../services/world_service.dart';
-import '../theme/v_colors.dart';
-import '../theme/v_commune_colors.dart';
+import '../theme/prestige_noir.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/fade_in.dart';
-import '../ui/icons/v_icons.dart';
 import '../widgets/core/shimmer.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/worlds/world_icon.dart';
@@ -98,7 +96,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (_channelId != null) {
         ref
             .read(chatProvider.notifier)
-            .loadChannelMessages(_channelId!, force: false);
+            .loadChannelMessages(_channelId!);
       }
     } else if (mode == 'following') {
       _mode = _SearchMode.following;
@@ -143,7 +141,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 resident: Resident(
                   id: h.id,
                   name: h.name,
-                  tier: ResidentTier.hustlers,
                   profession: h.bioSnippet,
                   avatarUrl: h.avatarUrl ?? '',
                 ),
@@ -214,7 +211,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 name: name,
                 tier: ResidentTier.fromValue(tierValue ?? 1),
                 profession: profession,
-                avatarUrl: '',
               ),
               rep: m['rep'] ?? 0,
             );
@@ -345,13 +341,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
+  List<World> _trendingWorlds() {
+    final worlds = ref.read(worldProvider).worlds.values.toList()
+      ..sort((a, b) => b.activityScore.compareTo(a.activityScore));
+    return worlds.where((w) => w.activityScore > 0).take(6).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isFocused = _focusNode.hasFocus;
-    final showRecent =
-        isFocused && _controller.text.isEmpty && _recentSearches.isNotEmpty;
     final channelHits = _channelMode && _query.length >= 2
         ? _searchChannelMessages(_query)
         : <ChannelMessage>[];
@@ -361,36 +359,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         : null;
 
     return VHubPage(
-      title: _channelMode ? 'Search channel' : 'Search',
+      title: '',
+      titleWidget: _PrestigeSearchPill(
+        controller: _controller,
+        focusNode: _focusNode,
+        hintText: _channelMode
+            ? 'Search in #${_channelName ?? 'channel'}…'
+            : 'Search worlds, residents, posts…',
+        onChanged: (v) {
+          setState(() => _query = v);
+          _scheduleGlobalResidentSearch(v);
+        },
+        onSubmitted: _onSubmitted,
+        onClear: () {
+          _controller.clear();
+          setState(() => _query = '');
+        },
+      ),
       showBack: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              VSpacing.md,
-              VSpacing.sm,
-              VSpacing.md,
-              0,
-            ),
-            child: VSearchBar(
-              controller: _controller,
-              focusNode: _focusNode,
-              autofocus: true,
-              hintText: _channelMode
-                  ? 'Search in #${_channelName ?? 'channel'}…'
-                  : 'Search worlds, residents, posts…',
-              onChanged: (v) {
-                setState(() => _query = v);
-                _scheduleGlobalResidentSearch(v);
-              },
-              onSubmitted: _onSubmitted,
-              onClear: () {
-                _controller.clear();
-                setState(() => _query = '');
-              },
-            ),
-          ),
           if (_channelMode)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -405,21 +394,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   vertical: VSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: VCommuneColors.surfaceSecondary,
+                  color: PrestigeNoir.surfaceRaised,
                   borderRadius: BorderRadius.circular(VRadius.pill),
+                  border: Border.all(color: PrestigeNoir.border),
                 ),
                 child: Text(
                   'in:#${_channelName ?? 'channel'}',
                   style: const TextStyle(
                     fontSize: VFontSize.labelSm,
-                    color: VCommuneColors.textLink,
+                    color: PrestigeNoir.accent,
                     fontWeight: VFontWeight.semiBold,
                   ),
                 ),
               ),
             )
           else
-            _buildFilterChips(isDark),
+            _buildFilterChips(),
           if (_residentsLoadError != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -435,99 +425,104 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           Expanded(
             child: _channelMode
-                ? _buildChannelBody(theme, channelHits, isDark)
-                : _buildBody(theme, results, showRecent, isDark),
+                ? _buildChannelBody(theme, channelHits)
+                : _buildBody(theme, results),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChips(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        VSpacing.md,
-        VSpacing.sm,
-        VSpacing.md,
-        0,
+  Widget _buildFilterChips() {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: PrestigeNoir.border)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _SearchFilterChip(
-                  label: 'All',
-                  selected: _mode == _SearchMode.all,
-                  onTap: () => setState(() => _mode = _SearchMode.all),
-                ),
-                const SizedBox(width: VSpacing.xs),
-                _SearchFilterChip(
-                  label: 'Following',
-                  selected: _mode == _SearchMode.following,
-                  onTap: () {
-                    setState(() => _mode = _SearchMode.following);
-                    final resident = ref.read(residentProvider).resident;
-                    if (resident != null) {
-                      ref.read(allyProvider.notifier).loadAll(resident.id);
-                    }
-                  },
-                ),
-                const SizedBox(width: VSpacing.xs),
-                _SearchFilterChip(
-                  label: 'Allies',
-                  selected: _mode == _SearchMode.allies,
-                  onTap: () {
-                    setState(() => _mode = _SearchMode.allies);
-                    final resident = ref.read(residentProvider).resident;
-                    if (resident != null) {
-                      ref.read(allyProvider.notifier).loadAll(resident.id);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          if (_query.length >= 2) ...[
-            const SizedBox(height: VSpacing.xs),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          VSpacing.md,
+          VSpacing.sm,
+          VSpacing.md,
+          VSpacing.sm,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _SearchFilterChip(
-                    label: 'Everything',
-                    selected: _category == _SearchCategory.all,
-                    onTap: () =>
-                        setState(() => _category = _SearchCategory.all),
+                  _PrestigeFilterChip(
+                    label: 'All',
+                    selected: _mode == _SearchMode.all,
+                    onTap: () => setState(() => _mode = _SearchMode.all),
                   ),
-                  const SizedBox(width: VSpacing.xs),
-                  _SearchFilterChip(
-                    label: 'Worlds',
-                    selected: _category == _SearchCategory.worlds,
-                    onTap: () =>
-                        setState(() => _category = _SearchCategory.worlds),
+                  const SizedBox(width: 6),
+                  _PrestigeFilterChip(
+                    label: 'Following',
+                    selected: _mode == _SearchMode.following,
+                    onTap: () {
+                      setState(() => _mode = _SearchMode.following);
+                      final resident = ref.read(residentProvider).resident;
+                      if (resident != null) {
+                        ref.read(allyProvider.notifier).loadAll(resident.id);
+                      }
+                    },
                   ),
-                  const SizedBox(width: VSpacing.xs),
-                  _SearchFilterChip(
-                    label: 'Residents',
-                    selected: _category == _SearchCategory.people,
-                    onTap: () =>
-                        setState(() => _category = _SearchCategory.people),
-                  ),
-                  const SizedBox(width: VSpacing.xs),
-                  _SearchFilterChip(
-                    label: 'Posts',
-                    selected: _category == _SearchCategory.posts,
-                    onTap: () =>
-                        setState(() => _category = _SearchCategory.posts),
+                  const SizedBox(width: 6),
+                  _PrestigeFilterChip(
+                    label: 'Allies',
+                    selected: _mode == _SearchMode.allies,
+                    onTap: () {
+                      setState(() => _mode = _SearchMode.allies);
+                      final resident = ref.read(residentProvider).resident;
+                      if (resident != null) {
+                        ref.read(allyProvider.notifier).loadAll(resident.id);
+                      }
+                    },
                   ),
                 ],
               ),
             ),
+            if (_query.length >= 2) ...[
+              const SizedBox(height: VSpacing.sm),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _PrestigeFilterChip(
+                      label: 'Everything',
+                      selected: _category == _SearchCategory.all,
+                      onTap: () =>
+                          setState(() => _category = _SearchCategory.all),
+                    ),
+                    const SizedBox(width: 6),
+                    _PrestigeFilterChip(
+                      label: 'Worlds',
+                      selected: _category == _SearchCategory.worlds,
+                      onTap: () =>
+                          setState(() => _category = _SearchCategory.worlds),
+                    ),
+                    const SizedBox(width: 6),
+                    _PrestigeFilterChip(
+                      label: 'Residents',
+                      selected: _category == _SearchCategory.people,
+                      onTap: () =>
+                          setState(() => _category = _SearchCategory.people),
+                    ),
+                    const SizedBox(width: 6),
+                    _PrestigeFilterChip(
+                      label: 'Posts',
+                      selected: _category == _SearchCategory.posts,
+                      onTap: () =>
+                          setState(() => _category = _SearchCategory.posts),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -535,15 +530,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildChannelBody(
     ThemeData theme,
     List<ChannelMessage> hits,
-    bool isDark,
   ) {
     if (_query.length < 2) {
       return Center(
         child: Text(
           'Type to search messages in #${_channelName ?? 'channel'}',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: const TextStyle(color: PrestigeNoir.muted),
         ),
       );
     }
@@ -560,19 +552,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
       itemBuilder: (context, index) {
         final msg = hits[index];
-        return ListTile(
-          tileColor: VCommuneColors.surfaceSecondary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(VRadius.md),
-          ),
-          title: Text(
-            msg.senderName,
-            style: const TextStyle(fontWeight: VFontWeight.semiBold),
-          ),
-          subtitle: Text(
-            msg.content,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
+        return VPrestigeCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
           ),
           onTap: () {
             if (_channelWorldId != null && _channelId != null) {
@@ -585,19 +568,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               );
             }
           },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                msg.senderName,
+                style: const TextStyle(
+                  fontWeight: VFontWeight.semiBold,
+                  color: PrestigeNoir.foreground,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                msg.content,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: VFontSize.bodySm,
+                  color: PrestigeNoir.muted,
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
-  Widget _buildBody(
-    ThemeData theme,
-    _SearchResults? results,
-    bool showRecent,
-    bool isDark,
-  ) {
-    if (showRecent) {
-      return _buildRecentSearches(theme, isDark);
+  Widget _buildBody(ThemeData theme, _SearchResults? results) {
+    if (_query.length < 2 && _mode == _SearchMode.all) {
+      return _buildExploreIdle(theme);
     }
 
     if (_query.length < 2) {
@@ -605,23 +605,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.search,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.mutedDim,
             ),
             const SizedBox(height: VSpacing.md),
             Text(
               'Search worlds, people, and posts',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: PrestigeNoir.muted,
               ),
             ),
             const SizedBox(height: VSpacing.xs),
-            Text(
+            const Text(
               'Type at least 2 characters',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              style: TextStyle(
+                fontSize: VFontSize.bodySm,
+                color: PrestigeNoir.mutedDim,
               ),
             ),
           ],
@@ -634,13 +635,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.search_off,
               size: VIconSize.xl,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: PrestigeNoir.mutedDim,
             ),
             const SizedBox(height: VSpacing.sm),
-            Text('No results for "$_query"', style: theme.textTheme.bodyLarge),
+            Text(
+              'No results for "$_query"',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: PrestigeNoir.foreground,
+              ),
+            ),
           ],
         ),
       );
@@ -652,122 +658,208 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         await ref.read(postProvider.notifier).loadPosts();
         setState(() {});
       },
-      child: ListView(
-        padding: const EdgeInsets.only(bottom: VSpacing.lg),
-        children: [
+      child: CustomScrollView(
+        slivers: [
           if (_category == _SearchCategory.all ||
               _category == _SearchCategory.worlds) ...[
-            _SectionHeader(
-              icon: Icons.public,
-              title: 'Worlds',
-              count: results.worlds.length,
-              isDark: isDark,
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                icon: Icons.public,
+                title: 'Worlds',
+                count: results.worlds.length,
+              ),
             ),
             if (results.worlds.isEmpty)
-              _EmptySection(text: 'No worlds found', isDark: isDark)
+              SliverToBoxAdapter(
+                child: _EmptySection(text: 'No worlds found'),
+              )
             else
-              ...results.worlds.map((w) => _WorldTile(world: w)),
+              SliverList.builder(
+                itemCount: results.worlds.length,
+                itemBuilder: (context, index) =>
+                    _WorldTile(world: results.worlds[index]),
+              ),
             if (_category == _SearchCategory.all)
-              Divider(
-                height: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
+              const SliverToBoxAdapter(
+                child: SizedBox(height: VSpacing.sm),
               ),
           ],
           if (_category == _SearchCategory.all ||
               _category == _SearchCategory.people) ...[
-            _SectionHeader(
-              icon: Icons.people,
-              title: 'Residents',
-              count: results.residents.length,
-              isDark: isDark,
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                icon: Icons.people,
+                title: 'Residents',
+                count: results.residents.length,
+              ),
             ),
             if (_loadingResidents)
-              Padding(
-                padding: const EdgeInsets.all(VSpacing.md),
-                child: const Pulse(width: double.infinity, height: 48),
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(VSpacing.md),
+                  child: Pulse(height: 48),
+                ),
               )
             else if (results.residents.isEmpty)
-              _EmptySection(text: 'No residents found', isDark: isDark)
+              SliverToBoxAdapter(
+                child: _EmptySection(text: 'No residents found'),
+              )
             else
-              ...results.residents.take(20).map((r) => _PersonTile(entry: r)),
+              SliverList.builder(
+                itemCount: results.residents.length > 20
+                    ? 20
+                    : results.residents.length,
+                itemBuilder: (context, index) =>
+                    _PersonTile(entry: results.residents[index]),
+              ),
             if (_category == _SearchCategory.all)
-              Divider(
-                height: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
+              const SliverToBoxAdapter(
+                child: SizedBox(height: VSpacing.sm),
               ),
           ],
           if (_category == _SearchCategory.all ||
               _category == _SearchCategory.posts) ...[
-            _SectionHeader(
-              icon: Icons.forum,
-              title: 'Posts',
-              count: results.posts.length,
-              isDark: isDark,
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                icon: Icons.forum,
+                title: 'Posts',
+                count: results.posts.length,
+              ),
             ),
             if (results.posts.isEmpty)
-              _EmptySection(text: 'No posts found', isDark: isDark)
+              SliverToBoxAdapter(
+                child: _EmptySection(text: 'No posts found'),
+              )
             else
-              ...results.posts.take(20).map((p) => _PostTile(post: p)),
+              SliverList.builder(
+                itemCount: results.posts.length > 20
+                    ? 20
+                    : results.posts.length,
+                itemBuilder: (context, index) =>
+                    _PostTile(post: results.posts[index]),
+              ),
           ],
+          SliverToBoxAdapter(
+            child: const SizedBox(height: VSpacing.lg),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildRecentSearches(ThemeData theme, bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildExploreIdle(ThemeData theme) {
+    final trending = _trendingWorlds();
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        VSpacing.md,
+        VSpacing.md,
+        VSpacing.md,
+        VSpacing.lg,
+      ),
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            VSpacing.md,
-            VSpacing.md,
-            VSpacing.md,
-            VSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.history,
-                size: VIconSize.md,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: VSpacing.sm),
-              Text(
-                'Recent searches',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: VFontWeight.bold,
+        if (trending.isNotEmpty) ...[
+          const VPrestigeSectionLabel(title: 'Trending now'),
+          ...trending.map((world) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: VPrestigeCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: VSpacing.md,
+                  vertical: 10,
+                ),
+                onTap: () => context.push(exploreWorldPath(world.id)),
+                child: Row(
+                  children: [
+                    const Text('🔥', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            world.name,
+                            style: const TextStyle(
+                              fontSize: VFontSize.bodySm,
+                              fontWeight: VFontWeight.semiBold,
+                              color: PrestigeNoir.foreground,
+                            ),
+                          ),
+                          Text(
+                            'World · ${world.memberCount} members',
+                            style: const TextStyle(
+                              fontSize: VFontSize.labelSm,
+                              color: PrestigeNoir.muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      _formatActivity(world.activityScore),
+                      style: const TextStyle(
+                        fontSize: VFontSize.bodySm,
+                        color: PrestigeNoir.mutedDim,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            );
+          }),
+        ],
+        if (_recentSearches.isNotEmpty) ...[
+          const SizedBox(height: VSpacing.md),
+          const VPrestigeSectionLabel(title: 'Recent searches'),
+          ..._recentSearches.map(
+            (q) => _RecentSearchRow(
+              query: q,
+              onTap: () {
+                _controller.text = q;
+                setState(() => _query = q);
+                _scheduleGlobalResidentSearch(q);
+                _focusNode.unfocus();
+              },
+              onRemove: () => _removeRecentSearch(q),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-          child: Wrap(
-            spacing: VSpacing.sm,
-            runSpacing: VSpacing.xs,
-            children: _recentSearches
-                .map(
-                  (q) => InputChip(
-                    label: Text(q, style: theme.textTheme.labelSmall),
-                    onPressed: () {
-                      _controller.text = q;
-                      setState(() => _query = q);
-                      _focusNode.unfocus();
-                    },
-                    onDeleted: () => _removeRecentSearch(q),
-                    deleteIcon: const Icon(VIcons.x, size: VIconSize.denseSm),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+        ],
+        if (trending.isEmpty && _recentSearches.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: VSpacing.xxl),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.search,
+                  size: 64,
+                  color: PrestigeNoir.mutedDim,
+                ),
+                const SizedBox(height: VSpacing.md),
+                Text(
+                  'Search worlds, people, and posts',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: PrestigeNoir.muted,
                   ),
-                )
-                .toList(),
+                ),
+                const SizedBox(height: VSpacing.xs),
+                const Text(
+                  'Type at least 2 characters',
+                  style: TextStyle(
+                    fontSize: VFontSize.bodySm,
+                    color: PrestigeNoir.mutedDim,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
+  }
+
+  String _formatActivity(int score) {
+    if (score >= 1000) {
+      return '${(score / 1000).toStringAsFixed(1)}K';
+    }
+    return '$score';
   }
 }
 
@@ -775,42 +867,31 @@ class _SectionHeader extends StatelessWidget {
   final IconData icon;
   final String title;
   final int count;
-  final bool isDark;
 
   const _SectionHeader({
     required this.icon,
     required this.title,
     required this.count,
-    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,
         VSpacing.md,
         VSpacing.md,
-        VSpacing.xs,
+        VSpacing.sm,
       ),
       child: Row(
         children: [
-          Container(
-            width: 3,
-            height: 20,
-            decoration: BoxDecoration(
-              color: VColors.tertiary,
-              borderRadius: BorderRadius.circular(VRadius.sm),
-            ),
-          ),
-          const SizedBox(width: VSpacing.sm),
-          Icon(icon, size: VIconSize.md, color: Theme.of(context).colorScheme.primary),
+          Icon(icon, size: VIconSize.md, color: PrestigeNoir.accent),
           const SizedBox(width: VSpacing.sm),
           Text(
             title,
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: const TextStyle(
               fontWeight: VFontWeight.bold,
+              color: PrestigeNoir.foreground,
             ),
           ),
           const SizedBox(width: VSpacing.sm),
@@ -820,13 +901,15 @@ class _SectionHeader extends StatelessWidget {
               vertical: 2,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+              color: PrestigeNoir.accentSoft,
               borderRadius: BorderRadius.circular(VRadius.pill),
+              border: Border.all(color: PrestigeNoir.accent.withValues(alpha: 0.35)),
             ),
             child: Text(
               '$count',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
+              style: const TextStyle(
+                fontSize: VFontSize.labelSm,
+                color: PrestigeNoir.accent,
                 fontWeight: VFontWeight.bold,
               ),
             ),
@@ -839,9 +922,8 @@ class _SectionHeader extends StatelessWidget {
 
 class _EmptySection extends StatelessWidget {
   final String text;
-  final bool isDark;
 
-  const _EmptySection({required this.text, required this.isDark});
+  const _EmptySection({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -852,8 +934,9 @@ class _EmptySection extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        style: const TextStyle(
+          fontSize: VFontSize.bodySm,
+          color: PrestigeNoir.muted,
         ),
       ),
     );
@@ -868,7 +951,6 @@ class _WorldTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return FadeIn(
       delayMs: 30,
@@ -877,33 +959,49 @@ class _WorldTile extends StatelessWidget {
           horizontal: VSpacing.md,
           vertical: VSpacing.xs,
         ),
-        child: Material(
-          color: isDark
-              ? VColors.surfaceContainerDark
-              : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          child: InkWell(
-            onTap: () => context.push(exploreWorldPath(world.id)),
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            child: ListTile(
-              leading: WorldIcon(
+        child: VPrestigeCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          onTap: () => context.push(exploreWorldPath(world.id)),
+          child: Row(
+            children: [
+              WorldIcon(
                 worldId: world.assetKey,
                 size: 36,
                 useGlassContainer: false,
               ),
-              title: Text(
-                world.name,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: VFontWeight.bold,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      world.name,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                        color: PrestigeNoir.foreground,
+                      ),
+                    ),
+                    Text(
+                      world.description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: VFontSize.bodySm,
+                        color: PrestigeNoir.muted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              subtitle: Text(
-                world.description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              const Icon(
+                VIcons.chevronRight,
+                size: VIconSize.sm,
+                color: PrestigeNoir.mutedDim,
               ),
-              trailing: const Icon(VIcons.chevronRight),
-            ),
+            ],
           ),
         ),
       ),
@@ -930,7 +1028,6 @@ class _PersonTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final resident = entry.resident;
     final me = ref.watch(residentProvider).resident;
     final canDm = me != null && me.id != resident.id;
@@ -942,59 +1039,60 @@ class _PersonTile extends ConsumerWidget {
           horizontal: VSpacing.md,
           vertical: VSpacing.xs,
         ),
-        child: Material(
-          color: isDark
-              ? VColors.surfaceContainerDark
-              : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          child: ListTile(
-            leading: CosmeticAvatar(
-              imageUrl: resident.avatarUrl,
-              seed: resident.id,
-              size: 40,
-            ),
-            title: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    resident.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: VFontWeight.bold,
+        child: VPrestigeCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          onTap: canDm
+              ? () => _openDm(context, ref)
+              : () => context.push(residentProfilePath(resident.id)),
+          child: Row(
+            children: [
+              CosmeticAvatar(
+                imageUrl: resident.avatarUrl,
+                seed: resident.id,
+                size: 36,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            resident.name,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: VFontWeight.bold,
+                              color: PrestigeNoir.foreground,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: VSpacing.xs),
+                        TierIcon(tier: resident.tier.value, size: VIconSize.base),
+                      ],
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    if (resident.profession != null)
+                      Text(
+                        resident.profession!,
+                        style: const TextStyle(
+                          fontSize: VFontSize.bodySm,
+                          color: PrestigeNoir.muted,
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(width: VSpacing.xs),
-                TierIcon(tier: resident.tier.value, size: VIconSize.base),
-              ],
-            ),
-            subtitle: resident.profession != null
-                ? Text(
-                    resident.profession!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                : null,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (canDm)
-                  TextButton(
-                    onPressed: () => _openDm(context, ref),
-                    child: const Text('Message'),
-                  ),
-                IconButton(
-                  icon: const Icon(VIcons.chevronRight),
-                  tooltip: 'View profile',
-                  onPressed: () =>
-                      context.push(residentProfilePath(resident.id)),
+              ),
+              if (canDm)
+                VButton(
+                  label: 'Message',
+                  onPressed: () => _openDm(context, ref),
+                  variant: ButtonVariant.text,
                 ),
-              ],
-            ),
-            onTap: canDm
-                ? () => _openDm(context, ref)
-                : () => context.push(residentProfilePath(resident.id)),
+            ],
           ),
         ),
       ),
@@ -1010,7 +1108,6 @@ class _PostTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return FadeIn(
       delayMs: 30,
@@ -1019,37 +1116,60 @@ class _PostTile extends StatelessWidget {
           horizontal: VSpacing.md,
           vertical: VSpacing.xs,
         ),
-        child: Material(
-          color: isDark
-              ? VColors.surfaceContainerDark
-              : VColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(VRadius.lg),
-          child: InkWell(
-            onTap: () =>
-                context.push(exploreWorldPath(post.worldId, postId: post.id)),
-            borderRadius: BorderRadius.circular(VRadius.lg),
-            child: ListTile(
-              leading: CosmeticAvatar(
+        child: VPrestigeCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          onTap: () =>
+              context.push(exploreWorldPath(post.worldId, postId: post.id)),
+          child: Row(
+            children: [
+              CosmeticAvatar(
                 imageUrl: post.residentAvatar,
                 seed: post.residentId,
                 size: 36,
               ),
-              title: Text(
-                post.residentName,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: VFontWeight.bold,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post.residentName,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: VFontWeight.bold,
+                        color: PrestigeNoir.foreground,
+                      ),
+                    ),
+                    Text(
+                      post.content,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: VFontSize.bodySm,
+                        color: PrestigeNoir.muted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              subtitle: Text(
-                post.content,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: PrestigeNoir.surface,
+                  borderRadius: BorderRadius.circular(VRadius.xs),
+                  border: Border.all(color: PrestigeNoir.borderLight),
+                ),
+                child: Text(
+                  '#${post.worldId}',
+                  style: const TextStyle(
+                    fontSize: VFontSize.labelSm,
+                    color: PrestigeNoir.mutedDim,
+                  ),
+                ),
               ),
-              trailing: Text(
-                '#${post.worldId}',
-                style: theme.textTheme.labelSmall,
-              ),
-            ),
+            ],
           ),
         ),
       ),
@@ -1057,12 +1177,107 @@ class _PostTile extends StatelessWidget {
   }
 }
 
-class _SearchFilterChip extends StatelessWidget {
+class _PrestigeSearchPill extends StatefulWidget {
+  final TextEditingController controller;
+  final FocusNode? focusNode;
+  final String hintText;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onClear;
+
+  const _PrestigeSearchPill({
+    required this.controller,
+    this.focusNode,
+    required this.hintText,
+    this.onChanged,
+    this.onSubmitted,
+    this.onClear,
+  });
+
+  @override
+  State<_PrestigeSearchPill> createState() => _PrestigeSearchPillState();
+}
+
+class _PrestigeSearchPillState extends State<_PrestigeSearchPill> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onTextChanged);
+    widget.focusNode?.addListener(_onFocusChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    widget.focusNode?.removeListener(_onFocusChanged);
+    super.dispose();
+  }
+
+  void _onTextChanged() => setState(() {});
+  void _onFocusChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: PrestigeNoir.surfaceRaised,
+        borderRadius: BorderRadius.circular(VRadius.md),
+        border: Border.all(
+          color: widget.focusNode?.hasFocus == true
+              ? PrestigeNoir.accent
+              : PrestigeNoir.border,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+      child: Row(
+        children: [
+          const Icon(
+            VIcons.search,
+            size: VIconSize.md,
+            color: PrestigeNoir.mutedDim,
+          ),
+          const SizedBox(width: VSpacing.sm),
+          Expanded(
+            child: TextField(
+              controller: widget.controller,
+              focusNode: widget.focusNode,
+              autofocus: true,
+              style: const TextStyle(
+                fontSize: VFontSize.bodySm,
+                color: PrestigeNoir.foreground,
+              ),
+              onChanged: widget.onChanged,
+              onSubmitted: widget.onSubmitted,
+              decoration: InputDecoration(
+                hintText: widget.hintText,
+                hintStyle: const TextStyle(color: PrestigeNoir.mutedDim),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
+          if (widget.controller.text.isNotEmpty && widget.onClear != null)
+            GestureDetector(
+              onTap: widget.onClear,
+              child: const Icon(
+                VIcons.x,
+                size: VIconSize.md,
+                color: PrestigeNoir.mutedDim,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrestigeFilterChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
-  const _SearchFilterChip({
+  const _PrestigeFilterChip({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -1073,19 +1288,12 @@ class _SearchFilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: VSpacing.md,
-          vertical: VSpacing.xs,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: selected
-              ? VCommuneColors.modifierSelected
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(VRadius.pill),
+          color: selected ? PrestigeNoir.accentSoft : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected
-                ? VCommuneColors.textLink
-                : VCommuneColors.dividerSubtle,
+            color: selected ? PrestigeNoir.accent : PrestigeNoir.border,
           ),
         ),
         child: Text(
@@ -1093,9 +1301,60 @@ class _SearchFilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: VFontSize.labelSm,
             fontWeight: selected ? VFontWeight.semiBold : VFontWeight.medium,
-            color: selected
-                ? VCommuneColors.headerPrimary
-                : VCommuneColors.textMuted,
+            color: selected ? PrestigeNoir.accent : PrestigeNoir.muted,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentSearchRow extends StatelessWidget {
+  final String query;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  const _RecentSearchRow({
+    required this.query,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(VRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.history,
+                size: VIconSize.denseSm,
+                color: PrestigeNoir.mutedDim,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  query,
+                  style: const TextStyle(
+                    fontSize: VFontSize.bodySm,
+                    color: PrestigeNoir.muted,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: onRemove,
+                child: const Icon(
+                  VIcons.x,
+                  size: VIconSize.denseSm,
+                  color: PrestigeNoir.mutedDim,
+                ),
+              ),
+            ],
           ),
         ),
       ),

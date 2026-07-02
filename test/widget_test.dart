@@ -8,11 +8,11 @@ import 'package:vertiege/widgets/chat/scroll_fab.dart';
 import 'package:vertiege/widgets/feed/heart_animation.dart';
 
 void main() {
-  testWidgets('App theme is compact light mode', (WidgetTester tester) async {
+  testWidgets('App theme is Prestige Noir dark', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: VTheme.light, home: const SizedBox()),
+      MaterialApp(theme: VTheme.dark, home: const SizedBox()),
     );
-    expect(VTheme.light.brightness, Brightness.light);
+    expect(VTheme.dark.brightness, Brightness.dark);
   });
 
   testWidgets('ExploreSectionHeader renders', (WidgetTester tester) async {

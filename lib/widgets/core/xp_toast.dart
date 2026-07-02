@@ -1,4 +1,3 @@
-﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,7 +74,6 @@ class _XpToastWidgetState extends State<_XpToastWidget>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Positioned(
       top: MediaQuery.of(context).padding.top + VSpacing.md,
       right: VSpacing.md,
@@ -98,9 +96,9 @@ class _XpToastWidgetState extends State<_XpToastWidget>
                 vertical: VSpacing.sm + 2,
               ),
               decoration: BoxDecoration(
-                color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainerLow,
+                color: VColors.surfaceContainerDark,
                 borderRadius: BorderRadius.circular(VRadius.pill),
-                border: Border.all(color: isDark ? VColors.outlineVariantDark : VColors.outlineVariant),
+                border: Border.all(color: VColors.outlineVariantDark),
                 boxShadow: [
                   // Outer glow in gold
                   BoxShadow(
@@ -116,7 +114,6 @@ class _XpToastWidgetState extends State<_XpToastWidget>
                       alpha: 0.3,
                     ),
                     blurRadius: 10,
-                    offset: Offset.zero,
                   ),
                 ],
               ),

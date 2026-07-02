@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vertiege/ui/ui.dart';
 
 import '../../config/achievements.dart';
-import 'package:vertiege/ui/ui.dart';
 import '../../models/achievement.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
@@ -36,10 +35,10 @@ class _AchievementCategoryScreenState
         .where((c) => c.name == widget.category)
         .firstOrNull;
     if (cat == null) {
-      return VHubPage(
+      return const VHubPage(
         title: 'Achievements',
         showBack: true,
-        body: const AppEmptyState(
+        body: AppEmptyState(
           title: 'Category not found',
           description: 'This achievement category is no longer available.',
           icon: Icons.emoji_events_outlined,
@@ -86,7 +85,7 @@ class _AchievementCategoryScreenState
               VSpacing.md,
               0,
             ),
-            child: VSurfaceCard(
+            child: VCard(
                 child: Text(
                   '${progress.earned} verified · ${progress.total - progress.earned} remaining · ${progress.xp} XP in this category',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -143,7 +142,6 @@ class _AchievementCategoryScreenState
                     title: 'No achievements here',
                     description: _emptyMessage(_filter),
                     icon: Icons.emoji_events_outlined,
-                    variant: EmptyStateVariant.default_,
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.fromLTRB(

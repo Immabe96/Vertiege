@@ -1,8 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/chat_density_prefs.dart';
 
-class ChatDensityNotifier extends Notifier<ChatMessageDensity> {
+part 'chat_density_provider.g.dart';
+
+@Riverpod(name: 'chatDensityProvider', keepAlive: true)
+class ChatDensityNotifier extends _$ChatDensityNotifier {
   @override
   ChatMessageDensity build() {
     Future.microtask(_load);
@@ -18,8 +22,3 @@ class ChatDensityNotifier extends Notifier<ChatMessageDensity> {
     await ChatDensityPrefs.save(density);
   }
 }
-
-final chatDensityProvider =
-    NotifierProvider<ChatDensityNotifier, ChatMessageDensity>(
-      ChatDensityNotifier.new,
-    );

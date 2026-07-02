@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../services/chat_service.dart';
-import '../widgets/core/v_feedback.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../models/ally.dart';
 import '../models/resident.dart';
@@ -17,7 +16,6 @@ import '../widgets/core/empty_state.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/screen_loading.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
-import '../ui/icons/v_icons.dart';
 
 enum ConnectionsMode { following, allies }
 
@@ -175,83 +173,117 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
       body: RefreshIndicator(
         onRefresh: _load,
         child: _loading
-            ? ListView(
+            ? CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: const [ScreenLoading.list()],
+                slivers: const [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: ScreenLoading.list(),
+                  ),
+                ],
               )
             : _loadError != null && _rows.isEmpty
-            ? ListView(
+            ? CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(VSpacing.md),
-                children: [AppErrorState(message: _loadError, onRetry: _load)],
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(VSpacing.md),
+                    sliver: SliverToBoxAdapter(
+                      child: AppErrorState(message: _loadError, onRetry: _load),
+                    ),
+                  ),
+                ],
               )
-            : ListView(
+            : Padding(
                 padding: const EdgeInsets.all(VSpacing.md),
-                children: [
-                  Text(
-                    widget.mode == ConnectionsMode.following
-                        ? 'Following'
-                        : 'Allies',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: VFontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: VSpacing.xs),
-                  Text(
-                    widget.mode == ConnectionsMode.following
-                        ? 'Residents you follow for feed priority — not the same as mutual allies.'
-                        : 'Mutual allegiance requests you accepted — stronger than a one-way follow.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      height: 1.35,
-                    ),
-                  ),
-                  const SizedBox(height: VSpacing.lg),
-                  if (widget.mode == ConnectionsMode.allies &&
-                      allyState.pendingRequests.isNotEmpty) ...[
-                    Text(
-                      'PENDING REQUESTS',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Text(
+                      widget.mode == ConnectionsMode.following
+                          ? 'Following'
+                          : 'Allies',
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: VFontWeight.bold,
-                        letterSpacing: 0.5,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: VSpacing.sm),
-                    ...allyState.pendingRequests.map(
-                      (a) =>
-                          _PendingAllyTile(ally: a, residentId: resident?.id),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: VSpacing.xs),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Text(
+                      widget.mode == ConnectionsMode.following
+                          ? 'Residents you follow for feed priority — not the same as mutual allies.'
+                          : 'Mutual allegiance requests you accepted — stronger than a one-way follow.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
                     ),
-                    const SizedBox(height: VSpacing.lg),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: VSpacing.lg),
+                  ),
+                  if (widget.mode == ConnectionsMode.allies &&
+                      allyState.pendingRequests.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: Text(
+                        'PENDING REQUESTS',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: VFontWeight.bold,
+                          letterSpacing: 0.5,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: VSpacing.sm),
+                    ),
+                    SliverList.builder(
+                      itemCount: allyState.pendingRequests.length,
+                      itemBuilder: (context, index) => _PendingAllyTile(
+                        ally: allyState.pendingRequests[index],
+                        residentId: resident?.id,
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: VSpacing.lg),
+                    ),
                   ],
                   if (_rows.isEmpty && _loadError == null)
-                    AppEmptyState(
-                      icon: widget.mode == ConnectionsMode.following
-                          ? Icons.people_outline
-                          : Icons.handshake_outlined,
-                      title: widget.mode == ConnectionsMode.following
-                          ? 'Not following anyone yet'
-                          : 'No allies yet',
-                      description: widget.mode == ConnectionsMode.following
-                          ? 'Find residents from world feeds or search.'
-                          : 'Send allegiance requests from resident profiles.',
-                      actionLabel: widget.mode == ConnectionsMode.allies
-                          ? 'Find residents'
-                          : null,
-                      onAction: widget.mode == ConnectionsMode.allies
-                          ? () => context.push('/search')
-                          : null,
+                    SliverToBoxAdapter(
+                      child: AppEmptyState(
+                        icon: widget.mode == ConnectionsMode.following
+                            ? Icons.people_outline
+                            : Icons.handshake_outlined,
+                        title: widget.mode == ConnectionsMode.following
+                            ? 'Not following anyone yet'
+                            : 'No allies yet',
+                        description: widget.mode == ConnectionsMode.following
+                            ? 'Find residents from world feeds or search.'
+                            : 'Send allegiance requests from resident profiles.',
+                        actionLabel: widget.mode == ConnectionsMode.allies
+                            ? 'Find residents'
+                            : null,
+                        onAction: widget.mode == ConnectionsMode.allies
+                            ? () => context.push('/search')
+                            : null,
+                      ),
                     )
                   else
-                    ..._rows.map(
-                      (row) => _PersonTile(
-                        row: row,
+                    SliverList.builder(
+                      itemCount: _rows.length,
+                      itemBuilder: (context, index) => _PersonTile(
+                        row: _rows[index],
                         showMessageAction:
                             widget.mode == ConnectionsMode.allies,
                       ),
                     ),
                 ],
               ),
+            ),
       ),
     );
   }

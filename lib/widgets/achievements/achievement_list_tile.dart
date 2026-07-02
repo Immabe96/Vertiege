@@ -31,7 +31,6 @@ class AchievementListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final accent = statusColor(status);
     final canOpen = status != AchievementStatus.verified;
     final isFunnyOrCreative = achievement.category == AchievementCategory.funny ||
@@ -61,7 +60,7 @@ class AchievementListTile extends StatelessWidget {
         children: [
           prefix,
           const SizedBox(width: VSpacing.sm),
-          _ManualReviewBadge(),
+          const _ManualReviewBadge(),
         ],
       );
     }

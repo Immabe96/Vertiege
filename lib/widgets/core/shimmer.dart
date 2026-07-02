@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
@@ -40,7 +40,6 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -48,7 +47,7 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: (isDark ? VColors.surfaceContainerHighestDark : VColors.surfaceContainerHighest).withValues(
+            color: VColors.surfaceContainerHighestDark.withValues(
               alpha: widget.opacity ?? (0.3 + (_controller.value * 0.2)),
             ),
             borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -105,15 +104,13 @@ class ShimmerPostCard extends StatelessWidget {
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.35,
                   height: VSpacing.md,
-                  borderRadius: VRadius.sm,
                 ),
                 const SizedBox(height: VSpacing.sm),
-                const Pulse(borderRadius: VRadius.sm),
+                const Pulse(),
                 const SizedBox(height: VSpacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.6,
                   height: VFontSize.bodyMd,
-                  borderRadius: VRadius.sm,
                 ),
               ],
             ),
@@ -149,13 +146,11 @@ class ShimmerChatTile extends StatelessWidget {
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.3,
                   height: VSpacing.md,
-                  borderRadius: VRadius.sm,
                 ),
                 const SizedBox(height: VSpacing.xs),
                 Pulse(
                   width: MediaQuery.of(context).size.width * 0.55,
                   height: VSpacing.md,
-                  borderRadius: VRadius.sm,
                 ),
               ],
             ),

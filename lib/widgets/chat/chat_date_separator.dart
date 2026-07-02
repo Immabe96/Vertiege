@@ -45,10 +45,7 @@ class ChatDateSeparator extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final dividerColor = isDark
-        ? VCommuneColors.dividerSubtle
-        : VCommuneColors.dividerSubtle;
+    final dividerColor = VCommuneColors.dividerSubtle;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: VSpacing.md),
       child: Row(

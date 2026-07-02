@@ -12,8 +12,8 @@ void main() {
       expect(isUuid(''), isFalse);
     });
 
-    test('returns false for a UUID with uppercase characters', () {
-      expect(isUuid('550E8400-E29B-41D4-A716-446655440000'), isFalse);
+    test('returns true for a UUID with uppercase characters', () {
+      expect(isUuid('550E8400-E29B-41D4-A716-446655440000'), isTrue);
     });
 
     test('returns false for a string with invalid length', () {

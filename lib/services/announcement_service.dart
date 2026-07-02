@@ -38,7 +38,7 @@ class AnnouncementService {
       'author_name': authorName,
       'title': title,
       'content': content,
-      if (imageUrl != null) 'image_url': imageUrl,
+      'image_url': ?imageUrl,
       'priority': priority,
       'is_pinned': isPinned,
     });

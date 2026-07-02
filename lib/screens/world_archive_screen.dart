@@ -43,10 +43,9 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
           ..sort((a, b) => a.position.compareTo(b.position));
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (archiveChannels.isEmpty) {
-      return AppEmptyState(
+      return const AppEmptyState(
         title: 'Empty Archive',
         description:
             'No lore or documents have been recorded in this archive yet.',
@@ -65,7 +64,7 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
               'The Vault of Ages',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: VFontWeight.bold,
-                color: isDark ? VColors.primaryDark : VColors.primary,
+                color: theme.colorScheme.primary,
               ),
             ),
           ),
@@ -74,9 +73,7 @@ class _WorldArchiveScreenState extends ConsumerState<WorldArchiveScreen> {
             child: Text(
               'Explore the foundational knowledge and history of this dominion.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? VColors.onSurfaceVariantDark
-                    : VColors.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -111,7 +108,7 @@ class _ArchiveItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: VSpacing.sm),
@@ -121,15 +118,9 @@ class _ArchiveItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(VSpacing.md),
           decoration: BoxDecoration(
-            color:
-                (isDark
-                        ? VColors.surfaceContainerDark
-                        : VColors.surfaceContainer)
-                    .withValues(alpha: 0.64),
+            color: VColors.surfaceContainerDark.withValues(alpha: 0.64),
             borderRadius: BorderRadius.circular(VRadius.md),
-            border: Border.all(
-              color: isDark ? VColors.glassBorderDark : VColors.glassBorder,
-            ),
+            border: Border.all(color: VColors.glassBorderDark),
           ),
           child: Row(
             children: [
@@ -137,13 +128,12 @@ class _ArchiveItem extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: (isDark ? VColors.primaryDark : VColors.primary)
-                      .withValues(alpha: 0.12),
+                  color: colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(VRadius.md),
                 ),
                 child: Icon(
                   _icon,
-                  color: isDark ? VColors.primaryDark : VColors.primary,
+                  color: colorScheme.primary,
                   size: 24,
                 ),
               ),
@@ -157,9 +147,7 @@ class _ArchiveItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: isDark
-                            ? VColors.onSurfaceDark
-                            : VColors.onSurface,
+                        color: colorScheme.onSurface,
                         fontWeight: VFontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -173,9 +161,7 @@ class _ArchiveItem extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: isDark
-                                ? VColors.onSurfaceVariantDark
-                                : VColors.onSurfaceVariant,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: VFontSize.labelSm,
                           ),
                         ),
@@ -185,9 +171,7 @@ class _ArchiveItem extends StatelessWidget {
               ),
               Icon(
                 VIcons.chevronRight,
-                color: isDark
-                    ? VColors.outlineVariantDark
-                    : VColors.outlineVariant,
+                color: colorScheme.outlineVariant,
                 size: 24,
               ),
             ],

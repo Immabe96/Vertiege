@@ -61,7 +61,7 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
     }
   }
 
-  void _showCreateChallengeDialog() {
+  Future<void> _showCreateChallengeDialog() async {
     final titleController = TextEditingController();
     final descController = TextEditingController();
     final targetController = TextEditingController();
@@ -69,94 +69,89 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
     final rewardCurrencyController = TextEditingController(text: '0');
     String challengeType = 'individual';
 
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Create Assignment'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
-                  ),
+    try {
+      await showVDialog<void>(
+        context: context,
+        title: 'Create Assignment',
+        scrollContent: true,
+        content: StatefulBuilder(
+          builder: (ctx, setDialogState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.lg),
-                TextField(
-                  controller: descController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
+              ),
+              const SizedBox(height: VSpacing.lg),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.lg),
-                VSelect<String>(
-                  value: challengeType,
-                  onChanged: (v) {
-                    if (v != null) setDialogState(() => challengeType = v);
-                  },
-                  format: (value) =>
-                      value == 'individual' ? 'Individual' : 'Collective',
-                  label: const Text('Type'),
-                  hint: 'Select type',
-                  items: const [
-                    VSelectItem(
-                      value: 'individual',
-                      title: Text('Individual'),
-                    ),
-                    VSelectItem(
-                      value: 'collective',
-                      title: Text('Collective'),
-                    ),
-                  ],
+                maxLines: 2,
+              ),
+              const SizedBox(height: VSpacing.lg),
+              VSelect<String>(
+                value: challengeType,
+                onChanged: (v) {
+                  if (v != null) setDialogState(() => challengeType = v);
+                },
+                format: (value) =>
+                    value == 'individual' ? 'Individual' : 'Collective',
+                label: const Text('Type'),
+                hint: 'Select type',
+                items: const [
+                  VSelectItem(value: 'individual', title: Text('Individual')),
+                  VSelectItem(value: 'collective', title: Text('Collective')),
+                ],
+              ),
+              const SizedBox(height: VSpacing.lg),
+              TextField(
+                controller: targetController,
+                decoration: const InputDecoration(
+                  labelText: 'Target Value',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: VSpacing.lg),
-                TextField(
-                  controller: targetController,
-                  decoration: const InputDecoration(
-                    labelText: 'Target Value',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: VSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: rewardXpController,
-                        decoration: const InputDecoration(
-                          labelText: 'XP Reward',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: VSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: rewardXpController,
+                      decoration: const InputDecoration(
+                        labelText: 'XP Reward',
+                        border: OutlineInputBorder(),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: rewardCurrencyController,
-                        decoration: const InputDecoration(
-                          labelText: 'Currency Reward',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: rewardCurrencyController,
+                      decoration: const InputDecoration(
+                        labelText: 'Currency Reward',
+                        border: OutlineInputBorder(),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          actions: [
+        ),
+        actions: [
+          vDialogActionsRow([
             VButton(
               label: 'Cancel',
-              onPressed: () => Navigator.of(ctx).pop(),
+              onPressed: () => Navigator.pop(context),
               variant: ButtonVariant.text,
             ),
             VButton(
@@ -173,25 +168,28 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
                   challengeType: challengeType,
                   targetValue: target,
                   rewardXp: int.tryParse(rewardXpController.text) ?? 0,
-                  rewardCurrency:
-                      int.tryParse(rewardCurrencyController.text) ?? 0,
+                  rewardCurrency: int.tryParse(rewardCurrencyController.text) ?? 0,
                 );
-                if (context.mounted) {
-                  Navigator.of(ctx).pop();
-                  _loadChallenges();
-                }
+                if (!mounted) return;
+                Navigator.pop(context);
+                _loadChallenges();
               },
             ),
-          ],
-        ),
-      ),
-    );
+          ]),
+        ],
+      );
+    } finally {
+      titleController.dispose();
+      descController.dispose();
+      targetController.dispose();
+      rewardXpController.dispose();
+      rewardCurrencyController.dispose();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (_loading) {
       return ListView.builder(
@@ -202,9 +200,7 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
             margin: const EdgeInsets.only(bottom: VSpacing.sm),
             padding: const EdgeInsets.all(VSpacing.md),
             decoration: BoxDecoration(
-              color: isDark
-                  ? VColors.surfaceContainerDark
-                  : VColors.surfaceContainer,
+              color: VColors.surfaceContainerDark,
               borderRadius: BorderRadius.circular(VRadius.lg),
             ),
             child: const Column(
@@ -224,16 +220,25 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
     }
 
     if (_challenges.isEmpty) {
-      return AppEmptyState(
-        title: 'No assignments',
-        description: widget.isSovereignOrCouncil
-            ? 'Create the first assignment!'
-            : 'No active assignments in this world.',
-        icon: Icons.school_outlined,
-        actionLabel: widget.isSovereignOrCouncil ? 'Create Assignment' : null,
-        onAction: widget.isSovereignOrCouncil
-            ? _showCreateChallengeDialog
-            : null,
+      return RefreshIndicator(
+        onRefresh: _loadChallenges,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            AppEmptyState(
+              title: 'No assignments',
+              description: widget.isSovereignOrCouncil
+                  ? 'Create the first assignment!'
+                  : 'No active assignments in this world.',
+              icon: Icons.school_outlined,
+              actionLabel:
+                  widget.isSovereignOrCouncil ? 'Create Assignment' : null,
+              onAction: widget.isSovereignOrCouncil
+                  ? _showCreateChallengeDialog
+                  : null,
+            ),
+          ],
+        ),
       );
     }
 
@@ -260,19 +265,22 @@ class _WorldAcademyScreenState extends ConsumerState<WorldAcademyScreen> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-            itemCount: _challenges.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: VSpacing.sm),
-                child: _ChallengeCard(
-                  challenge: _challenges[index],
-                  isSovereignOrCouncil: widget.isSovereignOrCouncil,
-                  onToggle: _loadChallenges,
-                ),
-              );
-            },
+          child: RefreshIndicator(
+            onRefresh: _loadChallenges,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
+              itemCount: _challenges.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: VSpacing.sm),
+                  child: _ChallengeCard(
+                    challenge: _challenges[index],
+                    isSovereignOrCouncil: widget.isSovereignOrCouncil,
+                    onToggle: _loadChallenges,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -294,14 +302,13 @@ class _ChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final pct = challenge.progressPct;
     final isCompleted = challenge.isCompleted;
 
     return Container(
       padding: const EdgeInsets.all(VSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer,
+        color: VColors.surfaceContainerDark,
         borderRadius: BorderRadius.circular(VRadius.lg),
       ),
       child: Column(
@@ -342,9 +349,7 @@ class _ChallengeCard extends StatelessWidget {
           Text(
             challenge.description,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? VColors.onSurfaceVariantDark
-                  : VColors.onSurfaceVariant,
+              color: VColors.onSurfaceVariantDark,
             ),
           ),
           const SizedBox(height: VSpacing.sm),

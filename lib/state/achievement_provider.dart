@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/achievement.dart';
-import '../models/resident.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../config/achievements.dart' as config;
 import '../config/titles.dart';
+import '../models/achievement.dart';
+import '../models/resident.dart';
 import '../services/gamification_service.dart';
 import '../services/profile_achievements_service.dart';
 import '../services/supabase.dart';
@@ -13,6 +14,8 @@ import '../services/storage_service.dart';
 import '../utils/achievement_proof_utils.dart';
 import '../utils/haptics.dart';
 import 'resident_provider.dart';
+
+part 'achievement_provider.g.dart';
 
 class AchievementState {
   final List<UserAchievement> userAchievements;
@@ -52,7 +55,8 @@ class AchievementState {
   );
 }
 
-class AchievementNotifier extends Notifier<AchievementState> {
+@Riverpod(name: 'achievementProvider', keepAlive: true)
+class AchievementNotifier extends _$AchievementNotifier {
   void Function(List<String> verifiedIds, ResidentTier? newTier)?
   onAchievementsVerified;
 
@@ -94,7 +98,6 @@ class AchievementNotifier extends Notifier<AchievementState> {
     final now = DateTime.now().millisecondsSinceEpoch;
     final entry = UserAchievement(
       achievementId: achievementId,
-      status: AchievementStatus.submitted,
       proofUris: proofUris,
       submittedAt: now,
       isProfileVisible: existing?.isProfileVisible ?? true,
@@ -106,7 +109,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
       updated = state.userAchievements
           .map(
             (a) => a.achievementId == achievementId
-                ? entry.copyWith(aiNotes: null)
+                ? entry.copyWith()
                 : a,
           )
           .toList();
@@ -207,7 +210,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
         );
         await loadAchievements();
         await ref.read(residentProvider.notifier).refreshGamificationFromServer();
-      } catch (e, stackTrace) {
+      } catch (e) {
         debugPrint('autoAwardAchievement server grant failed: $e');
         return;
       }
@@ -388,7 +391,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
             .map((e) => _fromJson(e as Map<String, dynamic>))
             .toList();
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       localFailed = true;
       debugPrint('loadAchievements local cache failed: $e');
     }
@@ -407,7 +410,7 @@ class AchievementNotifier extends Notifier<AchievementState> {
           List<Map<String, dynamic>>.from(rows),
         );
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       cloudFailed = true;
       debugPrint('loadAchievements cloud sync failed: $e');
     }
@@ -573,7 +576,4 @@ class AchievementNotifier extends Notifier<AchievementState> {
   };
 }
 
-final achievementProvider =
-    NotifierProvider<AchievementNotifier, AchievementState>(
-      AchievementNotifier.new,
-    );
+

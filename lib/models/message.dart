@@ -87,7 +87,7 @@ class ChannelMessage {
     id: id ?? this.id,
     channelId: channelId ?? this.channelId,
     senderId: senderId ?? this.senderId,
-    senderName: senderName ?? this.senderId,
+    senderName: senderName ?? this.senderName,
     senderAvatar: senderAvatar ?? this.senderAvatar,
     content: content ?? this.content,
     imageUrl: imageUrl ?? this.imageUrl,

@@ -8,6 +8,8 @@ import '../../state/achievement_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
+import '../../ui/feedback/v_states.dart';
 import '../../widgets/achievements/achievement_icon.dart';
 import '../../widgets/core/v_feedback.dart';
 import '../../ui/overlays/v_sheet.dart';
@@ -106,7 +108,7 @@ class _FeaturedAchievementsSheetState
           if (_loading)
             const Padding(
               padding: EdgeInsets.all(VSpacing.xl),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: VSpinner()),
             )
           else if (verified.isEmpty)
             const Text('Verify achievements first to feature them.')
@@ -139,9 +141,11 @@ class _FeaturedAchievementsSheetState
               ),
             ),
           const SizedBox(height: VSpacing.md),
-          FilledButton(
+          VButton(
             onPressed: _saving || _loading ? null : _save,
-            child: Text(_saving ? 'Saving…' : 'Save featured (${_selected.length}/3)'),
+            isLoading: _saving,
+            label: 'Save featured (${_selected.length}/3)',
+            isFullWidth: true,
           ),
         ],
       ),

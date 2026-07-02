@@ -43,7 +43,6 @@ const achievementProofOverrides = <String, AchievementProofSpec>{
   ),
   'life-secret-talent': AchievementProofSpec(
     proofType: AchievementProofType.multi,
-    minProofImages: 1,
     maxProofImages: 3,
     proofHint: 'Photo or short clip still — show the talent in action.',
   ),
@@ -63,7 +62,6 @@ const achievementProofOverrides = <String, AchievementProofSpec>{
   ),
   'life-main-character': AchievementProofSpec(
     proofType: AchievementProofType.location,
-    minProofImages: 1,
     maxProofImages: 3,
     proofHint: 'Show the scene — skyline, rain, stage, or crowd.',
   ),
@@ -106,7 +104,6 @@ AchievementProofSpec proofSpecForCategory(
     ),
     AchievementCategory.health => const AchievementProofSpec(
       proofType: AchievementProofType.multi,
-      minProofImages: 1,
       maxProofImages: 3,
       proofHint:
           'App screenshot, race result, scale trend, or gym log — no sensitive medical IDs.',
@@ -135,14 +132,12 @@ AchievementProofSpec proofSpecForCategory(
     ),
     AchievementCategory.creative => const AchievementProofSpec(
       proofType: AchievementProofType.multi,
-      minProofImages: 1,
       maxProofImages: 4,
       proofHint:
           'Portfolio piece, storefront link screenshot, or performance photo.',
     ),
     AchievementCategory.life => const AchievementProofSpec(
       proofType: AchievementProofType.multi,
-      minProofImages: 1,
       maxProofImages: 4,
       proofHint:
           'Photos that show the moment — blur faces or addresses if needed.',

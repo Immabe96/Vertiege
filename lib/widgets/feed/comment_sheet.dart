@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/post.dart';
@@ -158,10 +158,9 @@ class _CommentSheetState extends State<CommentSheet> {
       if (depth > 20) return depth;
       if (visited.contains(current)) break;
       visited.add(current);
-      final comment = widget.comments.firstWhere(
-        (c) => c.id == current,
-        orElse: () => widget.comments.first,
-      );
+      final idx = widget.comments.indexWhere((c) => c.id == current);
+      if (idx == -1) break;
+      final comment = widget.comments[idx];
       current = comment.parentId;
       if (current != null) depth++;
     }
@@ -170,7 +169,6 @@ class _CommentSheetState extends State<CommentSheet> {
 
   Widget _buildThreadBody({
     required ThemeData theme,
-    required bool isDark,
     required List<Comment> tree,
     required ScrollController scrollController,
   }) {
@@ -249,7 +247,7 @@ class _CommentSheetState extends State<CommentSheet> {
                     horizontal: VSpacing.md,
                     vertical: VSpacing.xs,
                   ),
-                  color: (isDark ? VColors.surfaceContainerDark : VColors.surfaceContainer).withValues(alpha: 0.5),
+                  color: VColors.surfaceContainerDark.withValues(alpha: 0.5),
                   child: Row(
                     children: [
                       Icon(
@@ -303,7 +301,7 @@ class _CommentSheetState extends State<CommentSheet> {
                           hintText: _replyToId != null
                               ? 'Reply to $_replyToName...'
                               : 'Add a comment...',
-                          border: OutlineInputBorder(
+                          border: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(VRadius.md),
                             ),
@@ -335,13 +333,11 @@ class _CommentSheetState extends State<CommentSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final tree = _buildTree(widget.comments);
 
     if (widget.embedded) {
       return _buildThreadBody(
         theme: theme,
-        isDark: isDark,
         tree: tree,
         scrollController: _listController!,
       );
@@ -365,7 +361,6 @@ class _CommentSheetState extends State<CommentSheet> {
           ),
           child: _buildThreadBody(
             theme: theme,
-            isDark: isDark,
             tree: tree,
             scrollController: scrollController,
           ),
@@ -384,7 +379,7 @@ class _SortDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<CommentSort>(
-      icon: Icon(Icons.sort, size: VIconSize.md, color: VColors.outline),
+      icon: const Icon(Icons.sort, size: VIconSize.md, color: VColors.outline),
       tooltip: 'Sort comments',
       itemBuilder: (context) => [
         const PopupMenuItem(

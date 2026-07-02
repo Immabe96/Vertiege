@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +8,6 @@ import '../../models/resident.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../services/access_control.dart';
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/core/loading_state.dart';
 import 'access_icon.dart';
@@ -154,16 +153,14 @@ class WorldAccessGuard extends ConsumerWidget {
               style: Theme.of(context).textTheme.labelSmall,
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                icon: const Icon(VIcons.trophy),
-                label: const Text('Go to Achievements'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  context.push('/achievements');
-                },
-              ),
+            VButton(
+              label: 'Go to Achievements',
+              icon: const Icon(VIcons.trophy),
+              isFullWidth: true,
+              onPressed: () {
+                Navigator.pop(context);
+                context.push('/achievements');
+              },
             ),
             const SizedBox(height: 8),
             VButton(

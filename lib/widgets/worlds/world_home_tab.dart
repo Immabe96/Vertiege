@@ -5,7 +5,6 @@ import '../../config/progression_glossary.dart';
 import '../../config/world_page_ia.dart';
 import '../../models/post.dart';
 import '../../models/world.dart';
-import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/empty_state.dart';
 import '../core/progression_help_button.dart';
@@ -58,7 +57,6 @@ class WorldHomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final announcement = _adminAnnouncement;
     final previews = _discussionPreviews;
 
@@ -67,11 +65,11 @@ class WorldHomeTab extends StatelessWidget {
       children: [
         if (world.isArchive) const ArchiveWorldBanner(),
         const SizedBox(height: VSpacing.sm),
-        _GroupMetaCard(world: world, isDark: isDark),
+        _GroupMetaCard(world: world),
         WorldGrowthCard(world: world),
         if (announcement != null) ...[
           const SizedBox(height: VSpacing.md),
-          _AdminAnnouncementCard(post: announcement, isDark: isDark),
+          _AdminAnnouncementCard(post: announcement),
         ],
         if (isJoined) ...[
           const SizedBox(height: VSpacing.md),
@@ -92,9 +90,11 @@ class WorldHomeTab extends StatelessWidget {
             ),
             const Spacer(),
             if (previews.isNotEmpty)
-              TextButton(
+              VButton(
+                label: 'See all',
+                variant: ButtonVariant.text,
+                size: ButtonSize.small,
                 onPressed: onOpenFeed,
-                child: const Text('See all'),
               ),
           ],
         ),
@@ -110,13 +110,14 @@ class WorldHomeTab extends StatelessWidget {
           ...previews.map(
             (post) => Padding(
               padding: const EdgeInsets.only(bottom: VSpacing.sm),
-              child: _DiscussionPreview(post: post, isDark: isDark),
+              child: _DiscussionPreview(post: post),
             ),
           ),
         const SizedBox(height: VSpacing.md),
-        TextButton(
+        VButton(
+          label: 'Realm guide, alliances & vault',
+          variant: ButtonVariant.text,
           onPressed: onOpenRealmGuide,
-          child: const Text('Realm guide, alliances & vault'),
         ),
         ProgressionHelpLink(
           focus: world.type == WorldType.dominion
@@ -132,11 +133,9 @@ class WorldHomeTab extends StatelessWidget {
 /// Group facts — identity lives in [WorldProfileHeader] above the tabs.
 class _GroupMetaCard extends StatelessWidget {
   final World world;
-  final bool isDark;
 
   const _GroupMetaCard({
     required this.world,
-    required this.isDark,
   });
 
   @override
@@ -145,7 +144,7 @@ class _GroupMetaCard extends StatelessWidget {
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final desc = world.description.trim();
 
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(
@@ -221,7 +220,6 @@ class _MetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final fg = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Container(
@@ -250,11 +248,9 @@ class _MetaChip extends StatelessWidget {
 
 class _AdminAnnouncementCard extends StatelessWidget {
   final Post post;
-  final bool isDark;
 
   const _AdminAnnouncementCard({
     required this.post,
-    required this.isDark,
   });
 
   @override
@@ -271,7 +267,7 @@ class _AdminAnnouncementCard extends StatelessWidget {
         ),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.08),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
             Colors.transparent,
           ],
           begin: Alignment.topLeft,
@@ -321,11 +317,9 @@ class _AdminAnnouncementCard extends StatelessWidget {
 
 class _DiscussionPreview extends StatelessWidget {
   final Post post;
-  final bool isDark;
 
   const _DiscussionPreview({
     required this.post,
-    required this.isDark,
   });
 
   @override
@@ -333,7 +327,7 @@ class _DiscussionPreview extends StatelessWidget {
     final theme = Theme.of(context);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
 
-    return VSurfaceCard(
+    return VCard(
       child: Padding(
         padding: const EdgeInsets.all(VSpacing.md),
         child: Column(

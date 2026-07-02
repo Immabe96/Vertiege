@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../config/build_info.dart';
 import '../theme/v_tokens.dart';
 import '../ui/buttons/v_button.dart';
-import '../ui/icons/v_icons.dart';
 import '../widgets/core/v_dialog.dart';
 
 /// Shared privacy, terms, and license surfaces (Wave 15 — More + Settings).

@@ -1,9 +1,9 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 
 /// AI-assisted banner generator that creates 4 procedural variants
 /// seeded deterministically from the world's ID and properties.
@@ -68,7 +68,7 @@ class _BannerGeneratorState extends State<BannerGenerator> {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () => widget.onSelect(index),
-          child: VSurfacePanel(
+          child: VCard(
             padding: EdgeInsets.zero,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(VRadius.xl),
@@ -122,13 +122,13 @@ class _BannerGeneratorState extends State<BannerGenerator> {
 class _GeneratingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return VSurfacePanel(
+    return VCard(
       padding: const EdgeInsets.all(VSpacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _PulseWidget(
-            child: const Icon(
+          const _PulseWidget(
+            child: Icon(
               Icons.auto_awesome,
               size: VIconSize.xl,
               color: VColors.tertiary,

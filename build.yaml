@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      riverpod_generator:
+        options:
+          # Generate providers with the same names as current manual declarations
+          # where possible (class name controls generated provider name).

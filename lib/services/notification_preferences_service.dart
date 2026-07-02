@@ -40,13 +40,11 @@ abstract final class NotificationPreferencesService {
     await client.rpc(
       'upsert_notification_preferences',
       params: {
-        if (likesEnabled != null) 'p_likes_enabled': likesEnabled,
-        if (commentsEnabled != null) 'p_comments_enabled': commentsEnabled,
-        if (worldInvitesEnabled != null)
-          'p_world_invites_enabled': worldInvitesEnabled,
-        if (tierUpgradesEnabled != null)
-          'p_tier_upgrades_enabled': tierUpgradesEnabled,
-        if (pushEnabled != null) 'p_push_enabled': pushEnabled,
+        'p_likes_enabled': ?likesEnabled,
+        'p_comments_enabled': ?commentsEnabled,
+        'p_world_invites_enabled': ?worldInvitesEnabled,
+        'p_tier_upgrades_enabled': ?tierUpgradesEnabled,
+        'p_push_enabled': ?pushEnabled,
       },
     );
   }

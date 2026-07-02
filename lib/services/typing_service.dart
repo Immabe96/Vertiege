@@ -14,6 +14,7 @@ class TypingService {
   static const Duration _cleanupDelay = Duration(seconds: 7);
   static const String _broadcastEvent = 'typing';
 
+  static const int _maxListeners = 64;
   static final List<void Function(String roomId, String userId, bool isTyping)>
       _listeners = [];
 
@@ -51,6 +52,9 @@ class TypingService {
   static void addListener(
     void Function(String roomId, String userId, bool isTyping) listener,
   ) {
+    if (_listeners.length >= _maxListeners) {
+      _listeners.removeAt(0);
+    }
     _listeners.add(listener);
   }
 

@@ -40,7 +40,7 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
   bool get _isValid {
     final email = _emailController.text.trim();
     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) &&
-        _passwordController.text.length >= 6;
+        _passwordController.text.length >= 8;
   }
 
   Future<void> _routeAfterSignIn() async {
@@ -121,10 +121,9 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? VColors.surfaceDark : VColors.surface,
+      backgroundColor: VColors.surfaceDark,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -198,9 +197,10 @@ class _VerifierLoginScreenState extends ConsumerState<VerifierLoginScreen> {
                     isLoading: _isLoading,
                   ),
                   const SizedBox(height: VSpacing.md),
-                  TextButton(
+                  VButton(
+                    label: 'Use player sign-in instead',
+                    variant: ButtonVariant.text,
                     onPressed: _isLoading ? null : () => context.go('/login'),
-                    child: const Text('Use player sign-in instead'),
                   ),
                 ],
               ),

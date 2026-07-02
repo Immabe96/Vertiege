@@ -17,7 +17,6 @@ class FeedSortDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final label = switch (currentSort) {
       FeedSort.latest => 'Latest',
@@ -25,7 +24,7 @@ class FeedSortDropdown extends StatelessWidget {
       FeedSort.top => 'Top',
     };
 
-    final mutedColor = isDark ? VColors.onSurfaceVariantDark : VColors.onSurfaceVariant;
+    const mutedColor = VColors.onSurfaceVariantDark;
 
     return PopupMenuButton<FeedSort>(
       initialValue: currentSort,
@@ -43,7 +42,7 @@ class FeedSortDropdown extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sort, size: VIconSize.denseSm, color: mutedColor),
+            const Icon(Icons.sort, size: VIconSize.denseSm, color: mutedColor),
             const SizedBox(width: 4),
             Text(
               label,
@@ -52,7 +51,7 @@ class FeedSortDropdown extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 2),
-            Icon(
+            const Icon(
               Icons.arrow_drop_down,
               size: VIconSize.sm,
               color: mutedColor,

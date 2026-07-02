@@ -30,7 +30,7 @@ class TrophyCase extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(VIcons.trophy, size: VIconSize.sm, color: VColors.tertiary),
+              const Icon(VIcons.trophy, size: VIconSize.sm, color: VColors.tertiary),
               const SizedBox(width: VSpacing.xs),
               Text(
                 'Trophy Case',

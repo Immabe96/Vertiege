@@ -26,10 +26,24 @@ class _WorldPulseIndicatorState extends State<WorldPulseIndicator>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
+    );
     _animation = Tween<double>(begin: 0.2, end: 0.6).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+    if (_shouldAnimate) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(WorldPulseIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_shouldAnimate && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!_shouldAnimate && _controller.isAnimating) {
+      _controller.stop();
+      _controller.reset();
+    }
   }
 
   @override

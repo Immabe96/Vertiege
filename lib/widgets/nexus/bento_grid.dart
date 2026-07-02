@@ -1,8 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 
-import '../../theme/v_commune_colors.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
 
 class BentoGrid extends StatelessWidget {
   final List<BentoCard> cards;
@@ -181,43 +180,28 @@ class _BentoCardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
     final padding = flat ? VSpacing.sm : VSpacing.md;
     final innerHeight = height - (padding * 2);
-    final surface = flat
-        ? DecoratedBox(
-            decoration: BoxDecoration(
-              color: VCommuneColors.surfaceSecondaryOf(brightness),
-              borderRadius: BorderRadius.circular(VRadius.md),
-              border: Border.all(color: VCommuneColors.dividerOf(brightness)),
+    final surface = DecoratedBox(
+      decoration: BoxDecoration(
+        color: PrestigeNoir.surfaceRaised,
+        borderRadius: BorderRadius.circular(VRadius.bento),
+        border: Border.all(color: PrestigeNoir.borderLight),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(padding),
+        child: ClipRect(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: width - (padding * 2),
+              height: innerHeight,
+              child: card.child,
             ),
-            child: Padding(
-              padding: EdgeInsets.all(padding),
-              child: ClipRect(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: SizedBox(
-                    width: width - (padding * 2),
-                    height: innerHeight,
-                    child: card.child,
-                  ),
-                ),
-              ),
-            ),
-          )
-        : VSurfacePanel(
-            padding: EdgeInsets.all(padding),
-            child: ClipRect(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: width - (padding * 2),
-                  height: innerHeight,
-                  child: card.child,
-                ),
-              ),
-            ),
-          );
+          ),
+        ),
+      ),
+    );
     final child = SizedBox(
       width: width,
       height: height,

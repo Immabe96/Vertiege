@@ -89,7 +89,6 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return VHubPage(
       title: 'Twin Seal (2FA)',
@@ -147,7 +146,6 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
   }
 
   Widget _buildSuccessState(ThemeData theme) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Column(
         children: [
@@ -169,10 +167,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: VSpacing.xl),
-          FilledButton.icon(
-            onPressed: () => Navigator.pop(context),
+          VButton(
+            label: 'Done',
             icon: const Icon(VIcons.badgeCheck),
-            label: const Text('Done'),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
@@ -180,7 +178,6 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
   }
 
   Widget _buildVerifyState(ThemeData theme) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -203,7 +200,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
             child: Container(
               padding: const EdgeInsets.all(VSpacing.md),
               decoration: BoxDecoration(
-                color: isDark ? VColors.surfaceDark : VColors.surface,
+                color: VColors.surfaceDark,
                 borderRadius: BorderRadius.circular(VRadius.xl),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.outlineVariant,
@@ -214,9 +211,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                   Container(
                     width: 200,
                     height: 200,
-                    color: isDark
-                        ? VColors.surfaceContainerDark
-                        : VColors.surfaceContainer,
+                    color: VColors.surfaceContainerDark,
                     child: Center(
                       child: Text(
                         'QR Code\n(Use qr_flutter package)',
@@ -237,7 +232,10 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                     ),
                   ),
                   const SizedBox(height: VSpacing.sm),
-                  TextButton.icon(
+                  VButton(
+                    label: 'Copy secret',
+                    icon: const Icon(Icons.copy, size: VIconSize.sm),
+                    variant: ButtonVariant.text,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _secret!));
                       VFeedback.showMessage(
@@ -246,8 +244,6 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                         duration: const Duration(seconds: 2),
                       );
                     },
-                    icon: const Icon(Icons.copy, size: VIconSize.sm),
-                    label: const Text('Copy secret'),
                   ),
                 ],
               ),
@@ -258,7 +254,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
           controller: _codeController,
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: VFontSize.headlineLg,
             fontFamily: VFont.mono,
             letterSpacing: 8,
@@ -271,9 +267,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
               borderRadius: BorderRadius.circular(VRadius.xl),
             ),
             filled: true,
-            fillColor: isDark
-                ? VColors.surfaceContainerDark
-                : VColors.surfaceContainer,
+            fillColor: VColors.surfaceContainerDark,
           ),
         ),
         const SizedBox(height: VSpacing.lg),
@@ -292,7 +286,6 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
   }
 
   Widget _generateState(ThemeData theme) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -319,7 +312,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
           label: 'Generate Secret',
           isFullWidth: true,
           isLoading: _isLoading,
-          icon: Icon(VIcons.shield),
+          icon: const Icon(VIcons.shield),
           onPressed: _generateSecret,
         ),
       ],

@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../models/invite.dart';
 import '../../utils/date_format.dart';
-import '../../widgets/core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
+import '../../ui/buttons/v_button.dart';
 import '../../widgets/core/loading_state.dart';
 
 class WorldSettingsInvites extends StatelessWidget {
@@ -58,20 +59,13 @@ class WorldSettingsInvites extends StatelessWidget {
         ),
         const SizedBox(height: VSpacing.md),
         if (residentId == sovereignId)
-          SizedBox(
-            width: double.infinity,
-            height: VTouchTarget.minimum,
-            child: OutlinedButton.icon(
-              onPressed: isGenerating ? null : onGenerate,
-              icon: isGenerating
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.link),
-              label: Text(isGenerating ? 'Generating...' : 'Generate Invite'),
-            ),
+          VButton(
+            label: 'Generate Invite',
+            icon: const Icon(Icons.link),
+            variant: ButtonVariant.outlined,
+            isFullWidth: true,
+            isLoading: isGenerating,
+            onPressed: isGenerating ? null : onGenerate,
           ),
         if (generatedCode != null) ...[
           const SizedBox(height: VSpacing.md),
@@ -140,8 +134,7 @@ class _InviteRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: VSpacing.sm),
-      child: VSurfacePanel(
-        padding: const EdgeInsets.all(VSpacing.md),
+      child: VCard(
         borderRadius: BorderRadius.circular(VRadius.xl),
         child: Row(
           children: [

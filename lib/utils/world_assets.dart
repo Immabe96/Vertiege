@@ -132,7 +132,7 @@ class WorldAssets {
     'inApp': 'assets/generated/ach-community.png',
   };
 
-  /// Pool of pre-approved accent colors drawn from AppColors.
+  /// Pool of pre-approved accent colors drawn from VColors.
   static final _accentPalette = <Color>[
     VColors.achievementSocial,
     VColors.achievementFinance,

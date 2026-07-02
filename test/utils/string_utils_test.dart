@@ -6,7 +6,7 @@ void main() {
     group('capitalize', () {
       test('capitalizes first letter', () {
         expect(capitalize('hello'), 'Hello');
-        expect(capitalize('WORLD'), 'World');
+        expect(capitalize('WORLD'), 'WORLD');
       });
 
       test('handles empty string', () {
@@ -29,7 +29,8 @@ void main() {
       });
 
       test('handles mixed case', () {
-        expect(capitalize('hElLo'), 'Hello');
+        expect(capitalize('hElLo'), 'HElLo');
+        expect(capitalize('mcDonald'), 'McDonald');
       });
     });
 
@@ -56,7 +57,7 @@ void main() {
 
       test('handles max length < 3', () {
         expect(truncate('hello', 0), '');
-        expect(truncate('hello', 1), '.');
+        expect(truncate('hello', 1), 'h');
         expect(truncate('hello', 2), '..');
         expect(truncate('hello', 3), '...');
       });

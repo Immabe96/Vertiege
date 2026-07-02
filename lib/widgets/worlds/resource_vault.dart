@@ -5,7 +5,7 @@ import '../../models/channel.dart';
 import '../../router/world_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../core/glass_panel.dart';
+import '../../ui/cards/v_card.dart';
 
 class ResourceVault extends StatelessWidget {
   final String worldId;
@@ -25,7 +25,7 @@ class ResourceVault extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
-      child: VSurfacePanel(
+      child: VCard(
         padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

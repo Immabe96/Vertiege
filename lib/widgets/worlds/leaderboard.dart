@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
@@ -76,12 +76,12 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
     final theme = Theme.of(context);
 
     if (_loading) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: VSpacing.xs),
         child: Row(
           children: [
-            const Pulse(width: 28, height: 28, borderRadius: VRadius.pill),
-            const SizedBox(width: VSpacing.sm),
+            Pulse(width: 28, height: 28, borderRadius: VRadius.pill),
+            SizedBox(width: VSpacing.sm),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -90,13 +90,11 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
                   Pulse(
                     width: 140,
                     height: VFontSize.bodyMd,
-                    borderRadius: VRadius.sm,
                   ),
-                  const SizedBox(height: VSpacing.xs),
+                  SizedBox(height: VSpacing.xs),
                   Pulse(
                     width: 64,
                     height: VFontSize.labelSm,
-                    borderRadius: VRadius.sm,
                   ),
                 ],
               ),
@@ -160,7 +158,7 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.leaderboard,
                   size: VIconSize.md,
                   color: VColors.achievementFinance,

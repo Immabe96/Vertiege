@@ -220,7 +220,7 @@ class StoreService {
               purchase.verificationData.serverVerificationData;
           lastPurchasedProductId = purchase.productID;
         }
-        InAppPurchase.instance.completePurchase(purchase);
+        _store.completePurchase(purchase);
         completer?.complete(StorePurchaseState.purchased);
         _pendingPurchases.remove(purchase.productID);
       } else if (purchase.status == PurchaseStatus.error) {

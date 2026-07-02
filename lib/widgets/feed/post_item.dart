@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +25,7 @@ import 'comment_sheet.dart';
 import 'post_action_bar.dart';
 import 'reaction_bar.dart';
 import '../core/tab_aware_sheet.dart';
+import '../../ui/overlays/v_dialog.dart';
 import '../../state/world_mute_provider.dart';
 import 'heart_animation.dart';
 import 'post_image.dart';
@@ -47,7 +48,7 @@ class PostItem extends ConsumerWidget {
     final isOwnPost = resident?.id == post.residentId;
     final canMod = _canDelete(ref);
     final canPin = _canPin(ref);
-    final showOverflow = canMod || !isOwnPost || canPin || isOwnPost;
+    final showOverflow = canMod || canPin;
 
     // Build a resident name -> ID map from all posts for mention resolution
     final postState = ref.watch(postProvider);
@@ -413,19 +414,19 @@ class PostItem extends ConsumerWidget {
 
   void _onEdit(BuildContext context, WidgetRef ref) {
     final ctrl = TextEditingController(text: post.content);
-    showTabAwareDialog(
+    showTabAwareVDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit post'),
-        content: TextField(
-          controller: ctrl,
-          maxLines: 3,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-        ),
-        actions: [
+      title: 'Edit post',
+      content: TextField(
+        controller: ctrl,
+        maxLines: 3,
+        decoration: const InputDecoration(border: OutlineInputBorder()),
+      ),
+      actions: [
+        vDialogActionsRow([
           VButton(
             label: 'Cancel',
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             variant: ButtonVariant.text,
           ),
           VButton(
@@ -434,13 +435,13 @@ class PostItem extends ConsumerWidget {
               final text = ctrl.text.trim();
               if (text.isNotEmpty) {
                 ref.read(postProvider.notifier).editPost(post.id, text);
-                Navigator.pop(ctx);
+                Navigator.pop(context);
               }
             },
           ),
-        ],
-      ),
-    );
+        ]),
+      ],
+    ).whenComplete(ctrl.dispose);
   }
 
   void _showResidentPreview(BuildContext context, WidgetRef ref) {
@@ -457,7 +458,6 @@ class PostItem extends ConsumerWidget {
         padding: const EdgeInsets.all(VSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: VSpacing.lg),
             CosmeticAvatar(
@@ -493,7 +493,7 @@ class PostItem extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  FilledButton.icon(
+                  VButton(
                     onPressed: () {
                       final notifier = ref.read(residentProvider.notifier);
                       if (isFollowing) {
@@ -510,40 +510,30 @@ class PostItem extends ConsumerWidget {
                       isFollowing ? Icons.person_remove : Icons.person_add,
                       size: VIconSize.sm,
                     ),
-                    label: Text(isFollowing ? 'Unfollow' : 'Follow'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: VColors.tertiary,
-                      foregroundColor: VColors.onTertiary,
-                    ),
+                    label: isFollowing ? 'Unfollow' : 'Follow',
                   ),
                   const SizedBox(width: VSpacing.md),
-                  OutlinedButton.icon(
+                  VButton(
+                    variant: ButtonVariant.outlined,
                     onPressed: () {
                       Navigator.pop(context);
                       // Navigate to full profile on second tap
                       context.push(residentProfilePath(post.residentId));
                     },
                     icon: const Icon(VIcons.user, size: VIconSize.sm),
-                    label: const Text('View Profile'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.primary,
-                      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                    ),
+                    label: 'View Profile',
                   ),
                 ],
               )
             else
-              OutlinedButton.icon(
+              VButton(
+                variant: ButtonVariant.outlined,
                 onPressed: () {
                   Navigator.pop(context);
                   context.push(residentProfilePath(post.residentId));
                 },
                 icon: const Icon(VIcons.user, size: VIconSize.sm),
-                label: const Text('View My Profile'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                ),
+                label: 'View My Profile',
               ),
             const SizedBox(height: VSpacing.lg),
           ],
@@ -574,7 +564,6 @@ class PostItem extends ConsumerWidget {
     if (resident == null) return;
     ReportSheet.show(
       context,
-      targetLabel: 'post',
       onSubmit: (reason, details) {
         Navigator.pop(context);
         ModerationService.submitReport(
@@ -929,7 +918,6 @@ class _DecreeLabelState extends State<_DecreeLabel>
                   alpha: 0.15 + (0.2 * _controller.value),
                 ),
                 blurRadius: 8,
-                spreadRadius: 0,
               ),
             ],
           ),

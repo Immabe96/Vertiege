@@ -116,7 +116,7 @@ class _ResidentListContentState extends ConsumerState<_ResidentListContent> {
           const SizedBox(height: VSpacing.md),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: VSpinner())
                 : _members.isEmpty
                 ? Center(
                     child: Text(
@@ -185,7 +185,7 @@ class _ResidentListContentState extends ConsumerState<_ResidentListContent> {
                             ),
                             if (identityTick) ...[
                               const SizedBox(width: VSpacing.xxs),
-                              Icon(
+                              const Icon(
                                 VIcons.badgeCheck,
                                 size: VIconSize.sm,
                                 color: VCommuneColors.textLink,

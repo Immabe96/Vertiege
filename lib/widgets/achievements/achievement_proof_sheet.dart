@@ -9,6 +9,7 @@ import '../../services/achievement_proof_upload.dart';
 import '../../state/achievement_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../ui/buttons/v_button.dart';
 import '../../ui/icons/v_icons.dart';
 import 'achievement_icon.dart';
 import 'achievement_resubmit_banner.dart';
@@ -153,7 +154,6 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final accent = statusColor(widget.status);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final profileVisible = ref
@@ -368,9 +368,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                       height: 100,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? VColors.surfaceContainerHighDark
-                            : VColors.surfaceContainerHigh,
+                        color: VColors.surfaceContainerHighDark,
                         borderRadius: BorderRadius.circular(VRadius.xl),
                         border: Border.all(
                           color: Theme.of(context).colorScheme.outlineVariant,
@@ -385,16 +383,16 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                       ),
                     ),
                   const SizedBox(height: VSpacing.md),
-                  OutlinedButton.icon(
+                  VButton(
+                    variant: ButtonVariant.outlined,
                     onPressed: _proofImagePaths.length >= _ach.effectiveMaxImages
                         ? null
                         : _pickImages,
                     icon: const Icon(Icons.add_photo_alternate_outlined),
-                    label: Text(
-                      _proofImagePaths.isEmpty
-                          ? 'Add photos'
-                          : 'Add more (${_proofImagePaths.length}/${_ach.effectiveMaxImages})',
-                    ),
+                    label: _proofImagePaths.isEmpty
+                        ? 'Add photos'
+                        : 'Add more (${_proofImagePaths.length}/${_ach.effectiveMaxImages})',
+                    isFullWidth: true,
                   ),
                   if (_errorText != null) ...[
                     const SizedBox(height: VSpacing.sm),
@@ -407,27 +405,12 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                     ),
                   ],
                   const SizedBox(height: VSpacing.lg),
-                  FButton(
-                    onPress: _isUploading ? null : _submit,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (_isUploading)
-                          const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        else
-                          const Icon(VIcons.upload, size: VIconSize.base),
-                        const SizedBox(width: VSpacing.sm),
-                        Text(
-                          _isUploading
-                              ? 'Submitting…'
-                              : 'Submit for review',
-                        ),
-                      ],
-                    ),
+                  VButton(
+                    onPressed: _isUploading ? null : _submit,
+                    isLoading: _isUploading,
+                    icon: const Icon(VIcons.upload, size: VIconSize.base),
+                    label: 'Submit for review',
+                    isFullWidth: true,
                   ),
                 ],
               ],
