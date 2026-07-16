@@ -334,9 +334,17 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
   Future<void> _safeLoad(String name, Future<void> Function() load) async {
     try {
-      await load().timeout(const Duration(seconds: 5));
+      // Background loads share a cold-start connection pool; allow headroom.
+      await load().timeout(const Duration(seconds: 20));
+    } on TimeoutException catch (e, st) {
+      debugPrint('Splash: $name load timed out (continuing in background)');
+      CrashReporter.instance.recordError(
+        e,
+        st,
+        hint: 'splash background load timeout: $name',
+      );
     } catch (e, st) {
-      debugPrint('Splash: $name load failed/timed out');
+      debugPrint('Splash: $name load failed');
       CrashReporter.instance.recordError(
         e,
         st,

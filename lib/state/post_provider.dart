@@ -1261,7 +1261,8 @@ class PostNotifier extends _$PostNotifier {
       cursor: append ? _nexusCursor : null,
     );
 
-    if (nexusResult.items.isNotEmpty || !append) {
+    // Successful Nexus response (including empty feed) — do not treat empty as error.
+    if (nexusResult != null && (nexusResult.items.isNotEmpty || !append)) {
       _nexusCursor = nexusResult.nextCursor;
       _nexusHasMore = nexusResult.hasMore;
 
@@ -1272,9 +1273,7 @@ class PostNotifier extends _$PostNotifier {
 
       return (
         posts: merged,
-        loadError: merged.isEmpty && !append
-            ? 'Could not load posts from your worlds. Pull to refresh.'
-            : null,
+        loadError: null,
         hasMore: nexusResult.hasMore,
       );
     }

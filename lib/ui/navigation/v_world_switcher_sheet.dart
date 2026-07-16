@@ -124,7 +124,7 @@ class _WorldSwitcherBodyState extends State<_WorldSwitcherBody> {
                         child: ListTile(
                           leading: WorldIcon(
                             worldId: world.assetKey,
-                            size: 36,
+                            size: VWorldIconSize.dense,
                             useGlassContainer: false,
                           ),
                           title: Text(

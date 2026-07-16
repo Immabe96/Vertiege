@@ -9,7 +9,45 @@ class LeagueService {
   static const promotionCount = 7;
   static const demotionCount = 5;
 
-  static Future<Map<String, dynamic>> getCurrentSeason() async {
+  static Map<String, dynamic>? _cachedSeason;
+  static DateTime? _cachedSeasonAt;
+  static Future<Map<String, dynamic>>? _seasonInFlight;
+  static const _seasonCacheTtl = Duration(minutes: 5);
+
+  /// Clears the in-memory season cache (e.g. after sign-out).
+  static void clearSeasonCache() {
+    _cachedSeason = null;
+    _cachedSeasonAt = null;
+    _seasonInFlight = null;
+  }
+
+  static Future<Map<String, dynamic>> getCurrentSeason({
+    bool forceRefresh = false,
+  }) async {
+    final cached = _cachedSeason;
+    final cachedAt = _cachedSeasonAt;
+    if (!forceRefresh &&
+        cached != null &&
+        cachedAt != null &&
+        DateTime.now().difference(cachedAt) < _seasonCacheTtl) {
+      return cached;
+    }
+
+    final inFlight = _seasonInFlight;
+    if (inFlight != null) return inFlight;
+
+    final future = _fetchCurrentSeason();
+    _seasonInFlight = future;
+    try {
+      return await future;
+    } finally {
+      if (identical(_seasonInFlight, future)) {
+        _seasonInFlight = null;
+      }
+    }
+  }
+
+  static Future<Map<String, dynamic>> _fetchCurrentSeason() async {
     final client = getSupabase();
     final response = await client
         .from('league_seasons')
@@ -17,9 +55,10 @@ class LeagueService {
         .eq('is_active', true)
         .maybeSingle();
 
-    if (response != null) return response;
-
-    return createNewSeason();
+    final season = response ?? await createNewSeason();
+    _cachedSeason = season;
+    _cachedSeasonAt = DateTime.now();
+    return season;
   }
 
   static Future<Map<String, dynamic>> createNewSeason() async {
@@ -36,6 +75,8 @@ class LeagueService {
 
     await client.from('league_seasons').update({'is_active': false}).neq('id', response['id']);
 
+    _cachedSeason = response;
+    _cachedSeasonAt = DateTime.now();
     return response;
   }
 

@@ -294,43 +294,67 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ],
               ),
               const SizedBox(height: VSpacing.sm),
-              InkWell(
-                onTap: () => _editStatus(resident),
-                borderRadius: BorderRadius.circular(VRadius.sm),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: VSpacing.xxs),
-                  child: Row(
-                    children: [
-                      StatusDot(presence: presence, size: 8),
-                      const SizedBox(width: VSpacing.xs),
-                      Expanded(
-                        child: Text(
-                          statusText,
-                          style: const TextStyle(
-                            fontSize: VFontSize.labelSm,
-                            color: PrestigeNoir.muted,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _editStatus(resident),
+                      borderRadius: BorderRadius.circular(VRadius.sm),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: VSpacing.xxs,
+                        ),
+                        child: Row(
+                          children: [
+                            StatusDot(presence: presence, size: 8),
+                            const SizedBox(width: VSpacing.xs),
+                            Expanded(
+                              child: Text(
+                                statusText,
+                                style: const TextStyle(
+                                  fontSize: VFontSize.labelSm,
+                                  color: PrestigeNoir.muted,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Icon(
-                        Icons.edit_outlined,
-                        size: VIconSize.sm,
-                        color: PrestigeNoir.muted,
-                      ),
-                      const SizedBox(width: VSpacing.sm),
-                      Text(
-                        '${resident.sovereignCoins} coins',
-                        style: const TextStyle(
-                          fontSize: VFontSize.labelSm,
-                          color: VColors.brand,
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(width: VSpacing.sm),
+                  InkWell(
+                    onTap: () => context.push('/shop'),
+                    borderRadius: BorderRadius.circular(VRadius.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.xs,
+                        vertical: VSpacing.xxs,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            VIcons.coins,
+                            size: VIconSize.sm,
+                            color: VColors.brand,
+                          ),
+                          const SizedBox(width: VSpacing.xxs),
+                          Text(
+                            '${resident.sovereignCoins}',
+                            style: const TextStyle(
+                              fontSize: VFontSize.labelSm,
+                              color: VColors.brand,
+                              fontWeight: VFontWeight.semiBold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1032,7 +1056,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 child: CompletionHint(
                   icon: Icons.auto_awesome,
                   title: 'Add a bio',
-                  subtitle: 'Tell people who you are and what you do.',
+                  subtitle: 'Tell residents who you are and what you do.',
                   color: VColors.warning,
                   onTap: () => _showEditProfileSheet(resident),
                 ),

@@ -232,9 +232,17 @@ class WorldService {
       return [];
     }
     final client = getSupabase();
+    // Explicit column list keeps payload lean vs select('*').
     final data = await client
         .from('worlds')
-        .select()
+        .select(
+          'id, slug, name, description, icon, banner, type, dominion_type, '
+          'sovereign_id, sovereign_name, member_count, prestige, activity_score, '
+          'boost_count, last_boost_month, sort_order, created_at, is_default, '
+          'required_tier, required_profession, tags, world_currency_name, '
+          'tax_rate, landmark_level, constitution, motto, accent_color, lore, '
+          'lineage, welcome_message, visibility',
+        )
         .order('sort_order', ascending: true)
         .order('created_at', ascending: false);
     return (data as List).cast<Map<String, dynamic>>();
@@ -345,7 +353,8 @@ class WorldService {
       final data = await client
           .from('world_members')
           .select(
-            '*, profiles(avatar_url, tier, total_xp, last_seen_at, verified_roles, presence_mode, custom_status, avatar_frame_id)',
+            '*, profiles(avatar_url, tier, total_xp, last_seen_at, '
+            'verified_roles, presence_mode, custom_status, avatar_frame_id)',
           )
           .eq('world_id', worldId)
           .order('rep', ascending: false);
@@ -354,12 +363,28 @@ class WorldService {
           .map(_flattenMemberProfile)
           .toList();
     } catch (_) {
-      final data = await client
-          .from('world_members')
-          .select()
-          .eq('world_id', worldId)
-          .order('rep', ascending: false);
-      return (data as List).cast<Map<String, dynamic>>();
+      try {
+        // Fallback without cosmetics column if migration lagging.
+        final data = await client
+            .from('world_members')
+            .select(
+              '*, profiles(avatar_url, tier, total_xp, last_seen_at, '
+              'verified_roles, presence_mode, custom_status)',
+            )
+            .eq('world_id', worldId)
+            .order('rep', ascending: false);
+        return (data as List)
+            .cast<Map<String, dynamic>>()
+            .map(_flattenMemberProfile)
+            .toList();
+      } catch (_) {
+        final data = await client
+            .from('world_members')
+            .select()
+            .eq('world_id', worldId)
+            .order('rep', ascending: false);
+        return (data as List).cast<Map<String, dynamic>>();
+      }
     }
   }
 

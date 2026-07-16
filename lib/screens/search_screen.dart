@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../utils/provider_errors.dart';
+import '../utils/world_resident_count_label.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/sync_warning_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -612,7 +613,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
             const SizedBox(height: VSpacing.md),
             Text(
-              'Search worlds, people, and posts',
+              'Search worlds, residents, and posts',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: PrestigeNoir.muted,
               ),
@@ -785,7 +786,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             ),
                           ),
                           Text(
-                            'World · ${world.memberCount} members',
+                            'World · ${worldMemberCountLabel(world.memberCount)}',
                             style: const TextStyle(
                               fontSize: VFontSize.labelSm,
                               color: PrestigeNoir.muted,
@@ -835,7 +836,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
                 const SizedBox(height: VSpacing.md),
                 Text(
-                  'Search worlds, people, and posts',
+                  'Search worlds, residents, and posts',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: PrestigeNoir.muted,
                   ),
@@ -969,7 +970,7 @@ class _WorldTile extends StatelessWidget {
             children: [
               WorldIcon(
                 worldId: world.assetKey,
-                size: 36,
+                size: VWorldIconSize.dense,
                 useGlassContainer: false,
               ),
               const SizedBox(width: 10),
@@ -1242,6 +1243,7 @@ class _PrestigeSearchPillState extends State<_PrestigeSearchPill> {
               controller: widget.controller,
               focusNode: widget.focusNode,
               autofocus: true,
+              cursorColor: PrestigeNoir.accent,
               style: const TextStyle(
                 fontSize: VFontSize.bodySm,
                 color: PrestigeNoir.foreground,
@@ -1251,7 +1253,15 @@ class _PrestigeSearchPillState extends State<_PrestigeSearchPill> {
               decoration: InputDecoration(
                 hintText: widget.hintText,
                 hintStyle: const TextStyle(color: PrestigeNoir.mutedDim),
+                // Kill theme fill + outline so only the pill gold border shows.
+                filled: false,
+                fillColor: Colors.transparent,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
               ),

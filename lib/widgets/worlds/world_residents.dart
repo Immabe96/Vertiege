@@ -113,7 +113,7 @@ class WorldResidents extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: VSpacing.xs),
             child: VButton(
-              label: 'See all ${members.length} members',
+              label: 'See all ${members.length} residents',
               onPressed: () => context.push(
                 worldMembersPath(
                   world.id,

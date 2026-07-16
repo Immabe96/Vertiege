@@ -48,7 +48,7 @@ class JoinedWorldsRow extends StatelessWidget {
                 children: [
                   WorldIcon(
                     worldId: world.assetKey,
-                    size: 52,
+                    size: VWorldIconSize.list,
                     useGlassContainer: false,
                   ),
                   const SizedBox(height: VSpacing.xs),

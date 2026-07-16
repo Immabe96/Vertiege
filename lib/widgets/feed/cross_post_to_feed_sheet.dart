@@ -170,7 +170,7 @@ class _CrossPostToFeedSheetState extends ConsumerState<CrossPostToFeedSheet> {
                           ),
                           child: WorldIcon(
                             worldId: id,
-                            size: 48,
+                            size: VWorldIconSize.dense,
                             circular: true,
                           ),
                         ),

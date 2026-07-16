@@ -64,7 +64,9 @@ class PostRepository {
     return ids;
   }
 
-  Future<PaginatedResult<Map<String, dynamic>>> loadNexusPosts({
+  /// Returns `null` when the Nexus RPC fails so callers can fall back or
+  /// show a real error — empty [PaginatedResult.items] means a successful empty feed.
+  Future<PaginatedResult<Map<String, dynamic>>?> loadNexusPosts({
     String? cursor,
     int limit = 25,
   }) async {
@@ -101,7 +103,7 @@ class PostRepository {
         nextCursor: nextCursor,
       );
     } catch (_) {
-      return const PaginatedResult(items: [], hasMore: false);
+      return null;
     }
   }
 

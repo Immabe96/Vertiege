@@ -60,3 +60,7 @@ Append-only session notes. The queue state of record is `image-manifest.json`.
 - **2026-05-22 18:19** - world-silver-page -> generated 
 - **2026-05-22 18:21** - world-sovereign-city -> generated 
 - **2026-05-22 18:23** - world-tech-sprawl -> generated 
+- **2026-07-16 19:41** — world-crystal-shore → generated
+- **2026-07-16 19:41** — world-neon-district → generated
+- **2026-07-16 19:49** — world-financial-district → generated
+- **2026-07-16 19:49** — world-silver-page → generated

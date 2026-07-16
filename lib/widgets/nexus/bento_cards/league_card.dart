@@ -21,7 +21,10 @@ class LeagueCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    if (userLeague == null && resident != null && !leagueState.isLoading) {
+    if (userLeague == null &&
+        resident != null &&
+        !leagueState.isLoading &&
+        leagueState.error == null) {
       Future.microtask(() => ref.read(leagueProvider.notifier).loadLeague());
     }
 

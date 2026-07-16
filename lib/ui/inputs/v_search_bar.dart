@@ -5,7 +5,7 @@ import '../../theme/v_tokens.dart';
 import '../icons/v_icons.dart';
 
 /// Commune search field with optional filter chips (DCX-113).
-class VSearchBar extends StatelessWidget {
+class VSearchBar extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode? focusNode;
   final String hintText;
@@ -28,12 +28,61 @@ class VSearchBar extends StatelessWidget {
   });
 
   @override
+  State<VSearchBar> createState() => _VSearchBarState();
+}
+
+class _VSearchBarState extends State<VSearchBar> {
+  FocusNode? _ownedFocus;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? (_ownedFocus = FocusNode());
+    _focusNode.addListener(_onFocusChanged);
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant VSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_onFocusChanged);
+      _ownedFocus?.dispose();
+      _ownedFocus = null;
+      _focusNode = widget.focusNode ?? (_ownedFocus = FocusNode());
+      _focusNode.addListener(_onFocusChanged);
+    }
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onTextChanged);
+      widget.controller.addListener(_onTextChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChanged);
+    widget.controller.removeListener(_onTextChanged);
+    _ownedFocus?.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChanged() => setState(() {});
+  void _onTextChanged() => setState(() {});
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final surface = isDark
         ? VCommuneColors.surfaceSecondary
         : VCommuneColors.surfaceSecondaryLight;
+    final focused = _focusNode.hasFocus;
+    final borderColor = focused
+        ? theme.colorScheme.primary
+        : (isDark
+            ? VCommuneColors.dividerSubtle
+            : VCommuneColors.dividerSubtleLight);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,9 +93,8 @@ class VSearchBar extends StatelessWidget {
             color: surface,
             borderRadius: BorderRadius.circular(VRadius.lg),
             border: Border.all(
-              color: isDark
-                  ? VCommuneColors.dividerSubtle
-                  : VCommuneColors.dividerSubtleLight,
+              color: borderColor,
+              width: focused ? 1.5 : 1,
             ),
           ),
           child: Row(
@@ -61,24 +109,32 @@ class VSearchBar extends StatelessWidget {
               const SizedBox(width: VSpacing.sm),
               Expanded(
                 child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  autofocus: autofocus,
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  autofocus: widget.autofocus,
+                  cursorColor: theme.colorScheme.primary,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDark
                         ? VCommuneColors.textNormal
                         : VCommuneColors.textNormalLight,
                   ),
-                  onChanged: onChanged,
-                  onSubmitted: onSubmitted,
+                  onChanged: widget.onChanged,
+                  onSubmitted: widget.onSubmitted,
                   decoration: InputDecoration(
-                    hintText: hintText,
+                    hintText: widget.hintText,
                     hintStyle: theme.textTheme.bodyMedium?.copyWith(
                       color: isDark
                           ? VCommuneColors.textMuted
                           : VCommuneColors.textMutedLight,
                     ),
+                    filled: false,
+                    fillColor: Colors.transparent,
                     border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: VSpacing.sm,
@@ -86,24 +142,24 @@ class VSearchBar extends StatelessWidget {
                   ),
                 ),
               ),
-              if (controller.text.isNotEmpty && onClear != null)
+              if (widget.controller.text.isNotEmpty && widget.onClear != null)
                 IconButton(
                   icon: const Icon(VIcons.x, size: VIconSize.md),
-                  onPressed: onClear,
+                  onPressed: widget.onClear,
                   tooltip: 'Clear search',
                 ),
             ],
           ),
         ),
-        if (filters.isNotEmpty) ...[
+        if (widget.filters.isNotEmpty) ...[
           const SizedBox(height: VSpacing.sm),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (var i = 0; i < filters.length; i++) ...[
+                for (var i = 0; i < widget.filters.length; i++) ...[
                   if (i > 0) const SizedBox(width: VSpacing.xs),
-                  filters[i],
+                  widget.filters[i],
                 ],
               ],
             ),

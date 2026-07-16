@@ -4,6 +4,7 @@ import '../../router/world_navigation.dart';
 import '../../models/world.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/world_resident_count_label.dart';
 import '../worlds/world_icon.dart';
 
 class BoostedWorldsRow extends StatelessWidget {
@@ -16,7 +17,7 @@ class BoostedWorldsRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 120,
+      height: 128,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
@@ -47,7 +48,7 @@ class BoostedWorldsRow extends StatelessWidget {
                 children: [
                   WorldIcon(
                     worldId: world.assetKey,
-                    size: 40,
+                    size: VWorldIconSize.list,
                     useGlassContainer: false,
                     circular: true,
                   ),
@@ -68,33 +69,13 @@ class BoostedWorldsRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            const Icon(Icons.bolt, size: VIconSize.xs, color: VColors.tertiary),
-                            const SizedBox(width: 2),
-                            Flexible(
-                              child: Text(
-                                'Boosted',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: VColors.tertiary,
-                                  fontWeight: VFontWeight.semiBold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: VSpacing.sm),
-                            Flexible(
-                              child: Text(
-                                '★ P${world.prestige}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: VColors.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          '★ P${world.prestige} · ${worldMemberCountLabel(world.memberCount)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: VColors.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),

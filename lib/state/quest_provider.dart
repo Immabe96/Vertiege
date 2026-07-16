@@ -76,12 +76,28 @@ class Quest {
 class QuestState {
   final List<Quest> quests;
   final String dateKey;
+  final bool isLoading;
 
-  const QuestState({this.quests = const [], this.dateKey = ''});
+  const QuestState({
+    this.quests = const [],
+    this.dateKey = '',
+    this.isLoading = false,
+  });
 
   int get completedCount => quests.where((q) => q.isComplete).length;
   int get totalXpAvailable =>
       quests.fold(0, (sum, q) => sum + (q.claimed ? 0 : q.xpReward));
+
+  QuestState copyWith({
+    List<Quest>? quests,
+    String? dateKey,
+    bool? isLoading,
+  }) =>
+      QuestState(
+        quests: quests ?? this.quests,
+        dateKey: dateKey ?? this.dateKey,
+        isLoading: isLoading ?? this.isLoading,
+      );
 }
 
 @Riverpod(name: 'questProvider', keepAlive: true)
@@ -104,44 +120,51 @@ class QuestNotifier extends _$QuestNotifier {
   }
 
   Future<void> _load(String dateKey) async {
-    final fromCloud = await _loadFromCloud(dateKey);
-    if (fromCloud != null) {
-      state = QuestState(quests: fromCloud, dateKey: dateKey);
-      _persist();
-      return;
-    }
+    state = state.copyWith(isLoading: true);
+    try {
+      final fromCloud = await _loadFromCloud(dateKey);
+      if (fromCloud != null) {
+        state = QuestState(quests: fromCloud, dateKey: dateKey);
+        _persist();
+        return;
+      }
 
-    final raw = await StorageService.getString('@quests_data');
-    if (raw != null) {
-      try {
-        final data = jsonDecode(raw) as Map<String, dynamic>;
-        if (data['dateKey'] == dateKey) {
-          final rawQuests = data['quests'] as List?;
-          if (rawQuests != null) {
-            final quests = rawQuests.whereType<Map<String, dynamic>>().map((q) {
-              final id = q['id'] as String? ?? '';
-              final template = _templates.firstWhere(
-                (t) => t.$1 == id,
-                orElse: () => _templates[0],
-              );
-              return Quest.fromTemplate(
-                template,
-                progress: q['progress'] as int? ?? 0,
-                claimed: q['claimed'] as bool? ?? false,
-              );
-            }).toList();
-            state = QuestState(quests: quests, dateKey: dateKey);
-            _syncAllToCloud();
-            return;
+      final raw = await StorageService.getString('@quests_data');
+      if (raw != null) {
+        try {
+          final data = jsonDecode(raw) as Map<String, dynamic>;
+          if (data['dateKey'] == dateKey) {
+            final rawQuests = data['quests'] as List?;
+            if (rawQuests != null) {
+              final quests = rawQuests.whereType<Map<String, dynamic>>().map((q) {
+                final id = q['id'] as String? ?? '';
+                final template = _templates.firstWhere(
+                  (t) => t.$1 == id,
+                  orElse: () => _templates[0],
+                );
+                return Quest.fromTemplate(
+                  template,
+                  progress: q['progress'] as int? ?? 0,
+                  claimed: q['claimed'] as bool? ?? false,
+                );
+              }).toList();
+              state = QuestState(quests: quests, dateKey: dateKey);
+              _syncAllToCloud();
+              return;
+            }
           }
-        }
-      } catch (_) {}
-    }
+        } catch (_) {}
+      }
 
-    final quests = _templates.map(Quest.fromTemplate).toList();
-    state = QuestState(quests: quests, dateKey: dateKey);
-    _persist();
-    _syncAllToCloud();
+      final quests = _templates.map(Quest.fromTemplate).toList();
+      state = QuestState(quests: quests, dateKey: dateKey);
+      _persist();
+      _syncAllToCloud();
+    } finally {
+      if (state.isLoading) {
+        state = state.copyWith(isLoading: false);
+      }
+    }
   }
 
   Future<List<Quest>?> _loadFromCloud(String dateKey) async {

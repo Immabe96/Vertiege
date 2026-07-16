@@ -89,7 +89,7 @@ class VPrestigeSectionLabel extends StatelessWidget {
   }
 }
 
-/// Thin gold or neutral progress track (prototype 4–6px bars).
+/// Gold progress track — readable empty fill on Prestige Noir surfaces.
 class VPrestigeProgressBar extends StatelessWidget {
   final double value;
   final double height;
@@ -98,7 +98,7 @@ class VPrestigeProgressBar extends StatelessWidget {
   const VPrestigeProgressBar({
     super.key,
     required this.value,
-    this.height = 4,
+    this.height = 8,
     this.color,
   });
 
@@ -109,7 +109,7 @@ class VPrestigeProgressBar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: value.clamp(0.0, 1.0),
         minHeight: height,
-        backgroundColor: PrestigeNoir.border,
+        backgroundColor: PrestigeNoir.borderLight,
         valueColor: AlwaysStoppedAnimation<Color>(
           color ?? PrestigeNoir.accent,
         ),

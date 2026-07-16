@@ -14,3 +14,9 @@ String worldChannelResidentSubtitle({
   if (total > 0) return '$total residents';
   return '';
 }
+
+/// Pluralized member count for world lists (`1 member` / `N members`).
+String worldMemberCountLabel(int count) {
+  final n = count.clamp(0, 999999);
+  return n == 1 ? '1 member' : '$n members';
+}

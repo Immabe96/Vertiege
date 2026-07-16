@@ -50,9 +50,9 @@ class _NexusShortcutsSectionState extends ConsumerState<NexusShortcutsSection> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,
-        VSpacing.xs,
+        0,
         VSpacing.md,
-        VSpacing.sm,
+        VSpacing.xs,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

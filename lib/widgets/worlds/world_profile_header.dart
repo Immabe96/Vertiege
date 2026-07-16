@@ -44,7 +44,7 @@ class WorldCompactHeader extends StatelessWidget {
             children: [
               WorldIcon(
                 worldId: world.assetKey,
-                size: 40,
+                size: VWorldIconSize.list,
                 useGlassContainer: false,
               ),
               const SizedBox(width: VSpacing.sm),
@@ -149,7 +149,7 @@ class WorldProfileHeader extends StatelessWidget {
                 children: [
                   WorldIcon(
                     worldId: world.assetKey,
-                    size: 52,
+                    size: VWorldIconSize.header,
                     useGlassContainer: false,
                   ),
                   const SizedBox(width: VSpacing.md),

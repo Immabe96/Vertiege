@@ -9,6 +9,7 @@ import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/haptics.dart';
+import '../../utils/world_resident_count_label.dart';
 import '../../widgets/core/empty_state.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../models/season_cohort.dart';
@@ -263,7 +264,7 @@ class _CohortBanner extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${cohort.memberCount} member${cohort.memberCount == 1 ? '' : 's'} this season'
+                    '${worldMemberCountLabel(cohort.memberCount)} this season'
                     '${cohort.matchBand != null ? ' · ${cohort.matchBand} band' : ''}',
                     style: const TextStyle(
                       fontSize: VFontSize.labelMd,

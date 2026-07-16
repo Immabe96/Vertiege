@@ -2,6 +2,7 @@ import '../config/tiers.dart';
 import '../models/channel.dart';
 import '../models/resident.dart';
 import '../models/world.dart';
+import 'feature_flags.dart';
 import 'permission_service.dart';
 
 /// Parses optional tier gate from channel name or description.
@@ -66,6 +67,12 @@ class WorldChannelAccessService {
     }
 
     if (!isLounge && !isCampfire) return const ChannelAccessDecision.open();
+
+    if (isCampfire && !FeatureFlags.campfireEnabled) {
+      return const ChannelAccessDecision.locked(
+        'Campfire voice is coming soon.',
+      );
+    }
 
     if (isLounge && !features.lounge) {
       return const ChannelAccessDecision.locked(

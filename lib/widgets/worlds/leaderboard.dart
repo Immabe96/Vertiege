@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/world_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../core/empty_state.dart';
 import '../core/fade_in.dart';
 import '../core/shimmer.dart';
 import '../profile/cosmetic_avatar.dart';
@@ -24,6 +25,7 @@ class WorldLeaderboard extends ConsumerStatefulWidget {
 class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
   List<_RankedResident> _residents = [];
   bool _loading = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -38,7 +40,10 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
   }
 
   Future<void> _loadLeaderboard() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final members = await WorldService.getMembers(widget.worldId);
       final all =
@@ -49,8 +54,8 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
                   id:
                       m['resident_id'] as String? ??
                       m['resident_name'] as String? ??
-                      'member',
-                  name: m['resident_name'] as String? ?? 'Member',
+                      'resident',
+                  name: m['resident_name'] as String? ?? 'Resident',
                   avatarUrl: m['avatar_url'] as String?,
                   rep: m['rep'] as int? ?? 0,
                 ),
@@ -66,7 +71,10 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _loading = false);
+        setState(() {
+          _loading = false;
+          _loadError = 'Could not load leaderboard.';
+        });
       }
     }
   }
@@ -100,6 +108,16 @@ class _WorldLeaderboardState extends ConsumerState<WorldLeaderboard> {
               ),
             ),
           ],
+        ),
+      );
+    }
+
+    if (_loadError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: AppErrorState(
+          message: _loadError,
+          onRetry: _loadLeaderboard,
         ),
       );
     }

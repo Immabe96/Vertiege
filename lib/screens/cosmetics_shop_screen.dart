@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
+import '../router/progress_navigation.dart';
 import '../models/listing.dart';
 import '../config/progression_access.dart';
+import '../services/feature_flags.dart';
 import '../services/marketplace_service.dart';
 import '../services/cosmetic_purchase_service.dart';
 import '../state/achievement_provider.dart';
@@ -68,7 +70,7 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
-                Icons.monetization_on,
+                VIcons.coins,
                 size: VIconSize.sm,
                 color: VColors.brand,
               ),
@@ -236,26 +238,76 @@ class _ShopGrid extends StatelessWidget {
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(VSpacing.md),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: VSpacing.sm,
-        mainAxisSpacing: VSpacing.sm,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        final canAfford = coins >= item.price;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            VSpacing.md,
+            VSpacing.sm,
+            VSpacing.md,
+            0,
+          ),
+          child: Material(
+            color: PrestigeNoir.accentSoft,
+            borderRadius: BorderRadius.circular(VRadius.md),
+            child: InkWell(
+              onTap: () => context.push(progressPath(tab: ProgressTab.quests)),
+              borderRadius: BorderRadius.circular(VRadius.md),
+              child: Padding(
+                padding: const EdgeInsets.all(VSpacing.sm),
+                child: Row(
+                  children: [
+                    const Icon(
+                      VIcons.coins,
+                      size: VIconSize.sm,
+                      color: VColors.brand,
+                    ),
+                    const SizedBox(width: VSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Earn coins via quests and verified achievements — tap to open Progress.',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: PrestigeNoir.foreground,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: VIconSize.sm,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(VSpacing.md),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.85,
+              crossAxisSpacing: VSpacing.sm,
+              mainAxisSpacing: VSpacing.sm,
+            ),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              final canAfford = coins >= item.price;
 
-        return _ShopCard(
-          category: category,
-          item: item,
-          canAfford: canAfford,
-          index: index,
-        );
-      },
+              return _ShopCard(
+                category: category,
+                item: item,
+                coins: coins,
+                canAfford: canAfford,
+                index: index,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -263,22 +315,28 @@ class _ShopGrid extends StatelessWidget {
 class _ShopCard extends ConsumerWidget {
   final _ShopCategory category;
   final _ShopItem item;
+  final int coins;
   final bool canAfford;
   final int index;
 
   const _ShopCard({
     required this.category,
     required this.item,
+    required this.coins,
     required this.canAfford,
     required this.index,
   });
+
+  int get _shortfall => (item.price - coins).clamp(0, item.price);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return GestureDetector(
-      onTap: canAfford ? () => _buyItem(context, ref, item) : null,
+      onTap: canAfford
+          ? () => _buyItem(context, ref, item)
+          : () => _showEarnPath(context, item: item, shortfall: _shortfall),
       onLongPress: () => _previewItem(context, ref, item),
       child: VPrestigeCard(
           child: Column(
@@ -345,7 +403,7 @@ class _ShopCard extends ConsumerWidget {
               Row(
                 children: [
                   const Icon(
-                    Icons.monetization_on,
+                    VIcons.coins,
                     size: VIconSize.xs,
                     color: VColors.brand,
                   ),
@@ -360,20 +418,79 @@ class _ShopCard extends ConsumerWidget {
                   ),
                   const Spacer(),
                   VButton(
-                    label: canAfford ? 'Buy' : 'Locked',
+                    label: canAfford
+                        ? 'Buy'
+                        : (_shortfall > 0 ? 'Need $_shortfall' : 'Earn'),
                     size: ButtonSize.small,
                     variant: canAfford
                         ? ButtonVariant.filled
                         : ButtonVariant.outlined,
                     onPressed: canAfford
                         ? () => _buyItem(context, ref, item)
-                        : null,
+                        : () => _showEarnPath(
+                              context,
+                              item: item,
+                              shortfall: _shortfall,
+                            ),
                   ),
                 ],
               ),
             ],
           ),
       ),
+    );
+  }
+
+  void _showEarnPath(
+    BuildContext context, {
+    required _ShopItem item,
+    required int shortfall,
+  }) {
+    showVSheet(
+      context,
+      Padding(
+        padding: const EdgeInsets.all(VSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Need $shortfall more coins',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: VFontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            Text(
+              '${item.name} costs ${item.price} coins. Earn sovereign coins by completing quests and verifying achievements — purchases are not sold for cash in closed beta.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: VSpacing.lg),
+            VButton(
+              label: 'Open quests',
+              isFullWidth: true,
+              onPressed: () {
+                Navigator.pop(context);
+                context.push(progressPath(tab: ProgressTab.quests));
+              },
+            ),
+            const SizedBox(height: VSpacing.sm),
+            VButton(
+              label: 'Verify achievements',
+              variant: ButtonVariant.outlined,
+              isFullWidth: true,
+              onPressed: () {
+                Navigator.pop(context);
+                context.push('/achievements');
+              },
+            ),
+          ],
+        ),
+      ),
+      maxSize: 0.5,
     );
   }
 
@@ -565,29 +682,22 @@ class _DominionsTabState extends ConsumerState<_DominionsTab> {
     }
 
     if (_listings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.storefront_outlined,
-              size: 48,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: VSpacing.md),
-            const Text(
-              'No active listings',
-              style: TextStyle(fontWeight: VFontWeight.semiBold),
-            ),
-            const SizedBox(height: VSpacing.xs),
-            Text(
-              'Listings from your worlds will appear here.',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+      if (!FeatureFlags.marketplace) {
+        return AppEmptyState(
+          icon: Icons.storefront_outlined,
+          title: 'Marketplace paused',
+          description:
+              'World listings are off in closed beta. Cosmetics still spend sovereign coins you earn in Progress.',
+          actionLabel: 'Open quests',
+          onAction: () => context.push(progressPath(tab: ProgressTab.quests)),
+        );
+      }
+      return AppEmptyState(
+        icon: Icons.storefront_outlined,
+        title: 'No active listings',
+        description: 'Listings from your worlds will appear here.',
+        actionLabel: 'Open Progress',
+        onAction: () => context.push(progressPath(tab: ProgressTab.quests)),
       );
     }
 

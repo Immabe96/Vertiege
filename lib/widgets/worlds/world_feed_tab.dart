@@ -280,7 +280,7 @@ class _WorldFeedTabState extends ConsumerState<WorldFeedTab>
               title: isJoined ? 'No posts yet' : 'Join to participate',
               description: isJoined
                   ? 'Be the first to share an update in this world.'
-                  : 'Join this world to read the full feed and post with members.',
+                  : 'Join this world to read the full feed and post with residents.',
               icon: isJoined ? Icons.auto_awesome : Icons.lock_outline,
               actionLabel: isJoined ? null : 'Join world',
               onAction: isJoined ? null : onJoin,

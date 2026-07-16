@@ -14,6 +14,7 @@ import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
 import '../widgets/core/quiet_gate_tile.dart';
 import '../widgets/worlds/world_admin_breadcrumb.dart';
+import '../widgets/worlds/world_constitution_sheet.dart';
 import '../services/permission_service.dart';
 
 /// Manage / Participate hub (Wave 10) with visible gate reasons.
@@ -53,6 +54,14 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
     await ref.read(worldProvider.notifier).loadWorlds();
     if (!mounted) return;
     await ref.read(channelProvider.notifier).loadChannels(worldId);
+  }
+
+  Future<void> _handleJoin(String worldId) async {
+    final world = ref.read(worldProvider).worlds[worldId];
+    if (world == null) return;
+    final agreed = await showWorldConstitutionPreview(context, world: world);
+    if (!mounted || agreed != true) return;
+    await ref.read(residentProvider.notifier).joinWorld(worldId);
   }
 
   @override
@@ -139,13 +148,15 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
           padding: const EdgeInsets.all(VSpacing.md),
           children: [
           if (!isJoined)
-            const Padding(
-              padding: EdgeInsets.only(bottom: VSpacing.md),
+            Padding(
+              padding: const EdgeInsets.only(bottom: VSpacing.md),
               child: AppEmptyState(
                 title: 'Join to participate',
                 description:
                     'Economy, Lounge, Campfire, and polls unlock after you join this world.',
                 icon: Icons.group_add_outlined,
+                actionLabel: 'Join world',
+                onAction: () => _handleJoin(worldId),
               ),
             ),
           SingleChildScrollView(

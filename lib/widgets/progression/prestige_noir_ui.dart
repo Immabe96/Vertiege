@@ -40,7 +40,7 @@ class PrestigeSectionLabel extends StatelessWidget {
   }
 }
 
-/// Thin gold XP / progress bar (4–6px) from Open Design prototypes.
+/// Gold XP / progress bar — taller track for readable empty fill on noir.
 class PrestigeXpBar extends StatelessWidget {
   final double value;
   final double height;
@@ -50,7 +50,7 @@ class PrestigeXpBar extends StatelessWidget {
   const PrestigeXpBar({
     super.key,
     required this.value,
-    this.height = 4,
+    this.height = 10,
     this.fillColor,
     this.fillGradient,
   });
@@ -65,7 +65,9 @@ class PrestigeXpBar extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const ColoredBox(color: PrestigeNoir.border),
+            ColoredBox(
+              color: PrestigeNoir.borderLight.withValues(alpha: 0.95),
+            ),
             FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: clamped,
@@ -290,7 +292,6 @@ class PrestigeXpHero extends StatelessWidget {
           const SizedBox(height: VSpacing.md),
           PrestigeXpBar(
             value: tierProgress,
-            height: 6,
             fillGradient: const LinearGradient(
               colors: [VColors.brand, VColors.warning],
             ),

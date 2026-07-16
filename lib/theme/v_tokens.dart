@@ -51,6 +51,23 @@ class VIconSize {
   static const double denseMd = 16;
 }
 
+/// Raster world emblem display sizes (readable ornate framed art).
+class VWorldIconSize {
+  VWorldIconSize._();
+
+  /// Worlds list, compact headers, featured strip.
+  static const double list = 56;
+
+  /// Chat / commune world rail.
+  static const double rail = 56;
+
+  /// Expanded world profile header.
+  static const double header = 64;
+
+  /// Search rows, switcher sheets, banner overlays.
+  static const double dense = 48;
+}
+
 /// Raster profession / achievement badge display sizes (~10% above legacy defaults).
 class VBadgeSize {
   VBadgeSize._();

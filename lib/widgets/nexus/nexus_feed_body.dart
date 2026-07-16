@@ -327,16 +327,21 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
       case _NexusFeedTab.following:
         return AppEmptyState(
           title: 'Nobody you follow has posted',
-          description: 'Find people in Worlds or Chat, then follow them.',
+          description: 'Find residents in Worlds or Chat, then follow them.',
           icon: Icons.people_outline,
           actionLabel: 'Browse worlds',
           onAction: () => context.go('/worlds'),
         );
       case _NexusFeedTab.announcements:
-        return const AppEmptyState(
+        return AppEmptyState(
           title: 'No announcements yet',
           description: 'World admins post decrees here when something matters.',
           icon: Icons.campaign_outlined,
+          actionLabel: 'Browse worlds',
+          onAction: () => context.go('/worlds'),
+          secondaryActionLabel: hasJoinedWorlds ? 'Open Chat' : null,
+          onSecondaryAction:
+              hasJoinedWorlds ? () => context.go('/chat') : null,
         );
       case _NexusFeedTab.all:
         if (!hasJoinedWorlds) {

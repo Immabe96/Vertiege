@@ -181,7 +181,7 @@ class _CrossPostAchievementSheetState
                           ),
                           child: WorldIcon(
                             worldId: world.id,
-                            size: 48,
+                            size: VWorldIconSize.dense,
                             circular: true,
                           ),
                         ),

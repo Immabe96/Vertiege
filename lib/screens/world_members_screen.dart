@@ -75,7 +75,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'Failed to load members';
+          _error = 'Failed to load residents';
         });
       }
     }
@@ -124,13 +124,19 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
           ? AppErrorState(message: _error, onRetry: _load)
           : filtered.isEmpty
           ? AppEmptyState(
-              title: _search.isNotEmpty ? 'No members found' : 'No members yet',
+              title: _search.isNotEmpty
+                  ? 'No residents found'
+                  : 'No residents yet',
               description: _search.isNotEmpty
-                  ? 'No members match "$_search".'
-                  : 'This world has no members yet.',
+                  ? 'No residents match "$_search".'
+                  : 'Invite residents to grow this world.',
               icon: _search.isNotEmpty
                   ? Icons.search_off
                   : Icons.people_outline,
+              actionLabel: _search.isEmpty ? 'Find residents' : null,
+              onAction: _search.isEmpty
+                  ? () => context.push('/search')
+                  : null,
             )
           : RefreshIndicator(
               onRefresh: () async {
@@ -441,7 +447,7 @@ class _WorldMembersScreenState extends ConsumerState<WorldMembersScreen> {
   Future<void> _showSearch(BuildContext context) async {
     await showVDialog<void>(
       context: context,
-      title: 'Search members',
+      title: 'Search residents',
       content: TextField(
         autofocus: true,
         decoration: const InputDecoration(hintText: 'Search by name...'),

@@ -4,6 +4,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/cards/v_card.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../utils/world_resident_count_label.dart';
 
 class WorldInviteSection extends StatelessWidget {
   final List<World> invites;
@@ -48,7 +49,7 @@ class WorldInviteSection extends StatelessWidget {
           const SizedBox(height: VSpacing.sm),
           ...invites.map((world) {
             final iconData = _iconForWorldType(world.type);
-            final memberLabel = '${world.memberCount} members';
+            final memberLabel = worldMemberCountLabel(world.memberCount);
             return Padding(
               padding: const EdgeInsets.only(bottom: VSpacing.sm),
               child: VCard(

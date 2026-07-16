@@ -6,6 +6,11 @@ String userFacingLoadError(
   String fallback = 'Something went wrong. Pull to refresh.',
 }) {
   if (error is AppFailure) return error.message;
+  // Providers often store a finished user message — keep it.
+  if (error is String) {
+    final trimmed = error.trim();
+    if (trimmed.isNotEmpty) return trimmed;
+  }
 
   final text = error.toString().toLowerCase();
   if (text.contains('socketexception') ||

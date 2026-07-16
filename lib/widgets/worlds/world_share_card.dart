@@ -180,7 +180,7 @@ class WorldShareCard extends StatelessWidget {
                       _ShareStat(
                         icon: Icons.people,
                         value: '${world.memberCount}',
-                        label: 'MEMBERS',
+                        label: 'RESIDENTS',
                         color: _tierColor,
                       ),
                       Container(

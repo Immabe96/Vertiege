@@ -5,6 +5,7 @@ import '../../../router/world_navigation.dart';
 import '../../../state/world_provider.dart';
 import '../../../theme/v_colors.dart';
 import '../../../theme/v_tokens.dart';
+import '../../../utils/world_resident_count_label.dart';
 
 /// Large card with 3 trending world rows.
 class TrendingCard extends ConsumerWidget {
@@ -102,7 +103,7 @@ class TrendingCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Prestige ${world.prestige}  •  ${world.memberCount} members',
+                            'Prestige ${world.prestige}  •  ${worldMemberCountLabel(world.memberCount)}',
                             style: TextStyle(
                               fontSize: VFontSize.labelSm,
                               color: Theme.of(context).colorScheme.outline,

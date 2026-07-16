@@ -405,12 +405,12 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       case WorldDetailTabId.members:
         return (!_membersLoading && _members.isEmpty)
             ? AppEmptyState(
-                title: 'No members yet',
+                title: 'No residents yet',
                 description: isJoined
-                    ? 'Invite people who match this world\'s culture.'
-                    : 'Join to meet members and join the conversation.',
+                    ? 'Invite residents who match this world\'s culture.'
+                    : 'Join to meet residents and join the conversation.',
                 icon: Icons.people_outline,
-                actionLabel: isJoined ? 'Invite members' : 'Join world',
+                actionLabel: isJoined ? 'Find residents' : 'Join world',
                 onAction: isJoined
                     ? () => context.push('/search')
                     : _handleJoin,

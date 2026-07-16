@@ -12,6 +12,7 @@ import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../widgets/core/empty_state.dart';
+import '../widgets/core/screen_loading.dart';
 import '../widgets/progression/prestige_noir_ui.dart';
 
 /// Lists today's daily quests (distinct from seasonal `/challenges`).
@@ -108,26 +109,37 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
             ),
           ),
         Expanded(
-          child: quests.isEmpty
-              ? const AppEmptyState(
-                  title: 'Loading today\'s quests',
-                  description: 'If this stays empty, pull to refresh.',
+          child: questState.isLoading && quests.isEmpty
+              ? const ScreenLoading.list()
+              : quests.isEmpty
+              ? AppEmptyState(
+                  title: 'No quests today',
+                  description:
+                      'Daily quests will appear here. Pull to refresh if this looks wrong.',
                   icon: Icons.flag_outlined,
+                  actionLabel: 'Refresh',
+                  onAction: () =>
+                      ref.read(questProvider.notifier).loadQuests(),
                 )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(VSpacing.lg),
-                  itemCount: quests.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: VSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final q = quests[index];
-                    return _QuestCard(
-                      quest: q,
-                      onClaim: () => ref
-                          .read(questProvider.notifier)
-                          .claimQuest(q.id),
-                    );
-                  },
+              : RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(questProvider.notifier).loadQuests(),
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(VSpacing.lg),
+                    itemCount: quests.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: VSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final q = quests[index];
+                      return _QuestCard(
+                        quest: q,
+                        onClaim: () => ref
+                            .read(questProvider.notifier)
+                            .claimQuest(q.id),
+                      );
+                    },
+                  ),
                 ),
         ),
       ],

@@ -806,7 +806,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionHeader(Icons.group, 'Members'),
+                        _sectionHeader(Icons.group, 'Residents'),
                         const SizedBox(height: VSpacing.sm),
                         Text(
                           'Manage residents and their standing in this world.',
@@ -819,7 +819,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                           const Center(child: VLoadingCard())
                         else if (_members.isEmpty)
                           Text(
-                            'No members found',
+                            'No residents found',
                             style: theme.textTheme.bodyMedium,
                           )
                         else

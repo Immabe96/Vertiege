@@ -348,10 +348,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     );
 
     features.add(
-      const _TierFeature(label: 'Gold profile frame', included: true),
-    );
-
-    features.add(
       _TierFeature(
         label: 'Review queue status visibility',
         included: priorityV,
@@ -416,50 +412,62 @@ class _SubscriptionBenefitsTable extends StatelessWidget {
 
     Widget cell(String text, {bool header = false}) => Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: VSpacing.xs,
-        vertical: VSpacing.xs,
+        horizontal: VSpacing.sm,
+        vertical: VSpacing.sm,
       ),
       child: Text(
         text,
         style: theme.textTheme.labelSmall?.copyWith(
           fontWeight: header ? VFontWeight.bold : VFontWeight.regular,
           color: header ? PrestigeNoir.foreground : PrestigeNoir.muted,
+          height: 1.25,
         ),
       ),
     );
 
     return VPrestigeCard(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
       raised: false,
-      child: Table(
-        columnWidths: const {
-          0: FlexColumnWidth(2),
-          1: FlexColumnWidth(),
-          2: FlexColumnWidth(),
-          3: FlexColumnWidth(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                columnWidths: const {
+                  0: FlexColumnWidth(2.2),
+                  1: FlexColumnWidth(1.1),
+                  2: FlexColumnWidth(1.1),
+                  3: FlexColumnWidth(1.1),
+                },
+                children: [
+                  TableRow(
+                    decoration: const BoxDecoration(
+                      color: PrestigeNoir.surfaceRaised,
+                    ),
+                    children: [
+                      cell('Benefit', header: true),
+                      cell('Resident', header: true),
+                      cell('Patrician', header: true),
+                      cell('Elite', header: true),
+                    ],
+                  ),
+                  for (final row in rows)
+                    TableRow(
+                      children: [
+                        cell(row.feature),
+                        cell(row.resident),
+                        cell(row.patrician),
+                        cell(row.elite),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          );
         },
-        children: [
-          TableRow(
-            decoration: const BoxDecoration(
-              color: PrestigeNoir.surfaceRaised,
-            ),
-            children: [
-              cell('Benefit', header: true),
-              cell('Resident', header: true),
-              cell('Patrician', header: true),
-              cell('Elite', header: true),
-            ],
-          ),
-          for (final row in rows)
-            TableRow(
-              children: [
-                cell(row.feature),
-                cell(row.resident),
-                cell(row.patrician),
-                cell(row.elite),
-              ],
-            ),
-        ],
       ),
     );
   }

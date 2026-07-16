@@ -114,11 +114,11 @@ class SovereignProgressBar extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(VRadius.sm),
           child: SizedBox(
-            height: 4,
+            height: 8,
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
               backgroundColor: VColors.surfaceContainerHighestDark.withValues(
-                alpha: 0.3,
+                alpha: 0.55,
               ),
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
             ),

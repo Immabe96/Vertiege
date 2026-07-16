@@ -12,6 +12,7 @@ import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../core/empty_state.dart';
+import 'world_constitution_sheet.dart';
 
 /// Marketplace dominion — economy entry (formerly part of Manage).
 class WorldShopTab extends ConsumerWidget {
@@ -42,10 +43,17 @@ class WorldShopTab extends ConsumerWidget {
     );
 
     if (!isJoined) {
-      return const AppEmptyState(
+      return AppEmptyState(
         title: 'Join to use the shop',
         description: 'Listings, treasury, and trades unlock after you join.',
         icon: Icons.storefront_outlined,
+        actionLabel: 'Join world',
+        onAction: () async {
+          final agreed =
+              await showWorldConstitutionPreview(context, world: world);
+          if (!context.mounted || agreed != true) return;
+          await ref.read(residentProvider.notifier).joinWorld(worldId);
+        },
       );
     }
 

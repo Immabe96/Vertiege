@@ -11,6 +11,7 @@ import '../../services/legacy_service.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/world_assets.dart';
+import '../../utils/world_resident_count_label.dart';
 import '../core/fade_in.dart';
 import 'world_icon.dart';
 import 'world_banner.dart';
@@ -168,7 +169,7 @@ class _CardBody extends ConsumerWidget {
               Icon(VIcons.users, size: VIconSize.xs, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
-                '${world.memberCount} ${world.memberCount == 1 ? 'member' : 'members'}',
+                worldMemberCountLabel(world.memberCount),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -293,7 +294,7 @@ class _BannerThumbnail extends StatelessWidget {
                 child: Center(
                   child: WorldIcon(
                     worldId: world.assetKey,
-                    size: VIconSize.md + 16,
+                    size: VWorldIconSize.dense,
                     tintColor: WorldAssets.colorForPrestige(world.prestige),
                   ),
                 ),

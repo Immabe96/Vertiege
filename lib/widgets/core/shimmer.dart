@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/v_colors.dart';
+import '../../theme/prestige_noir.dart';
 import '../../theme/v_tokens.dart';
 
 class Pulse extends StatefulWidget {
@@ -43,14 +43,17 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final t = _controller.value;
+        final alpha = widget.opacity ?? (0.55 + (t * 0.25));
         return Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: VColors.surfaceContainerHighestDark.withValues(
-              alpha: widget.opacity ?? (0.3 + (_controller.value * 0.2)),
-            ),
+            color: PrestigeNoir.surfaceRaised.withValues(alpha: alpha),
             borderRadius: BorderRadius.circular(widget.borderRadius),
+            border: Border.all(
+              color: PrestigeNoir.borderLight.withValues(alpha: 0.4),
+            ),
           ),
         );
       },

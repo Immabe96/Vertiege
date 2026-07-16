@@ -36,8 +36,12 @@ class WorldMemberRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final displayMembers = members.take(8).toList();
+    // Cap avatars so narrow phones don't overflow the row.
+    final displayMembers = members.take(5).toList();
     final remaining = members.length - displayMembers.length;
+    final stackWidth = displayMembers.isEmpty
+        ? 0.0
+        : 32 + (displayMembers.length - 1) * 28.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -67,8 +71,10 @@ class WorldMemberRow extends StatelessWidget {
                 ),
               ] else ...[
                 SizedBox(
+                  width: stackWidth,
                   height: 40,
                   child: Stack(
+                    clipBehavior: Clip.none,
                     children: displayMembers.asMap().entries.map((entry) {
                       final member = entry.value;
                       final isCouncil = member.rep >= 5000;
@@ -133,43 +139,57 @@ class WorldMemberRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: VSpacing.sm),
-                if (remaining > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.sm,
-                      vertical: VSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: cs.primaryContainer.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(VRadius.pill),
-                    ),
-                    child: Text(
-                      '+$remaining more',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: cs.primary,
-                        fontWeight: VFontWeight.bold,
-                      ),
-                    ),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (remaining > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.sm,
+                            vertical: VSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: cs.primaryContainer.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(VRadius.pill),
+                          ),
+                          child: Text(
+                            '+$remaining more',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: cs.primary,
+                              fontWeight: VFontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      if (remaining > 0 && onlineCount > 0)
+                        const SizedBox(width: VSpacing.sm),
+                      if (onlineCount > 0) ...[
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: VColors.success,
+                          ),
+                        ),
+                        const SizedBox(width: VSpacing.xs),
+                        Flexible(
+                          child: Text(
+                            '$onlineCount online',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: VColors.success,
+                              fontWeight: VFontWeight.regular,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                if (remaining > 0) const SizedBox(width: VSpacing.sm),
-                if (onlineCount > 0) ...[
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: VColors.success,
-                    ),
-                  ),
-                  const SizedBox(width: VSpacing.xs),
-                  Text(
-                    '$onlineCount online',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: VColors.success,
-                      fontWeight: VFontWeight.regular,
-                    ),
-                  ),
-                ],
+                ),
               ],
               const Spacer(),
               Icon(VIcons.chevronRight, size: VIconSize.md, color: cs.outline),

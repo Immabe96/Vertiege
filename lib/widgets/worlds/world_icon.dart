@@ -24,7 +24,7 @@ class WorldIcon extends StatelessWidget {
   const WorldIcon({
     super.key,
     required this.worldId,
-    this.size = 64,
+    this.size = VWorldIconSize.header,
     this.tintColor,
     this.useGlassContainer = true,
     this.circular = false,

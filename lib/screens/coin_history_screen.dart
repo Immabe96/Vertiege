@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
+import '../router/progress_navigation.dart';
 import '../services/coin_ledger_service.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
@@ -62,10 +64,16 @@ class _CoinHistoryScreenState extends State<CoinHistoryScreen> {
           : _error != null
           ? AppErrorState(message: _error, onRetry: _load)
           : (_rows == null || _rows!.isEmpty)
-          ? const AppEmptyState(
+          ? AppEmptyState(
               title: 'No transactions yet',
-              description: 'Earn or spend sovereign coins to see entries here.',
+              description:
+                  'Complete quests and verify achievements to earn sovereign coins. Spend them in the shop — cash IAP is paused in closed beta.',
               icon: Icons.monetization_on_outlined,
+              actionLabel: 'Open quests',
+              onAction: () =>
+                  context.push(progressPath(tab: ProgressTab.quests)),
+              secondaryActionLabel: 'Browse shop',
+              onSecondaryAction: () => context.push('/shop'),
             )
           : RefreshIndicator(
               onRefresh: _load,
@@ -77,7 +85,8 @@ class _CoinHistoryScreenState extends State<CoinHistoryScreen> {
                 itemBuilder: (context, index) {
                   final tx = _rows![index];
                   final positive = tx.amount >= 0;
-                  return ListTile(
+                  return Material(
+                    color: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(VRadius.md),
                       side: BorderSide(
@@ -86,22 +95,48 @@ class _CoinHistoryScreenState extends State<CoinHistoryScreen> {
                             : VColors.outlineVariant,
                       ),
                     ),
-                    leading: Icon(
-                      positive
-                          ? Icons.add_circle_outline
-                          : Icons.remove_circle_outline,
-                      color: positive ? VColors.success : VColors.error,
-                    ),
-                    title: Text(_reasonLabel(tx.reason)),
-                    subtitle: Text(
-                      _formatWhen(tx.createdAt),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    trailing: Text(
-                      '${positive ? '+' : ''}${tx.amount}',
-                      style: TextStyle(
-                        fontWeight: VFontWeight.bold,
-                        color: positive ? VColors.success : VColors.error,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.md,
+                        vertical: VSpacing.sm,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            positive
+                                ? Icons.add_circle_outline
+                                : Icons.remove_circle_outline,
+                            color: positive ? VColors.success : VColors.error,
+                          ),
+                          const SizedBox(width: VSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _reasonLabel(tx.reason),
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _formatWhen(tx.createdAt),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '${positive ? '+' : ''}${tx.amount}',
+                            style: TextStyle(
+                              fontWeight: VFontWeight.bold,
+                              color:
+                                  positive ? VColors.success : VColors.error,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );

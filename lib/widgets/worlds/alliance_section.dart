@@ -7,6 +7,7 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/cards/v_card.dart';
 import '../../ui/buttons/v_button.dart';
+import '../../utils/world_resident_count_label.dart';
 
 class AllianceSection extends ConsumerWidget {
   final String worldId;
@@ -115,7 +116,7 @@ class AllianceSection extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              '$memberCount members',
+                              worldMemberCountLabel(memberCount),
                               style: const TextStyle(
                                 fontSize: VFontSize.labelSm,
                                 color: VColors.onSurfaceVariantDark,

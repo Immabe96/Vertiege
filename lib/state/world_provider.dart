@@ -59,7 +59,7 @@ class WorldNotifier extends _$WorldNotifier {
     state = state.copyWith(isLoading: true, clearLoadError: true);
     try {
       final remote = await WorldService.loadWorlds().timeout(
-        const Duration(seconds: 8),
+        const Duration(seconds: 15),
       );
       final worlds = <String, World>{};
       for (final data in remote) {
@@ -85,9 +85,8 @@ class WorldNotifier extends _$WorldNotifier {
     }
 
     try {
-      await _loadAlliances().timeout(const Duration(seconds: 3));
+      await _loadAlliances().timeout(const Duration(seconds: 5));
     } catch (_) {}
-    state = state.copyWith(alliances: state.alliances);
   }
 
   World? getWorld(String worldId) => state.worlds[worldId];

@@ -97,7 +97,8 @@ class _ProgressHubScreenState extends ConsumerState<ProgressHubScreen>
                 totalXp: totalXp,
                 tierProgress: _tierProgress(totalXp, tierNum),
                 metaLeft: ProgressionGlossary.xpToNextTier(totalXp, tierNum),
-                metaRight: resident.streakCount > 0
+                metaRight: (_tabs.index != ProgressTab.quests.index &&
+                        resident.streakCount > 0)
                     ? '${resident.streakCount}-day streak'
                     : null,
               ),

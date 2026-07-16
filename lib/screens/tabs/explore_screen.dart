@@ -13,7 +13,9 @@ import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../utils/provider_errors.dart';
+import '../../utils/world_resident_count_label.dart';
 import '../../widgets/core/empty_state.dart';
+import '../../widgets/core/sync_warning_banner.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/explore/boosted_worlds_row.dart';
 import '../../widgets/explore/shimmer_world_card.dart';
@@ -61,12 +63,18 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
     final boosted = List<World>.from(available)
       ..sort((a, b) => b.prestige.compareTo(a.prestige));
-    final boostedWorlds = boosted.take(5).where((w) => w.prestige >= 10).toList();
+    // Featured should feel alive — skip empty shells even if prestige is high.
+    final boostedWorlds = boosted
+        .where((w) => w.prestige >= 10 && w.memberCount > 0)
+        .take(5)
+        .toList();
+    final featuredIds = boostedWorlds.map((w) => w.id).toSet();
 
     final recommended = resident != null
         ? available
               .where(
                 (w) =>
+                    !featuredIds.contains(w.id) &&
                     !resident.joinedWorldIds.contains(w.id) &&
                     (w.requiredTier == null ||
                         resident.tier.value >= w.requiredTier!) &&
@@ -77,6 +85,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           requiredProfession: w.requiredProfession!,
                         )),
               )
+              .take(8)
               .toList()
         : <World>[];
 
@@ -93,8 +102,23 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           .toList();
     }
 
-    final filteredAvailable = filter(available);
-    final filteredLocked = filter(locked);
+    // Featured strip owns those worlds — don't repeat them in list sections.
+    final filteredAvailable = filter(
+      available
+          .where(
+            (w) =>
+                !featuredIds.contains(w.id) &&
+                !recommended.any((r) => r.id == w.id),
+          )
+          .toList(),
+    );
+    final filteredLocked = filter(
+      locked.where((w) => !featuredIds.contains(w.id)).toList(),
+    );
+    final filteredRecommended = filter(recommended);
+    final filteredTrending = filter(
+      topTrending.where((w) => !featuredIds.contains(w.id)).toList(),
+    );
 
     final headerActions = <Widget>[
       VAccessibleHeaderAction(
@@ -135,13 +159,25 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           VSpacing.md,
                           0,
                         ),
-                        child: AppErrorState(
-                          message: userFacingLoadError(
-                            state.loadError ?? 'Could not load worlds.',
-                          ),
-                          onRetry: () =>
-                              ref.read(worldProvider.notifier).loadWorlds(),
-                        ),
+                        child: worlds.isNotEmpty
+                            ? SyncWarningBanner(
+                                message: userFacingLoadError(
+                                  state.loadError!,
+                                  fallback: state.loadError!,
+                                ),
+                                onRetry: () => ref
+                                    .read(worldProvider.notifier)
+                                    .loadWorlds(),
+                              )
+                            : AppErrorState(
+                                message: userFacingLoadError(
+                                  state.loadError!,
+                                  fallback: 'Could not load worlds.',
+                                ),
+                                onRetry: () => ref
+                                    .read(worldProvider.notifier)
+                                    .loadWorlds(),
+                              ),
                       ),
                     ),
                   SliverToBoxAdapter(
@@ -206,110 +242,112 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     ),
                   ),
 
-                  if (filteredAvailable.isNotEmpty) ...[
-                    if (topTrending.isNotEmpty) ...[
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            VSpacing.md,
-                            VSpacing.sm,
-                            VSpacing.md,
-                            VSpacing.sm,
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.local_fire_department,
-                                size: VIconSize.sm,
+                  if (filteredTrending.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          VSpacing.md,
+                          VSpacing.sm,
+                          VSpacing.md,
+                          VSpacing.sm,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.local_fire_department,
+                              size: VIconSize.sm,
+                              color: VColors.brand,
+                            ),
+                            const SizedBox(width: VSpacing.xs),
+                            Text(
+                              'Trending',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: VFontWeight.semiBold,
                                 color: VColors.brand,
                               ),
-                              const SizedBox(width: VSpacing.xs),
-                              Text(
-                                'Trending',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: VFontWeight.semiBold,
-                                  color: VColors.brand,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 140,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: VSpacing.md,
                             ),
-                            itemCount: topTrending.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(width: VSpacing.sm),
-                            itemBuilder: (context, index) {
-                              final world = topTrending[index];
-                              return _TrendingWorldCard(world: world);
-                            },
-                          ),
+                          ],
                         ),
                       ),
-                    ],
-
-                    if (recommended.isNotEmpty) ...[
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            VSpacing.md,
-                            VSpacing.lg,
-                            VSpacing.md,
-                            VSpacing.sm,
+                    ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 140,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: VSpacing.md,
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.recommend,
-                                size: VIconSize.sm,
+                          itemCount: filteredTrending.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(width: VSpacing.sm),
+                          itemBuilder: (context, index) {
+                            final world = filteredTrending[index];
+                            return _TrendingWorldCard(world: world);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  if (filteredRecommended.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          VSpacing.md,
+                          VSpacing.lg,
+                          VSpacing.md,
+                          VSpacing.sm,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.auto_awesome,
+                              size: VIconSize.sm,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: VSpacing.xs),
+                            Text(
+                              'Recommended for You',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: VFontWeight.semiBold,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
-                              const SizedBox(width: VSpacing.xs),
-                              Text(
-                                'Recommended for You',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: VFontWeight.semiBold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: VSpacing.md,
-                        ),
-                        sliver: SliverList.separated(
-                          itemCount: recommended.length > 3
-                              ? 3
-                              : recommended.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: VSpacing.sm),
-                          itemBuilder: (context, index) => _WorldListCard(
-                            world: recommended[index],
-                            resident: resident,
-                            isExpanded:
-                                _expandedIds[recommended[index].id] ?? false,
-                            onToggle: () {
-                              setState(() {
-                                _expandedIds[recommended[index].id] =
-                                    !(_expandedIds[recommended[index].id] ??
-                                        false);
-                              });
-                            },
-                          ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.md,
+                      ),
+                      sliver: SliverList.separated(
+                        itemCount: filteredRecommended.length > 3
+                            ? 3
+                            : filteredRecommended.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: VSpacing.sm),
+                        itemBuilder: (context, index) => _WorldListCard(
+                          world: filteredRecommended[index],
+                          resident: resident,
+                          isExpanded:
+                              _expandedIds[filteredRecommended[index].id] ??
+                              false,
+                          onToggle: () {
+                            setState(() {
+                              _expandedIds[filteredRecommended[index].id] =
+                                  !(_expandedIds[filteredRecommended[index]
+                                          .id] ??
+                                      false);
+                            });
+                          },
                         ),
                       ),
-                    ],
+                    ),
+                  ],
 
+                  if (filteredAvailable.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(
@@ -486,7 +524,8 @@ class _WorldListCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isLocked ? null : () => context.push(exploreWorldPath(world.id)),
+        // Row expands details; Enter World navigates (avoids chevron vs open conflict).
+        onTap: isLocked ? null : onToggle,
         borderRadius: BorderRadius.circular(VRadius.bento),
         child: VPrestigeCard(
           padding: EdgeInsets.zero,
@@ -501,7 +540,7 @@ class _WorldListCard extends StatelessWidget {
                       worldId: world.assetKey.isNotEmpty
                           ? world.assetKey
                           : world.id,
-                      size: 40,
+                      size: VWorldIconSize.list,
                       useGlassContainer: false,
                     ),
                     const SizedBox(width: VSpacing.md),
@@ -582,7 +621,7 @@ class _WorldListCard extends StatelessWidget {
                               ),
                               const SizedBox(width: VSpacing.xs),
                               Text(
-                                '${world.memberCount} members',
+                                worldMemberCountLabel(world.memberCount),
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
@@ -600,13 +639,13 @@ class _WorldListCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: VSpacing.sm),
-                    GestureDetector(
-                      onTap: onToggle,
+                    Tooltip(
+                      message: isExpanded ? 'Collapse' : 'Show details',
                       child: AnimatedRotation(
                         turns: isExpanded ? 0.5 : 0,
                         duration: VAnimation.fast,
                         child: Icon(
-                          Icons.keyboard_arrow_down,
+                          Icons.expand_more,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -833,7 +872,7 @@ class _TrendingWorldCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${world.memberCount} members',
+                worldMemberCountLabel(world.memberCount),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: PrestigeNoir.muted,
                 ),

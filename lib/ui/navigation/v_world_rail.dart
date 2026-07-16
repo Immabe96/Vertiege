@@ -21,8 +21,8 @@ class VWorldRail extends StatelessWidget {
   final void Function(World world)? onToggleMute;
   final VoidCallback? onQuickSwitch;
 
-  static const double railWidth = 52;
-  static const double iconSize = 48;
+  static const double railWidth = 64;
+  static const double iconSize = VWorldIconSize.rail;
   /// WCAG minimum touch target (DCX-131).
   static const double minTouchTarget = 44;
 

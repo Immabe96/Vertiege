@@ -7,7 +7,6 @@ import '../../models/channel_mute_mode.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
-import '../../services/feature_flags.dart';
 import '../../services/voice_presence_service.dart';
 import '../../services/world_channel_access_service.dart';
 import '../../state/channel_provider.dart';
@@ -151,12 +150,8 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     final features = ref
         .read(worldProvider.notifier)
         .featuresForWorld(widget.worldId);
-    // Hide Campfire voice rows while voice is beta-frozen.
-    final channels = FeatureFlags.campfireEnabled
-        ? allChannels
-        : allChannels
-            .where((c) => c.channelType != ChannelType.voice)
-            .toList();
+    // Keep Campfire rows visible when voice is beta-frozen so the lock reads clearly.
+    final channels = allChannels;
     final activityIds = channels
         .where((c) => c.channelType != ChannelType.voice)
         .map((c) => c.id)
@@ -402,11 +397,15 @@ class _ChannelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final isLocked = lockedReason != null;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
+        child: Opacity(
+          opacity: isLocked ? 0.72 : 1,
+          child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: VSpacing.sm,
             vertical: VSpacing.sm,
@@ -415,9 +414,9 @@ class _ChannelTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                lockedReason != null ? Icons.lock_outline : _icon,
+                isLocked ? Icons.lock_outline : _icon,
                 size: VIconSize.md,
-                color: lockedReason != null
+                color: isLocked
                     ? theme.colorScheme.onSurfaceVariant
                     : unreadCount > 0
                         ? (VColors.onSurfaceDark)
@@ -440,10 +439,15 @@ class _ChannelTile extends StatelessWidget {
                               fontWeight: unreadCount > 0
                                   ? VFontWeight.bold
                                   : VFontWeight.regular,
+                              color: isLocked
+                                  ? theme.colorScheme.onSurfaceVariant
+                                  : null,
                             ),
                           ),
                         ),
-                        if (voiceOccupancy != null && voiceOccupancy! > 0)
+                        if (!isLocked &&
+                            voiceOccupancy != null &&
+                            voiceOccupancy! > 0)
                           Text(
                             '$voiceOccupancy in Campfire',
                             style: theme.textTheme.labelSmall?.copyWith(
@@ -509,6 +513,7 @@ class _ChannelTile extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

@@ -47,36 +47,53 @@ class NexusFeedHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  FeedTabChip(
-                    label: 'All',
-                    selected: allSelected,
-                    onTap: onAllTap,
-                  ),
-                  const SizedBox(width: 6),
-                  FeedTabChip(
-                    label: 'Verified',
-                    selected: verifiedSelected,
-                    icon: Icons.verified,
-                    onTap: onVerifiedTap,
-                  ),
-                  const SizedBox(width: 6),
-                  FeedTabChip(
-                    label: 'Following',
-                    selected: followingSelected,
-                    onTap: onFollowingTap,
-                  ),
-                  const SizedBox(width: 6),
-                  FeedTabChip(
-                    label: 'News',
-                    selected: announcementsSelected,
-                    icon: Icons.campaign,
-                    onTap: onAnnouncementsTap,
-                  ),
-                ],
+            child: ShaderMask(
+              shaderCallback: (bounds) {
+                return const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black,
+                    Colors.black,
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.04, 0.88, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    FeedTabChip(
+                      label: 'All',
+                      selected: allSelected,
+                      onTap: onAllTap,
+                    ),
+                    const SizedBox(width: 6),
+                    FeedTabChip(
+                      label: 'Verified',
+                      selected: verifiedSelected,
+                      icon: Icons.verified,
+                      onTap: onVerifiedTap,
+                    ),
+                    const SizedBox(width: 6),
+                    FeedTabChip(
+                      label: 'Following',
+                      selected: followingSelected,
+                      onTap: onFollowingTap,
+                    ),
+                    const SizedBox(width: 6),
+                    FeedTabChip(
+                      label: 'News',
+                      selected: announcementsSelected,
+                      icon: Icons.campaign,
+                      onTap: onAnnouncementsTap,
+                    ),
+                    const SizedBox(width: VSpacing.md),
+                  ],
+                ),
               ),
             ),
           ),

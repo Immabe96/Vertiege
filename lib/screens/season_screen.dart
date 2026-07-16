@@ -13,6 +13,7 @@ import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import '../utils/world_assets.dart';
+import '../utils/world_resident_count_label.dart';
 import '../widgets/core/fade_in.dart';
 import '../widgets/core/shimmer.dart';
 
@@ -153,7 +154,11 @@ class _SeasonScreenState extends ConsumerState<SeasonScreen> {
                   }, childCount: myRankedWorlds.length),
                 ),
               ],
-              const SliverToBoxAdapter(child: SizedBox(height: VSpacing.xxl)),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.paddingOf(context).bottom + VSpacing.xxl,
+                ),
+              ),
             ],
           )
         : _buildLoading();
@@ -218,7 +223,7 @@ class _SeasonCohortCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${cohort.memberCount} members competing in season challenges'
+                  '${worldMemberCountLabel(cohort.memberCount)} competing in season challenges'
                   '${cohort.matchBand != null ? ' · ${cohort.matchBand} band' : ''}',
                   style: theme.textTheme.bodySmall,
                 ),
@@ -479,7 +484,7 @@ class _SeasonProgress extends StatelessWidget {
             ],
           ),
           const SizedBox(height: VSpacing.sm),
-          VPrestigeProgressBar(value: season.progress, height: 6),
+          VPrestigeProgressBar(value: season.progress, height: 10),
         ],
       ),
     );

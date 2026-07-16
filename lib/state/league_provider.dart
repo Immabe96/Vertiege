@@ -100,13 +100,30 @@ class LeagueState {
 
 @Riverpod(name: 'leagueProvider', keepAlive: true)
 class LeagueNotifier extends _$LeagueNotifier {
+  Future<void>? _loadInFlight;
+
   @override
   LeagueState build() {
     return const LeagueState();
   }
 
   Future<void> loadLeague() async {
-    state = state.copyWith(isLoading: true);
+    final inFlight = _loadInFlight;
+    if (inFlight != null) return inFlight;
+
+    final future = _loadLeagueBody();
+    _loadInFlight = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_loadInFlight, future)) {
+        _loadInFlight = null;
+      }
+    }
+  }
+
+  Future<void> _loadLeagueBody() async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final userId = ref.read(residentProvider).resident?.id;
       final residentId = ref.read(residentProvider).resident?.id;
@@ -125,7 +142,8 @@ class LeagueNotifier extends _$LeagueNotifier {
         await LeagueService.assignNewUserLeague(effectiveUserId);
       }
 
-      final updatedUserLeagueData = await LeagueService.getUserLeague(effectiveUserId);
+      final updatedUserLeagueData =
+          await LeagueService.getUserLeague(effectiveUserId);
       final userTier = updatedUserLeagueData['league_tier'] ?? 'bronze';
       final userWeeklyXp = updatedUserLeagueData['weekly_xp'] ?? 0;
 
@@ -206,6 +224,8 @@ class LeagueNotifier extends _$LeagueNotifier {
   }
 
   void clearForSignOut() {
+    _loadInFlight = null;
+    LeagueService.clearSeasonCache();
     state = const LeagueState();
   }
 }

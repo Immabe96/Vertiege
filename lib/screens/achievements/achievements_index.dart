@@ -238,13 +238,6 @@ class _StatsHeroCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  tierLabel,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: VColors.brand,
-                    fontWeight: VFontWeight.semiBold,
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: VSpacing.md),

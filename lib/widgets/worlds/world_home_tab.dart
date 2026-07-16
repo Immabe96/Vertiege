@@ -6,6 +6,7 @@ import '../../config/world_page_ia.dart';
 import '../../models/post.dart';
 import '../../models/world.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/world_resident_count_label.dart';
 import '../core/empty_state.dart';
 import '../core/progression_help_button.dart';
 import 'archive_world_banner.dart';
@@ -103,8 +104,10 @@ class WorldHomeTab extends StatelessWidget {
           AppEmptyState(
             title: announcement == null ? 'No posts yet' : 'No other posts yet',
             description:
-                'Member posts and admin updates will show up in the feed.',
+                'Resident posts and admin updates will show up in the feed.',
             icon: Icons.forum_outlined,
+            actionLabel: 'Go to feed',
+            onAction: onOpenFeed,
           )
         else
           ...previews.map(
@@ -163,7 +166,7 @@ class _GroupMetaCard extends StatelessWidget {
               children: [
                 _MetaChip(
                   icon: Icons.people_outline,
-                  label: '${world.memberCount} members',
+                  label: worldMemberCountLabel(world.memberCount),
                 ),
                 _MetaChip(
                   icon: world.constitution.admission == 'open'

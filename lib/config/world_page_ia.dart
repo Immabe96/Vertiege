@@ -61,7 +61,7 @@ class WorldPageIa {
       case WorldDetailTabId.channels:
         return 'CHANNELS';
       case WorldDetailTabId.members:
-        return 'MEMBERS';
+        return 'RESIDENTS';
       case WorldDetailTabId.shop:
         return 'SHOP';
     }
@@ -126,7 +126,7 @@ class WorldPageIa {
 
   static String adminStatusLabel(World world) {
     if (world.isUnclaimed) {
-      return 'No admin yet — first member can claim this world';
+      return 'No admin yet — first resident can claim this world';
     }
     return 'Admin: ${world.sovereignName}';
   }

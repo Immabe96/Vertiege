@@ -16,8 +16,10 @@ import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import '../../services/world_channel_access_service.dart';
 import '../../services/world_mute_prefs.dart';
 import '../../services/dm_room_mute_prefs.dart';
+import '../../services/world_service.dart';
 import '../../utils/chat_unread.dart';
 import '../../utils/chat_channel_sort.dart';
 import '../../utils/channel_typing_label.dart';
@@ -29,8 +31,6 @@ import '../../widgets/core/v_accessible.dart';
 import '../../widgets/core/screen_loading.dart';
 import '../../widgets/core/status_dot.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
-import '../../widgets/worlds/world_icon.dart';
-import '../../services/world_service.dart';
 
 enum _ChatMode { worlds, dms }
 
@@ -344,6 +344,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       orElse: () => joinedWorlds.first,
     );
     final currentUserId = ref.read(residentProvider).resident?.id;
+    final resident = ref.watch(residentProvider).resident;
+    final features = ref
+        .read(worldProvider.notifier)
+        .featuresForWorld(selectedWorld.id);
     final channelState = ref.watch(channelProvider);
     final allChannels = channelState.channelsByWorld[selectedWorld.id] ?? [];
     final channelError = channelState.error;
@@ -387,17 +391,18 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     // Discord-like two-panel layout
     return Row(
       children: [
-        // Left rail — vertical world icons
-        _WorldRail(
+        VWorldRail(
           worlds: joinedWorlds,
           selectedWorldId: selectedWorld.id,
           unreadByWorldId: unreadByWorld,
-          onWorldSelected: (worldId) {
-            setState(() => _selectedWorldId = worldId);
-            _loadWorldChannelActivity(worldId);
+          mutedWorldIds: _mutedWorldIds,
+          onWorldSelected: (world) {
+            setState(() => _selectedWorldId = world.id);
+            _loadWorldChannelActivity(world.id);
           },
-          onToggleMute: (worldId) async {
-            final muted = await WorldMutePrefs.toggle(worldId);
+          onAddWorld: () => context.go('/worlds'),
+          onToggleMute: (world) async {
+            final muted = await WorldMutePrefs.toggle(world.id);
             if (mounted) setState(() => _mutedWorldIds = muted);
           },
         ),
@@ -436,12 +441,18 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                           if (announcementChannels.isNotEmpty) ...[
                             const _ChannelGroupHeader(label: 'Foundation'),
                             ...announcementChannels.map((channel) {
-                              final unreadCount = ref
-                                  .read(chatProvider.notifier)
-                                  .unreadCount(
-                                    channel.id,
-                                    currentUserId: currentUserId,
-                                  );
+                              final decision = WorldChannelAccessService.decision(
+                                world: selectedWorld,
+                                channel: channel,
+                                features: features,
+                                resident: resident,
+                              );
+                              final unreadCount = decision.canOpen
+                                  ? ref.read(chatProvider.notifier).unreadCount(
+                                      channel.id,
+                                      currentUserId: currentUserId,
+                                    )
+                                  : 0;
                               final typingLabel = channelTypingLabel(
                                 typingByRoom[channel.id] ?? const <String>{},
                                 currentUserId: currentUserId,
@@ -451,18 +462,26 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                 world: selectedWorld,
                                 unreadCount: unreadCount,
                                 typingLabel: typingLabel,
+                                lockedReason: decision.reason,
                               );
                             }),
                           ],
                           if (chatChannels.isNotEmpty) ...[
                             const _ChannelGroupHeader(label: 'Chat'),
                             ...chatChannels.map((channel) {
-                              final unreadCount = ref
-                                  .read(chatProvider.notifier)
-                                  .unreadCount(
-                                    channel.id,
-                                    currentUserId: currentUserId,
-                                  );
+                              final decision = WorldChannelAccessService.decision(
+                                world: selectedWorld,
+                                channel: channel,
+                                features: features,
+                                resident: resident,
+                              );
+                              final unreadCount = decision.canOpen &&
+                                      channel.channelType != ChannelType.voice
+                                  ? ref.read(chatProvider.notifier).unreadCount(
+                                      channel.id,
+                                      currentUserId: currentUserId,
+                                    )
+                                  : 0;
                               final typingLabel = channelTypingLabel(
                                 typingByRoom[channel.id] ?? const <String>{},
                                 currentUserId: currentUserId,
@@ -472,6 +491,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                 world: selectedWorld,
                                 unreadCount: unreadCount,
                                 typingLabel: typingLabel,
+                                lockedReason: decision.reason,
                               );
                             }),
                           ],
@@ -501,10 +521,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     return AppEmptyState(
       title: 'No direct messages yet',
       description:
-          'Find someone to message, or jump into a world channel first.',
+          'Find a resident to message, or jump into a world channel first.',
       icon: Icons.mail_outline,
       illustration: EmptyStateIllustration.chat,
-      actionLabel: 'Find someone',
+      actionLabel: 'Find residents',
       onAction: () => openGlobalSearch(context),
       secondaryActionLabel: 'Browse worlds',
       onSecondaryAction: () => context.go('/worlds'),
@@ -772,12 +792,14 @@ class _ChannelTile extends StatelessWidget {
   final WorldChannel channel;
   final int unreadCount;
   final String? typingLabel;
+  final String? lockedReason;
 
   const _ChannelTile({
     required this.channel,
     required this.world,
     required this.unreadCount,
     this.typingLabel,
+    this.lockedReason,
   });
 
   IconData get _icon {
@@ -798,7 +820,7 @@ class _ChannelTile extends StatelessWidget {
       ChannelType.announcement => Icons.campaign_outlined,
       ChannelType.feed => Icons.dynamic_feed_outlined,
       ChannelType.text => Icons.tag,
-      ChannelType.voice => Icons.volume_up_outlined,
+      ChannelType.voice => Icons.local_fire_department,
     };
   }
 
@@ -806,217 +828,110 @@ class _ChannelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasTyping = typingLabel != null;
+    final isLocked = lockedReason != null;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push(
-          worldChannelDestinationPath(world.id, channel, worldName: world.name),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: VSpacing.md,
-            vertical: VSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                _icon,
-                size: VIconSize.md,
-                color: unreadCount > 0
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: VSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      channel.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: unreadCount > 0
-                            ? VFontWeight.semiBold
-                            : VFontWeight.regular,
-                        color: unreadCount > 0
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    if (hasTyping)
+        onTap: isLocked
+            ? null
+            : () => context.push(
+                  worldChannelDestinationPath(
+                    world.id,
+                    channel,
+                    worldName: world.name,
+                  ),
+                ),
+        child: Opacity(
+          opacity: isLocked ? 0.72 : 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: VSpacing.md,
+              vertical: VSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isLocked ? Icons.lock_outline : _icon,
+                  size: VIconSize.md,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        typingLabel!,
-                        maxLines: 2,
+                        channel.name,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: VColors.success,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: VFontWeight.semiBold,
-                        ),
-                      )
-                    else if (channel.description != null &&
-                        channel.description!.isNotEmpty)
-                      Text(
-                        channel.description!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: unreadCount > 0
+                              ? VFontWeight.semiBold
+                              : VFontWeight.regular,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                  ],
-                ),
-              ),
-              if (unreadCount > 0)
-                Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: VColors.brand,
-                    borderRadius: BorderRadius.circular(VRadius.pill),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    unreadCount > 99 ? '99+' : '$unreadCount',
-                    style: const TextStyle(
-                      color: VColors.onBrand,
-                      fontSize: VFontSize.labelSm,
-                      fontWeight: VFontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WorldRail extends StatelessWidget {
-  final List<World> worlds;
-  final String selectedWorldId;
-  final Map<String, int> unreadByWorldId;
-  final ValueChanged<String> onWorldSelected;
-  final ValueChanged<String>? onToggleMute;
-
-  const _WorldRail({
-    required this.worlds,
-    required this.selectedWorldId,
-    this.unreadByWorldId = const {},
-    required this.onWorldSelected,
-    this.onToggleMute,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: 88,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(right: BorderSide(color: theme.dividerColor)),
-      ),
-      child: ListView(
-        padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
-        children: worlds.map((world) {
-          final isSelected = world.id == selectedWorldId;
-          final unread = unreadByWorldId[world.id] ?? 0;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: VSpacing.xs),
-            child: GestureDetector(
-              onTap: () => onWorldSelected(world.id),
-              onLongPress: onToggleMute == null
-                  ? null
-                  : () => onToggleMute!(world.id),
-              behavior: HitTestBehavior.opaque,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48),
-                child: Container(
-                  width: 80,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: VSpacing.xs,
-                    vertical: VSpacing.xs,
-                  ),
-                  margin: const EdgeInsets.symmetric(horizontal: VSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? VColors.brandSoft(Theme.of(context).brightness)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(VRadius.md),
-                    border: isSelected
-                        ? Border.all(
-                            color: VColors.brand.withValues(alpha: 0.4),
-                          )
-                        : null,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          WorldIcon(
-                            worldId: world.assetKey,
-                            size: 36,
-                            useGlassContainer: false,
-                            tintColor: isSelected
-                                ? VColors.brand
-                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                      if (isLocked)
+                        Text(
+                          lockedReason!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: VColors.tertiary,
                           ),
-                          if (unread > 0)
-                            Positioned(
-                              top: -4,
-                              right: -4,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 5,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: VColors.error,
-                                  borderRadius: BorderRadius.circular(9),
-                                ),
-                                child: Text(
-                                  unread > 99 ? '99+' : '$unread',
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: VFontWeight.bold,
-                                    color: VColors.onPrimary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        world.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: isSelected
-                              ? VFontWeight.semiBold
-                              : VFontWeight.regular,
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        )
+                      else if (hasTyping)
+                        Text(
+                          typingLabel!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: VColors.success,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: VFontWeight.semiBold,
+                          ),
+                        )
+                      else if (channel.description != null &&
+                          channel.description!.isNotEmpty)
+                        Text(
+                          channel.description!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-              ),
+                if (!isLocked && unreadCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: VSpacing.sm),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: VColors.error,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Text(
+                        unreadCount > 99 ? '99+' : '$unreadCount',
+                        style: const TextStyle(
+                          color: VColors.onBrand,
+                          fontSize: VFontSize.labelSm,
+                          fontWeight: VFontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          );
-        }).toList(),
+          ),
+        ),
       ),
     );
   }
@@ -1167,35 +1082,58 @@ class _EmptyChannels extends ConsumerStatefulWidget {
 }
 
 class _EmptyChannelsState extends ConsumerState<_EmptyChannels> {
+  var _bootstrapped = false;
+  var _bootstrapping = true;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(channelProvider.notifier).ensureDefaultChannels(widget.worldId);
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+  }
+
+  Future<void> _bootstrap() async {
+    if (_bootstrapped) return;
+    _bootstrapped = true;
+    setState(() => _bootstrapping = true);
+    try {
+      await ref
+          .read(channelProvider.notifier)
+          .ensureDefaultChannels(widget.worldId);
+    } finally {
+      if (mounted) setState(() => _bootstrapping = false);
+    }
+  }
+
+  Future<void> _retry() async {
+    setState(() => _bootstrapping = true);
+    try {
+      await ref
+          .read(channelProvider.notifier)
+          .loadChannels(widget.worldId, force: true);
+      await ref
+          .read(channelProvider.notifier)
+          .ensureDefaultChannels(widget.worldId);
+    } finally {
+      if (mounted) setState(() => _bootstrapping = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.tag, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(height: VSpacing.md),
-          const Text(
-            'No channels yet',
-            style: TextStyle(fontWeight: VFontWeight.semiBold),
-          ),
-          const SizedBox(height: VSpacing.xs),
-          Text(
-            'This world does not have a public channel.',
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-          ),
-        ],
-      ),
+    if (_bootstrapping || ref.watch(channelProvider).isLoading) {
+      return const ScreenLoading.list();
+    }
+    return AppEmptyState(
+      title: 'No channels yet',
+      description:
+          'This world does not have a public channel. Retry setup or open the world page.',
+      icon: Icons.tag,
+      illustration: EmptyStateIllustration.chat,
+      actionLabel: 'Retry setup',
+      onAction: _retry,
+      secondaryActionLabel: 'Open world',
+      onSecondaryAction: () =>
+          context.push(exploreWorldPath(widget.worldId)),
     );
   }
 }
