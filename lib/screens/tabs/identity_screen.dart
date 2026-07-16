@@ -19,7 +19,6 @@ import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/profile/edit_profile_sheet.dart';
 import '../../widgets/shared/progress_bar.dart';
-import '../../router/search_navigation.dart';
 import '../../widgets/profile/completion_hint.dart';
 import '../../widgets/profile/subscription_badge.dart';
 import '../../utils/presence_utils.dart';
@@ -450,16 +449,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
         label: 'Preview public profile',
         icon: const Icon(VIcons.user),
         onPress: () => context.push(residentProfilePath(resident.id)),
-      ),
-      VAccessibleHeaderAction(
-        label: 'Search residents',
-        icon: const Icon(VIcons.search),
-        onPress: () => openGlobalSearch(context),
-      ),
-      VAccessibleHeaderAction(
-        label: 'Refresh honour wall',
-        icon: const Icon(VIcons.rotateCw),
-        onPress: refreshHonourWall,
       ),
       VAccessibleHeaderAction(
         label: 'Settings',

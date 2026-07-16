@@ -83,7 +83,10 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
     WorldChannel? campfire;
     for (final ch in channels) {
       if (WorldChannelAccessService.isLoungeChannel(ch)) lounge = ch;
-      if (WorldChannelAccessService.isCampfireChannel(ch)) campfire = ch;
+      if (FeatureFlags.campfireEnabled &&
+          WorldChannelAccessService.isCampfireChannel(ch)) {
+        campfire = ch;
+      }
     }
 
     String? loungeGate;
@@ -180,27 +183,47 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
               children: [
                 QuietGateTile.section(
                   icon: Icons.forum_outlined,
-                  label: 'Lounge & Campfire',
-                  gate: (lounge == null && campfire == null)
-                      ? 'No social channels in this world yet.'
-                      : (loungeGate != null && campfireGate != null)
-                      ? loungeGate
-                      : null,
-                  onOpen: (lounge != null || campfire != null)
-                      ? () => _openLoungeCampfirePicker(
-                          context,
-                          worldId: worldId,
-                          worldName: world.name,
-                          lounge: lounge,
-                          campfire: campfire,
-                          loungeGate: loungeGate,
-                          campfireGate:
-                              campfireGate ??
-                              (features.audioRooms
-                                  ? null
-                                  : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
-                        )
-                      : null,
+                  label: FeatureFlags.campfireEnabled
+                      ? 'Lounge & Campfire'
+                      : 'Lounge',
+                  gate: FeatureFlags.campfireEnabled
+                      ? ((lounge == null && campfire == null)
+                            ? 'No social channels in this world yet.'
+                            : (loungeGate != null && campfireGate != null)
+                            ? loungeGate
+                            : null)
+                      : (lounge == null
+                            ? 'No lounge channel in this world yet.'
+                            : loungeGate),
+                  onOpen: FeatureFlags.campfireEnabled
+                      ? ((lounge != null || campfire != null)
+                            ? () => _openLoungeCampfirePicker(
+                                context,
+                                worldId: worldId,
+                                worldName: world.name,
+                                lounge: lounge,
+                                campfire: campfire,
+                                loungeGate: loungeGate,
+                                campfireGate:
+                                    campfireGate ??
+                                    (features.audioRooms
+                                        ? null
+                                        : 'Unlocks at prestige ${WorldChannelAccessService.campfirePrestige}.'),
+                              )
+                            : null)
+                      : () {
+                          final loungeChannel = lounge;
+                          if (loungeChannel == null || loungeGate != null) {
+                            return null;
+                          }
+                          return () => context.push(
+                            worldChannelDestinationPath(
+                              worldId,
+                              loungeChannel,
+                              worldName: world.name,
+                            ),
+                          );
+                        }(),
                 ),
                 if (FeatureFlags.polls)
                   VSectionTile(

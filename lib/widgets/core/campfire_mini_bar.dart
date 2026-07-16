@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router/world_navigation.dart';
+import '../../services/feature_flags.dart';
 import '../../state/voice_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -13,6 +14,8 @@ class CampfireMiniBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!FeatureFlags.campfireEnabled) return const SizedBox.shrink();
+
     final voice = ref.watch(voiceProvider);
     if (voice.activeCampfireId == null) return const SizedBox.shrink();
 

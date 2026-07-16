@@ -25,6 +25,10 @@ class FeatureFlags {
   static bool get worldAcademy =>
       RemoteConfigService.getBool('world_academy_enabled');
 
+  /// Live Campfire voice. Off until reliability UAT — broken voice hurts trust.
+  static bool get campfireEnabled =>
+      RemoteConfigService.getBool('campfire_enabled');
+
   static bool get quests =>
       RemoteConfigService.getBool('quests_enabled', fallback: true);
 

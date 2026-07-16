@@ -17,9 +17,12 @@ class RemoteConfigService {
       ),
     );
     await _remoteConfig?.setDefaults(const {
-      // Feature flags
-      'marketplace_enabled': true,
-      'treasury_enabled': true,
+      // Feature flags — economy / voice off until activation loop is solid
+      'marketplace_enabled': false,
+      'treasury_enabled': false,
+      'world_jobs_enabled': false,
+      'world_academy_enabled': false,
+      'campfire_enabled': false,
       'quests_enabled': true,
       'events_enabled': true,
       'polls_enabled': true,

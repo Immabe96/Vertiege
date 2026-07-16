@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../config/progression_access.dart';
+import '../services/admin_access_service.dart';
+import '../services/feature_flags.dart';
 import '../state/resident_provider.dart';
 import '../services/supabase.dart';
 import '../services/analytics_service.dart';
@@ -41,7 +43,6 @@ import '../screens/hall_of_ascension_screen.dart';
 import '../screens/journey/ascension_path_screen.dart';
 import '../screens/auth/verifier_login_screen.dart';
 import '../screens/verification_review_screen.dart';
-import '../services/admin_access_service.dart';
 import '../screens/audit_log_screen.dart';
 import '../screens/post_comments_screen.dart';
 import '../screens/thread_screen.dart';
@@ -202,6 +203,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if ((location == '/hall-of-ascension' || location == '/ascension-path') &&
           !ProgressionAccess.canAccessAscension(tier)) {
         return '/progress';
+      }
+
+      if (location.startsWith('/campfire/') && !FeatureFlags.campfireEnabled) {
+        final worldId = state.uri.queryParameters['worldId'];
+        if (worldId != null && worldId.isNotEmpty) {
+          return '/explore/${Uri.encodeComponent(worldId)}';
+        }
+        return '/chat';
       }
 
       return null;

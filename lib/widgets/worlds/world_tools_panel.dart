@@ -180,8 +180,12 @@ class WorldToolsPanel extends ConsumerWidget {
             children: [
               VSectionTile(
                 icon: Icons.forum_outlined,
-                label: 'Lounge & Campfire',
-                detail: 'Voice and member spaces',
+                label: FeatureFlags.campfireEnabled
+                    ? 'Lounge & Campfire'
+                    : 'Lounge',
+                detail: FeatureFlags.campfireEnabled
+                    ? 'Voice and member spaces'
+                    : 'Member lounge',
                 onTap: () {
                   onDismiss();
                   context.push(worldManagePath(worldId));
