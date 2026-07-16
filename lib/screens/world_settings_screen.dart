@@ -399,7 +399,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     if (result.isFailure) {
       VFeedback.showMessage(context, 'Delete failed — will retry shortly.');
     } else {
-      context.go('/explore');
+      context.go('/worlds');
       VFeedback.showMessage(context, 'World has been deleted.');
     }
   }

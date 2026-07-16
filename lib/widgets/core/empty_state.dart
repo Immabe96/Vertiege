@@ -25,6 +25,8 @@ class AppEmptyState extends ConsumerStatefulWidget {
   final IconData icon;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
   final EmptyStateVariant variant;
   final EmptyStateIllustration illustration;
 
@@ -35,6 +37,8 @@ class AppEmptyState extends ConsumerStatefulWidget {
     this.icon = Icons.inbox_outlined,
     this.actionLabel,
     this.onAction,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
     this.variant = EmptyStateVariant.default_,
     this.illustration = EmptyStateIllustration.default_,
   });
@@ -174,6 +178,15 @@ class _AppEmptyStateState extends ConsumerState<AppEmptyState>
                 FButton(
                   onPress: widget.onAction,
                   child: Text(widget.actionLabel!),
+                ),
+              ],
+              if (widget.secondaryActionLabel != null &&
+                  widget.onSecondaryAction != null) ...[
+                const SizedBox(height: 8),
+                FButton(
+                  variant: FButtonVariant.outline,
+                  onPress: widget.onSecondaryAction,
+                  child: Text(widget.secondaryActionLabel!),
                 ),
               ],
             ],

@@ -167,10 +167,19 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 | ID | Task | Status |
 |----|------|--------|
-| S10.5 | Nexus — default-expanded bento, streak card, gold FAB | ✅ |
+| S10.5 | Nexus — default-expanded bento, streak card, gold FAB | ✅ → updated 2026-07: lean Today strip, feed-first |
 | S10.6 | Chat — gold unread badges, brand-soft rail selection | ✅ |
-| S10.7 | Achievements — 2-col category grid, Verified/Pending/Available hero | ✅ |
-| S10.8 | Identity — streak row, trophy wall, XP expanded by default | ✅ |
+| S10.7 | Achievements — 2-col category grid, Verified/Pending/Available hero | ✅ → hub under You (not a tab) |
+| S10.8 | Identity — streak row, trophy wall, XP expanded by default | ✅ → You tab; Worlds restored as tab |
+
+### S10.5 — IA spine (2026-07)
+
+| ID | Task | Status |
+|----|------|--------|
+| S10.14 | Tabs: Nexus · Worlds · Chat · You; Achievements hub under You | ✅ |
+| S10.15 | One Progress home; one notifications inbox; delete MoreScreen | ✅ |
+| S10.16 | Sticky First Steps; Ascension Elite+; economy flags off in beta | ✅ |
+| S10.17 | Empty-state CTAs; post-Gate path join→chat→proof; member vs sovereign tools | ✅ |
 
 ### S10.3 — Hub screens (agent swarm)
 

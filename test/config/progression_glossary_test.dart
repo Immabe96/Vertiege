@@ -30,5 +30,12 @@ void main() {
         contains('400 XP to High Roller'),
       );
     });
+
+    test('overview sheet is XP, Tier, Streak only', () {
+      final overview = ProgressionGlossary.entriesFor(
+        ProgressionFocus.overview,
+      );
+      expect(overview.map((e) => e.title), ['XP', 'Tier', 'Streak']);
+    });
   });
 }

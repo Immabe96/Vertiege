@@ -1,17 +1,15 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../config/progression_access.dart';
+import '../../router/progress_navigation.dart';
 import '../../state/resident_provider.dart';
 import '../../state/quest_provider.dart';
 import '../../state/world_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
-/// Dynamically renders contextual chips based on the resident's current state:
-/// - New resident (tier 1, no worlds joined, no streak)
-/// - Active daily quests available
-/// - Council membership (tier >= oldMoney)
-/// - Pending world invites
+/// Dynamically renders contextual chips based on the resident's current state.
 class ContextualChips extends ConsumerWidget {
   const ContextualChips({super.key});
 
@@ -22,10 +20,8 @@ class ContextualChips extends ConsumerWidget {
     final worldState = ref.watch(worldProvider);
 
     final chips = <Widget>[];
-    int invitesCount = 0;
 
     if (resident != null) {
-      // ── New resident (< 7 days proxy) ──
       if (resident.tier.value == 1 &&
           resident.joinedWorldIds.isEmpty &&
           resident.streakCount == 0) {
@@ -34,26 +30,23 @@ class ContextualChips extends ConsumerWidget {
             icon: Icons.auto_awesome,
             label: 'Getting Started',
             color: VColors.success,
-            onTap: () => context.push('/onboarding'),
+            onTap: () => context.go('/identity'),
           ),
         );
       }
 
-      // ── Council member ──
-      if (resident.tier.value >= 4 || resident.verifiedRoles.isNotEmpty) {
+      if (ProgressionAccess.canAccessAscension(resident.tier.value)) {
         chips.add(
           _ContextChip(
             icon: Icons.shield,
-            label: 'Governance',
+            label: 'Ascension',
             color: Theme.of(context).colorScheme.primary,
             onTap: () => context.push('/hall-of-ascension'),
           ),
         );
       }
 
-      // ── Pending world invites ──
-      final allWorlds = worldState.worlds.values.toList();
-      invitesCount = allWorlds
+      final invitesCount = worldState.worlds.values
           .where((w) => !resident.joinedWorldIds.contains(w.id))
           .length;
       if (invitesCount > 0) {
@@ -62,13 +55,12 @@ class ContextualChips extends ConsumerWidget {
             icon: Icons.mail,
             label: 'Invites ($invitesCount)',
             color: VColors.warning,
-            onTap: () => context.push('/explore'),
+            onTap: () => context.go('/worlds'),
           ),
         );
       }
     }
 
-    // ── Active quest ──
     final activeQuests = questState.quests
         .where((q) => !q.claimed && !q.isComplete)
         .toList();
@@ -78,7 +70,7 @@ class ContextualChips extends ConsumerWidget {
           icon: Icons.bolt,
           label: 'Daily Quest',
           color: VColors.tertiary,
-          onTap: () => context.push('/ascension-path'),
+          onTap: () => context.push(progressPath(tab: ProgressTab.quests)),
         ),
       );
     }
@@ -102,8 +94,6 @@ class ContextualChips extends ConsumerWidget {
   }
 }
 
-/// A single contextual chip styled similarly to FilterPill but with
-/// category-specific coloring.
 class _ContextChip extends StatelessWidget {
   final IconData icon;
   final String label;

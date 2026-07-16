@@ -47,7 +47,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
     with TickerProviderStateMixin {
   static const Duration _fabAnimDuration = VAnimation.normal;
 
-  /// All 4 shell branches are visible tabs (Explore is no longer a shell branch).
+  /// Shell branches: Nexus (0), Worlds (1), Chat (2), You (3).
   static const _branchForTab = [0, 1, 2, 3];
 
   late AnimationController _fabController;
@@ -224,22 +224,22 @@ class _MainBottomNav extends StatelessWidget {
       semanticsLabel: 'Nexus',
     ),
     (
+      icon: Icons.public_outlined,
+      activeIcon: Icons.public,
+      label: 'Worlds',
+      semanticsLabel: 'Worlds',
+    ),
+    (
       icon: Icons.chat_bubble_outline,
       activeIcon: Icons.chat_bubble,
       label: 'Chat',
-      semanticsLabel: 'Messages',
-    ),
-    (
-      icon: Icons.emoji_events_outlined,
-      activeIcon: Icons.emoji_events,
-      label: 'Achievements',
-      semanticsLabel: 'Achievements',
+      semanticsLabel: 'Chat',
     ),
     (
       icon: Icons.account_circle_outlined,
       activeIcon: Icons.account_circle,
-      label: 'Identity',
-      semanticsLabel: 'Identity',
+      label: 'You',
+      semanticsLabel: 'You',
     ),
   ];
 
@@ -252,7 +252,7 @@ class _MainBottomNav extends StatelessWidget {
         for (var i = 0; i < _destinations.length; i++)
           _navItem(
             dest: _destinations[i],
-            showBadge: (i == 0 && nexusUnread > 0) || (i == 1 && chatUnread > 0),
+            showBadge: (i == 0 && nexusUnread > 0) || (i == 2 && chatUnread > 0),
             badgeCount: i == 0 ? nexusUnread : chatUnread,
             outlined: _destinations[i].icon,
             filled: _destinations[i].activeIcon,

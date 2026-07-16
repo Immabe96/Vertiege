@@ -155,10 +155,18 @@ class ChatNotifier extends _$ChatNotifier {
 
   void _dispose() {
     for (final roomId in _typingListeners.keys.toList()) {
-      unsubscribeFromTyping(roomId);
+      unsubscribeFromTyping(roomId, updateState: false);
     }
     TypingService.dispose();
     unsubscribeAll();
+  }
+
+  /// Riverpod forbids synchronous [state] writes during widget build/dispose.
+  void _setStateAfterBuild(void Function() update) {
+    Future(() {
+      if (!ref.mounted) return;
+      update();
+    });
   }
 
   // ── Typing indicators ──────────────────────────────────
@@ -183,17 +191,19 @@ class ChatNotifier extends _$ChatNotifier {
 
     void handler(String rId, String userId, bool isTyping) {
       if (rId != roomId) return;
-      final current = Map<String, Set<String>>.from(state.typingUsers);
-      current.putIfAbsent(roomId, () => {});
-      if (isTyping) {
-        current[roomId]!.add(userId);
-      } else {
-        current[roomId]!.remove(userId);
-      }
-      if (current[roomId]!.isEmpty) {
-        current.remove(roomId);
-      }
-      state = state.copyWith(typingUsers: current);
+      _setStateAfterBuild(() {
+        final current = Map<String, Set<String>>.from(state.typingUsers);
+        current.putIfAbsent(roomId, () => {});
+        if (isTyping) {
+          current[roomId]!.add(userId);
+        } else {
+          current[roomId]!.remove(userId);
+        }
+        if (current[roomId]!.isEmpty) {
+          current.remove(roomId);
+        }
+        state = state.copyWith(typingUsers: current);
+      });
     }
 
     _typingListeners[roomId] = handler;
@@ -201,16 +211,20 @@ class ChatNotifier extends _$ChatNotifier {
     TypingService.subscribe(roomId);
   }
 
-  void unsubscribeFromTyping(String roomId) {
+  void unsubscribeFromTyping(String roomId, {bool updateState = true}) {
     final handler = _typingListeners.remove(roomId);
     if (handler != null) {
       TypingService.removeListener(handler);
     }
     TypingService.unsubscribe(roomId);
 
-    final current = Map<String, Set<String>>.from(state.typingUsers);
-    current.remove(roomId);
-    state = state.copyWith(typingUsers: current);
+    if (!updateState) return;
+
+    _setStateAfterBuild(() {
+      final current = Map<String, Set<String>>.from(state.typingUsers);
+      current.remove(roomId);
+      state = state.copyWith(typingUsers: current);
+    });
   }
 
   Future<void> loadDmRooms(String residentId) async {
@@ -267,6 +281,8 @@ class ChatNotifier extends _$ChatNotifier {
 
   Future<void> loadDmMessages(String roomId, {bool force = false}) async {
     if (!force && state.dmMessages.containsKey(roomId)) return;
+    await Future<void>.delayed(Duration.zero);
+    if (!ref.mounted) return;
     final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
       ..remove(roomId);
     state = state.copyWith(messagesLoadErrors: clearedErrors);
@@ -820,6 +836,8 @@ class ChatNotifier extends _$ChatNotifier {
     bool force = false,
   }) async {
     if (!force && state.channelMessages.containsKey(channelId)) return;
+    await Future<void>.delayed(Duration.zero);
+    if (!ref.mounted) return;
     final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
       ..remove(channelId);
     state = state.copyWith(messagesLoadErrors: clearedErrors);
@@ -1087,6 +1105,8 @@ class ChatNotifier extends _$ChatNotifier {
   // ── Threads ────────────────────────────────────────────
 
   Future<void> loadThreadMessages(String threadId) async {
+    await Future<void>.delayed(Duration.zero);
+    if (!ref.mounted) return;
     final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
       ..remove(threadId);
     state = state.copyWith(messagesLoadErrors: clearedErrors);

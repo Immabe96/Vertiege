@@ -1,42 +1,44 @@
 ---
 name: vertiege-discord-ux
 description: >-
-  Vertiege Commune UX — 3-tab shell with Vertiege lexicon (worlds, residents,
-  achievements). Use for DCX-* changes. Borrow layout patterns only; never
+  Vertiege Commune UX — 4-tab shell (Nexus · Worlds · Chat · You) with Vertiege
+  lexicon. Use for DCX-* / IA changes. Borrow layout patterns only; never
   Discord product naming.
 ---
 
 # Vertiege Commune UX
 
-## Three-tab product thesis (authoritative)
+## Four-tab product thesis (authoritative)
 
-| Tab | Analog | Job | Vertiege rule |
-|-----|--------|-----|----------------|
-| **Nexus** | LinkedIn | Public standing feed — verified wins, progression, announcements | Proof moments, not hot takes. FAB compose for milestone posts. |
-| **Chat** | Discord | Fast comms — worlds, channels, DMs, Campfire | Borrow Discord density; tier locks + constitution stay visible. |
-| **Identity** | *Only Vertiege* | **Passport / national ID → verified tick.** Honour wall, tier truth. | **Verify identity above the fold.** Achievement proof is separate (`/achievements/submit`). |
+| Tab | Job | Vertiege rule |
+|-----|-----|----------------|
+| **Nexus** | Public standing feed — verified wins, announcements | Proof moments. FAB compose. |
+| **Worlds** | Discover, join, open realm home | Worlds are first-class — not buried under Chat. |
+| **Chat** | Worlds channels, DMs, Campfire | Density + belonging after you join. |
+| **You** | Passport tick, honour wall, tier; Achievements + Progress hubs | Identity ≠ achievement proof. |
 
-**One line:** LinkedIn shows what you claim. Chat lets you talk. **Identity proves you are a real resident** (government ID tick) — achievements prove what you've done.
+**One line:** Nexus shows standing. Worlds is where you belong. Chat is how you talk. You proves who you are and what you've earned.
 
 ### Live shell (code truth)
 
-- **Tabs:** Nexus `/` · Chat `/chat` · Identity `/identity`
-- **Hidden branch 3:** `/explore` + world/channel routes (no tab; highlights Chat)
-- **Legacy redirects:** `/you` → `/identity`, `/more` → `/identity`
-- **`CommuneHomeScreen` / `commune_home_provider`:** deleted — NOT routed; do not restore unless DCX reopened
+- **Tabs:** Nexus `/` · Worlds `/worlds` · Chat `/chat` · You `/identity`
+- **Hubs (push):** Achievements `/achievements`, Progress `/progress`, world detail `/explore/:id`
+- **Legacy redirects:** `/you` → `/identity`, `/more` → `/identity`, bare `/explore` → `/worlds`
+- **Activation path:** Join world → Open Chat → Submit proof
 
 ## Lexicon (mandatory in all UI copy, docs, comments)
 
 | Use | Do not use |
 |-----|------------|
 | World | server |
-| Resident | member |
+| Resident | member (except world “members” list) |
 | Achievement / verified | generic “badge” alone |
 | World channel | server channel |
 | Nexus | “feed” alone in nav labels |
 | Campfire | voice channel (user-facing) |
+| Tier / XP / Streak | lead with prestige/ascension/league in v1 copy |
 
-Achievements, tiers, governance, and economy are **first-class** — not demoted behind chat.
+Achievements, tiers, and worlds are **first-class** — economy modules stay flag-gated in closed beta.
 
 ## When to use
 

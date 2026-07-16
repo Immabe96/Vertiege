@@ -92,7 +92,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                 'Challenges are scoped to worlds and seasons, not a permanent global board.',
             icon: Icons.emoji_events_outlined,
             actionLabel: 'Browse worlds',
-            onAction: () => context.go('/explore'),
+            onAction: () => context.go('/worlds'),
           )
         : challengeState.isLoading
         ? const ScreenLoading.list()

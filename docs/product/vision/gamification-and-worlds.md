@@ -10,15 +10,16 @@
 
 | Tab | Role |
 |-----|------|
-| **Identity** | **Government ID** (passport / national ID) → verified **tick**. Honour wall, tier/XP. Achievement proof is a separate button — not the same as identity. |
-| **Nexus** | Share verified **achievement** moments (LinkedIn-style standing feed) |
-| **Chat** | Celebrate wins in worlds; achievement attachments in channels |
+| **Nexus** | Share verified **achievement** moments (standing feed) |
+| **Worlds** | Discover / join realms; world detail is channels-first |
+| **Chat** | Celebrate wins in worlds; channels, DMs, Campfire |
+| **You** | **Government ID** → verified **tick**. Honour wall, tier/XP. Achievement proof is a separate hub — not the same as identity. |
 
 ## Two proof types (do not conflate)
 
 | Type | What | Where | Outcome |
 |------|------|-------|---------|
-| **Identity verification** | Passport or national ID card | Identity tab | Verified resident **tick** |
+| **Identity verification** | Passport or national ID card | You tab | Verified resident **tick** |
 | **Achievement proof** | Evidence for a catalog achievement | Achievements hub | XP, honour wall entry, tier progress |
 
 ## Two pillars

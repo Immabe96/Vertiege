@@ -36,96 +36,107 @@ class ProgressionGlossary {
 
   static const sheetTitle = 'How progression works';
 
+  /// Closed-beta intro — Tier, XP, Streak only.
   static const String accountIntro =
-      'Your account has one global tier (from XP). Each world has its own reputation. '
-      'Worlds also have prestige and, for communities you create, a growth level.';
+      'Earn XP from verified achievements and daily check-ins. '
+      'XP raises your global tier. Keep a streak for bonus XP. '
+      'World reputation and advanced prestige unlock later.';
 
   static const List<ProgressionEntry> entries = [
     ProgressionEntry(
       focus: ProgressionFocus.xpAndTier,
       title: 'XP',
-      oneLiner: 'Points from verified achievements and in-app milestones.',
+      oneLiner: 'Points from verified achievements and daily activity.',
       detail:
-          'XP adds up on your profile. It does not replace reputation inside a world — '
-          'think of it as your overall résumé in Vertiege.',
+          'XP adds up on your profile. Submit proof, get verified, show up '
+          'on Nexus — that is the main way to grow.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.xpAndTier,
-      title: 'Tier (your rank)',
-      oneLiner: 'Global rank: Hustler → High Roller → Elite → Old Money → Apex.',
+      title: 'Tier',
+      oneLiner: 'Your global rank from XP: Hustler → High Roller → Elite → …',
       detail:
-          'Tier is calculated from total XP (500 / 2,000 / 10,000 / 50,000 thresholds). '
-          'Higher tier unlocks more worlds, creating worlds, and marketplace selling.',
+          'Tier unlocks more worlds and capabilities. Thresholds are at '
+          '500 / 2,000 / 10,000 / 50,000 XP.',
+    ),
+    ProgressionEntry(
+      focus: ProgressionFocus.xpAndTier,
+      title: 'Streak',
+      oneLiner: 'Check in daily for bonus XP and milestone rewards.',
+      detail:
+          'Open Quests or Progress each day to keep your streak. Miss a day '
+          'and it resets unless you have a streak shield.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.repAndStanding,
       title: 'Rep (per world)',
       oneLiner: 'Reputation you earn by participating in one world.',
       detail:
-          'Rep is tracked separately for each world you join. Posting, trading, and '
-          'helping the community raise rep. Leaderboards and council eligibility use rep.',
+          'Rep is tracked separately for each world you join. Posting and '
+          'helping raise rep. Advanced features use rep bands later.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.repAndStanding,
       title: 'Standing (per world)',
       oneLiner: 'Named step from rep: Member, Contributor, Council, and more.',
       detail:
-          'Standing is the friendly label for your rep band in that world (e.g. Council at '
-          '5,000 rep). It gates features like lounge or treasury management in that realm.',
+          'Standing is the label for your rep band in that world. It gates '
+          'some world tools when those modules are enabled.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.worldPrestige,
       title: 'World prestige',
-      oneLiner: 'How developed a world is (1–50) — unlocks realm features for everyone.',
+      oneLiner: 'How developed a world is (1–50).',
       detail:
-          'World prestige rises with active members, posts, and leader tier. It unlocks '
-          'lounge, events, vault, treasury, marketplace, and governance for that world. '
-          'This is not your personal tier.',
+          'World prestige rises with active members and posts. It unlocks '
+          'realm features for everyone in that world — not your personal tier.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.worldLevel,
       title: 'World growth level',
       oneLiner: 'Levels 1–10 for worlds you create — from activity score.',
       detail:
-          'User-created community worlds level up from posts and joins (activity score). '
-          'Higher level raises the member cap. Premade worlds use prestige instead.',
+          'User-created worlds level up from posts and joins. Higher level '
+          'raises the member cap.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.ascension,
-      title: 'Ascension (optional)',
-      oneLiner: 'After Apex, reset XP to earn prestige stars and flair.',
+      title: 'Ascension',
+      oneLiner: 'Endgame flair after Elite — optional.',
       detail:
-          'At max tier with 50,000+ XP you may ascend from the Hall of Ascension: tier '
-          'resets to Hustler, XP resets, and you keep prestige stars as endgame flair.',
+          'At high tier you may open Ascension for prestige stars and flair. '
+          'It is not required to enjoy Vertiege.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.loungeAccess,
       title: 'Lounge',
-      oneLiner: 'A tier-gated voice channel for deeper conversation in a world.',
+      oneLiner: 'A tier-gated voice channel for deeper conversation.',
       detail:
-          'Lounges unlock when your global tier and world standing meet the realm rules. '
-          'They are optional — join when you want focused discussion, not pressure.',
+          'Lounges unlock when your tier and world standing meet realm rules.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.worldTreasury,
       title: 'Treasury',
-      oneLiner: 'Shared world funds for events, grants, and community projects.',
+      oneLiner: 'Shared world funds — paused in closed beta by default.',
       detail:
-          'Members with standing can donate coins; council and sovereign roles manage '
-          'payouts. Treasury activity is visible in the audit trail for transparency.',
+          'When enabled, members can donate coins; council manages payouts.',
     ),
     ProgressionEntry(
       focus: ProgressionFocus.worldPolls,
       title: 'Polls',
-      oneLiner: 'Structured votes on world decisions without spamming the feed.',
+      oneLiner: 'Structured votes on world decisions.',
       detail:
-          'Create polls from the world polls hub when your standing allows. Results '
-          'inform governance; they do not replace council votes on binding proposals.',
+          'Create polls from the world polls hub when your standing allows.',
     ),
   ];
 
+  /// Overview sheet shows only the v1 spine: XP, Tier, Streak.
   static List<ProgressionEntry> entriesFor(ProgressionFocus focus) {
-    if (focus == ProgressionFocus.overview) return entries;
+    if (focus == ProgressionFocus.overview) {
+      return entries
+          .where((e) => e.focus == ProgressionFocus.xpAndTier)
+          .toList();
+    }
     return entries.where((e) => e.focus == focus).toList();
   }
 

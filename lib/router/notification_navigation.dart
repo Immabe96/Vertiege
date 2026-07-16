@@ -46,7 +46,7 @@ String? routeForNotification(AppNotification notification) {
     case NotificationType.streakReminder:
       return '/identity';
     case NotificationType.welcome:
-      return '/explore';
+      return '/worlds';
     case NotificationType.modAction:
       return '/settings';
     case NotificationType.ranking:
@@ -61,7 +61,7 @@ String? routeForNotification(AppNotification notification) {
       if (worldId != null) {
         return worldJobsPath(worldId);
       }
-      return '/explore';
+      return '/worlds';
     case NotificationType.governanceProposalApproved:
     case NotificationType.governanceProposalRejected:
       if (worldId != null) {

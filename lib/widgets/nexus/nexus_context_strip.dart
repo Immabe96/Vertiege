@@ -50,43 +50,23 @@ class NexusContextStrip extends StatelessWidget {
             ],
           ),
           const SizedBox(height: VSpacing.sm),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _ContextChip(
-                  label: 'Season',
-                  icon: Icons.auto_awesome,
-                  useCommuneStyle: useCommuneStyle,
-                  onTap: () => context.push('/progress?tab=season'),
-                ),
-                const SizedBox(width: VSpacing.xs),
-                _ContextChip(
-                  label: 'Quests',
-                  icon: Icons.flag_outlined,
-                  useCommuneStyle: useCommuneStyle,
-                  onTap: () => context.push('/progress?tab=quests'),
-                ),
-                const SizedBox(width: VSpacing.xs),
-                _ContextChip(
-                  label: 'Worlds',
-                  icon: Icons.public_outlined,
-                  useCommuneStyle: useCommuneStyle,
-                  onTap: () => context.push('/explore'),
-                ),
-                if (showJoinWorldsCta) ...[
-                  const SizedBox(width: VSpacing.xs),
+          if (showJoinWorldsCta)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
                   _ContextChip(
                     label: 'Browse worlds',
                     icon: Icons.explore_outlined,
                     selected: true,
                     useCommuneStyle: useCommuneStyle,
-                    onTap: () => context.push('/explore'),
+                    onTap: () => context.go('/worlds'),
                   ),
                 ],
-              ],
-            ),
-          ),
+              ),
+            )
+          else
+            const SizedBox.shrink(),
           FutureBuilder<bool>(
             future: ContextualHelpPrefs.shouldShowContextualHelp(),
             builder: (context, snapshot) {

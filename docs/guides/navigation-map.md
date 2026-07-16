@@ -2,20 +2,33 @@
 
 Where primary surfaces live so we avoid duplicate CTAs.
 
-| Tab | Role | Achievements & progression |
-|-----|------|---------------------------|
-| **Nexus** | Home feed + **progress shortcuts** (quests, season, league, challenges) | Shortcuts only — not the catalog |
-| **Identity** | Profile, honours, trophy case, tier | **One** link to `/achievements` (section header) |
-| **More** | Account (shop, subscription, settings) + **Help & legal** | No achievements entry |
-| **Explore** | Worlds | World-scoped challenges in-world |
+| Tab | Role | Progression & proof |
+|-----|------|---------------------|
+| **Nexus** `/` | Standing feed + lean Today strip (streak / quests / progress / worlds) | Shortcuts only — not the catalog |
+| **Worlds** `/worlds` | Discover, join, realm home | World-scoped tools in-world |
+| **Chat** `/chat` | World channels + DMs + Campfire | Empty → Browse worlds / Submit proof |
+| **You** `/identity` | Passport tick, honour wall, tier | Achievements + Progress hubs (header / Standing) |
 
-## Search (Wave 15)
+## Hubs (push, not tabs)
 
-- **Nexus** and **Identity** headers open `/search` (residents + worlds).
-- **Chat** list uses the same global search entry.
+| Route | Role |
+|-------|------|
+| `/achievements` | Catalog + submit proof |
+| `/progress` | Quests, world challenges, season, league |
+| `/explore/:id` | World detail (channels-first) |
+| `/notifications` | Single inbox (Nexus bell) |
 
-## Progression
+## Activation path
 
-- **League** (`/leagues`): Nexus shortcuts only — not duplicated on Identity.
+**Join a world → Open Chat → Submit proof.** Nexus fills afterward.
 
-Rule: do not add a second `/achievements` tap target on Identity (stats are display-only; use header or trophy wall).
+## Search
+
+- **Nexus** header opens `/search`.
+- **Chat** “new DM” opens the same global search.
+
+## Rules
+
+- Do not restore Achievements or Explore as competing fifth concepts in the tab bar.
+- Economy (marketplace / treasury / jobs) stays Remote Config–off in closed beta.
+- Ascension / Hall unlocks at Elite+ only.

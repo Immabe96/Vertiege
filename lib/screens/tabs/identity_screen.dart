@@ -48,6 +48,7 @@ import '../../widgets/identity/identity_verification_card.dart';
 import '../../widgets/identity/streak_stats_row.dart';
 import '../../widgets/onboarding/first_steps_card.dart';
 import '../../widgets/profile/achievement_trophy_wall.dart';
+import '../../config/progression_access.dart';
 import '../../config/progression_glossary.dart';
 import '../../config/achievements.dart';
 import '../../widgets/core/progression_help_button.dart';
@@ -619,8 +620,12 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                                 Material(
                                   color: Colors.transparent,
                                   child: InkWell(
-                                    onTap: () =>
-                                        context.push('/ascension-path'),
+                                    onTap: ProgressionAccess.canAccessAscension(
+                                          tierValue,
+                                        )
+                                        ? () =>
+                                            context.push('/ascension-path')
+                                        : null,
                                     borderRadius: BorderRadius.circular(
                                       VRadius.pill,
                                     ),
@@ -781,7 +786,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ),
               ),
 
-            if (!_funnelDismissed &&
+            if (!widget.embedded &&
+                !_funnelDismissed &&
                 !OnboardingFunnel.isComplete(
                   resident: resident,
                   achievements: achievements.userAchievements,
@@ -1093,6 +1099,26 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             const SizedBox(height: VSpacing.lg),
 
             Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
+              child: VSectionList(
+                title: 'Standing',
+                children: [
+                  VSectionTile(
+                    icon: Icons.emoji_events_outlined,
+                    label: 'Achievements',
+                    onTap: () => context.push('/achievements'),
+                  ),
+                  VSectionTile(
+                    icon: Icons.insights_outlined,
+                    label: 'Progress · XP, streak & quests',
+                    onTap: () => context.push('/progress'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: VSpacing.md),
+
+            Padding(
               key: _exploreSectionKey,
               padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: VSectionList(
@@ -1114,15 +1140,16 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
               ),
             ),
             const SizedBox(height: VSpacing.md),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: VSectionList(
-                title: 'Vault',
+                title: 'Account',
                 children: [
                   VSectionTile(
                     icon: Icons.monetization_on,
                     label:
-                        'Sovereign Regalia · ${resident.sovereignCoins} coins',
+                        'Shop · ${resident.sovereignCoins} coins',
                     iconColor: VColors.tertiary,
                     onTap: () => context.push('/shop'),
                   ),
@@ -1131,17 +1158,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                     label: 'Subscription',
                     onTap: () => context.push('/subscription'),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: VSpacing.sm),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: VSectionList(
-                title: 'Account',
-                children: [
                   VSectionTile(
                     icon: Icons.settings_outlined,
                     label: 'Settings',

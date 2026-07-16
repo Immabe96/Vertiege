@@ -7,12 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../config/onboarding_funnel.dart';
 import '../../config/professions.dart';
 import '../../config/tiers.dart';
 import '../../models/resident.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
-import '../../services/invite_navigation.dart';
 import '../../services/supabase.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
@@ -181,13 +181,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  Future<void> _enterApp() async {
+  Future<void> _enterApp([String? path]) async {
     await OnboardingFunnelPrefs.markJustFinishedOnboarding();
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.onboardingCompleted));
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.gateCompleted));
     if (!mounted) return;
-    final route = await routeAfterAuth(ref, feedbackContext: context);
-    if (mounted) context.go(route);
+    final resident = ref.read(residentProvider).resident;
+    final hasWorld =
+        resident != null && OnboardingFunnel.hasJoinedWorld(resident);
+    // Forced path: worlds → chat → proof. Nexus is not the first landing.
+    final dest = path ?? (hasWorld ? '/chat' : '/worlds');
+    if (mounted) context.go(dest);
   }
 
   @override
@@ -710,7 +714,7 @@ class _GateTabState extends State<_GateTab> {
 }
 
 class _WorldTab extends ConsumerWidget {
-  final VoidCallback onEnter;
+  final void Function([String? path]) onEnter;
 
   const _WorldTab({required this.onEnter});
 
@@ -718,6 +722,8 @@ class _WorldTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final resident = ref.watch(residentProvider).resident;
+    final hasWorld =
+        resident != null && OnboardingFunnel.hasJoinedWorld(resident);
 
     final interestLabel = resident?.gateInterest != null
         ? _interestLabel(resident!.gateInterest!)
@@ -728,9 +734,10 @@ class _WorldTab extends ConsumerWidget {
       child: Column(
         children: [
           const SizedBox(height: VSpacing.xl),
-          const Text(
-            '🌍',
-            style: TextStyle(fontSize: 56),
+          Icon(
+            hasWorld ? Icons.chat_bubble_outline : Icons.public,
+            size: 56,
+            color: VColors.brand,
           ),
           const SizedBox(height: VSpacing.lg),
           Text(
@@ -755,27 +762,36 @@ class _WorldTab extends ConsumerWidget {
           ),
           const SizedBox(height: VSpacing.xl),
           AuthPrestigePrimaryButton(
-            label: 'Open Nexus',
+            label: hasWorld ? 'Open Chat' : 'Browse worlds',
             isLoading: false,
             onPressed: onEnter,
           ),
           const SizedBox(height: VSpacing.sm),
-          VButton(
-            label: 'Visit your world',
-            variant: ButtonVariant.outlined,
-            isFullWidth: true,
-            icon: const Icon(Icons.public),
-            onPressed: () {
-              final id = resident?.joinedWorldIds
-                  .where(WorldService.isRemoteWorldId)
-                  .firstOrNull;
-              if (id != null) {
-                context.push(exploreWorldPath(id));
-              } else {
-                context.push('/explore');
-              }
-            },
-          ),
+          if (hasWorld)
+            VButton(
+              label: 'Visit your world',
+              variant: ButtonVariant.outlined,
+              isFullWidth: true,
+              icon: const Icon(Icons.public),
+              onPressed: () {
+                final id = resident.joinedWorldIds
+                    .where(WorldService.isRemoteWorldId)
+                    .firstOrNull;
+                if (id != null) {
+                  onEnter(exploreWorldPath(id));
+                } else {
+                  onEnter('/worlds');
+                }
+              },
+            )
+          else
+            VButton(
+              label: 'Open Chat later',
+              variant: ButtonVariant.outlined,
+              isFullWidth: true,
+              icon: const Icon(Icons.chat_bubble_outline),
+              onPressed: () => onEnter('/chat'),
+            ),
           const SizedBox(height: VSpacing.sm),
           VButton(
             label: 'Submit proof',
@@ -784,9 +800,16 @@ class _WorldTab extends ConsumerWidget {
             icon: const Icon(Icons.verified_outlined),
             onPressed: () => context.push('/achievements/submit'),
           ),
+          const SizedBox(height: VSpacing.md),
+          VButton(
+            label: 'Skip to Nexus',
+            variant: ButtonVariant.text,
+            isFullWidth: true,
+            onPressed: () => onEnter('/'),
+          ),
           const SizedBox(height: VSpacing.lg),
           Text(
-            'Recommended path: profile → join worlds → Nexus feed → achievement proof.',
+            'Next: join a world → open Chat → submit proof.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: PrestigeNoir.mutedDim,
@@ -819,17 +842,17 @@ class _WorldTab extends ConsumerWidget {
       }
     }
     if (names.isEmpty) {
-      return 'You\'re set up with starter worlds. More unlock as you verify '
-          'your profession or level up.';
+      return 'Browse Worlds, join one, then open Chat. '
+          'Submit achievement proof when you\'re ready to rise.';
     }
     if (names.length == 1) {
-      return 'You start in ${names.first}. Submit proof and earn reputation '
-          'there, then explore more worlds.';
+      return 'You start in ${names.first}. Open Chat to meet the room, '
+          'then submit proof to earn XP.';
     }
     final head = names.take(2).join(' and ');
     final extra = names.length > 2 ? ' (+${names.length - 2} more)' : '';
-    return 'You start in $head$extra. Submit achievement proof in your worlds, '
-        'then browse Nexus for updates.';
+    return 'You start in $head$extra. Open Chat, then submit proof — '
+        'Nexus fills as you share standing.';
   }
 }
 

@@ -755,7 +755,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
                 innerBoxIsScrolled: innerBoxIsScrolled,
                 scaleAnimation: scaleAnimation,
                 joinButtonKey: _joinButtonKey,
-                onBack: () => safeBack(context, fallback: '/explore'),
+                onBack: () => safeBack(context, fallback: '/worlds'),
                 onShare: () => _showWorldShareSheet(world),
                 onSettings: onSettings,
                 onOpenTools: () => _openToolsSheet(

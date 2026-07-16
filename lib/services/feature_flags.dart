@@ -12,10 +12,18 @@ class FeatureFlags {
   // ── Feature gates ──
 
   static bool get marketplace =>
-      RemoteConfigService.getBool('marketplace_enabled', fallback: true);
+      RemoteConfigService.getBool('marketplace_enabled');
 
   static bool get treasury =>
-      RemoteConfigService.getBool('treasury_enabled', fallback: true);
+      RemoteConfigService.getBool('treasury_enabled');
+
+  /// World jobs / role board. Off by default in closed beta.
+  static bool get worldJobs =>
+      RemoteConfigService.getBool('world_jobs_enabled');
+
+  /// Academy / sanctuary learning modules. Off by default in closed beta.
+  static bool get worldAcademy =>
+      RemoteConfigService.getBool('world_academy_enabled');
 
   static bool get quests =>
       RemoteConfigService.getBool('quests_enabled', fallback: true);

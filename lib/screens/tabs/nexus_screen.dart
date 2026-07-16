@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 
 import '../../router/search_navigation.dart';
@@ -14,11 +15,9 @@ import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../widgets/core/tab_aware_sheet.dart';
 import '../../widgets/core/v_accessible.dart';
 import '../../widgets/nexus/nexus_feed_body.dart';
 import '../../widgets/onboarding/notification_permission_sheet.dart';
-import '../tabs/nexus_notifications_sheet.dart';
 
 class NexusScreen extends ConsumerStatefulWidget {
   const NexusScreen({super.key});
@@ -62,7 +61,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
     if (welcome && mounted) {
       VFeedback.showMessage(
         context,
-        'Welcome! Your Nexus feed fills as you join worlds and share standing.',
+        'Welcome. Join a world, open Chat, then submit proof — Nexus fills as you share standing.',
       );
     }
     if (!mounted) return;
@@ -72,12 +71,7 @@ class _NexusScreenState extends ConsumerState<NexusScreen> {
   }
 
   void _showNotifications() {
-    showTabAwareModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => const NexusNotificationsSheet(),
-    );
+    context.push('/notifications');
   }
 
   @override

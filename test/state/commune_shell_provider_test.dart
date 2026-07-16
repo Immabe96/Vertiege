@@ -29,6 +29,7 @@ void main() {
       expect(communeImmersivePath('/'), isFalse);
       expect(communeImmersivePath('/chat'), isFalse);
       expect(communeImmersivePath('/identity'), isFalse);
+      expect(communeImmersivePath('/worlds'), isFalse);
       expect(communeImmersivePath('/explore'), isFalse);
       expect(communeImmersivePath('/explore/discover'), isFalse);
     });

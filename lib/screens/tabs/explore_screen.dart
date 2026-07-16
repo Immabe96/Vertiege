@@ -424,13 +424,29 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         child: AppEmptyState(
                           title: _searchQuery.isNotEmpty
                               ? 'No worlds found'
-                              : 'No worlds available',
+                              : 'Find your first world',
                           description: _searchQuery.isNotEmpty
-                              ? 'No worlds match "$_searchQuery"'
-                              : 'No worlds have been created yet.',
+                              ? 'No worlds match "$_searchQuery". Try another search or browse Discover.'
+                              : 'Join a world to unlock Chat channels, then submit proof to earn XP.',
                           icon: _searchQuery.isNotEmpty
                               ? Icons.search_off
-                              : Icons.public_off,
+                              : Icons.public,
+                          illustration: EmptyStateIllustration.worlds,
+                          actionLabel: _searchQuery.isNotEmpty
+                              ? 'Clear search'
+                              : 'Discover worlds',
+                          onAction: _searchQuery.isNotEmpty
+                              ? () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                }
+                              : () => context.push(exploreDiscoverPath()),
+                          secondaryActionLabel: _searchQuery.isEmpty
+                              ? 'Submit proof'
+                              : null,
+                          onSecondaryAction: _searchQuery.isEmpty
+                              ? () => context.push('/achievements/submit')
+                              : null,
                         ),
                       ),
                     ),

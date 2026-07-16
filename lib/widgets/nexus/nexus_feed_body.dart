@@ -43,7 +43,6 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
   FeedSort _sort = FeedSort.latest;
   late final ScrollController _scrollController;
   bool _showScrollFab = false;
-  bool _shortcutsExpanded = true;
 
   @override
   void initState() {
@@ -180,12 +179,8 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                       useCommuneStyle: true,
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: NexusShortcutsSection(
-                      expanded: _shortcutsExpanded,
-                      onExpandedChanged: (v) =>
-                          setState(() => _shortcutsExpanded = v),
-                    ),
+                  const SliverToBoxAdapter(
+                    child: NexusShortcutsSection(),
                   ),
                 ] else ...[
                   SliverToBoxAdapter(
@@ -193,12 +188,8 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                       showJoinWorldsCta: joinedRemoteWorlds == 0,
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: NexusShortcutsSection(
-                      expanded: _shortcutsExpanded,
-                      onExpandedChanged: (v) =>
-                          setState(() => _shortcutsExpanded = v),
-                    ),
+                  const SliverToBoxAdapter(
+                    child: NexusShortcutsSection(),
                   ),
                 ],
                 SliverToBoxAdapter(
@@ -323,42 +314,56 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
 
     switch (_tab) {
       case _NexusFeedTab.verified:
-        return const AppEmptyState(
+        return AppEmptyState(
           title: 'No verified moments yet',
           description:
-              'When residents verify achievements and share to Nexus, '
-              'proof-backed moments appear here on your standing feed.',
+              'Submit achievement proof. When it\'s verified and shared, '
+              'it shows up here.',
           icon: Icons.verified_outlined,
+          illustration: EmptyStateIllustration.nexus,
+          actionLabel: 'Submit proof',
+          onAction: () => context.push('/achievements/submit'),
         );
       case _NexusFeedTab.following:
-        return const AppEmptyState(
-          title: 'No posts from people you follow',
-          description: 'Follow members in your worlds to see their posts here',
+        return AppEmptyState(
+          title: 'Nobody you follow has posted',
+          description: 'Find people in Worlds or Chat, then follow them.',
           icon: Icons.people_outline,
+          actionLabel: 'Browse worlds',
+          onAction: () => context.go('/worlds'),
         );
       case _NexusFeedTab.announcements:
         return const AppEmptyState(
           title: 'No announcements yet',
-          description: 'Admin announcements from your worlds will appear here',
+          description: 'World admins post decrees here when something matters.',
           icon: Icons.campaign_outlined,
         );
       case _NexusFeedTab.all:
         if (!hasJoinedWorlds) {
           return AppEmptyState(
-            title: 'Join a world to fill your Nexus',
+            title: 'Your Nexus is waiting',
             description:
-                'Join worlds to earn reputation and see standing posts '
-                'from communities you belong to.',
-            icon: Icons.explore_outlined,
+                'Join a world, then submit proof. Your feed fills as you '
+                'and your worlds share verified moments.',
+            icon: Icons.dynamic_feed_outlined,
+            illustration: EmptyStateIllustration.nexus,
             actionLabel: 'Browse worlds',
-            onAction: () => context.push('/explore/discover'),
+            onAction: () => context.go('/worlds'),
+            secondaryActionLabel: 'Submit proof',
+            onSecondaryAction: () => context.push('/achievements/submit'),
           );
         }
-        return const AppEmptyState(
-          title: 'No posts in your worlds yet',
+        return AppEmptyState(
+          title: 'No moments yet',
           description:
-              'Share an update or visit a world feed to start the conversation.',
+              'Share standing with the compose button, or submit achievement '
+              'proof so verified moments can appear here.',
           icon: Icons.auto_awesome,
+          illustration: EmptyStateIllustration.nexus,
+          actionLabel: 'Submit proof',
+          onAction: () => context.push('/achievements/submit'),
+          secondaryActionLabel: 'Open Chat',
+          onSecondaryAction: () => context.go('/chat'),
         );
     }
   }

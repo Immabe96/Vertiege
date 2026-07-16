@@ -612,11 +612,21 @@ class _EconomySection extends StatelessWidget {
     final showMarket = FeatureFlags.marketplace &&
         WorldCapabilityMatrix.worldHasMarketplace(world);
     final showTreasury = FeatureFlags.treasury &&
-        WorldCapabilityMatrix.worldHasTreasury(world);
+        WorldCapabilityMatrix.worldHasTreasury(world) &&
+        (isJoined || isSovereignOrCouncil);
     final showPolls = FeatureFlags.polls && isJoined;
     final showChallenges = FeatureFlags.challenges && isJoined;
+    final showJobs = FeatureFlags.worldJobs &&
+        isJoined &&
+        (isSovereignOrCouncil || world.isMarketplace);
 
-    if (!showMarket && !showTreasury && !showPolls && !showChallenges) {
+    // Members: polls/challenges (+ shop when marketplace is live).
+    // Council: full economy when flags allow.
+    if (!showMarket &&
+        !showTreasury &&
+        !showPolls &&
+        !showChallenges &&
+        !showJobs) {
       return const SizedBox.shrink();
     }
 
@@ -705,7 +715,7 @@ class _EconomySection extends StatelessWidget {
         },
       ));
     }
-    if (isJoined) {
+    if (showJobs) {
       tiles.add(_economyTile(
         context,
         icon: Icons.work_outline,
@@ -723,7 +733,10 @@ class _EconomySection extends StatelessWidget {
 
     if (tiles.isEmpty) return const SizedBox.shrink();
 
-    return VSectionList(title: 'Economy', children: tiles);
+    final sectionTitle = (showMarket || showTreasury || showJobs)
+        ? 'Economy'
+        : 'Participate';
+    return VSectionList(title: sectionTitle, children: tiles);
   }
 
   static VSectionTile _economyTile(

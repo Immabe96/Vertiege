@@ -142,7 +142,7 @@ Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-p
 | # | Area | Pass? | Notes |
 |---|------|-------|-------|
 | 1 | Cold start / login | | No black screen; reaches main shell |
-| 2 | Bottom tabs (5) | | Nexus, Worlds (Explore), Chat, Identity, More |
+| 2 | Bottom tabs (4) | | Nexus · Worlds · Chat · You |
 | 3 | Chat → world icons | | Raster world icons (no glass box in list) |
 | 4 | World channels | | Lists channels; can open a channel |
 | 5 | World members | | Members tab; stat chip opens full list |
@@ -171,12 +171,12 @@ Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-p
 
 | # | Area | Pass? | Notes |
 |---|------|-------|-------|
-| 20 | Nexus context strip | | Proof-first copy; “Browse worlds” if no joins |
-| 21 | Nexus empty feed | | No worlds → CTA to Explore |
-| 22 | Onboarding step 3 | | Open Nexus / Visit world / Submit proof CTAs |
-| 23 | Post-onboarding Nexus | | One-time welcome toast |
-| 24 | Identity first steps | | Checklist; dismissible; updates after world + Nexus |
-| 25 | Explore intro | | Achievement / proof-first blurb under search |
+| 20 | Nexus context strip | | “Browse worlds” when needed; lean Today strip |
+| 21 | Nexus empty feed | | Primary + secondary CTAs (worlds / proof) |
+| 22 | Post-Gate / onboarding | | Lands Chat or Worlds; Skip → Nexus escape hatch |
+| 23 | Notifications | | Nexus bell → full `/notifications` inbox |
+| 24 | You · First Steps | | Sticky checklist on You; dismissible |
+| 25 | Worlds empty | | Discover + Submit proof CTAs |
 
 ## Checklist — achievements & feed
 
@@ -187,7 +187,7 @@ Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-p
 | 28 | Submit proof flow | | Upload → “submitted for verification” toast; appears pending |
 | 29 | Achievement badges | | Category PNG on wall / list (not generic Material icon) |
 | 30 | Nexus post actions | | Like, reactions, comment, repost, share on posts |
-| 31 | Identity worlds row | | Larger bare icons (no chip box) |
+| 31 | You · worlds / allies | | Worlds row + Allies preview; Achievements from header |
 | 32 | Funny vs Life icons | | Distinct category colors / assets |
 
 ## Checklist — DM push (after migration deploy)

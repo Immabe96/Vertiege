@@ -153,11 +153,15 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                   label: const Text('Social'),
                   onPressed: () => _jumpTo(_socialKey),
                 ),
-                const SizedBox(width: VSpacing.xs),
-                ActionChip(
-                  label: const Text('Economy'),
-                  onPressed: () => _jumpTo(_economyKey),
-                ),
+                if (FeatureFlags.marketplace ||
+                    FeatureFlags.treasury ||
+                    isCouncil) ...[
+                  const SizedBox(width: VSpacing.xs),
+                  ActionChip(
+                    label: const Text('Economy'),
+                    onPressed: () => _jumpTo(_economyKey),
+                  ),
+                ],
                 if (isCouncil) ...[
                   const SizedBox(width: VSpacing.xs),
                   ActionChip(
@@ -209,16 +213,17 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
                         : null,
                     enabled: isJoined,
                   ),
-                VSectionTile(
-                  icon: Icons.work_outline,
-                  label: 'Role board',
-                  onTap: isJoined
-                      ? () => context.push(
-                          worldJobsPath(worldId, admin: isCouncil),
-                        )
-                      : null,
-                  enabled: isJoined,
-                ),
+                if (FeatureFlags.worldJobs)
+                  VSectionTile(
+                    icon: Icons.work_outline,
+                    label: 'Role board',
+                    onTap: isJoined
+                        ? () => context.push(
+                            worldJobsPath(worldId, admin: isCouncil),
+                          )
+                        : null,
+                    enabled: isJoined,
+                  ),
                 VSectionTile(
                   icon: Icons.menu_book_outlined,
                   label: 'Archive',
@@ -230,34 +235,45 @@ class _WorldManageScreenState extends ConsumerState<WorldManageScreen> {
               ],
             ),
           ),
-          KeyedSubtree(
-            key: _economyKey,
-            child: VSectionList(
-              title: 'Economy',
-              children: [
-                QuietGateTile.section(
-                  icon: Icons.account_balance_wallet,
-                  label: 'Treasury',
-                  gate: treasuryGate,
-                  onOpen: treasuryGate == null
-                      ? () => context.push(
-                          worldTreasuryPath(worldId, admin: isCouncil),
-                        )
-                      : null,
-                ),
-                QuietGateTile.section(
-                  icon: Icons.storefront,
-                  label: 'Marketplace',
-                  gate: marketplaceGate,
-                  onOpen: marketplaceGate == null
-                      ? () => context.push(
-                          worldMarketplacePath(worldId, member: isJoined),
-                        )
-                      : null,
-                ),
-              ],
+          if (FeatureFlags.marketplace || FeatureFlags.treasury || isCouncil)
+            KeyedSubtree(
+              key: _economyKey,
+              child: VSectionList(
+                title: 'Economy',
+                children: [
+                  if (FeatureFlags.treasury || isCouncil)
+                    QuietGateTile.section(
+                      icon: Icons.account_balance_wallet,
+                      label: 'Treasury',
+                      gate: FeatureFlags.treasury
+                          ? treasuryGate
+                          : 'Treasury is paused in this beta.',
+                      onOpen: FeatureFlags.treasury && treasuryGate == null
+                          ? () => context.push(
+                              worldTreasuryPath(worldId, admin: isCouncil),
+                            )
+                          : null,
+                    ),
+                  if (FeatureFlags.marketplace || isCouncil)
+                    QuietGateTile.section(
+                      icon: Icons.storefront,
+                      label: 'Marketplace',
+                      gate: FeatureFlags.marketplace
+                          ? marketplaceGate
+                          : 'Marketplace is paused in this beta.',
+                      onOpen: FeatureFlags.marketplace &&
+                              marketplaceGate == null
+                          ? () => context.push(
+                              worldMarketplacePath(
+                                worldId,
+                                member: isJoined,
+                              ),
+                            )
+                          : null,
+                    ),
+                ],
+              ),
             ),
-          ),
           if (isCouncil)
             KeyedSubtree(
               key: _governanceKey,

@@ -51,7 +51,7 @@ Future<String> routeAfterAuth(
     return exploreWorldPath(worldId);
   }
 
-  if (fallback == '/' || fallback == '/explore') {
+  if (fallback == '/' || fallback == '/explore' || fallback == '/worlds') {
     for (final id in resident.joinedWorldIds) {
       if (WorldService.isRemoteWorldId(id)) {
         return exploreWorldPath(id);

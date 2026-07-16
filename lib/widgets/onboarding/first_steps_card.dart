@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../config/onboarding_funnel.dart';
@@ -11,13 +10,16 @@ import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../ui/buttons/v_button.dart';
 
-/// Identity checklist for new residents (funnel 4→1→3→2).
+/// Identity checklist for new residents (funnel: profile → world → Nexus → proof).
 class FirstStepsCard extends StatelessWidget {
   final Resident resident;
   final List<UserAchievement> userAchievements;
   final bool openedWorld;
   final bool openedNexus;
   final VoidCallback onDismiss;
+
+  /// When true, sits pinned above the You tab scroll (no outer side padding).
+  final bool sticky;
 
   const FirstStepsCard({
     super.key,
@@ -26,6 +28,7 @@ class FirstStepsCard extends StatelessWidget {
     required this.openedWorld,
     required this.openedNexus,
     required this.onDismiss,
+    this.sticky = false,
   });
 
   String? get _firstWorldId {
@@ -51,13 +54,30 @@ class FirstStepsCard extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        VSpacing.lg,
-        VSpacing.sm,
-        VSpacing.lg,
-        0,
-      ),
-      child: FCard.raw(
+      padding: sticky
+          ? const EdgeInsets.fromLTRB(
+              VSpacing.md,
+              VSpacing.sm,
+              VSpacing.md,
+              VSpacing.sm,
+            )
+          : const EdgeInsets.fromLTRB(
+              VSpacing.lg,
+              VSpacing.sm,
+              VSpacing.lg,
+              0,
+            ),
+      child: Material(
+        color: VColors.surfaceContainerDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(VRadius.bento),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(
+              alpha: 0.35,
+            ),
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: const EdgeInsets.all(VSpacing.md),
           child: Column(
@@ -81,8 +101,8 @@ class FirstStepsCard extends StatelessWidget {
                 ],
               ),
               Text(
-                '$done / ${OnboardingFunnel.totalSteps} complete · '
-                'Profile → world → Nexus → proof',
+                '$done / ${OnboardingFunnel.totalSteps} · '
+                'Join a world → open Chat → submit proof',
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: VSpacing.md),
@@ -96,7 +116,7 @@ class FirstStepsCard extends StatelessWidget {
                 subtitle: joinedDone
                     ? 'You\'re in ${resident.joinedWorldIds.length} world(s)'
                     : 'Browse worlds that match your goals',
-                onTap: joinedDone ? null : () => context.push('/explore'),
+                onTap: joinedDone ? null : () => context.go('/worlds'),
               ),
               _StepRow(
                 done: openedWorld,
@@ -108,7 +128,7 @@ class FirstStepsCard extends StatelessWidget {
                         if (id != null) {
                           context.push(exploreWorldPath(id));
                         } else {
-                          context.push('/explore');
+                          context.go('/worlds');
                         }
                       },
               ),

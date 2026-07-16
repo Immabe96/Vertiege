@@ -122,12 +122,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     _ensureSelectedWorld(joinedWorlds);
 
     return VTabPage(
-      title: 'Messages',
+      title: 'Chat',
       headerActions: [
         VAccessibleHeaderAction(
           label: 'Explore worlds',
           icon: const Icon(VIcons.globe),
-          onPress: () => context.push('/explore'),
+          onPress: () => context.go('/worlds'),
         ),
         VAccessibleHeaderAction(
           label: 'New direct message',
@@ -326,11 +326,16 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Widget _buildWorldChats(List<World> joinedWorlds) {
     if (joinedWorlds.isEmpty) {
       return AppEmptyState(
-        title: 'No world chats yet',
-        description: 'Join a world to see its channels here.',
+        title: 'Join a world to chat',
+        description:
+            'World channels appear here after you join. Start with Worlds, '
+            'then come back to talk.',
         icon: Icons.public_outlined,
-        actionLabel: 'Explore Worlds',
-        onAction: () => context.push('/explore'),
+        illustration: EmptyStateIllustration.chat,
+        actionLabel: 'Browse worlds',
+        onAction: () => context.go('/worlds'),
+        secondaryActionLabel: 'Submit proof',
+        onSecondaryAction: () => context.push('/achievements/submit'),
       );
     }
 
@@ -496,10 +501,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     return AppEmptyState(
       title: 'No direct messages yet',
       description:
-          'Search for a resident and open their profile to start a private chat.',
+          'Find someone to message, or jump into a world channel first.',
       icon: Icons.mail_outline,
+      illustration: EmptyStateIllustration.chat,
       actionLabel: 'Find someone',
       onAction: () => openGlobalSearch(context),
+      secondaryActionLabel: 'Browse worlds',
+      onSecondaryAction: () => context.go('/worlds'),
     );
   }
 

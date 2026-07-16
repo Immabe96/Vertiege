@@ -203,14 +203,14 @@ void main() {
       expect(routeForNotification(n), '/identity');
     });
 
-    test('welcome routes to explore', () {
+    test('welcome routes to worlds', () {
       const n = AppNotification(
         id: 'n9',
         type: NotificationType.welcome,
         message: 'welcome',
         createdAt: 0,
       );
-      expect(routeForNotification(n), '/explore');
+      expect(routeForNotification(n), '/worlds');
     });
 
     test('modAction routes to settings', () {

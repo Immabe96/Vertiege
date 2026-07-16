@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../config/progression_access.dart';
 import '../state/resident_provider.dart';
 import '../services/supabase.dart';
 import '../services/analytics_service.dart';
@@ -198,6 +199,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/';
       }
 
+      if ((location == '/hall-of-ascension' || location == '/ascension-path') &&
+          !ProgressionAccess.canAccessAscension(tier)) {
+        return '/progress';
+      }
+
       return null;
     },
     routes: [
@@ -226,6 +232,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             TabLayout(navigationShell: navigationShell),
         branches: [
+          // 0 Nexus · 1 Worlds · 2 Chat · 3 You
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -246,28 +253,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/chat',
-                builder: (context, state) => const ChatListScreen(),
+                path: '/worlds',
+                builder: (context, state) => const ExploreScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/achievements',
-                builder: (context, state) => const AchievementsScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'submit',
-                    builder: (context, state) => const SubmitAchievementScreen(),
-                  ),
-                  GoRoute(
-                    path: ':category',
-                    builder: (context, state) => AchievementCategoryScreen(
-                      category: state.pathParameters['category']!,
-                    ),
-                  ),
-                ],
+                path: '/chat',
+                builder: (context, state) => const ChatListScreen(),
               ),
             ],
           ),
@@ -281,10 +276,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // Explore routes (outside tab shell — accessed via deep links)
+      // World detail / discover (outside shell — push over tabs)
       GoRoute(
         path: '/explore',
-        builder: (context, state) => const ExploreScreen(),
+        redirect: (context, state) {
+          // Bare /explore → Worlds tab. Keep /explore/... sub-routes.
+          if (state.uri.path == '/explore') return '/worlds';
+          return null;
+        },
         routes: [
           GoRoute(
             path: 'discover',
@@ -421,6 +420,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/more',
         redirect: (context, state) => '/identity',
+      ),
+      // Achievements hub (push from You / trophy wall — not a tab)
+      vGoRoute(
+        path: '/achievements',
+        builder: (context, state) => const AchievementsScreen(),
+        routes: [
+          GoRoute(
+            path: 'submit',
+            builder: (context, state) => const SubmitAchievementScreen(),
+          ),
+          GoRoute(
+            path: ':category',
+            builder: (context, state) => AchievementCategoryScreen(
+              category: state.pathParameters['category']!,
+            ),
+          ),
+        ],
       ),
       vGoRoute(
         path: '/notifications',

@@ -246,66 +246,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _showForgotPassword() async {
-    final emailController = TextEditingController(
-      text: _emailController.text.trim(),
-    );
-    final result = await showVDialog<bool>(
+    final email = await showVDialog<String>(
       context: context,
       title: 'Reset password',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Enter your email address. We will send you a password reset link.',
-            style: TextStyle(color: PrestigeNoir.muted),
-          ),
-          const SizedBox(height: VSpacing.md),
-          TextField(
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
-            style: const TextStyle(color: PrestigeNoir.foreground),
-            decoration: prestigeAuthFieldDecoration(hint: 'you@example.com'),
-          ),
-        ],
+      content: _ForgotPasswordDialogContent(
+        initialEmail: _emailController.text.trim(),
       ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Cancel',
-            variant: ButtonVariant.text,
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          VButton(
-            label: 'Send reset link',
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ]),
-      ],
     );
 
-    if (result == true && emailController.text.trim().isNotEmpty) {
-      try {
-        final client = maybeSupabase();
-        if (client != null) {
-          await client.auth.resetPasswordForEmail(emailController.text.trim());
-          if (mounted) {
-            VFeedback.showMessage(
-              context,
-              'Password reset link sent. Check your email.',
-            );
-          }
-        }
-      } catch (e) {
+    if (email == null || email.isEmpty) return;
+
+    try {
+      final client = maybeSupabase();
+      if (client != null) {
+        await client.auth.resetPasswordForEmail(email);
         if (mounted) {
           VFeedback.showMessage(
             context,
-            'Failed to send reset link. Please try again.',
+            'Password reset link sent. Check your email.',
           );
         }
       }
+    } catch (e) {
+      if (mounted) {
+        VFeedback.showMessage(
+          context,
+          'Failed to send reset link. Please try again.',
+        );
+      }
     }
-    emailController.dispose();
   }
 
   @override
@@ -425,6 +394,71 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Owns the email field so the controller lives until the dialog route disposes.
+class _ForgotPasswordDialogContent extends StatefulWidget {
+  const _ForgotPasswordDialogContent({required this.initialEmail});
+
+  final String initialEmail;
+
+  @override
+  State<_ForgotPasswordDialogContent> createState() =>
+      _ForgotPasswordDialogContentState();
+}
+
+class _ForgotPasswordDialogContentState
+    extends State<_ForgotPasswordDialogContent> {
+  late final TextEditingController _emailController;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.initialEmail);
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) return;
+    Navigator.pop(context, email);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Enter your email address. We will send you a password reset link.',
+          style: TextStyle(color: PrestigeNoir.muted),
+        ),
+        const SizedBox(height: VSpacing.md),
+        TextField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          style: const TextStyle(color: PrestigeNoir.foreground),
+          decoration: prestigeAuthFieldDecoration(hint: 'you@example.com'),
+          onSubmitted: (_) => _submit(),
+        ),
+        const SizedBox(height: VSpacing.lg),
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            variant: ButtonVariant.text,
+            onPressed: () => Navigator.pop(context),
+          ),
+          VButton(label: 'Send reset link', onPressed: _submit),
+        ]),
+      ],
     );
   }
 }
