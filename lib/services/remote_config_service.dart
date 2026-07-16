@@ -46,8 +46,8 @@ class RemoteConfigService {
       'whats_new_build': 0,
       'whats_new_message': '',
       'beta_feedback_url': 'https://forms.gle/placeholder-vertiege-beta',
-      'privacy_policy_url': '',
-      'terms_of_service_url': '',
+      'privacy_policy_url': 'https://veritage.web.app/privacy.html',
+      'terms_of_service_url': 'https://veritage.web.app/terms.html',
       'campfire_immersive': false,
     });
     await _remoteConfig?.fetchAndActivate().timeout(

@@ -107,13 +107,17 @@ class FeatureFlags {
         fallback: 'https://forms.gle/placeholder-vertiege-beta',
       );
 
-  /// Hosted Privacy Policy URL for store listings / "View online". Empty = in-app only.
-  static String get privacyPolicyUrl =>
-      RemoteConfigService.getString('privacy_policy_url');
+  /// Hosted Privacy Policy URL for store listings / "View online".
+  static String get privacyPolicyUrl => RemoteConfigService.getString(
+        'privacy_policy_url',
+        fallback: 'https://veritage.web.app/privacy.html',
+      );
 
-  /// Hosted Terms of Service URL. Empty = in-app only.
-  static String get termsOfServiceUrl =>
-      RemoteConfigService.getString('terms_of_service_url');
+  /// Hosted Terms of Service URL.
+  static String get termsOfServiceUrl => RemoteConfigService.getString(
+        'terms_of_service_url',
+        fallback: 'https://veritage.web.app/terms.html',
+      );
 
   /// Streak push copy: `calm` (default) or `direct` (legacy urgency).
   static String get reEngagementPushVariant => RemoteConfigService.getString(

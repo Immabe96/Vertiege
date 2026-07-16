@@ -112,8 +112,16 @@ serve(async (req: Request) => {
 
     const admin = createClient(supabaseUrl, serviceRoleKey)
 
+    // Best-effort personal data cleanup before auth deletion.
+    // Missing tables are skipped; FK cascades may also clean children of profiles.
     await deleteBestEffort(admin, 'device_tokens', 'resident_id', userId)
     await deleteBestEffort(admin, 'notifications', 'recipient_id', userId)
+    await deleteBestEffort(admin, 'notification_preferences', 'resident_id', userId)
+    await deleteBestEffort(admin, 'user_achievements', 'user_id', userId)
+    await deleteBestEffort(admin, 'reports', 'reporter_id', userId)
+    await deleteBestEffort(admin, 'posts', 'author_id', userId)
+    await deleteBestEffort(admin, 'channel_messages', 'author_id', userId)
+    await deleteBestEffort(admin, 'dm_messages', 'sender_id', userId)
     await deleteBestEffort(admin, 'profiles', 'id', userId)
 
     const { error: deleteUserError } = await admin.auth.admin.deleteUser(userId)

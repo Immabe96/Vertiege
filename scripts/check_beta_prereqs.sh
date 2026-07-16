@@ -105,6 +105,26 @@ else
   warn "Core achievement assets incomplete — run scripts/check_core_achievement_assets.py"
 fi
 
+# Publish readiness (code present; operator still deploys / hosts)
+if [[ -f supabase/functions/delete-account/index.ts ]]; then
+  ok "delete-account Edge Function source present"
+else
+  bad "supabase/functions/delete-account missing"
+fi
+if grep -q 'UIBackgroundModes' ios/Runner/Info.plist && grep -q '<string>voip</string>' ios/Runner/Info.plist; then
+  bad "iOS Info.plist still declares voip background mode (needs CallKit or remove)"
+else
+  ok "iOS voip background mode not declared"
+fi
+if grep -q "privacy_policy_url" lib/services/remote_config_service.dart; then
+  ok "RC hooks for hosted privacy/terms URLs"
+else
+  warn "privacy_policy_url RC hook missing"
+fi
+
+echo ""
+echo "Operator before public store: deploy delete-account, host legal URLs, device UAT."
+echo "See docs/guides/publish-readiness.md"
 echo ""
 if [[ "$FAIL" -eq 0 ]]; then
   echo "Prereqs passed (warnings are OK for sideload-only Android)."
