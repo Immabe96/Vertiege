@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-16T19:43:40.009561+00:00",
+  "updatedAt": "2026-07-16T19:48:56.324713+00:00",
   "stagingDir": "assets/staging/generated",
   "finalDir": "assets/generated",
   "workflowDoc": "docs/assets/CODEX_IMAGE_WORKFLOW.md",
@@ -222,8 +222,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-nova-station.jpg",
       "finalPath": "assets/generated/world-nova-station.jpg",
-      "generatedAt": "2026-05-23T01:13:22.2571058Z",
-      "approvedAt": "2026-05-23T01:24:00.5666794Z",
+      "generatedAt": "2026-07-16T19:48:56.125440+00:00",
+      "approvedAt": "2026-07-16T19:48:56.324534+00:00",
       "notes": null
     },
     {
@@ -273,8 +273,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-medical-nexus.jpg",
       "finalPath": "assets/generated/world-medical-nexus.jpg",
-      "generatedAt": "2026-05-23T01:08:17.5702718Z",
-      "approvedAt": "2026-05-23T01:24:00.5818339Z",
+      "generatedAt": "2026-07-16T19:48:55.824632+00:00",
+      "approvedAt": "2026-07-16T19:48:56.025856+00:00",
       "notes": null
     },
     {

@@ -135,54 +135,65 @@ class _ThreadRow extends StatelessWidget {
         ? '1 reply'
         : '${message.threadCount} replies';
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      onTap: onTap,
-      title: Text(
-        message.senderName,
-        style: theme.textTheme.labelLarge?.copyWith(
-          fontWeight: VFontWeight.semiBold,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (preview.isNotEmpty)
-            Text(
-              preview,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          const SizedBox(height: VSpacing.xxs),
-          Text(
-            '$replyLabel · ${formatTimestamp(message.createdAt)}',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (unreadCount > 0)
-            Container(
-              margin: const EdgeInsets.only(right: VSpacing.xs),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(VRadius.pill),
-              ),
-              child: Text(
-                unreadCount > 99 ? '99+' : '$unreadCount',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: VFontWeight.bold,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(VRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.senderName,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: VFontWeight.semiBold,
+                      ),
+                    ),
+                    if (preview.isNotEmpty)
+                      Text(
+                        preview,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    const SizedBox(height: VSpacing.xxs),
+                    Text(
+                      '$replyLabel · ${formatTimestamp(message.createdAt)}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          const Icon(Icons.chevron_right),
-        ],
+              if (unreadCount > 0)
+                Container(
+                  margin: const EdgeInsets.only(right: VSpacing.xs),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(VRadius.pill),
+                  ),
+                  child: Text(
+                    unreadCount > 99 ? '99+' : '$unreadCount',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: VFontWeight.bold,
+                    ),
+                  ),
+                ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

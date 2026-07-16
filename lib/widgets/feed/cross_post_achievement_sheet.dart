@@ -213,20 +213,49 @@ class _CrossPostAchievementSheetState
               const SizedBox(height: VSpacing.sm),
               ..._channelsForWorld(_selectedWorldId!).map((ch) {
                 final selected = _selectedChannelId == ch.id;
-                return ListTile(
-                  dense: true,
-                  selected: selected,
-                  leading: Icon(
-                    ch.channelType == ChannelType.voice
-                        ? Icons.local_fire_department
-                        : Icons.tag,
-                    size: VIconSize.md,
+                final enabled = ch.channelType != ChannelType.voice;
+                final muted = theme.colorScheme.onSurfaceVariant;
+                return Material(
+                  color: selected
+                      ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(VRadius.md),
+                    onTap: enabled
+                        ? () => setState(() => _selectedChannelId = ch.id)
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.sm,
+                        vertical: VSpacing.sm,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            ch.channelType == ChannelType.voice
+                                ? Icons.local_fire_department
+                                : Icons.tag,
+                            size: VIconSize.md,
+                            color: enabled ? null : muted,
+                          ),
+                          const SizedBox(width: VSpacing.md),
+                          Expanded(
+                            child: Text(
+                              ch.name,
+                              style: TextStyle(color: enabled ? null : muted),
+                            ),
+                          ),
+                          if (selected)
+                            Icon(
+                              Icons.check,
+                              size: VIconSize.md,
+                              color: theme.colorScheme.primary,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
-                  title: Text(ch.name),
-                  onTap: ch.channelType == ChannelType.voice
-                      ? null
-                      : () => setState(() => _selectedChannelId = ch.id),
-                  enabled: ch.channelType != ChannelType.voice,
                 );
               }),
             ],

@@ -65,15 +65,37 @@ Future<Achievement?> pickVerifiedAchievementToShare(
                 itemBuilder: (_, i) {
                   final ach = verified[i];
                   final meta = metaForCategory(ach.category);
-                  return ListTile(
-                    leading: AchievementBadgeAvatar(
-                      achievement: ach,
-                      accentColor: meta.color,
-                      size: VBadgeSize.avatarCompact,
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => Navigator.pop(ctx, ach),
+                      borderRadius: BorderRadius.circular(VRadius.md),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: VSpacing.sm,
+                          vertical: VSpacing.sm,
+                        ),
+                        child: Row(
+                          children: [
+                            AchievementBadgeAvatar(
+                              achievement: ach,
+                              accentColor: meta.color,
+                              size: VBadgeSize.avatarCompact,
+                            ),
+                            const SizedBox(width: VSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(ach.title),
+                                  Text('${ach.xpValue} XP'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    title: Text(ach.title),
-                    subtitle: Text('${ach.xpValue} XP'),
-                    onTap: () => Navigator.pop(ctx, ach),
                   );
                 },
               ),

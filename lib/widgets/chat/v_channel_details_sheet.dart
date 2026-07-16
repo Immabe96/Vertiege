@@ -136,33 +136,66 @@ class _ChannelDetailsContentState extends ConsumerState<_ChannelDetailsContent> 
             ),
             const SizedBox(height: VSpacing.sm),
             ...ChannelMuteMode.values.map(
-              (mode) => RadioListTile<ChannelMuteMode>(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                value: mode,
-                groupValue: muteMode,
-                title: Text(mode.label),
-                subtitle: Text(
-                  switch (mode) {
-                    ChannelMuteMode.off =>
-                      'Receive all channel and mention alerts',
-                    ChannelMuteMode.mentionsOnly =>
-                      'Only @mentions and @all pings',
-                    ChannelMuteMode.all => 'No channel notifications',
+              (mode) => Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () async {
+                    await ref.read(chatProvider.notifier).setChannelMuteMode(
+                          residentId: resident.id,
+                          channelId: widget.channelId,
+                          mode: mode,
+                        );
                   },
-                  style: TextStyle(
-                    fontSize: VFontSize.labelSm,
-                    color: VCommuneColors.textMutedOf(brightness),
+                  borderRadius: BorderRadius.circular(VRadius.md),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: VSpacing.sm),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          muteMode == mode
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_off,
+                          size: VIconSize.lg,
+                          color: muteMode == mode
+                              ? VCommuneColors.textLink
+                              : VCommuneColors.textMutedOf(brightness),
+                        ),
+                        const SizedBox(width: VSpacing.sm),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                mode.label,
+                                style: TextStyle(
+                                  fontWeight: VFontWeight.semiBold,
+                                  color: VCommuneColors.headerPrimaryOf(
+                                    brightness,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                switch (mode) {
+                                  ChannelMuteMode.off =>
+                                    'Receive all channel and mention alerts',
+                                  ChannelMuteMode.mentionsOnly =>
+                                    'Only @mentions and @all pings',
+                                  ChannelMuteMode.all =>
+                                    'No channel notifications',
+                                },
+                                style: TextStyle(
+                                  fontSize: VFontSize.labelSm,
+                                  color: VCommuneColors.textMutedOf(brightness),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                onChanged: (value) async {
-                  if (value == null) return;
-                  await ref.read(chatProvider.notifier).setChannelMuteMode(
-                        residentId: resident.id,
-                        channelId: widget.channelId,
-                        mode: value,
-                      );
-                },
               ),
             ),
           ],
