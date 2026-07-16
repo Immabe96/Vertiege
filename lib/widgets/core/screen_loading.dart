@@ -51,6 +51,8 @@ class ScreenLoading extends StatelessWidget {
         );
       case ScreenLoadingType.grid:
         return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.all(VSpacing.md),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,

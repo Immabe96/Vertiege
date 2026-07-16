@@ -43,7 +43,14 @@ class VPage extends StatelessWidget {
           )
         : FHeader(title: titleContent, suffixes: headerActions);
 
-    return FScaffold(header: header, footer: footer, child: body);
+    return FScaffold(
+      header: header,
+      footer: footer,
+      child: Material(
+        type: MaterialType.transparency,
+        child: SizedBox.expand(child: body),
+      ),
+    );
   }
 }
 

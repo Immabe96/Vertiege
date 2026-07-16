@@ -23,6 +23,11 @@ void main() async {
     if (_handlingFlutterError) return;
     _handlingFlutterError = true;
     try {
+      // Debug: full widget dump (Crashlytics truncates layout stacks).
+      assert(() {
+        FlutterError.dumpErrorToConsole(details, forceReport: true);
+        return true;
+      }());
       CrashReporter.instance.recordError(
         details.exception,
         details.stack ?? StackTrace.current,

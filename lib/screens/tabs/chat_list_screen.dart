@@ -245,17 +245,27 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     List<World> joinedWorlds,
     ChatState chatState,
   ) {
+    // Always use Column + Expanded so the scrollable under RefreshIndicator
+    // gets a bounded height (IndexedStack still lays out offstage Chat).
     if (residentId == null) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+      return Column(
         children: [
-          AppEmptyState(
-            title: 'Sign in to view chats',
-            description: 'Your worlds and direct messages appear here once you are signed in.',
-            icon: Icons.forum_outlined,
-            illustration: EmptyStateIllustration.chat,
-            actionLabel: 'Sign in',
-            onAction: () => context.go('/login'),
+          const ChatConnectionBanner(),
+          Expanded(
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                AppEmptyState(
+                  title: 'Sign in to view chats',
+                  description:
+                      'Your worlds and direct messages appear here once you are signed in.',
+                  icon: Icons.forum_outlined,
+                  illustration: EmptyStateIllustration.chat,
+                  actionLabel: 'Sign in',
+                  onAction: () => context.go('/login'),
+                ),
+              ],
+            ),
           ),
         ],
       );
