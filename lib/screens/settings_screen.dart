@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/build_info.dart';
 import '../config/platform_label.dart';
 import '../config/progression_access.dart';
+import '../legal/app_legal.dart';
 import '../state/theme_provider.dart';
 import '../state/resident_provider.dart';
 import '../state/achievement_provider.dart';
@@ -546,7 +547,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             }
                             final user = client.auth.currentUser;
                             if (user != null) {
-                              await client.functions.invoke('delete-account');
+                              final res = await client.functions.invoke(
+                                'delete-account',
+                              );
+                              final data = res.data;
+                              final ok = res.status == 200 &&
+                                  (data is Map
+                                      ? data['success'] == true
+                                      : true);
+                              if (!ok) {
+                                final msg = data is Map
+                                    ? (data['error']?.toString() ??
+                                        'Delete failed')
+                                    : 'Delete failed (${res.status})';
+                                throw StateError(msg);
+                              }
                             }
                             if (context.mounted) Navigator.pop(context);
                             if (context.mounted) {
@@ -1208,7 +1223,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.info_outline,
                   label: 'Privacy, terms & licenses',
                   detail: 'Legal & open-source notices',
-                  onTap: () => context.push('/identity'),
+                  onTap: () => AppLegal.showLegalHub(context),
                 ),
               ]),
             const SizedBox(height: VSpacing.md),

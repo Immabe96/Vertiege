@@ -183,6 +183,7 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 | S10.18 | P2 craft: collapsible Nexus Today; slim You → Progress/Connections/Account | ✅ |
 | S10.19 | P3: shop after first verified achievement; Allies/Following connections switcher | ✅ |
 | S10.20 | Campfire off by default (RC kill switch); header actions max 2 on Identity | ✅ |
+| S10.21 | Publish readiness: delete-account edge fn, legal hub, no voip BG, IAP paused | ✅ |
 
 ### S10.3 — Hub screens (agent swarm)
 

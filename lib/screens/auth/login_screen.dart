@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../legal/app_legal.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
 import '../../services/auth_service.dart';
@@ -14,6 +16,7 @@ import '../../state/resident_provider.dart';
 import '../../services/supabase_bootstrap.dart';
 import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/prestige_noir.dart';
+import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../widgets/auth/auth_fields.dart';
@@ -370,6 +373,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     isLoading: _isLoading,
                     onGoogle: _handleGoogleSignIn,
                     onApple: _handleAppleSignIn,
+                  ),
+                  const SizedBox(height: VSpacing.md),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: 'By continuing, you agree to our ',
+                      style: const TextStyle(
+                        fontSize: VFontSize.labelSm,
+                        color: PrestigeNoir.mutedDim,
+                        height: 1.5,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Terms of Service',
+                          style: const TextStyle(color: VColors.brand),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () =>
+                                AppLegal.showTermsOfService(context),
+                        ),
+                        const TextSpan(text: ' and '),
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          style: const TextStyle(color: VColors.brand),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () =>
+                                AppLegal.showPrivacyPolicy(context),
+                        ),
+                        const TextSpan(text: '.'),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: VSpacing.lg),
                   VButton(

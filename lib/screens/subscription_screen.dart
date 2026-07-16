@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/feature_flags.dart';
 import '../services/subscription_service.dart';
 import '../services/store_service.dart';
 import '../state/resident_provider.dart';
@@ -197,6 +198,27 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
                 const SizedBox(height: VSpacing.xl),
 
+                if (!FeatureFlags.receiptEdgeVerify) ...[
+                  Container(
+                    padding: const EdgeInsets.all(VSpacing.md),
+                    margin: const EdgeInsets.only(bottom: VSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: PrestigeNoir.surfaceRaised,
+                      borderRadius: BorderRadius.circular(VRadius.bento),
+                      border: Border.all(color: PrestigeNoir.border),
+                    ),
+                    child: Text(
+                      'Paid upgrades are paused for this beta. '
+                      'You can still review tiers — purchases unlock when '
+                      'store verification goes live.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: PrestigeNoir.muted,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+
                 // ── Purchase confirmation message ────────────────
                 if (_purchaseMessage != null) ...[
                   Container(
@@ -245,6 +267,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   final pricePeriod = tier == SubscriptionTier.resident
                       ? ''
                       : '/month';
+                  final iapLive = FeatureFlags.receiptEdgeVerify;
+                  final canPurchase = iapLive &&
+                      !isActive &&
+                      !_purchasing &&
+                      tier != SubscriptionTier.resident;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: VSpacing.md),
@@ -257,9 +284,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       isActive: isActive,
                       isLoading: _purchasing && !isActive,
                       features: _buildFeatures(benefits),
-                      onUpgrade: isActive || _purchasing
-                          ? null
-                          : () => _purchase(tier),
+                      onUpgrade: canPurchase ? () => _purchase(tier) : null,
                     ),
                   );
                 }),
@@ -269,10 +294,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 // ── Footer ────────────────────────────────────────
                 Center(
                   child: Text(
-                    'Purchases are billed through your '
-                    '${defaultTargetPlatform == TargetPlatform.iOS ? 'App Store' : 'Google Play'} account.\n'
-                    'All subscriptions support the Vertiege realm. Cancel anytime.\n'
-                    'Entitlements are verified on our servers after each purchase.',
+                    FeatureFlags.receiptEdgeVerify
+                        ? 'Purchases are billed through your '
+                            '${defaultTargetPlatform == TargetPlatform.iOS ? 'App Store' : 'Google Play'} account.\n'
+                            'All subscriptions support the Vertiege realm. Cancel anytime.\n'
+                            'Entitlements are verified on our servers after each purchase.'
+                        : 'Billing is disabled until store receipt verification is enabled.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: PrestigeNoir.muted,
@@ -283,13 +310,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 const SizedBox(height: VSpacing.lg),
 
                 // ── Restore purchases ────────────────────────────
-                Center(
-                  child: VButton(
-                    label: 'Restore Purchases',
-                    onPressed: _restorePurchases,
-                    variant: ButtonVariant.text,
+                if (FeatureFlags.receiptEdgeVerify)
+                  Center(
+                    child: VButton(
+                      label: 'Restore Purchases',
+                      onPressed: _restorePurchases,
+                      variant: ButtonVariant.text,
+                    ),
                   ),
-                ),
                 const SizedBox(height: VSpacing.xxl),
               ],
             ),

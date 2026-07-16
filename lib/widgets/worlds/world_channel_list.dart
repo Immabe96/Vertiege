@@ -7,6 +7,7 @@ import '../../models/channel_mute_mode.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
 import '../../router/world_navigation.dart';
+import '../../services/feature_flags.dart';
 import '../../services/voice_presence_service.dart';
 import '../../services/world_channel_access_service.dart';
 import '../../state/channel_provider.dart';
@@ -150,7 +151,12 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     final features = ref
         .read(worldProvider.notifier)
         .featuresForWorld(widget.worldId);
-    final channels = allChannels;
+    // Hide Campfire voice rows while voice is beta-frozen.
+    final channels = FeatureFlags.campfireEnabled
+        ? allChannels
+        : allChannels
+            .where((c) => c.channelType != ChannelType.voice)
+            .toList();
     final activityIds = channels
         .where((c) => c.channelType != ChannelType.voice)
         .map((c) => c.id)

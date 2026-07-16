@@ -46,6 +46,8 @@ class RemoteConfigService {
       'whats_new_build': 0,
       'whats_new_message': '',
       'beta_feedback_url': 'https://forms.gle/placeholder-vertiege-beta',
+      'privacy_policy_url': '',
+      'terms_of_service_url': '',
       'campfire_immersive': false,
     });
     await _remoteConfig?.fetchAndActivate().timeout(
