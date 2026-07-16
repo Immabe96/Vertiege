@@ -69,6 +69,7 @@ class WorldMemberRow extends StatelessWidget {
                     ),
                   ),
                 ),
+                const Spacer(),
               ] else ...[
                 SizedBox(
                   width: stackWidth,
@@ -139,27 +140,28 @@ class WorldMemberRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: VSpacing.sm),
-                Flexible(
+                Expanded(
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (remaining > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: VSpacing.sm,
-                            vertical: VSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cs.primaryContainer.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(VRadius.pill),
-                          ),
-                          child: Text(
-                            '+$remaining more',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: cs.primary,
-                              fontWeight: VFontWeight.bold,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: VSpacing.sm,
+                              vertical: VSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(VRadius.pill),
+                            ),
+                            child: Text(
+                              '+$remaining more',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: cs.primary,
+                                fontWeight: VFontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -191,7 +193,6 @@ class WorldMemberRow extends StatelessWidget {
                   ),
                 ),
               ],
-              const Spacer(),
               Icon(VIcons.chevronRight, size: VIconSize.md, color: cs.outline),
             ],
           ),

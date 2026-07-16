@@ -117,39 +117,63 @@ class _WorldSwitcherBodyState extends State<_WorldSwitcherBody> {
                       final world = filtered[index];
                       final selected = world.id == widget.selectedWorldId;
                       return Material(
-                        color: selected
-                            ? VCommuneColors.modifierSelected
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(VRadius.md),
-                        child: ListTile(
-                          leading: WorldIcon(
-                            worldId: world.assetKey,
-                            size: VWorldIconSize.dense,
-                            useGlassContainer: false,
-                          ),
-                          title: Text(
-                            world.name,
-                            style: TextStyle(
-                              fontWeight: selected
-                                  ? VFontWeight.semiBold
-                                  : VFontWeight.medium,
-                              color: VCommuneColors.headerPrimary,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '${world.memberCount} residents',
-                            style: const TextStyle(
-                              color: VCommuneColors.textMuted,
-                              fontSize: VFontSize.labelMd,
-                            ),
-                          ),
-                          trailing: selected
-                              ? const Icon(
-                                  Icons.check,
-                                  color: VCommuneColors.statusOnline,
-                                )
-                              : null,
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(VRadius.md),
                           onTap: () => widget.onWorldSelected(world),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? VCommuneColors.modifierSelected
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(VRadius.md),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: VSpacing.md,
+                                vertical: VSpacing.sm,
+                              ),
+                              child: Row(
+                                children: [
+                                  WorldIcon(
+                                    worldId: world.assetKey,
+                                    size: VWorldIconSize.dense,
+                                    useGlassContainer: false,
+                                  ),
+                                  const SizedBox(width: VSpacing.md),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          world.name,
+                                          style: TextStyle(
+                                            fontWeight: selected
+                                                ? VFontWeight.semiBold
+                                                : VFontWeight.medium,
+                                            color: VCommuneColors.headerPrimary,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${world.memberCount} residents',
+                                          style: const TextStyle(
+                                            color: VCommuneColors.textMuted,
+                                            fontSize: VFontSize.labelMd,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (selected)
+                                    const Icon(
+                                      Icons.check,
+                                      color: VCommuneColors.statusOnline,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     },

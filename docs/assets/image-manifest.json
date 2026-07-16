@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-16T14:49:40.169114+00:00",
+  "updatedAt": "2026-07-16T15:16:18.070817+00:00",
   "stagingDir": "assets/staging/generated",
   "finalDir": "assets/generated",
   "workflowDoc": "docs/assets/CODEX_IMAGE_WORKFLOW.md",
@@ -35,8 +35,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-tech-sprawl.jpg",
       "finalPath": "assets/generated/world-tech-sprawl.jpg",
-      "generatedAt": "2026-05-23T01:23:50.6647924Z",
-      "approvedAt": "2026-05-23T01:24:00.5091635Z",
+      "generatedAt": "2026-07-16T15:16:08.257487+00:00",
+      "approvedAt": "2026-07-16T15:16:08.548312+00:00",
       "notes": null
     },
     {
@@ -70,7 +70,7 @@
       "stagingPath": "assets/staging/generated/world-neon-district.jpg",
       "finalPath": "assets/generated/world-neon-district.jpg",
       "generatedAt": "2026-07-16T14:41:51.496559+00:00",
-      "approvedAt": "2026-07-16T14:44:41.681535+00:00",
+      "approvedAt": "2026-07-16T15:16:17.982243+00:00",
       "notes": null
     },
     {
@@ -103,8 +103,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-aviation-heights.jpg",
       "finalPath": "assets/generated/world-aviation-heights.jpg",
-      "generatedAt": "2026-05-23T01:06:29.7535957Z",
-      "approvedAt": "2026-05-23T01:24:00.5353124Z",
+      "generatedAt": "2026-07-16T15:13:16.899554+00:00",
+      "approvedAt": "2026-07-16T15:16:08.462367+00:00",
       "notes": null
     },
     {
@@ -155,7 +155,7 @@
       "stagingPath": "assets/staging/generated/world-silver-page.jpg",
       "finalPath": "assets/generated/world-silver-page.jpg",
       "generatedAt": "2026-07-16T14:49:40.123730+00:00",
-      "approvedAt": "2026-07-16T14:49:40.168919+00:00",
+      "approvedAt": "2026-07-16T15:16:18.070653+00:00",
       "notes": null
     },
     {
@@ -188,8 +188,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-aetheria.jpg",
       "finalPath": "assets/generated/world-aetheria.jpg",
-      "generatedAt": "2026-05-23T01:06:29.4808534Z",
-      "approvedAt": "2026-05-23T01:24:00.5504542Z",
+      "generatedAt": "2026-07-16T15:13:17.048204+00:00",
+      "approvedAt": "2026-07-16T15:16:08.506279+00:00",
       "notes": null
     },
     {
@@ -206,7 +206,7 @@
       "stagingPath": "assets/staging/generated/world-crystal-shore.jpg",
       "finalPath": "assets/generated/world-crystal-shore.jpg",
       "generatedAt": "2026-07-16T14:41:51.449124+00:00",
-      "approvedAt": "2026-07-16T14:44:41.634788+00:00",
+      "approvedAt": "2026-07-16T15:16:17.938718+00:00",
       "notes": null
     },
     {
@@ -240,7 +240,7 @@
       "stagingPath": "assets/staging/generated/world-financial-district.jpg",
       "finalPath": "assets/generated/world-financial-district.jpg",
       "generatedAt": "2026-07-16T14:49:39.979443+00:00",
-      "approvedAt": "2026-07-16T14:49:40.024308+00:00",
+      "approvedAt": "2026-07-16T15:16:18.028155+00:00",
       "notes": null
     },
     {
