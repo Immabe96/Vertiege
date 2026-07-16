@@ -124,18 +124,21 @@ class _FeaturedAchievementsSheetState
                   final picked = _selected.contains(ua.achievementId);
                   final disabled =
                       !picked && _selected.length >= 3;
-                  return CheckboxListTile(
-                    value: picked,
-                    onChanged: disabled
-                        ? null
-                        : (_) => _toggle(ua.achievementId),
-                    secondary: AchievementBadgeAvatar(
-                      achievement: def,
-                      accentColor: VColors.tertiary,
-                      size: VBadgeSize.avatarCompact,
+                  return Material(
+                    color: Colors.transparent,
+                    child: CheckboxListTile(
+                      value: picked,
+                      onChanged: disabled
+                          ? null
+                          : (_) => _toggle(ua.achievementId),
+                      secondary: AchievementBadgeAvatar(
+                        achievement: def,
+                        accentColor: VColors.tertiary,
+                        size: VBadgeSize.avatarCompact,
+                      ),
+                      title: Text(def.title),
+                      subtitle: Text(def.category.name),
                     ),
-                    title: Text(def.title),
-                    subtitle: Text(def.category.name),
                   );
                 },
               ),

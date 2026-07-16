@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-16T19:48:56.324713+00:00",
+  "updatedAt": "2026-07-16T19:59:08.961482+00:00",
   "stagingDir": "assets/staging/generated",
   "finalDir": "assets/generated",
   "workflowDoc": "docs/assets/CODEX_IMAGE_WORKFLOW.md",
@@ -18,8 +18,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-golden-estate.jpg",
       "finalPath": "assets/generated/world-golden-estate.jpg",
-      "generatedAt": "2026-05-23T01:06:30.4209663Z",
-      "approvedAt": "2026-05-23T01:24:00.4892399Z",
+      "generatedAt": "2026-07-16T19:56:34.028381+00:00",
+      "approvedAt": "2026-07-16T19:56:34.240822+00:00",
       "notes": null
     },
     {
@@ -52,8 +52,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-quantum-core.jpg",
       "finalPath": "assets/generated/world-quantum-core.jpg",
-      "generatedAt": "2026-05-23T01:16:22.4058451Z",
-      "approvedAt": "2026-05-23T01:24:00.5091635Z",
+      "generatedAt": "2026-07-16T19:59:08.758822+00:00",
+      "approvedAt": "2026-07-16T19:59:08.961293+00:00",
       "notes": null
     },
     {
@@ -86,8 +86,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-arts-pavilion.jpg",
       "finalPath": "assets/generated/world-arts-pavilion.jpg",
-      "generatedAt": "2026-05-23T01:06:29.6090030Z",
-      "approvedAt": "2026-05-23T01:24:00.5326006Z",
+      "generatedAt": "2026-07-16T19:56:33.395275+00:00",
+      "approvedAt": "2026-07-16T19:56:33.617400+00:00",
       "notes": null
     },
     {
@@ -256,8 +256,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-azure-coast.jpg",
       "finalPath": "assets/generated/world-azure-coast.jpg",
-      "generatedAt": "2026-05-23T01:06:29.8820812Z",
-      "approvedAt": "2026-05-23T01:24:00.5758157Z",
+      "generatedAt": "2026-07-16T19:56:33.727652+00:00",
+      "approvedAt": "2026-07-16T19:56:33.927154+00:00",
       "notes": null
     },
     {

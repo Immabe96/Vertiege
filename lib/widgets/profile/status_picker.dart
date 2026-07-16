@@ -103,13 +103,27 @@ class _StatusPickerSheetState extends State<_StatusPickerSheet> {
           ),
           const SizedBox(height: VSpacing.md),
           for (final option in ResidentPresence.values)
-            ListTile(
-              leading: StatusDot(presence: _mapPresence(option), size: 10),
-              title: Text(_labelFor(option)),
-              trailing: _presence == option
-                  ? const Icon(Icons.check, color: VCommuneColors.textLink)
-                  : null,
-              onTap: () => setState(() => _presence = option),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(() => _presence = option),
+                borderRadius: BorderRadius.circular(VRadius.md),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: VSpacing.sm,
+                    vertical: VSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      StatusDot(presence: _mapPresence(option), size: 10),
+                      const SizedBox(width: VSpacing.md),
+                      Expanded(child: Text(_labelFor(option))),
+                      if (_presence == option)
+                        const Icon(Icons.check, color: VCommuneColors.textLink),
+                    ],
+                  ),
+                ),
+              ),
             ),
           const SizedBox(height: VSpacing.sm),
           TextField(

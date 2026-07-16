@@ -695,19 +695,33 @@ class _VMessageBubbleState extends State<VMessageBubble>
                     .toList(),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.emoji_events_outlined),
-              title: const Text('React with achievement'),
-              onTap: () {
-                Navigator.pop(context);
-                showChatBadgeReactionPicker(
-                  context,
-                  onPick: (key) {
-                    Haptics.selection();
-                    onReaction(widget.message, key);
-                  },
-                );
-              },
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  showChatBadgeReactionPicker(
+                    context,
+                    onPick: (key) {
+                      Haptics.selection();
+                      onReaction(widget.message, key);
+                    },
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: VSpacing.lg,
+                    vertical: VSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.emoji_events_outlined),
+                      SizedBox(width: VSpacing.md),
+                      Expanded(child: Text('React with achievement')),
+                    ],
+                  ),
+                ),
+              ),
             ),
             Divider(
               color: VCommuneColors.dividerOf(

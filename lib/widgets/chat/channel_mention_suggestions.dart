@@ -37,11 +37,28 @@ class ChannelMentionSuggestions extends StatelessWidget {
           itemBuilder: (_, index) {
             final name = suggestions[index];
             final handle = TextParser.mentionHandleForName(name);
-            return ListTile(
-              dense: true,
-              title: Text(name),
-              subtitle: handle.isNotEmpty ? Text('@$handle') : null,
+            return InkWell(
               onTap: () => onSelect(name),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: VSpacing.md,
+                  vertical: VSpacing.sm,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name),
+                    if (handle.isNotEmpty)
+                      Text(
+                        '@$handle',
+                        style: TextStyle(
+                          fontSize: VFontSize.labelSm,
+                          color: VCommuneColors.textMutedOf(brightness),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             );
           },
         ),
