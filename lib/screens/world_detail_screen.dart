@@ -482,10 +482,15 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
   @override
   void dispose() {
-    ref.read(postProvider.notifier).setRealtimeWorldScope(null);
+    // Clear realtime after this State is fully torn down so postProvider
+    // updates cannot mark this element defunct mid-dispose.
+    final container = ProviderScope.containerOf(context, listen: false);
     _joinAnimController.dispose();
     _tabController?.dispose();
     super.dispose();
+    scheduleMicrotask(() {
+      unawaited(container.read(postProvider.notifier).setRealtimeWorldScope(null));
+    });
   }
 
   Future<void> _handleJoin() async {

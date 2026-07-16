@@ -993,6 +993,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ]),
             const SizedBox(height: VSpacing.md),
+            _prestigeSection('Help & legal', [
+                VSectionTile(
+                  icon: Icons.feedback_outlined,
+                  label: 'Send feedback',
+                  detail: 'Email the Vertiege team',
+                  onTap: () async {
+                    final raw = FeatureFlags.betaFeedbackUrl.trim();
+                    final uri = Uri.tryParse(raw);
+                    if (uri == null) {
+                      VFeedback.showError(context, 'Feedback link unavailable');
+                      return;
+                    }
+                    final ok = await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!ok && context.mounted) {
+                      VFeedback.showError(context, 'Could not open feedback');
+                    }
+                  },
+                ),
+                VSectionTile(
+                  icon: Icons.info_outline,
+                  label: 'Privacy, terms & licenses',
+                  detail: 'Legal & open-source notices',
+                  onTap: () => AppLegal.showLegalHub(context),
+                ),
+              ]),
+            const SizedBox(height: VSpacing.md),
             _prestigeSection('Account', [
                 Builder(
                   builder: (context) {
@@ -1219,35 +1248,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
-            const SizedBox(height: VSpacing.md),
-            _prestigeSection('Help & legal', [
-                VSectionTile(
-                  icon: Icons.feedback_outlined,
-                  label: 'Send feedback',
-                  detail: 'Email the Vertiege team',
-                  onTap: () async {
-                    final raw = FeatureFlags.betaFeedbackUrl.trim();
-                    final uri = Uri.tryParse(raw);
-                    if (uri == null) {
-                      VFeedback.showError(context, 'Feedback link unavailable');
-                      return;
-                    }
-                    final ok = await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
-                    if (!ok && context.mounted) {
-                      VFeedback.showError(context, 'Could not open feedback');
-                    }
-                  },
-                ),
-                VSectionTile(
-                  icon: Icons.info_outline,
-                  label: 'Privacy, terms & licenses',
-                  detail: 'Legal & open-source notices',
-                  onTap: () => AppLegal.showLegalHub(context),
-                ),
-              ]),
             const SizedBox(height: VSpacing.md),
             _prestigeSection('Data', [
                 VSectionTile(

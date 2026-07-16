@@ -152,90 +152,115 @@ class _ResidentListContentState extends ConsumerState<_ResidentListContent> {
                       final identityTick = memberHasIdentityTick(m);
                       final customStatus = m['custom_status'] as String?;
 
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            CosmeticAvatar(
-                              imageUrl: m['avatar_url'] as String?,
-                              seed: id,
-                              size: 40,
-                              totalXp: memberTotalXp(m),
-                              frameId: m['avatar_frame_id'] as String?,
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            final me = ref.read(residentProvider).resident;
+                            showResidentMemberCard(
+                              context,
+                              card: VMemberCard(
+                                residentId: id,
+                                name: name,
+                                rep: rep,
+                                tier: tierValue,
+                                profession: m['profession'] as String?,
+                                avatarUrl: m['avatar_url'] as String?,
+                                avatarFrameId: m['avatar_frame_id'] as String?,
+                                totalXp: memberTotalXp(m),
+                                sovereignId: sovereignId,
+                                presence: presence,
+                                identityVerified: identityTick,
+                                customStatus: customStatus,
+                                onMessage: me != null && me.id != id
+                                    ? () => _openDm(id, name)
+                                    : null,
+                                onDismiss: () => Navigator.pop(context),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: VSpacing.sm,
                             ),
-                            Positioned(
-                              right: -2,
-                              bottom: -2,
-                              child: StatusDot(presence: presence, size: 10),
-                            ),
-                          ],
-                        ),
-                        title: Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                name,
-                                style: TextStyle(
-                                  fontWeight: VFontWeight.semiBold,
-                                  color: nameColor,
+                            child: Row(
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    CosmeticAvatar(
+                                      imageUrl: m['avatar_url'] as String?,
+                                      seed: id,
+                                      size: 40,
+                                      totalXp: memberTotalXp(m),
+                                      frameId: m['avatar_frame_id'] as String?,
+                                    ),
+                                    Positioned(
+                                      right: -2,
+                                      bottom: -2,
+                                      child: StatusDot(
+                                        presence: presence,
+                                        size: 10,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                                const SizedBox(width: VSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              name,
+                                              style: TextStyle(
+                                                fontWeight: VFontWeight.semiBold,
+                                                color: nameColor,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          if (identityTick) ...[
+                                            const SizedBox(width: VSpacing.xxs),
+                                            const Icon(
+                                              VIcons.badgeCheck,
+                                              size: VIconSize.sm,
+                                              color: VCommuneColors.textLink,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      Text(
+                                        [
+                                          '${standing.title} · $rep rep',
+                                          if (customStatus != null &&
+                                              customStatus.trim().isNotEmpty)
+                                            customStatus.trim(),
+                                        ].join(' · '),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: VFontSize.labelSm,
+                                          color: VCommuneColors.textMutedOf(
+                                            brightness,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  size: VIconSize.sm,
+                                  color: VCommuneColors.textMutedOf(brightness),
+                                ),
+                              ],
                             ),
-                            if (identityTick) ...[
-                              const SizedBox(width: VSpacing.xxs),
-                              const Icon(
-                                VIcons.badgeCheck,
-                                size: VIconSize.sm,
-                                color: VCommuneColors.textLink,
-                              ),
-                            ],
-                          ],
-                        ),
-                        subtitle: Text(
-                          [
-                            '${standing.title} · $rep rep',
-                            if (customStatus != null &&
-                                customStatus.trim().isNotEmpty)
-                              customStatus.trim(),
-                          ].join(' · '),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: VFontSize.labelSm,
-                            color: VCommuneColors.textMutedOf(brightness),
                           ),
                         ),
-                        trailing: Icon(
-                          Icons.chevron_right,
-                          size: VIconSize.sm,
-                          color: VCommuneColors.textMutedOf(brightness),
-                        ),
-                        onTap: () {
-                          final me = ref.read(residentProvider).resident;
-                          showResidentMemberCard(
-                            context,
-                            card: VMemberCard(
-                              residentId: id,
-                              name: name,
-                              rep: rep,
-                              tier: tierValue,
-                              profession: m['profession'] as String?,
-                              avatarUrl: m['avatar_url'] as String?,
-                              avatarFrameId: m['avatar_frame_id'] as String?,
-                              totalXp: memberTotalXp(m),
-                              sovereignId: sovereignId,
-                              presence: presence,
-                              identityVerified: identityTick,
-                              customStatus: customStatus,
-                              onMessage: me != null && me.id != id
-                                  ? () => _openDm(id, name)
-                                  : null,
-                              onDismiss: () => Navigator.pop(context),
-                            ),
-                          );
-                        },
                       );
                     },
                   ),

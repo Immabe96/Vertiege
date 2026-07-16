@@ -1132,42 +1132,19 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   // ── Realm Audit ──────────────────────────────────
                   if (resident?.id == world.sovereignId)
-                    ListTile(
-                      leading: const Icon(
-                        Icons.history,
-                        color: VColors.tertiary,
-                      ),
-                      title: const Text('Realm Audit'),
-                      subtitle: const Text(
-                        'View moderation history and action logs',
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(VRadius.xl),
-                      ),
+                    VSectionTile(
+                      icon: Icons.history,
+                      label: 'Realm Audit',
+                      detail: 'View moderation history and action logs',
+                      iconColor: VColors.tertiary,
                       onTap: () => context.push(
                         auditLogPath(widget.worldId, worldName: world.name),
                       ),
                     ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.menu_book_outlined,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: const Text('World archive'),
-                    subtitle: const Text(
-                      'Lore, rules, and recorded history channels',
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right,
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(VRadius.xl),
-                    ),
+                  VSectionTile(
+                    icon: Icons.menu_book_outlined,
+                    label: 'World archive',
+                    detail: 'Lore, rules, and recorded history channels',
                     onTap: () => context.push(worldArchivePath(widget.worldId)),
                   ),
 
@@ -1483,23 +1460,26 @@ class _RanksSectionState extends ConsumerState<_RanksSection> {
             )
           else
             ..._ranks.map(
-              (r) => ListTile(
-                dense: true,
-                leading: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: _parseHex(r.colorHex),
-                    shape: BoxShape.circle,
+              (r) => Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  dense: true,
+                  leading: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: _parseHex(r.colorHex),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                title: Text(r.name),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, size: VIconSize.sm),
-                  onPressed: () async {
-                    await RankService.deleteRank(r.id);
-                    _load();
-                  },
+                  title: Text(r.name),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline, size: VIconSize.sm),
+                    onPressed: () async {
+                      await RankService.deleteRank(r.id);
+                      _load();
+                    },
+                  ),
                 ),
               ),
             ),

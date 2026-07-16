@@ -352,54 +352,98 @@ void _openLoungeCampfirePicker(
   required String? loungeGate,
   required String? campfireGate,
 }) {
+  Widget row({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool enabled,
+    required VoidCallback? onTap,
+  }) {
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(VRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: VSpacing.md,
+            vertical: VSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: enabled ? null : muted),
+              const SizedBox(width: VSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: VFontWeight.semiBold,
+                        color: enabled ? null : muted,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: VFontSize.labelMd,
+                        color: muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   showVSheet(
     context,
     Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (lounge != null)
-            ListTile(
-              leading: const Icon(Icons.weekend_outlined),
-              title: const Text('Lounge (text)'),
-              subtitle: loungeGate != null
-                  ? Text(loungeGate)
-                  : const Text('Async chat channel'),
-              enabled: loungeGate == null,
-              onTap: loungeGate == null
-                  ? () {
-                      Navigator.pop(context);
-                      context.push(
-                        worldChannelDestinationPath(
-                          worldId,
-                          lounge,
-                          worldName: worldName,
-                        ),
-                      );
-                    }
-                  : null,
-            ),
-          if (campfire != null)
-            ListTile(
-              leading: const Icon(Icons.local_fire_department),
-              title: const Text('Campfire (voice)'),
-              subtitle: Text(campfireGate ?? 'Live voice room for this world'),
-              enabled: campfireGate == null,
-              onTap: campfireGate == null
-                  ? () {
-                      Navigator.pop(context);
-                      context.push(
-                        worldChannelDestinationPath(
-                          worldId,
-                          campfire,
-                          worldName: worldName,
-                        ),
-                      );
-                    }
-                  : null,
-            ),
-          const SizedBox(height: VSpacing.md),
-        ],
-      ),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (lounge != null)
+          row(
+            icon: Icons.weekend_outlined,
+            title: 'Lounge (text)',
+            subtitle: loungeGate ?? 'Async chat channel',
+            enabled: loungeGate == null,
+            onTap: () {
+              Navigator.pop(context);
+              context.push(
+                worldChannelDestinationPath(
+                  worldId,
+                  lounge,
+                  worldName: worldName,
+                ),
+              );
+            },
+          ),
+        if (campfire != null)
+          row(
+            icon: Icons.local_fire_department,
+            title: 'Campfire (voice)',
+            subtitle: campfireGate ?? 'Live voice room for this world',
+            enabled: campfireGate == null,
+            onTap: () {
+              Navigator.pop(context);
+              context.push(
+                worldChannelDestinationPath(
+                  worldId,
+                  campfire,
+                  worldName: worldName,
+                ),
+              );
+            },
+          ),
+        const SizedBox(height: VSpacing.md),
+      ],
+    ),
     maxSize: 0.45,
   );
 }

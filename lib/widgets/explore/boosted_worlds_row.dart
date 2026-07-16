@@ -18,7 +18,7 @@ class BoostedWorldsRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 140,
+      height: 148,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: VSpacing.md),
@@ -39,19 +39,19 @@ class BoostedWorldsRow extends StatelessWidget {
                       worldId: world.id,
                       assetKey: world.assetKey,
                       width: 240,
-                      height: 140,
+                      height: 148,
                       worldType: world.type,
                       prestige: world.prestige,
                       contained: true,
                     ),
-                    DecoratedBox(
+                    const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withValues(alpha: 0.15),
-                            Colors.black.withValues(alpha: 0.72),
+                            Color(0x26000000),
+                            Color(0xB8000000),
                           ],
                         ),
                       ),
@@ -64,7 +64,7 @@ class BoostedWorldsRow extends StatelessWidget {
                         children: [
                           WorldIcon(
                             worldId: world.assetKey,
-                            size: VWorldIconSize.list,
+                            size: VWorldIconSize.dense,
                             useGlassContainer: false,
                             circular: true,
                           ),
@@ -79,17 +79,18 @@ class BoostedWorldsRow extends StatelessWidget {
                                   style: theme.textTheme.labelLarge?.copyWith(
                                     fontWeight: VFontWeight.bold,
                                     color: VColors.onSurfaceDark,
+                                    height: 1.15,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 2),
                                 Text(
                                   '★ P${world.prestige} · ${worldMemberCountLabel(world.memberCount)}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: VColors.onSurfaceVariantDark,
+                                    height: 1.15,
                                   ),
                                 ),
                               ],

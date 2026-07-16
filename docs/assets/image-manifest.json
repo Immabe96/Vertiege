@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-16T15:16:18.070817+00:00",
+  "updatedAt": "2026-07-16T19:43:40.009561+00:00",
   "stagingDir": "assets/staging/generated",
   "finalDir": "assets/generated",
   "workflowDoc": "docs/assets/CODEX_IMAGE_WORKFLOW.md",
@@ -120,8 +120,8 @@
       "negativePrompt": "no text, no letters, no numbers, no words, no logos, no signage, no neon signs with writing, no watermarks, no UI, no captions",
       "stagingPath": "assets/staging/generated/world-crimson-court.jpg",
       "finalPath": "assets/generated/world-crimson-court.jpg",
-      "generatedAt": "2026-05-23T01:06:30.0068013Z",
-      "approvedAt": "2026-05-23T01:24:00.5392970Z",
+      "generatedAt": "2026-07-16T19:43:39.808917+00:00",
+      "approvedAt": "2026-07-16T19:43:40.009283+00:00",
       "notes": null
     },
     {

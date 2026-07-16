@@ -74,3 +74,5 @@ Append-only session notes. The queue state of record is `image-manifest.json`.
 - **2026-07-16 20:16** — world-neon-district → approved
 - **2026-07-16 20:16** — world-financial-district → approved
 - **2026-07-16 20:16** — world-silver-page → approved
+- **2026-07-17 00:43** — world-crimson-court → generated
+- **2026-07-17 00:43** — world-crimson-court → approved
