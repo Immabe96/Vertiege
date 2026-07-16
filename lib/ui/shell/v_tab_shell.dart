@@ -32,7 +32,10 @@ class VTabShell extends StatelessWidget {
     return FScaffold(
       header: resolvedHeader,
       footer: footer,
-      child: Material(type: MaterialType.transparency, child: body),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SizedBox.expand(child: body),
+      ),
     );
   }
 }
