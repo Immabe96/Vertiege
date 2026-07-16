@@ -51,6 +51,10 @@ Widget vSheetSurface(
 }
 
 /// Modal bottom sheet via Forui [showFSheet]; respects tab-shell overlay.
+///
+/// Does **not** wrap [child] in [SingleChildScrollView] — that makes height
+/// unbounded and breaks sheets that use [Expanded]/[ListView]. Scroll inside
+/// the child when needed.
 Future<void> showVSheet(
   BuildContext context,
   Widget child, {
@@ -66,11 +70,17 @@ Future<void> showVSheet(
     context: context,
     side: side,
     mainAxisMaxRatio: maxSize,
-    builder: (sheetContext) => vSheetSurface(
-      sheetContext,
-      SingleChildScrollView(child: child),
-      side: side,
-    ),
+    builder: (sheetContext) {
+      final maxH = MediaQuery.sizeOf(sheetContext).height * maxSize;
+      return vSheetSurface(
+        sheetContext,
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxH),
+          child: child,
+        ),
+        side: side,
+      );
+    },
   ).whenComplete(overlay.release);
 }
 

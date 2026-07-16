@@ -140,11 +140,21 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       title: 'Worlds',
       headerActions: headerActions,
       body: isLoading
-          ? ListView.separated(
-              padding: const EdgeInsets.all(VSpacing.md),
-              itemCount: 6,
-              separatorBuilder: (_, _) => const SizedBox(height: VSpacing.sm),
-              itemBuilder: (_, _) => const ShimmerWorldCard(),
+          ? CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(VSpacing.md),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, _) => const Padding(
+                        padding: EdgeInsets.only(bottom: VSpacing.sm),
+                        child: ShimmerWorldCard(),
+                      ),
+                      childCount: 6,
+                    ),
+                  ),
+                ),
+              ],
             )
           : RefreshIndicator(
               onRefresh: () => ref.read(worldProvider.notifier).loadWorlds(),

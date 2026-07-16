@@ -77,7 +77,10 @@ class ChannelThreadListSheet extends ConsumerWidget {
           if (threads.isEmpty)
             const SizedBox.shrink()
           else
-            Flexible(
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.45,
+              ),
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: threads.length,

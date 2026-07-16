@@ -65,6 +65,7 @@ class WorldDetailScreen extends ConsumerStatefulWidget {
 class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
     with TickerProviderStateMixin {
   late final AnimationController _joinAnimController;
+  late final ProviderContainer _container;
   TabController? _tabController;
   final GlobalKey _joinButtonKey = GlobalKey();
   List<WorldDetailTabId> _tabIds = const [];
@@ -103,6 +104,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
   @override
   void initState() {
     super.initState();
+    _container = ProviderScope.containerOf(context, listen: false);
     _joinAnimController = AnimationController(
       duration: VAnimation.fast,
       vsync: this,
@@ -482,14 +484,15 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
 
   @override
   void dispose() {
-    // Clear realtime after this State is fully torn down so postProvider
-    // updates cannot mark this element defunct mid-dispose.
-    final container = ProviderScope.containerOf(context, listen: false);
+    // Clear realtime after teardown using a container captured in initState
+    // (do not touch [context] here — it can already be defunct).
     _joinAnimController.dispose();
     _tabController?.dispose();
     super.dispose();
     scheduleMicrotask(() {
-      unawaited(container.read(postProvider.notifier).setRealtimeWorldScope(null));
+      unawaited(
+        _container.read(postProvider.notifier).setRealtimeWorldScope(null),
+      );
     });
   }
 

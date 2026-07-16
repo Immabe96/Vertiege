@@ -81,7 +81,8 @@ class _ChannelDetailsContentState extends ConsumerState<_ChannelDetailsContent> 
     final residentLabel =
         widget.activeResidentCount == 1 ? 'resident' : 'residents';
 
-    return Padding(
+    return SingleChildScrollView(
+      child: Padding(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.lg,
         VSpacing.md,
@@ -265,6 +266,7 @@ class _ChannelDetailsContentState extends ConsumerState<_ChannelDetailsContent> 
             },
           ),
         ],
+      ),
       ),
     );
   }

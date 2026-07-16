@@ -79,7 +79,10 @@ class _AchievementCategorySheetBodyState
               illustration: EmptyStateIllustration.achievements,
             )
           else
-            Flexible(
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.5,
+              ),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: allInCategory.length,

@@ -80,7 +80,8 @@ class _StatusPickerSheetState extends State<_StatusPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
+    return SingleChildScrollView(
+      child: Container(
       decoration: const BoxDecoration(
         color: VCommuneColors.surfaceFloating,
         borderRadius: BorderRadius.vertical(top: Radius.circular(VRadius.lg)),
@@ -137,6 +138,7 @@ class _StatusPickerSheetState extends State<_StatusPickerSheet> {
           const SizedBox(height: VSpacing.sm),
           VButton(label: 'Save', onPressed: _save, isFullWidth: true),
         ],
+      ),
       ),
     );
   }
