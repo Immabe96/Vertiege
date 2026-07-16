@@ -180,6 +180,8 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 | S10.15 | One Progress home; one notifications inbox; delete MoreScreen | ✅ |
 | S10.16 | Sticky First Steps; Ascension Elite+; economy flags off in beta | ✅ |
 | S10.17 | Empty-state CTAs; post-Gate path join→chat→proof; member vs sovereign tools | ✅ |
+| S10.18 | P2 craft: collapsible Nexus Today; slim You → Progress/Connections/Account | ✅ |
+| S10.19 | P3: shop after first verified achievement; Allies/Following connections switcher | ✅ |
 
 ### S10.3 — Hub screens (agent swarm)
 

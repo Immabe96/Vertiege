@@ -5,8 +5,22 @@ class NexusShortcutPrefs {
   NexusShortcutPrefs._();
 
   static const _keyPrefix = 'nexus_shortcut_last_';
+  static const _todayExpandedKey = 'nexus_today_expanded';
 
   static String _key(String shortcutId) => '$_keyPrefix$shortcutId';
+
+  /// Today strip starts collapsed so the feed owns the first viewport.
+  static Future<bool> isTodayExpanded() async {
+    final raw = await StorageService.getString(_todayExpandedKey);
+    return raw == 'true';
+  }
+
+  static Future<void> setTodayExpanded(bool expanded) async {
+    await StorageService.setString(
+      _todayExpandedKey,
+      expanded ? 'true' : 'false',
+    );
+  }
 
   static Future<void> recordVisit(String shortcutId) async {
     final now = DateTime.now().millisecondsSinceEpoch;

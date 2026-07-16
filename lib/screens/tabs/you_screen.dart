@@ -9,7 +9,6 @@ import '../../services/onboarding_funnel_sync.dart';
 import '../../state/achievement_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../widgets/core/v_accessible.dart';
-import '../../widgets/identity/allies_preview_row.dart';
 import '../../widgets/onboarding/first_steps_card.dart';
 import 'identity_screen.dart';
 
@@ -90,7 +89,6 @@ class _YouScreenState extends ConsumerState<YouScreen> {
                 if (mounted) setState(() => _funnelDismissed = true);
               },
             ),
-          const AlliesPreviewRow(),
           const Expanded(child: IdentityScreen(embedded: true)),
         ],
       ),

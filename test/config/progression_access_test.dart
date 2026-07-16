@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vertiege/config/progression_access.dart';
+import 'package:vertiege/models/achievement.dart';
 import 'package:vertiege/models/resident.dart';
 
 void main() {
@@ -23,6 +24,27 @@ void main() {
         totalXp: 2000,
       );
       expect(ProgressionAccess.canAccessAscensionFor(elite), isTrue);
+    });
+
+    test('shop unlocks after first verified achievement', () {
+      expect(ProgressionAccess.canAccessShop(const []), isFalse);
+      expect(
+        ProgressionAccess.canAccessShop(const [
+          UserAchievement(
+            achievementId: 'a1',
+          ),
+        ]),
+        isFalse,
+      );
+      expect(
+        ProgressionAccess.canAccessShop(const [
+          UserAchievement(
+            achievementId: 'a1',
+            status: AchievementStatus.verified,
+          ),
+        ]),
+        isTrue,
+      );
     });
   });
 }

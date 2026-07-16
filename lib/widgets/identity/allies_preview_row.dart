@@ -58,7 +58,7 @@ class _AlliesPreviewRowState extends ConsumerState<AlliesPreviewRow> {
               children: [
                 const Expanded(
                   child: Text(
-                    'Allies',
+                    'Mutual allies',
                     style: TextStyle(
                       fontSize: VFontSize.labelSm,
                       fontWeight: VFontWeight.semiBold,

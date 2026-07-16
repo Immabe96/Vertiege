@@ -10,12 +10,43 @@ import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 
-/// Lean Nexus “Today” strip — streak + quest + Progress hub. Feed stays primary.
-class NexusShortcutsSection extends ConsumerWidget {
+/// Collapsible Nexus “Today” strip — collapsed by default so the feed leads.
+class NexusShortcutsSection extends ConsumerStatefulWidget {
   const NexusShortcutsSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NexusShortcutsSection> createState() =>
+      _NexusShortcutsSectionState();
+}
+
+class _NexusShortcutsSectionState extends ConsumerState<NexusShortcutsSection> {
+  bool _expanded = false;
+  bool _prefsLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadExpanded());
+  }
+
+  Future<void> _loadExpanded() async {
+    final expanded = await NexusShortcutPrefs.isTodayExpanded();
+    if (!mounted) return;
+    setState(() {
+      _expanded = expanded;
+      _prefsLoaded = true;
+    });
+  }
+
+  Future<void> _toggle() async {
+    final next = !_expanded;
+    setState(() => _expanded = next);
+    await NexusShortcutPrefs.setTodayExpanded(next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         VSpacing.md,
@@ -23,46 +54,80 @@ class NexusShortcutsSection extends ConsumerWidget {
         VSpacing.md,
         VSpacing.sm,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _TodayChip(
-              icon: Icons.local_fire_department,
-              label: 'Streak',
-              onTap: () => _open(context, 'streak', progressPath()),
-            ),
-          ),
-          const SizedBox(width: VSpacing.sm),
-          Expanded(
-            child: _TodayChip(
-              icon: Icons.flag_outlined,
-              label: 'Quests',
-              onTap: () => _open(
-                context,
-                'quest',
-                progressPath(tab: ProgressTab.quests),
+          Material(
+            color: PrestigeNoir.surfaceRaised,
+            borderRadius: BorderRadius.circular(VRadius.lg),
+            child: InkWell(
+              onTap: _prefsLoaded ? _toggle : null,
+              borderRadius: BorderRadius.circular(VRadius.lg),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: VSpacing.md,
+                  vertical: VSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.wb_sunny_outlined,
+                      size: VIconSize.md,
+                      color: VColors.brand,
+                    ),
+                    const SizedBox(width: VSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Today',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: VFontWeight.semiBold,
+                          color: PrestigeNoir.foreground,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _expanded ? Icons.expand_less : Icons.expand_more,
+                      color: PrestigeNoir.muted,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(width: VSpacing.sm),
-          Expanded(
-            child: _TodayChip(
-              icon: Icons.insights_outlined,
-              label: 'Progress',
-              onTap: () => _open(context, 'progress', progressPath()),
+          if (_expanded) ...[
+            const SizedBox(height: VSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: _TodayChip(
+                    icon: Icons.local_fire_department,
+                    label: 'Streak',
+                    onTap: () => _open(context, 'streak', progressPath()),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: _TodayChip(
+                    icon: Icons.flag_outlined,
+                    label: 'Quests',
+                    onTap: () => _open(
+                      context,
+                      'quest',
+                      progressPath(tab: ProgressTab.quests),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: VSpacing.sm),
+                Expanded(
+                  child: _TodayChip(
+                    icon: Icons.insights_outlined,
+                    label: 'Progress',
+                    onTap: () => _open(context, 'progress', progressPath()),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: VSpacing.sm),
-          Expanded(
-            child: _TodayChip(
-              icon: Icons.public,
-              label: 'Worlds',
-              onTap: () {
-                unawaited(NexusShortcutPrefs.recordVisit('worlds'));
-                context.go('/worlds');
-              },
-            ),
-          ),
+          ],
         ],
       ),
     );

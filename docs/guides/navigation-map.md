@@ -4,10 +4,10 @@ Where primary surfaces live so we avoid duplicate CTAs.
 
 | Tab | Role | Progression & proof |
 |-----|------|---------------------|
-| **Nexus** `/` | Standing feed + lean Today strip (streak / quests / progress / worlds) | Shortcuts only — not the catalog |
+| **Nexus** `/` | Standing feed; collapsible Today strip (streak / quests / progress) | Shortcuts collapsed by default |
 | **Worlds** `/worlds` | Discover, join, realm home | World-scoped tools in-world |
 | **Chat** `/chat` | World channels + DMs + Campfire | Empty → Browse worlds / Submit proof |
-| **You** `/identity` | Passport tick, honour wall, tier | Achievements + Progress hubs (header / Standing) |
+| **You** `/identity` | Passport, honour wall, allies | Achievements header; Progress / Connections / Account |
 
 ## Hubs (push, not tabs)
 

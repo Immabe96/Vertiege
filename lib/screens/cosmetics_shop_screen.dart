@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../router/world_navigation.dart';
 import '../models/listing.dart';
+import '../config/progression_access.dart';
 import '../services/marketplace_service.dart';
 import '../services/cosmetic_purchase_service.dart';
+import '../state/achievement_provider.dart';
 import '../state/resident_provider.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
+import '../widgets/core/empty_state.dart';
 import '../widgets/worlds/listing_card.dart';
 import '../widgets/core/shimmer.dart';
 import '../widgets/profile/cosmetic_avatar.dart';
@@ -28,7 +31,25 @@ class _CosmeticsShopScreenState extends ConsumerState<CosmeticsShopScreen> {
   @override
   Widget build(BuildContext context) {
     final resident = ref.watch(residentProvider).resident;
+    final achievements = ref.watch(achievementProvider).userAchievements;
+    final shopUnlocked = ProgressionAccess.canAccessShop(achievements);
     final coins = resident?.sovereignCoins ?? 0;
+
+    if (!shopUnlocked) {
+      return VHubPage(
+        title: 'Shop',
+        showBack: true,
+        body: AppEmptyState(
+          icon: Icons.lock_outline,
+          title: 'Shop unlocks with standing',
+          description:
+              'Verify one life achievement first — cosmetics come after identity.',
+          actionLabel: 'Submit proof',
+          onAction: () => context.push('/achievements'),
+        ),
+      );
+    }
+
     return VHubPage(
       title: 'Shop',
       showBack: true,

@@ -8,8 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/build_info.dart';
 import '../config/platform_label.dart';
+import '../config/progression_access.dart';
 import '../state/theme_provider.dart';
 import '../state/resident_provider.dart';
+import '../state/achievement_provider.dart';
 import '../services/storage_service.dart';
 import '../services/admin_access_service.dart';
 import '../services/auth_service.dart';
@@ -443,6 +445,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       oldController.dispose();
       newController.dispose();
       confirmController.dispose();
+    }
+  }
+
+  Future<void> _confirmSignOut() async {
+    final confirmed = await showVDialog<bool>(
+      context: context,
+      title: 'Sign out?',
+      content: const Text(
+        'You\'ll need to sign in again to access your worlds and progress.',
+      ),
+      actions: [
+        vDialogActionsRow([
+          VButton(
+            label: 'Cancel',
+            onPressed: () => Navigator.pop(context, false),
+            variant: ButtonVariant.text,
+          ),
+          VButton(
+            label: 'Sign Out',
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ]),
+      ],
+    );
+
+    if (confirmed == true && mounted) {
+      await AuthService.signOut(ref: ref);
+      if (mounted) context.go('/login');
     }
   }
 
@@ -947,6 +977,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ]),
             const SizedBox(height: VSpacing.md),
             _prestigeSection('Account', [
+                Builder(
+                  builder: (context) {
+                    final coins = ref.watch(residentProvider).resident
+                            ?.sovereignCoins ??
+                        0;
+                    final unlocked = ProgressionAccess.canAccessShop(
+                      ref.watch(achievementProvider).userAchievements,
+                    );
+                    return VSectionTile(
+                      icon: unlocked
+                          ? Icons.monetization_on
+                          : Icons.lock_outline,
+                      label: 'Shop',
+                      detail: unlocked
+                          ? '$coins coins'
+                          : 'Unlock after first verified achievement',
+                      iconColor: unlocked ? VColors.tertiary : null,
+                      onTap: () => context.push('/shop'),
+                    );
+                  },
+                ),
+                VSectionTile(
+                  icon: Icons.workspace_premium,
+                  label: 'Subscription',
+                  onTap: () => context.push('/subscription'),
+                ),
                 if (AdminAccessService.isCurrentSessionVerifier())
                   VSectionTile(
                     icon: Icons.verified_user_outlined,
@@ -983,6 +1039,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   iconColor: VColors.error,
                   titleColor: VColors.error,
                   onTap: _showDeleteAccountDialog,
+                ),
+                VSectionTile(
+                  icon: Icons.logout,
+                  label: 'Sign Out',
+                  iconColor: VColors.error,
+                  titleColor: VColors.error,
+                  onTap: _confirmSignOut,
                 ),
               ]),
             const SizedBox(height: VSpacing.md),
@@ -1144,7 +1207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 VSectionTile(
                   icon: Icons.info_outline,
                   label: 'Privacy, terms & licenses',
-                  detail: 'Open the More tab',
+                  detail: 'Legal & open-source notices',
                   onTap: () => context.push('/identity'),
                 ),
               ]),

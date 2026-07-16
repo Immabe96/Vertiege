@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
-import '../../services/auth_service.dart';
 import '../../services/subscription_service.dart';
 import '../../services/world_service.dart';
 import '../../state/resident_provider.dart';
@@ -15,13 +14,10 @@ import '../../state/post_provider.dart';
 import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
-import '../../ui/buttons/v_button.dart';
-import '../../ui/overlays/v_dialog.dart';
 import '../../utils/haptics.dart';
 import '../../widgets/profile/cosmetic_avatar.dart';
 import '../../widgets/profile/luminary_nameplate.dart';
 import '../../widgets/profile/edit_profile_sheet.dart';
-import '../../state/ally_provider.dart';
 import '../../widgets/shared/progress_bar.dart';
 import '../../router/search_navigation.dart';
 import '../../widgets/profile/completion_hint.dart';
@@ -40,6 +36,7 @@ import '../../widgets/core/tier_up_dialog.dart';
 import '../../widgets/shared/profession_icon.dart';
 import '../../widgets/shared/tier_icon.dart';
 import '../../widgets/identity/joined_worlds_row.dart';
+import '../../widgets/identity/allies_preview_row.dart';
 import '../../config/onboarding_funnel.dart';
 import '../../services/onboarding_funnel_prefs.dart';
 import '../../services/onboarding_funnel_sync.dart';
@@ -87,7 +84,6 @@ class IdentityScreen extends ConsumerStatefulWidget {
 
 class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   final _scrollController = ScrollController();
-  final _exploreSectionKey = GlobalKey();
   bool _handledRouteTab = false;
   int _previousXp = 0;
   SubscriptionTier _subscriptionTier = SubscriptionTier.resident;
@@ -172,34 +168,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  Future<void> _confirmSignOut() async {
-    final confirmed = await showVDialog<bool>(
-      context: context,
-      title: 'Sign out?',
-      content: const Text(
-        'You\'ll need to sign in again to access your worlds and progress.',
-      ),
-      actions: [
-        vDialogActionsRow([
-          VButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(context, false),
-            variant: ButtonVariant.text,
-          ),
-          VButton(
-            label: 'Sign Out',
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ]),
-      ],
-    );
-
-    if (confirmed == true) {
-      await AuthService.signOut(ref: ref);
-      if (mounted) context.go('/login');
-    }
   }
 
   void _showEditProfileSheet(Resident resident) {
@@ -452,8 +420,6 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       Haptics.light();
     }
     _previousXp = currentXp;
-
-    final allyCount = ref.watch(allyProvider).allies.length;
 
     final tierValue = resident.tier.value;
     final nextTierValue = tierValue + 1;
@@ -832,6 +798,8 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: VSpacing.md),
+            const AlliesPreviewRow(),
             const SizedBox(height: VSpacing.lg),
 
             InkWell(
@@ -1101,73 +1069,25 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
               child: VSectionList(
-                title: 'Standing',
+                title: 'More',
                 children: [
-                  VSectionTile(
-                    icon: Icons.emoji_events_outlined,
-                    label: 'Achievements',
-                    onTap: () => context.push('/achievements'),
-                  ),
                   VSectionTile(
                     icon: Icons.insights_outlined,
-                    label: 'Progress · XP, streak & quests',
+                    label: 'Progress',
+                    detail: 'XP, streak & quests',
                     onTap: () => context.push('/progress'),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.md),
-
-            Padding(
-              key: _exploreSectionKey,
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: VSectionList(
-                title: 'Social',
-                children: [
                   VSectionTile(
-                    icon: Icons.people,
-                    label: 'Following (${resident.following.length})',
-                    onTap: () => context.push('/following'),
-                  ),
-                  VSectionTile(
-                    icon: Icons.handshake,
-                    label: allyCount == 0
-                        ? 'Find allies'
-                        : 'Allies ($allyCount)',
+                    icon: Icons.handshake_outlined,
+                    label: 'Connections',
+                    detail: 'Allies & following',
                     onTap: () => context.push('/allies'),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: VSpacing.md),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: VSpacing.lg),
-              child: VSectionList(
-                title: 'Account',
-                children: [
-                  VSectionTile(
-                    icon: Icons.monetization_on,
-                    label:
-                        'Shop · ${resident.sovereignCoins} coins',
-                    iconColor: VColors.tertiary,
-                    onTap: () => context.push('/shop'),
-                  ),
-                  VSectionTile(
-                    icon: Icons.workspace_premium,
-                    label: 'Subscription',
-                    onTap: () => context.push('/subscription'),
                   ),
                   VSectionTile(
                     icon: Icons.settings_outlined,
-                    label: 'Settings',
+                    label: 'Account',
+                    detail: 'Settings & shop',
                     onTap: () => context.push('/settings'),
-                  ),
-                  VSectionTile(
-                    icon: Icons.logout,
-                    label: 'Sign Out',
-                    iconColor: VColors.error,
-                    onTap: _confirmSignOut,
                   ),
                 ],
               ),

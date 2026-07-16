@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -58,11 +60,19 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
   List<_ResidentRow> _rows = [];
   bool _loading = true;
   String? _loadError;
+  late ConnectionsMode _mode;
 
   @override
   void initState() {
     super.initState();
+    _mode = widget.mode;
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _setMode(ConnectionsMode mode) async {
+    if (mode == _mode) return;
+    setState(() => _mode = mode);
+    await _load();
   }
 
   Future<void> _load() async {
@@ -80,7 +90,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
       return;
     }
 
-    if (widget.mode == ConnectionsMode.allies) {
+    if (_mode == ConnectionsMode.allies) {
       await ref.read(allyProvider.notifier).loadAll(resident.id);
       final allyErr = ref.read(allyProvider).loadError;
       if (allyErr != null) {
@@ -120,7 +130,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
       }
 
       List<_ResidentRow> rows;
-      if (widget.mode == ConnectionsMode.following) {
+      if (_mode == ConnectionsMode.following) {
         final followingIds = resident.following.toSet();
         rows =
             allMembers.values
@@ -158,9 +168,6 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
     }
   }
 
-  String get _title =>
-      widget.mode == ConnectionsMode.following ? 'Following' : 'Allies';
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -168,7 +175,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
     final allyState = ref.watch(allyProvider);
 
     return VHubPage(
-      title: _title,
+      title: 'Connections',
       showBack: true,
       body: RefreshIndicator(
         onRefresh: _load,
@@ -199,23 +206,34 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                 child: CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
-                    child: Text(
-                      widget.mode == ConnectionsMode.following
-                          ? 'Following'
-                          : 'Allies',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: VFontWeight.bold,
-                      ),
+                    child: SegmentedButton<ConnectionsMode>(
+                      segments: const [
+                        ButtonSegment(
+                          value: ConnectionsMode.allies,
+                          label: Text('Allies'),
+                          icon: Icon(Icons.handshake_outlined, size: 18),
+                        ),
+                        ButtonSegment(
+                          value: ConnectionsMode.following,
+                          label: Text('Following'),
+                          icon: Icon(Icons.people_outline, size: 18),
+                        ),
+                      ],
+                      selected: {_mode},
+                      onSelectionChanged: (next) {
+                        if (next.isEmpty) return;
+                        unawaited(_setMode(next.first));
+                      },
                     ),
                   ),
                   const SliverToBoxAdapter(
-                    child: SizedBox(height: VSpacing.xs),
+                    child: SizedBox(height: VSpacing.md),
                   ),
                   SliverToBoxAdapter(
                     child: Text(
-                      widget.mode == ConnectionsMode.following
-                          ? 'Residents you follow for feed priority — not the same as mutual allies.'
-                          : 'Mutual allegiance requests you accepted — stronger than a one-way follow.',
+                      _mode == ConnectionsMode.following
+                          ? 'One-way follows boost Nexus feed priority. Not the same as allies.'
+                          : 'Mutual allegiance — both residents accepted. Stronger than a follow.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                         height: 1.35,
@@ -225,7 +243,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                   const SliverToBoxAdapter(
                     child: SizedBox(height: VSpacing.lg),
                   ),
-                  if (widget.mode == ConnectionsMode.allies &&
+                  if (_mode == ConnectionsMode.allies &&
                       allyState.pendingRequests.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Text(
@@ -255,21 +273,17 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                   if (_rows.isEmpty && _loadError == null)
                     SliverToBoxAdapter(
                       child: AppEmptyState(
-                        icon: widget.mode == ConnectionsMode.following
+                        icon: _mode == ConnectionsMode.following
                             ? Icons.people_outline
                             : Icons.handshake_outlined,
-                        title: widget.mode == ConnectionsMode.following
+                        title: _mode == ConnectionsMode.following
                             ? 'Not following anyone yet'
                             : 'No allies yet',
-                        description: widget.mode == ConnectionsMode.following
-                            ? 'Find residents from world feeds or search.'
-                            : 'Send allegiance requests from resident profiles.',
-                        actionLabel: widget.mode == ConnectionsMode.allies
-                            ? 'Find residents'
-                            : null,
-                        onAction: widget.mode == ConnectionsMode.allies
-                            ? () => context.push('/search')
-                            : null,
+                        description: _mode == ConnectionsMode.following
+                            ? 'Follow from profiles to prioritize their Nexus moments.'
+                            : 'Send allegiance requests from resident profiles — both must accept.',
+                        actionLabel: 'Find residents',
+                        onAction: () => context.push('/search'),
                       ),
                     )
                   else
@@ -277,8 +291,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                       itemCount: _rows.length,
                       itemBuilder: (context, index) => _PersonTile(
                         row: _rows[index],
-                        showMessageAction:
-                            widget.mode == ConnectionsMode.allies,
+                        showMessageAction: _mode == ConnectionsMode.allies,
                       ),
                     ),
                 ],
