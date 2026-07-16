@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/post.dart';
+import '../../services/moderation_service.dart';
+import '../../state/resident_provider.dart';
 import '../../theme/v_commune_colors.dart';
 import '../core/tab_aware_sheet.dart';
 import '../../theme/v_colors.dart';
@@ -12,6 +15,7 @@ import '../core/empty_state.dart';
 import '../core/tier_badge.dart';
 import '../../ui/icons/v_icons.dart';
 import '../../widgets/core/v_feedback.dart';
+import '../report_sheet.dart';
 
 enum CommentSort { best, newest, oldest }
 
@@ -39,6 +43,8 @@ class CommentSheet extends StatefulWidget {
   final List<Comment> comments;
   final ValueChanged<String> onSubmit;
   final String? postAuthorId;
+  final String? postId;
+  final String? worldId;
   final bool embedded;
 
   const CommentSheet({
@@ -46,6 +52,8 @@ class CommentSheet extends StatefulWidget {
     required this.comments,
     required this.onSubmit,
     this.postAuthorId,
+    this.postId,
+    this.worldId,
     this.embedded = false,
   });
 
@@ -231,6 +239,8 @@ class _CommentSheetState extends State<CommentSheet> {
                       isOp: widget.postAuthorId != null &&
                           comment.residentId == widget.postAuthorId,
                       allComments: widget.comments,
+                      postId: widget.postId,
+                      worldId: widget.worldId,
                       onReply: (id, name) {
                         setState(() {
                           _replyToId = id;
@@ -424,6 +434,8 @@ class _CommentTile extends StatefulWidget {
   final bool isOp;
   final void Function(String id, String name) onReply;
   final List<Comment> allComments;
+  final String? postId;
+  final String? worldId;
 
   const _CommentTile({
     required this.comment,
@@ -431,6 +443,8 @@ class _CommentTile extends StatefulWidget {
     required this.isOp,
     required this.onReply,
     required this.allComments,
+    this.postId,
+    this.worldId,
   });
 
   @override
@@ -584,6 +598,53 @@ class _CommentTileState extends State<_CommentTile> {
                                    ),
                                  ),
                               ),
+                              if (widget.postId != null) ...[
+                                const SizedBox(width: VSpacing.md),
+                                GestureDetector(
+                                  onTap: () {
+                                    final container = ProviderScope.containerOf(
+                                      context,
+                                    );
+                                    final me = container
+                                        .read(residentProvider)
+                                        .resident;
+                                    if (me == null) return;
+                                    ReportSheet.show(
+                                      context,
+                                      targetLabel: 'comment',
+                                      onSubmit: (reason, details) {
+                                        Navigator.pop(context);
+                                        ModerationService.submitReport(
+                                          worldId: widget.worldId,
+                                          postId: widget.postId,
+                                          reporterId: me.id,
+                                          reason: reason.name,
+                                          details: [
+                                            'comment_id:${widget.comment.id}',
+                                            if (details != null &&
+                                                details.isNotEmpty)
+                                              details,
+                                          ].join('\n'),
+                                        );
+                                        VFeedback.showMessage(
+                                          context,
+                                          'Report submitted. Thank you.',
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Text(
+                                    'Report',
+                                    style: TextStyle(
+                                      fontSize: VFontSize.labelSm,
+                                      fontWeight: VFontWeight.semiBold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
                               if (widget.depth > 0) ...[
                                 const SizedBox(width: VSpacing.sm),
                                 GestureDetector(

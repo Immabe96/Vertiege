@@ -535,6 +535,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       itemBuilder: (context, index) {
         final room = filteredRooms[index];
         final roomId = room['id'] as String?;
+        if (roomId == null || roomId.isEmpty) {
+          return const SizedBox.shrink();
+        }
         final typingLabel = channelTypingLabel(
           typingByRoom[roomId] ?? const <String>{},
           currentUserId: currentUserId,
@@ -549,23 +552,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               HapticFeedback.lightImpact();
               if (unreadCount > 0) {
                 ref.read(chatProvider.notifier).markDmRead(
-                      roomId: roomId!,
+                      roomId: roomId,
                       residentId: currentUserId,
                     );
               } else {
                 ref.read(chatProvider.notifier).markDmUnread(
-                      roomId: roomId!,
+                      roomId: roomId,
                       residentId: currentUserId,
                     );
               }
               return false;
             } else {
               HapticFeedback.lightImpact();
-              if (roomId != null) {
-                final muted = await DmRoomMutePrefs.toggle(roomId);
-                if (mounted) {
-                  setState(() => _mutedDmRoomIds = muted);
-                }
+              final muted = await DmRoomMutePrefs.toggle(roomId);
+              if (mounted) {
+                setState(() => _mutedDmRoomIds = muted);
               }
               return false;
             }

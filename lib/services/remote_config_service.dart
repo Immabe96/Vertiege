@@ -45,7 +45,8 @@ class RemoteConfigService {
       'maintenance_banner': '',
       'whats_new_build': 0,
       'whats_new_message': '',
-      'beta_feedback_url': 'https://forms.gle/placeholder-vertiege-beta',
+      'beta_feedback_url':
+          'mailto:privacy@vertiege.app?subject=Vertiege%20beta%20feedback',
       'privacy_policy_url': 'https://veritage.web.app/privacy.html',
       'terms_of_service_url': 'https://veritage.web.app/terms.html',
       'campfire_immersive': false,

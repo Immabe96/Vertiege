@@ -101,10 +101,10 @@ class FeatureFlags {
   static String get whatsNewMessage =>
       RemoteConfigService.getString('whats_new_message');
 
-  /// Beta feedback form URL (Settings).
+  /// Beta feedback form URL (Settings). Prefer a real form; mailto is fallback.
   static String get betaFeedbackUrl => RemoteConfigService.getString(
         'beta_feedback_url',
-        fallback: 'https://forms.gle/placeholder-vertiege-beta',
+        fallback: 'mailto:privacy@vertiege.app?subject=Vertiege%20beta%20feedback',
       );
 
   /// Hosted Privacy Policy URL for store listings / "View online".

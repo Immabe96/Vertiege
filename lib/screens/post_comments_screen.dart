@@ -9,25 +9,58 @@ import '../state/resident_provider.dart';
 import '../theme/v_commune_chat_theme.dart';
 import '../theme/v_commune_colors.dart';
 import '../theme/v_tokens.dart';
+import '../widgets/core/empty_state.dart';
+import '../widgets/core/screen_loading.dart';
 import '../widgets/core/v_accessible.dart';
 import '../widgets/feed/comment_sheet.dart';
 
 /// Full-screen post comment thread — commune chat feel (DCX-092).
-class PostCommentsScreen extends ConsumerWidget {
+class PostCommentsScreen extends ConsumerStatefulWidget {
   final String postId;
 
   const PostCommentsScreen({super.key, required this.postId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final posts = ref.watch(postProvider).posts;
-    Post? post;
+  ConsumerState<PostCommentsScreen> createState() => _PostCommentsScreenState();
+}
+
+class _PostCommentsScreenState extends ConsumerState<PostCommentsScreen> {
+  bool _resolving = false;
+  bool _resolveFailed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensurePost());
+  }
+
+  Future<void> _ensurePost() async {
+    final posts = ref.read(postProvider).posts;
+    if (posts.any((p) => p.id == widget.postId)) return;
+    setState(() {
+      _resolving = true;
+      _resolveFailed = false;
+    });
+    final ok =
+        await ref.read(postProvider.notifier).ensurePostVisible(widget.postId);
+    if (!mounted) return;
+    setState(() {
+      _resolving = false;
+      _resolveFailed = !ok;
+    });
+  }
+
+  Post? _findPost(List<Post> posts) {
     for (final candidate in posts) {
-      if (candidate.id == postId) {
-        post = candidate;
-        break;
-      }
+      if (candidate.id == widget.postId) return candidate;
     }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final posts = ref.watch(postProvider).posts;
+    final post = _findPost(posts);
 
     if (post == null) {
       return ColoredBox(
@@ -45,7 +78,17 @@ class PostCommentsScreen extends ConsumerWidget {
             ],
             title: const Text('Comments'),
           ),
-          child: const Center(child: Text('Post not found')),
+          child: _resolving
+              ? const ScreenLoading.list()
+              : AppEmptyState(
+                  icon: Icons.chat_bubble_outline,
+                  title: 'Post not found',
+                  description: _resolveFailed
+                      ? 'Could not load this thread. Check your connection.'
+                      : 'This post is no longer available.',
+                  actionLabel: 'Retry',
+                  onAction: _ensurePost,
+                ),
         ),
       );
     }
@@ -79,9 +122,11 @@ class PostCommentsScreen extends ConsumerWidget {
           ),
         ),
         child: CommentSheet(
-          embedded: true,
           comments: activePost.comments,
           postAuthorId: activePost.residentId,
+          postId: activePost.id,
+          worldId: activePost.worldId,
+          embedded: true,
           onSubmit: (content) {
             final resident = ref.read(residentProvider).resident;
             if (resident == null) return;

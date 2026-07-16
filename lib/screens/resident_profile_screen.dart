@@ -26,6 +26,8 @@ import '../services/profile_achievements_service.dart';
 import '../widgets/shared/profession_icon.dart';
 import '../widgets/shared/tier_icon.dart';
 import '../utils/profile_share.dart';
+import '../widgets/report_sheet.dart';
+import '../services/moderation_service.dart';
 
 class ResidentProfileScreen extends ConsumerStatefulWidget {
   final String residentId;
@@ -142,6 +144,35 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
       headerActions: _profile == null
           ? const []
           : [
+              if (_profile!.id !=
+                  ref.watch(residentProvider).resident?.id)
+                VIconButton(
+                  semanticsLabel: 'Report resident',
+                  tooltip: 'Report',
+                  child: const Icon(Icons.flag_outlined),
+                  onPressed: () {
+                    final me = ref.read(residentProvider).resident;
+                    final target = _profile;
+                    if (me == null || target == null) return;
+                    ReportSheet.show(
+                      context,
+                      targetLabel: 'resident',
+                      onSubmit: (reason, details) {
+                        Navigator.pop(context);
+                        ModerationService.submitReport(
+                          reportedResidentId: target.id,
+                          reporterId: me.id,
+                          reason: reason.name,
+                          details: details,
+                        );
+                        VFeedback.showMessage(
+                          context,
+                          'Report submitted. Thank you.',
+                        );
+                      },
+                    );
+                  },
+                ),
               VIconButton(
                 semanticsLabel: 'Share profile',
                 tooltip: 'Share profile',
