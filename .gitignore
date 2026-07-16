@@ -78,3 +78,4 @@ scripts/core_badge_jobs.json
 scripts/missing_badges.json
 scripts/missing_core_ids.json
 supabase/.temp/
+.firebase/

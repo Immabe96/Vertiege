@@ -16,7 +16,7 @@ Code gates for closed beta → public store. Complete the **operator** rows befo
 ## Operator (blocks public listing)
 
 - [x] `supabase functions deploy delete-account --no-verify-jwt` (done 2026-07-16)
-- [ ] Host Privacy Policy + Terms at public HTTPS URLs; set RC keys `privacy_policy_url` / `terms_of_service_url`
+- [x] Host Privacy Policy + Terms (Firebase Hosting `veritage.web.app`, 2026-07-16)
 - [ ] App Store Connect / Play Console: privacy nutrition / Data Safety, screenshots, age rating
 - [ ] App Review test account + notes (UGC reporting path, account deletion steps)
 - [ ] Device UAT: `docs/guides/device-uat.md` + `docs/operations/uat/api30-release-smoke.md` signed
