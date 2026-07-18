@@ -137,7 +137,8 @@ class VMessageContent extends StatelessWidget {
     );
     return MarkdownBody(
       data: withMentions,
-      selectable: selectable,
+      // Do not enable [selectable] here — selectable markdown inside chat
+      // list cells often paints an empty gray box on Prestige Noir.
       styleSheet: sheet,
       onTapLink: (text, href, title) {
         if (href == null) return;

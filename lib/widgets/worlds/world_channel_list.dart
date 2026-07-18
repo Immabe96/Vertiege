@@ -192,6 +192,8 @@ class _WorldChannelListState extends ConsumerState<WorldChannelList> {
     );
 
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       cacheExtent: kChannelListCacheExtent,
       padding: const EdgeInsets.only(bottom: VSpacing.md),
       itemCount: rows.length,

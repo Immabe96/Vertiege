@@ -19,6 +19,7 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
   final _codeController = TextEditingController();
   bool _enrolled = false;
   String? _error;
+  bool _secretRevealed = false;
 
   @override
   void dispose() {
@@ -224,13 +225,31 @@ class _TwinSealSetupScreenState extends State<TwinSealSetupScreen> {
                   ),
                   const SizedBox(height: VSpacing.md),
                   Text(
-                    'Secret: $_secret',
+                    'Scan the QR with your authenticator app. '
+                    'Reveal the secret only if you cannot scan.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: VFont.mono,
-                      fontSize: VFontSize.bodyMd,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: VFontSize.bodySm,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  const SizedBox(height: VSpacing.sm),
+                  if (_secretRevealed)
+                    SelectableText(
+                      _secret!,
+                      style: TextStyle(
+                        fontFamily: VFont.mono,
+                        fontSize: VFontSize.bodyMd,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    )
+                  else
+                    VButton(
+                      label: 'Reveal secret',
+                      icon: const Icon(Icons.visibility_outlined, size: VIconSize.sm),
+                      variant: ButtonVariant.text,
+                      onPressed: () => setState(() => _secretRevealed = true),
+                    ),
                   const SizedBox(height: VSpacing.sm),
                   VButton(
                     label: 'Copy secret',

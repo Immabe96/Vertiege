@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 
 import '../../models/message.dart';
@@ -285,11 +286,11 @@ class _VMessageBubbleState extends State<VMessageBubble>
               : CrossAxisAlignment.start,
           children: [
             animated,
-            const Padding(
-              padding: EdgeInsets.only(top: VSpacing.xs),
+            Padding(
+              padding: const EdgeInsets.only(top: VSpacing.xs),
               child: Text(
-                'Failed to send · tap to retry',
-                style: TextStyle(
+                AppLocalizations.of(context).messageFailedTapRetry,
+                style: const TextStyle(
                   fontSize: VFontSize.labelSm,
                   color: VColors.error,
                 ),
@@ -464,7 +465,7 @@ class _VMessageBubbleState extends State<VMessageBubble>
                               ],
                               if (_dmImageUrls(msg).isNotEmpty)
                                 ChatImageGrid(urls: _dmImageUrls(msg)),
-                              if (msg.content.isNotEmpty) ...[
+                              if (msg.content.trim().isNotEmpty) ...[
                                 if (_dmImageUrls(msg).isNotEmpty)
                                   const SizedBox(height: VSpacing.xs),
                                 msg.isDeleted
@@ -476,10 +477,19 @@ class _VMessageBubbleState extends State<VMessageBubble>
                                           fontStyle: FontStyle.italic,
                                         ),
                                       )
-                                    : VMessageContent(
+                                    : VMessagePlainContent(
                                         content: msg.content,
                                         textColor: textColor,
                                       ),
+                              ] else if (_dmImageUrls(msg).isEmpty) ...[
+                                Text(
+                                  'Message unavailable',
+                                  style: TextStyle(
+                                    fontSize: VFontSize.bodyMd,
+                                    color: timestampColor,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
                               ],
                               VLinkEmbed.forMessageContent(msg.content) ??
                                   const SizedBox.shrink(),

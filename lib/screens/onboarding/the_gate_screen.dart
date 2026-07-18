@@ -348,6 +348,7 @@ class _TheGateScreenState extends ConsumerState<TheGateScreen>
                 left: VSpacing.sm,
                 child: IconButton(
                   icon: const Icon(VIcons.chevronRight, size: VIconSize.md),
+                  tooltip: 'Back',
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   onPressed: _prevStage,
                 ),

@@ -167,20 +167,7 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.72,
-        minChildSize: 0.45,
-        maxChildSize: 0.92,
-        expand: false,
-        builder: (context, scrollController) {
-          return Material(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(VRadius.xl),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: ListView(
-              controller: scrollController,
+      child: ListView(
               padding: const EdgeInsets.fromLTRB(
                 VSpacing.lg,
                 VSpacing.md,
@@ -414,9 +401,6 @@ class _AchievementProofSheetState extends ConsumerState<_AchievementProofSheet> 
                   ),
                 ],
               ],
-            ),
-          );
-        },
       ),
     );
   }

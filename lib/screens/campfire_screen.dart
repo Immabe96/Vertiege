@@ -180,10 +180,10 @@ class _CampfireScreenState extends ConsumerState<CampfireScreen> {
                             child: Text(
                               'IN VOICE · ${participants.length}',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: PrestigeNoir.mutedDim,
+                                color: PrestigeNoir.muted,
                                 fontWeight: VFontWeight.semiBold,
                                 letterSpacing: 0.8,
-                                fontSize: 12,
+                                fontSize: VFontSize.labelSm,
                               ),
                             ),
                           ),
@@ -483,7 +483,7 @@ class _VoiceParticipantTileState extends State<_VoiceParticipantTile>
                   _statusLabel(isSpeaking, isMuted),
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: PrestigeNoir.muted,
-                    fontSize: 10,
+                    fontSize: VFontSize.labelSm,
                   ),
                 ),
               ],
@@ -675,8 +675,8 @@ class _ControlButton extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: PrestigeNoir.mutedDim,
-              fontSize: 10,
+              color: PrestigeNoir.muted,
+              fontSize: VFontSize.labelSm,
             ),
           ),
         ],

@@ -48,8 +48,17 @@ class FeatureFlags {
       );
 
   /// When true, subscriptions verify via the verify-subscription-purchase edge function.
+  /// Defaults on so stub client RPC cannot mint entitlements; override via Remote Config.
   static bool get receiptEdgeVerify => RemoteConfigService.getBool(
         'receipt_edge_verify',
+        fallback: true,
+      );
+
+  /// When true, route user text through the moderate-content edge function
+  /// (server-side). Defaults on; disable via Remote Config for local offline UX.
+  static bool get contentModerationRemote => RemoteConfigService.getBool(
+        'content_moderation_remote',
+        fallback: true,
       );
 
   // ── UI knobs ──

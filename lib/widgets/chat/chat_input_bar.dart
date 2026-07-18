@@ -466,9 +466,12 @@ class _ReplyQuoteBlock extends StatelessWidget {
           if (onCancelReply != null)
             IconButton(
               icon: const Icon(VIcons.x, size: VIconSize.sm),
+              tooltip: 'Cancel reply',
               onPressed: onCancelReply,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../state/commune_shell_provider.dart';
 import '../../state/chat_provider.dart';
@@ -126,7 +127,7 @@ class _TabLayoutState extends ConsumerState<TabLayout>
                       child: RotationTransition(
                         turns: _fabRotation,
                         child: Semantics(
-                          label: 'Compose post',
+                          label: AppLocalizations.of(context).composePost,
                           button: true,
                           child: FloatingActionButton(
                             onPressed: fabConfig.onPressed,
@@ -216,46 +217,46 @@ class _MainBottomNav extends StatelessWidget {
     required this.onTabTap,
   });
 
-  static const _destinations = [
-    (
-      icon: Icons.hub_outlined,
-      activeIcon: Icons.hub,
-      label: 'Nexus',
-      semanticsLabel: 'Nexus',
-    ),
-    (
-      icon: Icons.public_outlined,
-      activeIcon: Icons.public,
-      label: 'Worlds',
-      semanticsLabel: 'Worlds',
-    ),
-    (
-      icon: Icons.chat_bubble_outline,
-      activeIcon: Icons.chat_bubble,
-      label: 'Chat',
-      semanticsLabel: 'Chat',
-    ),
-    (
-      icon: Icons.account_circle_outlined,
-      activeIcon: Icons.account_circle,
-      label: 'You',
-      semanticsLabel: 'You',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final destinations = [
+      (
+        icon: Icons.hub_outlined,
+        activeIcon: Icons.hub,
+        label: l10n.tabNexus,
+        semanticsLabel: l10n.tabNexus,
+      ),
+      (
+        icon: Icons.public_outlined,
+        activeIcon: Icons.public,
+        label: l10n.tabWorlds,
+        semanticsLabel: l10n.tabWorlds,
+      ),
+      (
+        icon: Icons.chat_bubble_outline,
+        activeIcon: Icons.chat_bubble,
+        label: l10n.tabChat,
+        semanticsLabel: l10n.tabChat,
+      ),
+      (
+        icon: Icons.account_circle_outlined,
+        activeIcon: Icons.account_circle,
+        label: l10n.tabYou,
+        semanticsLabel: l10n.tabYou,
+      ),
+    ];
     return VBottomNavigationBar(
       index: index,
       onChange: onTabTap,
       children: [
-        for (var i = 0; i < _destinations.length; i++)
+        for (var i = 0; i < destinations.length; i++)
           _navItem(
-            dest: _destinations[i],
+            dest: destinations[i],
             showBadge: (i == 0 && nexusUnread > 0) || (i == 2 && chatUnread > 0),
             badgeCount: i == 0 ? nexusUnread : chatUnread,
-            outlined: _destinations[i].icon,
-            filled: _destinations[i].activeIcon,
+            outlined: destinations[i].icon,
+            filled: destinations[i].activeIcon,
           ),
       ],
     );

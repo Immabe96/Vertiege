@@ -1,7 +1,8 @@
 ﻿import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, kDebugMode;
 import 'package:flutter/material.dart' show TargetPlatform;
 
 import '../services/analytics_events.dart';
@@ -133,6 +134,10 @@ class SubscriptionService {
       if (response.data is! Map) return 'Unexpected response';
       map = Map<String, dynamic>.from(response.data as Map);
     } else {
+      // Debug / explicit RC override only — never mint via client RPC in release.
+      if (!kDebugMode) {
+        return 'Purchase verification is unavailable. Update the app and try again.';
+      }
       final result = await client.rpc(
         'verify_subscription_purchase',
         params: {

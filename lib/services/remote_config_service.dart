@@ -50,6 +50,9 @@ class RemoteConfigService {
       'privacy_policy_url': 'https://veritage.web.app/privacy.html',
       'terms_of_service_url': 'https://veritage.web.app/terms.html',
       'campfire_immersive': false,
+      // Security defaults — fail closed for IAP + moderation in production RC
+      'receipt_edge_verify': true,
+      'content_moderation_remote': true,
     });
     await _remoteConfig?.fetchAndActivate().timeout(
       const Duration(seconds: 5),

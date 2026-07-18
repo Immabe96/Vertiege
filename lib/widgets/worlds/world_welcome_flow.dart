@@ -139,7 +139,9 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
               }),
             ),
             const SizedBox(height: VSpacing.lg),
-            Expanded(
+            // Fixed height — Expanded inside mainAxisSize:min Column is unbounded.
+            SizedBox(
+              height: 360,
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),

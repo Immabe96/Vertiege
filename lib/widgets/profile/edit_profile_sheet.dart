@@ -216,7 +216,10 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 maxHeight: 512,
                 imageQuality: 85,
               );
-              if (picked != null) setState(() => _editAvatarFile = File(picked.path));
+              if (picked != null) {
+                if (!mounted) return;
+                setState(() => _editAvatarFile = File(picked.path));
+              }
             },
           ),
         ),
@@ -233,7 +236,10 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 maxHeight: 512,
                 imageQuality: 85,
               );
-              if (picked != null) setState(() => _editAvatarFile = File(picked.path));
+              if (picked != null) {
+                if (!mounted) return;
+                setState(() => _editAvatarFile = File(picked.path));
+              }
             },
           ),
         ),

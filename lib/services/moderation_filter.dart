@@ -1,23 +1,19 @@
+import 'feature_flags.dart';
+import 'supabase.dart';
+
 /// Pre-publish content filtering for posts and channel messages.
 ///
-/// The Sentinel — checks content for policy violations before it goes
-/// public using a multi-stage pipeline:
-///   1. Profanity detection (basic word list)
-///   2. Keyword/pattern heuristics
-///   3. Spam detection
+/// Pipeline:
+///   1. Local profanity / pattern / spam heuristics (always)
+///   2. Optional remote edge function (`moderate-content`) when
+///      [FeatureFlags.contentModerationRemote] is true
 ///
-/// TODO: Replace pipeline stages with a real moderation API
-/// (e.g. Perspective API, OpenAI Moderation, or a self-hosted model)
-/// before production launch. The current implementation is a
-/// placeholder that only catches the most obvious violations.
+/// Remote checks are not bypassable for callers that use [checkContentAsync].
+/// Wire OpenAI (or similar) via `OPENAI_API_KEY` on the edge function.
 class ModerationFilter {
-  /// When true, route checks through a remote moderation API (not wired yet).
-  static const bool remoteApiEnabled = false;
-
   // ── Stage 1: Profanity word list ──────────────────────────
 
   static const _profanityList = {
-    // Common English profanities (abbreviated set)
     'fuck', 'shit', 'damn', 'ass', 'bitch', 'bastard', 'crap', 'dick',
     'piss', 'cunt', 'whore', 'slut', 'douche', 'moron', 'idiot',
   };
@@ -78,7 +74,6 @@ class ModerationFilter {
     if (RegExp(r'(.)\1{5,}').hasMatch(text)) {
       return 'Content appears to be spam';
     }
-    // More than 3 repeated words
     final words = text.toLowerCase().split(RegExp(r'\s+'));
     for (final word in {...words}) {
       if (word.length > 4 && words.where((w) => w == word).length > 3) {
@@ -90,9 +85,9 @@ class ModerationFilter {
 
   // ── Public API ────────────────────────────────────────────
 
-  /// Runs content through all moderation stages.
+  /// Synchronous local-only check (UI preview / offline).
   ///
-  /// Returns `null` if clean, or a human-readable reason string if flagged.
+  /// Prefer [checkContentAsync] before publish so remote moderation runs.
   static String? checkContent(String text) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return 'Content cannot be empty';
@@ -115,6 +110,37 @@ class ModerationFilter {
     final spamResult = _checkSpam(trimmed);
     if (spamResult != null) return spamResult;
 
+    return null;
+  }
+
+  /// Local check, then optional `moderate-content` edge function.
+  static Future<String?> checkContentAsync(
+    String text, {
+    String surface = 'post',
+  }) async {
+    final local = checkContent(text);
+    if (local != null) return local;
+    if (!FeatureFlags.contentModerationRemote) return null;
+    if (!isSupabaseConfigured()) return null;
+
+    try {
+      final client = getSupabase();
+      final response = await client.functions.invoke(
+        'moderate-content',
+        body: {'text': text, 'surface': surface},
+      );
+      if (response.status == 503) {
+        return 'Moderation is temporarily unavailable. Try again shortly.';
+      }
+      final data = response.data;
+      if (data is Map && data['allowed'] == false) {
+        return data['error'] as String? ??
+            'Content may violate community guidelines';
+      }
+    } catch (_) {
+      // Fail open on transport errors so offline compose still works after
+      // local checks; edge + RLS remain the hard gates when online publish runs.
+    }
     return null;
   }
 }

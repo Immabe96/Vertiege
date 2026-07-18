@@ -17,6 +17,7 @@ import '../state/chat_provider.dart';
 import '../screens/world_channel_screen.dart';
 import '../screens/campfire_screen.dart';
 import '../screens/thread_screen.dart';
+import '../screens/onboarding/the_gate_screen.dart' show gateCompletedCache;
 import '../widgets/core/empty_state.dart';
 import 'world_navigation.dart';
 import 'notification_navigation.dart';
@@ -146,7 +147,8 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
 
     final resident = ref.read(residentProvider).resident;
     if (!mounted) return;
-    if (resident == null || !resident.gateCompleted) {
+    if (resident == null ||
+        (!resident.gateCompleted && !gateCompletedCache)) {
       await InviteService.savePendingInviteCode(widget.code);
       unawaited(AnalyticsService.logEvent(AnalyticsEvents.inviteSavedPending));
       if (!mounted) return;

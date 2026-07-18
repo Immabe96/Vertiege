@@ -20,6 +20,7 @@ import '../utils/id_generator.dart';
 import '../utils/provider_errors.dart';
 import '../utils/rate_limiter.dart';
 import 'resident_provider.dart';
+import 'chat/chat_outbox_replay.dart';
 
 part 'chat_provider.g.dart';
 
@@ -127,7 +128,7 @@ class ChatState {
 }
 
 @Riverpod(name: 'chatProvider', keepAlive: true)
-class ChatNotifier extends _$ChatNotifier {
+class ChatNotifier extends _$ChatNotifier with ChatOutboxReplay {
   final Map<String, RealtimeChannel> _subscriptions = {};
   final Map<String, RealtimeChannel> _dmSubscriptions = {};
   final Map<String, void Function(String, String, bool)> _typingListeners = {};
@@ -232,7 +233,7 @@ class ChatNotifier extends _$ChatNotifier {
     state = state.copyWith(isLoadingRooms: true, clearRoomsLoadError: true);
 
     try {
-      await _replayQueuedChatMutations();
+      await replayQueuedChatMutations();
       final rooms = await ChatService.getRooms(
         residentId,
       ).timeout(const Duration(seconds: 5));
@@ -279,20 +280,36 @@ class ChatNotifier extends _$ChatNotifier {
     return _capDmRoomMessages(merged);
   }
 
+  /// Keep optimistic sending/failed rows across a full remote reload.
+  List<ChannelMessage> _mergeInFlightMessages(
+    List<ChannelMessage> remote,
+    List<ChannelMessage> previous,
+  ) {
+    final remoteIds = remote.map((m) => m.id).toSet();
+    final inFlight = previous.where(
+      (m) => (m.sending || m.sendFailed) && !remoteIds.contains(m.id),
+    );
+    if (inFlight.isEmpty) return remote;
+    return _mergeDmMessages(remote, inFlight.toList());
+  }
+
   Future<void> loadDmMessages(String roomId, {bool force = false}) async {
     if (!force && state.dmMessages.containsKey(roomId)) return;
     await Future<void>.delayed(Duration.zero);
     if (!ref.mounted) return;
+    final previous = state.dmMessages[roomId] ?? const <ChannelMessage>[];
     final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
       ..remove(roomId);
     state = state.copyWith(messagesLoadErrors: clearedErrors);
     try {
-      await _replayQueuedChatMutations();
+      await replayQueuedChatMutations();
       final msgs = await ChatService.getMessages(
         roomId,
         limit: _dmFetchLimit,
       ).timeout(const Duration(seconds: 10));
-      final parsed = _capDmRoomMessages(_toChannelMessages(msgs));
+      final parsed = _capDmRoomMessages(
+        _mergeInFlightMessages(_toChannelMessages(msgs), previous),
+      );
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..remove(roomId);
       state = state.copyWith(
@@ -301,17 +318,16 @@ class ChatNotifier extends _$ChatNotifier {
         dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
         messagesLoadErrors: errors,
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..[roomId] = userFacingLoadError(
           e,
           fallback: 'Could not load messages. Pull to refresh.',
         );
+      // Keep prior messages (including in-flight) — don't wipe the room.
       state = state.copyWith(
-        dmMessages: {...state.dmMessages, roomId: const []},
-        dmHasMore: {...state.dmHasMore, roomId: false},
-        dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
         messagesLoadErrors: errors,
+        dmLoadingOlder: {...state.dmLoadingOlder, roomId: false},
       );
     }
   }
@@ -838,11 +854,13 @@ class ChatNotifier extends _$ChatNotifier {
     if (!force && state.channelMessages.containsKey(channelId)) return;
     await Future<void>.delayed(Duration.zero);
     if (!ref.mounted) return;
+    final previous =
+        state.channelMessages[channelId] ?? const <ChannelMessage>[];
     final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
       ..remove(channelId);
     state = state.copyWith(messagesLoadErrors: clearedErrors);
     try {
-      await _replayQueuedChatMutations();
+      await replayQueuedChatMutations();
       final msgs = await ChatService.getChannelMessages(channelId).timeout(
         const Duration(seconds: 10),
       );
@@ -851,20 +869,17 @@ class ChatNotifier extends _$ChatNotifier {
       state = state.copyWith(
         channelMessages: {
           ...state.channelMessages,
-          channelId: _toChannelMessages(msgs),
+          channelId: _mergeInFlightMessages(_toChannelMessages(msgs), previous),
         },
         messagesLoadErrors: errors,
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..[channelId] = userFacingLoadError(
           e,
           fallback: 'Could not load channel messages. Pull to refresh.',
         );
-      state = state.copyWith(
-        channelMessages: {...state.channelMessages, channelId: const []},
-        messagesLoadErrors: errors,
-      );
+      state = state.copyWith(messagesLoadErrors: errors);
     }
   }
 
@@ -1107,6 +1122,8 @@ class ChatNotifier extends _$ChatNotifier {
   Future<void> loadThreadMessages(String threadId) async {
     await Future<void>.delayed(Duration.zero);
     if (!ref.mounted) return;
+    final previous =
+        state.channelMessages[threadId] ?? const <ChannelMessage>[];
     final clearedErrors = Map<String, String>.from(state.messagesLoadErrors)
       ..remove(threadId);
     state = state.copyWith(messagesLoadErrors: clearedErrors);
@@ -1119,20 +1136,17 @@ class ChatNotifier extends _$ChatNotifier {
       state = state.copyWith(
         channelMessages: {
           ...state.channelMessages,
-          threadId: _toChannelMessages(msgs),
+          threadId: _mergeInFlightMessages(_toChannelMessages(msgs), previous),
         },
         messagesLoadErrors: errors,
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       final errors = Map<String, String>.from(state.messagesLoadErrors)
         ..[threadId] = userFacingLoadError(
           e,
           fallback: 'Could not load thread replies. Pull to refresh.',
         );
-      state = state.copyWith(
-        channelMessages: {...state.channelMessages, threadId: const []},
-        messagesLoadErrors: errors,
-      );
+      state = state.copyWith(messagesLoadErrors: errors);
     }
   }
 
@@ -1514,12 +1528,11 @@ class ChatNotifier extends _$ChatNotifier {
         newContent: newContent,
       );
     } catch (_) {
-      final revertedMessages = List<ChannelMessage>.from(messages);
-      revertedMessages[msgIndex] = msg;
-      state = state.copyWith(
-        dmMessages: {...state.dmMessages, roomId: revertedMessages},
-      );
-      rethrow;
+      await MutationOutboxService.enqueue('chat.message.edit', {
+        'messageId': messageId,
+        'newContent': newContent,
+        'roomId': roomId,
+      });
     }
   }
 
@@ -1547,12 +1560,10 @@ class ChatNotifier extends _$ChatNotifier {
     try {
       await ChatService.deleteMessage(messageId: messageId);
     } catch (_) {
-      final revertedMessages = List<ChannelMessage>.from(messages);
-      revertedMessages[msgIndex] = msg;
-      state = state.copyWith(
-        dmMessages: {...state.dmMessages, roomId: revertedMessages},
-      );
-      rethrow;
+      await MutationOutboxService.enqueue('chat.message.delete', {
+        'messageId': messageId,
+        'roomId': roomId,
+      });
     }
   }
 
@@ -1585,12 +1596,11 @@ class ChatNotifier extends _$ChatNotifier {
         newContent: newContent,
       );
     } catch (_) {
-      final revertedMessages = List<ChannelMessage>.from(messages);
-      revertedMessages[msgIndex] = msg;
-      state = state.copyWith(
-        channelMessages: {...state.channelMessages, threadId: revertedMessages},
-      );
-      rethrow;
+      await MutationOutboxService.enqueue('channel.message.edit', {
+        'messageId': messageId,
+        'newContent': newContent,
+        'channelId': threadId,
+      });
     }
   }
 
@@ -1618,12 +1628,10 @@ class ChatNotifier extends _$ChatNotifier {
     try {
       await ChatService.deleteMessage(messageId: messageId);
     } catch (_) {
-      final revertedMessages = List<ChannelMessage>.from(messages);
-      revertedMessages[msgIndex] = msg;
-      state = state.copyWith(
-        channelMessages: {...state.channelMessages, threadId: revertedMessages},
-      );
-      rethrow;
+      await MutationOutboxService.enqueue('channel.message.delete', {
+        'messageId': messageId,
+        'channelId': threadId,
+      });
     }
   }
 
@@ -1714,49 +1722,6 @@ class ChatNotifier extends _$ChatNotifier {
         ),
       )
       .toList();
-
-  Future<void> _replayQueuedChatMutations() async {
-    await MutationOutboxService.replayWhere(
-      (mutation) =>
-          mutation.type == 'chat.message' || mutation.type == 'channel.message',
-      (mutation) async {
-        switch (mutation.type) {
-          case 'chat.message':
-            final payload = mutation.payload;
-            await ChatService.sendMessage(
-              messageId: payload['messageId'] as String,
-              roomId: payload['roomId'] as String,
-              senderId: payload['senderId'] as String,
-              senderName: payload['senderName'] as String,
-              senderAvatar: payload['senderAvatar'] as String?,
-              content: payload['content'] as String,
-              imageUrl: payload['imageUrl'] as String?,
-              autoDeleteAfterSeconds: payload['autoDeleteAfterSeconds'] as int?,
-              replyToMessageId: payload['replyToMessageId'] as String?,
-              replyToSenderId: payload['replyToSenderId'] as String?,
-              replyToSenderName: payload['replyToSenderName'] as String?,
-              replyToContent: payload['replyToContent'] as String?,
-            );
-            return;
-          case 'channel.message':
-            final payload = mutation.payload;
-            await ChatService.sendChannelMessage(
-              messageId: payload['messageId'] as String,
-              worldId: payload['worldId'] as String,
-              channelId: payload['channelId'] as String,
-              senderId: payload['senderId'] as String,
-              senderName: payload['senderName'] as String,
-              senderAvatar: payload['senderAvatar'] as String?,
-              content: payload['content'] as String,
-              imageUrl: payload['imageUrl'] as String?,
-            );
-            return;
-          default:
-            return;
-        }
-      },
-    );
-  }
 
   Map<String, DateTime> _mergeLatestMessageTime(
     Map<String, DateTime> existing,

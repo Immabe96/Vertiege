@@ -278,12 +278,15 @@ class _CommentSheetState extends State<CommentSheet> {
                       ),
                       IconButton(
                         icon: const Icon(VIcons.x, size: VIconSize.sm),
+                        tooltip: 'Cancel reply',
                         onPressed: () => setState(() {
                           _replyToId = null;
                           _replyToName = null;
                         }),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                       ),
                     ],
                   ),

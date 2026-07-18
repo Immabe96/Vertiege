@@ -34,7 +34,8 @@ class FeedSortDropdown extends StatelessWidget {
         borderRadius: BorderRadius.circular(VRadius.lg),
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(VRadius.xl),

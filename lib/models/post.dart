@@ -256,6 +256,7 @@ class Post {
     String? localTempId,
     String? syncError,
     bool clearSyncError = false,
+    bool clearLocalTempId = false,
   }) => Post(
     id: id ?? this.id,
     worldId: worldId ?? this.worldId,
@@ -286,7 +287,7 @@ class Post {
     awards: awards ?? this.awards,
     failedPublishes: failedPublishes ?? this.failedPublishes,
     syncStatus: syncStatus ?? this.syncStatus,
-    localTempId: localTempId ?? this.localTempId,
+    localTempId: clearLocalTempId ? null : (localTempId ?? this.localTempId),
     syncError: clearSyncError ? null : (syncError ?? this.syncError),
   );
 }

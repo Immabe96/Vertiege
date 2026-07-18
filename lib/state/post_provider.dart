@@ -34,6 +34,8 @@ import 'resident_provider.dart';
 import 'notification_provider.dart';
 import 'quest_provider.dart';
 import 'achievement_provider.dart';
+import 'post/post_mapper.dart';
+import 'post/post_reaction_logic.dart';
 
 part 'post_provider.g.dart';
 
@@ -150,7 +152,7 @@ class PostNotifier extends _$PostNotifier {
       if (raw == null || raw.isEmpty) return;
       final list = jsonDecode(raw) as List<dynamic>;
       final posts = list
-          .map((e) => _postFromJson(e as Map<String, dynamic>))
+          .map((e) => postFromJson(e as Map<String, dynamic>))
           .toList();
       if (posts.isEmpty) return;
       state = state.copyWith(posts: posts, isLoading: false);
@@ -165,7 +167,7 @@ class PostNotifier extends _$PostNotifier {
       if (raw == null || raw.isEmpty) return;
       final list = jsonDecode(raw) as List<dynamic>;
       final posts = list
-          .map((e) => _postFromJson(e as Map<String, dynamic>))
+          .map((e) => postFromJson(e as Map<String, dynamic>))
           .toList();
       state = state.copyWith(scheduledPosts: posts);
     } catch (_) {}
@@ -234,7 +236,7 @@ class PostNotifier extends _$PostNotifier {
 
   Future<void> _persistScheduled() async {
     if (state.scheduledPosts.length == _lastPersistedCount) return;
-    final json = jsonEncode(state.scheduledPosts.map(_postToJson).toList());
+    final json = jsonEncode(state.scheduledPosts.map(postToJson).toList());
     await StorageService.setString(_scheduledKey, json);
     _lastPersistedCount = state.scheduledPosts.length;
   }
@@ -264,24 +266,38 @@ class PostNotifier extends _$PostNotifier {
       return;
     }
     final isNexusFeed = WorldService.localOnlyWorldIds.contains(worldId);
-    if (!isNexusFeed && !resident.joinedWorldIds.contains(worldId)) {
+    var effectiveWorldId = worldId;
+    if (isNexusFeed) {
+      final joined = resident.joinedWorldIds
+          .where(WorldService.isRemoteWorldId)
+          .toList();
+      if (joined.isEmpty) {
+        state = state.copyWith(
+          isPosting: false,
+          error: 'Join a world before posting',
+          lastError: 'No joined world for Nexus compose',
+        );
+        return;
+      }
+      effectiveWorldId = joined.first;
+    } else if (!resident.joinedWorldIds.contains(worldId)) {
       state = state.copyWith(isPosting: false);
       return;
     }
 
-    if (!isNexusFeed) {
-      final world = ref.read(worldProvider).worlds[worldId];
+    if (!WorldService.localOnlyWorldIds.contains(effectiveWorldId)) {
+      final world = ref.read(worldProvider).worlds[effectiveWorldId];
       final constitution = world?.constitution ?? const WorldConstitution();
       if (!WorldPermissions.canPost(
         resident,
-        worldId,
+        effectiveWorldId,
         world?.sovereignId,
         constitution: constitution,
       )) {
         state = state.copyWith(isPosting: false);
         return;
       }
-      if (WorldPermissions.isMuted(resident, worldId)) {
+      if (WorldPermissions.isMuted(resident, effectiveWorldId)) {
         state = state.copyWith(isPosting: false);
         return;
       }
@@ -290,14 +306,14 @@ class PostNotifier extends _$PostNotifier {
     final mentions = TextParser.extractMentions(content);
     final hashtags = TextParser.extractHashtags(content);
 
-    final moderationResult = ModerationFilter.checkContent(content);
+    final moderationResult = await ModerationFilter.checkContentAsync(content);
     final postStatus = moderationResult != null
         ? 'pending_review'
         : 'published';
 
     final post = Post(
       id: generateId(),
-      worldId: worldId,
+      worldId: effectiveWorldId,
       residentId: residentId,
       residentName: residentName,
       authorDisplayTitle: resident.title,
@@ -395,29 +411,38 @@ class PostNotifier extends _$PostNotifier {
       final syncedUris = cloudImageUrl == null
           ? null
           : (imageUris ?? [cloudImageUrl]);
+      final serverPost = result.data;
+      final confirmed = (serverPost ?? optimisticPost).copyWith(
+        imageUri: cloudImageUrl ?? serverPost?.imageUri ?? optimisticPost.imageUri,
+        imageUris: syncedUris ?? serverPost?.imageUris ?? optimisticPost.imageUris,
+        syncStatus: SyncStatus.synced,
+        clearSyncError: true,
+        clearLocalTempId: true,
+      );
       state = state.copyWith(
-        posts: state.posts.map((p) {
-          if (p.id != post.id) return p;
-          return p.copyWith(
-            imageUri: cloudImageUrl ?? p.imageUri,
-            imageUris: syncedUris ?? p.imageUris,
-            syncStatus: SyncStatus.synced,
-            clearSyncError: true,
-          );
-        }).toList(),
+        posts: [
+          confirmed,
+          ...state.posts.where(
+            (p) =>
+                p.id != post.id &&
+                p.localTempId != post.id &&
+                p.id != confirmed.id,
+          ),
+        ],
         isPosting: false,
         clearLastError: true,
+        clearError: true,
       );
       unawaited(
         AnalyticsService.logEvent(
           AnalyticsEvents.postCreated,
-          parameters: {'world_id': worldId},
+          parameters: {'world_id': effectiveWorldId},
         ),
       );
-      ref.read(residentProvider.notifier).addRep(worldId, 5);
-      unawaited(WorldActivityService.touchWorld(worldId));
+      ref.read(residentProvider.notifier).addRep(effectiveWorldId, 5);
+      unawaited(WorldActivityService.touchWorld(effectiveWorldId));
       _checkPostMilestones(residentId);
-      _triggerPrestigeUpdate(worldId);
+      _triggerPrestigeUpdate(effectiveWorldId);
     } else if (result.queued) {
       state = state.copyWith(
         isPosting: false,
@@ -426,7 +451,7 @@ class PostNotifier extends _$PostNotifier {
     } else {
       state = state.copyWith(
         posts: state.posts.map((p) {
-          if (p.id != post.id) return p;
+          if (p.id != post.id && p.localTempId != post.id) return p;
           return p.copyWith(
             syncStatus: SyncStatus.error,
             syncError: result.error?.toString() ?? 'Queued for sync',
@@ -439,9 +464,11 @@ class PostNotifier extends _$PostNotifier {
     }
     _persist();
 
-    ref.read(residentProvider.notifier).awardActivityXp('post', 5);
-    ref.read(questProvider.notifier).onPostCreated();
-    Haptics.medium();
+    if (result.isSuccess) {
+      ref.read(residentProvider.notifier).awardActivityXp('post', 5);
+      ref.read(questProvider.notifier).onPostCreated();
+      Haptics.medium();
+    }
   }
 
   void _checkPostMilestones(String residentId) {
@@ -476,20 +503,22 @@ class PostNotifier extends _$PostNotifier {
     return {};
   }
 
-  static const _voteKeys = {'upvote', 'downvote'};
-
   /// Toggles a reaction (RPC is toggle on server). Handles vote exclusivity.
-  void toggleReaction(String postId, String reactionKey, String residentId) {
+  Future<void> toggleReaction(
+    String postId,
+    String reactionKey,
+    String residentId,
+  ) async {
     if (!RateLimiter.canProceed('reaction_$postId')) return;
     final userSet = _userReactions.putIfAbsent(postId, () => {});
     final wasActive = userSet.contains(reactionKey);
+    final snapshotPosts = List<Post>.from(state.posts);
+    final snapshotUser = Set<String>.from(userSet);
 
     if (!wasActive) {
-      for (final other in _voteKeys) {
-        if (other != reactionKey && userSet.contains(other)) {
-          _applyReactionDelta(postId, other, -1);
-          userSet.remove(other);
-        }
+      for (final other in exclusiveVoteKeysToClear(userSet, reactionKey)) {
+        _applyReactionDelta(postId, other, -1);
+        userSet.remove(other);
       }
     }
 
@@ -503,15 +532,22 @@ class PostNotifier extends _$PostNotifier {
 
     _persist();
 
-    unawaited(
-      _postsRepository.addReaction(
-        postId: postId,
-        emoji: reactionKey,
-        residentId: residentId,
-      ),
+    final result = await _postsRepository.addReaction(
+      postId: postId,
+      emoji: reactionKey,
+      residentId: residentId,
     );
 
-    if (!wasActive) {
+    if (!result.isSuccess && !result.queued) {
+      state = state.copyWith(posts: snapshotPosts);
+      _userReactions[postId] = snapshotUser;
+      if (snapshotUser.isEmpty) _userReactions.remove(postId);
+      _persist();
+      return;
+    }
+
+    // Keep optimistic UI when queued; only award XP after confirmed success.
+    if (!wasActive && result.isSuccess) {
       ref.read(residentProvider.notifier).awardActivityXp('reaction', 1);
       ref.read(questProvider.notifier).onReacted();
 
@@ -546,22 +582,13 @@ class PostNotifier extends _$PostNotifier {
   }
 
   void addReaction(String postId, String emoji, String residentId) {
-    toggleReaction(postId, emoji, residentId);
+    unawaited(toggleReaction(postId, emoji, residentId));
   }
 
   void _applyReactionDelta(String postId, String reactionKey, int delta) {
-    final posts = state.posts.map((p) {
-      if (p.id != postId) return p;
-      final reactions = Map<String, int>.from(p.reactions);
-      final next = (reactions[reactionKey] ?? 0) + delta;
-      if (next <= 0) {
-        reactions.remove(reactionKey);
-      } else {
-        reactions[reactionKey] = next;
-      }
-      return p.copyWith(reactions: reactions);
-    }).toList();
-    state = state.copyWith(posts: posts);
+    state = state.copyWith(
+      posts: applyPostReactionDelta(state.posts, postId, reactionKey, delta),
+    );
   }
 
   Set<String> userReactionsForPost(String postId) =>
@@ -577,6 +604,7 @@ class PostNotifier extends _$PostNotifier {
   }
 
   void editPost(String postId, String newContent) {
+    final snapshotPosts = List<Post>.from(state.posts);
     final posts = state.posts.map((p) {
       if (p.id == postId) {
         return p.copyWith(content: newContent, isEdited: true);
@@ -585,10 +613,29 @@ class PostNotifier extends _$PostNotifier {
     }).toList();
     state = state.copyWith(posts: posts);
     _persist();
-    unawaited(_postsRepository.editPost(postId: postId, content: newContent));
+    unawaited(_syncEditPost(postId, newContent, snapshotPosts));
+  }
+
+  Future<void> _syncEditPost(
+    String postId,
+    String newContent,
+    List<Post> snapshotPosts,
+  ) async {
+    final result = await _postsRepository.editPost(
+      postId: postId,
+      content: newContent,
+    );
+    if (!result.isSuccess && !result.queued) {
+      state = state.copyWith(
+        posts: snapshotPosts,
+        lastError: result.error?.toString() ?? 'Could not edit post',
+      );
+      _persist();
+    }
   }
 
   void togglePin(String postId) {
+    final snapshotPosts = List<Post>.from(state.posts);
     final current = state.posts.where((p) => p.id == postId).firstOrNull;
     final nextPinned = !(current?.isPinned ?? false);
     final posts = state.posts.map((p) {
@@ -597,10 +644,30 @@ class PostNotifier extends _$PostNotifier {
     }).toList();
     state = state.copyWith(posts: posts);
     _persist();
-    unawaited(_postsRepository.setPinned(postId: postId, isPinned: nextPinned));
+    unawaited(_syncTogglePin(postId, nextPinned, snapshotPosts));
+  }
+
+  Future<void> _syncTogglePin(
+    String postId,
+    bool isPinned,
+    List<Post> snapshotPosts,
+  ) async {
+    final result = await _postsRepository.setPinned(
+      postId: postId,
+      isPinned: isPinned,
+    );
+    if (!result.isSuccess && !result.queued) {
+      state = state.copyWith(
+        posts: snapshotPosts,
+        lastError: result.error?.toString() ?? 'Could not update pin',
+      );
+      _persist();
+    }
   }
 
   void deletePost(String postId) {
+    final snapshotPosts = List<Post>.from(state.posts);
+    final snapshotBookmarks = Set<String>.from(state.bookmarkedPostIds);
     state = state.copyWith(
       posts: state.posts.where((p) => p.id != postId).toList(),
       bookmarkedPostIds: state.bookmarkedPostIds
@@ -609,7 +676,24 @@ class PostNotifier extends _$PostNotifier {
     );
     _persist();
     _persistBookmarks();
-    unawaited(_postsRepository.deletePost(postId));
+    unawaited(_syncDeletePost(postId, snapshotPosts, snapshotBookmarks));
+  }
+
+  Future<void> _syncDeletePost(
+    String postId,
+    List<Post> snapshotPosts,
+    Set<String> snapshotBookmarks,
+  ) async {
+    final result = await _postsRepository.deletePost(postId);
+    if (!result.isSuccess && !result.queued) {
+      state = state.copyWith(
+        posts: snapshotPosts,
+        bookmarkedPostIds: snapshotBookmarks,
+        lastError: result.error?.toString() ?? 'Could not delete post',
+      );
+      _persist();
+      _persistBookmarks();
+    }
   }
 
   void clearError() {
@@ -647,6 +731,7 @@ class PostNotifier extends _$PostNotifier {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
+    final snapshotPosts = List<Post>.from(state.posts);
     final posts = state.posts.map((p) {
       if (p.id != postId || p.poll == null) return p;
 
@@ -693,12 +778,36 @@ class PostNotifier extends _$PostNotifier {
     final updatedPoll = updatedPost?.poll;
     if (updatedPost != null && updatedPoll != null) {
       unawaited(
-        _postsRepository.votePoll(
-          post: updatedPost,
-          poll: updatedPoll,
+        _syncVoteOnPoll(
+          updatedPost: updatedPost,
+          updatedPoll: updatedPoll,
           residentId: resident.id,
+          pollOptionId: pollOptionId,
+          snapshotPosts: snapshotPosts,
         ),
       );
+    }
+  }
+
+  Future<void> _syncVoteOnPoll({
+    required Post updatedPost,
+    required Poll updatedPoll,
+    required String residentId,
+    required String pollOptionId,
+    required List<Post> snapshotPosts,
+  }) async {
+    final result = await _postsRepository.votePoll(
+      post: updatedPost,
+      poll: updatedPoll,
+      residentId: residentId,
+      optionId: pollOptionId,
+    );
+    if (!result.isSuccess && !result.queued) {
+      state = state.copyWith(
+        posts: snapshotPosts,
+        lastError: result.error?.toString() ?? 'Could not record vote',
+      );
+      _persist();
     }
   }
 
@@ -859,7 +968,7 @@ class PostNotifier extends _$PostNotifier {
           .eq('id', postId)
           .maybeSingle();
       if (row == null) return false;
-      final post = _postFromJson(row);
+      final post = postFromJson(row);
       state = state.copyWith(
         posts: [
           post,
@@ -893,6 +1002,22 @@ class PostNotifier extends _$PostNotifier {
     return sortNexusFeedPosts(source.toList(), feedSort);
   }
 
+  /// Keep optimistic / failed local posts across full feed reloads.
+  List<Post> _mergeInFlightLocalPosts(List<Post> remote) {
+    final remoteIds = remote.map((p) => p.id).toSet();
+    final inFlight = state.posts.where((p) {
+      final pending = p.syncStatus == SyncStatus.pending ||
+          p.syncStatus == SyncStatus.error;
+      if (!pending) return false;
+      if (remoteIds.contains(p.id)) return false;
+      final temp = p.localTempId;
+      if (temp != null && remoteIds.contains(temp)) return false;
+      return true;
+    });
+    if (inFlight.isEmpty) return remote;
+    return _sortPosts([...inFlight, ...remote]).take(150).toList();
+  }
+
   void setPosts(List<Post> posts) {
     state = state.copyWith(posts: posts);
     _persist();
@@ -901,9 +1026,10 @@ class PostNotifier extends _$PostNotifier {
   Future<void> loadPosts() async {
     try {
       final hadCachedPosts = state.posts.isNotEmpty;
+      // Don't wipe in-flight post errors while a create is still open.
       state = state.copyWith(
         isLoading: !hadCachedPosts,
-        clearError: true,
+        clearError: !state.isPosting,
       );
       if (!hadCachedPosts) {
         _currentLimit = 25;
@@ -928,14 +1054,14 @@ class PostNotifier extends _$PostNotifier {
       }
 
       final joinedResult = await _loadPostsFromJoinedWorlds();
-      final posts = joinedResult?.posts ?? [];
+      final posts = _mergeInFlightLocalPosts(joinedResult?.posts ?? []);
 
       state = state.copyWith(
         posts: posts,
         mutualWorldResidentIds: mutualIds,
         isLoading: false,
         error: joinedResult?.loadError,
-        clearError: joinedResult?.loadError == null,
+        clearError: joinedResult?.loadError == null && !state.isPosting,
         hasMorePosts: joinedResult?.hasMore ?? false,
       );
       _persist();
@@ -943,7 +1069,7 @@ class PostNotifier extends _$PostNotifier {
       final joinedResult = await _loadPostsFromJoinedWorlds();
       if (joinedResult != null) {
         state = state.copyWith(
-          posts: joinedResult.posts,
+          posts: _mergeInFlightLocalPosts(joinedResult.posts),
           error: joinedResult.loadError,
           clearError: joinedResult.loadError == null,
           isLoading: false,
@@ -956,7 +1082,7 @@ class PostNotifier extends _$PostNotifier {
       if (raw != null && raw.isNotEmpty) {
         final list = jsonDecode(raw) as List<dynamic>;
         final posts = list
-            .map((e) => _postFromJson(e as Map<String, dynamic>))
+            .map((e) => postFromJson(e as Map<String, dynamic>))
             .toList();
         state = state.copyWith(
           posts: posts,
@@ -985,7 +1111,7 @@ class PostNotifier extends _$PostNotifier {
         cursor: _lastCursor,
         limit: _currentLimit,
       );
-      final newPosts = remote.items.map(_postFromJson).toList();
+      final newPosts = remote.items.map(postFromJson).toList();
       _hasMore = remote.hasMore;
       _lastCursor = remote.nextCursor;
       state = state.copyWith(
@@ -1014,7 +1140,7 @@ class PostNotifier extends _$PostNotifier {
         resident.id,
         followingIds,
       );
-      final posts = remote.map(_postFromJson).toList();
+      final posts = remote.map(postFromJson).toList();
       state = state.copyWith(followingPosts: posts, clearError: true);
     } catch (e) {
       state = state.copyWith(
@@ -1092,11 +1218,26 @@ class PostNotifier extends _$PostNotifier {
     if (post == null || post.status != 'published') return;
     if (state.scheduledPosts.any((p) => p.id == post.id)) return;
 
-    final existingIndex = state.posts.indexWhere((p) => p.id == post.id);
+    // Drop optimistic local copy when realtime delivers the server row.
+    final withoutLocalDup = state.posts.where((p) {
+      if (p.id == post.id) return true;
+      final pending = p.syncStatus == SyncStatus.pending ||
+          p.syncStatus == SyncStatus.error;
+      if (!pending) return true;
+      if (p.localTempId != null && p.localTempId == post.id) return false;
+      if (p.residentId == post.residentId &&
+          p.content == post.content &&
+          (p.timestamp - post.timestamp).abs() < 120000) {
+        return false;
+      }
+      return true;
+    }).toList();
+
+    final existingIndex = withoutLocalDup.indexWhere((p) => p.id == post.id);
     if (existingIndex == -1) {
-      state = state.copyWith(posts: [post, ...state.posts]);
+      state = state.copyWith(posts: [post, ...withoutLocalDup]);
     } else {
-      final posts = List<Post>.from(state.posts);
+      final posts = List<Post>.from(withoutLocalDup);
       posts[existingIndex] = post;
       state = state.copyWith(posts: posts);
     }
@@ -1127,7 +1268,7 @@ class PostNotifier extends _$PostNotifier {
             value: worldId,
           ),
           callback: (payload) {
-            _mergeRealtimePost(_postFromJson(payload.newRecord));
+            _mergeRealtimePost(postFromJson(payload.newRecord));
           },
         )
         .onPostgresChanges(
@@ -1140,7 +1281,7 @@ class PostNotifier extends _$PostNotifier {
             value: worldId,
           ),
           callback: (payload) {
-            _mergeRealtimePost(_postFromJson(payload.newRecord));
+            _mergeRealtimePost(postFromJson(payload.newRecord));
           },
         )
         .onPostgresChanges(
@@ -1183,7 +1324,7 @@ class PostNotifier extends _$PostNotifier {
             ),
             callback: (payload) {
               _mergeRealtimePost(
-                _postFromJson(payload.newRecord),
+                postFromJson(payload.newRecord),
               );
             },
           )
@@ -1198,7 +1339,7 @@ class PostNotifier extends _$PostNotifier {
             ),
             callback: (payload) {
               _mergeRealtimePost(
-                _postFromJson(payload.newRecord),
+                postFromJson(payload.newRecord),
               );
             },
           )
@@ -1233,7 +1374,7 @@ class PostNotifier extends _$PostNotifier {
         return;
       }
       state = state.copyWith(
-        posts: joinedResult.posts,
+        posts: _mergeInFlightLocalPosts(joinedResult.posts),
         isLoadingMore: false,
         hasMorePosts: joinedResult.hasMore,
         error: joinedResult.loadError,
@@ -1266,7 +1407,7 @@ class PostNotifier extends _$PostNotifier {
       _nexusCursor = nexusResult.nextCursor;
       _nexusHasMore = nexusResult.hasMore;
 
-      final fetched = nexusResult.items.map(_postFromJson).toList();
+      final fetched = nexusResult.items.map(postFromJson).toList();
       final merged = append
           ? _sortPosts([...state.posts, ...fetched]).take(150).toList()
           : _sortPosts(fetched).take(150).toList();
@@ -1288,7 +1429,7 @@ class PostNotifier extends _$PostNotifier {
           worldId: worldId,
           limit: _currentLimit,
         );
-        posts.addAll(result.items.map(_postFromJson));
+        posts.addAll(result.items.map(postFromJson));
         if (result.hasMore) anyHasMore = true;
       } catch (_) {
         failures++;
@@ -1312,145 +1453,10 @@ class PostNotifier extends _$PostNotifier {
     return (posts: sorted, loadError: loadError, hasMore: anyHasMore);
   }
 
-  static Post _postFromJson(Map<String, dynamic> json) {
-    final media = (json['media'] as List<dynamic>?)
-        ?.map((e) => e.toString())
-        .toList();
-    final createdAt = json['created_at'];
-
-    return Post(
-      id: json['id'] ?? '',
-      worldId: json['worldId'] ?? json['world_id'] ?? '',
-      residentId:
-          json['residentId'] ?? json['resident_id'] ?? json['author_id'] ?? '',
-      residentName:
-          json['residentName'] ??
-          json['resident_name'] ??
-          json['author_name'] ??
-          '',
-      authorDisplayTitle:
-          json['authorDisplayTitle'] ??
-          json['author_display_title'] as String?,
-      residentAvatar:
-          json['residentAvatar'] ??
-          json['resident_avatar'] ??
-          json['author_avatar'] ??
-          '',
-      content: json['content'] ?? '',
-      imageUri: json['imageUri'] ?? json['image_url'],
-      imageUris:
-          media ??
-          (json['imageUris'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList(),
-      timestamp:
-          json['timestamp'] ??
-          (createdAt is int
-              ? createdAt
-              : DateTime.tryParse(
-                      createdAt?.toString() ?? '',
-                    )?.millisecondsSinceEpoch ??
-                    0),
-      tierAtPosting: ResidentTier.fromValue(
-        json['tierAtPosting'] ?? json['tier_at_posting'] ?? 1,
-      ),
-      reactions: Map<String, int>.from(json['reactions'] ?? {}),
-      comments:
-          (json['comments'] as List<dynamic>?)
-              ?.map(
-                (c) => Comment(
-                  id: c['id'] ?? '',
-                  residentId: c['residentId'] ?? '',
-                  residentName: c['residentName'] ?? '',
-                  content: c['content'] ?? '',
-                  timestamp: c['timestamp'] ?? 0,
-                  parentId: c['parentId'],
-                  tierAtPosting: c['tierAtPosting'] ?? 1,
-                ),
-              )
-              .toList() ??
-          [],
-      isAnnouncement:
-          json['isAnnouncement'] ?? json['is_announcement'] ?? false,
-      isPinned: json['isPinned'] ?? json['is_pinned'] ?? false,
-      isEdited: json['isEdited'] ?? json['is_edited'] ?? false,
-      repostOf: json['repostOf'] ?? json['repost_of'],
-      mentions:
-          (json['mentions'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      hashtags:
-          (json['hashtags'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      poll: json['poll'] != null
-          ? Poll.fromJson(json['poll'] as Map<String, dynamic>)
-          : null,
-      status: json['status'] ?? 'published',
-      isDecree: json['isDecree'] ?? json['is_decree'] ?? false,
-      scheduledFor: json['scheduledFor'] != null
-          ? DateTime.tryParse(json['scheduledFor'] as String)
-          : null,
-      awards:
-          (json['awards'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      failedPublishes: json['failedPublishes'] ?? 0,
-      syncStatus: SyncStatusJson.fromJson(json['syncStatus']),
-      localTempId: json['localTempId'] as String?,
-      syncError: json['syncError'] as String?,
-    );
-  }
-
   void _persist() {
-    final json = jsonEncode(state.posts.map(_postToJson).toList());
+    final json = jsonEncode(state.posts.map(postToJson).toList());
     StorageService.setStringDebounced(StorageService.postsKey, json);
   }
-
-  static Map<String, dynamic> _postToJson(Post p) => {
-    'id': p.id,
-    'worldId': p.worldId,
-    'residentId': p.residentId,
-    'residentName': p.residentName,
-    'residentAvatar': p.residentAvatar,
-    'content': p.content,
-    'imageUri': p.imageUri,
-    'imageUris': p.imageUris,
-    'timestamp': p.timestamp,
-    'tierAtPosting': p.tierAtPosting.value,
-    'reactions': p.reactions,
-    'isAnnouncement': p.isAnnouncement,
-    'isPinned': p.isPinned,
-    'isEdited': p.isEdited,
-    'repostOf': p.repostOf,
-    'mentions': p.mentions,
-    'hashtags': p.hashtags,
-    'poll': p.poll?.toJson(),
-    'isDecree': p.isDecree,
-    'status': p.status,
-    'scheduledFor': p.scheduledFor?.toIso8601String(),
-    'awards': p.awards,
-    'failedPublishes': p.failedPublishes,
-    'syncStatus': p.syncStatus.value,
-    'localTempId': p.localTempId,
-    'syncError': p.syncError,
-    'comments': p.comments
-        .map(
-          (c) => {
-            'id': c.id,
-            'residentId': c.residentId,
-            'residentName': c.residentName,
-            'content': c.content,
-            'timestamp': c.timestamp,
-            'parentId': c.parentId,
-            'tierAtPosting': c.tierAtPosting,
-          },
-        )
-        .toList(),
-  };
 
   void clearForSignOut() {
     unawaited(_realtimeChannel?.unsubscribe());

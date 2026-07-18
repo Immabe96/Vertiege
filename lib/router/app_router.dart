@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Presence;
 import '../config/progression_access.dart';
 import '../services/admin_access_service.dart';
 import '../services/feature_flags.dart';
 import '../state/resident_provider.dart';
+import '../state/session_reset.dart';
 import '../services/supabase.dart';
 import '../services/analytics_service.dart';
 import '../screens/onboarding/onboarding_screen.dart';
@@ -63,6 +67,7 @@ import '../screens/world_discovery_screen.dart';
 import '../screens/twin_seal_setup_screen.dart';
 import '../models/message.dart';
 import '../widgets/core/empty_state.dart';
+import '../l10n/app_localizations.dart';
 import '../screens/auth/auth_callback.dart';
 import 'go_router_refresh.dart';
 import 'navigation_keys.dart';
@@ -85,7 +90,13 @@ final goRouterRefreshProvider = Provider<GoRouterRefresh>((ref) {
   );
   final client = maybeSupabase();
   if (client != null) {
-    final sub = client.auth.onAuthStateChange.listen((_) => refresh.refresh());
+    final sub = client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedOut) {
+        // Token expiry / remote revoke must clear disk + voice, not only memory.
+        unawaited(clearSessionOnSignedOut(ref.read));
+      }
+      refresh.refresh();
+    });
     ref.onDispose(sub.cancel);
   }
   return refresh;
@@ -99,16 +110,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/login',
     refreshListenable: refreshListenable,
     observers: AnalyticsService.navigatorObservers,
-    errorBuilder: (context, state) => Scaffold(
-      body: AppEmptyState(
-        title: 'Page not found',
-        description: state.uri.path,
-        icon: Icons.error_outline,
-        variant: EmptyStateVariant.error,
-        actionLabel: 'Go to Nexus',
-        onAction: () => context.go('/'),
-      ),
-    ),
+    errorBuilder: (context, state) {
+      final l10n = AppLocalizations.of(context);
+      return Scaffold(
+        body: AppEmptyState(
+          title: l10n.pageNotFound,
+          description: state.uri.path,
+          icon: Icons.error_outline,
+          variant: EmptyStateVariant.error,
+          actionLabel: l10n.goToNexus,
+          onAction: () => context.go('/'),
+        ),
+      );
+    },
     redirect: (context, state) {
       final residentState = ref.read(residentProvider);
       final resident = residentState.resident;
@@ -211,6 +225,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/explore/${Uri.encodeComponent(worldId)}';
         }
         return '/chat';
+      }
+
+      final betaFeature = RegExp(
+        r'^/explore/([^/]+)/(jobs|treasury|academy|sanctuary|marketplace)$',
+      ).firstMatch(location);
+      if (betaFeature != null) {
+        final worldId = betaFeature.group(1)!;
+        final feature = betaFeature.group(2)!;
+        final enabled = switch (feature) {
+          'jobs' => FeatureFlags.worldJobs,
+          'treasury' => FeatureFlags.treasury,
+          'academy' || 'sanctuary' => FeatureFlags.worldAcademy,
+          'marketplace' => FeatureFlags.marketplace,
+          _ => true,
+        };
+        if (!enabled) {
+          return '/explore/${Uri.encodeComponent(worldId)}';
+        }
       }
 
       return null;

@@ -17,12 +17,20 @@ abstract final class VCommuneChatTheme {
           ? PrestigeNoir.surfaceRaised
           : VCommuneColors.surfaceSecondaryLight;
 
+  /// Opaque gold-tinted bubble (not [PrestigeNoir.accentSoft] alone — that
+  /// renders nearly invisible and hides message text on dark chat chrome).
   static Color sentBubbleColorOf(Brightness brightness) =>
       brightness == Brightness.dark
-          ? PrestigeNoir.accentSoft
+          ? Color.alphaBlend(
+              PrestigeNoir.accent.withValues(alpha: 0.32),
+              PrestigeNoir.surfaceRaised,
+            )
           : VColors.brandSoft(brightness);
 
-  static Color get sentBubbleColor => PrestigeNoir.accentSoft;
+  static Color get sentBubbleColor => Color.alphaBlend(
+        PrestigeNoir.accent.withValues(alpha: 0.32),
+        PrestigeNoir.surfaceRaised,
+      );
 
   static Color receivedTextColorOf(Brightness brightness) =>
       VCommuneColors.textNormalOf(brightness);

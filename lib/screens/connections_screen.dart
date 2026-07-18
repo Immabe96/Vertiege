@@ -431,11 +431,13 @@ class _PendingAllyTile extends ConsumerWidget {
                   Icons.check,
                   color: Theme.of(context).colorScheme.primary,
                 ),
+                tooltip: 'Accept request',
                 onPressed: () =>
                     ref.read(allyProvider.notifier).acceptRequest(ally.id),
               ),
               IconButton(
                 icon: const Icon(Icons.close, color: VColors.error),
+                tooltip: 'Decline request',
                 onPressed: () =>
                     ref.read(allyProvider.notifier).declineRequest(ally.id),
               ),

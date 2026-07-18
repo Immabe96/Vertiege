@@ -251,17 +251,22 @@ class QuestNotifier extends _$QuestNotifier {
         awarded = (result is int && result > 0) || result != null;
         if (awarded) {
           await ref.read(residentProvider.notifier).refreshGamificationFromServer();
+        } else {
+          // Server rejected claim — do not invent local XP.
+          return;
         }
       } catch (e) {
         debugPrint('claim_daily_quest failed: $e');
+        return;
       }
-    }
-
-    if (!awarded) {
+    } else {
       await ref
           .read(residentProvider.notifier)
           .awardActivityXp('daily_quest_${quest.id}', quest.xpReward);
+      awarded = true;
     }
+
+    if (!awarded) return;
 
     final quests = state.quests.map((q) {
       if (q.id == questId) return q.copyWith(claimed: true);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../models/listing.dart';
 import '../../router/world_navigation.dart';
@@ -9,8 +10,10 @@ import '../../config/world_capability_matrix.dart';
 import '../../services/analytics_events.dart';
 import '../../services/analytics_service.dart';
 import '../../services/marketplace_service.dart';
+import '../../services/feature_flags.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
+import '../../router/progress_navigation.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
 import '../../widgets/worlds/listing_card.dart';
@@ -187,6 +190,12 @@ class _WorldMarketplaceScreenState
                     title: 'Marketplace locked',
                     description: browseBlock,
                     icon: Icons.lock_outline,
+                    actionLabel: AppLocalizations.of(context).commonOpenProgress,
+                    onAction: () =>
+                        context.push(progressPath(tab: ProgressTab.quests)),
+                    secondaryActionLabel:
+                        AppLocalizations.of(context).commonGoBack,
+                    onSecondaryAction: () => context.pop(),
                   )
                 : _buildBody(context),
           ),
@@ -205,6 +214,18 @@ class _WorldMarketplaceScreenState
     }
 
     if (_listings.isEmpty) {
+      if (!FeatureFlags.marketplace) {
+        return AppEmptyState(
+          title: AppLocalizations.of(context).marketplacePausedTitle,
+          description:
+              'World listings are off in closed beta. Check back when listings reopen.',
+          icon: Icons.storefront_outlined,
+          actionLabel: AppLocalizations.of(context).commonOpenProgress,
+          onAction: () => context.push(progressPath(tab: ProgressTab.quests)),
+          secondaryActionLabel: AppLocalizations.of(context).commonGoBack,
+          onSecondaryAction: () => context.pop(),
+        );
+      }
       return AppEmptyState(
         title: 'No listings yet',
         description: widget.isMember

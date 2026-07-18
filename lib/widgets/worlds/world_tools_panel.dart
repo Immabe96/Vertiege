@@ -46,10 +46,11 @@ class WorldToolsPanel extends ConsumerWidget {
         world.dominionType == DominionType.academy;
     final showPolls = FeatureFlags.polls;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
             VSpacing.md,
@@ -245,7 +246,8 @@ class WorldToolsPanel extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: VSpacing.md),
-      ],
+        ],
+      ),
     );
   }
 }

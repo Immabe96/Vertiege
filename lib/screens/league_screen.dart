@@ -338,7 +338,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 'Season reward',
                 style: TextStyle(
                   fontSize: VFontSize.labelSm,
-                  color: PrestigeNoir.mutedDim,
+                  color: PrestigeNoir.muted,
                 ),
               ),
             ],
@@ -493,8 +493,8 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
               child: Text(
                 _formatTier(participant.leagueTier),
                 style: const TextStyle(
-                  fontSize: 10,
-                  color: PrestigeNoir.mutedDim,
+                  fontSize: VFontSize.labelSm,
+                  color: PrestigeNoir.muted,
                 ),
               ),
             ),
@@ -602,9 +602,9 @@ class _StatItem extends StatelessWidget {
         Text(
           label.toUpperCase(),
           style: const TextStyle(
-            fontSize: 10,
-            color: PrestigeNoir.mutedDim,
-            letterSpacing: 0.05 * 10,
+            fontSize: VFontSize.labelSm,
+            color: PrestigeNoir.muted,
+            letterSpacing: 0.05 * VFontSize.labelSm,
           ),
         ),
       ],
@@ -645,8 +645,8 @@ class _RewardCard extends StatelessWidget {
             desc,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 10,
-              color: PrestigeNoir.mutedDim,
+              fontSize: VFontSize.labelSm,
+              color: PrestigeNoir.muted,
             ),
           ),
         ],

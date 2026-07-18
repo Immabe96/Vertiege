@@ -5,6 +5,15 @@ import 'moderation_filter.dart';
 import 'supabase.dart';
 
 class PostService {
+  /// Columns needed for feed/list rendering (avoid select *).
+  static const feedSelectColumns =
+      'id, world_id, resident_id, resident_name, author_id, author_name, '
+      'author_display_title, author_avatar, resident_avatar, content, '
+      'image_url, media, created_at, tier_at_posting, reactions, '
+      'is_announcement, is_pinned, is_edited, is_decree, status, '
+      'repost_of, mentions, hashtags, poll, event_title, event_starts_at, '
+      'event_rsvp_ids, scheduled_for, awards, comment_count';
+
   static Future<String?> createPost({
     required String residentId,
     required String residentName,
@@ -18,7 +27,7 @@ class PostService {
   }) async {
     if (!isSupabaseConfigured()) return 'Service unavailable';
 
-    final moderationResult = ModerationFilter.checkContent(content);
+    final moderationResult = await ModerationFilter.checkContentAsync(content);
     if (moderationResult != null) return moderationResult;
 
     if (!_isUuid(worldId) || !_isUuid(residentId)) return null;
@@ -59,8 +68,11 @@ class PostService {
 
     final client = getSupabase();
     var query = worldId != null
-        ? client.from('posts').select().eq('world_id', worldId)
-        : client.from('posts').select();
+        ? client
+            .from('posts')
+            .select(feedSelectColumns)
+            .eq('world_id', worldId)
+        : client.from('posts').select(feedSelectColumns);
 
     if (cursor != null) {
       query = query.lt('created_at', cursor);
@@ -91,7 +103,7 @@ class PostService {
     final client = getSupabase();
     final data = await client
         .from('posts')
-        .select()
+        .select(feedSelectColumns)
         .inFilter('resident_id', followingIds)
         .order('created_at', ascending: false)
         .limit(50);

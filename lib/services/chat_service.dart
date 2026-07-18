@@ -209,6 +209,7 @@ class ChatService {
         'content': content,
         'created_at': payload['created_at'],
       };
+      if (imageUrl != null) fallback['image_url'] = imageUrl;
       if (autoDeleteAfterSeconds != null) {
         fallback['auto_delete_after_seconds'] = autoDeleteAfterSeconds;
       }
@@ -339,8 +340,9 @@ class ChatService {
       throw StateError('Join this world before sending messages.');
     }
 
-    // Run The Sentinel moderation filter before sending
-    final moderationResult = ModerationFilter.checkContent(content);
+    // Server + local moderation before send
+    final moderationResult =
+        await ModerationFilter.checkContentAsync(content, surface: 'chat');
     final isFlagged = moderationResult != null;
 
     final payload = <String, dynamic>{

@@ -84,32 +84,49 @@ class WorldEventsCard extends ConsumerWidget {
           ...events.take(3).map((event) {
             final isRsvp =
                 resident != null && event.rsvpIds.contains(resident.id);
-            return ListTile(
-              dense: true,
-              leading: Icon(
-                isRsvp ? Icons.event_available : Icons.event,
-                size: VIconSize.md,
-                color: isRsvp ? Theme.of(context).colorScheme.primary : cs.onSurfaceVariant,
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: VSpacing.sm,
+                vertical: VSpacing.xs,
               ),
-              title: Text(event.title, style: theme.textTheme.bodyMedium),
-              subtitle: Text(
-                event.description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall,
-              ),
-              trailing: VButton(
-                label: isRsvp
-                    ? 'Going (${event.rsvpIds.length})'
-                    : 'RSVP (${event.rsvpIds.length})',
-                onPressed: () {
-                  if (resident != null) {
-                    ref
-                        .read(eventProvider.notifier)
-                        .toggleRsvp(worldId, event.id, resident.id);
-                  }
-                },
-                variant: ButtonVariant.text,
+              child: Row(
+                children: [
+                  Icon(
+                    isRsvp ? Icons.event_available : Icons.event,
+                    size: VIconSize.md,
+                    color: isRsvp
+                        ? Theme.of(context).colorScheme.primary
+                        : cs.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: VSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(event.title, style: theme.textTheme.bodyMedium),
+                        Text(
+                          event.description,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  VButton(
+                    label: isRsvp
+                        ? 'Going (${event.rsvpIds.length})'
+                        : 'RSVP (${event.rsvpIds.length})',
+                    onPressed: () {
+                      if (resident != null) {
+                        ref
+                            .read(eventProvider.notifier)
+                            .toggleRsvp(worldId, event.id, resident.id);
+                      }
+                    },
+                    variant: ButtonVariant.text,
+                  ),
+                ],
               ),
             );
           }),

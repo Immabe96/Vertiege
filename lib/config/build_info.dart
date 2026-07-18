@@ -5,15 +5,15 @@
 const String kAppVersionName = '1.1.0-beta.3';
 
 /// Android versionCode / iOS CFBundleVersion.
-const int kAppBuildNumber = 12;
+const int kAppBuildNumber = 13;
 
 /// Human-readable label for Settings and release manifests.
-const String kAppVersionLabel = '1.1.0-beta.3+12';
+const String kAppVersionLabel = '1.1.0-beta.3+13';
 
 /// Release APK filename segment: vertiege-{name}+{build}-arm64-release.apk
 String get kReleaseApkBasename =>
-    'vertiege-1.1.0-beta.3+12-arm64-release.apk';
+    'vertiege-1.1.0-beta.3+13-arm64-release.apk';
 
 /// Release IPA filename segment: vertiege-{name}+{build}-release.ipa
 String get kReleaseIpaBasename =>
-    'vertiege-1.1.0-beta.3+12-release.ipa';
+    'vertiege-1.1.0-beta.3+13-release.ipa';

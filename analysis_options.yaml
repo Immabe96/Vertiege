@@ -31,6 +31,9 @@ linter:
     avoid_redundant_argument_values: true
     unnecessary_lambdas: true
     prefer_single_quotes: true
+    avoid_print: true
+    unnecessary_null_checks: true
+    # discarded_futures: enable after unawaited() sweep (~400 call sites)
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

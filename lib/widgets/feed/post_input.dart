@@ -8,6 +8,7 @@ import '../../router/world_navigation.dart';
 import '../../services/feature_flags.dart';
 import '../../services/post_capabilities.dart';
 import '../../services/storage_service.dart';
+import '../../services/world_service.dart';
 import '../../state/post_provider.dart';
 import '../../state/resident_provider.dart';
 import '../../state/world_provider.dart';
@@ -296,6 +297,7 @@ class _PostInputState extends ConsumerState<PostInput>
 
   Future<void> _loadDraft() async {
     final raw = await StorageService.getString(_draftKey);
+    if (!mounted) return;
     if (raw == null || raw.isEmpty) return;
     try {
       final data = jsonDecode(raw) as Map<String, dynamic>;
@@ -327,6 +329,7 @@ class _PostInputState extends ConsumerState<PostInput>
 
   Future<void> _discardDraft() async {
     await StorageService.remove(_draftKey);
+    if (!mounted) return;
     setState(() {
       _hasDraft = false;
       _controller.clear();
@@ -348,6 +351,13 @@ class _PostInputState extends ConsumerState<PostInput>
     if (resident == null) return;
 
     final targetWorldId = _selectedWorldId ?? widget.worldId;
+    if (widget.showWorldSelector &&
+        (_selectedWorldId == null ||
+            targetWorldId == 'nexus' ||
+            !WorldService.isRemoteWorldId(targetWorldId))) {
+      VFeedback.showError(context, 'Choose a world to post into.');
+      return;
+    }
     final imageUri = _imageUri;
     final isAnnouncement = _isAnnouncement;
 
@@ -674,6 +684,7 @@ class _PostInputState extends ConsumerState<PostInput>
                       scale: _sendScale,
                       child: IconButton(
                         icon: Icon(_sent ? Icons.check : Icons.send),
+                        tooltip: _sent ? 'Posted' : 'Send post',
                         onPressed: _sent || charLength > _maxChars
                             ? null
                             : _submit,
@@ -707,6 +718,7 @@ class _PostInputState extends ConsumerState<PostInput>
                     right: 0,
                     child: IconButton(
                       icon: const Icon(Icons.close, size: VIconSize.base),
+                      tooltip: 'Remove image',
                       onPressed: () => setState(() => _imageUri = null),
                       style: IconButton.styleFrom(
                         backgroundColor: theme.colorScheme.error,

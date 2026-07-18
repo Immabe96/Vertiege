@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:forui/forui.dart';
+import 'l10n/app_localizations.dart';
 import 'models/notification.dart';
 import 'state/theme_provider.dart';
 import 'state/resident_provider.dart';
@@ -22,7 +23,6 @@ import 'theme/forui_theme.dart';
 import 'router/app_router.dart';
 import 'router/navigation_keys.dart';
 import 'router/notification_navigation.dart';
-import 'screens/splash_screen.dart';
 import 'services/daily_reward_service.dart';
 import 'services/storage_service.dart';
 import 'services/store_service.dart';
@@ -60,12 +60,10 @@ class VirtualStatusWorldsApp extends ConsumerStatefulWidget {
 
 class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     with WidgetsBindingObserver {
-  final bool _showSplash = false;
   bool _isOnline = true;
   bool _supabaseBootstrapFailed = false;
   String? _maintenanceBanner;
   bool _buildBlocked = false;
-  String? _pendingNotificationRoute;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   StreamSubscription<String>? _notificationRouteSubscription;
   StreamSubscription<RemoteMessage>? _foregroundPushSubscription;
@@ -96,14 +94,9 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         },
       ),
     );
-    _flushPendingNotificationRoute();
     _notificationRouteSubscription ??=
         PushTokenService.notificationRoutes.listen((route) {
       if (!mounted) return;
-      if (_showSplash) {
-        _pendingNotificationRoute = route;
-        return;
-      }
       ref.read(appRouterProvider).go(route);
     });
     _foregroundPushSubscription ??=
@@ -118,7 +111,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
 
     unawaited(_bootstrapServices());
     _attachRuntimeListeners();
-    _flushPendingNotificationRoute();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Future<void>.delayed(const Duration(milliseconds: 800), () {
@@ -219,7 +211,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     void afterReady() {
       if (!mounted) return;
       _attachRuntimeListeners();
-      _flushPendingNotificationRoute();
       _scheduleBackgroundLoads();
     }
 
@@ -271,11 +262,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         resident.id,
       );
       if (initialRoute != null && mounted) {
-        if (_showSplash) {
-          _pendingNotificationRoute = initialRoute;
-        } else {
-          ref.read(appRouterProvider).go(initialRoute);
-        }
+        ref.read(appRouterProvider).go(initialRoute);
       }
       await PushService.initialize(userId: resident.id);
       await AchievementRealtimeService.initialize(
@@ -358,13 +345,6 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     final minBuild = FeatureFlags.minimumBuild;
     _maintenanceBanner = banner.isEmpty ? null : banner;
     _buildBlocked = kAppBuildNumber < minBuild;
-  }
-
-  void _flushPendingNotificationRoute() {
-    final route = _pendingNotificationRoute;
-    if (route == null || !mounted || _showSplash) return;
-    _pendingNotificationRoute = null;
-    ref.read(appRouterProvider).go(route);
   }
 
   void _retryAfterOffline() {
@@ -627,7 +607,11 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     ref.watch(residentMilestoneListenerProvider);
     ref.listen<ResidentState>(residentProvider, (previous, next) {
       final resident = next.resident;
-      if (resident == null) return;
+      if (resident == null) {
+        // Allow push/achievement services to re-init after logout → login.
+        _residentServicesInitializedFor = null;
+        return;
+      }
       if (previous?.resident?.id != resident.id) {
         _onResidentSignedIn();
         unawaited(ref.read(residentProvider.notifier).touchPresence());
@@ -660,8 +644,9 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
     return MaterialApp.router(
       title: 'Vertiege',
       debugShowCheckedModeBanner: false,
-      supportedLocales: FLocalizations.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         ...FLocalizations.localizationsDelegates,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -715,14 +700,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
           ),
         ),
         );
-        if (!_showSplash) return shell;
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            shell,
-            const Positioned.fill(child: SplashScreen()),
-          ],
-        );
+        return shell;
       },
     );
   }

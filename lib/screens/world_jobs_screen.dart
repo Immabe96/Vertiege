@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import '../config/tiers.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../models/resident.dart';
 import '../models/world_job.dart';
 import '../models/world_job_application.dart';
 import '../models/world.dart';
+import '../router/progress_navigation.dart';
 import '../services/world_job_service.dart';
+import '../services/feature_flags.dart';
 import '../state/resident_provider.dart';
 import '../state/world_provider.dart';
 import '../theme/v_colors.dart';
@@ -379,6 +383,18 @@ class _WorldJobsScreenState extends ConsumerState<WorldJobsScreen> {
       );
     }
     if (_jobs.isEmpty) {
+      if (!FeatureFlags.worldJobs) {
+        return AppEmptyState(
+          title: AppLocalizations.of(context).rolesPausedTitle,
+          description:
+              'World jobs are off in this beta. Check back when role boards reopen.',
+          icon: Icons.work_outline,
+          actionLabel: AppLocalizations.of(context).commonOpenProgress,
+          onAction: () => context.push(progressPath(tab: ProgressTab.quests)),
+          secondaryActionLabel: AppLocalizations.of(context).commonGoBack,
+          onSecondaryAction: () => context.pop(),
+        );
+      }
       return AppEmptyState(
         title: 'No open roles',
         description: widget.canManage

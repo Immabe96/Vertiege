@@ -7,14 +7,13 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import '../config/build_info.dart';
 import '../config/platform_label.dart';
-import '../config/progression_access.dart';
 import '../legal/app_legal.dart';
 import '../services/feature_flags.dart';
 import '../state/theme_provider.dart';
 import '../state/resident_provider.dart';
-import '../state/achievement_provider.dart';
 import '../services/storage_service.dart';
 import '../services/admin_access_service.dart';
 import '../services/auth_service.dart';
@@ -33,6 +32,9 @@ import '../theme/prestige_noir.dart';
 import '../theme/v_colors.dart';
 import '../theme/v_tokens.dart';
 import 'package:vertiege/ui/ui.dart';
+import 'settings/settings_account_section.dart';
+import 'settings/settings_notifications_section.dart';
+import 'settings/settings_prestige_section.dart';
 
 const _kPrefPushEnabled = 'settings_push_enabled';
 const _kPrefLikesEnabled = 'settings_likes_enabled';
@@ -452,21 +454,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _confirmSignOut() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showVDialog<bool>(
       context: context,
-      title: 'Sign out?',
+      title: l10n.signOutConfirmTitle,
       content: const Text(
         'You\'ll need to sign in again to access your worlds and progress.',
       ),
       actions: [
         vDialogActionsRow([
           VButton(
-            label: 'Cancel',
+            label: l10n.commonCancel,
             onPressed: () => Navigator.pop(context, false),
             variant: ButtonVariant.text,
           ),
           VButton(
-            label: 'Sign Out',
+            label: l10n.signOut,
             onPressed: () => Navigator.pop(context, true),
           ),
         ]),
@@ -486,7 +489,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final theme = Theme.of(context);
       await showVDialog(
         context: context,
-        title: 'Delete Account',
+        title: AppLocalizations.of(context).deleteAccount,
         titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
           fontWeight: VFontWeight.bold,
           color: VColors.error,
@@ -925,35 +928,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
   }
 
-  Widget _prestigeSection(String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: VSpacing.xs, bottom: VSpacing.xs),
-          child: VPrestigeSectionLabel(title: title),
-        ),
-        VPrestigeCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < children.length; i++) ...[
-                if (i > 0)
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: PrestigeNoir.borderLight,
-                  ),
-                children[i],
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     _estimateCacheSize();
@@ -969,7 +943,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           padding: const EdgeInsets.all(VSpacing.md),
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            _prestigeSection('About', [
+            SettingsPrestigeSection(title: 'About', children: [
                 VTile(
                   title: Text(
                     'Version $kAppVersionLabel',
@@ -993,7 +967,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ]),
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Help & legal', [
+            SettingsPrestigeSection(title: 'Help & legal', children: [
                 VSectionTile(
                   icon: Icons.feedback_outlined,
                   label: 'Send feedback',
@@ -1022,133 +996,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ]),
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Account', [
-                Builder(
-                  builder: (context) {
-                    final coins = ref.watch(residentProvider).resident
-                            ?.sovereignCoins ??
-                        0;
-                    final unlocked = ProgressionAccess.canAccessShop(
-                      ref.watch(achievementProvider).userAchievements,
-                    );
-                    return VSectionTile(
-                      icon: unlocked
-                          ? Icons.monetization_on
-                          : Icons.lock_outline,
-                      label: 'Shop',
-                      detail: unlocked
-                          ? '$coins coins'
-                          : 'Unlock after first verified achievement',
-                      iconColor: unlocked ? VColors.tertiary : null,
-                      onTap: () => context.push('/shop'),
-                    );
-                  },
-                ),
-                VSectionTile(
-                  icon: Icons.workspace_premium,
-                  label: 'Subscription',
-                  onTap: () => context.push('/subscription'),
-                ),
-                if (AdminAccessService.isCurrentSessionVerifier())
-                  VSectionTile(
-                    icon: Icons.verified_user_outlined,
-                    label: 'Staff review',
-                    detail: _verifierQueueCount > 0
-                        ? '$_verifierQueueCount in verifier queue'
-                        : 'Achievement & profession review',
-                    onTap: () => context.push('/verifier/review'),
-                  ),
-                VSectionTile(
-                  icon: Icons.email_outlined,
-                  label: 'Change Email',
-                  onTap: _showChangeEmailDialog,
-                ),
-                VSectionTile(
-                  icon: Icons.lock_outline,
-                  label: 'Change Password',
-                  onTap: _showChangePasswordDialog,
-                ),
-                VSectionTile(
-                  icon: Icons.security,
-                  label: 'Twin Seal (2FA)',
-                  iconColor: VColors.tertiary,
-                  onTap: () => context.push('/twin-seal'),
-                ),
-                VSectionTile(
-                  icon: Icons.monetization_on_outlined,
-                  label: 'Coin history',
-                  onTap: () => context.push('/coin-history'),
-                ),
-                VSectionTile(
-                  icon: Icons.delete_outline,
-                  label: 'Delete Account',
-                  iconColor: VColors.error,
-                  titleColor: VColors.error,
-                  onTap: _showDeleteAccountDialog,
-                ),
-                VSectionTile(
-                  icon: Icons.logout,
-                  label: 'Sign Out',
-                  iconColor: VColors.error,
-                  titleColor: VColors.error,
-                  onTap: _confirmSignOut,
-                ),
-              ]),
+            SettingsAccountSection(
+              verifierQueueCount: _verifierQueueCount,
+              onChangeEmail: _showChangeEmailDialog,
+              onChangePassword: _showChangePasswordDialog,
+              onDeleteAccount: _showDeleteAccountDialog,
+              onSignOut: _confirmSignOut,
+            ),
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Notifications', [
-                VSectionSwitchTile(
-                  icon: Icons.notifications_active,
-                  label: 'Push Notifications',
-                  value: _pushEnabled,
-                  onChanged: _prefsLoaded ? _onPushToggleChanged : null,
-                ),
-                VSectionSwitchTile(
-                  icon: Icons.favorite_border,
-                  label: 'Likes',
-                  value: _likesEnabled,
-                  onChanged: _prefsLoaded
-                      ? (v) {
-                          setState(() => _likesEnabled = v);
-                          _setNotificationPref(_kPrefLikesEnabled, v);
-                        }
-                      : null,
-                ),
-                VSectionSwitchTile(
-                  icon: Icons.mode_comment_outlined,
-                  label: 'Comments',
-                  value: _commentsEnabled,
-                  onChanged: _prefsLoaded
-                      ? (v) {
-                          setState(() => _commentsEnabled = v);
-                          _setNotificationPref(_kPrefCommentsEnabled, v);
-                        }
-                      : null,
-                ),
-                VSectionSwitchTile(
-                  icon: VIcons.globe,
-                  label: 'World Invites',
-                  value: _worldInvitesEnabled,
-                  onChanged: _prefsLoaded
-                      ? (v) {
-                          setState(() => _worldInvitesEnabled = v);
-                          _setNotificationPref(_kPrefWorldInvitesEnabled, v);
-                        }
-                      : null,
-                ),
-                VSectionSwitchTile(
-                  icon: Icons.military_tech,
-                  label: 'Tier Upgrades',
-                  value: _tierUpgradesEnabled,
-                  onChanged: _prefsLoaded
-                      ? (v) {
-                          setState(() => _tierUpgradesEnabled = v);
-                          _setNotificationPref(_kPrefTierUpgradesEnabled, v);
-                        }
-                      : null,
-                ),
-              ]),
+            SettingsNotificationsSection(
+              prefsLoaded: _prefsLoaded,
+              pushEnabled: _pushEnabled,
+              likesEnabled: _likesEnabled,
+              commentsEnabled: _commentsEnabled,
+              worldInvitesEnabled: _worldInvitesEnabled,
+              tierUpgradesEnabled: _tierUpgradesEnabled,
+              onPushChanged: _onPushToggleChanged,
+              onLikesChanged: (v) {
+                setState(() => _likesEnabled = v);
+                _setNotificationPref(_kPrefLikesEnabled, v);
+              },
+              onCommentsChanged: (v) {
+                setState(() => _commentsEnabled = v);
+                _setNotificationPref(_kPrefCommentsEnabled, v);
+              },
+              onWorldInvitesChanged: (v) {
+                setState(() => _worldInvitesEnabled = v);
+                _setNotificationPref(_kPrefWorldInvitesEnabled, v);
+              },
+              onTierUpgradesChanged: (v) {
+                setState(() => _tierUpgradesEnabled = v);
+                _setNotificationPref(_kPrefTierUpgradesEnabled, v);
+              },
+            ),
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Progression', [
+            SettingsPrestigeSection(title: 'Progression', children: [
                 VSectionSwitchTile(
                   icon: Icons.leaderboard_outlined,
                   label: 'Low-pressure mode',
@@ -1161,7 +1043,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ]),
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Worlds', [
+            SettingsPrestigeSection(title: 'Worlds', children: [
                 VSectionSwitchTile(
                   icon: Icons.dynamic_feed,
                   label: 'Open joined worlds on Feed',
@@ -1205,7 +1087,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: VSpacing.md),
-                    _prestigeSection('Tier Perks', [
+                    SettingsPrestigeSection(title: 'Tier Perks', children: [
                         VPerkTile(
                           icon: Icons.trending_up,
                           title: 'XP Multiplier',
@@ -1249,7 +1131,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Data', [
+            SettingsPrestigeSection(title: 'Data', children: [
                 VSectionTile(
                   icon: Icons.backup,
                   label: 'Create Backup',
@@ -1283,7 +1165,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ]),
             if (kDebugMode) ...[
               const SizedBox(height: VSpacing.md),
-              _prestigeSection('Developer', [
+              SettingsPrestigeSection(title: 'Developer', children: [
                   VSectionTile(
                     icon: Icons.cloud_outlined,
                     label: FirebaseBootstrap.isInitialized
@@ -1300,7 +1182,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ]),
             ],
             const SizedBox(height: VSpacing.md),
-            _prestigeSection('Danger Zone', [
+            SettingsPrestigeSection(title: 'Danger Zone', children: [
                 VSectionTile(
                   icon: Icons.delete_forever,
                   label: 'Reset All Data',

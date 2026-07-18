@@ -55,7 +55,9 @@ async function assertRateLimit(
 function requiredEnvDocs(): Record<string, string> {
   return {
     STORE_RECEIPT_VERIFY_MODE:
-      "stub (default) | live — stub uses RPC only; live requires Apple/Google implementation below",
+      "live (required for prod) | stub — stub only when ALLOW_STUB_RECEIPT_VERIFY=true",
+    ALLOW_STUB_RECEIPT_VERIFY:
+      "Set true only for local/dev; production must omit this and use live mode",
     SUPABASE_URL: 'Project URL (auto-injected)',
     SUPABASE_ANON_KEY: 'Anon key (auto-injected)',
     SUPABASE_SERVICE_ROLE_KEY:
@@ -175,6 +177,8 @@ serve(async (req: Request) => {
   }
 
   const mode = (Deno.env.get('STORE_RECEIPT_VERIFY_MODE') ?? 'stub').toLowerCase()
+  const allowStub =
+    Deno.env.get('ALLOW_STUB_RECEIPT_VERIFY')?.trim().toLowerCase() === 'true'
 
   if (mode === 'live') {
     const live = liveModeReadiness()
@@ -203,6 +207,20 @@ serve(async (req: Request) => {
     const rpcResponse = await verifyViaRpc(authHeader, body)
     const rpcJson = await rpcResponse.json()
     return json({ ...rpcJson, mode: 'live' }, rpcResponse.status)
+  }
+
+  // Fail closed unless explicitly opted into stub (local/dev only).
+  if (!allowStub) {
+    return json(
+      {
+        success: false,
+        error:
+          'Receipt verification is not configured for production. Set STORE_RECEIPT_VERIFY_MODE=live (preferred) or ALLOW_STUB_RECEIPT_VERIFY=true for non-prod only.',
+        mode: mode,
+        env_documentation: requiredEnvDocs(),
+      },
+      503,
+    )
   }
 
   return verifyViaRpc(authHeader, body)

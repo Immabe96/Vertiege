@@ -211,7 +211,13 @@ class _CrossPostAchievementSheetState
                 ),
               ),
               const SizedBox(height: VSpacing.sm),
-              ..._channelsForWorld(_selectedWorldId!).map((ch) {
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.35,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: _channelsForWorld(_selectedWorldId!).map((ch) {
                 final selected = _selectedChannelId == ch.id;
                 final enabled = ch.channelType != ChannelType.voice;
                 final muted = theme.colorScheme.onSurfaceVariant;
@@ -257,7 +263,9 @@ class _CrossPostAchievementSheetState
                     ),
                   ),
                 );
-              }),
+              }).toList(),
+                ),
+              ),
             ],
           ],
           const SizedBox(height: VSpacing.lg),

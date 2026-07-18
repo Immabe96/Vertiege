@@ -24,7 +24,8 @@ class FeedTabChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: VAnimation.fast,
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: selected
               ? VColors.primary.withValues(alpha: 0.18)

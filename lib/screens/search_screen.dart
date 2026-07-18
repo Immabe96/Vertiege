@@ -1298,7 +1298,8 @@ class _PrestigeFilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? PrestigeNoir.accentSoft : Colors.transparent,
           borderRadius: BorderRadius.circular(16),

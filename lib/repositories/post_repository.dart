@@ -7,8 +7,10 @@ import '../models/repository_result.dart';
 import '../models/sync_status.dart';
 import '../services/feature_flags.dart';
 import '../services/mutation_outbox_service.dart';
+import '../services/post_service.dart';
 import '../services/supabase.dart';
 import '../services/world_service.dart';
+
 class PostRepository {
   const PostRepository();
 
@@ -129,8 +131,11 @@ class PostRepository {
 
     final client = getSupabase();
     var query = worldId != null
-        ? client.from('posts').select().eq('world_id', worldId)
-        : client.from('posts').select();
+        ? client
+            .from('posts')
+            .select(PostService.feedSelectColumns)
+            .eq('world_id', worldId)
+        : client.from('posts').select(PostService.feedSelectColumns);
 
     query = query.eq('status', 'published');
 
@@ -393,15 +398,28 @@ class PostRepository {
     required Post post,
     required Poll poll,
     required String residentId,
+    required String optionId,
   }) {
     return _runOrQueue<void>(
       votePollMutation,
-      {'postId': post.id, 'residentId': residentId, 'poll': poll.toJson()},
+      {
+        'postId': post.id,
+        'residentId': residentId,
+        'optionId': optionId,
+      },
       () async {
-        await getSupabase()
-            .from('posts')
-            .update({'poll': poll.toJson()})
-            .eq('id', post.id);
+        final raw = await getSupabase().rpc(
+          'vote_on_post_poll',
+          params: {
+            'p_post_id': post.id,
+            'p_option_id': optionId,
+          },
+        );
+        if (raw is! Map || raw['success'] != true) {
+          throw StateError(
+            (raw is Map ? raw['error'] as String? : null) ?? 'Vote failed',
+          );
+        }
       },
     );
   }
@@ -460,10 +478,22 @@ class PostRepository {
           break;
         case votePollMutation:
           final postId = mutation.payload['postId'] as String;
-          await getSupabase()
-              .from('posts')
-              .update({'poll': mutation.payload['poll']})
-              .eq('id', postId);
+          final optionId = mutation.payload['optionId'] as String?;
+          if (optionId == null || optionId.isEmpty) {
+            throw StateError('Missing poll optionId for replay');
+          }
+          final raw = await getSupabase().rpc(
+            'vote_on_post_poll',
+            params: {
+              'p_post_id': postId,
+              'p_option_id': optionId,
+            },
+          );
+          if (raw is! Map || raw['success'] != true) {
+            throw StateError(
+              (raw is Map ? raw['error'] as String? : null) ?? 'Vote failed',
+            );
+          }
           break;
       }
     });

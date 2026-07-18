@@ -125,9 +125,12 @@ class AuthService {
       await client.auth.signOut();
     }
     await SecureStorageService.clearLegacyAuthCredentials();
-    await clearUserPersistedSessionData();
+    // AuthChangeEvent.signedOut also clears session; explicit clear keeps
+    // offline / no-supabase paths consistent.
     if (ref != null) {
-      resetUserSessionState(ref);
+      await clearSessionOnSignedOut(ref.read);
+    } else {
+      await clearUserPersistedSessionData();
     }
     unawaited(AnalyticsService.logEvent(AnalyticsEvents.signOut));
     CrashReporter.instance.setUser('');
