@@ -100,4 +100,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToNexus => 'Go to Nexus';
+
+  @override
+  String get authSubtitle => 'Rise through the ranks. Own your prestige.';
+
+  @override
+  String get authSignIn => 'Sign In';
+
+  @override
+  String get authCreateAccount => 'Create Account';
+
+  @override
+  String get authForgotPassword => 'Forgot password?';
+
+  @override
+  String get authContinueAgreePrefix => 'By continuing, you agree to our ';
+
+  @override
+  String get authResetPasswordTitle => 'Reset password';
+
+  @override
+  String get authResetPasswordBody =>
+      'Enter your email address. We will send you a password reset link.';
+
+  @override
+  String get authSendResetLink => 'Send reset link';
 }

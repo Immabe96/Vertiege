@@ -60,7 +60,17 @@ class PushTokenService {
       }
     } catch (e, st) {
       await _debugLog('push_token_error', '$e');
-      CrashReporter.instance.recordError(e, st, hint: 'fcm token registration');
+      final msg = e.toString();
+      // Simulators / early cold start often lack APNS — don't spam Crashlytics.
+      final isApnsPending = msg.contains('apns-token-not-set') ||
+          msg.contains('APNS token has not been received');
+      if (!isApnsPending) {
+        CrashReporter.instance.recordError(
+          e,
+          st,
+          hint: 'fcm token registration',
+        );
+      }
     }
     _listenForTokenRefresh();
     _registerMessageHandlers();

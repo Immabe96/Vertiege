@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/world_navigation.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../models/resident.dart';
 import '../../models/world.dart';
@@ -44,6 +45,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final state = ref.watch(worldProvider);
     final resident = ref.watch(residentProvider).resident;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final worlds = state.worlds.values.toList();
     final isLoading = worlds.isEmpty && state.isLoading;
 
@@ -472,7 +474,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         child: AppEmptyState(
                           title: _searchQuery.isNotEmpty
                               ? 'No worlds found'
-                              : 'Find your first world',
+                              : l10n.emptyJoinWorld,
                           description: _searchQuery.isNotEmpty
                               ? 'No worlds match "$_searchQuery". Try another search or browse Discover.'
                               : 'Join a world to unlock Chat channels, then submit proof to earn XP.',

@@ -30,5 +30,15 @@
   "rolesPausedTitle": "Roles paused",
   "marketplacePausedTitle": "Marketplace paused",
   "pageNotFound": "Page not found",
-  "goToNexus": "Go to Nexus"
+  "goToNexus": "Go to Nexus",
+  "authSubtitle": "Rise through the ranks. Own your prestige.",
+  "@authSubtitle": { "description": "Tagline on login and signup screens" },
+  "authSignIn": "Sign In",
+  "authCreateAccount": "Create Account",
+  "authForgotPassword": "Forgot password?",
+  "authContinueAgreePrefix": "By continuing, you agree to our ",
+  "@authContinueAgreePrefix": { "description": "Legal agreement prefix before Terms and Privacy links" },
+  "authResetPasswordTitle": "Reset password",
+  "authResetPasswordBody": "Enter your email address. We will send you a password reset link.",
+  "authSendResetLink": "Send reset link"
 }

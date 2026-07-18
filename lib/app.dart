@@ -657,6 +657,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
       themeMode: ThemeMode.dark,
       routerConfig: router,
       builder: (context, child) {
+        final l10n = AppLocalizations.of(context);
         final shell = _applyA11yColorAdjustments(
           themeState,
           _withForui(
@@ -666,20 +667,17 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
           Column(
             children: [
               if (_buildBlocked)
-                const VAppBanner(
+                VAppBanner(
                   variant: .destructive,
-                  message:
-                      'This build is outdated (v$kAppBuildNumber). '
-                      'Please update Vertiege from the store.',
+                  message: l10n.buildOutdated,
                 )
               else if (_maintenanceBanner != null)
                 VAppBanner(message: _maintenanceBanner!)
               else if (_supabaseBootstrapFailed)
                 VAppBanner(
-                  message:
-                      'Cloud sync is unavailable. Check .env and network, then restart.',
+                  message: l10n.cloudSyncUnavailable,
                   action: VButton(
-                    label: 'Retry',
+                    label: l10n.commonRetry,
                     onPressed: () {
                       setState(() => _supabaseBootstrapFailed = false);
                       unawaited(_bootstrapServices());

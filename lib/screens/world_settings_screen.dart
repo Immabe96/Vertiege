@@ -18,13 +18,13 @@ import '../models/world.dart';
 import '../config/tiers.dart';
 import '../models/invite.dart';
 import '../state/channel_provider.dart';
-import '../utils/tier_utils.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/screen_loading.dart';
-import '../services/rank_service.dart';
 import '../repositories/world_repository.dart';
-import '../models/rank.dart';
 import '../widgets/worlds/banner_generator.dart';
+import 'world_settings/world_settings_card.dart';
+import 'world_settings/world_settings_members.dart';
+import 'world_settings/world_settings_ranks.dart';
 import '../widgets/worlds/world_admin_breadcrumb.dart';
 import '../widgets/worlds/world_settings_channels.dart';
 import '../widgets/worlds/world_settings_invites.dart';
@@ -559,7 +559,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                 padding: const EdgeInsets.all(VSpacing.md),
                 children: [
                   // ── Overview ──────────────────────────────────
-                  _Card(
+                  WorldSettingsCard(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -667,7 +667,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: VSpacing.md),
 
                   // ── Banner Generator ──────────────────────
-                  _Card(
+                  WorldSettingsCard(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,7 +695,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: VSpacing.md),
 
                   // ── Channels ───────────────────────────────────
-                  _Card(
+                  WorldSettingsCard(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     child: WorldSettingsChannels(
                       worldId: widget.worldId,
@@ -715,7 +715,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       (s) => s.resident != null && s.resident!.tier.value >= 3,
                     ),
                   ))
-                    _Card(
+                    WorldSettingsCard(
                       padding: const EdgeInsets.all(VSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -751,7 +751,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                       (s) => s.resident != null && s.resident!.tier.value >= 4,
                     ),
                   ))
-                    _Card(
+                    WorldSettingsCard(
                       padding: const EdgeInsets.all(VSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -784,7 +784,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
                   const SizedBox(height: VSpacing.md),
 
                   // ── Invites ────────────────────────────────────
-                  _Card(
+                  WorldSettingsCard(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     child: WorldSettingsInvites(
                       sovereignId: world.sovereignId,
@@ -800,206 +800,25 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   const SizedBox(height: VSpacing.md),
 
-                  // ── Member Management ──────────────────────────
-                  _Card(
-                    padding: const EdgeInsets.all(VSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _sectionHeader(Icons.group, 'Residents'),
-                        const SizedBox(height: VSpacing.sm),
-                        Text(
-                          'Manage residents and their standing in this world.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                  WorldSettingsMembers(
+                    members: _members,
+                    isLoading: _isLoadingMembers,
+                    sovereignId: world.sovereignId,
+                    currentResidentId: resident?.id,
+                    canModerate: resident != null &&
+                        WorldPermissions.canModerate(
+                          resident,
+                          widget.worldId,
+                          world.sovereignId,
                         ),
-                        const SizedBox(height: VSpacing.md),
-                        if (_isLoadingMembers)
-                          const Center(child: VLoadingCard())
-                        else if (_members.isEmpty)
-                          Text(
-                            'No residents found',
-                            style: theme.textTheme.bodyMedium,
-                          )
-                        else
-                          ..._members.map((m) {
-                            final residentId =
-                                m['resident_id'] as String? ?? '';
-                            final name =
-                                m['resident_name'] as String? ?? 'Member';
-                            final rep = m['rep'] as int? ?? 0;
-                            final standing = getStanding(rep);
-                            final isSovereign = residentId == world.sovereignId;
-                            final isCurrentUser = residentId == resident?.id;
-                            final canMod =
-                                resident != null &&
-                                WorldPermissions.canModerate(
-                                  resident,
-                                  widget.worldId,
-                                  world.sovereignId,
-                                );
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: VSpacing.sm,
-                              ),
-                              child: _Card(
-                                padding: const EdgeInsets.all(VSpacing.md),
-                                borderRadius: BorderRadius.circular(VRadius.xl),
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      child: Text(
-                                        name.substring(0, 1).toUpperCase(),
-                                      ),
-                                    ),
-                                    const SizedBox(width: VSpacing.md),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Flexible(
-                                                child: Text(
-                                                  name,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: theme
-                                                      .textTheme
-                                                      .bodyMedium
-                                                      ?.copyWith(
-                                                        fontWeight: VFontWeight
-                                                            .semiBold,
-                                                        color: Theme.of(context).colorScheme.onSurface,
-                                                      ),
-                                                ),
-                                              ),
-                                              if (isSovereign) ...[
-                                                const SizedBox(
-                                                  width: VSpacing.sm,
-                                                ),
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: VSpacing.sm,
-                                                        vertical: 2,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: VColors.tertiary,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          VRadius.pill,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    'SOVEREIGN',
-                                                    style: theme
-                                                        .textTheme
-                                                        .labelSmall
-                                                        ?.copyWith(
-                                                          color: VColors
-                                                              .onTertiary,
-                                                        ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                          const SizedBox(height: VSpacing.xs),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: VSpacing.sm,
-                                                      vertical: 1,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: tierStandingColor(
-                                                    standing.level,
-                                                  ).withValues(alpha: 0.15),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        VRadius.pill,
-                                                      ),
-                                                ),
-                                                child: Text(
-                                                  standing.title,
-                                                  style: theme
-                                                      .textTheme
-                                                      .labelSmall
-                                                      ?.copyWith(
-                                                        color:
-                                                            tierStandingColor(
-                                                              standing.level,
-                                                            ),
-                                                      ),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                width: VSpacing.sm,
-                                              ),
-                                              Text(
-                                                'Rep $rep',
-                                                style: theme
-                                                    .textTheme
-                                                    .labelSmall
-                                                    ?.copyWith(
-                                                      color: VColors.tertiary,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (!isCurrentUser && canMod)
-                                      PopupMenuButton<String>(
-                                        icon: Icon(
-                                           Icons.more_vert,
-                                           size: VIconSize.base,
-                                           color: Theme.of(context).colorScheme.outlineVariant,
-                                        ),
-                                        onSelected: (action) {
-                                          switch (action) {
-                                            case 'mute1':
-                                              _muteMember(residentId, name, 1);
-                                            case 'mute24':
-                                              _muteMember(residentId, name, 24);
-                                            case 'ban':
-                                              _banMember(residentId, name);
-                                          }
-                                        },
-                                        itemBuilder: (ctx) => [
-                                          const PopupMenuItem(
-                                            value: 'mute1',
-                                            child: Text('Mute 1 hour'),
-                                          ),
-                                          const PopupMenuItem(
-                                            value: 'mute24',
-                                            child: Text('Mute 24 hours'),
-                                          ),
-                                          const PopupMenuItem(
-                                            value: 'ban',
-                                            child: Text('Ban'),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                      ],
-                    ),
+                    onMute: _muteMember,
+                    onBan: _banMember,
                   ),
 
                   const SizedBox(height: VSpacing.md),
 
                   // ── Quiet Hours ──────────────────────────────────
-                  _Card(
+                  WorldSettingsCard(
                     padding: const EdgeInsets.all(VSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1123,10 +942,7 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
 
                   // ── Ranks ────────────────────────────────────────
                   if (resident?.id == world.sovereignId)
-                    _RanksSection(
-                      worldId: widget.worldId,
-                      worldWorldId: widget.worldId,
-                    ),
+                    WorldSettingsRanks(worldId: widget.worldId),
 
                   const SizedBox(height: VSpacing.md),
 
@@ -1235,7 +1051,7 @@ class _BoostWorldCard extends ConsumerWidget {
         ? (progress / range).clamp(0.0, 1.0)
         : 1.0;
     final isMaxLevel = currentLevel >= 10;
-    return _Card(
+    return WorldSettingsCard(
       padding: const EdgeInsets.all(VSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1346,171 +1162,6 @@ class _BoostWorldCard extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _RanksSection extends ConsumerStatefulWidget {
-  final String worldId;
-  const _RanksSection({required this.worldId, required String worldWorldId});
-
-  @override
-  ConsumerState<_RanksSection> createState() => _RanksSectionState();
-}
-
-class _RanksSectionState extends ConsumerState<_RanksSection> {
-  List<Rank> _ranks = [];
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final ranks = await RankService.fetchWorldRanks(widget.worldId);
-    if (mounted) {
-      setState(() {
-        _ranks = ranks;
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _showCreateDialog() async {
-    final controller = TextEditingController();
-    try {
-      await showVDialog<void>(
-        context: context,
-        title: 'Create Rank',
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Rank name'),
-          autofocus: true,
-        ),
-        actions: [
-          vDialogActionsRow([
-            VButton(
-              label: 'Cancel',
-              onPressed: () => Navigator.pop(context),
-              variant: ButtonVariant.text,
-            ),
-            VButton(
-              label: 'Create',
-              onPressed: () async {
-                final name = controller.text.trim();
-                if (name.isEmpty) return;
-                await RankService.createRank(worldId: widget.worldId, name: name);
-                if (!mounted) return;
-                Navigator.pop(context);
-                _load();
-              },
-            ),
-          ]),
-        ],
-      );
-    } finally {
-      controller.dispose();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _Card(
-      padding: const EdgeInsets.all(VSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.military_tech,
-                color: VColors.tertiary,
-                size: VIconSize.md,
-              ),
-              const SizedBox(width: VSpacing.sm),
-              const Expanded(
-                child: Text(
-                  'Ranks',
-                  style: TextStyle(
-                    fontSize: VFontSize.headlineMd,
-                    fontWeight: VFontWeight.bold,
-                  ),
-                ),
-              ),
-              VButton(
-                label: 'Create',
-                variant: ButtonVariant.text,
-                size: ButtonSize.small,
-                icon: const Icon(VIcons.plus, size: VIconSize.sm),
-                onPressed: _showCreateDialog,
-              ),
-            ],
-          ),
-          const SizedBox(height: VSpacing.sm),
-          if (_loading)
-            const Center(child: VLoadingCard())
-          else if (_ranks.isEmpty)
-            Text(
-              'No ranks yet. Create one to assign privileges.',
-              style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            )
-          else
-            ..._ranks.map(
-              (r) => Material(
-                color: Colors.transparent,
-                child: ListTile(
-                  dense: true,
-                  leading: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: _parseHex(r.colorHex),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  title: Text(r.name),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, size: VIconSize.sm),
-                    onPressed: () async {
-                      await RankService.deleteRank(r.id);
-                      _load();
-                    },
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-Color _parseHex(String hex) =>
-    Color(int.parse('FF${hex.substring(1)}', radix: 16));
-
-class _Card extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final BorderRadiusGeometry? borderRadius;
-
-  const _Card({required this.child, this.padding, this.borderRadius});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding ?? const EdgeInsets.all(VSpacing.lg),
-      decoration: BoxDecoration(
-        color: VColors.surfaceContainerDark,
-        borderRadius: borderRadius ?? BorderRadius.circular(VRadius.lg),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: child,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 
 import '../../models/channel.dart';
@@ -528,8 +529,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   Widget _buildEmptyDmState() {
+    final l10n = AppLocalizations.of(context);
     return AppEmptyState(
-      title: 'No direct messages yet',
+      title: l10n.emptyFirstMessage,
       description:
           'Find a resident to message, or jump into a world channel first.',
       icon: Icons.mail_outline,

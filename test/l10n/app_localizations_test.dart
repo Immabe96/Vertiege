@@ -22,5 +22,8 @@ void main() {
     expect(l10n.tabNexus, 'Nexus');
     expect(l10n.signOut, 'Sign out');
     expect(l10n.postFailedTapRetry, contains('tap to retry'));
+    expect(l10n.authSignIn, 'Sign In');
+    expect(l10n.emptyJoinWorld, 'Join your first world');
+    expect(l10n.cloudSyncUnavailable, contains('Cloud sync'));
   });
 }

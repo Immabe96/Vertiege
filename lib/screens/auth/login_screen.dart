@@ -18,6 +18,7 @@ import '../../widgets/auth/auth_error_card.dart';
 import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../widgets/auth/auth_fields.dart';
 import '../../widgets/auth/auth_prestige_shell.dart';
@@ -249,9 +250,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _showForgotPassword() async {
+    final l10n = AppLocalizations.of(context);
     final email = await showVDialog<String>(
       context: context,
-      title: 'Reset password',
+      title: l10n.authResetPasswordTitle,
       content: _ForgotPasswordDialogContent(
         initialEmail: _emailController.text.trim(),
       ),
@@ -282,6 +284,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: PrestigeNoir.bg,
       body: SafeArea(
@@ -356,7 +359,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: VButton(
-                      label: 'Forgot password?',
+                      label: l10n.authForgotPassword,
                       variant: ButtonVariant.text,
                       size: ButtonSize.small,
                       onPressed: _isLoading ? null : _showForgotPassword,
@@ -364,7 +367,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: VSpacing.sm),
                   AuthPrestigePrimaryButton(
-                    label: 'Sign In',
+                    label: l10n.authSignIn,
                     isLoading: _isLoading,
                     onPressed: _isValid ? _handleLogin : null,
                   ),
@@ -378,7 +381,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      text: 'By continuing, you agree to our ',
+                      text: l10n.authContinueAgreePrefix,
                       style: const TextStyle(
                         fontSize: VFontSize.labelSm,
                         color: PrestigeNoir.mutedDim,
@@ -466,13 +469,14 @@ class _ForgotPasswordDialogContentState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Enter your email address. We will send you a password reset link.',
-          style: TextStyle(color: PrestigeNoir.muted),
+        Text(
+          l10n.authResetPasswordBody,
+          style: const TextStyle(color: PrestigeNoir.muted),
         ),
         const SizedBox(height: VSpacing.md),
         TextField(
@@ -485,11 +489,11 @@ class _ForgotPasswordDialogContentState
         const SizedBox(height: VSpacing.lg),
         vDialogActionsRow([
           VButton(
-            label: 'Cancel',
+            label: l10n.commonCancel,
             variant: ButtonVariant.text,
             onPressed: () => Navigator.pop(context),
           ),
-          VButton(label: 'Send reset link', onPressed: _submit),
+          VButton(label: l10n.authSendResetLink, onPressed: _submit),
         ]),
       ],
     );

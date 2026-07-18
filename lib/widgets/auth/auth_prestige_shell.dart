@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
@@ -12,6 +13,7 @@ class AuthPrestigeBrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         ShaderMask(
@@ -21,7 +23,7 @@ class AuthPrestigeBrandHeader extends StatelessWidget {
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: Text(
-            'Vertiege',
+            l10n.appTitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: VFontWeight.extraBold,
@@ -32,10 +34,10 @@ class AuthPrestigeBrandHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Rise through the ranks. Own your prestige.',
+        Text(
+          l10n.authSubtitle,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: VFontSize.labelLg,
             color: PrestigeNoir.muted,
           ),
@@ -61,6 +63,7 @@ class AuthPrestigeModeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -72,14 +75,14 @@ class AuthPrestigeModeSwitch extends StatelessWidget {
         children: [
           Expanded(
             child: _ModeTab(
-              label: 'Sign In',
+              label: l10n.authSignIn,
               isActive: activeMode == AuthPrestigeMode.signIn,
               onTap: isLoading ? null : onSignIn,
             ),
           ),
           Expanded(
             child: _ModeTab(
-              label: 'Create Account',
+              label: l10n.authCreateAccount,
               isActive: activeMode == AuthPrestigeMode.signUp,
               onTap: isLoading ? null : onSignUp,
             ),

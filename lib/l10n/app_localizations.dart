@@ -273,6 +273,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to Nexus'**
   String get goToNexus;
+
+  /// Tagline on login and signup screens
+  ///
+  /// In en, this message translates to:
+  /// **'Rise through the ranks. Own your prestige.'**
+  String get authSubtitle;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get authSignIn;
+
+  /// No description provided for @authCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get authCreateAccount;
+
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgotPassword;
+
+  /// Legal agreement prefix before Terms and Privacy links
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to our '**
+  String get authContinueAgreePrefix;
+
+  /// No description provided for @authResetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get authResetPasswordTitle;
+
+  /// No description provided for @authResetPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address. We will send you a password reset link.'**
+  String get authResetPasswordBody;
+
+  /// No description provided for @authSendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get authSendResetLink;
 }
 
 class _AppLocalizationsDelegate

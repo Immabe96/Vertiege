@@ -495,21 +495,49 @@ class _ProfileTab extends StatelessWidget {
       Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                onPickAvatar(ImageSource.camera);
-              },
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  onPickAvatar(ImageSource.camera);
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: VSpacing.lg,
+                    vertical: VSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.camera_alt),
+                      SizedBox(width: VSpacing.md),
+                      Expanded(child: Text('Camera')),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () {
-                Navigator.pop(context);
-                onPickAvatar(ImageSource.gallery);
-              },
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  onPickAvatar(ImageSource.gallery);
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: VSpacing.lg,
+                    vertical: VSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.photo_library),
+                      SizedBox(width: VSpacing.md),
+                      Expanded(child: Text('Gallery')),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),

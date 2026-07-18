@@ -19,6 +19,7 @@ import '../../widgets/nexus/nexus_context_strip.dart';
 import '../../widgets/nexus/nexus_feed_header.dart';
 import '../../widgets/nexus/nexus_inline_compose.dart';
 import '../../widgets/nexus/nexus_shortcuts_section.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import '../../screens/tabs/tab_layout.dart';
 import '../../utils/nexus_feed_sort.dart';
 import '../../utils/verified_moment.dart';
@@ -308,6 +309,7 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
     final resident = ref.read(residentProvider).resident;
     final hasJoinedWorlds =
         resident?.joinedWorldIds.any(WorldService.isRemoteWorldId) ?? false;
@@ -359,7 +361,7 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
           );
         }
         return AppEmptyState(
-          title: 'No moments yet',
+          title: l10n.emptyFirstPost,
           description:
               'Share standing with the compose button, or submit achievement '
               'proof so verified moments can appear here.',

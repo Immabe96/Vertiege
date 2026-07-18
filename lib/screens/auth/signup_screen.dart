@@ -14,6 +14,7 @@ import '../../legal/app_legal.dart';
 import '../../theme/prestige_noir.dart';
 import '../../theme/v_colors.dart';
 import '../../theme/v_tokens.dart';
+import 'package:vertiege/l10n/app_localizations.dart';
 import 'package:vertiege/ui/ui.dart';
 import '../../widgets/auth/auth_prestige_shell.dart';
 
@@ -196,6 +197,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: PrestigeNoir.bg,
       body: SafeArea(
@@ -264,7 +266,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   ),
                   const SizedBox(height: VSpacing.xl),
                   AuthPrestigePrimaryButton(
-                    label: 'Create Account',
+                    label: l10n.authCreateAccount,
                     isLoading: _isLoading,
                     onPressed: _isValid ? _handleSignUp : null,
                   ),
@@ -278,7 +280,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      text: 'By continuing, you agree to our ',
+                      text: l10n.authContinueAgreePrefix,
                       style: const TextStyle(
                         fontSize: VFontSize.labelSm,
                         color: PrestigeNoir.mutedDim,
