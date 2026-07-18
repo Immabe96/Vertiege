@@ -30,6 +30,10 @@
 | E2E / integration smoke + mapper/reaction/l10n tests | **Done** |
 | ListTile residual (world events) | **Partial** |
 | iOS simulator smoke (`flutter run` iPhone 17) | **App launched successfully** |
+| Plain `ListTile(` sweep | **Done (0 remaining)** |
+| Expanded i18n (auth + empty states + banners) | **Done** |
+| World settings section extract | **Done** (~1528→1167) |
+| Simulator APNS Crashlytics noise | **Quieted** |
 
 **Remote project:** `wjaphoaxalvgjnrwqjwe` — migration list synced through `20260718140000`.
 

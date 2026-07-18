@@ -29,13 +29,11 @@ import '../widgets/profile/cosmetic_avatar.dart';
 import '../widgets/worlds/world_icon.dart';
 import '../widgets/shared/tier_icon.dart';
 import '../services/chat_service.dart';
+import 'search/search_filter_chips.dart';
+import 'search/search_types.dart';
 
 const _recentSearchesKey = '@recent_searches';
 const _maxRecentSearches = 5;
-
-enum _SearchMode { all, following, allies }
-
-enum _SearchCategory { all, worlds, people, posts }
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -48,8 +46,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   String _query = '';
-  _SearchMode _mode = _SearchMode.all;
-  _SearchCategory _category = _SearchCategory.all;
+  SearchMode _mode = SearchMode.all;
+  SearchCategory _category = SearchCategory.all;
   bool _appliedRouteQuery = false;
   List<String> _recentSearches = [];
   List<_ResidentEntry> _allResidents = [];
@@ -100,9 +98,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             .loadChannelMessages(_channelId!);
       }
     } else if (mode == 'following') {
-      _mode = _SearchMode.following;
+      _mode = SearchMode.following;
     } else if (mode == 'allies') {
-      _mode = _SearchMode.allies;
+      _mode = SearchMode.allies;
       final resident = ref.read(residentProvider).resident;
       if (resident != null) {
         ref.read(allyProvider.notifier).loadAll(resident.id);
@@ -120,7 +118,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _scheduleGlobalResidentSearch(String q) {
     _ftsDebounce?.cancel();
-    if (_mode != _SearchMode.all || q.trim().length < 2) {
+    if (_mode != SearchMode.all || q.trim().length < 2) {
       if (_globalFtsResidents.isNotEmpty || _loadingGlobalSearch) {
         setState(() {
           _globalFtsResidents = [];
@@ -260,7 +258,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   _SearchResults _search(String q) {
     final resident = ref.read(residentProvider).resident;
-    if (_mode == _SearchMode.following && resident != null && q.length < 2) {
+    if (_mode == SearchMode.following && resident != null && q.length < 2) {
       final followingIds = resident.following.toSet();
       final residents =
           _allResidents
@@ -269,7 +267,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ..sort((a, b) => a.resident.name.compareTo(b.resident.name));
       return _SearchResults(residents: residents);
     }
-    if (_mode == _SearchMode.allies && q.length < 2) {
+    if (_mode == SearchMode.allies && q.length < 2) {
       final allies = ref.read(allyProvider).allies;
       final allyIds = <String>{};
       for (final a in allies) {
@@ -302,7 +300,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     worlds.sort((a, b) => a.name.compareTo(b.name));
 
     final seenIds = <String>{};
-    if (_mode == _SearchMode.all) {
+    if (_mode == SearchMode.all) {
       for (final entry in _globalFtsResidents) {
         seenIds.add(entry.resident.id);
         residents.add(entry);
@@ -355,7 +353,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ? _searchChannelMessages(_query)
         : <ChannelMessage>[];
     final results = !_channelMode &&
-            (_query.length >= 2 || _mode != _SearchMode.all)
+            (_query.length >= 2 || _mode != SearchMode.all)
         ? _search(_query)
         : null;
 
@@ -410,7 +408,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             )
           else
-            _buildFilterChips(),
+            SearchFilterChips(
+              mode: _mode,
+              category: _category,
+              query: _query,
+              onModeChanged: _onModeChanged,
+              onCategoryChanged: (category) =>
+                  setState(() => _category = category),
+            ),
           if (_residentsLoadError != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -434,98 +439,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildFilterChips() {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: PrestigeNoir.border)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          VSpacing.md,
-          VSpacing.sm,
-          VSpacing.md,
-          VSpacing.sm,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _PrestigeFilterChip(
-                    label: 'All',
-                    selected: _mode == _SearchMode.all,
-                    onTap: () => setState(() => _mode = _SearchMode.all),
-                  ),
-                  const SizedBox(width: 6),
-                  _PrestigeFilterChip(
-                    label: 'Following',
-                    selected: _mode == _SearchMode.following,
-                    onTap: () {
-                      setState(() => _mode = _SearchMode.following);
-                      final resident = ref.read(residentProvider).resident;
-                      if (resident != null) {
-                        ref.read(allyProvider.notifier).loadAll(resident.id);
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 6),
-                  _PrestigeFilterChip(
-                    label: 'Allies',
-                    selected: _mode == _SearchMode.allies,
-                    onTap: () {
-                      setState(() => _mode = _SearchMode.allies);
-                      final resident = ref.read(residentProvider).resident;
-                      if (resident != null) {
-                        ref.read(allyProvider.notifier).loadAll(resident.id);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-            if (_query.length >= 2) ...[
-              const SizedBox(height: VSpacing.sm),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _PrestigeFilterChip(
-                      label: 'Everything',
-                      selected: _category == _SearchCategory.all,
-                      onTap: () =>
-                          setState(() => _category = _SearchCategory.all),
-                    ),
-                    const SizedBox(width: 6),
-                    _PrestigeFilterChip(
-                      label: 'Worlds',
-                      selected: _category == _SearchCategory.worlds,
-                      onTap: () =>
-                          setState(() => _category = _SearchCategory.worlds),
-                    ),
-                    const SizedBox(width: 6),
-                    _PrestigeFilterChip(
-                      label: 'Residents',
-                      selected: _category == _SearchCategory.people,
-                      onTap: () =>
-                          setState(() => _category = _SearchCategory.people),
-                    ),
-                    const SizedBox(width: 6),
-                    _PrestigeFilterChip(
-                      label: 'Posts',
-                      selected: _category == _SearchCategory.posts,
-                      onTap: () =>
-                          setState(() => _category = _SearchCategory.posts),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
+  void _onModeChanged(SearchMode mode) {
+    setState(() => _mode = mode);
+    if (mode == SearchMode.following || mode == SearchMode.allies) {
+      final resident = ref.read(residentProvider).resident;
+      if (resident != null) {
+        ref.read(allyProvider.notifier).loadAll(resident.id);
+      }
+    }
   }
 
   Widget _buildChannelBody(
@@ -597,7 +518,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildBody(ThemeData theme, _SearchResults? results) {
-    if (_query.length < 2 && _mode == _SearchMode.all) {
+    if (_query.length < 2 && _mode == SearchMode.all) {
       return _buildExploreIdle(theme);
     }
 
@@ -661,8 +582,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       },
       child: CustomScrollView(
         slivers: [
-          if (_category == _SearchCategory.all ||
-              _category == _SearchCategory.worlds) ...[
+          if (_category == SearchCategory.all ||
+              _category == SearchCategory.worlds) ...[
             SliverToBoxAdapter(
               child: _SectionHeader(
                 icon: Icons.public,
@@ -680,13 +601,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 itemBuilder: (context, index) =>
                     _WorldTile(world: results.worlds[index]),
               ),
-            if (_category == _SearchCategory.all)
+            if (_category == SearchCategory.all)
               const SliverToBoxAdapter(
                 child: SizedBox(height: VSpacing.sm),
               ),
           ],
-          if (_category == _SearchCategory.all ||
-              _category == _SearchCategory.people) ...[
+          if (_category == SearchCategory.all ||
+              _category == SearchCategory.people) ...[
             SliverToBoxAdapter(
               child: _SectionHeader(
                 icon: Icons.people,
@@ -713,13 +634,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 itemBuilder: (context, index) =>
                     _PersonTile(entry: results.residents[index]),
               ),
-            if (_category == _SearchCategory.all)
+            if (_category == SearchCategory.all)
               const SliverToBoxAdapter(
                 child: SizedBox(height: VSpacing.sm),
               ),
           ],
-          if (_category == _SearchCategory.all ||
-              _category == _SearchCategory.posts) ...[
+          if (_category == SearchCategory.all ||
+              _category == SearchCategory.posts) ...[
             SliverToBoxAdapter(
               child: _SectionHeader(
                 icon: Icons.forum,
@@ -1277,44 +1198,6 @@ class _PrestigeSearchPillState extends State<_PrestigeSearchPill> {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _PrestigeFilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _PrestigeFilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 44),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? PrestigeNoir.accentSoft : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? PrestigeNoir.accent : PrestigeNoir.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: VFontSize.labelSm,
-            fontWeight: selected ? VFontWeight.semiBold : VFontWeight.medium,
-            color: selected ? PrestigeNoir.accent : PrestigeNoir.muted,
-          ),
-        ),
       ),
     );
   }
