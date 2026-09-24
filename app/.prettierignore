@@ -1,0 +1,4 @@
+# Generated artifacts — regenerating them must not break `npm run lint`.
+node_modules/
+db/migrations.generated.ts
+db/migrations/meta/

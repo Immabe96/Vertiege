@@ -8,14 +8,18 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="worlds"
         options={{
           title: 'Worlds',
-          tabBarIcon: ({ color, size }) => <Ionicons name="globe-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="globe-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -31,7 +35,9 @@ export default function TabsLayout() {
         name="you"
         options={{
           title: 'You',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

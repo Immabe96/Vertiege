@@ -31,8 +31,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   init: async () => {
-    const { data } = await supabase.auth.getSession();
-    set({ session: data.session, user: data.session.user ?? null, initialized: true });
+    // getSession() rejects when the stored session is corrupt — never let that
+    // strand the app on the boot spinner.
+    try {
+      const { data } = await supabase.auth.getSession();
+      set({ session: data.session, user: data.session?.user ?? null });
+    } catch {
+      set({ session: null, user: null });
+    } finally {
+      set({ initialized: true });
+    }
 
     // Keep the store in sync with token refresh / external sign-out.
     supabase.auth.onAuthStateChange((_event, session) => {

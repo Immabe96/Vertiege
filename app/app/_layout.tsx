@@ -1,12 +1,15 @@
 import '@/global.css';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { ensureDbReady } from '@/db';
 import { useAuthStore } from '@/lib/auth-store';
+import { queryClient } from '@/lib/query';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -20,6 +23,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     init();
+    // Local migrations run in the background — they never gate first paint.
+    ensureDbReady().catch((error: unknown) => {
+      console.warn('[db] migration failed', error);
+    });
   }, [init]);
 
   if (!initialized) {
@@ -31,16 +38,18 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={session !== null}>
-          <Stack.Screen name="(tabs)" />
-        </Stack.Protected>
-        <Stack.Protected guard={session === null}>
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
-      </Stack>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <StatusBar style="auto" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={session !== null}>
+            <Stack.Screen name="(tabs)" />
+          </Stack.Protected>
+          <Stack.Protected guard={session === null}>
+            <Stack.Screen name="(auth)" />
+          </Stack.Protected>
+        </Stack>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }

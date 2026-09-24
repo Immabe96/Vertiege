@@ -79,13 +79,18 @@ Backend tables/RLS not used by a pillar simply stay dormant.
 
 | Phase | Scope | Exit |
 |-------|-------|------|
-| **F0 — Foundation** | Scaffold `app/` ✅, NativeWind+UI+Reanimated ✅, app identity ✅, keys in `.env` ✅, Supabase client + secure-store session, Zustand + TanStack Query + MMKV + sqlite/Drizzle wiring, auth boot (email + Google + Apple via Supabase) | App boots, sign-in loop works, `tsc --noEmit` + eslint clean |
+| **F0 — Foundation** ✅ | Scaffold `app/` ✅, NativeWind+UI+Reanimated ✅, app identity ✅, keys in `.env` ✅, Supabase client + secure-store session ✅, Zustand + TanStack Query + MMKV + sqlite/Drizzle wiring ✅, RHF + Zod ✅, jest-expo ✅, auth boot — **email only** | App boots, sign-in loop works, `tsc --noEmit` + eslint + jest clean ✅ |
+| **F0b — Auth** 📋 | Google + Apple OAuth via Supabase (`vertiege://auth/callback`), sign-up, password reset | Full auth surface |
 | **F1 — Core loop** | Home feed + composer, worlds + channels, DM/chat with presence/typing, post detail/comments/reactions | Core loop usable end-to-end |
 | **F2 — Identity & progression** | Profile, achievements + proof upload, quests/season/league, streak | Progression loop complete |
 | **F3 — Notifications & retention** | Unified inbox, FCM push, quiet hours, notification prefs | Push + inbox live |
 | **F4 — Hardening & launch** | Reanimated polish (reduced-motion), a11y, empty/error states, Sentry + PostHog + Crashlytics/Remote Config/App Check, RevenueCat (if IAP unpaused), EAS build config, store beta review | Both stores green → cutover |
 
-Each phase lands with `tsc --noEmit` + eslint + jest (jest-expo).
+Each phase lands with `npm run check` (`tsc --noEmit` + eslint + prettier + jest).
+
+**F0 landed 2026-09-25.** Entry points: `lib/query.ts` (QueryClient), `lib/storage.ts` (MMKV — SecureStore stays for auth tokens), `db/` (Drizzle + expo-sqlite; edit `db/schema.ts` → `npm run db:generate`), `lib/validation/` (Zod), `test/`. Cold-start `/` now routes by auth state, and a corrupt stored session no longer strands the boot spinner.
+
+> ⚠️ **Dev-client rebuild required** before `npm start` — `react-native-mmkv` and `expo-sqlite` are native modules added after the last build.
 
 ## 8. Risks & mitigations
 

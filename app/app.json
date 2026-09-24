@@ -3,7 +3,6 @@
     "name": "Vertiege",
     "slug": "vertiege",
     "version": "1.0.0",
-
     "scheme": "vertiege",
     "platforms": ["ios", "android"],
     "web": {
@@ -19,19 +18,16 @@
           "image": "./assets/splash.png",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
-
       "tsconfigPaths": true
     },
-
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-
     "userInterfaceStyle": "automatic",
-
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
