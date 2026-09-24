@@ -2,6 +2,13 @@
 
 Start here. All docs follow [documentation standards](meta/documentation-standards.md).
 
+> **Repository layout & path convention**
+> The repo root holds two app folders plus shared assets:
+> `flutter-app/` (the Flutter app — `lib/`, `test/`, `android/`, `ios/`, `scripts/`, `pubspec.yaml`),
+> `expo-app/` (the React Native rewrite), and shared `docs/`, `supabase/`, `hosting/`, `.cursor/`.
+> **Paths in these docs are repo-root relative** (`flutter-app/lib/…`) unless a guide says it
+> changes directory first — the setup and workflow guides do (`cd flutter-app`).
+
 ## Quick links
 
 | I want to… | Read |
@@ -73,4 +80,4 @@ Historical material only — [archive/README.md](archive/README.md).
 
 - [README.md](../README.md) — project entry
 - [PLAN.md](../PLAN.md) — active engineering plan (social stack)
-- [releases/README.md](../releases/README.md) — APK releases
+- [releases/README.md](../flutter-app/releases/README.md) — APK releases

@@ -14,4 +14,4 @@ These segments under `/explore/{worldId}/` are **screens**, not channels:
 
 Do not create a channel whose `name` equals one of these values — navigation will open the economy/governance screen instead of chat.
 
-Use `worldChannelPath()` from `lib/router/world_navigation.dart` for all channel links.
+Use `worldChannelPath()` from `flutter-app/lib/router/world_navigation.dart` for all channel links.

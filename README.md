@@ -2,7 +2,7 @@
 
 Social world app — join realms, chat in channels, post, earn prestige, and climb tiers. Built with Flutter, Supabase, and Firebase (FCM).
 
-**Version:** 1.1.0-beta.3+7 (see `pubspec.yaml`)
+**Version:** 1.1.0-beta.3+7 (see `flutter-app/pubspec.yaml`)
 
 ## Download
 
@@ -30,16 +30,19 @@ Details: **[docs/guides/development-workflow.md](docs/guides/development-workflo
 
 **Requirements:** Flutter stable, JDK 21 (for `flutter run` — not for release APK builds)
 
+The Flutter project lives in `flutter-app/` — run Flutter/Dart commands from there:
+
 ```bash
 git clone https://github.com/Immabe96/Vertiege.git
 cd Vertiege
 git checkout develop
+cd flutter-app
 cp .env.template .env
 flutter pub get
 flutter run
 ```
 
-Before pushing (saves RAM — **no local APK build**):
+Before pushing (from `flutter-app/` — saves RAM, **no local APK build**):
 
 ```bash
 flutter analyze --no-fatal-infos --no-fatal-warnings
@@ -67,8 +70,10 @@ flutter test
 ## Project layout
 
 ```
-lib/           # screens, widgets, services, state, models, router
-supabase/      # migrations and Edge Functions
+flutter-app/   # Flutter app: lib/, test/, android/, ios/, pubspec.yaml, scripts/
+expo-app/      # React Native rewrite (Expo) — see expo-app/rn-rewrite-plan.md
+supabase/      # migrations and Edge Functions (repo root)
+docs/          # guides, reference, audits (repo root)
 ```
 
 ## License

@@ -9,7 +9,7 @@ Reference for cold-start routing, push taps, and custom URL schemes.
 
 | Host / pattern | Redirect | In-app route | Auth required |
 |----------------|----------|--------------|---------------|
-| `invite/{code}` | [deep_link_redirects.dart](../../lib/router/deep_link_redirects.dart) | `/invite/{code}` → accept → world or home | After signup for accept |
+| `invite/{code}` | [deep_link_redirects.dart](../../flutter-app/lib/router/deep_link_redirects.dart) | `/invite/{code}` → accept → world or home | After signup for accept |
 | `auth/callback` | → `/auth/callback` | OAuth / magic link completion | — |
 | `verifier/login` | → `/verifier/login` | Staff verifier login | Verifier role |
 
@@ -41,7 +41,7 @@ Reference for cold-start routing, push taps, and custom URL schemes.
 | `/auth/callback` | Supabase auth | Yes | — |
 | `/verifier/login`, `/verifier/review` | Verifier portal | Yes | — |
 
-Resolver for notification rows: [notification_navigation.dart](../../lib/router/notification_navigation.dart).
+Resolver for notification rows: [notification_navigation.dart](../../flutter-app/lib/router/notification_navigation.dart).
 
 ---
 
@@ -60,7 +60,7 @@ Resolver for notification rows: [notification_navigation.dart](../../lib/router/
 | `ranking` | `/season` |
 | `reactionMilestone` | World + post or `/identity` |
 
-Tests: [notification_navigation_test.dart](../../test/router/notification_navigation_test.dart).
+Tests: [notification_navigation_test.dart](../../flutter-app/test/router/notification_navigation_test.dart).
 
 ---
 

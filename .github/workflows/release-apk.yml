@@ -68,6 +68,9 @@ jobs:
 
       - name: Read app version
         id: version
+        # Per-step, not job-level: "Resolve CI run ID" runs before
+        # actions/checkout, so flutter-app/ would not exist yet.
+        working-directory: flutter-app
         run: |
           RAW=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
           TAG=$(echo "$RAW" | sed 's/+/-/g')

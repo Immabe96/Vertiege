@@ -8,7 +8,7 @@
 # Local JDK for ci-local.ps1 (optional download)
 # Miscellaneous
 # Obfuscation related
-# One-off badge generation scratch (use scripts/image_gen.py + check_core_achievement_assets.py)
+# One-off badge generation scratch (use flutter-app/scripts/image_gen.py + check_core_achievement_assets.py)
 # Symbolication related
 # The .vscode folder contains launch configuration and tasks you configure in
 # Understand-Anything (commit knowledge-graph.json if sharing with team)
@@ -63,17 +63,6 @@
 /flutter-app/coverage/
 /flutter-app/releases/*.aab
 /flutter-app/releases/*.apk
-# LEGACY (repo root) — remove once the Flutter tree is moved to flutter-app/
-/android/app/debug
-/android/app/profile
-/android/app/release
-/android/key.properties
-/android/upload-keystore.jks
-/assets/staging/withoutbg-backup/
-/build/
-/coverage/
-/releases/*.aab
-/releases/*.apk
 /ruvector.db
 /understand-anything-plugin
 /doc/

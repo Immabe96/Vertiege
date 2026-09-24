@@ -35,9 +35,15 @@ flowchart TD
 git clone https://github.com/Immabe96/Vertiege.git
 cd Vertiege
 git checkout develop
+cd flutter-app           # Flutter project lives here — every command below runs from it
 cp .env.template .env    # SUPABASE_URL, SUPABASE_ANON_KEY for device testing
 flutter pub get
 ```
+
+> The repo root also holds `docs/`, `supabase/`, `.cursor/`, `hosting/` and the
+> `expo-app/` React Native rewrite — those are shared, so paths to them below are
+> repo-root relative. Everything else (`lib/`, `android/`, `ios/`, `scripts/`,
+> `test/`, `assets/`) is inside `flutter-app/`.
 
 **Android package ID:** `com.vertiege` (see [../reference/android-package-id.md](../reference/android-package-id.md)).  
 `android/app/google-services.json` must match that package (committed after Firebase registration).  

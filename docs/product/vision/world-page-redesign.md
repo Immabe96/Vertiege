@@ -44,7 +44,7 @@ World detail feels like an admin console (Manage + long About) instead of a **Fa
 | Prestige | World level |
 | Decree | Announcement |
 
-Implementation: `lib/config/world_page_ia.dart`.
+Implementation: `flutter-app/lib/config/world_page_ia.dart`.
 
 ## Information architecture (Release 1)
 
@@ -111,12 +111,12 @@ Only when `world.isMarketplace`. Wealth/Profession economy links live in the too
 
 | Area | Path |
 |------|------|
-| IA helpers | `lib/config/world_page_ia.dart` |
-| Screen | `lib/screens/world_detail_screen.dart` |
-| Home | `lib/widgets/worlds/world_home_tab.dart` |
-| Shop | `lib/widgets/worlds/world_shop_tab.dart` |
-| Drawer | `lib/widgets/worlds/world_tools_drawer.dart` |
-| Legacy depth | `lib/widgets/worlds/world_realm_dossier.dart` |
+| IA helpers | `flutter-app/lib/config/world_page_ia.dart` |
+| Screen | `flutter-app/lib/screens/world_detail_screen.dart` |
+| Home | `flutter-app/lib/widgets/worlds/world_home_tab.dart` |
+| Shop | `flutter-app/lib/widgets/worlds/world_shop_tab.dart` |
+| Drawer | `flutter-app/lib/widgets/worlds/world_tools_drawer.dart` |
+| Legacy depth | `flutter-app/lib/widgets/worlds/world_realm_dossier.dart` |
 
 ## Verification
 

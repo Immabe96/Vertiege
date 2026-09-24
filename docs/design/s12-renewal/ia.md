@@ -156,4 +156,4 @@ Each wave lands on `develop` with `flutter analyze` + `flutter test` green.
 - Government-ID **Identity** tick and achievement **proof** remain separate concepts.
 - Vertiege lexicon in all copy: world, resident, achievement, Campfire, Nexus, Identity, Ally, tier.
 - Feature code never imports `package:forui/forui.dart` directly (CI gate).
-- `service_role` never appears in `lib/` (CI security gate).
+- `service_role` never appears in `flutter-app/lib/` (CI security gate).

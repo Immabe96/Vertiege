@@ -11,6 +11,7 @@ Tutorials for a working local app. For day-to-day git/CI workflow, see [guides/d
 ```bash
 git clone https://github.com/Immabe96/Vertiege.git
 cd Vertiege && git checkout develop
+cd flutter-app        # the Flutter project lives here — commands below run from it
 cp .env.template .env
 flutter pub get
 flutter run

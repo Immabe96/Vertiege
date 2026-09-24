@@ -26,9 +26,9 @@
 
 ### #1 — fixed
 
-- **Cause:** `assets/generated/achievements/` not listed in `pubspec.yaml` (Flutter does not bundle asset subfolders unless each is declared).
+- **Cause:** `flutter-app/assets/generated/achievements/` not listed in `flutter-app/pubspec.yaml` (Flutter does not bundle asset subfolders unless each is declared).
 - **Symptom:** `AchievementBadgeAvatar` fell back to Material category icons.
-- **Fix:** `pubspec.yaml` → `- assets/generated/achievements/`. Rebuild required.
+- **Fix:** `flutter-app/pubspec.yaml` → `- flutter-app/assets/generated/achievements/`. Rebuild required.
 - **Verify:** Wall of Honour shows PNG badges (tester confirmed).
 
 ### #2 — fixed (do not repeat)
@@ -58,11 +58,11 @@
 
 #### Files touched (reference)
 
-- `lib/screens/world_detail_screen.dart` — single tab body scroll
-- `lib/widgets/worlds/world_channel_list.dart` — InkWell rows
-- `lib/widgets/worlds/world_residents.dart` — parent data, no VLoadingCard
-- `lib/widgets/worlds/world_detail_members.dart` — pass members through
-- `lib/widgets/worlds/leaderboard.dart` — compact loading, `Column(min)`
+- `flutter-app/lib/screens/world_detail_screen.dart` — single tab body scroll
+- `flutter-app/lib/widgets/worlds/world_channel_list.dart` — InkWell rows
+- `flutter-app/lib/widgets/worlds/world_residents.dart` — parent data, no VLoadingCard
+- `flutter-app/lib/widgets/worlds/world_detail_members.dart` — pass members through
+- `flutter-app/lib/widgets/worlds/leaderboard.dart` — compact loading, `Column(min)`
 
 #### Prevention checklist (new world tab / list UI)
 

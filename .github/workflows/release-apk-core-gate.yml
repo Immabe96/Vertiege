@@ -8,6 +8,10 @@ concurrency:
   group: release-apk-core-gate
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: flutter-app
+
 jobs:
   gate-and-build:
     runs-on: ubuntu-latest
@@ -52,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vertiege-release-core-badges
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: flutter-app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
       - name: Publish GitHub Release
@@ -62,8 +66,8 @@ jobs:
           name: Vertiege core badges release (${{ github.sha }})
           body: |
             Release APK built after **110/110** core achievement badge assets passed
-            `scripts/check_core_achievement_assets.py`.
+            `flutter-app/scripts/check_core_achievement_assets.py`.
 
             Workflow: **Release APK (core assets gate)** (manual dispatch).
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: flutter-app/build/app/outputs/flutter-apk/app-release.apk
           make_latest: false

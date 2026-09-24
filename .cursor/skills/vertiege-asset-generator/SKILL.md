@@ -27,14 +27,14 @@ Brand: premium mobile game, violet `#7C3AED` / blue accents, **not** generic gol
 ### 1. Enqueue missing required assets (once per repo refresh)
 
 ```bash
-python3 scripts/sync_image_manifest.py
-python3 scripts/image_gen.py status
+python3 flutter-app/scripts/sync_image_manifest.py
+python3 flutter-app/scripts/image_gen.py status
 ```
 
 ### 2. Get next job
 
 ```bash
-python3 scripts/image_gen.py next --json
+python3 flutter-app/scripts/image_gen.py next --json
 ```
 
 If `"done": true`, stop and report queue complete.
@@ -50,7 +50,7 @@ If `"done": true`, stop and report queue complete.
 GenerateImage saves under the workspace assets path. Copy to the exact **`stagingPath`**:
 
 ```bash
-python3 scripts/image_gen.py copy --id <id> --from <path-to-generated-png>
+python3 flutter-app/scripts/image_gen.py copy --id <id> --from <path-to-generated-png>
 ```
 
 Or `cp` into `assets/staging/generated/<filename>`.
@@ -58,13 +58,13 @@ Or `cp` into `assets/staging/generated/<filename>`.
 ### 5. Mark and review
 
 ```bash
-python3 scripts/image_gen.py mark --id <id> --status generated
+python3 flutter-app/scripts/image_gen.py mark --id <id> --status generated
 ```
 
 If matte gray background on PNG:
 
 ```bash
-./scripts/process-transparent-assets.sh --staging
+./flutter-app/scripts/process-transparent-assets.sh --staging
 ```
 
 ### 6. Promote to production
@@ -72,10 +72,10 @@ If matte gray background on PNG:
 After visual check (dark theme):
 
 ```bash
-python3 scripts/image_gen.py promote --id <id>
+python3 flutter-app/scripts/image_gen.py promote --id <id>
 ```
 
-Updates `assets/generated/` — **keep filenames**; `lib/utils/world_assets.dart` maps by id.
+Updates `assets/generated/` — **keep filenames**; `flutter-app/lib/utils/world_assets.dart` maps by id.
 
 ### 7. Commit progress
 
@@ -95,7 +95,7 @@ Each **original** achievement in `_achievementCatalogRaw` gets a **unique** badg
 Enqueue / refresh prompts:
 
 ```bash
-python3 scripts/enqueue_core_achievement_badges.py
+python3 flutter-app/scripts/enqueue_core_achievement_badges.py
 ```
 
 Runtime: `WorldAssets.achievementBadgeImage(id)` → per-id PNG, else category icon, else Material icon.  
@@ -115,13 +115,13 @@ Same finesse as `badge-marathon` / `badge-doctor`: bespoke prompt per title+desc
 
 ## Wire-up after new `prof-*` files
 
-When dedicated PNGs exist, point `WorldAssets._badgeImagePaths` in `lib/utils/world_assets.dart` to the new files (not `prof-doctor.png` reuse).
+When dedicated PNGs exist, point `WorldAssets._badgeImagePaths` in `flutter-app/lib/utils/world_assets.dart` to the new files (not `prof-doctor.png` reuse).
 
 ## When all 110 core badges are on disk
 
 ```bash
-python3 scripts/check_core_achievement_assets.py
-./scripts/build_release_apk.sh
+python3 flutter-app/scripts/check_core_achievement_assets.py
+./flutter-app/scripts/build_release_apk.sh
 ```
 
 Output: `build/app/outputs/flutter-apk/app-release.apk`  
@@ -129,12 +129,12 @@ CI alternative: GitHub Actions → **Release APK (core assets gate)** (manual).
 
 ## Windows
 
-`scripts/image_gen.ps1` remains valid; prefer `scripts/image_gen.py` on Linux/CI.
+`flutter-app/scripts/image_gen.ps1` remains valid; prefer `flutter-app/scripts/image_gen.py` on Linux/CI.
 
 ## Failure handling
 
 ```bash
-python3 scripts/image_gen.py mark --id <id> --status failed --notes "rate limit"
+python3 flutter-app/scripts/image_gen.py mark --id <id> --status failed --notes "rate limit"
 ```
 
 Failed items are retried on the next `next` call.

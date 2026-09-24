@@ -11,7 +11,7 @@
 
 | ID | Item | Status |
 |----|------|--------|
-| S11.1 | Delete `lib/theme/colors.dart` (`AppColors`) | ✅ |
+| S11.1 | Delete `flutter-app/lib/theme/colors.dart` (`AppColors`) | ✅ |
 | S11.2 | Unify card radius (`VRadius.lg` = `VRadius.bento` = 14) | ✅ |
 | S11.3 | Align `VertiegeForuiTheme` type scale with `VFontSize` | ✅ |
 | S11.4 | `VButton` 48dp minimum touch target | ✅ |
@@ -20,11 +20,11 @@
 | S11.7 | `VPrestigeCard` — sole raised card (replaces `SovereignCard`, `PrestigeRaisedCard`) | ✅ |
 | S11.8 | `VSpinner` facade; screen-level `CircularProgressIndicator` removed | ✅ |
 | S11.9 | `VStates` on Prestige Noir tokens | ✅ |
-| S11.10 | Material buttons → `VButton` in all `lib/screens/` | ✅ |
+| S11.10 | Material buttons → `VButton` in all `flutter-app/lib/screens/` | ✅ |
 | S11.11 | Dead `isDark ?` ternaries removed app-wide | ✅ |
 | S11.12 | `design-system.md` + `flutter-ui.mdc` updated | ✅ |
 
-**Automated gates (2026-07-03):** 290/290 tests pass · `flutter analyze` clean (infos only) · 0 `isDark ?` in `lib/` · 0 `AlertDialog` in `lib/` · 0 Material buttons in `lib/screens/` · 0 `CircularProgressIndicator` in `lib/screens/`
+**Automated gates (2026-07-03):** 290/290 tests pass · `flutter analyze` clean (infos only) · 0 `isDark ?` in `flutter-app/lib/` · 0 `AlertDialog` in `flutter-app/lib/` · 0 Material buttons in `flutter-app/lib/screens/` · 0 `CircularProgressIndicator` in `flutter-app/lib/screens/`
 
 **Smoke test (2026-07-03):** iOS Simulator launch attempted; `run_dev.sh` `-d` + `ios` arg bug fixed. Manual walkthrough of auth → Nexus → Explore → Chat → league/challenges recommended on physical device.
 
@@ -47,7 +47,7 @@
 | R2 | `validate_assets.ps1` profession badge map resolution | ✅ |
 | R2 | Deep link redirect tests expanded | ✅ |
 | — | Device UAT (physical) | ⏳ manual |
-| — | Supabase Pro + HIBP | ⏳ `./scripts/enable-auth-hibp.sh` |
+| — | Supabase Pro + HIBP | ⏳ `./flutter-app/scripts/enable-auth-hibp.sh` |
 | — | ~~Strip ~144 dead `isDark` ternaries~~ | ✅ S11 |
 | — | ~~Card primitive consolidation~~ | ✅ S11 |
 
@@ -96,7 +96,7 @@
 ## 2. UI / design system (Prestige Noir)
 
 ### Strengths
-- `lib/theme/prestige_noir.dart` canonical palette (cool dark bg, gold accent, 14px bento)
+- `flutter-app/lib/theme/prestige_noir.dart` canonical palette (cool dark bg, gold accent, 14px bento)
 - Dark-only lock in `theme_provider` + `app.dart`
 - **Two card primitives:** `VCard` (flat) + `VPrestigeCard` (raised)
 - **`VSpinner`** for inline loading; **`VButton`** in all screens
@@ -119,7 +119,7 @@
 
 | Priority | Issue | Fix |
 |----------|-------|-----|
-| **P2** | `prestige_noir_ui.dart` widgets overlap `lib/ui/cards/v_prestige_card.dart` | Fold progression widgets into `lib/ui/` |
+| **P2** | `prestige_noir_ui.dart` widgets overlap `flutter-app/lib/ui/cards/v_prestige_card.dart` | Fold progression widgets into `flutter-app/lib/ui/` |
 | **P2** | ~10 feature widgets still import Forui directly | Migrate to V* facades |
 | **P2** | `VGateCta` + `world_hero_banner` join chip keep Material buttons (intentional branding) | Document exceptions |
 | **P3** | Offline font bundling (vs runtime `google_fonts`) | Optional `pubspec` font assets for air-gap |
@@ -173,7 +173,7 @@
 - **World-admin Prestige polish** (dialogs/refresh/empty states) — Wave S12 candidate
 - Real report flow (toast stub)
 - Voice messages, search-in-conversation, quick-reply from push
-- Fold `prestige_noir_ui.dart` into `lib/ui/`
+- Fold `prestige_noir_ui.dart` into `flutter-app/lib/ui/`
 
 ---
 
@@ -181,7 +181,7 @@
 
 | Check | Status |
 |-------|--------|
-| Direct `lib/` asset refs | ✅ 0 missing |
+| Direct `flutter-app/lib/` asset refs | ✅ 0 missing |
 | `WorldAssets` map | ✅ 70/70 resolve |
 | Generated assets committed | ✅ 180 tracked |
 | Core achievement badges | ✅ 6 profession IDs via flat map fallback |
@@ -214,7 +214,7 @@
 - ✅ `VIconButton` — Semantics + 48dp target
 - ✅ `VButton` — 48dp minimum height (S11)
 - ✅ `VGateCta` — `VSpinner` + dark-only tokens
-- ❌ Most `lib/ui` list tiles lack `Semantics` labels
+- ❌ Most `flutter-app/lib/ui` list tiles lack `Semantics` labels
 - ⚠️ Decorative icons not `excludeSemantics`
 - ✅ HeartAnimation / cosmetic avatar pause when offscreen (S8)
 
@@ -233,10 +233,10 @@
 1. World admin UX pass (`world_manage`, `world_treasury`, `world_settings`, …) using `world_jobs_screen.dart` as reference
 2. `RefreshIndicator` on achievements + remaining hub lists
 3. Physical device UAT checklist (auth, push, deep link, Campfire mic, purchase)
-4. Fold `prestige_noir_ui.dart` into `lib/ui/`
+4. Fold `prestige_noir_ui.dart` into `flutter-app/lib/ui/`
 
 ### Wave R3 — Public release (1–2 weeks after S12)
-1. Supabase Pro + `./scripts/enable-auth-hibp.sh`
+1. Supabase Pro + `./flutter-app/scripts/enable-auth-hibp.sh`
 2. WCAG pass: Semantics audit on tab roots + commerce
 3. Store screenshots from current Prestige Noir build
 4. Physical device matrix (iOS 18+, Android API 30–35)
@@ -268,4 +268,4 @@ From [closed-beta.md](../guides/closed-beta.md) + 2026 production guides:
 
 ---
 
-*Updated 2026-07-03 after Wave S11 design-system hardening + automated smoke gates. Re-run `./scripts/audit-ui-ux.sh` and device UAT before next TestFlight/Play internal build.*
+*Updated 2026-07-03 after Wave S11 design-system hardening + automated smoke gates. Re-run `./flutter-app/scripts/audit-ui-ux.sh` and device UAT before next TestFlight/Play internal build.*

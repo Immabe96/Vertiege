@@ -158,7 +158,7 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 | ID | Task | Status |
 |----|------|--------|
-| S10.1 | `lib/theme/prestige_noir.dart` canonical palette (cool-tinted bg, gold accent, 14px bento radius) | ✅ |
+| S10.1 | `flutter-app/lib/theme/prestige_noir.dart` canonical palette (cool-tinted bg, gold accent, 14px bento radius) | ✅ |
 | S10.2 | Dark-only `theme_provider` + `app.dart` (`ThemeMode.dark`); remove light/system scheme picker | ✅ |
 | S10.3 | `VColors`, `VCommuneColors`, `VTheme`, `forui_theme` aligned to Prestige Noir | ✅ |
 | S10.4 | Shared primitives: `VPrestigeCard`, `VSurfaceCard`, `prestige_noir_ui.dart` progression widgets | ✅ |
@@ -215,7 +215,7 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 | ID | Task | Status |
 |----|------|--------|
-| S11.1 | Delete `lib/theme/colors.dart` (`AppColors`) | ✅ |
+| S11.1 | Delete `flutter-app/lib/theme/colors.dart` (`AppColors`) | ✅ |
 | S11.2 | Unify card radius (`VRadius.lg` = `VRadius.bento` = 14) | ✅ |
 | S11.3 | Align `VertiegeForuiTheme` type scale with `VFontSize` | ✅ |
 | S11.4 | `VButton` 48dp minimum touch target | ✅ |
@@ -234,8 +234,8 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 | ID | Task | Status |
 |----|------|--------|
-| S11.10 | Material buttons → `VButton` in all `lib/screens/` | ✅ |
-| S11.11 | Remove dead `isDark ?` ternaries (screens + `lib/ui/` facades) | ✅ |
+| S11.10 | Material buttons → `VButton` in all `flutter-app/lib/screens/` | ✅ |
+| S11.11 | Remove dead `isDark ?` ternaries (screens + `flutter-app/lib/ui/` facades) | ✅ |
 | S11.12 | `docs/reference/design-system.md` + `.cursor/rules/flutter-ui.mdc` updated | ✅ |
 
 ---
@@ -247,7 +247,7 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 Constraint: **implement everything already built** — re-home and re-skin, never delete features. Economy flags stay off in beta; identity (government-ID tick) stays separate from achievement proof (Nexus standing); lexicon unchanged.
 
-**Decision 2026-09-18 — client rebuilt in React Native (from scratch).** Vertiege's client is being rebuilt **from scratch** in a new `app/` folder using **React Native + Expo + TypeScript** (Expo Router, NativeWind v4, NativeWindUI, Reanimated). Visual design is also from scratch — the Renewal design docs are exploration history, **not** applied. Supabase + Firebase backends are reused unchanged; the **only** things carried over from Flutter are **keys and logins** (`.env`, Firebase config, OAuth redirect, app ids). No Flutter code is ported. Stack additions per the 2026 RN guidance (Simon Grimm): Zustand + TanStack Query, MMKV, expo-sqlite + Drizzle, React Hook Form + Zod, FlashList, EAS, Sentry, RevenueCat, PostHog; **Supabase Auth is kept** (instead of Clerk) for backend/RLS continuity. The Flutter app keeps shipping the closed beta until the new app passes both stores, then it is archived as `legacy-flutter/`. Master plan: [`docs/design/s12-renewal/rn-rewrite-plan.md`](docs/design/s12-renewal/rn-rewrite-plan.md). Flutter tasks S12.4–S12.19 below are **superseded** — they remain as design-history reference only.
+**Decision 2026-09-18 — client rebuilt in React Native (from scratch).** Vertiege's client is being rebuilt **from scratch** in a new `expo-app/` folder using **React Native + Expo + TypeScript** (Expo Router, NativeWind v4, NativeWindUI, Reanimated). Visual design is also from scratch — the Renewal design docs are exploration history, **not** applied. Supabase + Firebase backends are reused unchanged; the **only** things carried over from Flutter are **keys and logins** (`.env`, Firebase config, OAuth redirect, app ids). No Flutter code is ported. Stack additions per the 2026 RN guidance (Simon Grimm): Zustand + TanStack Query, MMKV, expo-sqlite + Drizzle, React Hook Form + Zod, FlashList, EAS, Sentry, RevenueCat, PostHog; **Supabase Auth is kept** (instead of Clerk) for backend/RLS continuity. The Flutter app keeps shipping the closed beta until the new app passes both stores, then it is archived as `legacy-flutter/`. Master plan: [`expo-app/rn-rewrite-plan.md`](expo-app/rn-rewrite-plan.md). Flutter tasks S12.4–S12.19 below are **superseded** — they remain as design-history reference only.
 
 ### S12.1 — Direction & spec
 
@@ -306,7 +306,7 @@ Constraint: **implement everything already built** — re-home and re-skin, neve
 | A5 | Use `autoDispose` on all providers | HIGH | 📋 |
 | A6 | Add Riverpod lint rules to `analysis_options.yaml` | MEDIUM | 📋 |
 | A7 | Extract router redirect logic into testable pure functions | LOW | 📋 |
-| A8 | Feature-based folder structure (`lib/features/`) | MEDIUM | 📋 |
+| A8 | Feature-based folder structure (`flutter-app/lib/features/`) | MEDIUM | 📋 |
 | A9 | Unit tests for all service business logic (target 80%+) | HIGH | 📋 |
 | A10 | Use Freezed for immutable models | MEDIUM | 📋 partial |
 

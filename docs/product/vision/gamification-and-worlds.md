@@ -98,8 +98,8 @@ World info / detail UI should eventually express this dossier (deferred until ga
 
 | Vision piece | Today |
 |--------------|--------|
-| Categories (education, career, … funny, in-app) | `AchievementCategory` in `lib/models/achievement.dart` |
-| 100 achievements in config | `lib/config/achievements.dart` |
+| Categories (education, career, … funny, in-app) | `AchievementCategory` in `flutter-app/lib/models/achievement.dart` |
+| 100 achievements in config | `flutter-app/lib/config/achievements.dart` |
 | Manual proof review | Verifier portal + `user_achievements`; AI path removed |
 | In-app auto-unlocks | `autoAwardAchievement` (posts, streaks, worlds, …) — **local only until server sync** |
 | XP → tier | **Split:** achievement sum vs `profiles.total_xp` — needs server sync on verify |
@@ -125,7 +125,7 @@ Do not treat marketplace/treasury/polls as “done” until they participate in 
 ## Progression glossary (user-facing)
 
 Use these terms consistently in UI and support docs. In-app copy lives in
-`lib/config/progression_glossary.dart`; help sheet: **How progression works**.
+`flutter-app/lib/config/progression_glossary.dart`; help sheet: **How progression works**.
 
 | Term | Scope | Meaning |
 |------|--------|---------|

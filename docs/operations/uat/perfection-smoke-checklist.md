@@ -1,7 +1,7 @@
 # Perfection pass — quick device smoke (Waves 0–5)
 
 **Build:** `flutter build apk --release` from `develop`  
-**Install:** `adb install -r build/app/outputs/flutter-apk/app-release.apk`  
+**Install:** `adb install -r flutter-app/build/app/outputs/flutter-apk/app-release.apk`  
 **Record:** device, OS, commit SHA, date, tester
 
 ## Core tabs

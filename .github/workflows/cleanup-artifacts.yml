@@ -9,6 +9,10 @@ on:
 permissions:
   actions: write
 
+defaults:
+  run:
+    working-directory: flutter-app
+
 jobs:
   prune:
     runs-on: ubuntu-latest

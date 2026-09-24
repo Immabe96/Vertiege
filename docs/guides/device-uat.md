@@ -6,14 +6,14 @@ Manual checks on **CI APK** before promoting `develop` → `main`. Owner-run; up
 
 ## Release APK after core achievement badges (110/110)
 
-When every core catalog achievement has PNG art (`assets/generated/achievements/<id>.png` or legacy `prof-*` / `badge-*` maps):
+When every core catalog achievement has PNG art (`flutter-app/assets/generated/achievements/<id>.png` or legacy `prof-*` / `badge-*` maps):
 
 ```bash
-python3 scripts/check_core_achievement_assets.py
-./scripts/build_release_apk.sh
+python3 flutter-app/scripts/check_core_achievement_assets.py
+./flutter-app/scripts/build_release_apk.sh
 ```
 
-APK path: `build/app/outputs/flutter-apk/app-release.apk`  
+APK path: `flutter-app/build/app/outputs/flutter-apk/app-release.apk`  
 GitHub: **Actions → Release APK (core assets gate)** (manual; fails until assets are committed).
 
 Use `--force` on the script only for interim QA without full badge art.
@@ -125,12 +125,12 @@ adb install -r path\to\app-release.apk
 
 ```bash
 # Build (requires 110/110 core achievement badge PNGs; full catalog is ~619 entries using category art)
-./scripts/build_release_apk.sh
+./flutter-app/scripts/build_release_apk.sh
 # Or:
 flutter build apk --release
 
 adb uninstall com.vertiege   # if signature / package conflict
-adb install -r build/app/outputs/flutter-apk/app-release.apk
+adb install -r flutter-app/build/app/outputs/flutter-apk/app-release.apk
 ```
 
 Expected size: **~138–144 MB**. Specs: [world-page-redesign.md](vision/world-page-redesign.md), [onboarding-funnel.md](vision/onboarding-funnel.md).

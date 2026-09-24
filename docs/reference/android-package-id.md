@@ -19,7 +19,7 @@ Android `applicationId` and iOS/macOS bundle identifier are **`com.vertiege`**.
 The repo’s `google-services.json` may list `com.vertiege` but Firebase must have a matching **Android app** registered, or FCM/Crashlytics will not initialize correctly.
 
 1. Firebase Console → project **veritage** → Add Android app → `com.vertiege`
-2. Replace `android/app/google-services.json` with the downloaded file
+2. Replace `flutter-app/android/app/google-services.json` with the downloaded file
 3. Re-run `flutterfire configure` if you use FlutterFire CLI
 
 ## Install note

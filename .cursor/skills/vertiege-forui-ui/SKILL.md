@@ -17,15 +17,15 @@ Project design system for **Vertiege** (tier-gated social app). Read this **with
 |-------|-----|
 | **Forui** | `FScaffold`, `FHeader`, `FTile`/`FTileGroup`, `FButton`, `FTextField`, `FDialog`, `showFSheet`, `FToaster` |
 | **Material** | `ThemeData` via `VTheme` / `AppTheme` — backs Material widgets still in migration |
-| **Tokens** | `VSpacing`, `VFontSize`, `VFontWeight` in `lib/theme/v_tokens.dart` |
+| **Tokens** | `VSpacing`, `VFontSize`, `VFontWeight` in `flutter-app/lib/theme/v_tokens.dart` |
 | **Colors** | Prefer `Theme.of(context).colorScheme` or `context.theme.colors` (Forui); avoid new raw `VColors.*` + `isDark` ternaries |
-| **Hub pages** | `VHubPage` (`lib/forui/v_hub_page.dart`) for sub-routes |
+| **Hub pages** | `VHubPage` (`flutter-app/lib/forui/v_hub_page.dart`) for sub-routes |
 | **Settings lists** | `VSectionList` / `VSectionTile` → Forui tiles |
 
 ## Theme & light/dark
 
 - User preference: `themeProvider` — `ThemeScheme.system | light | dark` + `TextSize`.
-- App wiring: `lib/app.dart` — `MaterialApp.router` + `FTheme(data: VertiegeForuiTheme.light|dark)`.
+- App wiring: `flutter-app/lib/app.dart` — `MaterialApp.router` + `FTheme(data: VertiegeForuiTheme.light|dark)`.
 - **Both** Material `themeMode` and `FTheme` brightness must stay in sync (see `useDarkForui` in `app.dart`).
 - Default product look: **AMOLED dark** (violet + gold accents). Light mode must remain fully usable.
 - Known gaps (fix when touching related files): splash uses separate dark-only `MaterialApp` (U01); default scheme is light not system (U02).
@@ -36,20 +36,20 @@ Project design system for **Vertiege** (tier-gated social app). Read this **with
 2. **New buttons** → `FButton`, not `VButton` / `ElevatedButton` (unless inside legacy file not yet migrated).
 3. **New inputs** → `FTextField`, not raw `TextField`.
 4. **Feedback** → `FToaster` / `showFToast`, not `ScaffoldMessenger.showSnackBar`.
-5. **Sheets** → `showFSheet` (`lib/widgets/core/glass_sheet.dart`), not `showModalBottomSheet`.
+5. **Sheets** → `showFSheet` (`flutter-app/lib/widgets/core/glass_sheet.dart`), not `showModalBottomSheet`.
 6. **Confirmations** → `FDialog`, not `AlertDialog`.
 
 ## Tab shell (high traffic — Tier A)
 
 These still use Material chrome; align with Forui when editing:
 
-- `lib/screens/tabs/tab_layout.dart`
-- `lib/screens/tabs/explore_screen.dart`
-- `lib/screens/tabs/nexus_screen.dart`
-- `lib/screens/tabs/chat_list_screen.dart`
-- ~~`lib/screens/tabs/identity_screen.dart`~~ (uses `VHubPage` — polish feedback only, Tier B)
+- `flutter-app/lib/screens/tabs/tab_layout.dart`
+- `flutter-app/lib/screens/tabs/explore_screen.dart`
+- `flutter-app/lib/screens/tabs/nexus_screen.dart`
+- `flutter-app/lib/screens/tabs/chat_list_screen.dart`
+- ~~`flutter-app/lib/screens/tabs/identity_screen.dart`~~ (uses `VHubPage` — polish feedback only, Tier B)
 
-Reference: `lib/screens/chat_room_screen.dart` (`FScaffold` + `FHeader.nested`).
+Reference: `flutter-app/lib/screens/chat_room_screen.dart` (`FScaffold` + `FHeader.nested`).
 
 ## Brand constraints
 
@@ -61,8 +61,8 @@ Reference: `lib/screens/chat_room_screen.dart` (`FScaffold` + `FHeader.nested`).
 
 - Full UI/UX audit: `docs/audits/2026-05-24-cursor-swarm-ui-ux-audit.md`
 - Tracker: `docs/audits/2026-05-24-ui-ux-fix-tracker.md` (U01–U12)
-- Re-run swarm: `./scripts/audit-ui-ux.sh`
-- Forui widget index: `lib/forui/README.md`
+- Re-run swarm: `./flutter-app/scripts/audit-ui-ux.sh`
+- Forui widget index: `flutter-app/lib/forui/README.md`
 - Analyzer script (flutter-ai-ui-skill): `python .cursor/skills/flutter-ai-ui-skill/scripts/analyse_flutter_project.py`
 
 ## Anti-patterns in this repo

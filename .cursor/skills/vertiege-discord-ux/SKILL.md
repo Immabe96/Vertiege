@@ -70,16 +70,16 @@ Achievements, tiers, and worlds are **first-class** — economy modules stay fla
 
 | Area | Path |
 |------|------|
-| Nexus tab | `lib/screens/tabs/nexus_screen.dart` |
-| Nexus moment sheet | `lib/widgets/nexus/nexus_moment_sheet.dart` |
-| Chat tab | `lib/screens/tabs/chat_list_screen.dart` |
-| Identity tab | `lib/screens/tabs/you_screen.dart` |
-| Identity verification | `lib/widgets/identity/identity_verification_card.dart` |
-| Achievement proof | `lib/screens/achievements/submit_achievement.dart` |
-| Tab shell | `lib/screens/tabs/tab_layout.dart` |
-| Channel chat | `lib/screens/world_channel_screen.dart` |
-| Proof submit | `lib/screens/achievements/submit_achievement.dart` |
-| Theme | `lib/theme/v_commune_colors.dart` |
+| Nexus tab | `flutter-app/lib/screens/tabs/nexus_screen.dart` |
+| Nexus moment sheet | `flutter-app/lib/widgets/nexus/nexus_moment_sheet.dart` |
+| Chat tab | `flutter-app/lib/screens/tabs/chat_list_screen.dart` |
+| Identity tab | `flutter-app/lib/screens/tabs/you_screen.dart` |
+| Identity verification | `flutter-app/lib/widgets/identity/identity_verification_card.dart` |
+| Achievement proof | `flutter-app/lib/screens/achievements/submit_achievement.dart` |
+| Tab shell | `flutter-app/lib/screens/tabs/tab_layout.dart` |
+| Channel chat | `flutter-app/lib/screens/world_channel_screen.dart` |
+| Proof submit | `flutter-app/lib/screens/achievements/submit_achievement.dart` |
+| Theme | `flutter-app/lib/theme/v_commune_colors.dart` |
 
 ## Smoke test
 

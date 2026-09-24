@@ -4,15 +4,14 @@ description: >-
   image manifest queue and vertiege-asset-generator skill with GenerateImage.
 globs:
   - docs/assets/**
-  - assets/generated/**
-  - assets/staging/**
-  - scripts/image_gen.py
-  - scripts/sync_image_manifest.py
+  - flutter-app/assets/generated/**
+  - flutter-app/assets/staging/**
+  - flutter-app/scripts/image_gen.py
+  - flutter-app/scripts/sync_image_manifest.py
 alwaysApply: false
----
 
 Use skill **vertiege-asset-generator** (`/.cursor/skills/vertiege-asset-generator/SKILL.md`).
 
-- Queue: `docs/assets/image-manifest.json` + `python3 scripts/image_gen.py next --json`
+- Queue: `docs/assets/image-manifest.json` + `python3 flutter-app/scripts/image_gen.py next --json`
 - One image per turn; category `ach-*` covers bulk achievements (not 590 unique files)
 - Transparent PNG for badges; no text in pixels

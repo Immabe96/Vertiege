@@ -1,12 +1,12 @@
 ---
 description: Flutter UI/UX — Forui, theming, and design skills for Vertiege
 globs:
-  - lib/**/*.dart
+  - flutter-app/lib/**/*.dart
   - docs/audits/*ui-ux*
-  - lib/theme/**
-  - lib/forui/**
-  - lib/widgets/**
-  - lib/ui/**
+  - flutter-app/lib/theme/**
+  - flutter-app/lib/forui/**
+  - flutter-app/lib/widgets/**
+  - flutter-app/lib/ui/**
 alwaysApply: false
 ---
 
@@ -27,4 +27,4 @@ When building or reviewing **UI, screens, widgets, theme, Forui, light/dark mode
 ## Audits
 
 - `docs/audits/2026-06-29-release-readiness-audit.md`
-- `./scripts/audit-ui-ux.sh`
+- `./flutter-app/scripts/audit-ui-ux.sh`

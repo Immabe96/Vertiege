@@ -10,10 +10,10 @@
 
 ## Stack
 
-- **Material 3** — `ThemeData` via `lib/theme/v_theme.dart` (dark-only)
+- **Material 3** — `ThemeData` via `flutter-app/lib/theme/v_theme.dart` (dark-only)
 - **Forui** — `FScaffold`, `FHeader`, `FBottomNavigationBar`, forms, sheets (`forui: ^0.21.3`)
-- **Tokens** — `lib/theme/prestige_noir.dart`, `v_colors.dart`, `v_tokens.dart`, `v_context_colors.dart`
-- **Forui theme** — `lib/theme/forui_theme.dart` (`VertiegeForuiTheme.dark` — sole theme)
+- **Tokens** — `flutter-app/lib/theme/prestige_noir.dart`, `v_colors.dart`, `v_tokens.dart`, `v_context_colors.dart`
+- **Forui theme** — `flutter-app/lib/theme/forui_theme.dart` (`VertiegeForuiTheme.dark` — sole theme)
 
 ## Themes
 
@@ -21,9 +21,9 @@
 |------|----------|--------|
 | **Dark (only)** | Prestige Noir (`PrestigeNoir.bg` / `surface` / `surfaceRaised`) | Cool-tinted charcoal; gold accent discipline |
 
-App is locked to `ThemeMode.dark` in `lib/state/theme_provider.dart`. `VTheme.light` / `VertiegeForuiTheme.light` are legacy aliases that resolve to dark.
+App is locked to `ThemeMode.dark` in `flutter-app/lib/state/theme_provider.dart`. `VTheme.light` / `VertiegeForuiTheme.light` are legacy aliases that resolve to dark.
 
-App shell: `FTheme` → `FToaster` → `FTooltipGroup` → `Material` → content (`lib/app.dart`).
+App shell: `FTheme` → `FToaster` → `FTooltipGroup` → `Material` → content (`flutter-app/lib/app.dart`).
 
 ## Brand colors (summary)
 
@@ -38,7 +38,7 @@ Use `context.vOnSurface`, `context.vPrimary`, etc. from `v_context_colors.dart` 
 
 ## Typography
 
-- **Sans:** Plus Jakarta Sans (`VFonts.sansFamily`, `lib/theme/v_fonts.dart`)
+- **Sans:** Plus Jakarta Sans (`VFonts.sansFamily`, `flutter-app/lib/theme/v_fonts.dart`)
 - **Mono:** JetBrains Mono — codes, technical labels
 - Sizes/weights: `VFontSize`, `VFontWeight` in `v_tokens.dart` — aligned with `VertiegeForuiTheme` type scale
 
@@ -69,12 +69,12 @@ Legacy `VSurfaceCard`, `GlassPanel`, `SovereignCard`, `PrestigeRaisedCard` are r
 
 ## UI conventions
 
-1. **Tab screens** — `VTabShell` (`lib/ui/shell/v_tab_shell.dart`) — Forui `FScaffold` + `FHeader` inside.
-2. **Hub sub-pages** — `VPage` (`lib/ui/shell/v_page.dart`).
-3. **Import path** — feature screens use `package:vertiege/ui/ui.dart`; **no** `import 'package:forui/forui.dart'` in `lib/screens/`. Forui stays inside `lib/ui/` wrappers.
+1. **Tab screens** — `VTabShell` (`flutter-app/lib/ui/shell/v_tab_shell.dart`) — Forui `FScaffold` + `FHeader` inside.
+2. **Hub sub-pages** — `VPage` (`flutter-app/lib/ui/shell/v_page.dart`).
+3. **Import path** — feature screens use `package:vertiege/ui/ui.dart`; **no** `import 'package:forui/forui.dart'` in `flutter-app/lib/screens/`. Forui stays inside `flutter-app/lib/ui/` wrappers.
 4. **Buttons** — `VButton` / `VIconButton` in feature code; `VGateCta` for auth gate gold CTAs only.
 5. **Wide panels** — use `VCard` + full width, not `FTile.raw` with `Expanded` rows.
-6. See [lib/forui/README.md](../../lib/forui/README.md).
+6. See [flutter-app/lib/forui/README.md](../../flutter-app/lib/forui/README.md).
 
 ## Prestige Noir direction
 
@@ -96,7 +96,7 @@ Dark base `#101114` with stepped surfaces — avoid pure `#000000` for long read
 3. Motion: `context.motionDuration()` / `VHaptics` (reduced motion).
 4. Full-screen routes: `vGoRoute` in `app_router.dart`.
 5. Auth: `AuthSocialButtons` — Apple on iOS/macOS; Google on mobile.
-6. Empty states: `AppEmptyState` + `assets/images/empty_states/`.
+6. Empty states: `AppEmptyState` + `flutter-app/assets/images/empty_states/`.
 7. Remote tuning: Firebase `forui_strict_mode`, `minimum_build` (+ optional per-platform keys).
 
 ## Related docs

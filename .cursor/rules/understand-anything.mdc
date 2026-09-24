@@ -11,7 +11,7 @@ This project uses **[Understand-Anything](https://github.com/Lum1104/Understand-
 ### Setup (once per machine)
 
 ```bash
-./scripts/setup-understand-anything.sh
+./flutter-app/scripts/setup-understand-anything.sh
 ```
 
 Restart Cursor after setup. Plugin auto-discovery uses `.cursor-plugin/plugin.json` at the repo root.
@@ -20,10 +20,10 @@ Restart Cursor after setup. Plugin auto-discovery uses `.cursor-plugin/plugin.js
 
 | Goal | What to do |
 |------|------------|
-| Build / refresh the graph | Agent: run **`/understand lib`** (Flutter app code only) or **`/understand`** (full repo) |
+| Build / refresh the graph | Agent: run **`/understand flutter-app/lib`** (Flutter app code only) or **`/understand`** (full repo) |
 | Open visual dashboard | **`/understand-dashboard`** |
 | Ask how something works | **`/understand-chat`** or read `.understand-anything/knowledge-graph.json` |
-| Explain one file | **`/understand-explain lib/path/to/file.dart`** |
+| Explain one file | **`/understand-explain flutter-app/lib/path/to/file.dart`** |
 | Impact of local changes | **`/understand-diff`** |
 | Business flows | **`/understand-domain`** |
 
@@ -31,8 +31,8 @@ Restart Cursor after setup. Plugin auto-discovery uses `.cursor-plugin/plugin.js
 
 - **Prefer the committed graph** when `.understand-anything/knowledge-graph.json` exists — search nodes by `filePath`, `summary`, or `tags` before grepping the whole tree.
 - **Do not use `codegraph_*` MCP tools** — CodeGraph is retired for this repo.
-- **Scope large scans** to `lib/` (and `test/` if needed); skip `build/`, `.dart_tool/`, `*.g.dart`.
-- After major refactors, suggest the user re-run `/understand lib` (incremental by default).
+- **Scope large scans** to `flutter-app/lib/` (and `flutter-app/test/` if needed); skip `build/`, `.dart_tool/`, `*.g.dart`.
+- After major refactors, suggest the user re-run `/understand flutter-app/lib` (incremental by default).
 - For routing/UI audits, combine the graph with `docs/audits/` and manual navigation tests.
 
 ### Graph artifacts
@@ -42,5 +42,5 @@ Restart Cursor after setup. Plugin auto-discovery uses `.cursor-plugin/plugin.js
 
 ### If plugin/skills missing
 
-Run `./scripts/setup-understand-anything.sh` or add the plugin in **Cursor Settings → Plugins** → `https://github.com/Lum1104/Understand-Anything`.
+Run `./flutter-app/scripts/setup-understand-anything.sh` or add the plugin in **Cursor Settings → Plugins** → `https://github.com/Lum1104/Understand-Anything`.
 <!-- UNDERSTAND_ANYTHING_END -->

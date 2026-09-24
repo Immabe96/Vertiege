@@ -1,10 +1,10 @@
 # Fast verify on every push/PR; release APK only on develop (or manual dispatch).
 # main is updated after this workflow succeeds (see promote-to-main.yml).
-# Android: applicationId com.vertiege — google-services.json must stay in android/app/.
+# Android: applicationId com.vertiege — google-services.json must stay in flutter-app/android/app/.
 #
 # Repo secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_URL, SUPABASE_ANON_KEY — embedded in CI .env for the APK
-#   ANDROID_KEYSTORE_BASE64 — base64 -w0 android/upload-keystore.jks
+#   ANDROID_KEYSTORE_BASE64 — base64 -w0 flutter-app/android/upload-keystore.jks
 #   ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_PASSWORD
 #   ANDROID_KEY_ALIAS (optional, default upload)
 # Without Android signing secrets, build-apk falls back to debug signing.
@@ -35,6 +35,14 @@ concurrency:
 permissions:
   contents: read
   actions: write
+
+# The Flutter project lives in flutter-app/ — every `run:` step below is a
+# Flutter/Gradle/pod command, so run them all there. Note this does NOT affect
+# `uses:` steps; their `paths:`/`hashFiles()` are workspace-root relative and
+# are prefixed individually.
+defaults:
+  run:
+    working-directory: flutter-app
 
 jobs:
   verify:
@@ -133,8 +141,8 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            android/.gradle
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', 'android/**/*.kt*', 'pubspec.lock') }}
+            flutter-app/android/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', 'flutter-app/android/**/*.kt*', 'flutter-app/pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -180,8 +188,8 @@ jobs:
         with:
           name: vertiege-apk-${{ github.run_id }}
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            flutter-app/build/app/outputs/flutter-apk/app-release.apk
+            flutter-app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           if-no-files-found: error
           retention-days: 14
           compression-level: 9

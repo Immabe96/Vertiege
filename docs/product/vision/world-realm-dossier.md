@@ -1,7 +1,7 @@
 # World realm dossier (G4)
 
 **Screen:** `WorldDetailScreen` → **About** tab  
-**Widget:** `lib/widgets/worlds/world_realm_dossier.dart`
+**Widget:** `flutter-app/lib/widgets/worlds/world_realm_dossier.dart`
 
 ## Purpose
 

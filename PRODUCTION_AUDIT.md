@@ -3,7 +3,7 @@
 **Audited Application:** Vertiege v1.1.0-beta.3+13  
 **Platform:** Flutter (Android, iOS, Web, Desktop)  
 **Stack:** Flutter + Riverpod + GoRouter + Forui · Supabase · Firebase (FCM, Crashlytics, Analytics, Remote Config, App Check) · LiveKit (voice)  
-**Codebase (measured Jul 2026):** ~109K lines of Dart · 569 `lib/` files · 76 test files · ~283 `test`/`testWidgets` cases  
+**Codebase (measured Jul 2026):** ~109K lines of Dart · 569 `flutter-app/lib/` files · 76 test files · ~283 `test`/`testWidgets` cases  
 **Date:** July 18, 2026  
 **Status:** Corrected after verification against the repo. Prior draft had byte sizes listed as line counts and several false “missing feature” claims.
 
@@ -131,7 +131,7 @@
 
 ### C2. No real content moderation (server-side)
 
-**Where:** `lib/services/moderation_filter.dart` — `remoteApiEnabled = false`, ~15 English terms, TODO for real API.  
+**Where:** `flutter-app/lib/services/moderation_filter.dart` — `remoteApiEnabled = false`, ~15 English terms, TODO for real API.  
 **Impact:** Hate/harassment/CSAM-adjacent content not systematically blocked; client filter is bypassable. App-store and trust risk.  
 **Action:** Server-side moderation (Edge Function + Perspective / Azure / OpenAI Moderation), image moderation for proofs, RLS/visibility gates for unmoderated content. Client filter = UX only.
 

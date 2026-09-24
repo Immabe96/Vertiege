@@ -16,7 +16,7 @@ Enforced in: `WorldCapabilityMatrix`, `AdminAccessService.canCreateWorld`.
 
 ## World prestige (feature unlocks)
 
-From `featureUnlocks` in `lib/config/tiers.dart`:
+From `featureUnlocks` in `flutter-app/lib/config/tiers.dart`:
 
 | Prestige | Feature |
 |----------|---------|
@@ -40,7 +40,7 @@ Sovereign bypasses standing checks.
 
 | Check | File |
 |-------|------|
-| Matrix helpers | `lib/config/world_capability_matrix.dart` |
-| Post/moderate | `lib/services/permission_service.dart` |
-| World growth UI | `lib/widgets/worlds/world_growth_card.dart` |
+| Matrix helpers | `flutter-app/lib/config/world_capability_matrix.dart` |
+| Post/moderate | `flutter-app/lib/services/permission_service.dart` |
+| World growth UI | `flutter-app/lib/widgets/worlds/world_growth_card.dart` |
 | Daily quest claim RPC | `supabase/migrations/20260525230000_g3_daily_quests.sql` |

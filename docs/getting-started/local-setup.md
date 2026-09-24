@@ -1,10 +1,14 @@
 # Local development — iOS & Android parity
 
-Same Flutter app, same backend, same `pubspec.yaml` version. Use the commands below on either platform.
+Same Flutter app, same backend, same `flutter-app/pubspec.yaml` version. Use the commands below on either platform.
+
+> **Run these from `flutter-app/`** — the Flutter project sits one level below the repo root.
+> Repo-shared directories (`docs/`, `supabase/`, `.cursor/`) stay at the repo root.
 
 ## One-time setup
 
 ```bash
+cd flutter-app        # from the repo root
 cp .env.template .env          # SUPABASE_URL + SUPABASE_ANON_KEY (required for sign-up)
 ./scripts/firebase_beta_sync.sh # google-services.json + GoogleService-Info.plist
 ./scripts/check_beta_prereqs.sh

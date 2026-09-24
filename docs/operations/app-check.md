@@ -4,7 +4,7 @@ The Flutter app activates App Check in `AppCheckService` (debug providers in deb
 
 ## Client
 
-- `lib/services/supabase_app_check.dart` exposes `SupabaseAppCheck.headers()` for optional `X-Firebase-AppCheck` on sensitive calls.
+- `flutter-app/lib/services/supabase_app_check.dart` exposes `SupabaseAppCheck.headers()` for optional `X-Firebase-AppCheck` on sensitive calls.
 - Wire headers into custom edge clients when verifying purchases or admin actions.
 
 ## Server / edge

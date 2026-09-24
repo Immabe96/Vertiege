@@ -12,7 +12,7 @@
 | Open Chat | Chat tab empty states | Primary post-Gate CTA when worlds exist |
 | Submit proof | `OnboardingFunnel.hasSubmittedProof()` | `/achievements/submit` |
 
-## Prefs (`lib/services/onboarding_funnel_prefs.dart`)
+## Prefs (`flutter-app/lib/services/onboarding_funnel_prefs.dart`)
 
 - `onboarding_funnel_dismissed` — hide You checklist
 - `onboarding_funnel_opened_world` / `opened_nexus` — progress flags

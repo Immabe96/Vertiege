@@ -5,7 +5,7 @@
 ## One-time setup
 
 ```bash
-./scripts/setup-understand-anything.sh
+./flutter-app/scripts/setup-understand-anything.sh   # run from the repo root
 ```
 
 Requires **git**, **Node.js ≥ 22**, and **pnpm ≥ 10** (only for the first `/understand` build of `@understand-anything/core`).
@@ -23,15 +23,15 @@ Alternative: **Cursor Settings → Plugins** → add `https://github.com/Lum1104
 
 | Command | Purpose |
 |---------|---------|
-| `/understand lib` | Analyze `lib/` (recommended for Vertiege) |
+| `/understand flutter-app/lib` | Analyze `flutter-app/lib/` (recommended for Vertiege) |
 | `/understand` | Full repo scan (slower; respects `.understandignore`) |
 | `/understand-dashboard` | Interactive graph UI |
 | `/understand-chat How does world routing work?` | Q&A over the graph |
-| `/understand-explain lib/router/app_router.dart` | Deep-dive one file |
+| `/understand-explain flutter-app/lib/router/app_router.dart` | Deep-dive one file |
 | `/understand-diff` | Impact of uncommitted changes |
 | `/understand-domain` | Business-domain view |
 
-Re-run `/understand lib` after large refactors; incremental updates only re-analyze changed files.
+Re-run `/understand flutter-app/lib` after large refactors; incremental updates only re-analyze changed files.
 
 ## What to commit
 
@@ -44,14 +44,14 @@ Optional (good for onboarding): commit `knowledge-graph.json`, `meta.json`, and 
 
 ## Vertiege scope
 
-Default ignore list excludes `.dart_tool/`, `build/`, `*.g.dart`, platform trees, and legacy `.codegraph/`. Prefer **`/understand lib`** so agents focus on app architecture (router, screens, services, state).
+Default ignore list excludes `.dart_tool/`, `build/`, `*.g.dart`, platform trees, and legacy `.codegraph/`. Prefer **`/understand flutter-app/lib`** so agents focus on app architecture (router, screens, services, state).
 
 ## CodeGraph (retired)
 
 - MCP entry removed from `.cursor/mcp.json`
 - Rule replaced: `.cursor/rules/understand-anything.mdc`
 - Old docs: [CODEGRAPH.md](CODEGRAPH.md) (deprecated)
-- Scripts `scripts/codegraph-*.ps1` kept for reference only
+- Scripts `flutter-app/scripts/codegraph-*.ps1` kept for reference only
 
 ## Troubleshooting
 
@@ -59,5 +59,5 @@ Default ignore list excludes `.dart_tool/`, `build/`, `*.g.dart`, platform trees
 |-------|-----|
 | `/understand` not found | Run setup script; restart Cursor |
 | `pnpm` / build errors | Install Node 22+ and pnpm 10+; re-run setup |
-| Graph stale | `/understand lib --full` |
-| Too many files | `/understand lib` or `/understand lib/screens` |
+| Graph stale | `/understand flutter-app/lib --full` |
+| Too many files | `/understand flutter-app/lib` or `/understand flutter-app/lib/screens` |

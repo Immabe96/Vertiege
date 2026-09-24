@@ -6,7 +6,7 @@ Prevents **grey void** regressions on Channels / Members tabs (Wave 6 UAT).
 
 | Region | Scroll owner | Notes |
 |--------|--------------|--------|
-| World home | `NestedScrollView` on [world_detail_screen.dart](../../lib/screens/world_detail_screen.dart) | Header slivers + pinned tab bar |
+| World home | `NestedScrollView` on [world_detail_screen.dart](../../flutter-app/lib/screens/world_detail_screen.dart) | Header slivers + pinned tab bar |
 | Feed tab | Inner list inside tab — **no** nested `RefreshIndicator` on child | Pull-to-refresh on outer `NestedScrollView` only |
 | Channels tab | Single `ListView` / column of channel rows | No `Expanded` + inner `ListView` without bounded height |
 | Members tab | Single scrollable list | Do not wrap in `VLoadingCard` that steals flex |

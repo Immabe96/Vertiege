@@ -18,7 +18,7 @@ We adopt **chat-native layout patterns** (panel navigation, dark ladder, immersi
 
 ## Color — Commune ladder
 
-`lib/theme/v_commune_colors.dart`
+`flutter-app/lib/theme/v_commune_colors.dart`
 
 ### Dark
 
@@ -54,7 +54,7 @@ We adopt **chat-native layout patterns** (panel navigation, dark ladder, immersi
 | DND | `#f23f43` |
 | Offline | `#80848e` |
 
-Use `presenceColor()` from `lib/utils/presence_utils.dart`.
+Use `presenceColor()` from `flutter-app/lib/utils/presence_utils.dart`.
 
 ### Prestige accents
 
@@ -119,12 +119,12 @@ Saturation and contrast sliders (0.5–1.5) in Settings; applied via `ColorFilte
 
 | Component | File |
 |-----------|------|
-| `VOverlappingPanels` | `lib/ui/shell/v_overlapping_panels.dart` |
-| `VWorldRail` | `lib/ui/navigation/v_world_rail.dart` |
-| `VChannelTile` | `lib/ui/lists/v_channel_tile.dart` |
-| `VMessageBubble` | `lib/widgets/chat/v_message_bubble.dart` |
-| `VCommuneChatTheme` | `lib/theme/v_commune_chat_theme.dart` |
-| `VSurfaceCard` | `lib/ui/cards/v_surface_card.dart` |
+| `VOverlappingPanels` | `flutter-app/lib/ui/shell/v_overlapping_panels.dart` |
+| `VWorldRail` | `flutter-app/lib/ui/navigation/v_world_rail.dart` |
+| `VChannelTile` | `flutter-app/lib/ui/lists/v_channel_tile.dart` |
+| `VMessageBubble` | `flutter-app/lib/widgets/chat/v_message_bubble.dart` |
+| `VCommuneChatTheme` | `flutter-app/lib/theme/v_commune_chat_theme.dart` |
+| `VSurfaceCard` | `flutter-app/lib/ui/cards/v_surface_card.dart` |
 
 Chat chrome uses **solid** surfaces (`useCommuneStyle: true` on composers); glass blur only on modals.
 

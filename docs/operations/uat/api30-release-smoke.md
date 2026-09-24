@@ -5,13 +5,13 @@ Use this after a release APK build before store submission.
 ## Build
 
 ```bash
-./scripts/release_smoke_api30.sh
+./flutter-app/scripts/release_smoke_api30.sh
 ```
 
 Install on an API 30 emulator or device:
 
 ```bash
-adb install -r build/app/outputs/flutter-apk/app-release.apk
+adb install -r flutter-app/build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ## Pass criteria

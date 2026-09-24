@@ -82,14 +82,14 @@ Do not add Firebase Auth unless auth ownership is intentionally changed.
 
 ## Flutter client (`.env`)
 
-The mobile app reads **anon** credentials from a bundled `.env` asset (`pubspec.yaml` lists `.env`).
+The mobile app reads **anon** credentials from a bundled `.env` asset (`flutter-app/pubspec.yaml` lists `.env`).
 
 | Variable | Purpose |
 |----------|---------|
 | `SUPABASE_URL` | Project API URL |
 | `SUPABASE_ANON_KEY` | Public anon JWT for client SDK |
 
-Local: copy [`.env.template`](../../.env.template) → `.env`. CI/release APKs: GitHub Actions writes `.env` from `SUPABASE_URL` and `SUPABASE_ANON_KEY` secrets.
+Local: copy [`.env.template`](../../flutter-app/.env.template) → `.env`. CI/release APKs: GitHub Actions writes `.env` from `SUPABASE_URL` and `SUPABASE_ANON_KEY` secrets.
 
 `main.dart` calls `SupabaseBootstrap.initialize()` before `runApp`. Auth screens call `SupabaseBootstrap.ensureReady()` before sign-in or sign-up. Missing keys → user-visible “not configured” message (not a crash).
 

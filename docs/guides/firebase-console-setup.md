@@ -29,16 +29,16 @@ This guide walks you through connecting Firebase to Vertiege. You only need to d
 
 1. On the project dashboard, click the **Android icon** (the little robot)
 2. Fill in:
-   - **Android package name**: `com.vertiege` (must match `applicationId` in `android/app/build.gradle.kts`)
+   - **Android package name**: `com.vertiege` (must match `applicationId` in `flutter-app/android/app/build.gradle.kts`)
    - **App nickname**: `Vertiege`
    - **Debug signing certificate SHA-1**: Required for Google Sign-In on device — see [../reference/android-package-id.md](../reference/android-package-id.md)
 3. Click **Register app**
 4. Download the `google-services.json` file
 5. Put this file exactly here:
    ```
-   android/app/google-services.json
+   flutter-app/android/app/google-services.json
    ```
-   (NOT in `android/` — it must be in `android/app/`)
+   (NOT in `flutter-app/android/` — it must be in `flutter-app/android/app/`)
 
 ---
 
@@ -108,7 +108,7 @@ This is optional for now — Phase 9 only requires Firebase to be initialized an
 
 ## Checkpoint: Did It Work?
 
-- [ ] `google-services.json` is at `android/app/google-services.json`
+- [ ] `google-services.json` is at `flutter-app/android/app/google-services.json`
 - [ ] App builds and runs without Firebase errors in the console
 - [ ] Firebase Console shows the app connected (blue dot in Crashlytics)
 - [ ] A test crash appears in the Crashlytics dashboard

@@ -45,7 +45,7 @@ Use a test user from Studio → Authentication, or sign up with email (Inbucket:
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/release_smoke_api30.sh` | Device/emulator API 30 release smoke |
+| `flutter-app/scripts/release_smoke_api30.sh` | Device/emulator API 30 release smoke |
 | `curl` health on edge functions | See [store-receipt-hardening.md](store-receipt-hardening.md) |
 
 Suggested local RPC checks (manual until automated):
