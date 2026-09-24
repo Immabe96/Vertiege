@@ -240,6 +240,56 @@ Borrow **layout patterns** from popular chat apps; use Vertiege lexicon in all U
 
 ---
 
+## Wave S12 — Vertiege Renewal (UI/UX re-approach)
+
+**Target:** staged waves · **Exit:** all screens on the Renewal design system; IA restructured; **zero features removed**.  
+**Direction approved:** 2026-09-18 · **Dark-only** · Canonical design: root `DESIGN.md` · Prototypes + IA: `docs/design/s12-renewal/`
+
+Constraint: **implement everything already built** — re-home and re-skin, never delete features. Economy flags stay off in beta; identity (government-ID tick) stays separate from achievement proof (Nexus standing); lexicon unchanged.
+
+**Decision 2026-09-18 — client rebuilt in React Native (from scratch).** Vertiege's client is being rebuilt **from scratch** in a new `app/` folder using **React Native + Expo + TypeScript** (Expo Router, NativeWind v4, NativeWindUI, Reanimated). Visual design is also from scratch — the Renewal design docs are exploration history, **not** applied. Supabase + Firebase backends are reused unchanged; the **only** things carried over from Flutter are **keys and logins** (`.env`, Firebase config, OAuth redirect, app ids). No Flutter code is ported. Stack additions per the 2026 RN guidance (Simon Grimm): Zustand + TanStack Query, MMKV, expo-sqlite + Drizzle, React Hook Form + Zod, FlashList, EAS, Sentry, RevenueCat, PostHog; **Supabase Auth is kept** (instead of Clerk) for backend/RLS continuity. The Flutter app keeps shipping the closed beta until the new app passes both stores, then it is archived as `legacy-flutter/`. Master plan: [`docs/design/s12-renewal/rn-rewrite-plan.md`](docs/design/s12-renewal/rn-rewrite-plan.md). Flutter tasks S12.4–S12.19 below are **superseded** — they remain as design-history reference only.
+
+### S12.1 — Direction & spec
+
+| ID | Task | Status |
+|----|------|--------|
+| S12.1 | Canonical `DESIGN.md` — dark-only, warm ladder (`#0E0C09`/`#1A1611`/`#262019`), gold accent `#E3B84D`, Fraunces serif voice | ✅ |
+| S12.2 | Screen prototypes (Home, Chat, Worlds, You) — `screens.html` | ✅ |
+| S12.3 | IA spec — full feature map, `docs/design/s12-renewal/ia.md` | ✅ |
+
+### S12.2 — Flutter foundation
+
+| ID | Task | Status |
+|----|------|--------|
+| S12.4 | `PrestigeNoir`/`VColors` → Renewal tokens (ladder, accent, ink) | 📋 |
+| S12.5 | Add Fraunces display font; `VFonts` display/title roles | 📋 |
+| S12.6 | `VTheme` + `VertiegeForuiTheme` aligned to Renewal | 📋 |
+| S12.7 | `VCard`/`VRaisedCard`, gold-primary `VButton`, hairline borders | 📋 |
+
+### S12.3 — Shell & tabs
+
+| ID | Task | Status |
+|----|------|--------|
+| S12.8 | Tab shell restyle (surface bar, gold active, 4 tabs) | 📋 |
+| S12.9 | Home: serif wordmark, Today strip, composer, feed-first | 📋 |
+| S12.10 | Worlds: gallery hero + your worlds + trending (no rail) | 📋 |
+| S12.11 | Chat: DM-first unified inbox (Direct/Worlds/Campfire) | 📋 |
+| S12.12 | You: identity hero + stats + tier progress + hubs | 📋 |
+
+### S12.4 — Hub screens & cleanup
+
+| ID | Task | Status |
+|----|------|--------|
+| S12.13 | Unified notifications inbox (re-home `alerts_screen`) | 📋 |
+| S12.14 | Achievements hub under You (re-home tab root) | 📋 |
+| S12.15 | Progress hubs, shop, subscription, season/league/quests re-skin | 📋 |
+| S12.16 | World sub-pages (manage, governance, treasury, jobs, sanctuary, academy, archive, polls, challenges, marketplace) re-skin | 📋 |
+| S12.17 | Verifier + audit log + twin seal re-skin | 📋 |
+| S12.18 | Delete `/more`, legacy tab roots; remove dead theme layers | 📋 |
+| S12.19 | Quality gate per wave: analyze + tests + Forui import check | 📋 |
+
+---
+
 ## Wave S9 — Improvements (from audit + web suggestions)
 
 **Target:** 3–4 weeks · **Exit:** Key improvements shipped; tech debt reduced.  

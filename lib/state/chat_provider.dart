@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -830,13 +831,15 @@ class ChatNotifier extends _$ChatNotifier with ChatOutboxReplay {
     return messages.where((m) => m.isPinned).toList();
   }
 
-  Future<void> togglePin({
+  /// Returns false when the server pin update fails (local state is rolled back).
+  Future<bool> togglePin({
     required String channelId,
     required String messageId,
     required bool isPinned,
   }) async {
     final messages = state.channelMessages[channelId];
-    if (messages == null) return;
+    if (messages == null) return false;
+    final snapshot = List<ChannelMessage>.from(messages);
     final updated = messages.map((m) {
       if (m.id == messageId) return m.copyWith(isPinned: isPinned);
       return m;
@@ -844,7 +847,16 @@ class ChatNotifier extends _$ChatNotifier with ChatOutboxReplay {
     state = state.copyWith(
       channelMessages: {...state.channelMessages, channelId: updated},
     );
-    await ChatService.pinMessage(messageId: messageId, isPinned: isPinned);
+    try {
+      await ChatService.pinMessage(messageId: messageId, isPinned: isPinned);
+      return true;
+    } catch (e) {
+      debugPrint('togglePin failed: $e');
+      state = state.copyWith(
+        channelMessages: {...state.channelMessages, channelId: snapshot},
+      );
+      return false;
+    }
   }
 
   Future<void> loadChannelMessages(

@@ -278,25 +278,41 @@ class _VMessageBubbleState extends State<VMessageBubble>
     if (widget.message.sendFailed &&
         widget.isMe &&
         widget.onRetryFailed != null) {
-      child = GestureDetector(
-        onTap: widget.onRetryFailed,
-        child: Column(
-          crossAxisAlignment: widget.isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          children: [
-            animated,
-            Padding(
-              padding: const EdgeInsets.only(top: VSpacing.xs),
-              child: Text(
-                AppLocalizations.of(context).messageFailedTapRetry,
-                style: const TextStyle(
-                  fontSize: VFontSize.labelSm,
-                  color: VColors.error,
+      final retryLabel = AppLocalizations.of(context).messageFailedTapRetry;
+      child = Semantics(
+        button: true,
+        label: retryLabel,
+        child: GestureDetector(
+          onTap: widget.onRetryFailed,
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            crossAxisAlignment: widget.isMe
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              animated,
+              Padding(
+                padding: const EdgeInsets.only(top: VSpacing.xs),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: VTouchTarget.iconButton,
+                  ),
+                  child: Align(
+                    alignment: widget.isMe
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Text(
+                      retryLabel,
+                      style: const TextStyle(
+                        fontSize: VFontSize.labelSm,
+                        color: VColors.error,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     } else if (widget.message.sending && widget.isMe) {

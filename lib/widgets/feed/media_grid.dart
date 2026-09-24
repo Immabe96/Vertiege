@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/v_tokens.dart';
+import '../../utils/asset_image_decode.dart';
 import '../core/broken_media.dart';
 import '../core/shimmer.dart';
 
@@ -17,35 +18,43 @@ class MediaGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
-        mainAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
-      ),
-      itemCount: images.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: onImagePress != null
-              ? () => onImagePress!(images[index])
-              : null,
-          child: ClipRRect(
-            borderRadius: edgeToEdge
-                ? BorderRadius.zero
-                : BorderRadius.circular(VRadius.lg),
-            child: Image.network(
-              images[index],
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const Pulse();
-              },
-              errorBuilder: (context, error, stackTrace) =>
-                  const BrokenMediaTile(label: 'Unavailable'),
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cell = constraints.maxWidth / 3;
+        final cachePx = assetCachePx(context, cell, sourceMax: 1024);
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
+            mainAxisSpacing: edgeToEdge ? 2 : VSpacing.xs,
           ),
+          itemCount: images.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: onImagePress != null
+                  ? () => onImagePress!(images[index])
+                  : null,
+              child: ClipRRect(
+                borderRadius: edgeToEdge
+                    ? BorderRadius.zero
+                    : BorderRadius.circular(VRadius.lg),
+                child: Image.network(
+                  images[index],
+                  fit: BoxFit.cover,
+                  cacheWidth: cachePx,
+                  cacheHeight: cachePx,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Pulse();
+                  },
+                  errorBuilder: (context, error, stackTrace) =>
+                      const BrokenMediaTile(label: 'Unavailable'),
+                ),
+              ),
+            );
+          },
         );
       },
     );

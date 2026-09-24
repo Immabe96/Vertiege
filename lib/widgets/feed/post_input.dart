@@ -24,11 +24,16 @@ class PostInput extends ConsumerStatefulWidget {
   final String? sovereignId;
   final bool showWorldSelector;
 
+  /// When true (e.g. Nexus FAB sheet), dismiss the hosting route after a
+  /// successful submit so compose does not stay open with an empty field.
+  final bool popOnSubmit;
+
   const PostInput({
     super.key,
     required this.worldId,
     this.sovereignId,
     this.showWorldSelector = false,
+    this.popOnSubmit = false,
   });
 
   @override
@@ -109,7 +114,16 @@ class _PostInputState extends ConsumerState<PostInput>
       TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 60),
     ]).animate(CurvedAnimation(parent: _sendAnim, curve: Curves.easeInOut));
 
-    _selectedWorldId = widget.showWorldSelector ? null : widget.worldId;
+    // When composing from Nexus, prefer the FAB-provided joined world (or first
+    // joined world once the list loads). Never leave a null "Default world"
+    // that fails submit with "Choose a world to post into."
+    if (widget.showWorldSelector) {
+      _selectedWorldId = WorldService.isRemoteWorldId(widget.worldId)
+          ? widget.worldId
+          : null;
+    } else {
+      _selectedWorldId = widget.worldId;
+    }
     _loadDraft();
   }
 
@@ -361,16 +375,7 @@ class _PostInputState extends ConsumerState<PostInput>
     final imageUri = _imageUri;
     final isAnnouncement = _isAnnouncement;
 
-    _controller.clear();
-    _sendAnim.forward(from: 0);
-    XpToast.show(context, amount: 15);
-    setState(() {
-      _imageUri = null;
-      _isAnnouncement = false;
-      _sent = true;
-      _hasDraft = false;
-    });
-    await StorageService.remove(_draftKey);
+    setState(() => _sent = true);
 
     try {
       await ref
@@ -390,6 +395,40 @@ class _PostInputState extends ConsumerState<PostInput>
         setState(() => _sent = false);
         VFeedback.showMessage(context, 'Failed to publish post. Please try again.');
       }
+      return;
+    }
+
+    if (!mounted) return;
+
+    // addPost often fails soft (no throw) — don't clear compose / toast XP then.
+    final postState = ref.read(postProvider);
+    final hardFail = postState.error != null ||
+        postState.lastError == 'Image upload failed' ||
+        postState.lastError == 'Join a world before posting' ||
+        (postState.lastError?.startsWith('Failed to create') ?? false) ||
+        (postState.lastError?.startsWith('Could not') ?? false);
+    if (hardFail) {
+      setState(() => _sent = false);
+      // Prefer lastError toast via [PostActionErrorListener]; fall back for [error].
+      if (postState.lastError == null && postState.error != null) {
+        VFeedback.showMessage(context, postState.error!);
+      }
+      return;
+    }
+
+    _controller.clear();
+    _sendAnim.forward(from: 0);
+    XpToast.show(context, amount: 15);
+    setState(() {
+      _imageUri = null;
+      _isAnnouncement = false;
+      _hasDraft = false;
+    });
+    await StorageService.remove(_draftKey);
+
+    if (!mounted) return;
+    if (widget.popOnSubmit) {
+      Navigator.of(context).maybePop();
       return;
     }
 
@@ -489,57 +528,58 @@ class _PostInputState extends ConsumerState<PostInput>
               ),
 
             // ── World selector (Nexus) ─────────────────────────
-            if (widget.showWorldSelector && worlds.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: VSpacing.sm),
-                child: DropdownButtonFormField<String>(
-                  value: _selectedWorldId,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.md,
-                      vertical: VSpacing.sm,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(VRadius.md),
-                    ),
-                    labelText: 'Post to (Nexus shows all joined worlds)',
-                    labelStyle: theme.textTheme.labelSmall,
-                  ),
-                  items: [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.public,
-                            size: VIconSize.sm,
-                            color: theme.colorScheme.outline,
-                          ),
-                          const SizedBox(width: VSpacing.xs),
-                          Text(
-                            'Default world',
-                            style: theme.textTheme.labelMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    ...worlds.map(
-                      (world) => DropdownMenuItem<String>(
-                        value: world.id,
-                        child: Text(
-                          world.name,
-                          style: theme.textTheme.labelMedium,
+            if (widget.showWorldSelector && worlds.isNotEmpty) ...[
+              Builder(
+                builder: (context) {
+                  // Ensure a concrete joined world is always selected.
+                  final selected =
+                      _selectedWorldId != null &&
+                          worlds.any((w) => w.id == _selectedWorldId)
+                      ? _selectedWorldId!
+                      : worlds.first.id;
+                  if (_selectedWorldId != selected) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      setState(() => _selectedWorldId = selected);
+                    });
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VSpacing.sm),
+                    child: DropdownButtonFormField<String>(
+                      key: ValueKey('post-world-$selected'),
+                      initialValue: selected,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: VSpacing.md,
+                          vertical: VSpacing.sm,
                         ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(VRadius.md),
+                        ),
+                        labelText: 'Post to (Nexus shows all joined worlds)',
+                        labelStyle: theme.textTheme.labelSmall,
                       ),
+                      items: [
+                        ...worlds.map(
+                          (world) => DropdownMenuItem<String>(
+                            value: world.id,
+                            child: Text(
+                              world.name,
+                              style: theme.textTheme.labelMedium,
+                            ),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => _selectedWorldId = value);
+                      },
                     ),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _selectedWorldId = value),
-                ),
+                  );
+                },
               ),
-
+            ],
             if (canAnnounce)
               Theme(
                 data: theme.copyWith(dividerColor: Colors.transparent),
@@ -597,105 +637,93 @@ class _PostInputState extends ConsumerState<PostInput>
                 ),
               ),
 
-            // ── Text input + actions ──────────────────────────
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CompositedTransformTarget(
-                        link: _layerLink,
-                        child: TextField(
-                          controller: _controller,
-                          focusNode: _focusNode,
-                          maxLines: 3,
-                          minLines: 1,
-                          maxLength: _maxChars,
-                          buildCounter:
-                              (
-                                context, {
-                                required currentLength,
-                                required isFocused,
-                                maxLength,
-                              }) => null,
-                          decoration: const InputDecoration(
-                            hintText: "What's on your mind?",
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: VSpacing.md,
-                              vertical: VSpacing.sm,
-                            ),
-                          ),
-                          onChanged: _onTextChanged,
-                        ),
-                      ),
-                      // Character count
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: VSpacing.xs,
-                          left: VSpacing.xs,
-                        ),
-                        child: AnimatedDefaultTextStyle(
-                          duration: VAnimation.fast,
-                          style: theme.textTheme.labelSmall!.copyWith(
-                            color: charColor,
-                            fontWeight: charLength >= _warnChars
-                                ? VFontWeight.bold
-                                : VFontWeight.regular,
-                          ),
-                          child: Text('$charLength/$_maxChars'),
-                        ),
-                      ),
-                    ],
+            // ── Text input ─────────────────────────────────────
+            CompositedTransformTarget(
+              link: _layerLink,
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                maxLines: 3,
+                minLines: 1,
+                maxLength: _maxChars,
+                buildCounter:
+                    (
+                      context, {
+                      required currentLength,
+                      required isFocused,
+                      maxLength,
+                    }) => null,
+                decoration: const InputDecoration(
+                  hintText: "What's on your mind?",
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: VSpacing.md,
+                    vertical: VSpacing.sm,
                   ),
                 ),
-                const SizedBox(width: VSpacing.sm),
-                Column(
-                  children: [
-                    if (canLinkPoll)
-                      IconButton(
-                        icon: const Icon(Icons.poll_outlined),
-                        tooltip: 'Create poll in world polls',
-                        iconSize: VIconSize.md,
-                        color: theme.colorScheme.outline,
-                        onPressed: () {
-                          context.push(
-                            worldPollsPath(widget.worldId, create: true),
-                          );
-                        },
-                      ),
-                    // Save draft button
-                    IconButton(
-                      icon: const Icon(Icons.drafts_outlined),
-                      onPressed:
-                          _controller.text.trim().isNotEmpty ||
-                              _imageUri != null
-                          ? _saveDraft
-                          : null,
-                      tooltip: 'Save draft',
-                      iconSize: VIconSize.md,
-                      color: theme.colorScheme.outline,
-                    ),
-                    // Send button
-                    ScaleTransition(
-                      scale: _sendScale,
-                      child: IconButton(
-                        icon: Icon(_sent ? Icons.check : Icons.send),
-                        tooltip: _sent ? 'Posted' : 'Send post',
-                        onPressed: _sent || charLength > _maxChars
-                            ? null
-                            : _submit,
-                        color: _sent ? VColors.success : theme.colorScheme.primary,
-                        iconSize: VIconSize.md,
-                      ),
-                    ),
-                    ImagePickerWidget(
-                      onImageSelected: (uri) => setState(() => _imageUri = uri),
-                    ),
-                  ],
+                onChanged: _onTextChanged,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                top: VSpacing.xs,
+                left: VSpacing.xs,
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: VAnimation.fast,
+                style: theme.textTheme.labelSmall!.copyWith(
+                  color: charColor,
+                  fontWeight: charLength >= _warnChars
+                      ? VFontWeight.bold
+                      : VFontWeight.regular,
+                ),
+                child: Text('$charLength/$_maxChars'),
+              ),
+            ),
+            const SizedBox(height: VSpacing.sm),
+            // ── Toolbar: tools left, send right ───────────────
+            Row(
+              children: [
+                if (canLinkPoll)
+                  IconButton(
+                    icon: const Icon(Icons.poll_outlined),
+                    tooltip: 'Create poll in world polls',
+                    iconSize: VIconSize.md,
+                    color: theme.colorScheme.outline,
+                    onPressed: () {
+                      context.push(
+                        worldPollsPath(widget.worldId, create: true),
+                      );
+                    },
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.drafts_outlined),
+                  onPressed:
+                      _controller.text.trim().isNotEmpty || _imageUri != null
+                      ? _saveDraft
+                      : null,
+                  tooltip: 'Save draft',
+                  iconSize: VIconSize.md,
+                  color: theme.colorScheme.outline,
+                ),
+                ImagePickerWidget(
+                  onImageSelected: (uri) => setState(() => _imageUri = uri),
+                ),
+                const Spacer(),
+                ScaleTransition(
+                  scale: _sendScale,
+                  child: IconButton(
+                    icon: Icon(_sent ? Icons.check : Icons.send),
+                    tooltip: _sent ? 'Posted' : 'Send post',
+                    onPressed: _sent || charLength > _maxChars || charLength == 0
+                        ? null
+                        : _submit,
+                    color: _sent
+                        ? VColors.success
+                        : theme.colorScheme.primary,
+                    iconSize: VIconSize.md,
+                  ),
                 ),
               ],
             ),

@@ -1,5 +1,7 @@
 # Design system reference
 
+> **Wave S12 (in progress):** **Vertiege Renewal** — canonical tokens in root [DESIGN.md](../../DESIGN.md); prototypes + IA in [`docs/design/s12-renewal/`](../design/s12-renewal/ia.md). This page documents the shipped Prestige Noir baseline until the migration completes.
+
 > **Commune UX redesign:** [DESIGN.md](DESIGN.md) · [archived master plan](../archive/planning/discord-redesign-master-plan.md) · Vertiege lexicon (worlds, residents, achievements) · 144 tracked changes (archived).
 
 > **Status: Current** — Prestige Noir + Forui (2026).  

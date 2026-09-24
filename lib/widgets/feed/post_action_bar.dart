@@ -12,7 +12,7 @@ import '../../utils/haptics.dart';
 import 'badge_reaction_picker.dart';
 import 'cross_post_achievement_sheet.dart';
 
-/// Primary post actions: like, vote, comment, repost, share, badge react.
+/// Primary post actions: like, vote, comment — secondary actions in overflow.
 class PostActionBar extends ConsumerWidget {
   final Post post;
   final String? residentId;
@@ -58,15 +58,17 @@ class PostActionBar extends ConsumerWidget {
           ),
           _CompactAction(
             icon: Icons.arrow_upward,
-            tooltip: count('upvote') > 0 ? 'Upvote (${count('upvote')})' : 'Upvote',
+            tooltip:
+                count('upvote') > 0 ? 'Upvote (${count('upvote')})' : 'Upvote',
             active: activeReactions.contains('upvote'),
             onTap: canInteract ? () => _toggle(ref, 'upvote') : null,
             badge: count('upvote') > 0 ? count('upvote') : null,
           ),
           _CompactAction(
             icon: Icons.arrow_downward,
-            tooltip:
-                count('downvote') > 0 ? 'Downvote (${count('downvote')})' : 'Downvote',
+            tooltip: count('downvote') > 0
+                ? 'Downvote (${count('downvote')})'
+                : 'Downvote',
             active: activeReactions.contains('downvote'),
             onTap: canInteract ? () => _toggle(ref, 'downvote') : null,
             badge: count('downvote') > 0 ? count('downvote') : null,
@@ -90,53 +92,60 @@ class PostActionBar extends ConsumerWidget {
             onTap: onComment,
             badge: post.comments.isNotEmpty ? post.comments.length : null,
           ),
-          _CompactAction(
-            icon: Icons.repeat,
-            tooltip: 'Repost',
-            onTap: canInteract
-                ? () {
-                    Haptics.light();
-                    unawaited(ref.read(postProvider.notifier).repost(post.id));
-                  }
-                : null,
-          ),
-          _CompactAction(
-            icon: Icons.share_outlined,
-            tooltip: 'Share',
-            onTap: () {
-              final text = post.content.trim();
-              SharePlus.instance.share(
-                ShareParams(
-                  text: text.isEmpty
-                      ? 'Check out this post on Vertiege'
-                      : '$text\n\n— via Vertiege',
-                ),
-              );
+          const Spacer(),
+          PopupMenuButton<String>(
+            tooltip: 'More actions',
+            icon: Icon(
+              Icons.more_horiz,
+              size: VIconSize.md,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            onSelected: (action) {
+              switch (action) {
+                case 'repost':
+                  if (!canInteract) return;
+                  Haptics.light();
+                  unawaited(ref.read(postProvider.notifier).repost(post.id));
+                case 'share':
+                  final text = post.content.trim();
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text: text.isEmpty
+                          ? 'Check out this post on Vertiege'
+                          : '$text\n\n— via Vertiege',
+                    ),
+                  );
+                case 'badge':
+                  if (!canInteract) return;
+                  BadgeReactionPickerSheet.show(
+                    context,
+                    reactionKey: (key) => _toggle(ref, key),
+                  );
+                case 'cross_post':
+                  if (!canInteract) return;
+                  Haptics.light();
+                  showCrossPostAchievementSheet(
+                    context,
+                    post: post,
+                    activeReactions: activeReactions,
+                  );
+              }
             },
-          ),
-          _CompactAction(
-            icon: Icons.workspace_premium_outlined,
-            tooltip: 'Badge reaction',
-            onTap: canInteract
-                ? () => BadgeReactionPickerSheet.show(
-                      context,
-                      reactionKey: (key) => _toggle(ref, key),
-                    )
-                : null,
-          ),
-          _CompactAction(
-            icon: Icons.send_outlined,
-            tooltip: 'Share to world channel',
-            onTap: canInteract
-                ? () {
-                    Haptics.light();
-                    showCrossPostAchievementSheet(
-                      context,
-                      post: post,
-                      activeReactions: activeReactions,
-                    );
-                  }
-                : null,
+            itemBuilder: (context) => [
+              if (canInteract)
+                const PopupMenuItem(value: 'repost', child: Text('Repost')),
+              const PopupMenuItem(value: 'share', child: Text('Share')),
+              if (canInteract)
+                const PopupMenuItem(
+                  value: 'badge',
+                  child: Text('Badge reaction'),
+                ),
+              if (canInteract)
+                const PopupMenuItem(
+                  value: 'cross_post',
+                  child: Text('Share to world channel'),
+                ),
+            ],
           ),
         ],
       ),
@@ -176,42 +185,42 @@ class _CompactAction extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(VRadius.sm),
           child: SizedBox(
-          width: VTouchTarget.iconButton,
-          height: VTouchTarget.iconButton,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Icon(icon, size: VIconSize.md, color: iconColor),
-              if (badge != null)
-                Positioned(
-                  right: VSpacing.xxs,
-                  top: VSpacing.xs,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: VSpacing.xs,
-                      vertical: VSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(VRadius.pill),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant,
+            width: VTouchTarget.iconButton,
+            height: VTouchTarget.iconButton,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                Icon(icon, size: VIconSize.md, color: iconColor),
+                if (badge != null)
+                  Positioned(
+                    right: VSpacing.xxs,
+                    top: VSpacing.xs,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: VSpacing.xs,
+                        vertical: VSpacing.xxs,
                       ),
-                    ),
-                    child: Text(
-                      badge! > 99 ? '99+' : '$badge',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontSize: 9,
-                        fontWeight: VFontWeight.bold,
-                        color: iconColor,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(VRadius.pill),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant,
+                        ),
+                      ),
+                      child: Text(
+                        badge! > 99 ? '99+' : '$badge',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 9,
+                          fontWeight: VFontWeight.bold,
+                          color: iconColor,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

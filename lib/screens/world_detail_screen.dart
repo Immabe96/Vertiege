@@ -122,7 +122,7 @@ class _WorldDetailScreenState extends ConsumerState<WorldDetailScreen>
       } else {
         unawaited(OnboardingFunnelPrefs.markOpenedWorld());
       }
-      ref.read(questProvider.notifier).onWorldVisited();
+      ref.read(questProvider.notifier).onWorldVisited(widget.worldId);
       unawaited(
         AnalyticsService.logEvent(
           AnalyticsEvents.worldViewed,

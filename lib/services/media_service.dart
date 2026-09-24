@@ -70,13 +70,17 @@ class MediaService {
     if ((await file.length()) > _maxFileSize) return null;
 
     final client = getSupabase();
-    final ext = filePath.split('.').last.toLowerCase();
-    final fileName =
-        '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     try {
       final compressed = await _compressImage(file);
       final uploadFile = compressed ?? file;
+      // Compression always emits JPEG; keep the object key extension in sync
+      // so Image.network / CDN content-type sniffing stay consistent.
+      final ext = compressed != null
+          ? 'jpg'
+          : filePath.split('.').last.toLowerCase();
+      final fileName =
+          '${residentId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
       await client.storage.from(_postBucket).upload(fileName, uploadFile);
       if (compressed != null && compressed.path != file.path) {
         await compressed.delete();

@@ -221,7 +221,7 @@ class ThreadDeepLinkScreen extends StatefulWidget {
 }
 
 class _ThreadDeepLinkScreenState extends State<ThreadDeepLinkScreen> {
-  late final Future<ChannelMessage?> _messageFuture;
+  late final Future<({ChannelMessage message, String worldId})?> _messageFuture;
 
   @override
   void initState() {
@@ -229,10 +229,10 @@ class _ThreadDeepLinkScreenState extends State<ThreadDeepLinkScreen> {
     _messageFuture = _loadMessage();
   }
 
-  Future<ChannelMessage?> _loadMessage() async {
+  Future<({ChannelMessage message, String worldId})?> _loadMessage() async {
     final row = await ChatService.getChannelMessage(widget.messageId);
     if (row == null) return null;
-    return ChannelMessage(
+    final message = ChannelMessage(
       id: row['id'] ?? '',
       channelId: row['channel_id'] ?? '',
       senderId: row['sender_id'] ?? '',
@@ -249,11 +249,15 @@ class _ThreadDeepLinkScreenState extends State<ThreadDeepLinkScreen> {
               ?.millisecondsSinceEpoch ??
           0,
     );
+    return (
+      message: message,
+      worldId: row['world_id'] as String? ?? '',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ChannelMessage?>(
+    return FutureBuilder<({ChannelMessage message, String worldId})?>(
       future: _messageFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
@@ -263,8 +267,8 @@ class _ThreadDeepLinkScreenState extends State<ThreadDeepLinkScreen> {
           );
         }
 
-        final message = snapshot.data;
-        if (message == null) {
+        final data = snapshot.data;
+        if (data == null) {
           return Scaffold(
             appBar: AppBar(title: const Text('Thread')),
             body: AppEmptyState(
@@ -280,9 +284,9 @@ class _ThreadDeepLinkScreenState extends State<ThreadDeepLinkScreen> {
         }
 
         return ThreadScreen(
-          channelId: message.channelId,
-          worldId: '',
-          parentMessage: message,
+          channelId: data.message.channelId,
+          worldId: data.worldId,
+          parentMessage: data.message,
           channelName: 'Thread',
         );
       },
@@ -331,10 +335,11 @@ class _NotificationDeepLinkState extends ConsumerState<NotificationDeepLink> {
       ref.read(notificationProvider.notifier).markRead(widget.notificationId);
     }
 
-    if (!context.mounted) return;
+    if (!mounted) return;
     if (notif != null) {
       final route = routeForNotification(notif);
       if (route != null && route.isNotEmpty) {
+        // Replace this intermediate "Opening…" route so Back isn't stuck here.
         context.go(route);
         return;
       }
@@ -403,7 +408,12 @@ class _PostDeepLinkState extends ConsumerState<PostDeepLink> {
         context.go(exploreWorldPath(post.worldId, postId: widget.postId));
         return;
       }
-      if (mounted) context.go('/notifications');
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = 'Post not found';
+        });
+      }
     } catch (_) {
       if (mounted) {
         setState(() {

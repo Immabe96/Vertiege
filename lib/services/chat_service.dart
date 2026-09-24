@@ -481,9 +481,10 @@ class ChatService {
         .select()
         .eq('channel_id', channelId)
         .isFilter('thread_id', null)
-        .order('created_at', ascending: true)
+        .order('created_at', ascending: false)
         .limit(limit);
-    return (data as List).cast<Map<String, dynamic>>();
+    // Newest-first from DB → chronological for the UI.
+    return (data as List).cast<Map<String, dynamic>>().reversed.toList();
   }
 
   static Future<Map<String, dynamic>?> getChannelMessage(

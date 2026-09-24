@@ -79,3 +79,7 @@ scripts/missing_badges.json
 scripts/missing_core_ids.json
 supabase/.temp/
 .firebase/
+# Scratch / local agent artifacts (regenerable)
+tmp_*
+.kun-canvas/
+.kunsdd/

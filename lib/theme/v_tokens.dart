@@ -112,7 +112,7 @@ class VAnimation {
 class VTouchTarget {
   VTouchTarget._();
   static const double minimum = 48;
-  static const double iconButton = 40;
+  static const double iconButton = 44;
   static const double chip = 32;
 }
 

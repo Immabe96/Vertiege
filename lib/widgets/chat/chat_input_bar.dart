@@ -249,23 +249,29 @@ class _ChatInputBarState extends State<ChatInputBar> {
             IconButton(
               icon: const Icon(Icons.emoji_emotions_outlined),
               onPressed: () {
-                // Toggle emoji keyboard on supported platforms.
-                // For now, insert a common emoji as a quick action.
                 final controller = widget.controller;
                 final text = controller.text;
                 final sel = controller.selection;
-                final insertAt = sel.baseOffset < 0 ? text.length : sel.baseOffset;
-                final next = text.replaceRange(insertAt, insertAt, '😊');
+                final insertAt =
+                    sel.baseOffset < 0 ? text.length : sel.baseOffset;
+                const emoji = '😊';
+                final next = text.replaceRange(insertAt, insertAt, emoji);
                 controller.value = TextEditingValue(
                   text: next,
-                  selection: TextSelection.collapsed(offset: insertAt + 1),
+                  selection: TextSelection.collapsed(
+                    offset: insertAt + emoji.length,
+                  ),
                 );
               },
-              tooltip: 'Emoji',
+              tooltip: 'Insert emoji',
               color: widget.useCommuneStyle
                   ? VCommuneColors.textMuted
                   : Theme.of(context).colorScheme.onSurfaceVariant,
               iconSize: VIconSize.lg,
+              constraints: const BoxConstraints(
+                minWidth: VTouchTarget.iconButton,
+                minHeight: VTouchTarget.iconButton,
+              ),
               padding: EdgeInsets.zero,
             ),
             const SizedBox(width: VSpacing.xs),

@@ -315,7 +315,7 @@ class _DiscoverySearchPill extends StatelessWidget {
               onChanged: onChanged,
               decoration: const InputDecoration(
                 hintText: 'Search worlds...',
-                hintStyle: TextStyle(color: PrestigeNoir.mutedDim),
+                hintStyle: TextStyle(color: PrestigeNoir.muted),
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(vertical: 10),

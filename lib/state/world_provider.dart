@@ -91,6 +91,12 @@ class WorldNotifier extends _$WorldNotifier {
 
   World? getWorld(String worldId) => state.worlds[worldId];
 
+  void removeWorld(String worldId) {
+    if (!state.worlds.containsKey(worldId)) return;
+    final next = Map<String, World>.from(state.worlds)..remove(worldId);
+    state = state.copyWith(worlds: next);
+    unawaited(_cacheWorlds(next));
+  }
   World? getWorldBySlug(String slug) {
     for (final world in state.worlds.values) {
       if (world.slug == slug) return world;

@@ -113,6 +113,7 @@ class PostNotifier extends _$PostNotifier {
   int _currentLimit = 20;
   String? _lastCursor;
   String? _nexusCursor;
+  int _loadGeneration = 0;
   bool _hasMore = true;
   bool _nexusHasMore = true;
 
@@ -188,15 +189,6 @@ class PostNotifier extends _$PostNotifier {
     if (ready.isEmpty) return;
 
     for (final post in ready) {
-      if (now.difference(post.scheduledFor!) > const Duration(minutes: 5)) {
-        state = state.copyWith(
-          scheduledPosts: state.scheduledPosts
-              .where((p) => p.id != post.id)
-              .toList(),
-        );
-        _persistScheduled();
-        continue;
-      }
       try {
         final result = await _postsRepository.createPost(
           post.copyWith(syncStatus: SyncStatus.pending),
@@ -393,19 +385,18 @@ class PostNotifier extends _$PostNotifier {
     }
 
     final optimisticPost = post.copyWith(
+      // Always prefer the durable cloud URL in feed state — local picker
+      // paths are often cleaned up after upload and break Image.file.
+      imageUri: cloudImageUrl,
+      imageUris:
+          imageUris ?? (cloudImageUrl == null ? null : [cloudImageUrl]),
       syncStatus: SyncStatus.pending,
       localTempId: post.id,
     );
     state = state.copyWith(posts: [optimisticPost, ...state.posts]);
     _persist();
 
-    final result = await _postsRepository.createPost(
-      optimisticPost.copyWith(
-        imageUri: cloudImageUrl,
-        imageUris:
-            imageUris ?? (cloudImageUrl == null ? null : [cloudImageUrl]),
-      ),
-    );
+    final result = await _postsRepository.createPost(optimisticPost);
 
     if (result.isSuccess) {
       final syncedUris = cloudImageUrl == null
@@ -704,6 +695,7 @@ class PostNotifier extends _$PostNotifier {
     final post = state.posts.where((p) => p.id == postId).firstOrNull;
     if (post == null) return;
 
+    final snapshotPosts = List<Post>.from(state.posts);
     final posts = state.posts.map((p) {
       if (p.id != postId) return p;
       return p.copyWith(comments: [...p.comments, comment]);
@@ -712,19 +704,29 @@ class PostNotifier extends _$PostNotifier {
     state = state.copyWith(posts: posts);
     _persist();
 
-    unawaited(_postsRepository.addComment(postId: postId, comment: comment));
-
-    ref.read(questProvider.notifier).onCommentAdded();
-    if (post.residentId != comment.residentId) {
-      ref.read(notificationProvider.notifier).addNotification(
-            type: NotificationType.comment,
-            message: 'Someone commented on your post',
-            recipientId: post.residentId,
-            postId: postId,
-            worldId: post.worldId,
-            showInLocalInbox: false,
-          );
-    }
+    unawaited(() async {
+      try {
+        await _postsRepository.addComment(postId: postId, comment: comment);
+      } catch (_) {
+        state = state.copyWith(
+          posts: snapshotPosts,
+          lastError: 'Failed to post comment. Try again.',
+        );
+        _persist();
+        return;
+      }
+      ref.read(questProvider.notifier).onCommentAdded();
+      if (post.residentId != comment.residentId) {
+        ref.read(notificationProvider.notifier).addNotification(
+              type: NotificationType.comment,
+              message: 'Someone commented on your post',
+              recipientId: post.residentId,
+              postId: postId,
+              worldId: post.worldId,
+              showInLocalInbox: false,
+            );
+      }
+    }());
   }
 
   void voteOnPoll(String postId, String pollOptionId) {
@@ -749,25 +751,42 @@ class PostNotifier extends _$PostNotifier {
         final updatedVoted = poll.votedResidentIds
             .where((id) => id != resident.id)
             .toList();
+        final updatedByOption = Map<String, List<String>>.from(
+          poll.votesByOption.map(
+            (k, v) => MapEntry(k, List<String>.from(v)),
+          ),
+        );
+        updatedByOption[pollOptionId] = (updatedByOption[pollOptionId] ?? [])
+            .where((id) => id != resident.id)
+            .toList();
         return p.copyWith(
           poll: poll.copyWith(
             options: updatedOptions,
             votedResidentIds: updatedVoted,
+            votesByOption: updatedByOption,
           ),
         );
       }
-
-      if (!poll.isMultiChoice && poll.votedResidentIds.isNotEmpty) return p;
 
       final updatedOptions = poll.options.map((o) {
         if (o.id == pollOptionId) return o.copyWith(voteCount: o.voteCount + 1);
         return o;
       }).toList();
       final updatedVoted = [...poll.votedResidentIds, resident.id];
+      final updatedByOption = Map<String, List<String>>.from(
+        poll.votesByOption.map(
+          (k, v) => MapEntry(k, List<String>.from(v)),
+        ),
+      );
+      updatedByOption[pollOptionId] = [
+        ...(updatedByOption[pollOptionId] ?? const <String>[]),
+        resident.id,
+      ];
       return p.copyWith(
         poll: poll.copyWith(
           options: updatedOptions,
           votedResidentIds: updatedVoted,
+          votesByOption: updatedByOption,
         ),
       );
     }).toList();
@@ -812,6 +831,7 @@ class PostNotifier extends _$PostNotifier {
   }
 
   void toggleEventRsvp(String postId, String residentId) {
+    final snapshotPosts = List<Post>.from(state.posts);
     final posts = state.posts.map((p) {
       if (p.id != postId) return p;
       final rsvps = List<String>.from(p.eventRsvpIds);
@@ -824,6 +844,39 @@ class PostNotifier extends _$PostNotifier {
     }).toList();
     state = state.copyWith(posts: posts);
     _persist();
+    unawaited(_syncEventRsvp(
+      postId: postId,
+      residentId: residentId,
+      snapshotPosts: snapshotPosts,
+    ));
+  }
+
+  Future<void> _syncEventRsvp({
+    required String postId,
+    required String residentId,
+    required List<Post> snapshotPosts,
+  }) async {
+    final result = await _postsRepository.toggleEventRsvp(
+      postId: postId,
+      residentId: residentId,
+    );
+    if (result.isSuccess && result.data != null) {
+      final serverIds = result.data!;
+      final posts = state.posts.map((p) {
+        if (p.id != postId) return p;
+        return p.copyWith(eventRsvpIds: serverIds);
+      }).toList();
+      state = state.copyWith(posts: posts);
+      _persist();
+      return;
+    }
+    if (!result.isSuccess && !result.queued) {
+      state = state.copyWith(
+        posts: snapshotPosts,
+        lastError: result.error?.toString() ?? 'Could not update RSVP',
+      );
+      _persist();
+    }
   }
 
   static const String _bookmarksKey = '@bookmarked_posts';
@@ -1024,6 +1077,7 @@ class PostNotifier extends _$PostNotifier {
   }
 
   Future<void> loadPosts() async {
+    final generation = ++_loadGeneration;
     try {
       final hadCachedPosts = state.posts.isNotEmpty;
       // Don't wipe in-flight post errors while a create is still open.
@@ -1038,6 +1092,7 @@ class PostNotifier extends _$PostNotifier {
       }
 
       await _postsRepository.replayOutbox();
+      if (generation != _loadGeneration) return;
 
       final resident = ref.read(residentProvider).resident;
       final joinedWorldIds = resident?.joinedWorldIds
@@ -1052,8 +1107,10 @@ class PostNotifier extends _$PostNotifier {
           excludeResidentId: resident.id,
         );
       }
+      if (generation != _loadGeneration) return;
 
       final joinedResult = await _loadPostsFromJoinedWorlds();
+      if (generation != _loadGeneration) return;
       final posts = _mergeInFlightLocalPosts(joinedResult?.posts ?? []);
 
       state = state.copyWith(
@@ -1066,7 +1123,9 @@ class PostNotifier extends _$PostNotifier {
       );
       _persist();
     } catch (e) {
+      if (generation != _loadGeneration) return;
       final joinedResult = await _loadPostsFromJoinedWorlds();
+      if (generation != _loadGeneration) return;
       if (joinedResult != null) {
         state = state.copyWith(
           posts: _mergeInFlightLocalPosts(joinedResult.posts),
@@ -1079,6 +1138,7 @@ class PostNotifier extends _$PostNotifier {
       }
 
       final raw = await StorageService.getString(StorageService.postsKey);
+      if (generation != _loadGeneration) return;
       if (raw != null && raw.isNotEmpty) {
         final list = jsonDecode(raw) as List<dynamic>;
         final posts = list

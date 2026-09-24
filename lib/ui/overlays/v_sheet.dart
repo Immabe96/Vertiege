@@ -66,12 +66,15 @@ Future<void> showVSheet(
   final container = ProviderScope.containerOf(context);
   final overlay = container.read(tabShellOverlayProvider.notifier);
   overlay.acquire();
+  // Forui only exposes mainAxisMaxRatio (no true initial/min drag sizes).
+  // Prefer the caller's initialSize so sheets don't always open at max.
+  final openRatio = initialSize.clamp(minSize, maxSize);
   return showFSheet(
     context: context,
     side: side,
-    mainAxisMaxRatio: maxSize,
+    mainAxisMaxRatio: openRatio,
     builder: (sheetContext) {
-      final maxH = MediaQuery.sizeOf(sheetContext).height * maxSize;
+      final maxH = MediaQuery.sizeOf(sheetContext).height * openRatio;
       return vSheetSurface(
         sheetContext,
         ConstrainedBox(

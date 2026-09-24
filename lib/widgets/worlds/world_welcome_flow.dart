@@ -156,6 +156,12 @@ class _WorldWelcomeFlowState extends ConsumerState<WorldWelcomeFlow> {
                     world: widget.world,
                     resident: resident,
                     channels: channels,
+                    onQuickNavigate: (path) async {
+                      await WorldNavPrefs.markWelcomeSeen(widget.world.id);
+                      if (!context.mounted) return;
+                      Navigator.of(context).pop();
+                      context.push(path);
+                    },
                   ),
                 ],
               ),
@@ -373,11 +379,13 @@ class _ChannelPicksStep extends StatelessWidget {
   final World world;
   final Resident? resident;
   final List<WorldChannel> channels;
+  final Future<void> Function(String path) onQuickNavigate;
 
   const _ChannelPicksStep({
     required this.world,
     required this.resident,
     required this.channels,
+    required this.onQuickNavigate,
   });
 
   @override
@@ -421,16 +429,13 @@ class _ChannelPicksStep extends StatelessWidget {
                   subtitle: ch.description?.isNotEmpty == true
                       ? ch.description!
                       : 'Text channel',
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    context.push(
-                      worldChannelDestinationPath(
-                        world.id,
-                        ch,
-                        worldName: world.name,
-                      ),
-                    );
-                  },
+                  onTap: () => onQuickNavigate(
+                    worldChannelDestinationPath(
+                      world.id,
+                      ch,
+                      worldName: world.name,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -439,16 +444,13 @@ class _ChannelPicksStep extends StatelessWidget {
             icon: Icons.people_outline,
             title: 'Meet residents',
             subtitle: 'Browse who\'s in this world',
-            onTap: () {
-              Navigator.of(context).pop();
-              context.push(
-                worldMembersPath(
-                  world.id,
-                  worldName: world.name,
-                  sovereignId: world.sovereignId,
-                ),
-              );
-            },
+            onTap: () => onQuickNavigate(
+              worldMembersPath(
+                world.id,
+                worldName: world.name,
+                sovereignId: world.sovereignId,
+              ),
+            ),
           ),
         ],
       ),

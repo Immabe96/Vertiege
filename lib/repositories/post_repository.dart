@@ -23,6 +23,7 @@ class PostRepository {
   static const bookmarkPostMutation = 'post.bookmark';
   static const unbookmarkPostMutation = 'post.unbookmark';
   static const votePollMutation = 'post.poll.vote';
+  static const eventRsvpMutation = 'post.event.rsvp';
 
   /// Residents who share at least one of [worldIds] (for Nexus "Following" filter).
   /// Published standing posts for a resident's public profile grid.
@@ -195,7 +196,7 @@ class PostRepository {
   Future<RepositoryResult<Post>> createPost(Post post) async {
     return _runOrQueue<Post>(
       createPostMutation,
-      _postPayload(post),
+      _createPostRpcParams(post),
       () async {
         final synced = await _createPostViaRpc(post);
         return synced.copyWith(
@@ -207,11 +208,7 @@ class PostRepository {
     );
   }
 
-  static Future<Post> _createPostViaRpc(Post post) async {
-    final client = getSupabase();
-    final result = await client.rpc(
-      'create_post',
-      params: {
+  static Map<String, dynamic> _createPostRpcParams(Post post) => {
         'p_world_id': post.worldId,
         'p_content': post.content,
         'p_image_url': post.imageUri,
@@ -223,8 +220,14 @@ class PostRepository {
         'p_mentions': post.mentions,
         'p_hashtags': post.hashtags,
         'p_scheduled_for': post.scheduledFor?.toUtc().toIso8601String(),
-        if (post.repostOf != null) 'p_repost_of': post.repostOf,
-      },
+        'p_repost_of': post.repostOf,
+      };
+
+  static Future<Post> _createPostViaRpc(Post post) async {
+    final client = getSupabase();
+    final result = await client.rpc(
+      'create_post',
+      params: _createPostRpcParams(post),
     );
     if (result is! Map) {
       throw StateError('Unexpected create_post response');
@@ -424,11 +427,53 @@ class PostRepository {
     );
   }
 
+  Future<RepositoryResult<List<String>>> toggleEventRsvp({
+    required String postId,
+    required String residentId,
+  }) {
+    return _runOrQueue<List<String>>(
+      eventRsvpMutation,
+      {'postId': postId, 'residentId': residentId},
+      () async {
+        final raw = await getSupabase().rpc(
+          'toggle_post_event_rsvp',
+          params: {'p_post_id': postId},
+        );
+        if (raw is List) {
+          return raw.map((e) => e.toString()).toList();
+        }
+        throw StateError('RSVP failed');
+      },
+    );
+  }
+
   Future<void> replayOutbox() async {
     await MutationOutboxService.replay((mutation) async {
       switch (mutation.type) {
         case createPostMutation:
-          await getSupabase().rpc('create_post', params: mutation.payload);
+          final payload = Map<String, dynamic>.from(mutation.payload);
+          // Legacy outbox rows stored the posts table shape; map to RPC params.
+          if (!payload.containsKey('p_world_id')) {
+            await getSupabase().rpc(
+              'create_post',
+              params: {
+                'p_world_id': payload['world_id'],
+                'p_content': payload['content'],
+                'p_image_url': payload['image_url'],
+                'p_media': payload['media'] ?? const <String>[],
+                'p_is_announcement': payload['is_announcement'] == true,
+                'p_is_decree': payload['is_decree'] == true,
+                'p_is_pinned': payload['is_pinned'] == true,
+                'p_poll': payload['poll'],
+                'p_mentions': payload['mentions'] ?? const <String>[],
+                'p_hashtags': payload['hashtags'] ?? const <String>[],
+                'p_scheduled_for': payload['scheduled_for'],
+                'p_repost_of': payload['repost_of'],
+              },
+            );
+          } else {
+            await getSupabase().rpc('create_post', params: payload);
+          }
           break;
         case editPostMutation:
           await editPost(
@@ -494,6 +539,12 @@ class PostRepository {
               (raw is Map ? raw['error'] as String? : null) ?? 'Vote failed',
             );
           }
+          break;
+        case eventRsvpMutation:
+          await getSupabase().rpc(
+            'toggle_post_event_rsvp',
+            params: {'p_post_id': mutation.payload['postId'] as String},
+          );
           break;
       }
     });
@@ -599,8 +650,6 @@ class PostRepository {
           const [],
     );
   }
-
-  static Map<String, dynamic> _postPayload(Post post) => _postRow(post);
 
   static Map<String, dynamic> _postRow(Post post) => {
     'id': post.id,

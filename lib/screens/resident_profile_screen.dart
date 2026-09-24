@@ -28,6 +28,9 @@ import '../widgets/shared/tier_icon.dart';
 import '../utils/profile_share.dart';
 import '../widgets/report_sheet.dart';
 import '../services/moderation_service.dart';
+import '../utils/presence_utils.dart';
+import '../utils/time_ago.dart';
+import '../widgets/core/status_dot.dart';
 
 class ResidentProfileScreen extends ConsumerStatefulWidget {
   final String residentId;
@@ -281,6 +284,37 @@ class _ResidentProfileScreenState extends ConsumerState<ResidentProfileScreen> {
                   fontSize: VFontSize.headlineMd,
                   textAlign: TextAlign.center,
                   title: resident.title,
+                ),
+                const SizedBox(height: VSpacing.xs),
+                Builder(
+                  builder: (context) {
+                    final presence = presenceFromStatusFields(
+                      presenceMode: resident.presenceMode,
+                      lastSeenRaw: resident.lastSeenAt,
+                    );
+                    final label = switch (presence) {
+                      Presence.online => 'Online',
+                      Presence.idle => 'Away',
+                      Presence.dnd => 'Do not disturb',
+                      Presence.offline => resident.lastSeenAt > 0
+                          ? 'Last seen ${timeAgo(DateTime.fromMillisecondsSinceEpoch(resident.lastSeenAt))}'
+                          : 'Offline',
+                    };
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        StatusDot(presence: presence, size: 8),
+                        const SizedBox(width: VSpacing.xs),
+                        Text(
+                          label,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: PrestigeNoir.muted,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 if (resident.profession != null &&
                     resident.profession!.isNotEmpty) ...[

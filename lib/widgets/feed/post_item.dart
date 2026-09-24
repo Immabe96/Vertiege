@@ -18,7 +18,6 @@ import '../../ui/icons/v_icons.dart';
 import '../core/glass_sheet.dart';
 import '../core/tier_badge.dart';
 import '../report_sheet.dart';
-import '../shared/tier_icon.dart';
 import '../profile/cosmetic_avatar.dart';
 import '../profile/luminary_nameplate.dart';
 import 'comment_sheet.dart';
@@ -48,7 +47,9 @@ class PostItem extends ConsumerWidget {
     final isOwnPost = resident?.id == post.residentId;
     final canMod = _canDelete(ref);
     final canPin = _canPin(ref);
-    final showOverflow = canMod || canPin;
+    // Menu items are filtered in itemBuilder; always offer overflow so Nexus
+    // (and other surfaces that omit [worldId]) still get Edit / Report / Mute.
+    const showOverflow = true;
 
     // Build a resident name -> ID map from all posts for mention resolution
     final postState = ref.watch(postProvider);
@@ -171,21 +172,12 @@ class PostItem extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: VSpacing.xxs),
-                          Row(
-                            children: [
-                              TierIcon(
-                                tier: post.tierAtPosting.value,
-                                size: VIconSize.xs,
-                              ),
-                              const SizedBox(width: VSpacing.xs),
-                              Text(
-                                formatTimestamp(post.timestamp) +
-                                    (post.isEdited ? ' (edited)' : ''),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            formatTimestamp(post.timestamp) +
+                                (post.isEdited ? ' (edited)' : ''),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
                           ),
                         ],
                       ),
@@ -309,20 +301,29 @@ class PostItem extends ConsumerWidget {
                 if (post.allImageUris.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: VSpacing.md),
-                    child: Transform.translate(
-                      offset: const Offset(-VSpacing.md, 0),
-                      child: SizedBox(
-                        width: MediaQuery.sizeOf(context).width,
-                        child: post.allImageUris.length == 1
-                            ? PostImage(
-                                uri: post.allImageUris.first,
-                                borderRadius: BorderRadius.zero,
-                              )
-                            : _ImageCarousel(
-                                imageUris: post.allImageUris,
-                                edgeToEdge: true,
-                              ),
-                      ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Bleed only past this card's inner padding, not the
+                        // full screen width (avoids horizontal overflow).
+                        const leftBleed = VSpacing.md;
+                        const rightBleed = VSpacing.sm;
+                        return Transform.translate(
+                          offset: const Offset(-leftBleed, 0),
+                          child: SizedBox(
+                            width:
+                                constraints.maxWidth + leftBleed + rightBleed,
+                            child: post.allImageUris.length == 1
+                                ? PostImage(
+                                    uri: post.allImageUris.first,
+                                    borderRadius: BorderRadius.zero,
+                                  )
+                                : _ImageCarousel(
+                                    imageUris: post.allImageUris,
+                                    edgeToEdge: true,
+                                  ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -393,10 +394,12 @@ class PostItem extends ConsumerWidget {
 
   bool _canDelete(WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
-    if (resident == null || worldId == null) return false;
+    final effectiveWorldId =
+        worldId ?? (post.worldId.isNotEmpty ? post.worldId : null);
+    if (resident == null || effectiveWorldId == null) return false;
     return WorldPermissions.canDeletePost(
       resident,
-      worldId!,
+      effectiveWorldId,
       post.residentId,
       null,
     );
@@ -404,8 +407,10 @@ class PostItem extends ConsumerWidget {
 
   bool _canPin(WidgetRef ref) {
     final resident = ref.read(residentProvider).resident;
-    if (resident == null || worldId == null) return false;
-    return WorldPermissions.canModerate(resident, worldId!, null);
+    final effectiveWorldId =
+        worldId ?? (post.worldId.isNotEmpty ? post.worldId : null);
+    if (resident == null || effectiveWorldId == null) return false;
+    return WorldPermissions.canModerate(resident, effectiveWorldId, null);
   }
 
   void _onTogglePin(WidgetRef ref) {
@@ -694,13 +699,22 @@ class _RichPostContentState extends State<_RichPostContent> {
         children: [
           RichText(text: _buildRichText(displayText)),
           const SizedBox(height: VSpacing.xs),
-          GestureDetector(
+          InkWell(
             onTap: () => setState(() => _expanded = !_expanded),
-            child: Text(
-              _expanded ? 'Show less' : 'See more...',
-              style: widget.theme.textTheme.labelMedium?.copyWith(
-                color: widget.theme.colorScheme.primary,
-                fontWeight: VFontWeight.bold,
+            borderRadius: BorderRadius.circular(VRadius.sm),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: VTouchTarget.iconButton,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _expanded ? 'Show less' : 'See more...',
+                  style: widget.theme.textTheme.labelMedium?.copyWith(
+                    color: widget.theme.colorScheme.primary,
+                    fontWeight: VFontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
@@ -761,7 +775,8 @@ class _PollDisplay extends ConsumerWidget {
             final percentage = totalVotes > 0
                 ? (option.voteCount / totalVotes)
                 : 0.0;
-            final isSelected = hasVoted && option.voteCount > 0;
+            final isSelected = resident != null &&
+                poll.residentSelected(resident.id, option.id);
             final showResults = hasVoted;
 
             return Padding(
@@ -788,66 +803,69 @@ class _PollDisplay extends ConsumerWidget {
                           : theme.colorScheme.outlineVariant,
                     ),
                   ),
-                  child: Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      // Animated fill bar
-                      if (showResults || hasVoted)
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: AnimatedContainer(
-                            duration: VAnimation.slow,
-                            curve: Curves.easeInOutCubic,
-                            width: percentage > 0
-                                ? (MediaQuery.of(context).size.width - 120) *
-                                      percentage
-                                : 0,
-                            decoration: BoxDecoration(
-                              color: VColors.tertiary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(
-                                VRadius.sm,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          if (showResults || hasVoted)
+                            Positioned(
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              width: percentage > 0
+                                  ? constraints.maxWidth * percentage
+                                  : 0,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: VColors.tertiary.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    VRadius.sm,
+                                  ),
+                                ),
                               ),
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    option.text,
+                                    style: TextStyle(
+                                      fontSize: VFontSize.bodyMd,
+                                      fontWeight: VFontWeight.regular,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                                if (showResults) ...[
+                                  Text(
+                                    '${option.voteCount} vote${option.voteCount != 1 ? 's' : ''}',
+                                    style: TextStyle(
+                                      fontSize: VFontSize.labelSm,
+                                      color:
+                                          theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  const SizedBox(width: VSpacing.xs),
+                                  Text(
+                                    '${(percentage * 100).toStringAsFixed(0)}%',
+                                    style: const TextStyle(
+                                      fontSize: VFontSize.labelSm,
+                                      fontWeight: VFontWeight.semiBold,
+                                      color: VColors.tertiary,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                option.text,
-                                style: TextStyle(
-                                  fontSize: VFontSize.bodyMd,
-                                  fontWeight: VFontWeight.regular,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                            if (showResults) ...[
-                              Text(
-                                '${option.voteCount} vote${option.voteCount != 1 ? 's' : ''}',
-                                style: TextStyle(
-                                  fontSize: VFontSize.labelSm,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(width: VSpacing.xs),
-                              Text(
-                                '${(percentage * 100).toStringAsFixed(0)}%',
-                                style: const TextStyle(
-                                  fontSize: VFontSize.labelSm,
-                                  fontWeight: VFontWeight.semiBold,
-                                  color: VColors.tertiary,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

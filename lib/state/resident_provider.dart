@@ -300,21 +300,25 @@ class ResidentNotifier extends _$ResidentNotifier {
   void follow(String residentId) {
     final r = state.resident;
     if (r == null || r.following.contains(residentId)) return;
-    state = state.copyWith(
-      resident: r.copyWith(following: [...r.following, residentId]),
-    );
+    final updated = r.copyWith(following: [...r.following, residentId]);
+    state = state.copyWith(resident: updated);
     _persist();
+    ProfileService.upsertProfile(updated).catchError(
+      (e) => debugPrint('Failed to sync follow: $e'),
+    );
   }
 
   void unfollow(String residentId) {
     final r = state.resident;
     if (r == null) return;
-    state = state.copyWith(
-      resident: r.copyWith(
-        following: r.following.where((id) => id != residentId).toList(),
-      ),
+    final updated = r.copyWith(
+      following: r.following.where((id) => id != residentId).toList(),
     );
+    state = state.copyWith(resident: updated);
     _persist();
+    ProfileService.upsertProfile(updated).catchError(
+      (e) => debugPrint('Failed to sync unfollow: $e'),
+    );
   }
 
   bool isFollowing(String residentId) {
@@ -715,15 +719,11 @@ class ResidentNotifier extends _$ResidentNotifier {
     if (r == null || r.streakCount == 0) return;
 
     final now = DateTime.now();
-    final today = now.toIso8601String().substring(0, 10);
-    final yesterday = now
-        .subtract(const Duration(days: 1))
-        .toIso8601String()
-        .substring(0, 10);
-    final dayBeforeYesterday = now
-        .subtract(const Duration(days: 2))
-        .toIso8601String()
-        .substring(0, 10);
+    // Match check-in / RPC day keys (device-local), not UTC.
+    final today = localDateKey(now);
+    final yesterday = localDateKey(now.subtract(const Duration(days: 1)));
+    final dayBeforeYesterday =
+        localDateKey(now.subtract(const Duration(days: 2)));
 
     final lastDate = r.lastCheckIn?.substring(0, 10);
     if (lastDate == null || lastDate == today) return;
@@ -825,13 +825,13 @@ class ResidentNotifier extends _$ResidentNotifier {
     final r = state.resident;
     if (r == null) return;
     Haptics.medium();
-    state = state.copyWith(
-      resident: r.copyWith(
-        joinedWorldIds: r.joinedWorldIds.where((id) => id != worldId).toList(),
-      ),
+    final updatedResident = r.copyWith(
+      joinedWorldIds: r.joinedWorldIds.where((id) => id != worldId).toList(),
     );
+    state = state.copyWith(resident: updatedResident);
     _persist();
     unawaited(_worldRepository.leaveWorld(worldId: worldId, residentId: r.id));
+    unawaited(_worldRepository.saveProfileMembership(updatedResident));
     ref.read(worldProvider.notifier).decrementMemberCount(worldId);
     ref
         .read(worldProvider.notifier)

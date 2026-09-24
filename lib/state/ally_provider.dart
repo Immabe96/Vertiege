@@ -62,30 +62,82 @@ class AllyNotifier extends _$AllyNotifier {
     required String receiverId,
   }) async {
     Haptics.light();
-    await AllyService.sendAllegianceRequest(
+    final optimistic = Ally(
+      id: 'local-${DateTime.now().millisecondsSinceEpoch}',
       requesterId: requesterId,
       receiverId: receiverId,
+      status: AllegianceStatus.pending,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
     );
+    final snapshot = state.pendingRequests;
+    state = state.copyWith(
+      pendingRequests: [...state.pendingRequests, optimistic],
+      clearLoadError: true,
+    );
+    try {
+      await AllyService.sendAllegianceRequest(
+        requesterId: requesterId,
+        receiverId: receiverId,
+      );
+      // Refresh so server ids replace the local temp row.
+      await loadAll(requesterId);
+    } catch (_) {
+      state = state.copyWith(
+        pendingRequests: snapshot,
+        loadError: 'Could not send ally request. Try again.',
+      );
+    }
   }
 
   Future<void> acceptRequest(String requestId) async {
     Haptics.light();
-    await AllyService.acceptAllegianceRequest(requestId);
+    final pending = state.pendingRequests.where((r) => r.id == requestId).toList();
+    final snapshotPending = state.pendingRequests;
+    final snapshotAllies = state.allies;
+    final accepted = pending.isEmpty
+        ? null
+        : Ally(
+            id: pending.first.id,
+            requesterId: pending.first.requesterId,
+            receiverId: pending.first.receiverId,
+            status: AllegianceStatus.accepted,
+            createdAt: pending.first.createdAt,
+          );
     state = state.copyWith(
       pendingRequests: state.pendingRequests
           .where((r) => r.id != requestId)
           .toList(),
+      allies: accepted == null ? state.allies : [...state.allies, accepted],
+      clearLoadError: true,
     );
+    try {
+      await AllyService.acceptAllegianceRequest(requestId);
+    } catch (_) {
+      state = state.copyWith(
+        pendingRequests: snapshotPending,
+        allies: snapshotAllies,
+        loadError: 'Could not accept request. Try again.',
+      );
+    }
   }
 
   Future<void> declineRequest(String requestId) async {
     Haptics.light();
-    await AllyService.declineAllegianceRequest(requestId);
+    final snapshot = state.pendingRequests;
     state = state.copyWith(
       pendingRequests: state.pendingRequests
           .where((r) => r.id != requestId)
           .toList(),
+      clearLoadError: true,
     );
+    try {
+      await AllyService.declineAllegianceRequest(requestId);
+    } catch (_) {
+      state = state.copyWith(
+        pendingRequests: snapshot,
+        loadError: 'Could not decline request. Try again.',
+      );
+    }
   }
 
   Future<void> block(String requestId) async {
@@ -109,6 +161,22 @@ class AllyNotifier extends _$AllyNotifier {
   bool isAlly(String otherId) => state.allies.any(
     (a) => a.requesterId == otherId || a.receiverId == otherId,
   );
+
+  bool hasOutgoingPending(String requesterId, String receiverId) =>
+      state.pendingRequests.any(
+        (a) =>
+            a.status == AllegianceStatus.pending &&
+            a.requesterId == requesterId &&
+            a.receiverId == receiverId,
+      );
+
+  bool hasIncomingPending(String receiverId, String requesterId) =>
+      state.pendingRequests.any(
+        (a) =>
+            a.status == AllegianceStatus.pending &&
+            a.requesterId == requesterId &&
+            a.receiverId == receiverId,
+      );
 
   void clearForSignOut() {
     state = const AllyState();

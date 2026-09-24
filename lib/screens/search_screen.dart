@@ -544,7 +544,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               'Type at least 2 characters',
               style: TextStyle(
                 fontSize: VFontSize.bodySm,
-                color: PrestigeNoir.mutedDim,
+                color: PrestigeNoir.muted,
               ),
             ),
           ],
@@ -720,7 +720,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       _formatActivity(world.activityScore),
                       style: const TextStyle(
                         fontSize: VFontSize.bodySm,
-                        color: PrestigeNoir.mutedDim,
+                        color: PrestigeNoir.muted,
                       ),
                     ),
                   ],
@@ -767,7 +767,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   'Type at least 2 characters',
                   style: TextStyle(
                     fontSize: VFontSize.bodySm,
-                    color: PrestigeNoir.mutedDim,
+                    color: PrestigeNoir.muted,
                   ),
                 ),
               ],
@@ -966,9 +966,7 @@ class _PersonTile extends ConsumerWidget {
             horizontal: VSpacing.md,
             vertical: VSpacing.sm,
           ),
-          onTap: canDm
-              ? () => _openDm(context, ref)
-              : () => context.push(residentProfilePath(resident.id)),
+          onTap: () => context.push(residentProfilePath(resident.id)),
           child: Row(
             children: [
               CosmeticAvatar(
@@ -1087,7 +1085,7 @@ class _PostTile extends StatelessWidget {
                   '#${post.worldId}',
                   style: const TextStyle(
                     fontSize: VFontSize.labelSm,
-                    color: PrestigeNoir.mutedDim,
+                    color: PrestigeNoir.muted,
                   ),
                 ),
               ),
@@ -1173,7 +1171,7 @@ class _PrestigeSearchPillState extends State<_PrestigeSearchPill> {
               onSubmitted: widget.onSubmitted,
               decoration: InputDecoration(
                 hintText: widget.hintText,
-                hintStyle: const TextStyle(color: PrestigeNoir.mutedDim),
+                hintStyle: const TextStyle(color: PrestigeNoir.muted),
                 // Kill theme fill + outline so only the pill gold border shows.
                 filled: false,
                 fillColor: Colors.transparent,

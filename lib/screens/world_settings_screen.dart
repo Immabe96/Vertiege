@@ -20,7 +20,6 @@ import '../models/invite.dart';
 import '../state/channel_provider.dart';
 import '../widgets/core/loading_state.dart';
 import '../widgets/core/screen_loading.dart';
-import '../repositories/world_repository.dart';
 import '../widgets/worlds/banner_generator.dart';
 import 'world_settings/world_settings_card.dart';
 import 'world_settings/world_settings_members.dart';
@@ -385,23 +384,24 @@ class _WorldSettingsScreenState extends ConsumerState<WorldSettingsScreen> {
     final resident = ref.read(residentProvider).resident;
     if (resident == null) return;
 
-    // Optimistic local state update.
-    ref.read(residentProvider.notifier).leaveWorld(widget.worldId);
+    final worldId = widget.worldId;
+    try {
+      await WorldService.deleteWorld(worldId);
+    } catch (e) {
+      if (!mounted) return;
+      VFeedback.showError(
+        context,
+        'Could not delete world. Try again.',
+      );
+      return;
+    }
 
-    // Persist to server; if it fails the mutation outbox retries.
-    final result = await const WorldRepository().leaveWorld(
-      worldId: widget.worldId,
-      residentId: resident.id,
-    );
+    ref.read(residentProvider.notifier).leaveWorld(worldId);
+    ref.read(worldProvider.notifier).removeWorld(worldId);
 
     if (!mounted) return;
-
-    if (result.isFailure) {
-      VFeedback.showMessage(context, 'Delete failed — will retry shortly.');
-    } else {
-      context.go('/worlds');
-      VFeedback.showMessage(context, 'World has been deleted.');
-    }
+    context.go('/worlds');
+    VFeedback.showMessage(context, 'World has been deleted.');
   }
 
   void _showBannerGenerator() {

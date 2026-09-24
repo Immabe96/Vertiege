@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:forui/forui.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'l10n/app_localizations.dart';
 import 'models/notification.dart';
 import 'state/theme_provider.dart';
@@ -44,6 +48,7 @@ import 'services/chat_notification_scope.dart';
 import 'widgets/core/daily_reward_dialog.dart';
 import 'widgets/core/whats_new_dialog.dart';
 import 'widgets/core/mutation_outbox_sync_banner.dart';
+import 'widgets/core/post_action_error_listener.dart';
 import 'widgets/core/offline_banner.dart';
 import 'widgets/core/v_app_banner.dart';
 import 'widgets/core/v_feedback.dart';
@@ -434,26 +439,29 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         .toList();
     if (fresh.isEmpty) return;
 
-    final notification = fresh.first;
-    if (ChatNotificationScope.shouldSuppressNotification(notification)) {
-      return;
-    }
-    if (notification.type == NotificationType.achievementApproved) {
-      unawaited(
-        ref
-            .read(achievementProvider.notifier)
-            .reloadAndCelebrateRemoteVerifications(),
+    // Cap in-app toasts so a large batch doesn't flood the UI.
+    final toShow = fresh.take(3).toList();
+    for (final notification in toShow) {
+      if (ChatNotificationScope.shouldSuppressNotification(notification)) {
+        continue;
+      }
+      if (notification.type == NotificationType.achievementApproved) {
+        unawaited(
+          ref
+              .read(achievementProvider.notifier)
+              .reloadAndCelebrateRemoteVerifications(),
+        );
+      }
+      if (notification.type == NotificationType.identityVerified) {
+        unawaited(ref.read(residentProvider.notifier).loadResident());
+      }
+      _showInAppNotification(
+        id: notification.id,
+        title: _notificationTitle(notification.type),
+        body: notification.message,
+        route: _routeForNotification(notification),
       );
     }
-    if (notification.type == NotificationType.identityVerified) {
-      unawaited(ref.read(residentProvider.notifier).loadResident());
-    }
-    _showInAppNotification(
-      id: notification.id,
-      title: _notificationTitle(notification.type),
-      body: notification.message,
-      route: _routeForNotification(notification),
-    );
   }
 
   void _showInAppNotification({
@@ -670,6 +678,14 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
                 VAppBanner(
                   variant: .destructive,
                   message: l10n.buildOutdated,
+                  action: VButton(
+                    label: 'Update',
+                    onPressed: () {
+                      unawaited(_openStoreListing());
+                    },
+                    variant: ButtonVariant.text,
+                    size: ButtonSize.small,
+                  ),
                 )
               else if (_maintenanceBanner != null)
                 VAppBanner(message: _maintenanceBanner!)
@@ -691,7 +707,7 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
                 child: OfflineBanner(
                   show: !_isOnline,
                   onRetry: _retryAfterOffline,
-                  child: child!,
+                  child: PostActionErrorListener(child: child!),
                 ),
               ),
             ],
@@ -701,6 +717,16 @@ class _VirtualStatusWorldsAppState extends ConsumerState<VirtualStatusWorldsApp>
         return shell;
       },
     );
+  }
+
+  Future<void> _openStoreListing() async {
+    // Play listing is live; App Store id TBD — fall back to the marketing site.
+    final uri = Uri.parse(
+      !kIsWeb && Platform.isIOS
+          ? 'https://veritage.web.app'
+          : 'https://play.google.com/store/apps/details?id=com.vertiege',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Widget _applyA11yColorAdjustments(ThemeState state, Widget child) {

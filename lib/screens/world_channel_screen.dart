@@ -223,7 +223,11 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
       channelId: widget.channelId,
       messageId: last.id,
       isPinned: !last.isPinned,
-    );
+    ).then((ok) {
+      if (!ok && mounted) {
+        VFeedback.showError(context, 'Could not update pin.');
+      }
+    });
   }
 
   void _handleSlashThread() {
@@ -577,7 +581,11 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
                   channelId: widget.channelId,
                   messageId: msgId,
                   isPinned: pin,
-                );
+                ).then((ok) {
+                  if (!ok && mounted) {
+                    VFeedback.showError(context, 'Could not update pin.');
+                  }
+                });
               },
             ),
           Expanded(
@@ -843,7 +851,11 @@ class _WorldChannelScreenState extends ConsumerState<WorldChannelScreen>
           channelId: widget.channelId,
           messageId: msgId,
           isPinned: pin,
-        );
+        ).then((ok) {
+          if (!ok && mounted) {
+            VFeedback.showError(context, 'Could not update pin.');
+          }
+        });
       },
       onReaction: resident == null
           ? null

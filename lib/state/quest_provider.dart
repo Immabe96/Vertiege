@@ -77,11 +77,14 @@ class QuestState {
   final List<Quest> quests;
   final String dateKey;
   final bool isLoading;
+  /// Local dedupe for “visit different worlds” (not stored on server).
+  final List<String> visitedWorldIds;
 
   const QuestState({
     this.quests = const [],
     this.dateKey = '',
     this.isLoading = false,
+    this.visitedWorldIds = const [],
   });
 
   int get completedCount => quests.where((q) => q.isComplete).length;
@@ -92,11 +95,13 @@ class QuestState {
     List<Quest>? quests,
     String? dateKey,
     bool? isLoading,
+    List<String>? visitedWorldIds,
   }) =>
       QuestState(
         quests: quests ?? this.quests,
         dateKey: dateKey ?? this.dateKey,
         isLoading: isLoading ?? this.isLoading,
+        visitedWorldIds: visitedWorldIds ?? this.visitedWorldIds,
       );
 }
 
@@ -115,45 +120,38 @@ class QuestNotifier extends _$QuestNotifier {
   Future<void> loadQuests() => _init();
 
   Future<void> _init() async {
-    final today = DateTime.now().toIso8601String().substring(0, 10);
+    // Match server RPCs that key rows by UTC calendar date.
+    final today = DateTime.now().toUtc().toIso8601String().substring(0, 10);
     await _load(today);
   }
 
   Future<void> _load(String dateKey) async {
     state = state.copyWith(isLoading: true);
     try {
+      final localMeta = await _readLocalMeta();
+      final visited = localMeta?.dateKey == dateKey
+          ? localMeta!.visitedWorldIds
+          : const <String>[];
+
       final fromCloud = await _loadFromCloud(dateKey);
       if (fromCloud != null) {
-        state = QuestState(quests: fromCloud, dateKey: dateKey);
+        state = QuestState(
+          quests: fromCloud,
+          dateKey: dateKey,
+          visitedWorldIds: visited,
+        );
         _persist();
         return;
       }
 
-      final raw = await StorageService.getString('@quests_data');
-      if (raw != null) {
-        try {
-          final data = jsonDecode(raw) as Map<String, dynamic>;
-          if (data['dateKey'] == dateKey) {
-            final rawQuests = data['quests'] as List?;
-            if (rawQuests != null) {
-              final quests = rawQuests.whereType<Map<String, dynamic>>().map((q) {
-                final id = q['id'] as String? ?? '';
-                final template = _templates.firstWhere(
-                  (t) => t.$1 == id,
-                  orElse: () => _templates[0],
-                );
-                return Quest.fromTemplate(
-                  template,
-                  progress: q['progress'] as int? ?? 0,
-                  claimed: q['claimed'] as bool? ?? false,
-                );
-              }).toList();
-              state = QuestState(quests: quests, dateKey: dateKey);
-              _syncAllToCloud();
-              return;
-            }
-          }
-        } catch (_) {}
+      if (localMeta != null && localMeta.dateKey == dateKey) {
+        state = QuestState(
+          quests: localMeta.quests,
+          dateKey: dateKey,
+          visitedWorldIds: localMeta.visitedWorldIds,
+        );
+        _syncAllToCloud();
+        return;
       }
 
       final quests = _templates.map(Quest.fromTemplate).toList();
@@ -164,6 +162,37 @@ class QuestNotifier extends _$QuestNotifier {
       if (state.isLoading) {
         state = state.copyWith(isLoading: false);
       }
+    }
+  }
+
+  Future<({String dateKey, List<Quest> quests, List<String> visitedWorldIds})?>
+  _readLocalMeta() async {
+    final raw = await StorageService.getString('@quests_data');
+    if (raw == null) return null;
+    try {
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      final dateKey = data['dateKey'] as String? ?? '';
+      final rawQuests = data['quests'] as List?;
+      if (rawQuests == null) return null;
+      final quests = rawQuests.whereType<Map<String, dynamic>>().map((q) {
+        final id = q['id'] as String? ?? '';
+        final template = _templates.firstWhere(
+          (t) => t.$1 == id,
+          orElse: () => _templates[0],
+        );
+        return Quest.fromTemplate(
+          template,
+          progress: q['progress'] as int? ?? 0,
+          claimed: q['claimed'] as bool? ?? false,
+        );
+      }).toList();
+      final visited = (data['visitedWorldIds'] as List?)
+              ?.whereType<String>()
+              .toList() ??
+          const <String>[];
+      return (dateKey: dateKey, quests: quests, visitedWorldIds: visited);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -233,13 +262,20 @@ class QuestNotifier extends _$QuestNotifier {
 
   void onCommentAdded() => _increment('comment_quest');
 
-  void onWorldVisited() => _increment('explore_quest');
+  void onWorldVisited(String worldId) {
+    if (worldId.isEmpty || state.visitedWorldIds.contains(worldId)) return;
+    state = state.copyWith(
+      visitedWorldIds: [...state.visitedWorldIds, worldId],
+    );
+    _increment('explore_quest');
+  }
 
-  Future<void> claimQuest(String questId) async {
+  /// Returns null on success, or a short error message for the UI.
+  Future<String?> claimQuest(String questId) async {
     final quest = state.quests
         .where((q) => q.id == questId && q.isComplete && !q.claimed)
         .firstOrNull;
-    if (quest == null) return;
+    if (quest == null) return 'Quest is not ready to claim.';
 
     var awarded = false;
     if (isSupabaseConfigured()) {
@@ -248,16 +284,18 @@ class QuestNotifier extends _$QuestNotifier {
           'claim_daily_quest',
           params: {'p_quest_id': questId},
         );
-        awarded = (result is int && result > 0) || result != null;
-        if (awarded) {
+        if (result is int && result > 0) {
+          awarded = true;
           await ref.read(residentProvider.notifier).refreshGamificationFromServer();
+        } else if (result is int && result == 0) {
+          // Already claimed on server — align local state.
+          awarded = true;
         } else {
-          // Server rejected claim — do not invent local XP.
-          return;
+          return 'Could not claim quest. Try again.';
         }
       } catch (e) {
         debugPrint('claim_daily_quest failed: $e');
-        return;
+        return 'Could not claim quest. Try again.';
       }
     } else {
       await ref
@@ -266,13 +304,17 @@ class QuestNotifier extends _$QuestNotifier {
       awarded = true;
     }
 
-    if (!awarded) return;
+    if (!awarded) return 'Could not claim quest. Try again.';
 
     final quests = state.quests.map((q) {
       if (q.id == questId) return q.copyWith(claimed: true);
       return q;
     }).toList();
-    state = QuestState(quests: quests, dateKey: state.dateKey);
+    state = QuestState(
+      quests: quests,
+      dateKey: state.dateKey,
+      visitedWorldIds: state.visitedWorldIds,
+    );
     _persist();
     final updated = quests.where((q) => q.id == questId).firstOrNull;
     if (updated != null) await _syncQuestToCloud(updated.copyWith(claimed: true));
@@ -282,6 +324,7 @@ class QuestNotifier extends _$QuestNotifier {
         parameters: {'quest_id': questId},
       ),
     );
+    return null;
   }
 
   void _increment(String questId) {
@@ -291,7 +334,11 @@ class QuestNotifier extends _$QuestNotifier {
       }
       return q;
     }).toList();
-    state = QuestState(quests: quests, dateKey: state.dateKey);
+    state = QuestState(
+      quests: quests,
+      dateKey: state.dateKey,
+      visitedWorldIds: state.visitedWorldIds,
+    );
     _persist();
     final updated = quests.where((q) => q.id == questId).firstOrNull;
     if (updated != null) _syncQuestToCloud(updated);
@@ -301,6 +348,7 @@ class QuestNotifier extends _$QuestNotifier {
     final json = jsonEncode({
       'dateKey': state.dateKey,
       'quests': state.quests.map((q) => q.toJson()).toList(),
+      'visitedWorldIds': state.visitedWorldIds,
     });
     StorageService.setStringDebounced('@quests_data', json);
   }

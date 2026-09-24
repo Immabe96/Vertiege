@@ -134,9 +134,20 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
                       final q = quests[index];
                       return _QuestCard(
                         quest: q,
-                        onClaim: () => ref
-                            .read(questProvider.notifier)
-                            .claimQuest(q.id),
+                        onClaim: () async {
+                          final err = await ref
+                              .read(questProvider.notifier)
+                              .claimQuest(q.id);
+                          if (!context.mounted) return;
+                          if (err != null) {
+                            VFeedback.showError(context, err);
+                          } else {
+                            VFeedback.showMessage(
+                              context,
+                              'Claimed +${q.xpReward} XP',
+                            );
+                          }
+                        },
                       );
                     },
                   ),
@@ -163,7 +174,7 @@ class _DailyQuestsScreenState extends ConsumerState<DailyQuestsScreen> {
 
 class _QuestCard extends StatelessWidget {
   final Quest quest;
-  final VoidCallback onClaim;
+  final Future<void> Function() onClaim;
 
   const _QuestCard({required this.quest, required this.onClaim});
 
@@ -286,7 +297,7 @@ class _QuestCard extends StatelessWidget {
 }
 
 class _ClaimChip extends StatelessWidget {
-  final VoidCallback onClaim;
+  final Future<void> Function() onClaim;
 
   const _ClaimChip({required this.onClaim});
 
@@ -296,7 +307,7 @@ class _ClaimChip extends StatelessWidget {
       color: VColors.brand,
       borderRadius: BorderRadius.circular(VRadius.sm),
       child: InkWell(
-        onTap: onClaim,
+        onTap: () => unawaited(onClaim()),
         borderRadius: BorderRadius.circular(VRadius.sm),
         child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),

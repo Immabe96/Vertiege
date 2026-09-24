@@ -199,7 +199,11 @@ class _TabLayoutState extends ConsumerState<TabLayout>
 
     showAppSheet(
       context,
-      PostInput(worldId: worldId, showWorldSelector: true),
+      PostInput(
+        worldId: worldId,
+        showWorldSelector: true,
+        popOnSubmit: true,
+      ),
     );
   }
 }

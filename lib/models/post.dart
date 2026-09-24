@@ -77,25 +77,35 @@ class Poll {
   final bool isMultiChoice;
   final List<String> votedResidentIds;
 
+  /// optionId → residentIds who selected it (client-optimistic; may be empty
+  /// on server-hydrated polls until the RPC returns richer vote maps).
+  final Map<String, List<String>> votesByOption;
+
   const Poll({
     required this.question,
     required this.options,
     this.isMultiChoice = false,
     this.votedResidentIds = const [],
+    this.votesByOption = const {},
   });
 
   int get totalVotes => options.fold<int>(0, (sum, o) => sum + o.voteCount);
+
+  bool residentSelected(String residentId, String optionId) =>
+      votesByOption[optionId]?.contains(residentId) ?? false;
 
   Poll copyWith({
     String? question,
     List<PollOption>? options,
     bool? isMultiChoice,
     List<String>? votedResidentIds,
+    Map<String, List<String>>? votesByOption,
   }) => Poll(
     question: question ?? this.question,
     options: options ?? this.options,
     isMultiChoice: isMultiChoice ?? this.isMultiChoice,
     votedResidentIds: votedResidentIds ?? this.votedResidentIds,
+    votesByOption: votesByOption ?? this.votesByOption,
   );
 
   Map<String, dynamic> toJson() => {
@@ -103,22 +113,36 @@ class Poll {
     'options': options.map((o) => o.toJson()).toList(),
     'isMultiChoice': isMultiChoice,
     'votedResidentIds': votedResidentIds,
+    'votesByOption': votesByOption,
   };
 
-  factory Poll.fromJson(Map<String, dynamic> json) => Poll(
-    question: json['question'] ?? '',
-    options:
-        (json['options'] as List<dynamic>?)
-            ?.map((o) => PollOption.fromJson(o as Map<String, dynamic>))
-            .toList() ??
-        [],
-    isMultiChoice: json['isMultiChoice'] ?? false,
-    votedResidentIds:
-        (json['votedResidentIds'] as List<dynamic>?)
-            ?.map((e) => e.toString())
-            .toList() ??
-        [],
-  );
+  factory Poll.fromJson(Map<String, dynamic> json) {
+    final rawVotes = json['votesByOption'];
+    final votes = <String, List<String>>{};
+    if (rawVotes is Map) {
+      for (final entry in rawVotes.entries) {
+        final value = entry.value;
+        votes[entry.key.toString()] = value is List
+            ? value.map((e) => e.toString()).toList()
+            : const [];
+      }
+    }
+    return Poll(
+      question: json['question'] ?? '',
+      options:
+          (json['options'] as List<dynamic>?)
+              ?.map((o) => PollOption.fromJson(o as Map<String, dynamic>))
+              .toList() ??
+          [],
+      isMultiChoice: json['isMultiChoice'] ?? false,
+      votedResidentIds:
+          (json['votedResidentIds'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      votesByOption: votes,
+    );
+  }
 }
 
 class Post {

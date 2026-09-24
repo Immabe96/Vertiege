@@ -243,7 +243,11 @@ class _NexusFeedBodyState extends ConsumerState<NexusFeedBody> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) =>
-                          PostItem(post: posts[index], index: index),
+                          PostItem(
+                            post: posts[index],
+                            index: index,
+                            worldId: posts[index].worldId,
+                          ),
                       childCount: posts.length,
                     ),
                   ),
