@@ -53,6 +53,17 @@
 /.swarm/
 /AGENTS.md
 /CLAUDE.md
+/flutter-app/android/app/debug
+/flutter-app/android/app/profile
+/flutter-app/android/app/release
+/flutter-app/android/key.properties
+/flutter-app/android/upload-keystore.jks
+/flutter-app/assets/staging/withoutbg-backup/
+/flutter-app/build/
+/flutter-app/coverage/
+/flutter-app/releases/*.aab
+/flutter-app/releases/*.apk
+# LEGACY (repo root) — remove once the Flutter tree is moved to flutter-app/
 /android/app/debug
 /android/app/profile
 /android/app/release
@@ -65,18 +76,20 @@
 /releases/*.apk
 /ruvector.db
 /understand-anything-plugin
+/doc/
+/pr_description.txt
 analyze_output.txt
-android/build/
-android/hs_err_pid*.log
+flutter-app/android/build/
+flutter-app/android/hs_err_pid*.log
 app.*.map.json
 app.*.symbols
 build_output.txt
 migrate_working_dir/
 node_modules/
-scripts/core_badge_chunk_*.json
-scripts/core_badge_jobs.json
-scripts/missing_badges.json
-scripts/missing_core_ids.json
+flutter-app/scripts/core_badge_chunk_*.json
+flutter-app/scripts/core_badge_jobs.json
+flutter-app/scripts/missing_badges.json
+flutter-app/scripts/missing_core_ids.json
 supabase/.temp/
 .firebase/
 # Scratch / local agent artifacts (regenerable)
