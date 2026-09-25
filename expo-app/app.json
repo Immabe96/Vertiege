@@ -16,7 +16,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#FDF7C4"
         }
       ],
       "expo-sqlite"
@@ -37,7 +37,7 @@
       "package": "com.vertiege",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FDF7C4"
       }
     }
   }

@@ -35,12 +35,11 @@ export default function Root({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Web-only. Light-only by design (lib/theme/tokens.ts is the source of truth,
+// but this runs before any module can be imported) — kept in sync by
+// test/tokens.test.ts.
 const responsiveBackground = `
 body {
-  background-color: #fff;
-}
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #000;
-  }
+  background-color: #fdf7c4;
+  color: #000000;
 }`;

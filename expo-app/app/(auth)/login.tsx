@@ -1,15 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/nativewindui/Button';
-import { Text } from '@/components/nativewindui/Text';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Text } from '@/components/ui/text';
 import { useAuthStore } from '@/lib/auth-store';
 import { signInSchema, type SignInValues } from '@/lib/validation/auth';
 
-const fieldClass = 'rounded-xl border border-border bg-card px-4 py-3 text-foreground';
+const fieldClass = 'h-12 w-full';
 
 export default function LoginScreen() {
   const signIn = useAuthStore((s) => s.signIn);
@@ -35,10 +36,8 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1 justify-center px-6">
         <View className="gap-2 pb-10">
-          <Text variant="largeTitle" className="font-bold">
-            Vertiege
-          </Text>
-          <Text variant="subhead" color="secondary">
+          <Text variant="display">Vertiege</Text>
+          <Text variant="small" tone="secondary">
             Sign in to your world
           </Text>
         </View>
@@ -50,10 +49,9 @@ export default function LoginScreen() {
               name="email"
               render={({ field: { onChange, onBlur, value }, fieldState }) => (
                 <>
-                  <TextInput
+                  <Input
                     className={fieldClass}
                     placeholder="Email"
-                    placeholderTextColor="#8E8E93"
                     autoCapitalize="none"
                     autoComplete="email"
                     keyboardType="email-address"
@@ -64,7 +62,7 @@ export default function LoginScreen() {
                     accessibilityLabel="Email"
                   />
                   {fieldState.error ? (
-                    <Text variant="footnote" className="text-destructive">
+                    <Text variant="caption" tone="danger">
                       {fieldState.error.message}
                     </Text>
                   ) : null}
@@ -76,10 +74,9 @@ export default function LoginScreen() {
               name="password"
               render={({ field: { onChange, onBlur, value }, fieldState }) => (
                 <>
-                  <TextInput
+                  <Input
                     className={fieldClass}
                     placeholder="Password"
-                    placeholderTextColor="#8E8E93"
                     secureTextEntry
                     textContentType="password"
                     value={value}
@@ -89,7 +86,7 @@ export default function LoginScreen() {
                     accessibilityLabel="Password"
                   />
                   {fieldState.error ? (
-                    <Text variant="footnote" className="text-destructive">
+                    <Text variant="caption" tone="danger">
                       {fieldState.error.message}
                     </Text>
                   ) : null}
@@ -99,7 +96,7 @@ export default function LoginScreen() {
           </View>
 
           {serverError ? (
-            <Text variant="footnote" className="text-destructive">
+            <Text variant="caption" tone="danger">
               {serverError}
             </Text>
           ) : null}
@@ -111,7 +108,7 @@ export default function LoginScreen() {
 
         <View className="pt-8">
           <Pressable className="items-center py-2" onPress={() => setServerError(null)}>
-            <Text variant="footnote" color="secondary">
+            <Text variant="caption" tone="secondary">
               Forgot password? Password reset lands with the auth wave.
             </Text>
           </Pressable>

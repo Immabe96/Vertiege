@@ -1,52 +1,76 @@
-const { hairlineWidth, platformSelect } = require('nativewind/theme');
+const { hairlineWidth } = require('nativewind/theme');
+const tokens = require('./tailwind.tokens.json');
+
+/**
+ * Neobrutalism tokens — GENERATED from `lib/theme/tokens.ts`.
+ * Do not put colour literals in this file: edit the tokens and run `npm run tokens`.
+ */
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // NOTE: Update this to include the paths to all of your component files.
-  darkMode: 'class', // Enable manual toggling of dark mode
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
     './lib/**/*.{js,jsx,ts,tsx}',
-    './theme/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
       colors: {
-        border: withOpacity('border'),
-        input: withOpacity('input'),
-        ring: withOpacity('ring'),
-        background: withOpacity('background'),
-        foreground: withOpacity('foreground'),
-        primary: {
-          DEFAULT: withOpacity('primary'),
-          foreground: withOpacity('primary-foreground'),
+        background: tokens.colors.background,
+        'background-raised': tokens.colors['background-raised'],
+        'secondary-background': tokens.colors['secondary-background'],
+        foreground: tokens.colors.foreground,
+        border: tokens.colors.border,
+        ring: tokens.colors.ring,
+        overlay: tokens.colors.overlay,
+        main: {
+          DEFAULT: tokens.colors.main,
+          foreground: tokens.colors['main-foreground'],
         },
         secondary: {
-          DEFAULT: withOpacity('secondary'),
-          foreground: withOpacity('secondary-foreground'),
-        },
-        destructive: {
-          DEFAULT: withOpacity('destructive'),
-          foreground: withOpacity('destructive-foreground'),
+          DEFAULT: tokens.colors.secondary,
+          foreground: tokens.colors['secondary-foreground'],
         },
         muted: {
-          DEFAULT: withOpacity('muted'),
-          foreground: withOpacity('muted-foreground'),
+          DEFAULT: tokens.colors.muted,
+          foreground: tokens.colors['muted-foreground'],
         },
-        accent: {
-          DEFAULT: withOpacity('accent'),
-          foreground: withOpacity('accent-foreground'),
+        success: {
+          DEFAULT: tokens.colors.success,
+          foreground: tokens.colors['success-foreground'],
         },
-        popover: {
-          DEFAULT: withOpacity('popover'),
-          foreground: withOpacity('popover-foreground'),
+        warning: {
+          DEFAULT: tokens.colors.warning,
+          foreground: tokens.colors['warning-foreground'],
         },
-        card: {
-          DEFAULT: withOpacity('card'),
-          foreground: withOpacity('card-foreground'),
+        danger: {
+          DEFAULT: tokens.colors.danger,
+          foreground: tokens.colors['danger-foreground'],
         },
+        // Status *text* inks — AA on all three grounds (see tokens.ts).
+        'success-ink': tokens.colors['success-ink'],
+        'warning-ink': tokens.colors['warning-ink'],
+        'danger-ink': tokens.colors['danger-ink'],
+      },
+      borderRadius: {
+        base: `${tokens.radius.base}px`,
+      },
+      boxShadow: {
+        shadow: `${tokens.shadow.x}px ${tokens.shadow.y}px ${tokens.shadow.blur}px ${tokens.shadow.spread}px ${tokens.colors.border}`,
+        none: '0px 0px 0px 0px transparent',
+      },
+      fontFamily: {
+        sans: tokens.fontFamily.base,
+        heading: tokens.fontFamily.heading,
+        'heading-semibold': tokens.fontFamily.headingSemibold,
+        base: tokens.fontFamily.base,
+        'base-regular': tokens.fontFamily.baseRegular,
+        'base-semibold': tokens.fontFamily.baseSemibold,
+      },
+      fontWeight: {
+        base: String(tokens.fontWeight.base),
+        heading: String(tokens.fontWeight.heading),
       },
       borderWidth: {
         hairline: hairlineWidth(),
@@ -55,18 +79,3 @@ module.exports = {
   },
   plugins: [],
 };
-
-function withOpacity(variableName) {
-  return ({ opacityValue }) => {
-    if (opacityValue !== undefined) {
-      return platformSelect({
-        ios: `rgb(var(--${variableName}) / ${opacityValue})`,
-        android: `rgb(var(--android-${variableName}) / ${opacityValue})`,
-      });
-    }
-    return platformSelect({
-      ios: `rgb(var(--${variableName}))`,
-      android: `rgb(var(--android-${variableName}))`,
-    });
-  };
-}

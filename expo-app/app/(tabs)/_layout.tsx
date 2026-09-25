@@ -1,25 +1,41 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { Globe, House, MessagesSquare, User } from 'lucide-react-native';
+
+import { HEX } from '@/lib/theme/tokens';
+
+const ICON_PROPS = { strokeWidth: 2.5 } as const;
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: true }}>
+    <Tabs
+      screenOptions={{
+        headerShown: true,
+        // Family 1 of 3: tabs shift rather than slide (push = root Stack,
+        // sheet = Sheet/Dialog primitives in components/ui/).
+        animation: 'shift',
+        headerStyle: { backgroundColor: HEX.background },
+        headerTitleStyle: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 20 },
+        tabBarStyle: {
+          backgroundColor: HEX['secondary-background'],
+          borderTopColor: HEX.border,
+          borderTopWidth: 2,
+        },
+        tabBarLabelStyle: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 12 },
+        tabBarActiveTintColor: HEX.foreground,
+        tabBarInactiveTintColor: HEX['muted-foreground'],
+      }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
+          title: 'Nexus',
+          tabBarIcon: ({ color, size }) => <House color={color} size={size} {...ICON_PROPS} />,
         }}
       />
       <Tabs.Screen
         name="worlds"
         options={{
           title: 'Worlds',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="globe-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Globe color={color} size={size} {...ICON_PROPS} />,
         }}
       />
       <Tabs.Screen
@@ -27,17 +43,15 @@ export default function TabsLayout() {
         options={{
           title: 'Chat',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
+            <MessagesSquare color={color} size={size} {...ICON_PROPS} />
           ),
         }}
       />
       <Tabs.Screen
-        name="you"
+        name="identity"
         options={{
           title: 'You',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <User color={color} size={size} {...ICON_PROPS} />,
         }}
       />
     </Tabs>

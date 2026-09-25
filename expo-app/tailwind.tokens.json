@@ -1,0 +1,53 @@
+{
+  "$comment": "GENERATED from lib/theme/tokens.ts — do not edit. Run `npm run tokens`.",
+  "palette": "yellow",
+  "colors": {
+    "background": "#FDF7C4",
+    "secondary-background": "#FFFFFF",
+    "background-raised": "#FFF6D6",
+    "foreground": "#000000",
+    "main-foreground": "#000000",
+    "main": "#FACC00",
+    "border": "#000000",
+    "ring": "#000000",
+    "overlay": "#000000",
+    "secondary": "#432DD7",
+    "secondary-foreground": "#FFFFFF",
+    "muted": "#F1F1F1",
+    "muted-foreground": "#3F3F46",
+    "success": "#16A34A",
+    "success-foreground": "#000000",
+    "warning": "#D97706",
+    "warning-foreground": "#000000",
+    "danger": "#DC2626",
+    "danger-foreground": "#FFFFFF",
+    "success-ink": "#0F7A38",
+    "warning-ink": "#8A4B00",
+    "danger-ink": "#B3261E"
+  },
+  "radius": {
+    "base": 5
+  },
+  "shadow": {
+    "x": 4,
+    "y": 4,
+    "blur": 0,
+    "spread": 0
+  },
+  "fontWeight": {
+    "base": 500,
+    "heading": 700
+  },
+  "fontFamily": {
+    "heading": ["SpaceGrotesk_700Bold"],
+    "headingSemibold": ["SpaceGrotesk_600SemiBold"],
+    "base": ["PlusJakartaSans_500Medium"],
+    "baseRegular": ["PlusJakartaSans_400Regular"],
+    "baseSemibold": ["PlusJakartaSans_600SemiBold"]
+  },
+  "motion": {
+    "press": 80,
+    "enter": 150
+  },
+  "overlayAlpha": 0.8
+}
